@@ -1,0 +1,59 @@
+<robot name="hinged_box">
+  <material name="dark_plastic">
+    <color rgba="0.2 0.2 0.2 1" />
+    </material>
+  <material name="brushed_metal">
+    <color rgba="0.7 0.7 0.75 1" />
+    </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.00166667" ixy="0" ixz="0" iyy="0.00166667" iyz="0" izz="0.00166667" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.2 0.2 0.2 1" />
+        </material>
+      </visual>
+    <collision name="base__visual_1">
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.1" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="top">
+    <inertial>
+      <origin xyz="0 -0.05 0.01" rpy="0 0 0" />
+      <mass value="0.2" />
+      <inertia ixx="0.000173333" ixy="0" ixz="0" iyy="0.000173333" iyz="0" izz="0.000333333" />
+      </inertial>
+    <visual>
+      <origin xyz="0 -0.05 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.02" />
+        </geometry>
+      <material name="brushed_metal">
+        <color rgba="0.7 0.7 0.75 1" />
+        </material>
+      </visual>
+    <collision name="top__visual_1">
+      <origin xyz="0 -0.05 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.02" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="lid_hinge" type="revolute">
+    <origin xyz="0 0.05 0.1" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="top" />
+    <axis xyz="-1 0 0" />
+    <limit effort="1" velocity="1" lower="0" upper="1.57" />
+    </joint>
+  </robot>
