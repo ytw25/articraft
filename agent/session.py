@@ -1,0 +1,987 @@
+from __future__ import annotations
+
+import asyncio
+import hashlib
+import json
+import logging
+import os
+import time
+from pathlib import Path
+from typing import Any, Callable, Optional
+
+from rich.console import Console
+
+from agent.compiler import (
+    compile_urdf_report_maybe_timeout,
+    persist_compile_success_artifacts,
+)
+from agent.cost import CostTracker, pricing_for_provider_model
+from agent.feedback import contains_code_in_text, format_compile_exception
+from agent.models import AgentResult, CompileReport, TerminateReason
+from agent.prompts import (
+    load_sdk_docs_reference,
+    load_system_prompt_text,
+    normalize_sdk_docs_mode as _normalize_sdk_docs_mode,
+    normalize_sdk_package as _normalize_sdk_package,
+)
+from agent.providers.gemini import GeminiLLM
+from agent.providers.openai import OpenAILLM
+from agent.tools import (
+    build_first_turn_messages as _build_first_turn_messages,
+    build_tool_registry,
+    provider_system_prompt_suffix,
+)
+from agent.traces import TraceWriter
+from agent.tools.base import ToolResult
+from agent.tools.code_region import extract_editable_code
+from agent.tui.single_run import SingleRunDisplay
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+CONSOLE = Console()
+
+
+def _minimal_scaffold_text(*, sdk_package: str = "sdk") -> str:
+    _normalize_sdk_package(sdk_package)
+    return """from __future__ import annotations
+
+# The harness only exposes the editable block to the model.
+# User code should import every SDK/stdlib symbol it uses instead of relying on
+# hidden scaffold imports.
+
+# >>> USER_CODE_START
+# >>> USER_CODE_END
+
+object_model = build_object_model()
+"""
+
+
+class UrdfAgent:
+    def __init__(
+        self,
+        file_path: str,
+        provider: str = "openai",
+        model_id: Optional[str] = None,
+        openai_transport: str = "http",
+        thinking_level: str = "high",
+        max_turns: int = 30,
+        system_prompt_path: str = "designer_system_prompt.txt",
+        trace_dir: Optional[str] = None,
+        display_enabled: Optional[bool] = None,
+        on_turn_start: Optional[Callable[[int], None]] = None,
+        checkpoint_urdf_path: Optional[Path] = None,
+        manifest_outputs_root: Optional[Path] = None,
+        sdk_package: str = "sdk",
+        sdk_docs_mode: str = "full",
+        openai_reasoning_summary: Optional[str] = "auto",
+    ):
+        self.file_path = file_path
+        self.max_turns = max_turns
+        self.sdk_package = _normalize_sdk_package(sdk_package)
+        self.sdk_docs_mode = _normalize_sdk_docs_mode(sdk_docs_mode)
+        self._last_compile_warning_text: Optional[str] = None
+        self._seen_compile_warning_sigs: set[str] = set()
+        self._seen_tool_error_sigs: set[str] = set()
+        self._last_compile_error_sig: Optional[str] = None
+        self.checkpoint_urdf_path = (
+            Path(checkpoint_urdf_path).resolve() if checkpoint_urdf_path else None
+        )
+        self.manifest_outputs_root = (
+            Path(manifest_outputs_root).resolve() if manifest_outputs_root else None
+        )
+        self._last_checkpoint_urdf_sig: Optional[str] = None
+        self.trace_writer: Optional[TraceWriter] = (
+            TraceWriter(Path(trace_dir)) if trace_dir else None
+        )
+
+        provider_norm = (provider or "openai").strip().lower()
+        self.provider = provider_norm
+        if provider_norm == "gemini":
+            if model_id is not None:
+                self.llm = GeminiLLM(model_id=model_id, thinking_level=thinking_level)
+            else:
+                self.llm = GeminiLLM(thinking_level=thinking_level)
+        elif provider_norm == "openai":
+            if model_id is not None:
+                self.llm = OpenAILLM(
+                    model_id=model_id,
+                    thinking_level=thinking_level,
+                    reasoning_summary=openai_reasoning_summary,
+                    transport=openai_transport,
+                )
+            else:
+                self.llm = OpenAILLM(
+                    thinking_level=thinking_level,
+                    reasoning_summary=openai_reasoning_summary,
+                    transport=openai_transport,
+                )
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
+
+        actual_model_id = self.llm.model_id
+        self.cost_tracker: Optional[CostTracker] = None
+        pricing = pricing_for_provider_model(provider_norm, actual_model_id)
+        if pricing:
+            self.cost_tracker = CostTracker(model_id=actual_model_id, pricing=pricing)
+
+        self.tool_registry = build_tool_registry(provider_norm, sdk_package=self.sdk_package)
+        self.on_turn_start = on_turn_start
+
+        if display_enabled is None:
+            display_enabled = os.environ.get("URDF_TUI_ENABLED", "1") != "0"
+        self.display = SingleRunDisplay(
+            console=CONSOLE,
+            model_id=actual_model_id,
+            thinking_level=thinking_level,
+            max_turns=max_turns,
+            enabled=display_enabled,
+        )
+
+        (
+            self.loaded_system_prompt_path,
+            base_system_prompt,
+        ) = self._build_system_prompt(system_prompt_path)
+        suffix = provider_system_prompt_suffix(provider_norm, sdk_package=self.sdk_package)
+        if suffix:
+            self.system_prompt = f"{base_system_prompt.rstrip()}\n\n{suffix}\n"
+        else:
+            self.system_prompt = base_system_prompt
+        repo_root = Path(__file__).resolve().parents[1]
+        self.sdk_docs_context = load_sdk_docs_reference(
+            repo_root,
+            sdk_package=self.sdk_package,
+            docs_mode=self.sdk_docs_mode,
+        )
+        if self.trace_writer:
+            self.trace_writer.write_system_prompt(self.system_prompt)
+
+    def _maybe_inject_compile_warnings(
+        self,
+        conversation: list[dict],
+        *,
+        report: CompileReport,
+    ) -> bool:
+        warnings = getattr(report, "warnings", None)
+        if not isinstance(warnings, list) or not warnings:
+            return False
+
+        interesting: list[str] = []
+        for warning in warnings:
+            if not isinstance(warning, str):
+                continue
+            if (
+                "visual connectivity check failed" in warning
+                or "cwd-relative asset paths detected" in warning
+                or "isolated parts detected" in warning
+            ):
+                interesting.append(warning.strip())
+
+        if not interesting:
+            return False
+
+        try:
+            sig_src = json.dumps(interesting, sort_keys=False, separators=(",", ":")).encode("utf-8")
+            sig = hashlib.sha1(sig_src).hexdigest()
+        except Exception:
+            sig = None
+
+        if sig and sig in self._seen_compile_warning_sigs:
+            return False
+        if sig:
+            self._seen_compile_warning_sigs.add(sig)
+
+        content = (
+            "WARNING: The harness detected issues that will likely look wrong in the viewer "
+            "(even if collision-based checks pass). Please fix these in code:\n\n"
+            + "\n\n".join(interesting)
+            + "\n\nDo not ignore these warnings; fix geometry placement, joint placement, and mesh axis/origin issues rather than weakening tests."
+        )
+        msg = {"role": "user", "content": content}
+        conversation.append(msg)
+        if self.trace_writer:
+            self.trace_writer.write_message(msg)
+        return True
+
+    def _maybe_inject_edit_code_guidance(
+        self,
+        conversation: list[dict],
+        *,
+        tool_calls: list[dict],
+        tool_results: list[ToolResult],
+    ) -> None:
+        for tool_call, result in zip(tool_calls, tool_results, strict=False):
+            func = tool_call.get("function", {}) if isinstance(tool_call, dict) else {}
+            if func.get("name") != "edit_code":
+                continue
+            if not getattr(result, "error", None):
+                continue
+            if "Could not find the old_string in the code" not in result.error:
+                continue
+
+            sig = "edit_code_old_string_not_found"
+            if sig in self._seen_tool_error_sigs:
+                return
+            self._seen_tool_error_sigs.add(sig)
+
+            msg = {
+                "role": "user",
+                "content": (
+                    "Your last edit_code failed because `old_string` did not match the file exactly. "
+                    "Do NOT guess. Call `read_code` again, then pick a smaller exact snippet from the "
+                    "current file as `old_string` and retry. Keep edits surgical. "
+                    "Use `write_code` only as a last resort (for the initial scaffold fill, "
+                    "or after repeated edit_code failures)."
+                ),
+            }
+            conversation.append(msg)
+            if self.trace_writer:
+                self.trace_writer.write_message(msg)
+            return
+
+    def _append_compile_retry_message(
+        self,
+        conversation: list[dict],
+        *,
+        formatted: str,
+    ) -> str:
+        text = (formatted or "").strip()
+        try:
+            sig = hashlib.sha1(text.encode("utf-8")).hexdigest()
+        except Exception:
+            sig = None
+
+        if sig and sig == self._last_compile_error_sig:
+            first_line = next(
+                (line for line in text.splitlines() if line.strip()),
+                "URDF compile failed.",
+            )
+            content = (
+                f"{first_line}\n"
+                "Same compile failure as previous turn (details unchanged).\n\n"
+                "Fix the code and continue. Preserve or improve visible realism while fixing this. "
+                "If the current design has drifted into a weak local minimum, a broader rethink of the authored model is allowed."
+            )
+        else:
+            if sig:
+                self._last_compile_error_sig = sig
+            content = (
+                text
+                + "\n\nFix the code and continue. Keep the object visually rich and faithful to the prompt, "
+                "not merely acceptable to QC. If the current design quality has collapsed, rethink the visual model instead of only patching symptoms."
+            )
+
+        msg = {"role": "user", "content": content}
+        conversation.append(msg)
+        if self.trace_writer:
+            self.trace_writer.write_message(msg)
+        return content
+
+    async def _compile_urdf_report_async(self) -> CompileReport:
+        return await asyncio.to_thread(
+            compile_urdf_report_maybe_timeout,
+            Path(self.file_path),
+            sdk_package=self.sdk_package,
+        )
+
+    async def _persist_compile_success_checkpoint_async(self, urdf_xml: str) -> None:
+        try:
+            self._last_checkpoint_urdf_sig = await asyncio.to_thread(
+                persist_compile_success_artifacts,
+                urdf_xml=urdf_xml,
+                urdf_out=self.checkpoint_urdf_path,
+                outputs_root=self.manifest_outputs_root,
+                previous_sig=self._last_checkpoint_urdf_sig,
+            )
+        except Exception as exc:
+            logger.warning("Failed to persist compile-success checkpoint: %s", exc)
+
+    async def _persist_compile_failure_checkpoint_async(self, exc: BaseException) -> bool:
+        partial_urdf_xml = getattr(exc, "partial_urdf_xml", None)
+        if not isinstance(partial_urdf_xml, str) or not partial_urdf_xml.strip():
+            return False
+        await self._persist_compile_success_checkpoint_async(partial_urdf_xml)
+        return True
+
+    def _build_system_prompt(self, prompt_path: str) -> tuple[Path, str]:
+        return load_system_prompt_text(
+            prompt_path,
+            provider=self.provider,
+            sdk_package=self.sdk_package,
+        )
+
+    def _extract_tool_calls(self, message: dict) -> list[dict]:
+        return message.get("tool_calls", []) if isinstance(message, dict) else []
+
+    def _extract_text(self, message: dict) -> str:
+        if not isinstance(message, dict):
+            return ""
+        return message.get("content", "") or ""
+
+    def _extract_usage(self, message: dict) -> Optional[dict[str, int]]:
+        if not isinstance(message, dict):
+            return None
+        usage = message.get("usage")
+        if not isinstance(usage, dict):
+            return None
+        cleaned: dict[str, int] = {}
+        for key, value in usage.items():
+            if isinstance(key, str) and isinstance(value, int):
+                cleaned[key] = value
+        return cleaned or None
+
+    def _extract_thinking(self, message: dict) -> Optional[str]:
+        if not isinstance(message, dict):
+            return None
+        return message.get("thought_summary")
+
+    def _build_assistant_message(self, message: dict) -> dict:
+        text = self._extract_text(message)
+        tool_calls = self._extract_tool_calls(message)
+        thinking = self._extract_thinking(message)
+        usage = self._extract_usage(message)
+        extra_content = message.get("extra_content") if isinstance(message, dict) else None
+
+        msg = {"role": "assistant"}
+        if thinking:
+            msg["thought_summary"] = thinking
+        if text:
+            msg["content"] = text
+        if tool_calls:
+            msg["tool_calls"] = tool_calls
+        if extra_content:
+            msg["extra_content"] = extra_content
+        if usage:
+            msg["usage"] = usage
+        return msg
+
+    def _code_paste_nudge_text(self) -> str:
+        if self.provider == "openai":
+            return (
+                "Do not paste code in your response. "
+                "Use tools to apply your changes. "
+                "Use write_code for the initial scaffold fill, then read_file plus apply_patch for edits. "
+                "Do not provide file_path."
+            )
+        return (
+            "Do not paste code in your response. "
+            "Use tools to apply your changes. "
+            "Use read_file with line_numbers=false to copy exact current text for edit_code. "
+            "Use write_code only for the initial scaffold fill or when edit_code "
+            "has repeatedly failed."
+        )
+
+    def _first_turn_tool_nudge_text(self) -> str:
+        if self.provider == "openai":
+            return (
+                "Begin with a tool call. "
+                "Because the editable section starts empty, prefer write_code first. "
+                "After that, use read_file first to inspect the file, then apply_patch for changes. "
+                "Do not provide file_path."
+            )
+        return (
+            "Begin with a tool call. Prefer write_code first because the editable "
+            "section starts empty. After the first write, prefer read_file with "
+            "line_numbers=false plus edit_code for incremental edits. "
+            "Reserve write_code for necessary full rewrites only."
+        )
+
+    def _tool_call_name(self, tool_call: dict) -> str:
+        if not isinstance(tool_call, dict):
+            return ""
+        func = tool_call.get("function")
+        if isinstance(func, dict):
+            name = func.get("name")
+            if isinstance(name, str):
+                return name
+        custom = tool_call.get("custom")
+        if isinstance(custom, dict):
+            name = custom.get("name")
+            if isinstance(name, str):
+                return name
+        name = tool_call.get("name")
+        if isinstance(name, str):
+            return name
+        return ""
+
+    def _tool_call_display_args(self, tool_call: dict) -> dict:
+        if not isinstance(tool_call, dict):
+            return {}
+        func = tool_call.get("function")
+        if isinstance(func, dict):
+            return func.get("arguments", {})
+        custom = tool_call.get("custom")
+        if isinstance(custom, dict):
+            return {"input": custom.get("input", "")}
+        return {}
+
+    def _ensure_code_file(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        scaffold_path = (
+            repo_root / "scaffold_hybrid.py"
+            if self.sdk_package == "sdk_hybrid"
+            else repo_root / "scaffold.py"
+        )
+        path = Path(self.file_path)
+        if path.exists():
+            existing = path.read_text()
+            if existing.strip():
+                return
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if scaffold_path.exists():
+            path.write_text(scaffold_path.read_text())
+        else:
+            path.write_text(_minimal_scaffold_text(sdk_package=self.sdk_package))
+
+    async def _execute_tool(self, tool_call: dict) -> tuple[ToolResult, dict]:
+        tool_id = tool_call["id"]
+        call_type = str(tool_call.get("type", "function"))
+        func_name = self._tool_call_name(tool_call)
+        thought_signature = tool_call.get("thought_signature")
+        if thought_signature is None:
+            thought_signature = (
+                tool_call.get("extra_content", {}).get("google", {}).get("thought_signature")
+            )
+
+        if call_type == "custom":
+            custom = tool_call.get("custom") if isinstance(tool_call, dict) else None
+            if not isinstance(custom, dict):
+                result = ToolResult(
+                    error="Invalid custom tool payload",
+                    tool_call_id=tool_id,
+                )
+                tool_message = {
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "name": func_name,
+                    "tool_type": "custom",
+                    "content": json.dumps(
+                        {k: v for k, v in result.to_dict().items() if k != "tool_call_id"}
+                    ),
+                }
+                if thought_signature:
+                    tool_message["thought_signature"] = thought_signature
+                return result, tool_message
+            func_args = {"input": str(custom.get("input") or "")}
+        else:
+            function = tool_call.get("function") if isinstance(tool_call, dict) else None
+            func_args_str = ""
+            if isinstance(function, dict):
+                func_args_str = str(function.get("arguments") or "")
+            try:
+                func_args = json.loads(func_args_str)
+            except json.JSONDecodeError as exc:
+                result = ToolResult(
+                    error=f"Invalid JSON in tool arguments: {str(exc)}",
+                    tool_call_id=tool_id,
+                )
+                tool_message = {
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "name": func_name,
+                    "content": json.dumps(result.to_dict()),
+                }
+                if thought_signature:
+                    tool_message["thought_signature"] = thought_signature
+                return result, tool_message
+
+        if not isinstance(func_args, dict):
+            result = ToolResult(
+                error="Tool arguments must be a JSON object",
+                tool_call_id=tool_id,
+            )
+            tool_message = {
+                "role": "tool",
+                "tool_call_id": tool_id,
+                "name": func_name,
+                "content": json.dumps(
+                    {k: v for k, v in result.to_dict().items() if k != "tool_call_id"}
+                ),
+            }
+            if thought_signature:
+                tool_message["thought_signature"] = thought_signature
+            return result, tool_message
+
+        func_args.pop("file_path", None)
+        func_args["file_path"] = self.file_path
+
+        if func_name == "edit_code" and func_args.get("old_string") == "":
+            result = ToolResult(
+                error=(
+                    "old_string cannot be empty. Use read_file with line_numbers=false to copy the exact "
+                    "existing text and replace it."
+                ),
+                tool_call_id=tool_id,
+            )
+            tool_message = {
+                "role": "tool",
+                "tool_call_id": tool_id,
+                "name": func_name,
+                "content": json.dumps(
+                    {k: v for k, v in result.to_dict().items() if k != "tool_call_id"}
+                ),
+            }
+            if thought_signature:
+                tool_message["thought_signature"] = thought_signature
+            return result, tool_message
+
+        if func_name == "edit_code":
+            try:
+                editable = extract_editable_code(Path(self.file_path).read_text(encoding="utf-8"))
+            except Exception:
+                editable = None
+            if editable is not None and editable.strip() == "":
+                result = ToolResult(
+                    error=(
+                        "Editable code section is empty. Use write_code to create the initial "
+                        "build_object_model() and run_tests() implementation."
+                    ),
+                    tool_call_id=tool_id,
+                )
+                tool_message = {
+                    "role": "tool",
+                    "tool_call_id": tool_id,
+                    "name": func_name,
+                    "content": json.dumps(
+                        {k: v for k, v in result.to_dict().items() if k != "tool_call_id"}
+                    ),
+                }
+                if thought_signature:
+                    tool_message["thought_signature"] = thought_signature
+                return result, tool_message
+
+        try:
+            invocation = await self.tool_registry.build_invocation(
+                func_name,
+                func_args,
+            )
+
+            if not invocation:
+                result = ToolResult(
+                    error=f"Tool {func_name} not found",
+                    tool_call_id=tool_id,
+                )
+            else:
+                result = await invocation.execute()
+                result.tool_call_id = tool_id
+        except Exception as exc:
+            from pydantic import ValidationError
+
+            if isinstance(exc, ValidationError):
+                errors = exc.errors()
+                missing = [err["loc"][0] for err in errors if err["type"] == "missing"]
+                invalid = [
+                    f"{err['loc'][0]}: {err['msg']}"
+                    for err in errors
+                    if err["type"] != "missing"
+                ]
+
+                parts = [f"Invalid parameters for {func_name}."]
+                if missing:
+                    parts.append(f"Missing required: {missing}")
+                if invalid:
+                    parts.append(f"Invalid values: {invalid}")
+                parts.append(f"Provided: {list(func_args.keys())}")
+                error_msg = " ".join(parts)
+            else:
+                error_msg = f"Tool execution error: {str(exc)}"
+
+            result = ToolResult(error=error_msg, tool_call_id=tool_id)
+
+        tool_message = {
+            "role": "tool",
+            "tool_call_id": tool_id,
+            "name": func_name,
+            "tool_type": call_type if call_type == "custom" else "function",
+            "content": json.dumps(
+                {k: v for k, v in result.to_dict().items() if k != "tool_call_id"}
+            ),
+        }
+        if thought_signature:
+            tool_message["thought_signature"] = thought_signature
+        return result, tool_message
+
+    def _is_code_valid(self, tool_results: list[ToolResult]) -> bool:
+        for result in reversed(tool_results):
+            if result.compilation:
+                return result.compilation.get("status") == "success"
+        return False
+
+    def _should_terminate(
+        self,
+        text_response: str,
+        tool_calls: list[dict],
+        turn: int,
+    ) -> tuple[bool, TerminateReason, str]:
+        if contains_code_in_text(text_response):
+            return False, TerminateReason.GOAL_COMPLETE, ""
+        if text_response.strip() and not tool_calls:
+            return True, TerminateReason.GOAL_COMPLETE, "Agent completed with response"
+        if turn >= self.max_turns:
+            return False, TerminateReason.MAX_TURNS, "Agent hit max turns limit"
+        return False, TerminateReason.GOAL_COMPLETE, ""
+
+    async def run(
+        self,
+        user_message: Any,
+        *,
+        initial_conversation: Optional[list[dict]] = None,
+    ) -> AgentResult:
+        self._ensure_code_file()
+        self.display.start()
+        conversation = initial_conversation or []
+        if not conversation:
+            conversation.extend(
+                _build_first_turn_messages(
+                    user_message,
+                    sdk_docs_context=self.sdk_docs_context,
+                )
+            )
+            if self.trace_writer:
+                for message in conversation:
+                    self.trace_writer.write_message(message)
+        else:
+            user_entry = {"role": "user", "content": user_message}
+            conversation.append(user_entry)
+            if self.trace_writer:
+                self.trace_writer.write_message(user_entry)
+
+        usage_totals: dict[str, int] = {}
+        completed_turns = 0
+        llm_calls = 0
+        had_successful_compile = False
+        last_successful_urdf_xml: Optional[str] = None
+
+        while completed_turns < self.max_turns:
+            turn = completed_turns + 1
+            llm_calls += 1
+            logger.info(
+                "Starting turn %s/%s (llm_call=%s)",
+                turn,
+                self.max_turns,
+                llm_calls,
+            )
+            self.display.start_turn(turn)
+            if self.on_turn_start:
+                try:
+                    self.on_turn_start(turn)
+                except Exception:
+                    logger.exception("on_turn_start callback failed for turn %s", turn)
+
+            llm_start = time.monotonic()
+            self.display.start_llm_wait()
+            logger.info("Calling LLM (%s)...", type(self.llm).__name__)
+            try:
+                response = await self.llm.generate_with_tools(
+                    system_prompt=self.system_prompt,
+                    messages=conversation,
+                    tools=self.tool_registry.get_tool_schemas(),
+                )
+            except Exception as exc:
+                logger.exception("LLM error on turn %s: %s", turn, exc)
+                self.display.end_turn(success=False, error=str(exc))
+                return AgentResult(
+                    success=False,
+                    reason=TerminateReason.ERROR,
+                    message=f"LLM error: {str(exc)}",
+                    conversation=conversation,
+                    turn_count=completed_turns,
+                )
+            finally:
+                self.display.stop_llm_wait()
+                logger.info("LLM call finished in %.2fs", time.monotonic() - llm_start)
+
+            text = self._extract_text(response)
+            tool_calls = self._extract_tool_calls(response)
+            thinking = self._extract_thinking(response)
+            usage = self._extract_usage(response) or {}
+            for key, value in usage.items():
+                usage_totals[key] = usage_totals.get(key, 0) + value
+
+            assistant_message = self._build_assistant_message(response)
+            has_assistant_payload = any(
+                key in assistant_message
+                for key in ("content", "tool_calls", "thought_summary")
+            )
+            if has_assistant_payload:
+                conversation.append(assistant_message)
+                if self.trace_writer:
+                    self.trace_writer.write_message(assistant_message)
+            else:
+                logger.warning("Skipping empty assistant message")
+
+            if usage and self.cost_tracker:
+                turn_cost = self.cost_tracker.add_turn(usage)
+                llm_duration = time.monotonic() - llm_start
+                self.display.add_llm_call(usage, turn_cost.total_cost, llm_duration)
+
+            logger.info(
+                "Turn %s: %s tool calls, text_length=%s",
+                turn,
+                len(tool_calls),
+                len(text),
+            )
+            if isinstance(thinking, str) and thinking.strip():
+                self.display.add_thinking_summary(thinking)
+
+            is_empty_response = (
+                not has_assistant_payload and not tool_calls and not text.strip()
+            )
+            if is_empty_response:
+                if had_successful_compile and isinstance(last_successful_urdf_xml, str):
+                    logger.info("Empty response after successful compile; terminating run.")
+                    final_code = None
+                    try:
+                        import aiofiles
+
+                        async with aiofiles.open(self.file_path, "r") as file:
+                            final_code = await file.read()
+                    except Exception:
+                        pass
+
+                    if self.cost_tracker:
+                        try:
+                            cost_path = Path(self.file_path).parent / "cost.json"
+                            self.cost_tracker.save_json(cost_path)
+                            logger.info("Saved cost tracking to %s", cost_path)
+                        except Exception as exc:
+                            logger.warning("Failed to save cost tracking: %s", exc)
+
+                    self.display.current_turn = completed_turns
+                    self.display.end_turn(success=True)
+                    return AgentResult(
+                        success=True,
+                        reason=TerminateReason.CODE_VALID,
+                        message="Compile succeeded and model returned no further actions",
+                        conversation=conversation,
+                        final_code=final_code,
+                        urdf_xml=last_successful_urdf_xml,
+                        turn_count=completed_turns,
+                        usage=usage_totals or None,
+                    )
+
+                logger.warning(
+                    "Skipping no-op model response (empty assistant + no tool calls); "
+                    "not counting toward max turns."
+                )
+                self.display.current_turn = completed_turns
+                self.display.end_turn(success=True)
+                continue
+
+            completed_turns += 1
+
+            if contains_code_in_text(text):
+                nudge = {
+                    "role": "user",
+                    "content": self._code_paste_nudge_text(),
+                }
+                conversation.append(nudge)
+                if self.trace_writer:
+                    self.trace_writer.write_message(nudge)
+                continue
+
+            if turn == 1 and not tool_calls:
+                nudge = {
+                    "role": "user",
+                    "content": self._first_turn_tool_nudge_text(),
+                }
+                conversation.append(nudge)
+                if self.trace_writer:
+                    self.trace_writer.write_message(nudge)
+                continue
+
+            should_stop, reason, msg = self._should_terminate(text, tool_calls, turn)
+            if should_stop:
+                try:
+                    compile_start = time.monotonic()
+                    logger.info("Running URDF compile checks...")
+                    report = await self._compile_urdf_report_async()
+                    logger.info(
+                        "URDF compile passed in %.2fs",
+                        time.monotonic() - compile_start,
+                    )
+                    await self._persist_compile_success_checkpoint_async(report.urdf_xml)
+                    had_successful_compile = True
+                    last_successful_urdf_xml = report.urdf_xml
+                    injected = self._maybe_inject_compile_warnings(conversation, report=report)
+                    if injected:
+                        continue
+                except TimeoutError as exc:
+                    formatted = f"URDF compile failed: TimeoutError: {exc}"
+                    logger.warning("%s", formatted)
+                    compile_duration = time.monotonic() - compile_start
+                    retry_message = self._append_compile_retry_message(
+                        conversation,
+                        formatted=formatted,
+                    )
+                    self.display.add_compile_result(
+                        success=False,
+                        duration=compile_duration,
+                        error=retry_message,
+                    )
+                    continue
+                except Exception as exc:
+                    await self._persist_compile_failure_checkpoint_async(exc)
+                    formatted = format_compile_exception(exc)
+                    logger.warning("%s", formatted)
+                    compile_duration = time.monotonic() - compile_start
+                    retry_message = self._append_compile_retry_message(
+                        conversation,
+                        formatted=formatted,
+                    )
+                    self.display.add_compile_result(
+                        success=False,
+                        duration=compile_duration,
+                        error=retry_message,
+                    )
+                    continue
+
+                final_code = None
+                try:
+                    import aiofiles
+
+                    async with aiofiles.open(self.file_path, "r") as file:
+                        final_code = await file.read()
+                except Exception:
+                    pass
+
+                if self.cost_tracker:
+                    try:
+                        cost_path = Path(self.file_path).parent / "cost.json"
+                        self.cost_tracker.save_json(cost_path)
+                        logger.info("Saved cost tracking to %s", cost_path)
+                    except Exception as exc:
+                        logger.warning("Failed to save cost tracking: %s", exc)
+
+                self.display.end_turn(success=True)
+                return AgentResult(
+                    success=True,
+                    reason=TerminateReason.CODE_VALID,
+                    message=msg,
+                    conversation=conversation,
+                    final_code=final_code,
+                    urdf_xml=report.urdf_xml,
+                    turn_count=completed_turns,
+                    usage=usage_totals or None,
+                )
+
+            turn_tool_results: list[ToolResult] = []
+            for tool_call in tool_calls:
+                func_name = self._tool_call_name(tool_call)
+                func_args = self._tool_call_display_args(tool_call)
+                logger.info("Executing tool: %s", func_name)
+
+                tool_start = time.monotonic()
+                result, tool_message = await self._execute_tool(tool_call)
+                tool_duration = time.monotonic() - tool_start
+                logger.info("Tool %s finished in %.2fs", func_name, tool_duration)
+                turn_tool_results.append(result)
+                conversation.append(tool_message)
+                if self.trace_writer:
+                    self.trace_writer.write_message(tool_message)
+
+                self.display.add_tool_call(
+                    tool_name=func_name,
+                    args=func_args,
+                    success=result.is_success(),
+                    duration=tool_duration,
+                    error=result.error if not result.is_success() else None,
+                )
+
+                if result.is_success():
+                    logger.info("Tool %s succeeded", func_name)
+                else:
+                    logger.warning("Tool %s failed: %s", func_name, result.error)
+
+            self._maybe_inject_edit_code_guidance(
+                conversation,
+                tool_calls=tool_calls,
+                tool_results=turn_tool_results,
+            )
+
+            if self._is_code_valid(turn_tool_results):
+                try:
+                    compile_start = time.monotonic()
+                    logger.info("Running URDF compile checks...")
+                    report = await self._compile_urdf_report_async()
+                    compile_duration = time.monotonic() - compile_start
+                    logger.info("URDF compile passed in %.2fs", compile_duration)
+                    await self._persist_compile_success_checkpoint_async(report.urdf_xml)
+                    had_successful_compile = True
+                    last_successful_urdf_xml = report.urdf_xml
+                    self.display.add_compile_result(
+                        success=True,
+                        duration=compile_duration,
+                        warnings=report.warnings,
+                    )
+                    self._maybe_inject_compile_warnings(conversation, report=report)
+                except TimeoutError as exc:
+                    formatted = f"URDF compile failed: TimeoutError: {exc}"
+                    logger.warning("%s", formatted)
+                    compile_duration = time.monotonic() - compile_start
+                    retry_message = self._append_compile_retry_message(
+                        conversation,
+                        formatted=formatted,
+                    )
+                    self.display.add_compile_result(
+                        success=False,
+                        duration=compile_duration,
+                        error=retry_message,
+                    )
+                except Exception as exc:
+                    await self._persist_compile_failure_checkpoint_async(exc)
+                    formatted = format_compile_exception(exc)
+                    logger.warning("%s", formatted)
+                    compile_duration = time.monotonic() - compile_start
+                    retry_message = self._append_compile_retry_message(
+                        conversation,
+                        formatted=formatted,
+                    )
+                    self.display.add_compile_result(
+                        success=False,
+                        duration=compile_duration,
+                        error=retry_message,
+                    )
+
+            if self._is_code_valid(turn_tool_results):
+                logger.info("Code validation passed")
+
+            self.display.end_turn(success=True)
+
+        final_code = None
+        try:
+            import aiofiles
+
+            async with aiofiles.open(self.file_path, "r") as file:
+                final_code = await file.read()
+        except Exception:
+            pass
+
+        if self.cost_tracker:
+            try:
+                cost_path = Path(self.file_path).parent / "cost.json"
+                self.cost_tracker.save_json(cost_path)
+                logger.info("Saved cost tracking to %s", cost_path)
+            except Exception as exc:
+                logger.warning("Failed to save cost tracking: %s", exc)
+
+        return AgentResult(
+            success=False,
+            reason=TerminateReason.MAX_TURNS,
+            message="Agent hit max turns limit",
+            conversation=conversation,
+            final_code=final_code,
+            turn_count=completed_turns,
+            usage=usage_totals or None,
+        )
+
+    async def close(self) -> None:
+        self.display.stop()
+        if self.trace_writer:
+            self.trace_writer.close()
+        await self.llm.close()
+
+    async def __aenter__(self) -> UrdfAgent:
+        return self
+
+    async def __aexit__(self, exc_type: object, exc_val: object, exc_tb: object) -> None:
+        await self.close()
