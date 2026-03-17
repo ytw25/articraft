@@ -10,10 +10,10 @@ if __package__ in {None, ""}:
 
 
 from storage.collections import CollectionStore
+from storage.datasets import DatasetStore
 from storage.materialize import MaterializationStore, build_materialization_fingerprint
 from storage.models import (
     CompileReport,
-    DatasetCollection,
     DisplayMetadata,
     PromptingSettings,
     Provenance,
@@ -38,10 +38,6 @@ def main() -> None:
         repo.ensure_layout()
 
         collections = CollectionStore(repo)
-        collections.save_dataset(
-            DatasetCollection(schema_version=1, collection="dataset", updated_at="2026-03-18T00:00:00Z")
-        )
-        assert repo.layout.dataset_collection_path().exists()
         collections.append_workbench_entry(
             record_id="rec_123",
             added_at="2026-03-18T00:00:00Z",
@@ -51,6 +47,7 @@ def main() -> None:
         workbench = collections.load_workbench()
         assert workbench is not None
         assert workbench["entries"][0]["record_id"] == "rec_123"
+        assert repo.layout.local_workbench_path().exists()
 
         record_store = RecordStore(repo)
         record = Record(
@@ -80,6 +77,19 @@ def main() -> None:
         assert repo.layout.record_metadata_path("rec_123").exists()
         assert repo.layout.record_inputs_dir("rec_123").exists()
         assert not repo.layout.record_assets_dir("rec_123").exists()
+
+        datasets = DatasetStore(repo)
+        promoted = datasets.promote_record(
+            record_id="rec_123",
+            dataset_id="hinge_dataset_001",
+            promoted_at="2026-03-18T00:01:00Z",
+        )
+        assert promoted["record_id"] == "rec_123"
+        assert repo.layout.record_dataset_entry_path("rec_123").exists()
+        assert datasets.validate() == []
+        manifest = datasets.write_dataset_manifest()
+        assert manifest["generated"] == [{"name": "hinge_dataset_001", "record_id": "rec_123"}]
+        assert repo.layout.dataset_manifest_path().exists()
 
         report = CompileReport(
             schema_version=1,

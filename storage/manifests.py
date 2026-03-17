@@ -2,22 +2,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from storage.collections import CollectionStore
+from storage.datasets import DatasetStore
 from storage.repo import StorageRepo
 
 
 @dataclass(slots=True)
 class ManifestStore:
     repo: StorageRepo
-    collections: CollectionStore
+    datasets: DatasetStore
 
     def dataset_manifest(self) -> dict:
-        collection = self.collections.load_dataset() or {"entries": []}
-        generated = [
-            {
-                "name": entry["dataset_id"],
-                "record_id": entry["record_id"],
-            }
-            for entry in collection.get("entries", [])
-        ]
-        return {"generated": generated}
+        return self.datasets.dataset_manifest()
+
+    def write_dataset_manifest(self) -> dict:
+        manifest = self.dataset_manifest()
+        self.repo.write_json(self.repo.layout.dataset_manifest_path(), manifest)
+        return manifest

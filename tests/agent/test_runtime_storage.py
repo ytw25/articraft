@@ -110,7 +110,7 @@ def main() -> None:
             assert (record_dir / "assets" / "meshes" / "part.obj").exists()
 
             workbench = json.loads(
-                (repo_root / "data" / "collections" / "workbench.json").read_text(encoding="utf-8")
+                (repo_root / "data" / "local" / "workbench.json").read_text(encoding="utf-8")
             )
             assert len(workbench["entries"]) == 1
             assert workbench["entries"][0]["record_id"] == record_dir.name

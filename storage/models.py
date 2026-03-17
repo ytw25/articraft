@@ -232,6 +232,7 @@ class CompileReport:
 
 @dataclass(slots=True, frozen=True)
 class DatasetEntry:
+    schema_version: int
     dataset_id: str
     record_id: str
     category_slug: str
@@ -325,4 +326,3 @@ class AssetStatus:
     meshes_present: bool
     glb_present: bool
     viewer_present: bool
-

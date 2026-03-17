@@ -43,7 +43,7 @@ def main(argv: list[str] | None = None) -> int:
                     updated_at=_utc_now(),
                 )
             )
-        print(f"Initialized workbench storage at {repo.layout.data_root}")
+        print(f"Initialized workbench storage at {repo.layout.local_workbench_path()}")
         return 0
 
     if args.command == "status":
