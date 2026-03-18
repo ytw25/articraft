@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_single_continuous_rotary_shaft_0002",
+  "created_at": "2026-03-12T16:05:10Z",
+  "updated_at": "2026-03-12T16:05:10Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "single_continuous_rotary_shaft",
+  "source": {
+    "run_id": "run_import_single_continuous_rotary_shaft_20260312-155835-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A belt-driven workshop buffing wheel with one continuously rotating spindle and a simple motor housing.",
+    "prompt_preview": "A belt-driven workshop buffing wheel with one continuously rotating spindle and a simple motor housing."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "ed2188d4edca5f1aa9ef33b3e65b6cd8dc7efc2cee21e6afcd75955d0b543f01",
+    "model_py_sha256": "6c14a828ca9ee2798ae021c102e71ae4d79f40b34e3d294d50013d308cb32930",
+    "model_urdf_sha256": "50ca5ff4fa638c2b1a26fdf321d64e5b19bb03a48291429ef17516dccd0c60aa"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_robotic_leg_0001",
+  "created_at": "2026-03-16T15:58:16Z",
+  "updated_at": "2026-03-16T15:58:16Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "robotic_leg",
+  "source": {
+    "run_id": "run_import_robotic_leg_20260316-155143-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic humanoid robotic leg with a compact hip mount, sculpted upper and lower leg housings, visible knee and ankle",
+    "prompt_preview": "A realistic humanoid robotic leg with a compact hip mount, sculpted upper and lower leg housings, visible knee and ankle joint covers, and a believable elect..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "e4a4ce17e5565ee5540bf681486cfc4e72bb2cdfd6c3192aee0b28923ef880c7",
+    "model_py_sha256": "139ba0eb91e2fa8de9ed1f3ac92c78d27a216e573af83dd274c1df57a6f94fc1",
+    "model_urdf_sha256": "23a33bbe8590658e20b473e0ebb6b6ca7cdb3e103d055c960663e9a09758f445"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

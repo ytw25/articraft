@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_prismaticrevolute_chain_0001",
+  "created_at": "2026-03-12T16:06:00Z",
+  "updated_at": "2026-03-12T16:06:00Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "prismaticrevolute_chain",
+  "source": {
+    "run_id": "run_import_prismaticrevolute_chain_20260312-155835-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A machine fixture with one horizontal prismatic carriage carrying a single rotating inspection flap.",
+    "prompt_preview": "A machine fixture with one horizontal prismatic carriage carrying a single rotating inspection flap."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "a67f4708450b97bb0a7f52dccb76584e15008e820a11a0fba8fb2fb6a5dc8171",
+    "model_py_sha256": "9461d63188c9e362117fb8a123a202da395353dadff699dea0ec3dad4a1398ad",
+    "model_urdf_sha256": "37dd32e08c587f2d7fe6a4c0926c674af45e25aa0a0017aa90113738f21e9f10"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

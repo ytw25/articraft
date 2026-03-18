@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_jet_engine_0001",
+  "created_at": "2026-03-16T01:19:50Z",
+  "updated_at": "2026-03-16T01:19:50Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "jet_engine",
+  "source": {
+    "run_id": "run_import_jet_engine_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed jet engine with a convincing nacelle, intake, fan assembly, core, and exhaust structure. Th",
+    "prompt_preview": "A realistic, highly detailed jet engine with a convincing nacelle, intake, fan assembly, core, and exhaust structure. The fan and any standard exposed mechan..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "94271a87c6ffc493e647232731231434de3a3d5a24edecfe2ccf68abc5d9f3d7",
+    "model_py_sha256": "897f3cffe9f7e40647c6cf44724b125b321a1139dd48253e3067967611827492",
+    "model_urdf_sha256": "de51fcc37f99a4a0f614cb3943189355d834e21d4d35973c06c961fa7abba6fb"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

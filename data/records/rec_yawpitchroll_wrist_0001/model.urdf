@@ -1,0 +1,192 @@
+<robot name="three_axis_wrist">
+  <material name="anodized_black">
+    <color rgba="0.14 0.14 0.16 1" />
+  </material>
+  <material name="machined_steel">
+    <color rgba="0.62 0.64 0.68 1" />
+  </material>
+  <material name="tool_face">
+    <color rgba="0.78 0.56 0.18 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.026" rpy="0 0 0" />
+      <mass value="1.2" />
+      <inertia ixx="0.0007504" ixy="0" ixz="0" iyy="0.0007504" iyz="0" izz="0.00096" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_base.glb" />
+      </geometry>
+      <material name="machined_steel" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.009" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.018" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.035" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="yaw_ring">
+    <inertial>
+      <origin xyz="0 0 0.032" rpy="0 0 0" />
+      <mass value="0.55" />
+      <inertia ixx="0.000797317" ixy="0" ixz="0" iyy="0.000357317" iyz="0" izz="0.000476667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_yaw_ring.glb" />
+      </geometry>
+      <material name="anodized_black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.016" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.04 0.032" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.018 0.08" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.04 0.032" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.018 0.08" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.064 0.016" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="pitch_yoke">
+    <inertial>
+      <origin xyz="-0.004 -0.039 0" rpy="0 0 0" />
+      <mass value="0.42" />
+      <inertia ixx="0.0004095" ixy="0" ixz="0" iyy="0.000182" iyz="0" izz="0.0003395" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_pitch_yoke.glb" />
+      </geometry>
+      <material name="machined_steel" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.01 0.044" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.078 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.01 0.044" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.012 -0.039 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.05 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.012 -0.039 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.018" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="roll_tool">
+    <inertial>
+      <origin xyz="0.032 0 0" rpy="0 0 0" />
+      <mass value="0.28" />
+      <inertia ixx="9.03467e-05" ixy="0" ixz="0" iyy="0.000172947" iyz="0" izz="0.000172947" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_roll_tool.glb" />
+      </geometry>
+      <material name="tool_face" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.018" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0275 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.055" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.059 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.008" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.066 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="tool_key">
+    <inertial>
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+      <mass value="0.03" />
+      <inertia ixx="1.64e-06" ixy="0" ixz="0" iyy="1.49e-06" iyz="0" izz="1.13e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_tool_key.glb" />
+      </geometry>
+      <material name="anodized_black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.016 0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_yaw" type="revolute">
+    <origin xyz="0 0 0.044" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="yaw_ring" />
+    <axis xyz="0 0 1" />
+    <limit effort="18" velocity="2.5" lower="-1.8" upper="1.8" />
+  </joint>
+  <joint name="yaw_to_pitch" type="revolute">
+    <origin xyz="0 0.039 0.032" rpy="0 0 0" />
+    <parent link="yaw_ring" />
+    <child link="pitch_yoke" />
+    <axis xyz="0 1 0" />
+    <limit effort="14" velocity="2.2" lower="-0.65" upper="0.95" />
+  </joint>
+  <joint name="pitch_to_roll" type="revolute">
+    <origin xyz="-0.012 -0.039 0" rpy="0 0 0" />
+    <parent link="pitch_yoke" />
+    <child link="roll_tool" />
+    <axis xyz="1 0 0" />
+    <limit effort="9" velocity="4.5" lower="-2.8" upper="2.8" />
+  </joint>
+  <joint name="roll_to_key" type="fixed">
+    <origin xyz="0.028 0 0.021" rpy="0 0 0" />
+    <parent link="roll_tool" />
+    <child link="tool_key" />
+  </joint>
+</robot>

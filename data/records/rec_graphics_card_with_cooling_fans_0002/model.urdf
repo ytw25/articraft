@@ -1,0 +1,388 @@
+<robot name="graphics_card">
+  <material name="shroud_black">
+    <color rgba="0.1 0.1 0.11 1" />
+  </material>
+  <material name="graphite">
+    <color rgba="0.23 0.24 0.27 1" />
+  </material>
+  <material name="brushed_aluminum">
+    <color rgba="0.66 0.68 0.72 1" />
+  </material>
+  <material name="fan_black">
+    <color rgba="0.08 0.08 0.09 1" />
+  </material>
+  <material name="gold_contact">
+    <color rgba="0.86 0.72 0.25 1" />
+  </material>
+  <material name="trim_metal">
+    <color rgba="0.47 0.49 0.53 1" />
+  </material>
+  <material name="bracket_metal">
+    <color rgba="0.71 0.73 0.76 1" />
+  </material>
+  <link name="gpu_body">
+    <inertial>
+      <mass value="1.55" />
+      <inertia ixx="0.00214778" ixy="0" ixz="0" iyy="0.0125121" iyz="0" izz="0.0110629" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_shroud.glb" />
+      </geometry>
+      <material name="shroud_black" />
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_backplate.glb" />
+      </geometry>
+      <material name="graphite" />
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_heatsink.glb" />
+      </geometry>
+      <material name="brushed_aluminum" />
+    </visual>
+    <visual>
+      <origin xyz="-0.022 -0.006 -0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.072 0.006 0.01" />
+      </geometry>
+      <material name="gold_contact" />
+    </visual>
+    <visual>
+      <origin xyz="0.01 0.0245 0.044" rpy="0 0 0" />
+      <geometry>
+        <box size="0.172 0.0025 0.006" />
+      </geometry>
+      <material name="trim_metal" />
+    </visual>
+    <collision name="gpu_body__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_shroud__2d504fd18e707396__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_backplate__08f50bcdc040d507__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_3__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_heatsink__be5eaf72bbb1df76__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_4">
+      <origin xyz="-0.022 -0.006 -0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.072 0.006 0.01" />
+      </geometry>
+    </collision>
+    <collision name="gpu_body__visual_5">
+      <origin xyz="0.01 0.0245 0.044" rpy="0 0 0" />
+      <geometry>
+        <box size="0.172 0.0025 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="bracket">
+    <inertial>
+      <origin xyz="-0.003 0 0" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="9.84067e-05" ixy="0" ixz="0" iyy="9.64267e-05" iyz="0" izz="2.83333e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_bracket.glb" />
+      </geometry>
+      <material name="bracket_metal" />
+    </visual>
+    <collision name="bracket__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_bracket__8a528a26ca027903__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="bracket__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_bracket__8a528a26ca027903__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="bracket__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_bracket__8a528a26ca027903__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="bracket__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_bracket__8a528a26ca027903__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="bracket__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_bracket__8a528a26ca027903__hull_005.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="fan_left">
+    <inertial>
+      <mass value="0.035" />
+      <inertia ixx="1.281e-05" ixy="0" ixz="0" iyy="2.541e-05" iyz="0" izz="1.281e-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_fan_rotor.glb" />
+      </geometry>
+      <material name="fan_black" />
+    </visual>
+    <collision name="fan_left__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_left__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_left__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_left__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_004.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="fan_center">
+    <inertial>
+      <mass value="0.035" />
+      <inertia ixx="1.281e-05" ixy="0" ixz="0" iyy="2.541e-05" iyz="0" izz="1.281e-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_fan_rotor.glb" />
+      </geometry>
+      <material name="fan_black" />
+    </visual>
+    <collision name="fan_center__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_center__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_center__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_center__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_004.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="fan_right">
+    <inertial>
+      <mass value="0.035" />
+      <inertia ixx="1.281e-05" ixy="0" ixz="0" iyy="2.541e-05" iyz="0" izz="1.281e-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gpu_fan_rotor.glb" />
+      </geometry>
+      <material name="fan_black" />
+    </visual>
+    <collision name="fan_right__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_right__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_right__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_right__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/gpu_fan_rotor__4987558348302fbe__hull_004.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="body_to_bracket" type="fixed">
+    <origin xyz="-0.143 0 0" rpy="0 0 0" />
+    <parent link="gpu_body" />
+    <child link="bracket" />
+  </joint>
+  <joint name="fan_left_spin" type="continuous">
+    <origin xyz="-0.086 0.013 0" rpy="0 0 0" />
+    <parent link="gpu_body" />
+    <child link="fan_left" />
+    <axis xyz="0 1 0" />
+    <limit effort="0.25" velocity="120" />
+  </joint>
+  <joint name="fan_center_spin" type="continuous">
+    <origin xyz="0 0.013 0" rpy="0 0 0" />
+    <parent link="gpu_body" />
+    <child link="fan_center" />
+    <axis xyz="0 1 0" />
+    <limit effort="0.25" velocity="120" />
+  </joint>
+  <joint name="fan_right_spin" type="continuous">
+    <origin xyz="0.086 0.013 0" rpy="0 0 0" />
+    <parent link="gpu_body" />
+    <child link="fan_right" />
+    <axis xyz="0 1 0" />
+    <limit effort="0.25" velocity="120" />
+  </joint>
+</robot>

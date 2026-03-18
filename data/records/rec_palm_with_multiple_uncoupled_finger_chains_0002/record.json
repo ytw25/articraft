@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_palm_with_multiple_uncoupled_finger_chains_0002",
+  "created_at": "2026-03-12T18:25:13Z",
+  "updated_at": "2026-03-12T18:25:13Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "palm_with_multiple_uncoupled_finger_chains",
+  "source": {
+    "run_id": "run_import_palm_with_multiple_uncoupled_finger_chains_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A multi-finger end-effector with a rigid central palm and multiple independent hinge-linked fingers, using flat plates a",
+    "prompt_preview": "A multi-finger end-effector with a rigid central palm and multiple independent hinge-linked fingers, using flat plates and compact pin joints."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "d8fe59f8b5eb2adb2f547f48ea97c956b439a973a578d2636b4421263c109ee0",
+    "model_py_sha256": "646e8a9308e681d24d5a8b94a8e99aebb4a6dafcf22f50cfd6f7f9a88ca09935",
+    "model_urdf_sha256": "1c43556f78481d8953a7b7d83b824a738fea8fc376a5eb7399ee851ccffc8f3c"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,260 @@
+<robot name="robotic_palm_block">
+  <material name="anodized_black">
+    <color rgba="0.16 0.17 0.2 1" />
+  </material>
+  <material name="finger_polymer">
+    <color rgba="0.42 0.44 0.48 1" />
+  </material>
+  <material name="thumb_polymer">
+    <color rgba="0.33 0.35 0.39 1" />
+  </material>
+  <link name="palm">
+    <inertial>
+      <mass value="0.82" />
+      <inertia ixx="0.000312967" ixy="0" ixz="0" iyy="0.000809613" iyz="0" izz="0.000925233" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/palm.glb" />
+      </geometry>
+      <material name="anodized_black" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.102 0.056 0.038" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.024 0 0.026" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.046 0.014" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.026" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.046 0.014" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.024 0 0.026" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.046 0.014" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.058 -0.004 0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.04 0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_prox">
+    <inertial>
+      <origin xyz="0 0 0.0205" rpy="0 0 0" />
+      <mass value="0.09" />
+      <inertia ixx="1.40859e-05" ixy="0" ixz="0" iyy="1.38985e-05" iyz="0" izz="2.76942e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/index_prox.glb" />
+      </geometry>
+      <material name="finger_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0205" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01312 0.01404 0.041" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_dist">
+    <inertial>
+      <origin xyz="0 0 0.01445" rpy="0 0 0" />
+      <mass value="0.055" />
+      <inertia ixx="4.59275e-06" ixy="0" ixz="0" iyy="4.49581e-06" iyz="0" izz="1.43247e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/index_dist.glb" />
+      </geometry>
+      <material name="finger_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.01445" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0120704 0.0129168 0.0289" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle_prox">
+    <inertial>
+      <origin xyz="0 0 0.0235" rpy="0 0 0" />
+      <mass value="0.098" />
+      <inertia ixx="1.98338e-05" ixy="0" ixz="0" iyy="1.96271e-05" iyz="0" izz="3.38064e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle_prox.glb" />
+      </geometry>
+      <material name="finger_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01394 0.01482 0.047" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle_dist">
+    <inertial>
+      <origin xyz="0 0 0.016575" rpy="0 0 0" />
+      <mass value="0.06" />
+      <inertia ixx="6.4241e-06" ixy="0" ixz="0" iyy="6.31699e-06" iyz="0" izz="1.75186e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle_dist.glb" />
+      </geometry>
+      <material name="finger_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.016575" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0128248 0.0136344 0.03315" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="ring_prox">
+    <inertial>
+      <origin xyz="0 0 0.0195" rpy="0 0 0" />
+      <mass value="0.082" />
+      <inertia ixx="1.1595e-05" ixy="0" ixz="0" iyy="1.14273e-05" iyz="0" izz="2.2353e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/ring_prox.glb" />
+      </geometry>
+      <material name="finger_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0195" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0123 0.01326 0.039" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="ring_dist">
+    <inertial>
+      <origin xyz="0 0 0.0136" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="3.70275e-06" ixy="0" ixz="0" iyy="3.61622e-06" iyz="0" izz="1.15363e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/ring_dist.glb" />
+      </geometry>
+      <material name="finger_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.011316 0.0121992 0.0272" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_prox">
+    <inertial>
+      <origin xyz="0 0 0.01615" rpy="0 0 0" />
+      <mass value="0.078" />
+      <inertia ixx="8.52536e-06" ixy="0" ixz="0" iyy="8.19746e-06" iyz="0" izz="3.16005e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/thumb_prox.glb" />
+      </geometry>
+      <material name="thumb_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.01615" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01476 0.01638 0.0323" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_dist">
+    <inertial>
+      <origin xyz="0 0 0.012325" rpy="0 0 0" />
+      <mass value="0.047" />
+      <inertia ixx="3.2693e-06" ixy="0" ixz="0" iyy="3.10207e-06" iyz="0" izz="1.61166e-06" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/thumb_dist.glb" />
+      </geometry>
+      <material name="thumb_polymer" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.012325" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0135792 0.0150696 0.02465" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="palm_to_index_prox" type="revolute">
+    <origin xyz="-0.024 0.012 0.033" rpy="0 0 0" />
+    <parent link="palm" />
+    <child link="index_prox" />
+    <axis xyz="1 0 0" />
+    <limit effort="8" velocity="2.8" lower="0" upper="1.2" />
+  </joint>
+  <joint name="index_prox_to_index_dist" type="revolute">
+    <origin xyz="0 0 0.047" rpy="0 0 0" />
+    <parent link="index_prox" />
+    <child link="index_dist" />
+    <axis xyz="1 0 0" />
+    <limit effort="6" velocity="3.4" lower="0" upper="1.32" />
+  </joint>
+  <joint name="palm_to_middle_prox" type="revolute">
+    <origin xyz="0 0 0.033" rpy="0 0 0" />
+    <parent link="palm" />
+    <child link="middle_prox" />
+    <axis xyz="1 0 0" />
+    <limit effort="8" velocity="2.8" lower="0" upper="1.22" />
+  </joint>
+  <joint name="middle_prox_to_middle_dist" type="revolute">
+    <origin xyz="0 0 0.053" rpy="0 0 0" />
+    <parent link="middle_prox" />
+    <child link="middle_dist" />
+    <axis xyz="1 0 0" />
+    <limit effort="6" velocity="3.4" lower="0" upper="1.35" />
+  </joint>
+  <joint name="palm_to_ring_prox" type="revolute">
+    <origin xyz="0.024 -0.012 0.033" rpy="0 0 0" />
+    <parent link="palm" />
+    <child link="ring_prox" />
+    <axis xyz="1 0 0" />
+    <limit effort="8" velocity="2.8" lower="0" upper="1.18" />
+  </joint>
+  <joint name="ring_prox_to_ring_dist" type="revolute">
+    <origin xyz="0 0 0.045" rpy="0 0 0" />
+    <parent link="ring_prox" />
+    <child link="ring_dist" />
+    <axis xyz="1 0 0" />
+    <limit effort="6" velocity="3.4" lower="0" upper="1.28" />
+  </joint>
+  <joint name="palm_to_thumb_prox" type="revolute">
+    <origin xyz="-0.068 -0.004 0.002" rpy="0 -0.95 0" />
+    <parent link="palm" />
+    <child link="thumb_prox" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="2.8" lower="0" upper="1.05" />
+  </joint>
+  <joint name="thumb_prox_to_thumb_dist" type="revolute">
+    <origin xyz="0 0 0.038" rpy="0 0 0" />
+    <parent link="thumb_prox" />
+    <child link="thumb_dist" />
+    <axis xyz="0 1 0" />
+    <limit effort="6" velocity="3.4" lower="0" upper="1.1" />
+  </joint>
+</robot>

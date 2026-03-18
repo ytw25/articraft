@@ -1,0 +1,135 @@
+<robot name="vertical_slide_wrist">
+  <material name="frame_gray">
+    <color rgba="0.56 0.58 0.61 1" />
+  </material>
+  <material name="rail_dark">
+    <color rgba="0.2 0.21 0.23 1" />
+  </material>
+  <material name="carriage_light">
+    <color rgba="0.74 0.76 0.79 1" />
+  </material>
+  <material name="tool_dark">
+    <color rgba="0.16 0.16 0.18 1" />
+  </material>
+  <material name="accent">
+    <color rgba="0.84 0.47 0.15 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.27" rpy="0 0 0" />
+      <mass value="8.8" />
+      <inertia ixx="0.226233" ixy="0" ixz="0" iyy="0.232613" iyz="0" izz="0.0311667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/vertical_slide_base.glb" />
+      </geometry>
+      <material name="frame_gray" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.13 0.02" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.005 0.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.04 0.52" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.04 0.018 0.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.018 0.44" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.04 0.018 0.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.018 0.44" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.006 0.505" rpy="0 0 0" />
+      <geometry>
+        <box size="0.11 0.03 0.03" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="carriage">
+    <inertial>
+      <origin xyz="0 0.025 0.075" rpy="0 0 0" />
+      <mass value="1.6" />
+      <inertia ixx="0.00529333" ixy="0" ixz="0" iyy="0.00706667" iyz="0" izz="0.00273333" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/vertical_slide_carriage.glb" />
+      </geometry>
+      <material name="carriage_light" />
+    </visual>
+    <collision>
+      <origin xyz="0 0.035 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.125 0.02 0.1" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.01 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.012 0.09" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.035 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.046 0.02 0.085" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wrist">
+    <inertial>
+      <origin xyz="0 0.085 -0.095" rpy="0 0 0" />
+      <mass value="0.8" />
+      <inertia ixx="0.00232667" ixy="0" ixz="0" iyy="0.0024" iyz="0" izz="0.000406667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/vertical_slide_wrist.glb" />
+      </geometry>
+      <material name="tool_dark" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.034 0.018 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.08 -0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.028 0.095" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.095 -0.112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.04 0.115" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_carriage" type="prismatic">
+    <origin xyz="0 0.018 0.24" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="carriage" />
+    <axis xyz="0 0 1" />
+    <limit effort="220" velocity="0.4" lower="0" upper="0.18" />
+  </joint>
+  <joint name="carriage_to_wrist" type="revolute">
+    <origin xyz="0 0.035 0.145" rpy="0 0 0" />
+    <parent link="carriage" />
+    <child link="wrist" />
+    <axis xyz="0 1 0" />
+    <limit effort="20" velocity="2.5" lower="-1" upper="1.1" />
+  </joint>
+</robot>

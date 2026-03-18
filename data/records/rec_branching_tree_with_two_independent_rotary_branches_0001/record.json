@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_branching_tree_with_two_independent_rotary_branches_0001",
+  "created_at": "2026-03-12T18:18:08Z",
+  "updated_at": "2026-03-12T18:18:08Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "branching_tree_with_two_independent_rotary_branches",
+  "source": {
+    "run_id": "run_import_branching_tree_with_two_independent_rotary_branches_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A branching mechanism with one base structure feeding two separate revolute arms, each branch moving independently with ",
+    "prompt_preview": "A branching mechanism with one base structure feeding two separate revolute arms, each branch moving independently with its own hinge chain."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "44bcaa4494f6de863d5219c33d9b8f079c547b9eff56fdf8bf05debc1e1ebceb",
+    "model_py_sha256": "57b8407c84159cce288720dd65eff120899598ae4712dc47f209997b2a39ca89",
+    "model_urdf_sha256": "bebde38b6936369726d1f06d29809ef8d194f25e1d86f0ce2a3df9ed7836947e"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_orthogonal_xz_stage_0002",
+  "created_at": "2026-03-12T18:23:21Z",
+  "updated_at": "2026-03-12T18:23:21Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "orthogonal_xz_stage",
+  "source": {
+    "run_id": "run_import_orthogonal_xz_stage_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A two-axis positioning stage combining X translation and Z translation, with straight guide assemblies and a square payl",
+    "prompt_preview": "A two-axis positioning stage combining X translation and Z translation, with straight guide assemblies and a square payload plate."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "14571c51a3593c6924023a07a282ddece66377fc82d2b0b1cc699c7352e8c6b2",
+    "model_py_sha256": "83a1dcdcbf158b1f1cee3f34b7ffb9422e819d3d4b46fdd4d72bcabd1d56b3da",
+    "model_urdf_sha256": "a5df0df05437bcc3e40d828a044a056495e61aa5359836d68ef5bbe02103c6eb"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

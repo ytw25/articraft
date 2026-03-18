@@ -1,0 +1,820 @@
+<robot name="industrial_compound_gear_train">
+  <material name="painted_steel">
+    <color rgba="0.24 0.28 0.32 1" />
+    </material>
+  <material name="machined_steel">
+    <color rgba="0.66 0.68 0.71 1" />
+    </material>
+  <material name="dark_oxide">
+    <color rgba="0.14 0.15 0.17 1" />
+    </material>
+  <material name="bronze">
+    <color rgba="0.73 0.55 0.24 1" />
+    </material>
+  <material name="signal_red">
+    <color rgba="0.68 0.15 0.13 1" />
+    </material>
+  <link name="bed">
+    <inertial>
+      <origin xyz="0 0 0.013" rpy="0 0 0" />
+      <mass value="8" />
+      <inertia ixx="0.0150533" ixy="0" ixz="0" iyy="0.0512347" iyz="0" izz="0.0653867" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gear_train_bed.obj" />
+        </geometry>
+      <material name="painted_steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.105 -0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <visual>
+      <origin xyz="-0.105 0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <visual>
+      <origin xyz="0.105 -0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <visual>
+      <origin xyz="0.105 0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <collision name="bed__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/8eeba164f48b904036eaf7af__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="bed__visual_2">
+      <origin xyz="-0.105 -0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="bed__visual_3">
+      <origin xyz="-0.105 0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="bed__visual_4">
+      <origin xyz="0.105 -0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="bed__visual_5">
+      <origin xyz="0.105 0.05 0.016" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.004" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="input_support">
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <mass value="0.95" />
+      <inertia ixx="0.000279933" ixy="0" ixz="0" iyy="0.000324583" iyz="0" izz="0.000351183" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/input_support.obj" />
+        </geometry>
+      <material name="painted_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0095" length="0.006" />
+        </geometry>
+      <material name="bronze" />
+      </visual>
+    <visual>
+      <origin xyz="-0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <visual>
+      <origin xyz="0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <collision name="input_support__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/12d7eae5664258eba0a15236__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/12d7eae5664258eba0a15236__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/12d7eae5664258eba0a15236__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/12d7eae5664258eba0a15236__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/12d7eae5664258eba0a15236__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/12d7eae5664258eba0a15236__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_2">
+      <origin xyz="0 0 0.037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0095" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_3">
+      <origin xyz="-0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="input_support__visual_4">
+      <origin xyz="0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="compound_support">
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <mass value="1.15" />
+      <inertia ixx="0.000374133" ixy="0" ixz="0" iyy="0.000475717" iyz="0" izz="0.000543183" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/compound_support.obj" />
+        </geometry>
+      <material name="painted_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0105" length="0.006" />
+        </geometry>
+      <material name="bronze" />
+      </visual>
+    <visual>
+      <origin xyz="-0.016 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0038" length="0.003" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <visual>
+      <origin xyz="0.016 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0038" length="0.003" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <collision name="compound_support__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3903c42dd89433473db6719__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3903c42dd89433473db6719__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3903c42dd89433473db6719__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3903c42dd89433473db6719__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3903c42dd89433473db6719__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3903c42dd89433473db6719__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_2">
+      <origin xyz="0 0 0.037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0105" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_3">
+      <origin xyz="-0.016 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0038" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="compound_support__visual_4">
+      <origin xyz="0.016 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0038" length="0.003" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="output_support">
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.000309667" ixy="0" ixz="0" iyy="0.000358667" iyz="0" izz="0.000401667" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/output_support.obj" />
+        </geometry>
+      <material name="painted_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.006" />
+        </geometry>
+      <material name="bronze" />
+      </visual>
+    <visual>
+      <origin xyz="-0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <visual>
+      <origin xyz="0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <collision name="output_support__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/524972275fbdff18a5d8e758__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/524972275fbdff18a5d8e758__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/524972275fbdff18a5d8e758__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/524972275fbdff18a5d8e758__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/524972275fbdff18a5d8e758__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/524972275fbdff18a5d8e758__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_2">
+      <origin xyz="0 0 0.037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_3">
+      <origin xyz="-0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="output_support__visual_4">
+      <origin xyz="0.014 0 0.0095" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.003" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="input_gear">
+    <inertial>
+      <origin xyz="0 0 0.044" rpy="0 0 0" />
+      <mass value="1.05" />
+      <inertia ixx="0.00135415" ixy="0" ixz="0" iyy="0.00135415" iyz="0" izz="0.0009583" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/input_gear.obj" />
+        </geometry>
+      <material name="machined_steel" />
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/input_handwheel.obj" />
+        </geometry>
+      <material name="signal_red" />
+      </visual>
+    <collision name="input_gear__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/229c2b7f8978fcbf50ede1d9__hull_016.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="input_gear__visual_2__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/381a8d8c11f6c80e1f0680da__hull_016.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="compound_cluster">
+    <inertial>
+      <origin xyz="0 0 0.031" rpy="0 0 0" />
+      <mass value="1.55" />
+      <inertia ixx="0.00221392" ixy="0" ixz="0" iyy="0.00221392" iyz="0" izz="0.0030132" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/compound_cluster.obj" />
+        </geometry>
+      <material name="machined_steel" />
+      </visual>
+    <collision name="compound_cluster__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="compound_cluster__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0ce97c89d6396fe94b780f5__hull_016.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="output_gear">
+    <inertial>
+      <origin xyz="0 0 0.038" rpy="0 0 0" />
+      <mass value="1.45" />
+      <inertia ixx="0.00256167" ixy="0" ixz="0" iyy="0.00256167" iyz="0" izz="0.00325187" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/output_gear.obj" />
+        </geometry>
+      <material name="machined_steel" />
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/output_flange.obj" />
+        </geometry>
+      <material name="dark_oxide" />
+      </visual>
+    <collision name="output_gear__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/745673bd0970e7e32db3e1ec__hull_016.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="output_gear__visual_2__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f1f7726e1a2ee480353e25c7__hull_016.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="bed_to_input_support" type="fixed">
+    <origin xyz="-0.078 0 0.02" rpy="0 0 0" />
+    <parent link="bed" />
+    <child link="input_support" />
+    </joint>
+  <joint name="bed_to_compound_support" type="fixed">
+    <origin xyz="0 0 0.02" rpy="0 0 0" />
+    <parent link="bed" />
+    <child link="compound_support" />
+    </joint>
+  <joint name="bed_to_output_support" type="fixed">
+    <origin xyz="0.078 0 0.02" rpy="0 0 0" />
+    <parent link="bed" />
+    <child link="output_support" />
+    </joint>
+  <joint name="input_spin" type="continuous">
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <parent link="input_support" />
+    <child link="input_gear" />
+    <axis xyz="0 0 1" />
+    <limit effort="18" velocity="25" />
+    </joint>
+  <joint name="compound_spin" type="continuous">
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <parent link="compound_support" />
+    <child link="compound_cluster" />
+    <axis xyz="0 0 1" />
+    <limit effort="18" velocity="25" />
+    </joint>
+  <joint name="output_spin" type="continuous">
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <parent link="output_support" />
+    <child link="output_gear" />
+    <axis xyz="0 0 1" />
+    <limit effort="18" velocity="25" />
+    </joint>
+  </robot>

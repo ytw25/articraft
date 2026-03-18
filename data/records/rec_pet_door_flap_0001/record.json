@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_pet_door_flap_0001",
+  "created_at": "2026-03-16T01:22:47Z",
+  "updated_at": "2026-03-16T01:22:47Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "pet_door_flap",
+  "source": {
+    "run_id": "run_import_pet_door_flap_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed pet door flap with a framed opening, flexible or rigid flap panel, and practical mounting d",
+    "prompt_preview": "A realistic, highly detailed pet door flap with a framed opening, flexible or rigid flap panel, and practical mounting detail. The flap articulates naturally..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "9958eabdb6ad62778e249f24a3bc80dd2a3451a8635be72523ba69295eb3b010",
+    "model_py_sha256": "0ee8056d2c5e605704d52e1aeb01d32a728bd6798051312fdcf701173a02390a",
+    "model_urdf_sha256": "31b432ac2eb104f7744b22f94af4ba505fc916048252316a7cf938a0b0a0c291"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,854 @@
+<robot name="binoculars">
+  <link name="left_body">
+    <inertial>
+      <origin xyz="-0.024 0.004 0.001" rpy="0 0 0" />
+      <mass value="0.42" />
+      <inertia ixx="0.00107887" ixy="0" ixz="0" iyy="0.0004095" iyz="0" izz="0.00123637" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/left_body_shell.obj" />
+        </geometry>
+      <material name="armored_black">
+        <color rgba="0.13 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.017 -0.002 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.024 0.018" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.03 -0.003 0.022" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.028 0.01" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 -0.004 0.023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.036 0.008" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.057 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0225" length="0.062" />
+        </geometry>
+      <material name="armored_black">
+        <color rgba="0.13 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.09 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0248" length="0.006" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.028 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.037 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.046 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.055 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 0.092 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0205" length="0.002" />
+        </geometry>
+      <material name="optic_glass">
+        <color rgba="0.16 0.22 0.28 0.45" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 -0.056 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0175" length="0.02" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 -0.064 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0187" length="0.004" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 -0.075 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0198" length="0.016" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.043 -0.082 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0132" length="0.002" />
+        </geometry>
+      <material name="optic_glass">
+        <color rgba="0.16 0.22 0.28 0.45" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.058 0.03" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 -0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 -0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 -0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.06 0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.006" length="0.05" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.004" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.004" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.004 -0.013 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.018" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.026" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.009 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.003 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.003 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.009 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <collision name="left_body__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52f3ae0f25c173353f4752f5__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_2">
+      <origin xyz="-0.017 -0.002 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.024 0.018" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_3">
+      <origin xyz="-0.03 -0.003 0.022" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.028 0.01" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_4">
+      <origin xyz="-0.043 -0.004 0.023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.036 0.008" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_5">
+      <origin xyz="-0.043 0.057 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0225" length="0.062" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_6">
+      <origin xyz="-0.043 0.09 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0248" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_7">
+      <origin xyz="-0.043 0.028 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_8">
+      <origin xyz="-0.043 0.037 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_9">
+      <origin xyz="-0.043 0.046 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_10">
+      <origin xyz="-0.043 0.055 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_11">
+      <origin xyz="-0.043 0.092 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0205" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_12">
+      <origin xyz="-0.043 -0.056 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0175" length="0.02" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_13">
+      <origin xyz="-0.043 -0.064 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0187" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_14">
+      <origin xyz="-0.043 -0.075 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0198" length="0.016" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_15">
+      <origin xyz="-0.043 -0.082 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0132" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_16">
+      <origin xyz="-0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.058 0.03" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_17">
+      <origin xyz="-0.06 -0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_18">
+      <origin xyz="-0.06 -0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_19">
+      <origin xyz="-0.06 -0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_20">
+      <origin xyz="-0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_21">
+      <origin xyz="-0.06 0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_22">
+      <origin xyz="-0.06 0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_23">
+      <geometry>
+        <cylinder radius="0.006" length="0.05" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_24">
+      <origin xyz="0 0 -0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_25">
+      <origin xyz="0 0 0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_26">
+      <origin xyz="-0.004 -0.013 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.018" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_27">
+      <origin xyz="0 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.026" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_28">
+      <origin xyz="-0.009 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_29">
+      <origin xyz="-0.003 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_30">
+      <origin xyz="0.003 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="left_body__visual_31">
+      <origin xyz="0.009 -0.018 0.017" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0115" length="0.002" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="right_body">
+    <inertial>
+      <origin xyz="0.024 0.004 0.001" rpy="0 0 0" />
+      <mass value="0.36" />
+      <inertia ixx="0.00092475" ixy="0" ixz="0" iyy="0.000351" iyz="0" izz="0.00105975" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/right_body_shell.obj" />
+        </geometry>
+      <material name="armored_black">
+        <color rgba="0.13 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.017 -0.002 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.024 0.018" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.03 -0.003 0.022" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.028 0.01" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 -0.004 0.023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.036 0.008" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.057 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0225" length="0.062" />
+        </geometry>
+      <material name="armored_black">
+        <color rgba="0.13 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.09 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0248" length="0.006" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.028 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.037 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.046 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.055 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 0.092 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0205" length="0.002" />
+        </geometry>
+      <material name="optic_glass">
+        <color rgba="0.16 0.22 0.28 0.45" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 -0.056 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0175" length="0.02" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 -0.064 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0187" length="0.004" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 -0.075 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0198" length="0.016" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.043 -0.082 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0132" length="0.002" />
+        </geometry>
+      <material name="optic_glass">
+        <color rgba="0.16 0.22 0.28 0.45" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.058 0.03" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 -0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 -0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 -0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      <material name="textured_rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <cylinder radius="0.0092" length="0.046" />
+        </geometry>
+      <material name="graphite_metal">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.024" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.004" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.004" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.56 0.58 0.61 1" />
+        </material>
+      </visual>
+    <collision name="right_body__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/99135538b38ca6a6aaf30ebc__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_2">
+      <origin xyz="0.017 -0.002 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.024 0.018" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_3">
+      <origin xyz="0.03 -0.003 0.022" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.028 0.01" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_4">
+      <origin xyz="0.043 -0.004 0.023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.036 0.008" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_5">
+      <origin xyz="0.043 0.057 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0225" length="0.062" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_6">
+      <origin xyz="0.043 0.09 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0248" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_7">
+      <origin xyz="0.043 0.028 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_8">
+      <origin xyz="0.043 0.037 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_9">
+      <origin xyz="0.043 0.046 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_10">
+      <origin xyz="0.043 0.055 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0242" length="0.003" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_11">
+      <origin xyz="0.043 0.092 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0205" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_12">
+      <origin xyz="0.043 -0.056 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0175" length="0.02" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_13">
+      <origin xyz="0.043 -0.064 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0187" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_14">
+      <origin xyz="0.043 -0.075 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0198" length="0.016" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_15">
+      <origin xyz="0.043 -0.082 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0132" length="0.002" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_16">
+      <origin xyz="0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.058 0.03" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_17">
+      <origin xyz="0.06 -0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_18">
+      <origin xyz="0.06 -0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_19">
+      <origin xyz="0.06 -0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_20">
+      <origin xyz="0.06 0.004 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_21">
+      <origin xyz="0.06 0.012 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_22">
+      <origin xyz="0.06 0.02 0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.004 0.032" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_23">
+      <geometry>
+        <cylinder radius="0.0092" length="0.046" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_24">
+      <origin xyz="0 0 -0.024" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="right_body__visual_25">
+      <origin xyz="0 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.004" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="center_hinge" type="revolute">
+    <parent link="left_body" />
+    <child link="right_body" />
+    <axis xyz="0 0 1" />
+    <limit effort="4" velocity="1.2" lower="-0.279253" upper="0.314159" />
+    </joint>
+  </robot>

@@ -1,0 +1,902 @@
+<robot name="astronomical_telescope_tripod">
+  <material name="white_paint">
+    <color rgba="0.93 0.94 0.96 1" />
+    </material>
+  <material name="black_anodized">
+    <color rgba="0.12 0.12 0.13 1" />
+    </material>
+  <material name="dark_plastic">
+    <color rgba="0.19 0.2 0.22 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.69 0.71 0.73 1" />
+    </material>
+  <material name="rubber_black">
+    <color rgba="0.08 0.08 0.09 1" />
+    </material>
+  <material name="optical_glass">
+    <color rgba="0.42 0.58 0.68 0.35" />
+    </material>
+  <link name="tripod_base">
+    <inertial>
+      <origin xyz="0 0 -0.58" rpy="0 0 0" />
+      <mass value="7.2" />
+      <inertia ixx="1.34886" ixy="0" ixz="0" iyy="1.34886" iyz="0" izz="1.083" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 -0.012" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.024" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.29" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.52" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.55" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.032" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tripod_upper_legs.obj" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tripod_accessory_tray.obj" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.325 0 -0.79" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.023" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.1625 0.281458 -0.79" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.023" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.1625 -0.281458 -0.79" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.023" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <collision name="tripod_base__visual_1">
+      <origin xyz="0 0 -0.012" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.024" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_2">
+      <origin xyz="0 0 -0.29" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.52" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_3">
+      <origin xyz="0 0 -0.55" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.032" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_4__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/30f118e242221b5e9fbcc37d__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_5__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ffebe0f556ee0433efd8e5eb__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_6">
+      <origin xyz="0.325 0 -0.79" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.023" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_7">
+      <origin xyz="-0.1625 0.281458 -0.79" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.023" />
+        </geometry>
+      </collision>
+    <collision name="tripod_base__visual_8">
+      <origin xyz="-0.1625 -0.281458 -0.79" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.023" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="leg_extension_a">
+    <inertial>
+      <origin xyz="0.0643638 0 -0.146483" rpy="0 0 0" />
+      <mass value="0.8" />
+      <inertia ixx="0.0121867" ixy="0" ixz="0" iyy="0.0121867" iyz="0" izz="0.000853333" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leg_extension_a_body.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leg_extension_a_sleeve.obj" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.016" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.142807 0 -0.325009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <collision name="leg_extension_a__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/99f6a229c5b7de734929d608__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_a__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5c928663fd99549928af3136__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_a__visual_3">
+      <geometry>
+        <sphere radius="0.016" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_a__visual_4">
+      <origin xyz="0.142807 0 -0.325009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="leg_extension_b">
+    <inertial>
+      <origin xyz="-0.0321819 0.0557407 -0.146483" rpy="0 0 0" />
+      <mass value="0.8" />
+      <inertia ixx="0.0121867" ixy="0" ixz="0" iyy="0.0121867" iyz="0" izz="0.000853333" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leg_extension_b_body.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leg_extension_b_sleeve.obj" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.016" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0714036 0.123675 -0.325009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <collision name="leg_extension_b__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ade65a973eef8714178be63e__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_b__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c4739c6a140de25a59f0b6f1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_b__visual_3">
+      <geometry>
+        <sphere radius="0.016" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_b__visual_4">
+      <origin xyz="-0.0714036 0.123675 -0.325009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="leg_extension_c">
+    <inertial>
+      <origin xyz="-0.0321819 -0.0557407 -0.146483" rpy="0 0 0" />
+      <mass value="0.8" />
+      <inertia ixx="0.0121867" ixy="0" ixz="0" iyy="0.0121867" iyz="0" izz="0.000853333" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leg_extension_c_body.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leg_extension_c_sleeve.obj" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <sphere radius="0.016" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0714036 -0.123675 -0.325009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <collision name="leg_extension_c__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a31afbcbecbce0351cd05e81__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_c__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/049c4114c4ca2c481dbad786__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_c__visual_3">
+      <geometry>
+        <sphere radius="0.016" />
+        </geometry>
+      </collision>
+    <collision name="leg_extension_c__visual_4">
+      <origin xyz="-0.0714036 -0.123675 -0.325009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.02" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="mount_head">
+    <inertial>
+      <origin xyz="0 0 0.14" rpy="0 0 0" />
+      <mass value="3" />
+      <inertia ixx="0.0245" ixy="0" ixz="0" iyy="0.0277" iyz="0" izz="0.013" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.075" length="0.03" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.044" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.055" length="0.028" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.085 0.11" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.008 0 0.16" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.11 0.16" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.015 0 0.222" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.1 0.036" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.055 0.242" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.16 0.045" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.112 0.24" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.065" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.24" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.12" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.058 0 0.102" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.035 0.06" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.055 0.03 0.125" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.05" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.054 -0.028 0.1" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.04" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/mount_control_cable.obj" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.138 0.15 0.045" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.018" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <collision name="mount_head__visual_1">
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.075" length="0.03" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_2">
+      <origin xyz="0 0 0.044" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.055" length="0.028" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_3">
+      <origin xyz="0 0 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.085 0.11" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_4">
+      <origin xyz="-0.008 0 0.16" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.11 0.16" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_5">
+      <origin xyz="0.015 0 0.222" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.1 0.036" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_6">
+      <origin xyz="0 0.055 0.242" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.16 0.045" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_7">
+      <origin xyz="0 0.112 0.24" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.065" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_8">
+      <origin xyz="0 0 0.24" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.12" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_9">
+      <origin xyz="0.058 0 0.102" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.035 0.06" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_10">
+      <origin xyz="-0.055 0.03 0.125" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.05" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_11">
+      <origin xyz="0.054 -0.028 0.1" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.04" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_12__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c8cc327ff288e0d226900e85__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_12__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c8cc327ff288e0d226900e85__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_head__visual_13">
+      <origin xyz="-0.138 0.15 0.045" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="optical_tube">
+    <inertial>
+      <origin xyz="0.18 0 0.015" rpy="0 0 0" />
+      <mass value="4.6" />
+      <inertia ixx="0.0444667" ixy="0" ixz="0" iyy="0.424733" iyz="0" izz="0.417373" />
+      </inertial>
+    <visual>
+      <origin xyz="0.16 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.061" length="0.74" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.93 0.94 0.96 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.59 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.24" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.93 0.94 0.96 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.47 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.067" length="0.022" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.706 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.056" length="0.006" />
+        </geometry>
+      <material name="optical_glass">
+        <color rgba="0.42 0.58 0.68 0.35" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.1 0.03" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.12" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.04 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.022" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.14 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.022" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.04 0 -0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.026 0.06 0.045" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.14 0 -0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.026 0.06 0.045" />
+        </geometry>
+      <material name="dark_plastic">
+        <color rgba="0.19 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.05 0 -0.041" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.036 0.018" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.17 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.043" length="0.12" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.28 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.1" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.69 0.71 0.73 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.35 0 0.035" rpy="0 -0.785398 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.1" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.405 0 0.108" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.085" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.2 0 0.105" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.18" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.1 0 0.075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.032 0.06" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.28 0 0.075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.032 0.06" />
+        </geometry>
+      <material name="black_anodized">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.17 0.034 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.03" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.17 -0.034 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.03" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <collision name="optical_tube__visual_1">
+      <origin xyz="0.16 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.061" length="0.74" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_2">
+      <origin xyz="0.59 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.24" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_3">
+      <origin xyz="0.47 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.067" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_4">
+      <origin xyz="0.706 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.056" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_5">
+      <origin xyz="0 0 -0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.1 0.03" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_6">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.12" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_7">
+      <origin xyz="-0.04 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_8">
+      <origin xyz="0.14 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_9">
+      <origin xyz="-0.04 0 -0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.026 0.06 0.045" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_10">
+      <origin xyz="0.14 0 -0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.026 0.06 0.045" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_11">
+      <origin xyz="0.05 0 -0.041" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.036 0.018" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_12">
+      <origin xyz="-0.17 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.043" length="0.12" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_13">
+      <origin xyz="-0.28 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.1" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_14">
+      <origin xyz="-0.35 0 0.035" rpy="0 -0.785398 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.1" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_15">
+      <origin xyz="-0.405 0 0.108" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.085" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_16">
+      <origin xyz="0.2 0 0.105" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.18" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_17">
+      <origin xyz="0.1 0 0.075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.032 0.06" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_18">
+      <origin xyz="0.28 0 0.075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.032 0.06" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_19">
+      <origin xyz="-0.17 0.034 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.03" />
+        </geometry>
+      </collision>
+    <collision name="optical_tube__visual_20">
+      <origin xyz="-0.17 -0.034 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.03" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="leg_a_extension" type="prismatic">
+    <origin xyz="0.325 0 -0.79" rpy="0 0 0" />
+    <parent link="tripod_base" />
+    <child link="leg_extension_a" />
+    <axis xyz="0.402274 0 -0.915519" />
+    <limit effort="120" velocity="0.08" lower="0" upper="0.14" />
+    </joint>
+  <joint name="leg_b_extension" type="prismatic">
+    <origin xyz="-0.1625 0.281458 -0.79" rpy="0 0 0" />
+    <parent link="tripod_base" />
+    <child link="leg_extension_b" />
+    <axis xyz="-0.201137 0.348379 -0.915519" />
+    <limit effort="120" velocity="0.08" lower="0" upper="0.14" />
+    </joint>
+  <joint name="leg_c_extension" type="prismatic">
+    <origin xyz="-0.1625 -0.281458 -0.79" rpy="0 0 0" />
+    <parent link="tripod_base" />
+    <child link="leg_extension_c" />
+    <axis xyz="-0.201137 -0.348379 -0.915519" />
+    <limit effort="120" velocity="0.08" lower="0" upper="0.14" />
+    </joint>
+  <joint name="mount_azimuth" type="revolute">
+    <parent link="tripod_base" />
+    <child link="mount_head" />
+    <axis xyz="0 0 1" />
+    <limit effort="14" velocity="1" lower="-3.14159" upper="3.14159" />
+    </joint>
+  <joint name="tube_elevation" type="revolute">
+    <origin xyz="0 0.112 0.24" rpy="0 0 0" />
+    <parent link="mount_head" />
+    <child link="optical_tube" />
+    <axis xyz="0 -1 0" />
+    <limit effort="8" velocity="0.8" lower="-0.25" upper="1.15" />
+    </joint>
+  </robot>

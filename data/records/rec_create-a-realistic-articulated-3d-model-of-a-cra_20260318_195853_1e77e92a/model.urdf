@@ -1,0 +1,814 @@
+<robot name="pedestal_crane">
+  <material name="concrete">
+    <color rgba="0.63 0.64 0.66 1" />
+    </material>
+  <material name="crane_yellow">
+    <color rgba="0.92 0.72 0.16 1" />
+    </material>
+  <material name="dark_steel">
+    <color rgba="0.22 0.24 0.27 1" />
+    </material>
+  <material name="steel">
+    <color rgba="0.58 0.6 0.63 1" />
+    </material>
+  <material name="cable_black">
+    <color rgba="0.09 0.09 0.1 1" />
+    </material>
+  <material name="glass">
+    <color rgba="0.73 0.84 0.9 0.42" />
+    </material>
+  <material name="warning_red">
+    <color rgba="0.63 0.12 0.12 1" />
+    </material>
+  <link name="base_frame">
+    <inertial>
+      <origin xyz="0 0 0.09" rpy="0 0 0" />
+      <mass value="6200" />
+      <inertia ixx="760.74" ixy="0" ixz="0" iyy="1029.41" iyz="0" izz="1756.67" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="1.4 1.2 0.18" />
+        </geometry>
+      <material name="concrete">
+        <color rgba="0.63 0.64 0.66 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="1.7 0.18 0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 1.5 0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.64 -0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.64 0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.64 -0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.64 0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.35" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.42 0.1" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.38 0 0.27" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.08 0.06" />
+        </geometry>
+      <material name="warning_red">
+        <color rgba="0.63 0.12 0.12 1" />
+        </material>
+      </visual>
+    <collision name="base_frame__visual_1">
+      <origin xyz="0 0 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="1.4 1.2 0.18" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_2">
+      <origin xyz="0 0 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="1.7 0.18 0.12" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_3">
+      <origin xyz="0 0 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 1.5 0.12" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_4">
+      <origin xyz="-0.64 -0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_5">
+      <origin xyz="-0.64 0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_6">
+      <origin xyz="0.64 -0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_7">
+      <origin xyz="0.64 0.48 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.24 0.12" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_8">
+      <origin xyz="0 0 0.35" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.42 0.1" />
+        </geometry>
+      </collision>
+    <collision name="base_frame__visual_9">
+      <origin xyz="0.38 0 0.27" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.08 0.06" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="mast">
+    <inertial>
+      <origin xyz="0 0 0.58" rpy="0 0 0" />
+      <mass value="1400" />
+      <inertia ixx="96.2617" ixy="0" ixz="0" iyy="96.2617" iyz="0" izz="11.83" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.07" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.19" length="0.14" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.58" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.13" length="0.88" />
+        </geometry>
+      <material name="crane_yellow">
+        <color rgba="0.92 0.72 0.16 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 1.08" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.18" length="0.12" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.17 0 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.04 0.32" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <collision name="mast__visual_1">
+      <origin xyz="0 0 0.07" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.19" length="0.14" />
+        </geometry>
+      </collision>
+    <collision name="mast__visual_2">
+      <origin xyz="0 0 0.58" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.13" length="0.88" />
+        </geometry>
+      </collision>
+    <collision name="mast__visual_3">
+      <origin xyz="0 0 1.08" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.18" length="0.12" />
+        </geometry>
+      </collision>
+    <collision name="mast__visual_4">
+      <origin xyz="-0.17 0 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.04 0.32" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="upper">
+    <inertial>
+      <origin xyz="0.02 0 0.16" rpy="0 0 0" />
+      <mass value="2100" />
+      <inertia ixx="53.55" ixy="0" ixz="0" iyy="126" iyz="0" izz="174.51" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.3" length="0.1" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.02 0 0.16" rpy="0 0 0" />
+      <geometry>
+        <box size="0.84 0.54 0.12" />
+        </geometry>
+      <material name="crane_yellow">
+        <color rgba="0.92 0.72 0.16 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.04 0.08 0.39" rpy="0 0 0" />
+      <geometry>
+        <box size="0.56 0.34 0.34" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.42 0.02 0.25" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.46 0.22" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.24 -0.22 0.31" rpy="0 0 0" />
+      <geometry>
+        <box size="0.26 0.24 0.18" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.37 -0.22 0.31" rpy="0 -0.35 0" />
+      <geometry>
+        <box size="0.02 0.22 0.16" />
+        </geometry>
+      <material name="glass">
+        <color rgba="0.73 0.84 0.9 0.42" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.25 -0.33 0.31" rpy="0 -0.12 0" />
+      <geometry>
+        <box size="0.18 0.02 0.14" />
+        </geometry>
+      <material name="glass">
+        <color rgba="0.73 0.84 0.9 0.42" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.32 0.1 0.31" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.18" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.32 -0.1 0.31" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.18" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.32 0 0.31" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.24" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.08 0 0.28" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.18" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.12 0.39" rpy="0 0.439843 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.375766" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.12 0.39" rpy="0 0.439843 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.375766" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.08 0 0.56" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.34 0.06" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.18 0.21 0.64" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.16" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <collision name="upper__visual_1">
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.3" length="0.1" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_2">
+      <origin xyz="0.02 0 0.16" rpy="0 0 0" />
+      <geometry>
+        <box size="0.84 0.54 0.12" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_3">
+      <origin xyz="-0.04 0.08 0.39" rpy="0 0 0" />
+      <geometry>
+        <box size="0.56 0.34 0.34" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_4">
+      <origin xyz="-0.42 0.02 0.25" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.46 0.22" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_5">
+      <origin xyz="0.24 -0.22 0.31" rpy="0 0 0" />
+      <geometry>
+        <box size="0.26 0.24 0.18" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_6">
+      <origin xyz="0.37 -0.22 0.31" rpy="0 -0.35 0" />
+      <geometry>
+        <box size="0.02 0.22 0.16" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_7">
+      <origin xyz="0.25 -0.33 0.31" rpy="0 -0.12 0" />
+      <geometry>
+        <box size="0.18 0.02 0.14" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_8">
+      <origin xyz="0.32 0.1 0.31" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.18" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_9">
+      <origin xyz="0.32 -0.1 0.31" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.18" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_10">
+      <origin xyz="0.32 0 0.31" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.24" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_11">
+      <origin xyz="0.08 0 0.28" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.18" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_12">
+      <origin xyz="0 0.12 0.39" rpy="0 0.439843 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.375766" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_13">
+      <origin xyz="0 -0.12 0.39" rpy="0 0.439843 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.375766" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_14">
+      <origin xyz="0.08 0 0.56" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.34 0.06" />
+        </geometry>
+      </collision>
+    <collision name="upper__visual_15">
+      <origin xyz="-0.18 0.21 0.64" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.16" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="boom">
+    <inertial>
+      <origin xyz="0.95 0 0" rpy="0 0 0" />
+      <mass value="950" />
+      <inertia ixx="3.57833" ixy="0" ixz="0" iyy="258.527" iyz="0" izz="258.052" />
+      </inertial>
+    <visual>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.1 0.14" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.08 0.085 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.04 0.18" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.08 -0.085 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.04 0.18" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.7 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.18 0.14 0.16" />
+        </geometry>
+      <material name="crane_yellow">
+        <color rgba="0.92 0.72 0.16 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="1.62 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.98 0.1 0.12" />
+        </geometry>
+      <material name="crane_yellow">
+        <color rgba="0.92 0.72 0.16 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="2.12 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.14 0.18" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="1.26 0 0.11" rpy="0 0 0" />
+      <geometry>
+        <box size="1.1 0.08 0.05" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="1.08 0.055 0.1" rpy="0 1.54807 0" />
+      <geometry>
+        <cylinder radius="0.018" length="1.76045" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="1.08 -0.055 0.1" rpy="0 1.54807 0" />
+      <geometry>
+        <cylinder radius="0.018" length="1.76045" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="1.03 0.055 -0.005" rpy="0 1.49125 0" />
+      <geometry>
+        <cylinder radius="0.012" length="1.38438" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="1.03 -0.055 -0.005" rpy="0 1.49125 0" />
+      <geometry>
+        <cylinder radius="0.012" length="1.38438" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="2.1 0 0.05" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.035" length="0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="2.05 0 -0.05" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.12" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <collision name="boom__visual_1">
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.1 0.14" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_2">
+      <origin xyz="0.08 0.085 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.04 0.18" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_3">
+      <origin xyz="0.08 -0.085 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.04 0.18" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_4">
+      <origin xyz="0.7 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.18 0.14 0.16" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_5">
+      <origin xyz="1.62 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.98 0.1 0.12" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_6">
+      <origin xyz="2.12 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.14 0.18" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_7">
+      <origin xyz="1.26 0 0.11" rpy="0 0 0" />
+      <geometry>
+        <box size="1.1 0.08 0.05" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_8">
+      <origin xyz="1.08 0.055 0.1" rpy="0 1.54807 0" />
+      <geometry>
+        <cylinder radius="0.018" length="1.76045" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_9">
+      <origin xyz="1.08 -0.055 0.1" rpy="0 1.54807 0" />
+      <geometry>
+        <cylinder radius="0.018" length="1.76045" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_10">
+      <origin xyz="1.03 0.055 -0.005" rpy="0 1.49125 0" />
+      <geometry>
+        <cylinder radius="0.012" length="1.38438" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_11">
+      <origin xyz="1.03 -0.055 -0.005" rpy="0 1.49125 0" />
+      <geometry>
+        <cylinder radius="0.012" length="1.38438" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_12">
+      <origin xyz="2.1 0 0.05" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.035" length="0.12" />
+        </geometry>
+      </collision>
+    <collision name="boom__visual_13">
+      <origin xyz="2.05 0 -0.05" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.12" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="hoist">
+    <inertial>
+      <origin xyz="0 0 -0.87" rpy="0 0 0" />
+      <mass value="180" />
+      <inertia ixx="0.6075" ixy="0" ixz="0" iyy="0.636" iyz="0" izz="0.2715" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 -0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.1 0.06" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.018 0 -0.42" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.72" />
+        </geometry>
+      <material name="cable_black">
+        <color rgba="0.09 0.09 0.1 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.018 0 -0.42" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.72" />
+        </geometry>
+      <material name="cable_black">
+        <color rgba="0.09 0.09 0.1 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.03" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.08" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.87" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.09 0.18" />
+        </geometry>
+      <material name="warning_red">
+        <color rgba="0.63 0.12 0.12 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.81" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.08" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.22 0.24 0.27 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.96" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/crane_hook.obj" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.58 0.6 0.63 1" />
+        </material>
+      </visual>
+    <collision name="hoist__visual_1">
+      <origin xyz="0 0 -0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.1 0.06" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_2">
+      <origin xyz="0.018 0 -0.42" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.72" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_3">
+      <origin xyz="-0.018 0 -0.42" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.72" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_4">
+      <origin xyz="0 0 -0.03" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.08" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_5">
+      <origin xyz="0 0 -0.87" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.09 0.18" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_6">
+      <origin xyz="0 0 -0.81" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.08" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_7__hull_001">
+      <origin xyz="0 0 -0.96" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/86cee83bf82103c2bf191a45__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_7__hull_002">
+      <origin xyz="0 0 -0.96" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/86cee83bf82103c2bf191a45__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="hoist__visual_7__hull_003">
+      <origin xyz="0 0 -0.96" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/86cee83bf82103c2bf191a45__hull_003.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="base_to_mast" type="fixed">
+    <origin xyz="0 0 0.4" rpy="0 0 0" />
+    <parent link="base_frame" />
+    <child link="mast" />
+    </joint>
+  <joint name="mast_slew" type="continuous">
+    <origin xyz="0 0 1.14" rpy="0 0 0" />
+    <parent link="mast" />
+    <child link="upper" />
+    <axis xyz="0 0 1" />
+    <limit effort="14000" velocity="0.65" />
+    </joint>
+  <joint name="boom_luff" type="revolute">
+    <origin xyz="0.32 0 0.31" rpy="0 0 0" />
+    <parent link="upper" />
+    <child link="boom" />
+    <axis xyz="0 -1 0" />
+    <limit effort="9000" velocity="0.8" lower="0" upper="1.05" />
+    </joint>
+  <joint name="boom_to_hoist" type="fixed">
+    <origin xyz="2.1 0 0.02" rpy="0 0 0" />
+    <parent link="boom" />
+    <child link="hoist" />
+    </joint>
+  </robot>

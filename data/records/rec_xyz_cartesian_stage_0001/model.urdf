@@ -1,0 +1,223 @@
+<robot name="three_axis_gantry">
+  <material name="frame_gray">
+    <color rgba="0.66 0.68 0.72 1" />
+  </material>
+  <material name="rail_dark">
+    <color rgba="0.18 0.2 0.23 1" />
+  </material>
+  <material name="gantry_blue">
+    <color rgba="0.26 0.42 0.72 1" />
+  </material>
+  <material name="carriage_orange">
+    <color rgba="0.9 0.5 0.12 1" />
+  </material>
+  <material name="tool_black">
+    <color rgba="0.14 0.14 0.16 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.06" rpy="0 0 0" />
+      <mass value="18" />
+      <inertia ixx="0.5982" ixy="0" ixz="0" iyy="1.08" iyz="0" izz="1.635" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gantry_base.glb" />
+      </geometry>
+      <material name="frame_gray" />
+    </visual>
+    <visual>
+      <origin xyz="-0.305 0 0.088" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.54 0.024" />
+      </geometry>
+      <material name="rail_dark" />
+    </visual>
+    <visual>
+      <origin xyz="0.305 0 0.088" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.54 0.024" />
+      </geometry>
+      <material name="rail_dark" />
+    </visual>
+    <collision>
+      <origin xyz="-0.38 0 0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.62 0.06" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.38 0 0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.62 0.06" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.29 0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.76 0.04 0.06" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.29 0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.76 0.04 0.06" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.66 0.44 0.012" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.305 0 0.088" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.54 0.024" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.305 0 0.088" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.54 0.024" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="gantry">
+    <inertial>
+      <origin xyz="0.305 0 0.21" rpy="0 0 0" />
+      <mass value="6.5" />
+      <inertia ixx="0.106167" ixy="0" ixz="0" iyy="0.37635" iyz="0" izz="0.291417" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gantry_bridge.glb" />
+      </geometry>
+      <material name="gantry_blue" />
+    </visual>
+    <visual>
+      <origin xyz="0.305 -0.035 0.305" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.022 0.04" />
+      </geometry>
+      <material name="rail_dark" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.12 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.61 0 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.12 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.223" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.1 0.39" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.61 0 0.223" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.1 0.39" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.305 0 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.7 0.06 0.06" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.305 -0.035 0.305" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.022 0.04" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="x_carriage">
+    <inertial>
+      <origin xyz="0 0 -0.01" rpy="0 0 0" />
+      <mass value="2.2" />
+      <inertia ixx="0.00623333" ixy="0" ixz="0" iyy="0.00953333" iyz="0" izz="0.00858" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/x_carriage.glb" />
+      </geometry>
+      <material name="carriage_orange" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.13 0.11 0.1" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.02 0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.15 0.06 0.03" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 -0.08" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.08 0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="z_slide">
+    <inertial>
+      <origin xyz="0 0 -0.06" rpy="0 0 0" />
+      <mass value="1.4" />
+      <inertia ixx="0.00415333" ixy="0" ixz="0" iyy="0.00597333" iyz="0" izz="0.00415333" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/z_slide.glb" />
+      </geometry>
+      <material name="tool_black" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.16 0.1 0.04" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 -0.07" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.06 0.1" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 -0.13" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.08 0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_gantry" type="prismatic">
+    <origin xyz="-0.305 0 0.1" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="gantry" />
+    <axis xyz="0 1 0" />
+    <limit effort="120" velocity="0.6" lower="-0.16" upper="0.16" />
+  </joint>
+  <joint name="gantry_to_x_carriage" type="prismatic">
+    <origin xyz="0.305 -0.035 0.305" rpy="0 0 0" />
+    <parent link="gantry" />
+    <child link="x_carriage" />
+    <axis xyz="1 0 0" />
+    <limit effort="90" velocity="0.8" lower="-0.18" upper="0.18" />
+  </joint>
+  <joint name="x_carriage_to_z_slide" type="prismatic">
+    <origin xyz="0 0 -0.09" rpy="0 0 0" />
+    <parent link="x_carriage" />
+    <child link="z_slide" />
+    <axis xyz="0 0 -1" />
+    <limit effort="70" velocity="0.35" lower="0" upper="0.06" />
+  </joint>
+</robot>

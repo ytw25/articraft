@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_singleleaf_drawbridge_0001",
+  "created_at": "2026-03-16T01:26:57Z",
+  "updated_at": "2026-03-16T01:26:57Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "singleleaf_drawbridge",
+  "source": {
+    "run_id": "run_import_singleleaf_drawbridge_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed single-leaf drawbridge with a substantial bridge deck, hinge structure, and believable supp",
+    "prompt_preview": "A realistic, highly detailed single-leaf drawbridge with a substantial bridge deck, hinge structure, and believable support architecture. The bridge opening..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "61e3f9d9e1aebb652fcb88b7e928af433ed583af405f59702e94a25555b4b41f",
+    "model_py_sha256": "bf66e66f430844955ef3f719dff9e35bbd180bc7fcf18d38a257874d65ce95dc",
+    "model_urdf_sha256": "99ef05b566f93e9ef5a91c317546b29b2ad4f6ee43a36baf335227de2575d359"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

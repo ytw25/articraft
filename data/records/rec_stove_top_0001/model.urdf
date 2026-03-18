@@ -1,0 +1,1227 @@
+<robot name="freestanding_range">
+  <material name="stainless">
+    <color rgba="0.74 0.75 0.77 1" />
+    </material>
+  <material name="dark_steel">
+    <color rgba="0.28 0.29 0.31 1" />
+    </material>
+  <material name="black_enamel">
+    <color rgba="0.07 0.07 0.08 1" />
+    </material>
+  <material name="cast_iron">
+    <color rgba="0.16 0.16 0.17 1" />
+    </material>
+  <material name="knob_black">
+    <color rgba="0.05 0.05 0.06 1" />
+    </material>
+  <material name="glass">
+    <color rgba="0.1 0.12 0.15 0.28" />
+    </material>
+  <material name="chrome">
+    <color rgba="0.84 0.85 0.87 1" />
+    </material>
+  <material name="display_blue">
+    <color rgba="0.18 0.36 0.58 0.6" />
+    </material>
+  <link name="body">
+    <inertial>
+      <origin xyz="0 0 0.455" rpy="0 0 0" />
+      <mass value="58" />
+      <inertia ixx="6.17217" ixy="0" ixz="0" iyy="6.79422" iyz="0" izz="4.96142" />
+      </inertial>
+    <visual name="left_side_panel">
+      <origin xyz="-0.3675 0 0.435" rpy="0 0 0" />
+      <geometry>
+        <box size="0.025 0.64 0.87" />
+        </geometry>
+      <material name="stainless">
+        <color rgba="0.74 0.75 0.77 1" />
+        </material>
+      </visual>
+    <visual name="right_side_panel">
+      <origin xyz="0.3675 0 0.435" rpy="0 0 0" />
+      <geometry>
+        <box size="0.025 0.64 0.87" />
+        </geometry>
+      <material name="stainless">
+        <color rgba="0.74 0.75 0.77 1" />
+        </material>
+      </visual>
+    <visual name="rear_panel">
+      <origin xyz="0 -0.31 0.425" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.02 0.85" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="bottom_deck">
+      <origin xyz="0 -0.01 0.0125" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.6 0.025" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="oven_roof">
+      <origin xyz="0 -0.01 0.78" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.6 0.025" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="toe_kick">
+      <origin xyz="0 0.29 0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.05 0.11" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="door_threshold">
+      <origin xyz="0 0.286 0.106" rpy="0 0 0" />
+      <geometry>
+        <box size="0.6 0.022 0.012" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="left_front_stile">
+      <origin xyz="-0.3275 0.2925 0.4225" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.045 0.625" />
+        </geometry>
+      <material name="stainless">
+        <color rgba="0.74 0.75 0.77 1" />
+        </material>
+      </visual>
+    <visual name="right_front_stile">
+      <origin xyz="0.3275 0.2925 0.4225" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.045 0.625" />
+        </geometry>
+      <material name="stainless">
+        <color rgba="0.74 0.75 0.77 1" />
+        </material>
+      </visual>
+    <visual name="upper_front_rail">
+      <origin xyz="0 0.285 0.7775" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.06 0.09" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="control_fascia">
+      <origin xyz="0 0.3275 0.815" rpy="0 0 0" />
+      <geometry>
+        <box size="0.72 0.045 0.12" />
+        </geometry>
+      <material name="stainless">
+        <color rgba="0.74 0.75 0.77 1" />
+        </material>
+      </visual>
+    <visual name="display_glass">
+      <origin xyz="0 0.35 0.825" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.006 0.045" />
+        </geometry>
+      <material name="display_blue">
+        <color rgba="0.18 0.36 0.58 0.6" />
+        </material>
+      </visual>
+    <visual name="oven_vent">
+      <origin xyz="0 0.314 0.7425" rpy="0 0 0" />
+      <geometry>
+        <box size="0.56 0.012 0.015" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="cooktop_slab">
+      <origin xyz="0 0 0.885" rpy="0 0 0" />
+      <geometry>
+        <box size="0.76 0.67 0.03" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="burner_bowl_1">
+      <origin xyz="-0.19 0.17 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.085" length="0.008" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="burner_ring_1">
+      <origin xyz="-0.19 0.17 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.058" length="0.006" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="burner_cap_1">
+      <origin xyz="-0.19 0.17 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.02" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="burner_bowl_2">
+      <origin xyz="0.19 0.17 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.095" length="0.008" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="burner_ring_2">
+      <origin xyz="0.19 0.17 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.066" length="0.006" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="burner_cap_2">
+      <origin xyz="0.19 0.17 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.02" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="burner_bowl_3">
+      <origin xyz="-0.19 -0.14 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.078" length="0.008" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="burner_ring_3">
+      <origin xyz="-0.19 -0.14 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.054" length="0.006" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="burner_cap_3">
+      <origin xyz="-0.19 -0.14 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.038" length="0.02" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="burner_bowl_4">
+      <origin xyz="0.19 -0.14 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.008" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="burner_ring_4">
+      <origin xyz="0.19 -0.14 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.056" length="0.006" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="burner_cap_4">
+      <origin xyz="0.19 -0.14 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.039" length="0.02" />
+        </geometry>
+      <material name="black_enamel">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="left_grate_front">
+      <origin xyz="-0.19 0.25 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="left_grate_rear">
+      <origin xyz="-0.19 -0.21 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="left_grate_outer">
+      <origin xyz="-0.345 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="left_grate_inner">
+      <origin xyz="-0.035 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="left_grate_center">
+      <origin xyz="-0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.36 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="left_grate_cross">
+      <origin xyz="-0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.018 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="right_grate_front">
+      <origin xyz="0.19 0.25 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="right_grate_rear">
+      <origin xyz="0.19 -0.21 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="right_grate_outer">
+      <origin xyz="0.035 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="right_grate_inner">
+      <origin xyz="0.345 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="right_grate_center">
+      <origin xyz="0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.36 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <visual name="right_grate_cross">
+      <origin xyz="0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.018 0.018" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.16 0.16 0.17 1" />
+        </material>
+      </visual>
+    <collision name="body__left_side_panel">
+      <origin xyz="-0.3675 0 0.435" rpy="0 0 0" />
+      <geometry>
+        <box size="0.025 0.64 0.87" />
+        </geometry>
+      </collision>
+    <collision name="body__right_side_panel">
+      <origin xyz="0.3675 0 0.435" rpy="0 0 0" />
+      <geometry>
+        <box size="0.025 0.64 0.87" />
+        </geometry>
+      </collision>
+    <collision name="body__rear_panel">
+      <origin xyz="0 -0.31 0.425" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.02 0.85" />
+        </geometry>
+      </collision>
+    <collision name="body__bottom_deck">
+      <origin xyz="0 -0.01 0.0125" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.6 0.025" />
+        </geometry>
+      </collision>
+    <collision name="body__oven_roof">
+      <origin xyz="0 -0.01 0.78" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.6 0.025" />
+        </geometry>
+      </collision>
+    <collision name="body__toe_kick">
+      <origin xyz="0 0.29 0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.05 0.11" />
+        </geometry>
+      </collision>
+    <collision name="body__door_threshold">
+      <origin xyz="0 0.286 0.106" rpy="0 0 0" />
+      <geometry>
+        <box size="0.6 0.022 0.012" />
+        </geometry>
+      </collision>
+    <collision name="body__left_front_stile">
+      <origin xyz="-0.3275 0.2925 0.4225" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.045 0.625" />
+        </geometry>
+      </collision>
+    <collision name="body__right_front_stile">
+      <origin xyz="0.3275 0.2925 0.4225" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.045 0.625" />
+        </geometry>
+      </collision>
+    <collision name="body__upper_front_rail">
+      <origin xyz="0 0.285 0.7775" rpy="0 0 0" />
+      <geometry>
+        <box size="0.71 0.06 0.09" />
+        </geometry>
+      </collision>
+    <collision name="body__control_fascia">
+      <origin xyz="0 0.3275 0.815" rpy="0 0 0" />
+      <geometry>
+        <box size="0.72 0.045 0.12" />
+        </geometry>
+      </collision>
+    <collision name="body__display_glass">
+      <origin xyz="0 0.35 0.825" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.006 0.045" />
+        </geometry>
+      </collision>
+    <collision name="body__oven_vent">
+      <origin xyz="0 0.314 0.7425" rpy="0 0 0" />
+      <geometry>
+        <box size="0.56 0.012 0.015" />
+        </geometry>
+      </collision>
+    <collision name="body__cooktop_slab">
+      <origin xyz="0 0 0.885" rpy="0 0 0" />
+      <geometry>
+        <box size="0.76 0.67 0.03" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_bowl_1">
+      <origin xyz="-0.19 0.17 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.085" length="0.008" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_ring_1">
+      <origin xyz="-0.19 0.17 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.058" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_cap_1">
+      <origin xyz="-0.19 0.17 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.02" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_bowl_2">
+      <origin xyz="0.19 0.17 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.095" length="0.008" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_ring_2">
+      <origin xyz="0.19 0.17 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.066" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_cap_2">
+      <origin xyz="0.19 0.17 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.02" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_bowl_3">
+      <origin xyz="-0.19 -0.14 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.078" length="0.008" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_ring_3">
+      <origin xyz="-0.19 -0.14 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.054" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_cap_3">
+      <origin xyz="-0.19 -0.14 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.038" length="0.02" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_bowl_4">
+      <origin xyz="0.19 -0.14 0.889" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.082" length="0.008" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_ring_4">
+      <origin xyz="0.19 -0.14 0.893" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.056" length="0.006" />
+        </geometry>
+      </collision>
+    <collision name="body__burner_cap_4">
+      <origin xyz="0.19 -0.14 0.901" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.039" length="0.02" />
+        </geometry>
+      </collision>
+    <collision name="body__left_grate_front">
+      <origin xyz="-0.19 0.25 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__left_grate_rear">
+      <origin xyz="-0.19 -0.21 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__left_grate_outer">
+      <origin xyz="-0.345 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__left_grate_inner">
+      <origin xyz="-0.035 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__left_grate_center">
+      <origin xyz="-0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.36 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__left_grate_cross">
+      <origin xyz="-0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.018 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__right_grate_front">
+      <origin xyz="0.19 0.25 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__right_grate_rear">
+      <origin xyz="0.19 -0.21 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.31 0.018 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__right_grate_outer">
+      <origin xyz="0.035 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__right_grate_inner">
+      <origin xyz="0.345 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.46 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__right_grate_center">
+      <origin xyz="0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.36 0.018" />
+        </geometry>
+      </collision>
+    <collision name="body__right_grate_cross">
+      <origin xyz="0.19 0.02 0.9085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.018 0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="oven_door">
+    <inertial>
+      <origin xyz="0 0 0.295" rpy="0 0 0" />
+      <mass value="12.5" />
+      <inertia ixx="0.381667" ixy="0" ixz="0" iyy="0.75" iyz="0" izz="0.381667" />
+      </inertial>
+    <visual name="door_outer_panel">
+      <origin xyz="0 -0.021 0.295" rpy="0 0 0" />
+      <geometry>
+        <box size="0.585 0.042 0.59" />
+        </geometry>
+      <material name="stainless">
+        <color rgba="0.74 0.75 0.77 1" />
+        </material>
+      </visual>
+    <visual name="door_glass">
+      <origin xyz="0 0.002 0.285" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.008 0.34" />
+        </geometry>
+      <material name="glass">
+        <color rgba="0.1 0.12 0.15 0.28" />
+        </material>
+      </visual>
+    <visual name="door_upper_trim">
+      <origin xyz="0 -0.002 0.47" rpy="0 0 0" />
+      <geometry>
+        <box size="0.47 0.012 0.03" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="handle_left_post">
+      <origin xyz="-0.22 0.026 0.545" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.052 0.024" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="handle_right_post">
+      <origin xyz="0.22 0.026 0.545" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.052 0.024" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="handle_bar">
+      <origin xyz="0 0.054 0.545" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.46" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <collision name="oven_door__door_outer_panel">
+      <origin xyz="0 -0.021 0.295" rpy="0 0 0" />
+      <geometry>
+        <box size="0.585 0.042 0.59" />
+        </geometry>
+      </collision>
+    <collision name="oven_door__door_glass">
+      <origin xyz="0 0.002 0.285" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.008 0.34" />
+        </geometry>
+      </collision>
+    <collision name="oven_door__door_upper_trim">
+      <origin xyz="0 -0.002 0.47" rpy="0 0 0" />
+      <geometry>
+        <box size="0.47 0.012 0.03" />
+        </geometry>
+      </collision>
+    <collision name="oven_door__handle_left_post">
+      <origin xyz="-0.22 0.026 0.545" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.052 0.024" />
+        </geometry>
+      </collision>
+    <collision name="oven_door__handle_right_post">
+      <origin xyz="0.22 0.026 0.545" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.052 0.024" />
+        </geometry>
+      </collision>
+    <collision name="oven_door__handle_bar">
+      <origin xyz="0 0.054 0.545" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.46" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="knob_front_left">
+    <inertial>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="6.45e-05" ixy="0" ixz="0" iyy="6.45e-05" iyz="0" izz="8.1e-05" />
+      </inertial>
+    <visual name="knob_front_left_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_left_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_left_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_left_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_left_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_left_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <collision name="knob_front_left__knob_front_left_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_left__knob_front_left_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_left__knob_front_left_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_left__knob_front_left_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_left__knob_front_left_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_left__knob_front_left_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="knob_rear_left">
+    <inertial>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="6.45e-05" ixy="0" ixz="0" iyy="6.45e-05" iyz="0" izz="8.1e-05" />
+      </inertial>
+    <visual name="knob_rear_left_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_left_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_left_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_left_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_left_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_left_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <collision name="knob_rear_left__knob_rear_left_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_left__knob_rear_left_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_left__knob_rear_left_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_left__knob_rear_left_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_left__knob_rear_left_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_left__knob_rear_left_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="knob_center">
+    <inertial>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="6.45e-05" ixy="0" ixz="0" iyy="6.45e-05" iyz="0" izz="8.1e-05" />
+      </inertial>
+    <visual name="knob_center_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_center_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_center_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="knob_center_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="knob_center_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_center_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <collision name="knob_center__knob_center_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="knob_center__knob_center_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      </collision>
+    <collision name="knob_center__knob_center_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="knob_center__knob_center_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_center__knob_center_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_center__knob_center_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="knob_rear_right">
+    <inertial>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="6.45e-05" ixy="0" ixz="0" iyy="6.45e-05" iyz="0" izz="8.1e-05" />
+      </inertial>
+    <visual name="knob_rear_right_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_right_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_right_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_right_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_right_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_rear_right_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <collision name="knob_rear_right__knob_rear_right_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_right__knob_rear_right_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_right__knob_rear_right_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_right__knob_rear_right_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_right__knob_rear_right_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_rear_right__knob_rear_right_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="knob_front_right">
+    <inertial>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="6.45e-05" ixy="0" ixz="0" iyy="6.45e-05" iyz="0" izz="8.1e-05" />
+      </inertial>
+    <visual name="knob_front_right_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_right_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_right_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.28 0.29 0.31 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_right_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      <material name="chrome">
+        <color rgba="0.84 0.85 0.87 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_right_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <visual name="knob_front_right_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      <material name="knob_black">
+        <color rgba="0.05 0.05 0.06 1" />
+        </material>
+      </visual>
+    <collision name="knob_front_right__knob_front_right_skirt">
+      <origin xyz="0 0.014 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_right__knob_front_right_face">
+      <origin xyz="0 0.031 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.012" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_right__knob_front_right_center_cap">
+      <origin xyz="0 0.038 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.004" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_right__knob_front_right_indicator">
+      <origin xyz="0 0.036 0.017" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.01 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_right__knob_front_right_left_grip">
+      <origin xyz="-0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    <collision name="knob_front_right__knob_front_right_right_grip">
+      <origin xyz="0.021 0.02 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.012 0.018" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="oven_door_hinge" type="revolute">
+    <origin xyz="0 0.315 0.12" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="oven_door" />
+    <axis xyz="-1 0 0" />
+    <limit effort="35" velocity="2.5" lower="0" upper="1.35" />
+    </joint>
+  <joint name="knob_front_left_joint" type="revolute">
+    <origin xyz="-0.28 0.35 0.805" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="knob_front_left" />
+    <axis xyz="0 1 0" />
+    <limit effort="2.5" velocity="4" lower="-2.4" upper="0.35" />
+    </joint>
+  <joint name="knob_rear_left_joint" type="revolute">
+    <origin xyz="-0.14 0.35 0.805" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="knob_rear_left" />
+    <axis xyz="0 1 0" />
+    <limit effort="2.5" velocity="4" lower="-2.4" upper="0.35" />
+    </joint>
+  <joint name="knob_center_joint" type="revolute">
+    <origin xyz="0 0.35 0.805" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="knob_center" />
+    <axis xyz="0 1 0" />
+    <limit effort="2.5" velocity="4" lower="-2.4" upper="0.35" />
+    </joint>
+  <joint name="knob_rear_right_joint" type="revolute">
+    <origin xyz="0.14 0.35 0.805" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="knob_rear_right" />
+    <axis xyz="0 1 0" />
+    <limit effort="2.5" velocity="4" lower="-2.4" upper="0.35" />
+    </joint>
+  <joint name="knob_front_right_joint" type="revolute">
+    <origin xyz="0.28 0.35 0.805" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="knob_front_right" />
+    <axis xyz="0 1 0" />
+    <limit effort="2.5" velocity="4" lower="-2.4" upper="0.35" />
+    </joint>
+  </robot>

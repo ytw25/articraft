@@ -1,0 +1,2735 @@
+<robot name="playground_swing">
+  <link name="frame">
+    <inertial>
+      <origin xyz="0 0 1.175" rpy="0 0 0" />
+      <mass value="72" />
+      <inertia ixx="69.15" ixy="0" ixz="0" iyy="50.475" iyz="0" izz="53.355" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 2.25" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="2.3" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.41 -1.05 1.135" rpy="0 0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.82 -1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.41 -1.05 1.135" rpy="0 -0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.82 -1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -1.05 0.92" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.982488" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -1.05 2.22" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.12 0.11" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.41 1.05 1.135" rpy="0 0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.82 1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.41 1.05 1.135" rpy="0 -0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.82 1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 1.05 0.92" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.982488" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 1.05 2.22" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.12 0.11" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 2.214" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.03 0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 2.214" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.03 0.028" />
+      </geometry>
+    </visual>
+    <collision name="frame__visual_1">
+      <origin xyz="0 0 2.25" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="2.3" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_2">
+      <origin xyz="-0.41 -1.05 1.135" rpy="0 0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_3">
+      <origin xyz="-0.82 -1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_4">
+      <origin xyz="0.41 -1.05 1.135" rpy="0 -0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_5">
+      <origin xyz="0.82 -1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_6">
+      <origin xyz="0 -1.05 0.92" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.982488" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_7">
+      <origin xyz="0 -1.05 2.22" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.12 0.11" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_8">
+      <origin xyz="-0.41 1.05 1.135" rpy="0 0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_9">
+      <origin xyz="-0.82 1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_10">
+      <origin xyz="0.41 1.05 1.135" rpy="0 -0.361293 0" />
+      <geometry>
+        <cylinder radius="0.042" length="2.31976" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_11">
+      <origin xyz="0.82 1.05 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.1" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_12">
+      <origin xyz="0 1.05 0.92" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.982488" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_13">
+      <origin xyz="0 1.05 2.22" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.12 0.11" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_14">
+      <origin xyz="0 -0.18 2.214" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.03 0.028" />
+      </geometry>
+    </collision>
+    <collision name="frame__visual_15">
+      <origin xyz="0 0.18 2.214" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.03 0.028" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="swing_assembly">
+    <inertial>
+      <origin xyz="0 0 -0.83" rpy="0 0 0" />
+      <mass value="6" />
+      <inertia ixx="1.513" ixy="0" ixz="0" iyy="1.4066" iyz="0" izz="0.164" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 -0.012" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.46" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 -1.59" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.46 0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.09 0 -1.59" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.46" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.09 0 -1.59" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.46" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 -1.608" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.41 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.79" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 1.54" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.505" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.06" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.03 0.08" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.79" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 1.54" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.505" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.06" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.03 0.08" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_yz.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/swing_chain_link_xz.glb" />
+      </geometry>
+    </visual>
+    <collision name="swing_assembly__visual_1">
+      <origin xyz="0 0 -0.012" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.46" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_2">
+      <origin xyz="0 0 -1.59" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.46 0.028" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_3">
+      <origin xyz="0.09 0 -1.59" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.46" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_4">
+      <origin xyz="-0.09 0 -1.59" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.46" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_5">
+      <origin xyz="0 0 -1.608" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.41 0.014" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_6">
+      <origin xyz="0 -0.18 -0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_7">
+      <origin xyz="0 -0.18 -0.79" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 1.54" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_8">
+      <origin xyz="0 -0.18 -1.505" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.06" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_9">
+      <origin xyz="0 -0.18 -1.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.03 0.08" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_001">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_002">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_003">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_004">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_005">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_006">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_007">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_10__hull_008">
+      <origin xyz="0 -0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_001">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_002">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_003">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_004">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_005">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_006">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_007">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_11__hull_008">
+      <origin xyz="0 -0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_001">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_002">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_003">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_004">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_005">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_006">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_007">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_12__hull_008">
+      <origin xyz="0 -0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_001">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_002">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_003">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_004">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_005">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_006">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_007">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_13__hull_008">
+      <origin xyz="0 -0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_001">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_002">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_003">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_004">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_005">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_006">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_007">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_14__hull_008">
+      <origin xyz="0 -0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_001">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_002">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_003">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_004">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_005">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_006">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_007">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_15__hull_008">
+      <origin xyz="0 -0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_001">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_002">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_003">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_004">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_005">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_006">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_007">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_16__hull_008">
+      <origin xyz="0 -0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_001">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_002">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_003">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_004">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_005">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_006">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_007">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_17__hull_008">
+      <origin xyz="0 -0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_001">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_002">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_003">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_004">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_005">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_006">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_007">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_18__hull_008">
+      <origin xyz="0 -0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_001">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_002">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_003">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_004">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_005">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_006">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_007">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_19__hull_008">
+      <origin xyz="0 -0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_001">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_002">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_003">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_004">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_005">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_006">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_007">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_20__hull_008">
+      <origin xyz="0 -0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_001">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_002">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_003">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_004">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_005">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_006">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_007">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_21__hull_008">
+      <origin xyz="0 -0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_001">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_002">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_003">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_004">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_005">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_006">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_007">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_22__hull_008">
+      <origin xyz="0 -0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_001">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_002">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_003">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_004">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_005">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_006">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_007">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_23__hull_008">
+      <origin xyz="0 -0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_001">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_002">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_003">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_004">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_005">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_006">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_007">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_24__hull_008">
+      <origin xyz="0 -0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_001">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_002">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_003">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_004">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_005">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_006">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_007">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_25__hull_008">
+      <origin xyz="0 -0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_001">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_002">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_003">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_004">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_005">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_006">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_007">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_26__hull_008">
+      <origin xyz="0 -0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_001">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_002">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_003">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_004">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_005">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_006">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_007">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_27__hull_008">
+      <origin xyz="0 -0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_001">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_002">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_003">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_004">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_005">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_006">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_007">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_28__hull_008">
+      <origin xyz="0 -0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_001">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_002">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_003">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_004">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_005">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_006">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_007">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_29__hull_008">
+      <origin xyz="0 -0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_001">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_002">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_003">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_004">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_005">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_006">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_007">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_30__hull_008">
+      <origin xyz="0 -0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_001">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_002">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_003">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_004">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_005">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_006">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_007">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_31__hull_008">
+      <origin xyz="0 -0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_32">
+      <origin xyz="0 0.18 -0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_33">
+      <origin xyz="0 0.18 -0.79" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 1.54" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_34">
+      <origin xyz="0 0.18 -1.505" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.06" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_35">
+      <origin xyz="0 0.18 -1.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.03 0.08" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_001">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_002">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_003">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_004">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_005">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_006">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_007">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_36__hull_008">
+      <origin xyz="0 0.18 -0.095" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_001">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_002">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_003">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_004">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_005">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_006">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_007">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_37__hull_008">
+      <origin xyz="0 0.18 -0.161" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_001">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_002">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_003">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_004">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_005">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_006">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_007">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_38__hull_008">
+      <origin xyz="0 0.18 -0.227" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_001">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_002">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_003">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_004">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_005">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_006">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_007">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_39__hull_008">
+      <origin xyz="0 0.18 -0.293" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_001">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_002">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_003">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_004">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_005">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_006">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_007">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_40__hull_008">
+      <origin xyz="0 0.18 -0.359" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_001">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_002">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_003">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_004">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_005">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_006">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_007">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_41__hull_008">
+      <origin xyz="0 0.18 -0.425" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_001">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_002">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_003">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_004">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_005">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_006">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_007">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_42__hull_008">
+      <origin xyz="0 0.18 -0.491" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_001">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_002">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_003">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_004">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_005">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_006">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_007">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_43__hull_008">
+      <origin xyz="0 0.18 -0.557" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_001">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_002">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_003">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_004">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_005">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_006">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_007">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_44__hull_008">
+      <origin xyz="0 0.18 -0.623" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_001">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_002">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_003">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_004">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_005">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_006">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_007">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_45__hull_008">
+      <origin xyz="0 0.18 -0.689" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_001">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_002">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_003">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_004">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_005">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_006">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_007">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_46__hull_008">
+      <origin xyz="0 0.18 -0.755" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_001">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_002">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_003">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_004">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_005">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_006">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_007">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_47__hull_008">
+      <origin xyz="0 0.18 -0.821" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_001">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_002">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_003">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_004">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_005">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_006">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_007">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_48__hull_008">
+      <origin xyz="0 0.18 -0.887" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_001">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_002">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_003">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_004">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_005">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_006">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_007">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_49__hull_008">
+      <origin xyz="0 0.18 -0.953" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_001">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_002">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_003">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_004">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_005">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_006">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_007">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_50__hull_008">
+      <origin xyz="0 0.18 -1.019" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_001">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_002">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_003">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_004">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_005">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_006">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_007">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_51__hull_008">
+      <origin xyz="0 0.18 -1.085" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_001">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_002">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_003">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_004">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_005">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_006">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_007">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_52__hull_008">
+      <origin xyz="0 0.18 -1.151" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_001">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_002">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_003">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_004">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_005">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_006">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_007">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_53__hull_008">
+      <origin xyz="0 0.18 -1.217" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_001">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_002">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_003">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_004">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_005">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_006">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_007">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_54__hull_008">
+      <origin xyz="0 0.18 -1.283" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_001">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_002">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_003">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_004">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_005">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_006">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_007">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_55__hull_008">
+      <origin xyz="0 0.18 -1.349" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_001">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_002">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_003">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_004">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_005">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_006">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_007">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_56__hull_008">
+      <origin xyz="0 0.18 -1.415" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ef93fc53d965ce3c019b024a__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_001">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_002">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_003">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_004">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_005">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_006">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_007">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="swing_assembly__visual_57__hull_008">
+      <origin xyz="0 0.18 -1.481" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/436e5410e280875bfcb24c39__hull_008.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="swing_hinge" type="revolute">
+    <origin xyz="0 0 2.2" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="swing_assembly" />
+    <axis xyz="0 1 0" />
+    <limit effort="60" velocity="2.2" lower="-0.65" upper="0.65" />
+  </joint>
+</robot>

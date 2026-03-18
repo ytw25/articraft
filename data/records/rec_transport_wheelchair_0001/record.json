@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_transport_wheelchair_0001",
+  "created_at": "2026-03-16T01:40:00Z",
+  "updated_at": "2026-03-16T01:40:00Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "transport_wheelchair",
+  "source": {
+    "run_id": "run_import_transport_wheelchair_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed transport wheelchair with a lightweight frame, smaller wheels, seat and back support, and p",
+    "prompt_preview": "A realistic, highly detailed transport wheelchair with a lightweight frame, smaller wheels, seat and back support, and practical push handles. The rolling pa..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "d8fab4b50863f59ad6b30d5e271cb772edf52f47758d936ec27766a3fc884b5c",
+    "model_py_sha256": "134233c6f6e4d8cf3b1120c2e4332112f5f7b76fd6939a931f2abb9090f39a02",
+    "model_urdf_sha256": "10d624d9c4d1be51588fb626d871a921fcd496545009fbf8f65f50233c43aef1"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

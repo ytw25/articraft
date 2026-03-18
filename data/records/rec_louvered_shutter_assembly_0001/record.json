@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_louvered_shutter_assembly_0001",
+  "created_at": "2026-03-16T01:26:41Z",
+  "updated_at": "2026-03-16T01:26:41Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "louvered_shutter_assembly",
+  "source": {
+    "run_id": "run_import_louvered_shutter_assembly_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed louvered shutter assembly with a framed body, slatted surfaces, and believable exterior har",
+    "prompt_preview": "A realistic, highly detailed louvered shutter assembly with a framed body, slatted surfaces, and believable exterior hardware. The main opening motion and an..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "418672c76d496cb1f13af3e89b2aa11d38f8722e0ec1b57e2ad8591f063cd696",
+    "model_py_sha256": "4bc8d52ba3947de8a6e40279bfe126957172b0a89cb0b28487a144840335f9dc",
+    "model_urdf_sha256": "5685af2a5e3a8022498027c00b643c1cf047336d8de03cbe500df1de489a051b"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

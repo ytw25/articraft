@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_flip_phone_0001",
+  "created_at": "2026-03-16T14:59:21Z",
+  "updated_at": "2026-03-16T14:59:21Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "flip_phone",
+  "source": {
+    "run_id": "run_import_flip_phone_20260316-145137-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed flip phone with a compact lower body, a hinged upper display half, a visible hinge spine, a",
+    "prompt_preview": "A realistic, highly detailed flip phone with a compact lower body, a hinged upper display half, a visible hinge spine, and a believable mobile-device appeara..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "d2901f027571faef711078f98fc2b78b2889cf5ddd971fe553ef2323423fc984",
+    "model_py_sha256": "eba11844e057b32513f2b22c3c2f2e2fd3cc2e12bdb3906a003a0cff916f6b4b",
+    "model_urdf_sha256": "a01e0c60cdaa9d7640cba9140d3a5256044d04e7a5649912aaec11f16bb535d5"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

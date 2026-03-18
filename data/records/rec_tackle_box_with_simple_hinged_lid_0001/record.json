@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_tackle_box_with_simple_hinged_lid_0001",
+  "created_at": "2026-03-16T01:17:48Z",
+  "updated_at": "2026-03-16T01:17:48Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "tackle_box_with_simple_hinged_lid",
+  "source": {
+    "run_id": "run_import_tackle_box_with_simple_hinged_lid_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed tackle box with a compact storage body, practical handle, latch details, and a simple hinge",
+    "prompt_preview": "A realistic, highly detailed tackle box with a compact storage body, practical handle, latch details, and a simple hinged lid. The lid and any standard organ..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "cf5cd88e804a295721030e22a098bb8a75c79b040a96ca1bee7fb0f6e72504c1",
+    "model_py_sha256": "a93d64773619d4b3b7bf0c73e4a9136243b9ca9f6d76b47f74a6bc9ec450ed9a",
+    "model_urdf_sha256": "23a606a77f50a5d91846065a576b15daf5e6b0b6f93217f0b3ffc8586081ddde"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

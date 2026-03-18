@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_retractable_utility_knife_0001",
+  "created_at": "2026-03-17T02:40:06Z",
+  "updated_at": "2026-03-17T02:40:06Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "retractable_utility_knife",
+  "source": {
+    "run_id": "run_import_retractable_utility_knife_20260317-023258-retractable-utility-knife-0001",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed retractable utility knife with a molded handle body, a sliding blade carrier, exposed guide",
+    "prompt_preview": "A realistic, highly detailed retractable utility knife with a molded handle body, a sliding blade carrier, exposed guide track details, and a believable work..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "9e97f8369763c535c9737e077a7430b0ab30ad806d0f10b510238275893c02d7",
+    "model_py_sha256": "13cec019e8957c9ae7186591f7eca61f34e2ed53cd79249753e3fcb47297e908",
+    "model_urdf_sha256": "2226eed31b2cd3148c2a7b165ca15203c52b61c87d8a109ed3d7d31442546910"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

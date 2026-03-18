@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_garden_gate_0001",
+  "created_at": "2026-03-16T01:23:34Z",
+  "updated_at": "2026-03-16T01:23:34Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "garden_gate",
+  "source": {
+    "run_id": "run_import_garden_gate_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed garden gate with a sturdy frame, practical latch hardware, and a believable outdoor fence o",
+    "prompt_preview": "A realistic, highly detailed garden gate with a sturdy frame, practical latch hardware, and a believable outdoor fence or garden character. The swing motion..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "ff0cfe73de08f5deaef69513b25b5aa4bf158b14ad9aa3b06ce3acf234a7fcbb",
+    "model_py_sha256": "5d3b4716b39309eec0cac4f0a9790a2f24c176ce822771ec7c8eb88620170b2a",
+    "model_urdf_sha256": "28073bad519d87c7d496d4b7f17a2fc67332bcd52131822ffdccc869b1e504fd"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

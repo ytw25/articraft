@@ -1,0 +1,300 @@
+<robot name="utility_scale_wind_turbine">
+  <link name="tower">
+    <inertial>
+      <origin xyz="0 0 20" rpy="0 0 0" />
+      <mass value="24000" />
+      <inertia ixx="3.21442e+06" ixy="0" ixz="0" iyy="3.21442e+06" iyz="0" izz="28830" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tower_shell.glb" />
+      </geometry>
+      <material name="painted_white">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual name="foundation_ring">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="1.78" length="0.24" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="tower_top_flange">
+      <origin xyz="0 0 39.91" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.78" length="0.18" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="service_door">
+      <origin xyz="1.53 0 1.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.82 1.7" />
+      </geometry>
+      <material name="access_black">
+        <color rgba="0.14 0.15 0.17 1" />
+      </material>
+    </visual>
+    <collision name="tower__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f0d7044ba5766b4baa37a92c__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="tower__foundation_ring">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="1.78" length="0.24" />
+      </geometry>
+    </collision>
+    <collision name="tower__tower_top_flange">
+      <origin xyz="0 0 39.91" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.78" length="0.18" />
+      </geometry>
+    </collision>
+    <collision name="tower__service_door">
+      <origin xyz="1.53 0 1.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.82 1.7" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="nacelle">
+    <inertial>
+      <origin xyz="0 0.45 1.12" rpy="0 0 0" />
+      <mass value="8200" />
+      <inertia ixx="23385.4" ixy="0" ixz="0" iyy="7074.21" iyz="0" izz="23540.8" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/nacelle_shell.glb" />
+      </geometry>
+      <material name="painted_white">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual name="yaw_bearing_housing">
+      <origin xyz="0 0 0.086" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.72" length="0.16" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="main_bearing_fairing">
+      <origin xyz="0 3.29 1.04" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.3" length="0.36" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="main_bearing_nose">
+      <origin xyz="0 3.48 1.04" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.34" length="0.18" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="roof_hatch">
+      <origin xyz="0 0.42 2.06" rpy="0 0 0" />
+      <geometry>
+        <box size="0.64 0.86 0.24" />
+      </geometry>
+      <material name="access_black">
+        <color rgba="0.14 0.15 0.17 1" />
+      </material>
+    </visual>
+    <visual name="rear_cooling_housing">
+      <origin xyz="0 -1.48 1.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.6 0.78 0.2" />
+      </geometry>
+      <material name="access_black">
+        <color rgba="0.14 0.15 0.17 1" />
+      </material>
+    </visual>
+    <visual name="inspection_window">
+      <origin xyz="0.9 -0.18 1.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.52 0.34" />
+      </geometry>
+      <material name="inspection_glass">
+        <color rgba="0.16 0.22 0.26 0.35" />
+      </material>
+    </visual>
+    <collision name="nacelle__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0cfc59ac9d7773c11f569b13__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__yaw_bearing_housing">
+      <origin xyz="0 0 0.086" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.72" length="0.16" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__main_bearing_fairing">
+      <origin xyz="0 3.29 1.04" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.3" length="0.36" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__main_bearing_nose">
+      <origin xyz="0 3.48 1.04" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.34" length="0.18" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__roof_hatch">
+      <origin xyz="0 0.42 2.06" rpy="0 0 0" />
+      <geometry>
+        <box size="0.64 0.86 0.24" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__rear_cooling_housing">
+      <origin xyz="0 -1.48 1.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.6 0.78 0.2" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__inspection_window">
+      <origin xyz="0.9 -0.18 1.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.52 0.34" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="rotor">
+    <inertial>
+      <origin xyz="0 0.72 0" rpy="0 0 0" />
+      <mass value="5200" />
+      <inertia ixx="204672" ixy="0" ixz="0" iyy="404352" iyz="0" izz="204672" />
+    </inertial>
+    <visual name="drive_shaft_stub">
+      <origin xyz="0 0.095 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.18" length="0.18" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="hub_backplate">
+      <origin xyz="0 0.27 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.44" length="0.16" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual name="hub_barrel">
+      <origin xyz="0 0.61 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.42" length="0.76" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/pitch_cuffs.glb" />
+      </geometry>
+      <material name="machined_steel">
+        <color rgba="0.58 0.6 0.64 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/spinner.glb" />
+      </geometry>
+      <material name="painted_white">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/rotor_blades.glb" />
+      </geometry>
+      <material name="blade_composite">
+        <color rgba="0.9 0.91 0.93 1" />
+      </material>
+    </visual>
+    <collision name="rotor__drive_shaft_stub">
+      <origin xyz="0 0.095 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.18" length="0.18" />
+      </geometry>
+    </collision>
+    <collision name="rotor__hub_backplate">
+      <origin xyz="0 0.27 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.44" length="0.16" />
+      </geometry>
+    </collision>
+    <collision name="rotor__hub_barrel">
+      <origin xyz="0 0.61 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.42" length="0.76" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_4__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/966bf471b405849ec804437f__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_4__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/966bf471b405849ec804437f__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_4__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/966bf471b405849ec804437f__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_5__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/84e65a9f084e85030dfb7b93__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_6__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/08f66e5b8e57d775799c2460__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_6__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/08f66e5b8e57d775799c2460__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_6__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/08f66e5b8e57d775799c2460__hull_003.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="tower_to_nacelle" type="fixed">
+    <origin xyz="0 0 40" rpy="0 0 0" />
+    <parent link="tower" />
+    <child link="nacelle" />
+  </joint>
+  <joint name="rotor_spin" type="revolute">
+    <origin xyz="0 3.576 1.04" rpy="0 0 0" />
+    <parent link="nacelle" />
+    <child link="rotor" />
+    <axis xyz="0 1 0" />
+    <limit effort="20000" velocity="2.5" lower="-3.14159" upper="3.14159" />
+  </joint>
+</robot>

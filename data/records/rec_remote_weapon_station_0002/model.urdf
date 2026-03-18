@@ -1,0 +1,334 @@
+<robot name="remote_weapon_station">
+  <material name="dark_steel">
+    <color rgba="0.21 0.22 0.25 1" />
+    </material>
+  <material name="olive_drab">
+    <color rgba="0.34 0.38 0.27 1" />
+    </material>
+  <material name="gunmetal">
+    <color rgba="0.18 0.19 0.22 1" />
+    </material>
+  <material name="sensor_glass">
+    <color rgba="0.26 0.39 0.44 0.78" />
+    </material>
+  <material name="black_rubber">
+    <color rgba="0.08 0.08 0.09 1" />
+    </material>
+  <link name="mount_base">
+    <inertial>
+      <origin xyz="0 0 0.11" rpy="0 0 0" />
+      <mass value="85" />
+      <inertia ixx="1.59233" ixy="0" ixz="0" iyy="1.59233" iyz="0" izz="2.499" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/mount_base.obj" />
+        </geometry>
+      <material name="dark_steel" />
+      </visual>
+    <collision name="mount_base__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="mount_base__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/mount_base__17915b4acbff66aa__hull_008.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="pan_housing">
+    <inertial>
+      <origin xyz="0.02 0 0.17" rpy="0 0 0" />
+      <mass value="55" />
+      <inertia ixx="0.999167" ixy="0" ixz="0" iyy="1.19167" iyz="0" izz="1.13117" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/pan_housing.obj" />
+        </geometry>
+      <material name="olive_drab" />
+      </visual>
+    <visual>
+      <origin xyz="0.082 0.164 0.205" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.068 0.052" />
+        </geometry>
+      <material name="sensor_glass" />
+      </visual>
+    <visual>
+      <origin xyz="-0.005 0.164 0.286" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.028" />
+        </geometry>
+      <material name="sensor_glass" />
+      </visual>
+    <visual>
+      <origin xyz="0.12 0 0.18" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.22" />
+        </geometry>
+      <material name="dark_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.085 0 0.175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.16 0.05" />
+        </geometry>
+      <material name="dark_steel" />
+      </visual>
+    <collision name="pan_housing__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/pan_housing__2ee5955860211886__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_2">
+      <origin xyz="0.082 0.164 0.205" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.068 0.052" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_3">
+      <origin xyz="-0.005 0.164 0.286" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.028" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_4">
+      <origin xyz="0.12 0 0.18" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.22" />
+        </geometry>
+      </collision>
+    <collision name="pan_housing__visual_5">
+      <origin xyz="0.085 0 0.175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.16 0.05" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="weapon_cradle">
+    <inertial>
+      <origin xyz="0.3 0 -0.01" rpy="0 0 0" />
+      <mass value="28" />
+      <inertia ixx="0.322933" ixy="0" ixz="0" iyy="1.75933" iyz="0" izz="1.8564" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/weapon_cradle.obj" />
+        </geometry>
+      <material name="olive_drab" />
+      </visual>
+    <visual>
+      <origin xyz="0.09 -0.11 -0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.08 0.16" />
+        </geometry>
+      <material name="dark_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.49 0 0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.48" />
+        </geometry>
+      <material name="gunmetal" />
+      </visual>
+    <visual>
+      <origin xyz="0.78 0 0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.1" />
+        </geometry>
+      <material name="gunmetal" />
+      </visual>
+    <visual>
+      <origin xyz="0.855 0 0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.023" length="0.05" />
+        </geometry>
+      <material name="black_rubber" />
+      </visual>
+    <collision name="weapon_cradle__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/weapon_cradle__7c4553d6ebcb4c68__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_2">
+      <origin xyz="0.09 -0.11 -0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.08 0.16" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_3">
+      <origin xyz="0.49 0 0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.48" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_4">
+      <origin xyz="0.78 0 0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.1" />
+        </geometry>
+      </collision>
+    <collision name="weapon_cradle__visual_5">
+      <origin xyz="0.855 0 0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.023" length="0.05" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="turret_pan" type="revolute">
+    <origin xyz="0 0 0.22" rpy="0 0 0" />
+    <parent link="mount_base" />
+    <child link="pan_housing" />
+    <axis xyz="0 0 1" />
+    <limit effort="1200" velocity="1.5" lower="-3.14159" upper="3.14159" />
+    </joint>
+  <joint name="weapon_elevation" type="revolute">
+    <origin xyz="0.12 0 0.18" rpy="0 0 0" />
+    <parent link="pan_housing" />
+    <child link="weapon_cradle" />
+    <axis xyz="0 -1 0" />
+    <limit effort="450" velocity="1.2" lower="-0.15" upper="1" />
+    </joint>
+  </robot>

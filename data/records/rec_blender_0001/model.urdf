@@ -1,0 +1,512 @@
+<robot name="countertop_blender">
+  <material name="painted_steel">
+    <color rgba="0.73 0.75 0.78 1" />
+  </material>
+  <material name="brushed_stainless">
+    <color rgba="0.84 0.85 0.86 1" />
+  </material>
+  <material name="black_plastic">
+    <color rgba="0.12 0.12 0.13 1" />
+  </material>
+  <material name="charcoal_rubber">
+    <color rgba="0.05 0.05 0.06 1" />
+  </material>
+  <material name="clear_polycarbonate">
+    <color rgba="0.88 0.93 0.97 0.28" />
+  </material>
+  <material name="smoked_plastic">
+    <color rgba="0.18 0.2 0.22 0.45" />
+  </material>
+  <material name="satin_trim">
+    <color rgba="0.56 0.58 0.6 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.056" rpy="0 0 0" />
+      <mass value="3.8" />
+      <inertia ixx="0.0149277" ixy="0" ixz="0" iyy="0.0163869" iyz="0" izz="0.02337" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/blender_base_body.glb" />
+      </geometry>
+      <material name="painted_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+      </material>
+    </visual>
+    <visual name="control_panel">
+      <origin xyz="0.09 0 0.052" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.126 0.074" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="drive_pad">
+      <origin xyz="0 0 0.107" rpy="0 0 0" />
+      <geometry>
+        <box size="0.086 0.086 0.01" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="drive_coupler">
+      <origin xyz="0 0 0.117" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.01" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <visual name="panel_trim">
+      <origin xyz="0.082 0 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.132 0.01" />
+      </geometry>
+      <material name="satin_trim">
+        <color rgba="0.56 0.58 0.6 1" />
+      </material>
+    </visual>
+    <visual name="foot_rear_left">
+      <origin xyz="-0.068 -0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+      <material name="charcoal_rubber">
+        <color rgba="0.05 0.05 0.06 1" />
+      </material>
+    </visual>
+    <visual name="foot_rear_right">
+      <origin xyz="-0.068 0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+      <material name="charcoal_rubber">
+        <color rgba="0.05 0.05 0.06 1" />
+      </material>
+    </visual>
+    <visual name="foot_front_left">
+      <origin xyz="0.068 -0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+      <material name="charcoal_rubber">
+        <color rgba="0.05 0.05 0.06 1" />
+      </material>
+    </visual>
+    <visual name="foot_front_right">
+      <origin xyz="0.068 0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+      <material name="charcoal_rubber">
+        <color rgba="0.05 0.05 0.06 1" />
+      </material>
+    </visual>
+    <collision name="base__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1d42041c27188e423d7d786a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__control_panel">
+      <origin xyz="0.09 0 0.052" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.126 0.074" />
+      </geometry>
+    </collision>
+    <collision name="base__drive_pad">
+      <origin xyz="0 0 0.107" rpy="0 0 0" />
+      <geometry>
+        <box size="0.086 0.086 0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__drive_coupler">
+      <origin xyz="0 0 0.117" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__panel_trim">
+      <origin xyz="0.082 0 0.09" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.132 0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_rear_left">
+      <origin xyz="-0.068 -0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_rear_right">
+      <origin xyz="-0.068 0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_front_left">
+      <origin xyz="0.068 -0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_front_right">
+      <origin xyz="0.068 0.07 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="jar">
+    <inertial>
+      <origin xyz="0 0 0.118" rpy="0 0 0" />
+      <mass value="1.25" />
+      <inertia ixx="0.012263" ixy="0" ixz="0" iyy="0.00876302" iyz="0" izz="0.00952083" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/blender_pitcher_body.glb" />
+      </geometry>
+      <material name="clear_polycarbonate">
+        <color rgba="0.88 0.93 0.97 0.28" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/blender_pitcher_handle.glb" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="jar_collar">
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.126 0.12 0.024" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="blade_hub">
+      <origin xyz="0 0 0.028" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.012" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <visual name="blade_post">
+      <origin xyz="0 0 0.038" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.022" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <visual name="blade_a">
+      <origin xyz="0 0 0.039" rpy="0 0.16 0.5" />
+      <geometry>
+        <box size="0.064 0.01 0.002" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <visual name="blade_b">
+      <origin xyz="0 0 0.034" rpy="0 -0.22 -0.55" />
+      <geometry>
+        <box size="0.052 0.01 0.002" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <visual name="blade_c">
+      <origin xyz="0 0 0.038" rpy="0 0.2 2.2" />
+      <geometry>
+        <box size="0.056 0.01 0.002" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <visual name="blade_d">
+      <origin xyz="0 0 0.033" rpy="0 -0.18 -2.1" />
+      <geometry>
+        <box size="0.044 0.01 0.002" />
+      </geometry>
+      <material name="brushed_stainless">
+        <color rgba="0.84 0.85 0.86 1" />
+      </material>
+    </visual>
+    <collision name="jar__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e959ddb7d96e81acb7030106__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="jar__visual_2__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a6cd22da5c613008eaad23d4__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="jar__visual_2__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a6cd22da5c613008eaad23d4__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="jar__visual_2__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a6cd22da5c613008eaad23d4__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="jar__visual_2__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a6cd22da5c613008eaad23d4__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="jar__jar_collar">
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.126 0.12 0.024" />
+      </geometry>
+    </collision>
+    <collision name="jar__blade_hub">
+      <origin xyz="0 0 0.028" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="jar__blade_post">
+      <origin xyz="0 0 0.038" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="jar__blade_a">
+      <origin xyz="0 0 0.039" rpy="0 0.16 0.5" />
+      <geometry>
+        <box size="0.064 0.01 0.002" />
+      </geometry>
+    </collision>
+    <collision name="jar__blade_b">
+      <origin xyz="0 0 0.034" rpy="0 -0.22 -0.55" />
+      <geometry>
+        <box size="0.052 0.01 0.002" />
+      </geometry>
+    </collision>
+    <collision name="jar__blade_c">
+      <origin xyz="0 0 0.038" rpy="0 0.2 2.2" />
+      <geometry>
+        <box size="0.056 0.01 0.002" />
+      </geometry>
+    </collision>
+    <collision name="jar__blade_d">
+      <origin xyz="0 0 0.033" rpy="0 -0.18 -2.1" />
+      <geometry>
+        <box size="0.044 0.01 0.002" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="lid">
+    <inertial>
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="0.00041694" ixy="0" ixz="0" iyy="0.000447" iyz="0" izz="0.00083694" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/blender_lid.glb" />
+      </geometry>
+      <material name="charcoal_rubber">
+        <color rgba="0.05 0.05 0.06 1" />
+      </material>
+    </visual>
+    <visual name="measuring_cap">
+      <origin xyz="0 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.012" />
+      </geometry>
+      <material name="smoked_plastic">
+        <color rgba="0.18 0.2 0.22 0.45" />
+      </material>
+    </visual>
+    <visual name="cap_grip">
+      <origin xyz="0 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.006" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <collision name="lid__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a52e27fc67909e81baf1f30e__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__measuring_cap">
+      <origin xyz="0 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="lid__cap_grip">
+      <origin xyz="0 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="low_switch">
+    <inertial>
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <mass value="0.03" />
+      <inertia ixx="4e-06" ixy="0" ixz="0" iyy="2.92e-06" iyz="0" izz="1.8e-06" />
+    </inertial>
+    <visual name="paddle">
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.032" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="switch_cap">
+      <origin xyz="0.01 0 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.018 0.006" />
+      </geometry>
+      <material name="satin_trim">
+        <color rgba="0.56 0.58 0.6 1" />
+      </material>
+    </visual>
+    <collision name="low_switch__paddle">
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.032" />
+      </geometry>
+    </collision>
+    <collision name="low_switch__switch_cap">
+      <origin xyz="0.01 0 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.018 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="high_switch">
+    <inertial>
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <mass value="0.03" />
+      <inertia ixx="4e-06" ixy="0" ixz="0" iyy="2.92e-06" iyz="0" izz="1.8e-06" />
+    </inertial>
+    <visual name="paddle">
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.032" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="switch_cap">
+      <origin xyz="0.01 0 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.018 0.006" />
+      </geometry>
+      <material name="satin_trim">
+        <color rgba="0.56 0.58 0.6 1" />
+      </material>
+    </visual>
+    <collision name="high_switch__paddle">
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.032" />
+      </geometry>
+    </collision>
+    <collision name="high_switch__switch_cap">
+      <origin xyz="0.01 0 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.018 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="pulse_switch">
+    <inertial>
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <mass value="0.03" />
+      <inertia ixx="4e-06" ixy="0" ixz="0" iyy="2.92e-06" iyz="0" izz="1.8e-06" />
+    </inertial>
+    <visual name="paddle">
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.032" />
+      </geometry>
+      <material name="black_plastic">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="switch_cap">
+      <origin xyz="0.01 0 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.018 0.006" />
+      </geometry>
+      <material name="satin_trim">
+        <color rgba="0.56 0.58 0.6 1" />
+      </material>
+    </visual>
+    <collision name="pulse_switch__paddle">
+      <origin xyz="0.006 0 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.032" />
+      </geometry>
+    </collision>
+    <collision name="pulse_switch__switch_cap">
+      <origin xyz="0.01 0 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.018 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="low_switch_joint" type="revolute">
+    <origin xyz="0.101 -0.04 0.03" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="low_switch" />
+    <axis xyz="0 1 0" />
+    <limit effort="1" velocity="2.5" lower="0" upper="0.42" />
+  </joint>
+  <joint name="high_switch_joint" type="revolute">
+    <origin xyz="0.101 0 0.03" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="high_switch" />
+    <axis xyz="0 1 0" />
+    <limit effort="1" velocity="2.5" lower="0" upper="0.42" />
+  </joint>
+  <joint name="pulse_switch_joint" type="revolute">
+    <origin xyz="0.101 0.04 0.03" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="pulse_switch" />
+    <axis xyz="0 1 0" />
+    <limit effort="1" velocity="2.5" lower="0" upper="0.42" />
+  </joint>
+  <joint name="base_to_jar" type="revolute">
+    <origin xyz="0 0 0.119" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="jar" />
+    <axis xyz="0 0 1" />
+    <limit effort="6" velocity="2" lower="-0.35" upper="0.35" />
+  </joint>
+  <joint name="jar_to_lid" type="prismatic">
+    <origin xyz="0 0 0.228" rpy="0 0 0" />
+    <parent link="jar" />
+    <child link="lid" />
+    <axis xyz="0 0 1" />
+    <limit effort="4" velocity="0.15" lower="0" upper="0.036" />
+  </joint>
+</robot>

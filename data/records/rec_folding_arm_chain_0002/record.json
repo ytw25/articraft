@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_folding_arm_chain_0002",
+  "created_at": "2026-03-12T18:18:08Z",
+  "updated_at": "2026-03-12T18:18:08Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "folding_arm_chain",
+  "source": {
+    "run_id": "run_import_folding_arm_chain_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A folding arm chain made of several flat-bar segments linked by revolute joints, arranged like a deployable industrial l",
+    "prompt_preview": "A folding arm chain made of several flat-bar segments linked by revolute joints, arranged like a deployable industrial linkage."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "140fa17593c97509f6f6c05db551333942e242bf4f7b4e76bb5eff544249bb34",
+    "model_py_sha256": "2ea4c1126d7a1f46ca080ee98f91fd906fb039d0f709b90d293bf87867a113ef",
+    "model_urdf_sha256": "e99a73afa8c5096d4cc64dd281692d5a12ceb4b7811dd5b3d183f94a75524446"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

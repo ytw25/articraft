@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_wheelbarrow_0001",
+  "created_at": "2026-03-17T02:45:32Z",
+  "updated_at": "2026-03-17T02:45:32Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "wheelbarrow",
+  "source": {
+    "run_id": "run_import_wheelbarrow_20260317-023258-wheelbarrow-0001",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed wheelbarrow with a deep tray, strong frame, front wheel assembly, and long handles. The whe",
+    "prompt_preview": "A realistic, highly detailed wheelbarrow with a deep tray, strong frame, front wheel assembly, and long handles. The wheel and any standard support or dumpin..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "1ca6a9b3c5e7f062362014ad628c6a5eca279575dbaf0149412cea452ad74166",
+    "model_py_sha256": "27dc736b4144fcff311ea2cdda5c75fe4dec8b813b9faafbf6dcf1f916d5c818",
+    "model_urdf_sha256": "f7541b2408592773bdb16dc72cfc85fbb92e399f6d51df46d63f77cb0dcbdd32"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

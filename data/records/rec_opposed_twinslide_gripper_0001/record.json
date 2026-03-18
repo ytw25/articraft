@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_opposed_twinslide_gripper_0001",
+  "created_at": "2026-03-16T14:01:07Z",
+  "updated_at": "2026-03-16T14:01:07Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "opposed_twinslide_gripper",
+  "source": {
+    "run_id": "run_import_opposed_twinslide_gripper_20260316-135037-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic opposed twin-slide gripper with a rigid central body, two symmetrical sliding jaws, visible guide rails, and",
+    "prompt_preview": "A realistic opposed twin-slide gripper with a rigid central body, two symmetrical sliding jaws, visible guide rails, and a compact industrial end-effector ap..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "77b488c5192e0e2d2a8ce1338a3043075f1e14d772663b3817695fb112d4f375",
+    "model_py_sha256": "7a1b533f91eb537393f55e148a2ad004cbc58d71be7aaf51a4b19865016b7018",
+    "model_urdf_sha256": "9c0f4540d1eed37bcdfd708c96e9092003a167522be29aeed64eb2513f22432c"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

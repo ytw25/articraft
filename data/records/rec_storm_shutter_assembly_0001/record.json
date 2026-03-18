@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_storm_shutter_assembly_0001",
+  "created_at": "2026-03-16T01:27:54Z",
+  "updated_at": "2026-03-16T01:27:54Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "storm_shutter_assembly",
+  "source": {
+    "run_id": "run_import_storm_shutter_assembly_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed storm shutter assembly with a protective outer frame, paneling, and durable hardware suited",
+    "prompt_preview": "A realistic, highly detailed storm shutter assembly with a protective outer frame, paneling, and durable hardware suited for harsh weather. The opening or cl..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "ef5e869609e53b4f5f64560001b27e07928bb83447d52eeb346407696deddf7b",
+    "model_py_sha256": "6c7d5e1118f39855a27190a1881a7c03dfc10cb3c1179c7eb2b2d5fd914a59db",
+    "model_urdf_sha256": "7ebe7fb1d4fd6a9b41bf1fa6c935410a7de5d329226b4893e07ab41ceb6179cd"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

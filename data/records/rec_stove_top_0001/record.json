@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_stove_top_0001",
+  "created_at": "2026-03-16T01:20:07Z",
+  "updated_at": "2026-03-16T01:20:07Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "stove_top",
+  "source": {
+    "run_id": "run_import_stove_top_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed stove top appliance with a substantial body, cooktop surface, front-facing controls, and an",
+    "prompt_preview": "A realistic, highly detailed stove top appliance with a substantial body, cooktop surface, front-facing controls, and an oven door below. The door and standa..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "4a58d3127dfeddbd127d5e744d24797ef17fe62ad2f7f5d820ec793ebc2ca77e",
+    "model_py_sha256": "c0b38d828f55ecd6a5b42b506303bc7c49ed38ca9197ac0afe960e0f04d5c622",
+    "model_urdf_sha256": "8abb9224c4b661cdf4d5815b2437a00af2ec3bcb6797756e06e2daa548fa7761"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,688 @@
+<robot name="instrument_case">
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.0475" rpy="0 0 0" />
+      <mass value="3.8" />
+      <inertia ixx="0.0322112" ixy="0" ixz="0" iyy="0.21745" iyz="0" izz="0.243945" />
+    </inertial>
+    <visual name="base_ring">
+      <geometry>
+        <mesh filename="meshes/instrument_case_base_ring.glb" />
+      </geometry>
+      <material name="shell_black">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="base_floor">
+      <geometry>
+        <mesh filename="meshes/instrument_case_base_floor.glb" />
+      </geometry>
+      <material name="shell_black">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="base_liner">
+      <geometry>
+        <mesh filename="meshes/instrument_case_base_liner.glb" />
+      </geometry>
+      <material name="lining_burgundy">
+        <color rgba="0.44 0.1 0.16 1" />
+      </material>
+    </visual>
+    <visual name="latch_keeper_left">
+      <origin xyz="-0.165 0.154336 0.068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.018" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_keeper_right">
+      <origin xyz="0.165 0.154336 0.068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.018" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="hinge_leaf_base">
+      <geometry>
+        <mesh filename="meshes/instrument_case_hinge_leaf_base.glb" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="hinge_barrel_base">
+      <geometry>
+        <mesh filename="meshes/instrument_case_hinge_barrel_base.glb" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="foot_0">
+      <origin xyz="-0.295 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.02 0.008" />
+      </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+      </material>
+    </visual>
+    <visual name="foot_1">
+      <origin xyz="0.215 -0.085 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.02 0.008" />
+      </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+      </material>
+    </visual>
+    <visual name="foot_2">
+      <origin xyz="0.215 0.085 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.02 0.008" />
+      </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+      </material>
+    </visual>
+    <collision name="base__base_ring__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_ring__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e55ba1f0887130e7b9b97c60__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_floor__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/38a80eed991e6fd6440b4b47__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_floor__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/38a80eed991e6fd6440b4b47__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_liner__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/39254541b3437474b6a46164__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__base_liner__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/39254541b3437474b6a46164__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__latch_keeper_left">
+      <origin xyz="-0.165 0.154336 0.068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.018" />
+      </geometry>
+    </collision>
+    <collision name="base__latch_keeper_right">
+      <origin xyz="0.165 0.154336 0.068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.018" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_leaf_base__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6c98d1f47f559398e767f5b7__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_leaf_base__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6c98d1f47f559398e767f5b7__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_leaf_base__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6c98d1f47f559398e767f5b7__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_leaf_base__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6c98d1f47f559398e767f5b7__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_leaf_base__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6c98d1f47f559398e767f5b7__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_barrel_base__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c0a6c24d6c7fe12e184d79ef__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_barrel_base__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c0a6c24d6c7fe12e184d79ef__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_barrel_base__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c0a6c24d6c7fe12e184d79ef__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_barrel_base__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c0a6c24d6c7fe12e184d79ef__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__hinge_barrel_base__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c0a6c24d6c7fe12e184d79ef__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_0">
+      <origin xyz="-0.295 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.02 0.008" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_1">
+      <origin xyz="0.215 -0.085 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.02 0.008" />
+      </geometry>
+    </collision>
+    <collision name="base__foot_2">
+      <origin xyz="0.215 0.085 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.02 0.008" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="lid">
+    <inertial>
+      <origin xyz="0 0.155336 0.026" rpy="0 0 0" />
+      <mass value="1.6" />
+      <inertia ixx="0.0122205" ixy="0" ixz="0" iyy="0.0870647" iyz="0" izz="0.0985641" />
+    </inertial>
+    <visual name="lid_ring">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/instrument_case_lid_ring.glb" />
+      </geometry>
+      <material name="shell_black">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="lid_roof">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/instrument_case_lid_roof.glb" />
+      </geometry>
+      <material name="shell_black">
+        <color rgba="0.12 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="lid_liner">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/instrument_case_lid_liner.glb" />
+      </geometry>
+      <material name="lining_burgundy">
+        <color rgba="0.44 0.1 0.16 1" />
+      </material>
+    </visual>
+    <visual name="carry_handle">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/instrument_case_handle.glb" />
+      </geometry>
+      <material name="handle_black">
+        <color rgba="0.09 0.09 0.08 1" />
+      </material>
+    </visual>
+    <visual name="handle_bracket_left">
+      <origin xyz="-0.06 0.155336 0.056" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.028 0.008" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="handle_bracket_right">
+      <origin xyz="0.06 0.155336 0.056" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.028 0.008" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="hinge_leaf_lid">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/instrument_case_hinge_leaf_lid.glb" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="hinge_barrel_lid">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/instrument_case_hinge_barrel_lid.glb" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_mount_left">
+      <origin xyz="-0.165 0.282671 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.008 0.004" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_mount_right">
+      <origin xyz="0.165 0.282671 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.008 0.004" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <collision name="lid__lid_ring__hull_001">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_002">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_003">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_004">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_005">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_006">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_007">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_008">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_009">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_ring__hull_010">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/5069b1f0d536ec3b3f702623__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_roof__hull_001">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/02a84f9770c086f7c852d7f8__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_roof__hull_002">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/02a84f9770c086f7c852d7f8__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_liner__hull_001">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/054bcfcec49526a0373a27f2__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__lid_liner__hull_002">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/054bcfcec49526a0373a27f2__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__carry_handle__hull_001">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/25b56f6562e8093d47253a7b__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__carry_handle__hull_002">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/25b56f6562e8093d47253a7b__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__carry_handle__hull_003">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/25b56f6562e8093d47253a7b__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__carry_handle__hull_004">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/25b56f6562e8093d47253a7b__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__handle_bracket_left">
+      <origin xyz="-0.06 0.155336 0.056" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.028 0.008" />
+      </geometry>
+    </collision>
+    <collision name="lid__handle_bracket_right">
+      <origin xyz="0.06 0.155336 0.056" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.028 0.008" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_leaf_lid__hull_001">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/96db1f040a85336adc2766ee__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_leaf_lid__hull_002">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/96db1f040a85336adc2766ee__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_leaf_lid__hull_003">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/96db1f040a85336adc2766ee__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_leaf_lid__hull_004">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/96db1f040a85336adc2766ee__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_leaf_lid__hull_005">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/96db1f040a85336adc2766ee__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_barrel_lid__hull_001">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3c6d8f70da55ca5184dceedb__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_barrel_lid__hull_002">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3c6d8f70da55ca5184dceedb__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_barrel_lid__hull_003">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3c6d8f70da55ca5184dceedb__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_barrel_lid__hull_004">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3c6d8f70da55ca5184dceedb__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__hinge_barrel_lid__hull_005">
+      <origin xyz="0 0.155336 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3c6d8f70da55ca5184dceedb__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="lid__latch_mount_left">
+      <origin xyz="-0.165 0.282671 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.008 0.004" />
+      </geometry>
+    </collision>
+    <collision name="lid__latch_mount_right">
+      <origin xyz="0.165 0.282671 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.008 0.004" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="latch_left">
+    <inertial>
+      <origin xyz="0 0.018 -0.012" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="1.2e-05" ixy="0" ixz="0" iyy="1.776e-05" iyz="0" izz="1.776e-05" />
+    </inertial>
+    <visual name="pivot_barrel">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.042" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_plate">
+      <origin xyz="0 0.008 -0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.012 0.004" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_arm">
+      <origin xyz="0 0.022 -0.012" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.036 0.032 0.007" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_hook">
+      <origin xyz="0 0.036 -0.024" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.022 0.012 0.01" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <collision name="latch_left__pivot_barrel">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.042" />
+      </geometry>
+    </collision>
+    <collision name="latch_left__latch_plate">
+      <origin xyz="0 0.008 -0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.012 0.004" />
+      </geometry>
+    </collision>
+    <collision name="latch_left__latch_arm">
+      <origin xyz="0 0.022 -0.012" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.036 0.032 0.007" />
+      </geometry>
+    </collision>
+    <collision name="latch_left__latch_hook">
+      <origin xyz="0 0.036 -0.024" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.022 0.012 0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="latch_right">
+    <inertial>
+      <origin xyz="0 0.018 -0.012" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="1.2e-05" ixy="0" ixz="0" iyy="1.776e-05" iyz="0" izz="1.776e-05" />
+    </inertial>
+    <visual name="pivot_barrel">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.042" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_plate">
+      <origin xyz="0 0.008 -0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.012 0.004" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_arm">
+      <origin xyz="0 0.022 -0.012" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.036 0.032 0.007" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <visual name="latch_hook">
+      <origin xyz="0 0.036 -0.024" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.022 0.012 0.01" />
+      </geometry>
+      <material name="hardware_steel">
+        <color rgba="0.7 0.72 0.75 1" />
+      </material>
+    </visual>
+    <collision name="latch_right__pivot_barrel">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.042" />
+      </geometry>
+    </collision>
+    <collision name="latch_right__latch_plate">
+      <origin xyz="0 0.008 -0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.012 0.004" />
+      </geometry>
+    </collision>
+    <collision name="latch_right__latch_arm">
+      <origin xyz="0 0.022 -0.012" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.036 0.032 0.007" />
+      </geometry>
+    </collision>
+    <collision name="latch_right__latch_hook">
+      <origin xyz="0 0.036 -0.024" rpy="-0.58 0 0" />
+      <geometry>
+        <box size="0.022 0.012 0.01" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="lid_hinge" type="revolute">
+    <origin xyz="0 -0.155336 0.082" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="lid" />
+    <axis xyz="1 0 0" />
+    <limit effort="18" velocity="1.4" lower="0" upper="1.55" />
+  </joint>
+  <joint name="left_latch_joint" type="revolute">
+    <origin xyz="-0.165 0.286671 0.014" rpy="0 0 0" />
+    <parent link="lid" />
+    <child link="latch_left" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="4" lower="0" upper="1.2" />
+  </joint>
+  <joint name="right_latch_joint" type="revolute">
+    <origin xyz="0.165 0.286671 0.014" rpy="0 0 0" />
+    <parent link="lid" />
+    <child link="latch_right" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="4" lower="0" upper="1.2" />
+  </joint>
+</robot>

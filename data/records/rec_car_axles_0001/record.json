@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_car_axles_0001",
+  "created_at": "2026-03-16T01:17:30Z",
+  "updated_at": "2026-03-16T01:17:30Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "car_axles",
+  "source": {
+    "run_id": "run_import_car_axles_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed car axle assembly with a convincing housing, mounting structure, hubs, and automotive hardw",
+    "prompt_preview": "A realistic, highly detailed car axle assembly with a convincing housing, mounting structure, hubs, and automotive hardware presence. The rotating elements a..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "8f895d9034a196b615b25b52f7b8180dbc8a34e95f8c20f89f682ea91a127b3f",
+    "model_py_sha256": "ac38257a9e9d9638030d9c3e985050c05843686da6e761c66d47b8f6ce18f4fe",
+    "model_urdf_sha256": "ae6b1f0553bae68b4815fe833e18b041504d9f1ed97d0c3abcfd6c831ece7803"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

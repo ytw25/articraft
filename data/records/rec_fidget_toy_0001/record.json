@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_fidget_toy_0001",
+  "created_at": "2026-03-16T18:20:38Z",
+  "updated_at": "2026-03-16T18:20:38Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "fidget_toy",
+  "source": {
+    "run_id": "run_import_fidget_toy_20260316-181508-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed fidget spinner with a compact central bearing hub, multiple balanced lobes, and a believabl",
+    "prompt_preview": "A realistic, highly detailed fidget spinner with a compact central bearing hub, multiple balanced lobes, and a believable consumer desk-toy appearance. The s..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "3fa00f2e9482ab315f793bb1fe218b9e3dddd4f6b852092c178c38eba405540d",
+    "model_py_sha256": "fa4d7d5b2db57d23eb4cefdb7b321ba35c647cb7d30db6bd436e60ee907c79fc",
+    "model_urdf_sha256": "4d667d7f263058b775add2de7d71ff38064f112105a8a80789335e047af023d6"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

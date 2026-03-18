@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_rolling_walker_0001",
+  "created_at": "2026-03-16T01:28:01Z",
+  "updated_at": "2026-03-16T01:28:01Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "rolling_walker",
+  "source": {
+    "run_id": "run_import_rolling_walker_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed rolling walker with a stable frame, handles, front wheels, and practical support features s",
+    "prompt_preview": "A realistic, highly detailed rolling walker with a stable frame, handles, front wheels, and practical support features such as a seat or basket if appropriat..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "d8ebefe047d6e292fc5208f1bdb40748df4b2bcad5915d0101796916ad056821",
+    "model_py_sha256": "51d27c5b5ccd31e1c7ee7c01a8aa1a9ad995b530d66dbd8991c7bda58141a1a8",
+    "model_urdf_sha256": "cdbadaf0abeced53cfd0463f49d289d10d5949eb44aad845da0725e40ed79d72"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

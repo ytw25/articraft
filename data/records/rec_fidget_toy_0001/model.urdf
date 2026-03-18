@@ -1,0 +1,538 @@
+<robot name="tri_lobe_fidget_spinner">
+  <link name="hub">
+    <inertial>
+      <mass value="0.028" />
+      <inertia ixx="1.75959e-06" ixy="0" ixz="0" iyy="1.75959e-06" iyz="0" izz="2.5515e-06" />
+      </inertial>
+    <visual name="inner_race">
+      <geometry>
+        <cylinder radius="0.0042" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <visual name="button_base_bottom">
+      <origin xyz="0 0 -0.0054" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0135" length="0.0028" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.1 0.1 0.11 1" />
+        </material>
+      </visual>
+    <visual name="button_shoulder_bottom">
+      <origin xyz="0 0 -0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0105" length="0.0012" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.1 0.1 0.11 1" />
+        </material>
+      </visual>
+    <visual name="button_accent_bottom">
+      <origin xyz="0 0 -0.0068" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.0008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <visual name="button_base_top">
+      <origin xyz="0 0 0.0054" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0135" length="0.0028" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.1 0.1 0.11 1" />
+        </material>
+      </visual>
+    <visual name="button_shoulder_top">
+      <origin xyz="0 0 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0105" length="0.0012" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.1 0.1 0.11 1" />
+        </material>
+      </visual>
+    <visual name="button_accent_top">
+      <origin xyz="0 0 0.0068" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.0008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <collision name="hub__inner_race">
+      <geometry>
+        <cylinder radius="0.0042" length="0.008" />
+        </geometry>
+      </collision>
+    <collision name="hub__button_base_bottom">
+      <origin xyz="0 0 -0.0054" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0135" length="0.0028" />
+        </geometry>
+      </collision>
+    <collision name="hub__button_shoulder_bottom">
+      <origin xyz="0 0 -0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0105" length="0.0012" />
+        </geometry>
+      </collision>
+    <collision name="hub__button_accent_bottom">
+      <origin xyz="0 0 -0.0068" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.0008" />
+        </geometry>
+      </collision>
+    <collision name="hub__button_base_top">
+      <origin xyz="0 0 0.0054" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0135" length="0.0028" />
+        </geometry>
+      </collision>
+    <collision name="hub__button_shoulder_top">
+      <origin xyz="0 0 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0105" length="0.0012" />
+        </geometry>
+      </collision>
+    <collision name="hub__button_accent_top">
+      <origin xyz="0 0 0.0068" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.0008" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="spinner_frame">
+    <inertial>
+      <mass value="0.085" />
+      <inertia ixx="2.82483e-05" ixy="0" ixz="0" iyy="2.82483e-05" iyz="0" izz="5.508e-05" />
+      </inertial>
+    <visual name="body_shell">
+      <geometry>
+        <mesh filename="meshes/spinner_body_shell.obj" />
+        </geometry>
+      <material name="anodized_body">
+        <color rgba="0.16 0.22 0.31 1" />
+        </material>
+      </visual>
+    <visual name="center_bearing_outer_race">
+      <geometry>
+        <mesh filename="meshes/spinner_center_bearing_ring.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <visual name="weight_ring_0">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/spinner_lobe_weight_ring.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <visual name="grip_pad_0_bottom">
+      <origin xyz="1.59204e-18 0.026 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.18 0.18 0.19 1" />
+        </material>
+      </visual>
+    <visual name="grip_pad_0_top">
+      <origin xyz="1.59204e-18 0.026 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.18 0.18 0.19 1" />
+        </material>
+      </visual>
+    <visual name="weight_ring_1">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/spinner_lobe_weight_ring.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <visual name="grip_pad_1_bottom">
+      <origin xyz="-0.0225167 -0.013 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.18 0.18 0.19 1" />
+        </material>
+      </visual>
+    <visual name="grip_pad_1_top">
+      <origin xyz="-0.0225167 -0.013 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.18 0.18 0.19 1" />
+        </material>
+      </visual>
+    <visual name="weight_ring_2">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/spinner_lobe_weight_ring.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.73 0.75 0.78 1" />
+        </material>
+      </visual>
+    <visual name="grip_pad_2_bottom">
+      <origin xyz="0.0225167 -0.013 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.18 0.18 0.19 1" />
+        </material>
+      </visual>
+    <visual name="grip_pad_2_top">
+      <origin xyz="0.0225167 -0.013 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.18 0.18 0.19 1" />
+        </material>
+      </visual>
+    <collision name="spinner_frame__body_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__body_shell__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bb293c9bcd8ad6c4fd69f372__hull_016.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__center_bearing_outer_race__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37d0fb1a2074ef37511c9711__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_001">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_002">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_003">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_004">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_005">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_006">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_007">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_008">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_0__hull_009">
+      <origin xyz="1.59204e-18 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__grip_pad_0_bottom">
+      <origin xyz="1.59204e-18 0.026 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__grip_pad_0_top">
+      <origin xyz="1.59204e-18 0.026 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_001">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_002">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_003">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_004">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_005">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_006">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_007">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_008">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_1__hull_009">
+      <origin xyz="-0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__grip_pad_1_bottom">
+      <origin xyz="-0.0225167 -0.013 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__grip_pad_1_top">
+      <origin xyz="-0.0225167 -0.013 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_001">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_002">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_003">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_004">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_005">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_006">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_007">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_008">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__weight_ring_2__hull_009">
+      <origin xyz="0.0225167 -0.013 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3b6e172a87245530b73e8682__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__grip_pad_2_bottom">
+      <origin xyz="0.0225167 -0.013 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      </collision>
+    <collision name="spinner_frame__grip_pad_2_top">
+      <origin xyz="0.0225167 -0.013 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.0008" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="hub_to_spinner" type="continuous">
+    <parent link="hub" />
+    <child link="spinner_frame" />
+    <axis xyz="0 0 1" />
+    <limit effort="2" velocity="80" />
+    </joint>
+  </robot>

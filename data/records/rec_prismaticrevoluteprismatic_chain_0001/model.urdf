@@ -1,0 +1,331 @@
+<robot name="cartesian_fed_linkage">
+  <material name="machine_grey">
+    <color rgba="0.34 0.36 0.39 1" />
+    </material>
+  <material name="rail_steel">
+    <color rgba="0.58 0.6 0.63 1" />
+    </material>
+  <material name="anodized_aluminum">
+    <color rgba="0.72 0.74 0.76 1" />
+    </material>
+  <material name="tool_black">
+    <color rgba="0.14 0.15 0.17 1" />
+    </material>
+  <material name="safety_orange">
+    <color rgba="0.95 0.46 0.16 1" />
+    </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.03" rpy="0 0 0" />
+      <mass value="14" />
+      <inertia ixx="0.0340667" ixy="0" ixz="0" iyy="0.21" iyz="0" izz="0.235667" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.16 0.028" />
+        </geometry>
+      <material name="machine_grey" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.039" rpy="0 0 0" />
+      <geometry>
+        <box size="0.34 0.06 0.022" />
+        </geometry>
+      <material name="machine_grey" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.32 0.038 0.01" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 0.048 0.034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.018 0.012" />
+        </geometry>
+      <material name="tool_black" />
+      </visual>
+    <visual>
+      <origin xyz="0 -0.048 0.034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.018 0.012" />
+        </geometry>
+      <material name="tool_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.15 0 0.056" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.024 0.008" />
+        </geometry>
+      <material name="safety_orange" />
+      </visual>
+    <collision name="base__visual_1">
+      <origin xyz="0 0 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.16 0.028" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_2">
+      <origin xyz="0 0 0.039" rpy="0 0 0" />
+      <geometry>
+        <box size="0.34 0.06 0.022" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_3">
+      <origin xyz="0 0 0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.32 0.038 0.01" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_4">
+      <origin xyz="0 0.048 0.034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.018 0.012" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_5">
+      <origin xyz="0 -0.048 0.034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.018 0.012" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_6">
+      <origin xyz="-0.15 0 0.056" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.024 0.008" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="carriage">
+    <inertial>
+      <origin xyz="0 0 0.07" rpy="0 0 0" />
+      <mass value="3.2" />
+      <inertia ixx="0.00693333" ixy="0" ixz="0" iyy="0.00693333" iyz="0" izz="0.00341333" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/carriage.obj" />
+        </geometry>
+      <material name="anodized_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.028 0 0.068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.06 0.02" />
+        </geometry>
+      <material name="safety_orange" />
+      </visual>
+    <collision name="carriage__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/carriage__d1c09943b6f39697__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="carriage__visual_2">
+      <origin xyz="-0.028 0 0.068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.06 0.02" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="arm">
+    <inertial>
+      <origin xyz="0.135 0 0" rpy="0 0 0" />
+      <mass value="2.1" />
+      <inertia ixx="0.00126" ixy="0" ixz="0" iyy="0.0133875" iyz="0" izz="0.0133875" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/arm.obj" />
+        </geometry>
+      <material name="anodized_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.125 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.15 0.012 0.01" />
+        </geometry>
+      <material name="tool_black" />
+      </visual>
+    <collision name="arm__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm__ea11c0208597c3b0__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm__visual_2">
+      <origin xyz="0.125 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.15 0.012 0.01" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="tool_slide">
+    <inertial>
+      <origin xyz="0.08 0 0" rpy="0 0 0" />
+      <mass value="0.9" />
+      <inertia ixx="0.0008475" ixy="0" ixz="0" iyy="0.0024" iyz="0" izz="0.0022875" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tool_slide.obj" />
+        </geometry>
+      <material name="tool_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.136 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.05 0.012" />
+        </geometry>
+      <material name="safety_orange" />
+      </visual>
+    <collision name="tool_slide__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/tool_slide__9a1bc478d0c65ada__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="tool_slide__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/tool_slide__9a1bc478d0c65ada__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="tool_slide__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/tool_slide__9a1bc478d0c65ada__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="tool_slide__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/tool_slide__9a1bc478d0c65ada__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="tool_slide__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/tool_slide__9a1bc478d0c65ada__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="tool_slide__visual_2">
+      <origin xyz="0.136 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.05 0.012" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="base_to_carriage" type="prismatic">
+    <origin xyz="0 0 0.06" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="carriage" />
+    <axis xyz="1 0 0" />
+    <limit effort="90" velocity="0.8" lower="-0.11" upper="0.11" />
+    </joint>
+  <joint name="carriage_to_arm" type="revolute">
+    <origin xyz="0 0 0.113" rpy="0 0 0" />
+    <parent link="carriage" />
+    <child link="arm" />
+    <axis xyz="0 -1 0" />
+    <limit effort="45" velocity="1.2" lower="0" upper="1.05" />
+    </joint>
+  <joint name="arm_to_tool_slide" type="prismatic">
+    <origin xyz="0.15 0 0" rpy="0 0 0" />
+    <parent link="arm" />
+    <child link="tool_slide" />
+    <axis xyz="1 0 0" />
+    <limit effort="35" velocity="0.6" lower="0" upper="0.095" />
+    </joint>
+  </robot>

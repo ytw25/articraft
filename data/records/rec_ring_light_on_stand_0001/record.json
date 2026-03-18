@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_ring_light_on_stand_0001",
+  "created_at": "2026-03-16T17:50:36Z",
+  "updated_at": "2026-03-16T17:50:36Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "ring_light_on_stand",
+  "source": {
+    "run_id": "run_import_ring_light_on_stand_20260316-174115-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed ring light on a support stand with a circular illuminated ring, a central phone or camera m",
+    "prompt_preview": "A realistic, highly detailed ring light on a support stand with a circular illuminated ring, a central phone or camera mount, an adjustable tilt yoke, and a..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "f50f09edde5bb3a03b94b387a539dd31d48e9c1dd5d860cd725ffc34dd9e4c0f",
+    "model_py_sha256": "b1100faecba3097c6bb1dd9c380fc52624cd3517b15020558d6411903a0a516c",
+    "model_urdf_sha256": "9766a52e17cd652105b3065d9a371c53a4b18c7f4a9e4fc63c52459c20c92104"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

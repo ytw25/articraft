@@ -1,0 +1,234 @@
+<robot name="service_manipulator">
+  <material name="charcoal">
+    <color rgba="0.22 0.23 0.26 1" />
+    </material>
+  <material name="silver">
+    <color rgba="0.73 0.75 0.78 1" />
+    </material>
+  <material name="accent_blue">
+    <color rgba="0.17 0.35 0.58 1" />
+    </material>
+  <material name="rubber">
+    <color rgba="0.08 0.08 0.09 1" />
+    </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.065" rpy="0 0 0" />
+      <mass value="11" />
+      <inertia ixx="0.0451917" ixy="0" ixz="0" iyy="0.0598583" iyz="0" izz="0.0740667" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base.obj" />
+        </geometry>
+      <material name="charcoal" />
+      </visual>
+    <visual>
+      <origin xyz="0 0.089 0.052" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.004 0.035" />
+        </geometry>
+      <material name="accent_blue" />
+      </visual>
+    <collision name="base__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base__b840e5feb5521f97__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base__b840e5feb5521f97__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base__b840e5feb5521f97__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_2">
+      <origin xyz="0 0.089 0.052" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.004 0.035" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="arm_outer">
+    <inertial>
+      <origin xyz="0.12 0 0.0375" rpy="0 0 0" />
+      <mass value="4.5" />
+      <inertia ixx="0.00585938" ixy="0" ixz="0" iyy="0.0315094" iyz="0" izz="0.03315" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/arm_outer.obj" />
+        </geometry>
+      <material name="charcoal" />
+      </visual>
+    <visual>
+      <origin xyz="0.165 0 0.067" rpy="0 0 0" />
+      <geometry>
+        <box size="0.085 0.05 0.006" />
+        </geometry>
+      <material name="accent_blue" />
+      </visual>
+    <collision name="arm_outer__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/arm_outer__025fa8a208436099__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="arm_outer__visual_2">
+      <origin xyz="0.165 0 0.067" rpy="0 0 0" />
+      <geometry>
+        <box size="0.085 0.05 0.006" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="slide">
+    <inertial>
+      <origin xyz="0.07 0 0" rpy="0 0 0" />
+      <mass value="2.2" />
+      <inertia ixx="0.00183333" ixy="0" ixz="0" iyy="0.0135346" iyz="0" izz="0.0140479" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/slide.obj" />
+        </geometry>
+      <material name="silver" />
+      </visual>
+    <visual>
+      <origin xyz="0.03 0.033 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.012 0.03" />
+        </geometry>
+      <material name="rubber" />
+      </visual>
+    <collision name="slide__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/slide__2f9eb33b9fb4c0d0__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="slide__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/slide__2f9eb33b9fb4c0d0__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="slide__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/slide__2f9eb33b9fb4c0d0__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="slide__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/slide__2f9eb33b9fb4c0d0__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="slide__visual_2">
+      <origin xyz="0.03 0.033 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.012 0.03" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="wrist">
+    <inertial>
+      <origin xyz="0.07 0 0" rpy="0 0 0" />
+      <mass value="1.6" />
+      <inertia ixx="0.00173333" ixy="0" ixz="0" iyy="0.00369333" iyz="0" izz="0.00326667" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist.obj" />
+        </geometry>
+      <material name="silver" />
+      </visual>
+    <visual>
+      <origin xyz="0.13 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.05 0.05" />
+        </geometry>
+      <material name="rubber" />
+      </visual>
+    <collision name="wrist__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/wrist__f3ed9dccc58f0287__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="wrist__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/wrist__f3ed9dccc58f0287__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="wrist__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/wrist__f3ed9dccc58f0287__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="wrist__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/wrist__f3ed9dccc58f0287__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="wrist__visual_2">
+      <origin xyz="0.13 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.05 0.05" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="base_swivel" type="revolute">
+    <origin xyz="0 0 0.13" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="arm_outer" />
+    <axis xyz="0 0 1" />
+    <limit effort="50" velocity="1.2" lower="-3.14159" upper="3.14159" />
+    </joint>
+  <joint name="mid_slide" type="prismatic">
+    <origin xyz="0.135 0 0.047" rpy="0 0 0" />
+    <parent link="arm_outer" />
+    <child link="slide" />
+    <axis xyz="1 0 0" />
+    <limit effort="40" velocity="0.25" lower="0" upper="0.18" />
+    </joint>
+  <joint name="wrist_pitch" type="revolute">
+    <origin xyz="0.2 0 0" rpy="0 0 0" />
+    <parent link="slide" />
+    <child link="wrist" />
+    <axis xyz="0 -1 0" />
+    <limit effort="18" velocity="1.8" lower="-1.15" upper="1.1" />
+    </joint>
+  </robot>

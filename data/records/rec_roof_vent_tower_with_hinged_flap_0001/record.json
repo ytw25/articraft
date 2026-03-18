@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_roof_vent_tower_with_hinged_flap_0001",
+  "created_at": "2026-03-16T01:21:46Z",
+  "updated_at": "2026-03-16T01:21:46Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "roof_vent_tower_with_hinged_flap",
+  "source": {
+    "run_id": "run_import_roof_vent_tower_with_hinged_flap_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed roof vent tower with a weatherproof body, architectural integration, and a hinged flap or o",
+    "prompt_preview": "A realistic, highly detailed roof vent tower with a weatherproof body, architectural integration, and a hinged flap or outlet feature. The flap articulates n..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "537d194cf63f8ba3ef76ec2c04f380229b1fb00fdf4fc84768251d9bace572c1",
+    "model_py_sha256": "d4e133c7ac5038ccbe3e3bfa2b17a4773260bc7018cb00113f02d426799f4105",
+    "model_urdf_sha256": "f85bfc67b5ca1316e6a6e405c8bdf37dc3f527336ad97bbc74a3b94a8be5078a"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,646 @@
+<robot name="realistic_turbofan_engine">
+  <material name="nacelle_paint">
+    <color rgba="0.95 0.96 0.98 1" />
+  </material>
+  <material name="intake_lip_titanium">
+    <color rgba="0.79 0.81 0.84 1" />
+  </material>
+  <material name="duct_primer_gray">
+    <color rgba="0.24 0.25 0.27 1" />
+  </material>
+  <material name="compressor_steel">
+    <color rgba="0.58 0.61 0.64 1" />
+  </material>
+  <material name="burnt_nozzle_alloy">
+    <color rgba="0.42 0.38 0.34 1" />
+  </material>
+  <material name="spinner_alloy">
+    <color rgba="0.72 0.74 0.77 1" />
+  </material>
+  <material name="fan_blade_composite">
+    <color rgba="0.18 0.19 0.22 1" />
+  </material>
+  <link name="nacelle">
+    <inertial>
+      <origin xyz="1.53 0 0" rpy="0 1.5708 0" />
+      <mass value="2450" />
+      <inertia ixx="2396.9" ixy="0" ixz="0" iyy="2396.9" iyz="0" izz="970.322" />
+    </inertial>
+    <visual name="outer_shell">
+      <geometry>
+        <mesh filename="meshes/engine_outer_shell.glb" />
+      </geometry>
+      <material name="nacelle_paint">
+        <color rgba="0.95 0.96 0.98 1" />
+      </material>
+    </visual>
+    <visual name="intake_lip">
+      <geometry>
+        <mesh filename="meshes/engine_intake_lip.glb" />
+      </geometry>
+      <material name="intake_lip_titanium">
+        <color rgba="0.79 0.81 0.84 1" />
+      </material>
+    </visual>
+    <visual name="intake_liner">
+      <geometry>
+        <mesh filename="meshes/engine_intake_liner.glb" />
+      </geometry>
+      <material name="duct_primer_gray">
+        <color rgba="0.24 0.25 0.27 1" />
+      </material>
+    </visual>
+    <visual name="core_structure">
+      <geometry>
+        <mesh filename="meshes/engine_core_structure.glb" />
+      </geometry>
+      <material name="compressor_steel">
+        <color rgba="0.58 0.61 0.64 1" />
+      </material>
+    </visual>
+    <visual name="hot_liner">
+      <geometry>
+        <mesh filename="meshes/engine_hot_liner.glb" />
+      </geometry>
+      <material name="burnt_nozzle_alloy">
+        <color rgba="0.42 0.38 0.34 1" />
+      </material>
+    </visual>
+    <visual name="exhaust_band">
+      <geometry>
+        <mesh filename="meshes/engine_exhaust_band.glb" />
+      </geometry>
+      <material name="burnt_nozzle_alloy">
+        <color rgba="0.42 0.38 0.34 1" />
+      </material>
+    </visual>
+    <visual name="pylon">
+      <geometry>
+        <mesh filename="meshes/engine_pylon.glb" />
+      </geometry>
+      <material name="nacelle_paint">
+        <color rgba="0.95 0.96 0.98 1" />
+      </material>
+    </visual>
+    <collision name="nacelle__outer_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__outer_shell__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6399092fd03d99429a53f666__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_lip__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5fb66feeea63b3d9ba25d3b9__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__intake_liner__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4d54b972c38c5f22f8ea10a6__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__core_structure__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/52fd7fe10e9dc55c51a88a9f__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__hot_liner__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/f346b33c1ed07ece8758f4ca__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__exhaust_band__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/515fd5656a1d47fc0bc1b7a5__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="nacelle__pylon__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/db677c41eaeaaa29ef540b91__hull_001.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="fan_rotor">
+    <inertial>
+      <origin xyz="-0.18 0 0" rpy="0 1.5708 0" />
+      <mass value="340" />
+      <inertia ixx="49.9318" ixy="0" ixz="0" iyy="49.9318" iyz="0" izz="85.697" />
+    </inertial>
+    <visual name="rotor_metal">
+      <geometry>
+        <mesh filename="meshes/engine_rotor_metal.glb" />
+      </geometry>
+      <material name="spinner_alloy">
+        <color rgba="0.72 0.74 0.77 1" />
+      </material>
+    </visual>
+    <visual name="fan_blades">
+      <geometry>
+        <mesh filename="meshes/engine_fan_blades.glb" />
+      </geometry>
+      <material name="fan_blade_composite">
+        <color rgba="0.18 0.19 0.22 1" />
+      </material>
+    </visual>
+    <collision name="fan_rotor__rotor_metal__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5a1c87bc1c5fff1c952587da__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__rotor_metal__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5a1c87bc1c5fff1c952587da__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="fan_rotor__fan_blades__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/1b27943aa1ac958908659b5d__hull_016.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="fan_spin" type="continuous">
+    <origin xyz="0.505 0 0" rpy="0 0 0" />
+    <parent link="nacelle" />
+    <child link="fan_rotor" />
+    <axis xyz="1 0 0" />
+    <limit effort="180" velocity="320" />
+  </joint>
+</robot>

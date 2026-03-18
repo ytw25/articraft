@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_stationary_exercise_bike_0001",
+  "created_at": "2026-03-17T12:09:25Z",
+  "updated_at": "2026-03-17T12:09:25Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "stationary_exercise_bike",
+  "source": {
+    "run_id": "run_import_stationary_exercise_bike_20260317-023258-stationary-exercise-bike-0001",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed stationary exercise bike with a sturdy base, flywheel housing, crank assembly, adjustable s",
+    "prompt_preview": "A realistic, highly detailed stationary exercise bike with a sturdy base, flywheel housing, crank assembly, adjustable seat, and handlebar structure. The ped..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "5ca95e9a8ba404a50f865dff21c530c896bbf97db7d51c3ffb0cce9c78515ba7",
+    "model_py_sha256": "2d41f1397bfd08429c2d008e3593ceb79945372b1eaea67c34fb52a925865807",
+    "model_urdf_sha256": "ed9bb03e93f2e3c4d75022207acefcff2d944ecaf293282771eea2a299ad8b22"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

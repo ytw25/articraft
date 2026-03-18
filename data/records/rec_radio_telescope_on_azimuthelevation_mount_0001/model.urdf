@@ -1,0 +1,1192 @@
+<robot name="observatory_radio_telescope">
+  <material name="concrete">
+    <color rgba="0.69 0.7 0.72 1" />
+    </material>
+  <material name="white_paint">
+    <color rgba="0.91 0.93 0.95 1" />
+    </material>
+  <material name="machinery_gray">
+    <color rgba="0.38 0.4 0.43 1" />
+    </material>
+  <material name="dark_metal">
+    <color rgba="0.17 0.18 0.2 1" />
+    </material>
+  <material name="aluminum">
+    <color rgba="0.74 0.76 0.79 1" />
+    </material>
+  <material name="instrument_black">
+    <color rgba="0.07 0.08 0.09 1" />
+    </material>
+  <link name="pedestal_base">
+    <inertial>
+      <origin xyz="0 0 2.825" rpy="0 0 0" />
+      <mass value="22000" />
+      <inertia ixx="124525" ixy="0" ixz="0" iyy="124525" iyz="0" izz="132000" />
+      </inertial>
+    <visual name="foundation_plinth">
+      <origin xyz="0 0 0.35" rpy="0 0 0" />
+      <geometry>
+        <box size="6 6 0.7" />
+        </geometry>
+      <material name="concrete">
+        <color rgba="0.69 0.7 0.72 1" />
+        </material>
+      </visual>
+    <visual name="equipment_annex">
+      <origin xyz="-1.45 0 1.8" rpy="0 0 0" />
+      <geometry>
+        <box size="1.9 2.6 2.2" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="pedestal_tower">
+      <origin xyz="0 0 2.8" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.95" length="4.2" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.91 0.93 0.95 1" />
+        </material>
+      </visual>
+    <visual name="azimuth_bearing_housing">
+      <origin xyz="0 0 5.15" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="1.3" length="0.5" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="service_walkway_ring">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/service_ring.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="brace_pos_x">
+      <geometry>
+        <mesh filename="meshes/left_base_brace.obj" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="brace_neg_x">
+      <origin xyz="0 0 0" rpy="0 0 3.14159" />
+      <geometry>
+        <mesh filename="meshes/left_base_brace.obj" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="brace_pos_y">
+      <geometry>
+        <mesh filename="meshes/front_base_brace.obj" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="brace_neg_y">
+      <origin xyz="0 0 0" rpy="0 0 3.14159" />
+      <geometry>
+        <mesh filename="meshes/front_base_brace.obj" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <collision name="pedestal_base__foundation_plinth">
+      <origin xyz="0 0 0.35" rpy="0 0 0" />
+      <geometry>
+        <box size="6 6 0.7" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__equipment_annex">
+      <origin xyz="-1.45 0 1.8" rpy="0 0 0" />
+      <geometry>
+        <box size="1.9 2.6 2.2" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__pedestal_tower">
+      <origin xyz="0 0 2.8" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.95" length="4.2" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__azimuth_bearing_housing">
+      <origin xyz="0 0 5.15" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="1.3" length="0.5" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_001">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_002">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_003">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_004">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_005">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_006">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_007">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_008">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_009">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_010">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_011">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__service_walkway_ring__hull_012">
+      <origin xyz="0 0 5.46" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7e8fd1d9ff05502c08740a6d__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__brace_pos_x__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2cafee532b466ba86085a699__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__brace_neg_x__hull_001">
+      <origin xyz="0 0 0" rpy="0 0 3.14159" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2cafee532b466ba86085a699__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__brace_pos_y__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ce04cfb82c0c488a99c6e215__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="pedestal_base__brace_neg_y__hull_001">
+      <origin xyz="0 0 0" rpy="0 0 3.14159" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ce04cfb82c0c488a99c6e215__hull_001.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="azimuth_structure">
+    <inertial>
+      <origin xyz="0.15 0 2.4" rpy="0 0 0" />
+      <mass value="6400" />
+      <inertia ixx="25284" ixy="0" ixz="0" iyy="25284" iyz="0" izz="12168" />
+      </inertial>
+    <visual name="turntable_drum">
+      <origin xyz="0 0 0.1" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="1.4" length="0.8" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="rotating_deck">
+      <origin xyz="0 0 0.6" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="2.1" length="0.3" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="central_turret">
+      <origin xyz="0 0 1.8" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.78" length="2.6" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.91 0.93 0.95 1" />
+        </material>
+      </visual>
+    <visual name="left_yoke_arm">
+      <geometry>
+        <mesh filename="meshes/left_yoke_arm.obj" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.91 0.93 0.95 1" />
+        </material>
+      </visual>
+    <visual name="right_yoke_arm">
+      <geometry>
+        <mesh filename="meshes/right_yoke_arm.obj" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.91 0.93 0.95 1" />
+        </material>
+      </visual>
+    <visual name="rear_spine">
+      <geometry>
+        <mesh filename="meshes/azimuth_spine.obj" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="elevation_crosshead">
+      <origin xyz="0.85 0 5.2" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.28" length="3.25" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="drive_cabinet_left">
+      <origin xyz="-1.05 1.12 1.25" rpy="0 0 0" />
+      <geometry>
+        <box size="1.15 0.9 1" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="drive_cabinet_right">
+      <origin xyz="-1.05 -1.12 1.25" rpy="0 0 0" />
+      <geometry>
+        <box size="1.15 0.9 1" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="azimuth_drive_pack">
+      <origin xyz="0.05 0 1.11" rpy="0 0 0" />
+      <geometry>
+        <box size="1.3 1.05 0.72" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <collision name="azimuth_structure__turntable_drum">
+      <origin xyz="0 0 0.1" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="1.4" length="0.8" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__rotating_deck">
+      <origin xyz="0 0 0.6" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="2.1" length="0.3" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__central_turret">
+      <origin xyz="0 0 1.8" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.78" length="2.6" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__left_yoke_arm__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0212898c47525dd2308cf95e__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__right_yoke_arm__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e3a8e074f31d72e5e5bf9196__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__rear_spine__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/839d2544883c9267f1740e7a__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__rear_spine__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/839d2544883c9267f1740e7a__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__elevation_crosshead">
+      <origin xyz="0.85 0 5.2" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.28" length="3.25" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__drive_cabinet_left">
+      <origin xyz="-1.05 1.12 1.25" rpy="0 0 0" />
+      <geometry>
+        <box size="1.15 0.9 1" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__drive_cabinet_right">
+      <origin xyz="-1.05 -1.12 1.25" rpy="0 0 0" />
+      <geometry>
+        <box size="1.15 0.9 1" />
+        </geometry>
+      </collision>
+    <collision name="azimuth_structure__azimuth_drive_pack">
+      <origin xyz="0.05 0 1.11" rpy="0 0 0" />
+      <geometry>
+        <box size="1.3 1.05 0.72" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="dish_assembly">
+    <inertial>
+      <origin xyz="1.85 0 0" rpy="0 0 0" />
+      <mass value="5200" />
+      <inertia ixx="61152" ixy="0" ixz="0" iyy="53040" iyz="0" izz="53040" />
+      </inertial>
+    <visual name="trunnion_shaft">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.25" length="3.3" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="hub_barrel">
+      <origin xyz="0.45 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.55" length="0.9" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="hub_block">
+      <origin xyz="0.45 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.9 1.1 1.1" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="main_reflector">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/dish_shell.obj" />
+        </geometry>
+      <material name="white_paint">
+        <color rgba="0.91 0.93 0.95 1" />
+        </material>
+      </visual>
+    <visual name="rim_stiffener">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/dish_rim.obj" />
+        </geometry>
+      <material name="aluminum">
+        <color rgba="0.74 0.76 0.79 1" />
+        </material>
+      </visual>
+    <visual name="rear_ring_outer">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/back_ring_outer.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="rear_ring_inner">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/back_ring_inner.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_00">
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_01">
+      <origin xyz="0 0 0" rpy="0.523599 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_02">
+      <origin xyz="0 0 0" rpy="1.0472 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_03">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_04">
+      <origin xyz="0 0 0" rpy="2.0944 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_05">
+      <origin xyz="0 0 0" rpy="2.61799 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_06">
+      <origin xyz="0 0 0" rpy="3.14159 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_07">
+      <origin xyz="0 0 0" rpy="3.66519 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_08">
+      <origin xyz="0 0 0" rpy="4.18879 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_09">
+      <origin xyz="0 0 0" rpy="4.71239 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_10">
+      <origin xyz="0 0 0" rpy="5.23599 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="back_rib_11">
+      <origin xyz="0 0 0" rpy="5.75959 0 0" />
+      <geometry>
+        <mesh filename="meshes/dish_back_rib.obj" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="feed_strut_00">
+      <origin xyz="0 0 0" rpy="0.523599 0 0" />
+      <geometry>
+        <mesh filename="meshes/feed_support_strut.obj" />
+        </geometry>
+      <material name="aluminum">
+        <color rgba="0.74 0.76 0.79 1" />
+        </material>
+      </visual>
+    <visual name="feed_strut_01">
+      <origin xyz="0 0 0" rpy="2.61799 0 0" />
+      <geometry>
+        <mesh filename="meshes/feed_support_strut.obj" />
+        </geometry>
+      <material name="aluminum">
+        <color rgba="0.74 0.76 0.79 1" />
+        </material>
+      </visual>
+    <visual name="feed_strut_02">
+      <origin xyz="0 0 0" rpy="4.71239 0 0" />
+      <geometry>
+        <mesh filename="meshes/feed_support_strut.obj" />
+        </geometry>
+      <material name="aluminum">
+        <color rgba="0.74 0.76 0.79 1" />
+        </material>
+      </visual>
+    <visual name="feed_cabin">
+      <origin xyz="4.78 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.82 0.58 0.58" />
+        </geometry>
+      <material name="instrument_black">
+        <color rgba="0.07 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="feed_horn">
+      <origin xyz="5.25 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.17" length="0.68" />
+        </geometry>
+      <material name="aluminum">
+        <color rgba="0.74 0.76 0.79 1" />
+        </material>
+      </visual>
+    <visual name="counterweight_box">
+      <origin xyz="-1.1 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.6 0.74 1" />
+        </geometry>
+      <material name="machinery_gray">
+        <color rgba="0.38 0.4 0.43 1" />
+        </material>
+      </visual>
+    <visual name="counterweight_beam_upper">
+      <origin xyz="-0.65 0.34 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.4 0.22 0.22" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="counterweight_beam_lower">
+      <origin xyz="-0.65 -0.34 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.4 0.22 0.22" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="trim_weight_upper">
+      <origin xyz="-1.72 0 0.36" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.22" length="1.2" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual name="trim_weight_lower">
+      <origin xyz="-1.72 0 -0.36" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.22" length="1.2" />
+        </geometry>
+      <material name="dark_metal">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <collision name="dish_assembly__trunnion_shaft">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.25" length="3.3" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__hub_barrel">
+      <origin xyz="0.45 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.55" length="0.9" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__hub_block">
+      <origin xyz="0.45 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.9 1.1 1.1" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_001">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_002">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_003">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_004">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_005">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_006">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_007">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__main_reflector__hull_008">
+      <origin xyz="2.75 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/ac708c28f54dc929c098cf25__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_001">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_002">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_003">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_004">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_005">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_006">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_007">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_008">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_009">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rim_stiffener__hull_010">
+      <origin xyz="2.66 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8e157e911eab9352206e1189__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_001">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_002">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_003">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_004">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_005">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_006">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_007">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_008">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_009">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_010">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_011">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_outer__hull_012">
+      <origin xyz="2.35 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/a752dfc4ae9cea2cc6a8ba4d__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_001">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_002">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_003">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_004">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_005">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_006">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_007">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_008">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_009">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__rear_ring_inner__hull_010">
+      <origin xyz="1.82 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/b4280261c11694b06f954974__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_00__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_00__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_00__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_01__hull_001">
+      <origin xyz="0 0 0" rpy="0.523599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_01__hull_002">
+      <origin xyz="0 0 0" rpy="0.523599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_01__hull_003">
+      <origin xyz="0 0 0" rpy="0.523599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_02__hull_001">
+      <origin xyz="0 0 0" rpy="1.0472 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_02__hull_002">
+      <origin xyz="0 0 0" rpy="1.0472 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_02__hull_003">
+      <origin xyz="0 0 0" rpy="1.0472 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_03__hull_001">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_03__hull_002">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_03__hull_003">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_04__hull_001">
+      <origin xyz="0 0 0" rpy="2.0944 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_04__hull_002">
+      <origin xyz="0 0 0" rpy="2.0944 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_04__hull_003">
+      <origin xyz="0 0 0" rpy="2.0944 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_05__hull_001">
+      <origin xyz="0 0 0" rpy="2.61799 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_05__hull_002">
+      <origin xyz="0 0 0" rpy="2.61799 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_05__hull_003">
+      <origin xyz="0 0 0" rpy="2.61799 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_06__hull_001">
+      <origin xyz="0 0 0" rpy="3.14159 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_06__hull_002">
+      <origin xyz="0 0 0" rpy="3.14159 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_06__hull_003">
+      <origin xyz="0 0 0" rpy="3.14159 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_07__hull_001">
+      <origin xyz="0 0 0" rpy="3.66519 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_07__hull_002">
+      <origin xyz="0 0 0" rpy="3.66519 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_07__hull_003">
+      <origin xyz="0 0 0" rpy="3.66519 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_08__hull_001">
+      <origin xyz="0 0 0" rpy="4.18879 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_08__hull_002">
+      <origin xyz="0 0 0" rpy="4.18879 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_08__hull_003">
+      <origin xyz="0 0 0" rpy="4.18879 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_09__hull_001">
+      <origin xyz="0 0 0" rpy="4.71239 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_09__hull_002">
+      <origin xyz="0 0 0" rpy="4.71239 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_09__hull_003">
+      <origin xyz="0 0 0" rpy="4.71239 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_10__hull_001">
+      <origin xyz="0 0 0" rpy="5.23599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_10__hull_002">
+      <origin xyz="0 0 0" rpy="5.23599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_10__hull_003">
+      <origin xyz="0 0 0" rpy="5.23599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_11__hull_001">
+      <origin xyz="0 0 0" rpy="5.75959 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_11__hull_002">
+      <origin xyz="0 0 0" rpy="5.75959 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__back_rib_11__hull_003">
+      <origin xyz="0 0 0" rpy="5.75959 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/2d34809f42b08c0d0aa538c1__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__feed_strut_00__hull_001">
+      <origin xyz="0 0 0" rpy="0.523599 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7c7603d5b1fbb695ec1ef0bd__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__feed_strut_01__hull_001">
+      <origin xyz="0 0 0" rpy="2.61799 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7c7603d5b1fbb695ec1ef0bd__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__feed_strut_02__hull_001">
+      <origin xyz="0 0 0" rpy="4.71239 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/7c7603d5b1fbb695ec1ef0bd__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__feed_cabin">
+      <origin xyz="4.78 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.82 0.58 0.58" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__feed_horn">
+      <origin xyz="5.25 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.17" length="0.68" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__counterweight_box">
+      <origin xyz="-1.1 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.6 0.74 1" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__counterweight_beam_upper">
+      <origin xyz="-0.65 0.34 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.4 0.22 0.22" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__counterweight_beam_lower">
+      <origin xyz="-0.65 -0.34 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1.4 0.22 0.22" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__trim_weight_upper">
+      <origin xyz="-1.72 0 0.36" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.22" length="1.2" />
+        </geometry>
+      </collision>
+    <collision name="dish_assembly__trim_weight_lower">
+      <origin xyz="-1.72 0 -0.36" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.22" length="1.2" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="azimuth_rotation" type="continuous">
+    <origin xyz="0 0 5.15" rpy="0 0 0" />
+    <parent link="pedestal_base" />
+    <child link="azimuth_structure" />
+    <axis xyz="0 0 1" />
+    <limit effort="120000" velocity="0.22" />
+    </joint>
+  <joint name="elevation_axis" type="revolute">
+    <origin xyz="0.85 0 5.2" rpy="0 0 0" />
+    <parent link="azimuth_structure" />
+    <child link="dish_assembly" />
+    <axis xyz="0 -1 0" />
+    <limit effort="80000" velocity="0.45" lower="0" upper="1.55" />
+    </joint>
+  </robot>

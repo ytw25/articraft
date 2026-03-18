@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_revoluteprismaticrevolute_chain_0001",
+  "created_at": "2026-03-17T02:40:14Z",
+  "updated_at": "2026-03-17T02:40:14Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "revoluteprismaticrevolute_chain",
+  "source": {
+    "run_id": "run_import_revoluteprismaticrevolute_chain_20260317-023258-revoluteprismaticrevolute-chain-0001",
+    "prompt_batch_id": "revoluteprismaticrevolute_chain_0001",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A service manipulator with a rotary base joint, mid-span telescoping slide, and rotary wrist hinge, modeled as a tidy CA",
+    "prompt_preview": "A service manipulator with a rotary base joint, mid-span telescoping slide, and rotary wrist hinge, modeled as a tidy CAD assembly with simple housings."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "876a1913b5f4dae40535b60949a65b3d5e3d6757d4fe41bb3fd12910fedabbdb",
+    "model_py_sha256": "b21f5ca247dc7616ed734f73aad677e9a16a4a4e201e3a8ed45104b3adc7c734",
+    "model_urdf_sha256": "f3113f2e26c1a1466a49b433bb062d69741dfc742da4cb5e9b78e542c2840b83"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

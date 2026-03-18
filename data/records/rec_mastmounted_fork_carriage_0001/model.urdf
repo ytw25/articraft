@@ -1,0 +1,450 @@
+<robot name="mast_mounted_fork_carriage">
+  <material name="mast_steel">
+    <color rgba="0.27 0.29 0.32 1" />
+  </material>
+  <material name="ram_steel">
+    <color rgba="0.63 0.65 0.69 1" />
+  </material>
+  <material name="carriage_paint">
+    <color rgba="0.86 0.61 0.14 1" />
+  </material>
+  <material name="fork_steel">
+    <color rgba="0.18 0.18 0.2 1" />
+  </material>
+  <material name="roller_rubber">
+    <color rgba="0.1 0.1 0.1 1" />
+  </material>
+  <link name="mast">
+    <inertial>
+      <origin xyz="0.01 0 0.71" rpy="0 0 0" />
+      <mass value="92" />
+      <inertia ixx="17.0813" ixy="0" ixz="0" iyy="15.5283" iyz="0" izz="1.69146" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.005 -0.165 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.06 1.3" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.035 -0.13035 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.018 1.24" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="-0.005 0.165 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.06 1.3" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.035 0.13035 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.018 1.24" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.46 0.1" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0 0 1.395" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.4 0.05" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.0375 0 0.69" rpy="0 0 0" />
+      <geometry>
+        <box size="0.035 0.1 1.18" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="-0.018 0 0.675" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="1.15" />
+      </geometry>
+      <material name="ram_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.01 0 1.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.12 0.18" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <collision name="mast__visual_1">
+      <origin xyz="-0.005 -0.165 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.06 1.3" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_2">
+      <origin xyz="0.035 -0.13035 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.018 1.24" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_3">
+      <origin xyz="-0.005 0.165 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.06 1.3" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_4">
+      <origin xyz="0.035 0.13035 0.72" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.018 1.24" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_5">
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.46 0.1" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_6">
+      <origin xyz="0 0 1.395" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.4 0.05" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_7">
+      <origin xyz="0.0375 0 0.69" rpy="0 0 0" />
+      <geometry>
+        <box size="0.035 0.1 1.18" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_8">
+      <origin xyz="-0.018 0 0.675" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="1.15" />
+      </geometry>
+    </collision>
+    <collision name="mast__visual_9">
+      <origin xyz="0.01 0 1.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.12 0.18" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="carriage">
+    <inertial>
+      <origin xyz="0.065 0 0.131" rpy="0 0 0" />
+      <mass value="34" />
+      <inertia ixx="1.77168" ixy="0" ixz="0" iyy="1.31977" iyz="0" izz="0.547683" />
+    </inertial>
+    <visual>
+      <origin xyz="0.04 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.12 0.18" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.04 -0.16 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.46" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.01 -0.16 -0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.03 -0.16 -0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+      <material name="roller_rubber" />
+    </visual>
+    <visual>
+      <origin xyz="0.01 -0.16 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.03 -0.16 0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+      <material name="roller_rubber" />
+    </visual>
+    <visual>
+      <origin xyz="0.04 0.16 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.46" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.01 0.16 -0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.03 0.16 -0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+      <material name="roller_rubber" />
+    </visual>
+    <visual>
+      <origin xyz="0.01 0.16 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.03 0.16 0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+      <material name="roller_rubber" />
+    </visual>
+    <visual>
+      <origin xyz="0.085 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.42 0.36" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.095 0 0.18" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.36 0.035" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.095 0 -0.18" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.42 0.045" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.11 0 -0.085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.38 0.04" />
+      </geometry>
+      <material name="mast_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.09 -0.115 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.016 0.25" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.09 0 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.016 0.25" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.09 0.115 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.016 0.25" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <visual>
+      <origin xyz="0.09 0 0.463" rpy="0 0 0" />
+      <geometry>
+        <box size="0.025 0.3 0.03" />
+      </geometry>
+      <material name="carriage_paint" />
+    </visual>
+    <collision name="carriage__visual_1">
+      <origin xyz="0.04 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.12 0.18" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_2">
+      <origin xyz="0.04 -0.16 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.46" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_3">
+      <origin xyz="0.01 -0.16 -0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_4">
+      <origin xyz="0.03 -0.16 -0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_5">
+      <origin xyz="0.01 -0.16 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_6">
+      <origin xyz="0.03 -0.16 0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_7">
+      <origin xyz="0.04 0.16 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.46" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_8">
+      <origin xyz="0.01 0.16 -0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_9">
+      <origin xyz="0.03 0.16 -0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_10">
+      <origin xyz="0.01 0.16 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.045 0.11" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_11">
+      <origin xyz="0.03 0.16 0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.03" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_12">
+      <origin xyz="0.085 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.42 0.36" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_13">
+      <origin xyz="0.095 0 0.18" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.36 0.035" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_14">
+      <origin xyz="0.095 0 -0.18" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.42 0.045" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_15">
+      <origin xyz="0.11 0 -0.085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.38 0.04" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_16">
+      <origin xyz="0.09 -0.115 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.016 0.25" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_17">
+      <origin xyz="0.09 0 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.016 0.25" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_18">
+      <origin xyz="0.09 0.115 0.322" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.016 0.25" />
+      </geometry>
+    </collision>
+    <collision name="carriage__visual_19">
+      <origin xyz="0.09 0 0.463" rpy="0 0 0" />
+      <geometry>
+        <box size="0.025 0.3 0.03" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="fork_frame">
+    <inertial>
+      <origin xyz="0.32 0 -0.019" rpy="0 0 0" />
+      <mass value="22" />
+      <inertia ixx="0.315781" ixy="0" ixz="0" iyy="0.902447" iyz="0" izz="1.01053" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/fork_frame.glb" />
+      </geometry>
+      <material name="fork_steel" />
+    </visual>
+    <collision name="fork_frame__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/fork_frame__9e5a09f8338efc4a__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="fork_frame__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/fork_frame__9e5a09f8338efc4a__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="fork_frame__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/fork_frame__9e5a09f8338efc4a__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="fork_frame__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/fork_frame__9e5a09f8338efc4a__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="fork_frame__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/fork_frame__9e5a09f8338efc4a__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="fork_frame__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/fork_frame__9e5a09f8338efc4a__hull_006.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="mast_to_carriage" type="prismatic">
+    <origin xyz="0.057 0 0.42" rpy="0 0 0" />
+    <parent link="mast" />
+    <child link="carriage" />
+    <axis xyz="0 0 1" />
+    <limit effort="4500" velocity="0.35" lower="0" upper="0.48" />
+  </joint>
+  <joint name="carriage_to_fork_frame" type="fixed">
+    <origin xyz="0.128 0 -0.085" rpy="0 0 0" />
+    <parent link="carriage" />
+    <child link="fork_frame" />
+  </joint>
+</robot>

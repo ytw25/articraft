@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_folding_arm_chain_0001",
+  "created_at": "2026-03-12T18:16:27Z",
+  "updated_at": "2026-03-12T18:16:27Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "folding_arm_chain",
+  "source": {
+    "run_id": "run_import_folding_arm_chain_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A collapsible service arm with serial hinges and compact plates, designed as a neat mechanical fold-out structure.",
+    "prompt_preview": "A collapsible service arm with serial hinges and compact plates, designed as a neat mechanical fold-out structure."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "618289af340e6166f7dfc02ae6ea2a04e9762c84b0d58d979403b9407327e9af",
+    "model_py_sha256": "41907015287dc85cf4e19aef0618dd8a495886bfdcda72fbd579e1f3dcfa7932",
+    "model_urdf_sha256": "faffc01dfb2245decddacf65203ed92067661d1efd6a130341967e2a0f8faa22"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

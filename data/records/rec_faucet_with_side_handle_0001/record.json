@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_faucet_with_side_handle_0001",
+  "created_at": "2026-03-17T02:37:32Z",
+  "updated_at": "2026-03-17T02:37:32Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "faucet_with_side_handle",
+  "source": {
+    "run_id": "run_import_faucet_with_side_handle_20260317-023258-faucet-with-side-handle-0001",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed faucet with a central spout body, a single side-mounted control handle, a stable base flang",
+    "prompt_preview": "A realistic, highly detailed faucet with a central spout body, a single side-mounted control handle, a stable base flange, and a believable kitchen or bathro..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "a3ee4ad4a75a939f86b13f53b24de7fd507fe5cc68906276733e878baad03ce2",
+    "model_py_sha256": "2caa2052a805630399e92453376c21c768caeefc7e2062e944027016e41c1ce3",
+    "model_urdf_sha256": "47049a1953acdb9ff812b9d33dc6e99b9bf432bc2fedca0f6e53ee688575aa7f"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

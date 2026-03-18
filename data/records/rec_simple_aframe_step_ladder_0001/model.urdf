@@ -1,0 +1,622 @@
+<robot name="a_frame_step_ladder">
+  <link name="front_frame">
+    <inertial>
+      <origin xyz="0 -0.235 -0.76" rpy="0 0 0" />
+      <mass value="6.5" />
+      <inertia ixx="1.36868" ixy="0" ixz="0" iyy="1.30108" iyz="0" izz="0.296833" />
+      </inertial>
+    <visual>
+      <origin xyz="-0.195 -0.249792 -0.738071" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.045 0.02 1.48" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.195 -0.249792 -0.738071" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.045 0.02 1.48" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.062 -0.046" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4 0.124 0.058" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.114 -0.018" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.042 0.014" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.02 -0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.34 0.052 0.022" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.006 -0.012" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.012 0.03" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.165 -0.006 -0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.054 0.012 0.082" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.165 -0.006 -0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.054 0.012 0.082" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.212 -0.012 -0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.18" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.212 -0.012 -0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.18" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.128175 -0.359654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.1 -0.128175 -0.344654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.128175 -0.344654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.1 -0.128175 -0.344654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.215666 -0.615086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.1 -0.215666 -0.600086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.215666 -0.600086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.1 -0.215666 -0.600086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.303158 -0.870517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.1 -0.303158 -0.855517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.303158 -0.855517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.1 -0.303158 -0.855517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.390649 -1.12595" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.1 -0.390649 -1.11095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.390649 -1.11095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.1 -0.390649 -1.11095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.168 -0.249792 -0.738071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.168 -0.249792 -0.738071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.168 -0.334043 -0.984042" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.168 -0.334043 -0.984042" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.195 -0.485695 -1.42679" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.062 0.055 0.04" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.195 -0.485695 -1.42679" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.062 0.055 0.04" />
+        </geometry>
+      </visual>
+    <collision name="front_frame__visual_1">
+      <origin xyz="-0.195 -0.249792 -0.738071" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.045 0.02 1.48" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_2">
+      <origin xyz="0.195 -0.249792 -0.738071" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.045 0.02 1.48" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_3">
+      <origin xyz="0 -0.062 -0.046" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4 0.124 0.058" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_4">
+      <origin xyz="0 -0.114 -0.018" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.042 0.014" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_5">
+      <origin xyz="0 -0.02 -0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.34 0.052 0.022" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_6">
+      <origin xyz="0 -0.006 -0.012" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.012 0.03" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_7">
+      <origin xyz="-0.165 -0.006 -0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.054 0.012 0.082" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_8">
+      <origin xyz="0.165 -0.006 -0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.054 0.012 0.082" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_9">
+      <origin xyz="-0.212 -0.012 -0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.18" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_10">
+      <origin xyz="0.212 -0.012 -0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.18" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_11">
+      <origin xyz="0 -0.128175 -0.359654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_12">
+      <origin xyz="-0.1 -0.128175 -0.344654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_13">
+      <origin xyz="0 -0.128175 -0.344654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_14">
+      <origin xyz="0.1 -0.128175 -0.344654" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_15">
+      <origin xyz="0 -0.215666 -0.615086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_16">
+      <origin xyz="-0.1 -0.215666 -0.600086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_17">
+      <origin xyz="0 -0.215666 -0.600086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_18">
+      <origin xyz="0.1 -0.215666 -0.600086" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_19">
+      <origin xyz="0 -0.303158 -0.870517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_20">
+      <origin xyz="-0.1 -0.303158 -0.855517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_21">
+      <origin xyz="0 -0.303158 -0.855517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_22">
+      <origin xyz="0.1 -0.303158 -0.855517" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_23">
+      <origin xyz="0 -0.390649 -1.12595" rpy="0 0 0" />
+      <geometry>
+        <box size="0.356 0.126 0.034" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_24">
+      <origin xyz="-0.1 -0.390649 -1.11095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_25">
+      <origin xyz="0 -0.390649 -1.11095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_26">
+      <origin xyz="0.1 -0.390649 -1.11095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.112 0.005" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_27">
+      <origin xyz="-0.168 -0.249792 -0.738071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_28">
+      <origin xyz="0.168 -0.249792 -0.738071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_29">
+      <origin xyz="-0.168 -0.334043 -0.984042" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_30">
+      <origin xyz="0.168 -0.334043 -0.984042" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.115" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_31">
+      <origin xyz="-0.195 -0.485695 -1.42679" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.062 0.055 0.04" />
+        </geometry>
+      </collision>
+    <collision name="front_frame__visual_32">
+      <origin xyz="0.195 -0.485695 -1.42679" rpy="-0.33 0 0" />
+      <geometry>
+        <box size="0.062 0.055 0.04" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="rear_frame">
+    <inertial>
+      <origin xyz="0 0.3 -0.8" rpy="0 0 0" />
+      <mass value="3.9" />
+      <inertia ixx="0.8957" ixy="0" ixz="0" iyy="0.8281" iyz="0" izz="0.18226" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0.012 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.018 0.034" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.04 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.372 0.064 0.05" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.165 0.026 -0.046" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.03 0.11" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.165 0.026 -0.046" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.03 0.11" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.175 0.280031 -0.759317" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.042 0.022 1.54" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.175 0.280031 -0.759317" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.042 0.022 1.54" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.262886 -0.712348" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.138 0.028 1.02" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.132585 -0.355387" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.214881 -0.580836" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.297176 -0.806286" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.379472 -1.03174" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0.454909 -1.2384" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.168 0.256028 -0.693561" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.168 0.256028 -0.693561" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.168 0.345182 -0.937798" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.168 0.345182 -0.937798" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="-0.175 0.539948 -1.47136" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.062 0.06 0.04" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0.175 0.539948 -1.47136" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.062 0.06 0.04" />
+        </geometry>
+      </visual>
+    <collision name="rear_frame__visual_1">
+      <origin xyz="0 0.012 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.018 0.034" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_2">
+      <origin xyz="0 0.04 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.372 0.064 0.05" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_3">
+      <origin xyz="-0.165 0.026 -0.046" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.03 0.11" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_4">
+      <origin xyz="0.165 0.026 -0.046" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.03 0.11" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_5">
+      <origin xyz="-0.175 0.280031 -0.759317" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.042 0.022 1.54" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_6">
+      <origin xyz="0.175 0.280031 -0.759317" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.042 0.022 1.54" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_7">
+      <origin xyz="0 0.262886 -0.712348" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.138 0.028 1.02" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_8">
+      <origin xyz="0 0.132585 -0.355387" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_9">
+      <origin xyz="0 0.214881 -0.580836" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_10">
+      <origin xyz="0 0.297176 -0.806286" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_11">
+      <origin xyz="0 0.379472 -1.03174" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_12">
+      <origin xyz="0 0.454909 -1.2384" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.396 0.058 0.024" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_13">
+      <origin xyz="-0.168 0.256028 -0.693561" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_14">
+      <origin xyz="0.168 0.256028 -0.693561" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_15">
+      <origin xyz="-0.168 0.345182 -0.937798" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_16">
+      <origin xyz="0.168 0.345182 -0.937798" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.028 0.026 0.18" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_17">
+      <origin xyz="-0.175 0.539948 -1.47136" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.062 0.06 0.04" />
+        </geometry>
+      </collision>
+    <collision name="rear_frame__visual_18">
+      <origin xyz="0.175 0.539948 -1.47136" rpy="0.35 0 0" />
+      <geometry>
+        <box size="0.062 0.06 0.04" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="front_to_rear_hinge" type="revolute">
+    <parent link="front_frame" />
+    <child link="rear_frame" />
+    <axis xyz="1 0 0" />
+    <limit effort="60" velocity="1.5" lower="-0.1" upper="0.16" />
+    </joint>
+  </robot>

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_vacuum_cleaner_with_articulated_wand_0001",
+  "created_at": "2026-03-16T01:19:22Z",
+  "updated_at": "2026-03-16T01:19:22Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "vacuum_cleaner_with_articulated_wand",
+  "source": {
+    "run_id": "run_import_vacuum_cleaner_with_articulated_wand_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed vacuum cleaner with a main body, floor head, articulated wand, hose or connector sections, ",
+    "prompt_preview": "A realistic, highly detailed vacuum cleaner with a main body, floor head, articulated wand, hose or connector sections, and practical handle geometry. The wa..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "de6c68e25010a8528c8a2cf4ad01bee2b8ab396c30f13c225a3a0b3a8bc1d45c",
+    "model_py_sha256": "ade72876e6afb86d7c7c62a7a32e8029631c7e381f490f892d59889f80774061",
+    "model_urdf_sha256": "51448f9c3581bbe7b40057e3112572cb7f0fb809ac5fe2324d603d130dd888b0"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

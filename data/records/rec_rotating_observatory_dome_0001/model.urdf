@@ -1,0 +1,615 @@
+<robot name="observatory_dome">
+  <material name="painted_shell">
+    <color rgba="0.94 0.95 0.96 1" />
+  </material>
+  <material name="concrete">
+    <color rgba="0.7 0.71 0.73 1" />
+  </material>
+  <material name="dark_metal">
+    <color rgba="0.18 0.2 0.23 1" />
+  </material>
+  <material name="steel">
+    <color rgba="0.55 0.58 0.62 1" />
+  </material>
+  <material name="rubber">
+    <color rgba="0.08 0.08 0.09 1" />
+  </material>
+  <material name="glass">
+    <color rgba="0.2 0.29 0.34 0.45" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.575" rpy="0 0 0" />
+      <mass value="650" />
+      <inertia ixx="180.9" ixy="0" ixz="0" iyy="180.9" iyz="0" izz="218.53" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.08" rpy="0 0 0" />
+      <geometry>
+        <box size="2.08 2.08 0.16" />
+      </geometry>
+      <material name="concrete">
+        <color rgba="0.7 0.71 0.73 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.22" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.74" length="0.12" />
+      </geometry>
+      <material name="concrete">
+        <color rgba="0.7 0.71 0.73 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.65" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.66" length="0.74" />
+      </geometry>
+      <material name="painted_shell">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 1.06" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.72" length="0.08" />
+      </geometry>
+      <material name="painted_shell">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 1.117" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.77" length="0.05" />
+      </geometry>
+      <material name="dark_metal">
+        <color rgba="0.18 0.2 0.23 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 1.102" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.08" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.78 0.44" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.28 0.64" />
+      </geometry>
+      <material name="painted_shell">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.9 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.07 0.44" />
+      </geometry>
+      <material name="dark_metal">
+        <color rgba="0.18 0.2 0.23 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.13 -0.885 0.52" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.035 0.22" />
+      </geometry>
+      <material name="glass">
+        <color rgba="0.2 0.29 0.34 0.45" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.13 -0.885 0.52" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.035 0.22" />
+      </geometry>
+      <material name="glass">
+        <color rgba="0.2 0.29 0.34 0.45" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.66 0.76" rpy="0 0 0" />
+      <geometry>
+        <box size="0.38 0.06 0.05" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <collision name="base__visual_1">
+      <origin xyz="0 0 0.08" rpy="0 0 0" />
+      <geometry>
+        <box size="2.08 2.08 0.16" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_2">
+      <origin xyz="0 0 0.22" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.74" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_3">
+      <origin xyz="0 0 0.65" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.66" length="0.74" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_4">
+      <origin xyz="0 0 1.06" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.72" length="0.08" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_5">
+      <origin xyz="0 0 1.117" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.77" length="0.05" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_6">
+      <origin xyz="0 0 1.102" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.08" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_7">
+      <origin xyz="0 -0.78 0.44" rpy="0 0 0" />
+      <geometry>
+        <box size="0.42 0.28 0.64" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_8">
+      <origin xyz="0 -0.9 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.07 0.44" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_9">
+      <origin xyz="-0.13 -0.885 0.52" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.035 0.22" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_10">
+      <origin xyz="0.13 -0.885 0.52" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.035 0.22" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_11">
+      <origin xyz="0 -0.66 0.76" rpy="0 0 0" />
+      <geometry>
+        <box size="0.38 0.06 0.05" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="dome">
+    <inertial>
+      <origin xyz="0 0 0.46" rpy="0 0 0" />
+      <mass value="180" />
+      <inertia ixx="38.0085" ixy="0" ixz="0" iyy="38.0085" iyz="0" izz="50.625" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/dome_shell.glb" />
+      </geometry>
+      <material name="painted_shell">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.7" length="0.04" />
+      </geometry>
+      <material name="dark_metal">
+        <color rgba="0.18 0.2 0.23 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.11" length="0.1" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.860804" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.26" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/dome_left_rail.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/dome_right_rail.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/dome_sill.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.34 0.57" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.1 0.08" />
+      </geometry>
+      <material name="dark_metal">
+        <color rgba="0.18 0.2 0.23 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.34 0.62" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.06 0.02" />
+      </geometry>
+      <material name="rubber">
+        <color rgba="0.08 0.08 0.09 1" />
+      </material>
+    </visual>
+    <collision name="dome__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/198516015f47db106087c975__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_2">
+      <origin xyz="0 0 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.7" length="0.04" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_3">
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.11" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_4">
+      <origin xyz="0 0 0.860804" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.26" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_5__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a338031595aaa9b48d1b06ae__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_5__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a338031595aaa9b48d1b06ae__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_5__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a338031595aaa9b48d1b06ae__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_5__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/a338031595aaa9b48d1b06ae__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_6__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/910cef2831fa15c1ef408317__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_6__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/910cef2831fa15c1ef408317__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_6__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/910cef2831fa15c1ef408317__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_6__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/910cef2831fa15c1ef408317__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_7__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/df03ad8eeadb68069db7f713__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_7__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/df03ad8eeadb68069db7f713__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_8">
+      <origin xyz="0 -0.34 0.57" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.1 0.08" />
+      </geometry>
+    </collision>
+    <collision name="dome__visual_9">
+      <origin xyz="0 -0.34 0.62" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.06 0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="shutter">
+    <inertial>
+      <origin xyz="0 0.18 -0.34" rpy="0 0 0" />
+      <mass value="35" />
+      <inertia ixx="2.12917" ixy="0" ixz="0" iyy="2.22367" iyz="0" izz="0.4305" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shutter_shell.glb" />
+      </geometry>
+      <material name="painted_shell">
+        <color rgba="0.94 0.95 0.96 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.23" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shutter_left_support.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shutter_right_support.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shutter_left_rib.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shutter_right_rib.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shutter_crossbar.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.55 0.58 0.62 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0.703367 -0.810804" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.04 0.12" />
+      </geometry>
+      <material name="dark_metal">
+        <color rgba="0.18 0.2 0.23 1" />
+      </material>
+    </visual>
+    <collision name="shutter__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/69958cea7402b6b348ce7b8d__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/69958cea7402b6b348ce7b8d__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/69958cea7402b6b348ce7b8d__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/69958cea7402b6b348ce7b8d__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_2">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.23" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_3__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/8063bd8bf417c9786ac754e2__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_4__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e3be3dc8431c62c132f50ab0__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_5__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e79350a5cd8758e1ef6bccb7__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_5__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e79350a5cd8758e1ef6bccb7__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_5__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e79350a5cd8758e1ef6bccb7__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_5__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/e79350a5cd8758e1ef6bccb7__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_6__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/10d4fc6321fbe77598e03ef4__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_6__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/10d4fc6321fbe77598e03ef4__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_6__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/10d4fc6321fbe77598e03ef4__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_6__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/10d4fc6321fbe77598e03ef4__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_7__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/81428d0e0470dfefa7dab0ba__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_7__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/81428d0e0470dfefa7dab0ba__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="shutter__visual_8">
+      <origin xyz="0 0.703367 -0.810804" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.04 0.12" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_dome" type="continuous">
+    <origin xyz="0 0 1.15" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="dome" />
+    <axis xyz="0 0 1" />
+    <limit effort="120" velocity="0.35" />
+  </joint>
+  <joint name="dome_to_shutter" type="revolute">
+    <origin xyz="0 0 0.860804" rpy="0 0 0" />
+    <parent link="dome" />
+    <child link="shutter" />
+    <axis xyz="1 0 0" />
+    <limit effort="25" velocity="0.8" lower="0" upper="1.15" />
+  </joint>
+</robot>

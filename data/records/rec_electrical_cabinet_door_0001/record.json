@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_electrical_cabinet_door_0001",
+  "created_at": "2026-03-16T01:20:10Z",
+  "updated_at": "2026-03-16T01:20:10Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "electrical_cabinet_door",
+  "source": {
+    "run_id": "run_import_electrical_cabinet_door_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed electrical cabinet door with an industrial enclosure feel, strong hinges, latch hardware, a",
+    "prompt_preview": "A realistic, highly detailed electrical cabinet door with an industrial enclosure feel, strong hinges, latch hardware, and practical panel construction. The..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "c663072d46bc4dc50de5ee5792d271c1376f721fb8460bd39ae2367d16792c4b",
+    "model_py_sha256": "ce491c78817a78e4fe74860bbbc7b98366bb58257154ffc72026e9001b4f560d",
+    "model_urdf_sha256": "e42ea976f1771ccb28c9aac5b1832e9098416b8a075b7a0c6749440b301629db"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

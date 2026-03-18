@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_linear_carriage_with_independent_rotary_endeffector_0001",
+  "created_at": "2026-03-12T18:18:22Z",
+  "updated_at": "2026-03-12T18:18:22Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "linear_carriage_with_independent_rotary_endeffector",
+  "source": {
+    "run_id": "run_import_linear_carriage_with_independent_rotary_endeffector_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A slide-mounted rotary tool head with one translational axis and one uncoupled rotary axis, using boxy supports and simp",
+    "prompt_preview": "A slide-mounted rotary tool head with one translational axis and one uncoupled rotary axis, using boxy supports and simple CAD housings."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "59f760679ca5e0df25f840a737b6712f791109de05322f57cc0516b614ad10ff",
+    "model_py_sha256": "fb09682461d2bd75d18ef37ff79717d129476cf03a90e6ee285dd1392e7b9419",
+    "model_urdf_sha256": "fbf21a7c7308d3dafae527f728f826fff592cdf5e437113a1264ecdc51022f08"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

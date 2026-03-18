@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_knee_scooter_0001",
+  "created_at": "2026-03-16T01:37:33Z",
+  "updated_at": "2026-03-16T01:37:33Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "knee_scooter",
+  "source": {
+    "run_id": "run_import_knee_scooter_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed knee scooter with a stable wheeled frame, padded knee platform, steering column, and practi",
+    "prompt_preview": "A realistic, highly detailed knee scooter with a stable wheeled frame, padded knee platform, steering column, and practical hand controls. The steering and r..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "f77d5b063958de2f35dea7c101e9100b4bcc0b024e8e0894e9cb62e37e35a4cb",
+    "model_py_sha256": "09f51a9bd1f95f0f18f24b0f35a614e554d7293c8fd6857569a3123a0b7f992b",
+    "model_urdf_sha256": "cb357bd72c32c2a7fe5b8b321b4ceb13fb757f42b7f8bb76c62e6ef49f1d6809"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

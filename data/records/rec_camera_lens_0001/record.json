@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_camera_lens_0001",
+  "created_at": "2026-03-16T01:17:37Z",
+  "updated_at": "2026-03-16T01:17:37Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "camera_lens",
+  "source": {
+    "run_id": "run_import_camera_lens_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed camera lens with a convincing barrel, glass elements, control rings, and professional optic",
+    "prompt_preview": "A realistic, highly detailed camera lens with a convincing barrel, glass elements, control rings, and professional optical-equipment character. The focus or..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "3855c2ff3eb5c2b1e2dfc5e2eccdab52b887adf9b77d3a8b7c0930eac140661c",
+    "model_py_sha256": "85e8ea7876f230629bd215c96ea9edd499abc526c5a6cf76d2153e61b4264377",
+    "model_urdf_sha256": "24e1bec2784cd7ecc870822beaf1295a82cbf12d9da484afad339a5ac6a403a5"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

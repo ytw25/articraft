@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_recumbent_bicycle_0001",
+  "generation": {
+    "provider": "openai",
+    "model_id": "gpt-5.4",
+    "thinking_level": "high",
+    "openai_transport": "http",
+    "openai_reasoning_summary": null,
+    "max_turns": 30
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt.txt",
+    "system_prompt_sha256": "9e010d4aea5bc5aeb9049c916156c6813fba9651937eac9c18e5fc2e39557039",
+    "sdk_docs_mode": "legacy_import"
+  },
+  "sdk": {
+    "sdk_package": "sdk",
+    "sdk_version": "legacy_final_10k",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "unknown",
+    "platform": "unknown",
+    "git_commit": null,
+    "uv_lock_sha256": null
+  },
+  "run_summary": {
+    "turn_count": 16,
+    "tool_call_count": null,
+    "compile_attempt_count": null,
+    "final_status": "success"
+  },
+  "materialization": {
+    "fingerprint_inputs": {
+      "model_py_sha256": "6040e9c57d74c2f19998ddcc46a79f6c27acf24abf62e8f47d7cec6fd930f35b",
+      "model_urdf_sha256": "e3929ec618ebb56fe42c326bc9b5688fda377c4d0c4fb62ba993bf5b80b8683b",
+      "sdk_fingerprint": null,
+      "materializer_version": "v1"
+    }
+  }
+}

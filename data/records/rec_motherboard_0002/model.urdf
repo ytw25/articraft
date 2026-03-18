@@ -1,0 +1,1915 @@
+<robot name="enthusiast_motherboard">
+  <material name="pcb">
+    <color rgba="0.08 0.22 0.11 1" />
+    </material>
+  <material name="matte_black">
+    <color rgba="0.07 0.07 0.08 1" />
+    </material>
+  <material name="dark_gray">
+    <color rgba="0.18 0.18 0.2 1" />
+    </material>
+  <material name="graphite">
+    <color rgba="0.25 0.27 0.3 1" />
+    </material>
+  <material name="slot_gray">
+    <color rgba="0.43 0.45 0.47 1" />
+    </material>
+  <material name="latch_gray">
+    <color rgba="0.63 0.64 0.67 1" />
+    </material>
+  <material name="steel">
+    <color rgba="0.74 0.76 0.79 1" />
+    </material>
+  <material name="aluminum">
+    <color rgba="0.6 0.62 0.66 1" />
+    </material>
+  <material name="gold">
+    <color rgba="0.84 0.7 0.23 1" />
+    </material>
+  <material name="copper">
+    <color rgba="0.66 0.39 0.22 1" />
+    </material>
+  <material name="accent">
+    <color rgba="0.88 0.9 0.92 1" />
+    </material>
+  <link name="board">
+    <inertial>
+      <origin xyz="0 0 0.0009" rpy="0 0 0" />
+      <mass value="0.92" />
+      <inertia ixx="0.00456468" ixy="0" ixz="0" iyy="0.00713217" iyz="0" izz="0.0116963" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/motherboard_pcb.obj" />
+        </geometry>
+      <material name="pcb" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1365 0.07 0.0018" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/rear_io_shroud.obj" />
+        </geometry>
+      <material name="graphite" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1435 0.038 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1435 0.057 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1435 0.076 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1435 0.095 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1425 0.017 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.016 0.019" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.1445 -0.003 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.014" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.092 0.108 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.018 0.012" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.064 0.108 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.018 0.012" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.092 0.108 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.064 0.108 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.018 0.108 0.0062" rpy="0 0 0" />
+      <geometry>
+        <box size="0.062 0.024 0.009" />
+        </geometry>
+      <material name="graphite" />
+      </visual>
+    <visual>
+      <origin xyz="-0.044 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.035 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.026 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.017 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.008 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.001 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.01 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.06 0.0062" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.06 0.009" />
+        </geometry>
+      <material name="graphite" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.035 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.045 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.055 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.065 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.075 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0.085 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.008 0.032 0.0033" rpy="0 0 0" />
+      <geometry>
+        <box size="0.048 0.05 0.0032" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.008 0.057 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.052 0.004 0.0011" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.008 0.007 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.052 0.004 0.0011" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.032 0.032 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.0011" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.016 0.032 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.0011" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.008 0.032 0.0064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.038 0.038 0.0008" />
+        </geometry>
+      <material name="accent" />
+      </visual>
+    <visual>
+      <origin xyz="0.02 0.032 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.012 0.006" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.028 0.032 0.0063" rpy="0 0 0" />
+      <geometry>
+        <box size="0.007 0.006 0.005" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.046 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.046 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.034 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.034 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.022 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.022 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.01 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.01 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.002 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.002 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.014 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.014 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.078 0.022 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.078 0.034 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.078 0.046 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.078 0.058 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.07 0.08 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.07 0.08 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.07 0.066 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.07 0.066 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.07 0.052 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.07 0.052 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.082 0.08 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.082 0.08 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.082 0.066 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.082 0.066 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.082 0.052 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.082 0.052 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.094 0.08 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.094 0.08 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.094 0.066 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.094 0.066 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.094 0.052 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.094 0.052 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.06 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.07 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.07 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.07 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.07 0.084 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.08 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.08 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.08 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.08 0.084 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.09 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.09 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.09 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.09 0.084 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.06 0.084 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.006 0.006" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.1455 0.015 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.013 0.055 0.012" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.1435 0.015 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.046 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.1425 -0.07 0.0082" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.02 0.013" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.1405 -0.07 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.015 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.1425 -0.05 0.0082" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.02 0.013" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.1405 -0.05 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.015 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.03 -0.01 0.0042" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.017 0.005" />
+        </geometry>
+      <material name="graphite" />
+      </visual>
+    <visual>
+      <origin xyz="0 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.0085 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.017 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.0255 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.034 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.0425 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.051 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.0595 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.03 -0.003 0.0075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.0025 0.0014" />
+        </geometry>
+      <material name="accent" />
+      </visual>
+    <visual>
+      <origin xyz="0.083 -0.048 0.0047" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.04 0.006" />
+        </geometry>
+      <material name="graphite" />
+      </visual>
+    <visual>
+      <origin xyz="0.083 -0.06 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.083 -0.054 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.083 -0.048 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.083 -0.042 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.083 -0.036 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      <material name="aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.112 -0.004 0.0033" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.0032" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.112 -0.004 0.0051" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.0006" />
+        </geometry>
+      <material name="accent" />
+      </visual>
+    <visual>
+      <origin xyz="-0.01 -0.02 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.044 0.008 0.011" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.006 -0.02 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.0022 0.001" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.01 -0.04 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.122 0.008 0.011" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.006 -0.04 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.0022 0.001" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.01 -0.064 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.122 0.008 0.011" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.006 -0.064 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.0022 0.001" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.01 -0.088 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.044 0.008 0.011" />
+        </geometry>
+      <material name="slot_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.006 -0.088 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.0022 0.001" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.004 -0.0386 0.0123" rpy="0 0 0" />
+      <geometry>
+        <box size="0.116 0.0024 0.0012" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.004 -0.0626 0.0123" rpy="0 0 0" />
+      <geometry>
+        <box size="0.116 0.0024 0.0012" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.114 0.071 0.0057" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.012 0.008" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="0.114 0.071 0.0102" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.008 0.0015" />
+        </geometry>
+      <material name="accent" />
+      </visual>
+    <visual>
+      <origin xyz="0.122 0.098 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.022 0.012" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.122 0.098 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.016 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.113 -0.074 0.0067" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.01" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.113 -0.074 0.0121" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0026" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.113 -0.088 0.0067" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.01" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.113 -0.088 0.0121" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0026" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.113 -0.102 0.0067" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.01" />
+        </geometry>
+      <material name="dark_gray" />
+      </visual>
+    <visual>
+      <origin xyz="-0.113 -0.102 0.0121" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0026" length="0.001" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.118 -0.108 0.0047" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.006" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.05 -0.11 0.0067" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.014 0.01" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.085 -0.109 0.0057" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.01 0.008" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.04 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="-0.02 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <visual>
+      <origin xyz="0.02 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      <material name="gold" />
+      </visual>
+    <collision name="board__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/motherboard_pcb__d7b16b0082b5184d__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_2__hull_001">
+      <origin xyz="-0.1365 0.07 0.0018" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/rear_io_shroud__9f6b3964c149573c__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_2__hull_002">
+      <origin xyz="-0.1365 0.07 0.0018" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/rear_io_shroud__9f6b3964c149573c__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_2__hull_003">
+      <origin xyz="-0.1365 0.07 0.0018" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/rear_io_shroud__9f6b3964c149573c__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_3">
+      <origin xyz="-0.1435 0.038 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_4">
+      <origin xyz="-0.1435 0.057 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_5">
+      <origin xyz="-0.1435 0.076 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_6">
+      <origin xyz="-0.1435 0.095 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.014" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_7">
+      <origin xyz="-0.1425 0.017 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.016 0.019" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_8">
+      <origin xyz="-0.1445 -0.003 0.0087" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.014 0.014" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_9">
+      <origin xyz="-0.092 0.108 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.018 0.012" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_10">
+      <origin xyz="-0.064 0.108 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.018 0.012" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_11">
+      <origin xyz="-0.092 0.108 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_12">
+      <origin xyz="-0.064 0.108 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.012 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_13">
+      <origin xyz="-0.018 0.108 0.0062" rpy="0 0 0" />
+      <geometry>
+        <box size="0.062 0.024 0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_14">
+      <origin xyz="-0.044 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_15">
+      <origin xyz="-0.035 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_16">
+      <origin xyz="-0.026 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_17">
+      <origin xyz="-0.017 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_18">
+      <origin xyz="-0.008 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_19">
+      <origin xyz="0.001 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_20">
+      <origin xyz="0.01 0.108 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0042 0.022 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_21">
+      <origin xyz="-0.058 0.06 0.0062" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.06 0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_22">
+      <origin xyz="-0.058 0.035 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_23">
+      <origin xyz="-0.058 0.045 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_24">
+      <origin xyz="-0.058 0.055 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_25">
+      <origin xyz="-0.058 0.065 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_26">
+      <origin xyz="-0.058 0.075 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_27">
+      <origin xyz="-0.058 0.085 0.0157" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.004 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_28">
+      <origin xyz="-0.008 0.032 0.0033" rpy="0 0 0" />
+      <geometry>
+        <box size="0.048 0.05 0.0032" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_29">
+      <origin xyz="-0.008 0.057 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.052 0.004 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_30">
+      <origin xyz="-0.008 0.007 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.052 0.004 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_31">
+      <origin xyz="-0.032 0.032 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_32">
+      <origin xyz="0.016 0.032 0.0054" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_33">
+      <origin xyz="-0.008 0.032 0.0064" rpy="0 0 0" />
+      <geometry>
+        <box size="0.038 0.038 0.0008" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_34">
+      <origin xyz="0.02 0.032 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.005 0.012 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_35">
+      <origin xyz="-0.028 0.032 0.0063" rpy="0 0 0" />
+      <geometry>
+        <box size="0.007 0.006 0.005" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_36">
+      <origin xyz="-0.046 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_37">
+      <origin xyz="-0.046 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_38">
+      <origin xyz="-0.034 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_39">
+      <origin xyz="-0.034 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_40">
+      <origin xyz="-0.022 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_41">
+      <origin xyz="-0.022 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_42">
+      <origin xyz="-0.01 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_43">
+      <origin xyz="-0.01 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_44">
+      <origin xyz="0.002 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_45">
+      <origin xyz="0.002 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_46">
+      <origin xyz="0.014 0.084 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_47">
+      <origin xyz="0.014 0.071 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_48">
+      <origin xyz="-0.078 0.022 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_49">
+      <origin xyz="-0.078 0.034 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_50">
+      <origin xyz="-0.078 0.046 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_51">
+      <origin xyz="-0.078 0.058 0.00495" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.0085 0.0065" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_52">
+      <origin xyz="-0.07 0.08 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_53">
+      <origin xyz="-0.07 0.08 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_54">
+      <origin xyz="-0.07 0.066 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_55">
+      <origin xyz="-0.07 0.066 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_56">
+      <origin xyz="-0.07 0.052 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_57">
+      <origin xyz="-0.07 0.052 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_58">
+      <origin xyz="-0.082 0.08 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_59">
+      <origin xyz="-0.082 0.08 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_60">
+      <origin xyz="-0.082 0.066 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_61">
+      <origin xyz="-0.082 0.066 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_62">
+      <origin xyz="-0.082 0.052 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_63">
+      <origin xyz="-0.082 0.052 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_64">
+      <origin xyz="-0.094 0.08 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_65">
+      <origin xyz="-0.094 0.08 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_66">
+      <origin xyz="-0.094 0.066 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_67">
+      <origin xyz="-0.094 0.066 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_68">
+      <origin xyz="-0.094 0.052 0.0062" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0035" length="0.009" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_69">
+      <origin xyz="-0.094 0.052 0.0111" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_70">
+      <origin xyz="0.06 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_71">
+      <origin xyz="0.06 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_72">
+      <origin xyz="0.06 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_73">
+      <origin xyz="0.07 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_74">
+      <origin xyz="0.07 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_75">
+      <origin xyz="0.07 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_76">
+      <origin xyz="0.07 0.084 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_77">
+      <origin xyz="0.08 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_78">
+      <origin xyz="0.08 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_79">
+      <origin xyz="0.08 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_80">
+      <origin xyz="0.08 0.084 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_81">
+      <origin xyz="0.09 0.018 0.0068" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0074 0.126 0.0102" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_82">
+      <origin xyz="0.09 0.018 0.00235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.002 0.112 0.0011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_83">
+      <origin xyz="0.09 -0.048 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_84">
+      <origin xyz="0.09 0.084 0.0071" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.008 0.0108" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_85">
+      <origin xyz="0.06 0.084 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0085 0.006 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_86">
+      <origin xyz="0.1455 0.015 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.013 0.055 0.012" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_87">
+      <origin xyz="0.1435 0.015 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.046 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_88">
+      <origin xyz="0.1425 -0.07 0.0082" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.02 0.013" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_89">
+      <origin xyz="0.1405 -0.07 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.015 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_90">
+      <origin xyz="0.1425 -0.05 0.0082" rpy="0 0 0" />
+      <geometry>
+        <box size="0.015 0.02 0.013" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_91">
+      <origin xyz="0.1405 -0.05 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.015 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_92">
+      <origin xyz="0.03 -0.01 0.0042" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.017 0.005" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_93">
+      <origin xyz="0 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_94">
+      <origin xyz="0.0085 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_95">
+      <origin xyz="0.017 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_96">
+      <origin xyz="0.0255 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_97">
+      <origin xyz="0.034 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_98">
+      <origin xyz="0.0425 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_99">
+      <origin xyz="0.051 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_100">
+      <origin xyz="0.0595 -0.01 0.0097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.015 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_101">
+      <origin xyz="0.03 -0.003 0.0075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.0025 0.0014" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_102">
+      <origin xyz="0.083 -0.048 0.0047" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.04 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_103">
+      <origin xyz="0.083 -0.06 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_104">
+      <origin xyz="0.083 -0.054 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_105">
+      <origin xyz="0.083 -0.048 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_106">
+      <origin xyz="0.083 -0.042 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_107">
+      <origin xyz="0.083 -0.036 0.0112" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.004 0.007" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_108">
+      <origin xyz="0.112 -0.004 0.0033" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.0032" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_109">
+      <origin xyz="0.112 -0.004 0.0051" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.0006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_110">
+      <origin xyz="-0.01 -0.02 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.044 0.008 0.011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_111">
+      <origin xyz="-0.006 -0.02 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.0022 0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_112">
+      <origin xyz="-0.01 -0.04 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.122 0.008 0.011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_113">
+      <origin xyz="-0.006 -0.04 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.0022 0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_114">
+      <origin xyz="-0.01 -0.064 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.122 0.008 0.011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_115">
+      <origin xyz="-0.006 -0.064 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.0022 0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_116">
+      <origin xyz="-0.01 -0.088 0.0072" rpy="0 0 0" />
+      <geometry>
+        <box size="0.044 0.008 0.011" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_117">
+      <origin xyz="-0.006 -0.088 0.0023" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.0022 0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_118">
+      <origin xyz="-0.004 -0.0386 0.0123" rpy="0 0 0" />
+      <geometry>
+        <box size="0.116 0.0024 0.0012" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_119">
+      <origin xyz="-0.004 -0.0626 0.0123" rpy="0 0 0" />
+      <geometry>
+        <box size="0.116 0.0024 0.0012" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_120">
+      <origin xyz="0.114 0.071 0.0057" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.012 0.008" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_121">
+      <origin xyz="0.114 0.071 0.0102" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.008 0.0015" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_122">
+      <origin xyz="0.122 0.098 0.0077" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.022 0.012" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_123">
+      <origin xyz="0.122 0.098 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.016 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_124">
+      <origin xyz="-0.113 -0.074 0.0067" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_125">
+      <origin xyz="-0.113 -0.074 0.0121" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0026" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_126">
+      <origin xyz="-0.113 -0.088 0.0067" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_127">
+      <origin xyz="-0.113 -0.088 0.0121" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0026" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_128">
+      <origin xyz="-0.113 -0.102 0.0067" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_129">
+      <origin xyz="-0.113 -0.102 0.0121" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0026" length="0.001" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_130">
+      <origin xyz="-0.118 -0.108 0.0047" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.006" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_131">
+      <origin xyz="0.05 -0.11 0.0067" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.014 0.01" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_132">
+      <origin xyz="0.085 -0.109 0.0057" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.01 0.008" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_133">
+      <origin xyz="-0.04 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_134">
+      <origin xyz="-0.02 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_135">
+      <origin xyz="0 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      </collision>
+    <collision name="board__visual_136">
+      <origin xyz="0.02 -0.11 0.0037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.006 0.004" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="cpu_arm">
+    <inertial>
+      <origin xyz="-0.026 0 0.006" rpy="0 0 0" />
+      <mass value="0.012" />
+      <inertia ixx="2.44e-07" ixy="0" ixz="0" iyy="3.06e-06" iyz="0" izz="3.016e-06" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/cpu_retention_arm.obj" />
+        </geometry>
+      <material name="steel" />
+      </visual>
+    <collision name="cpu_arm__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/cpu_retention_arm__db96a196af7ea41d__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="cpu_arm__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/cpu_retention_arm__db96a196af7ea41d__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="cpu_arm__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/cpu_retention_arm__db96a196af7ea41d__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="cpu_arm__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/cpu_retention_arm__db96a196af7ea41d__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="cpu_arm__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/cpu_retention_arm__db96a196af7ea41d__hull_005.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="dimm_latch">
+    <inertial>
+      <origin xyz="0 0.002 0.006" rpy="0 0 0" />
+      <mass value="0.004" />
+      <inertia ixx="8.96667e-08" ixy="0" ixz="0" iyy="1.04333e-07" iyz="0" izz="8.13333e-08" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/dimm_slot_latch.obj" />
+        </geometry>
+      <material name="latch_gray" />
+      </visual>
+    <collision name="dimm_latch__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/dimm_slot_latch__78b9c8c614b83099__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="dimm_latch__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/dimm_slot_latch__78b9c8c614b83099__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="dimm_latch__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/dimm_slot_latch__78b9c8c614b83099__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="dimm_latch__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/dimm_slot_latch__78b9c8c614b83099__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="dimm_latch__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/dimm_slot_latch__78b9c8c614b83099__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="dimm_latch__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/dimm_slot_latch__78b9c8c614b83099__hull_006.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="cpu_retention_arm" type="revolute">
+    <origin xyz="0.02 0.032 0.008" rpy="0 0 0" />
+    <parent link="board" />
+    <child link="cpu_arm" />
+    <axis xyz="0 1 0" />
+    <limit effort="2" velocity="2.5" lower="0" upper="1.15" />
+    </joint>
+  <joint name="dimm_a1_latch" type="revolute">
+    <origin xyz="0.06 0.084 0.008" rpy="0 0 0" />
+    <parent link="board" />
+    <child link="dimm_latch" />
+    <axis xyz="1 0 0" />
+    <limit effort="1" velocity="3" lower="0" upper="0.9" />
+    </joint>
+  </robot>

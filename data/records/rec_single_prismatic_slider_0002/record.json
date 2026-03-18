@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_single_prismatic_slider_0002",
+  "created_at": "2026-03-12T16:03:52Z",
+  "updated_at": "2026-03-12T16:03:52Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "single_prismatic_slider",
+  "source": {
+    "run_id": "run_import_single_prismatic_slider_20260312-155835-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A single desk drawer sliding straight out of a minimal rectangular desk carcass on one prismatic axis.",
+    "prompt_preview": "A single desk drawer sliding straight out of a minimal rectangular desk carcass on one prismatic axis."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "9d3d6809ba7db3dccc5461071226cd8feef4a2c0b672f32032cc4b5881ba3ffd",
+    "model_py_sha256": "fac07533ec7f96b6407e8c944da08878c21659c6b9e1a7eac21e6858a50ea3cd",
+    "model_urdf_sha256": "f9c5d1e123cddd44466b02223bb524a2885cc182d81f19517ded0cad97f9df2f"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

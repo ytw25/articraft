@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_playground_swing_0001",
+  "created_at": "2026-03-16T13:21:00Z",
+  "updated_at": "2026-03-16T13:21:00Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "playground_swing",
+  "source": {
+    "run_id": "run_import_playground_swing_20260316-131259-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed playground swing with an A-frame support, two suspended chains, a simple molded or plank se",
+    "prompt_preview": "A realistic, highly detailed playground swing with an A-frame support, two suspended chains, a simple molded or plank seat, and a convincing park-equipment a..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "4a6d344ef89d3a297e6d481448d542764159d10a925d48aaacdff3a28064cbff",
+    "model_py_sha256": "8b750f5276cedca595373bcff6399a735499aa1e70e466894ad52b2263cecd31",
+    "model_urdf_sha256": "4f3bff14b89c7cd9396f9a0b74536ff65b59d2ed6bbfd749aa0d415081c39718"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

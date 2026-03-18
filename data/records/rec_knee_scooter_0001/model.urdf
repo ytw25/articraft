@@ -1,0 +1,734 @@
+<robot name="knee_scooter">
+  <link name="base_frame">
+    <inertial>
+      <origin xyz="0.29 0 0.32" rpy="0 0 0" />
+      <mass value="6.8" />
+      <inertia ixx="0.341813" ixy="0" ixz="0" iyy="0.542413" iyz="0" izz="0.420013" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/knee_scooter_frame.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.48 0 0.44" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.14" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.24 0 0.476" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.095 0.05" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.27 0 0.507" rpy="0 0 0" />
+      <geometry>
+        <box size="0.26 0.15 0.008" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.27 0 0.531" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.12 0.042" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.37 0 0.546" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.11 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.38 0 0.535" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.11" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.105 0.095 0.118" rpy="0 -0.3 0" />
+      <geometry>
+        <box size="0.04 0.016 0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.1 -0.198 0.1" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.1 0.198 0.1" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.022" />
+      </geometry>
+    </visual>
+    <collision name="base_frame__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d52f564b47381c863f2739e6__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_2">
+      <origin xyz="0.48 0 0.44" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.14" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_3">
+      <origin xyz="0.24 0 0.476" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.095 0.05" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_4">
+      <origin xyz="0.27 0 0.507" rpy="0 0 0" />
+      <geometry>
+        <box size="0.26 0.15 0.008" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_5">
+      <origin xyz="0.27 0 0.531" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.12 0.042" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_6">
+      <origin xyz="0.37 0 0.546" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.11 0.014" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_7">
+      <origin xyz="0.38 0 0.535" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.11" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_8">
+      <origin xyz="0.105 0.095 0.118" rpy="0 -0.3 0" />
+      <geometry>
+        <box size="0.04 0.016 0.012" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_9">
+      <origin xyz="0.1 -0.198 0.1" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="base_frame__visual_10">
+      <origin xyz="0.1 0.198 0.1" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="steering_assembly">
+    <inertial>
+      <origin xyz="0.08 0 0.14" rpy="0 0 0" />
+      <mass value="2.6" />
+      <inertia ixx="0.2379" ixy="0" ixz="0" iyy="0.21918" iyz="0" izz="0.05772" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.036" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.3" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.56" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.01 0 0.03" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.12" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.1 0 -0.18" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.16" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.18 0 -0.34" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.264" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/knee_scooter_fork.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.005 0 0.525" rpy="0 0 0" />
+      <geometry>
+        <box size="0.035 0.07 0.04" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.035 0 0.53" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.07" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.07 0 0.53" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.34" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.07 -0.17 0.53" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.07 0.17 0.53" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.1 -0.12 0.495" rpy="0 -0.58 -0.1" />
+      <geometry>
+        <box size="0.1 0.01 0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.1 0.12 0.495" rpy="0 -0.58 0.1" />
+      <geometry>
+        <box size="0.1 0.01 0.012" />
+      </geometry>
+    </visual>
+    <collision name="steering_assembly__visual_1">
+      <origin xyz="0 0 0.012" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.036" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_2">
+      <origin xyz="0 0 0.3" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.56" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_3">
+      <origin xyz="0.01 0 0.03" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_4">
+      <origin xyz="0.1 0 -0.18" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.16" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_5">
+      <origin xyz="0.18 0 -0.34" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.264" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_6__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3cb8e58a22f77c3eeb46507__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_6__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3cb8e58a22f77c3eeb46507__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_6__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3cb8e58a22f77c3eeb46507__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_6__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3cb8e58a22f77c3eeb46507__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_6__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d3cb8e58a22f77c3eeb46507__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_7">
+      <origin xyz="0.005 0 0.525" rpy="0 0 0" />
+      <geometry>
+        <box size="0.035 0.07 0.04" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_8">
+      <origin xyz="0.035 0 0.53" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.07" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_9">
+      <origin xyz="0.07 0 0.53" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.34" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_10">
+      <origin xyz="0.07 -0.17 0.53" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_11">
+      <origin xyz="0.07 0.17 0.53" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_12">
+      <origin xyz="0.1 -0.12 0.495" rpy="0 -0.58 -0.1" />
+      <geometry>
+        <box size="0.1 0.01 0.012" />
+      </geometry>
+    </collision>
+    <collision name="steering_assembly__visual_13">
+      <origin xyz="0.1 0.12 0.495" rpy="0 -0.58 0.1" />
+      <geometry>
+        <box size="0.1 0.01 0.012" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="rear_left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="0.75" />
+      <inertia ixx="0.001891" ixy="0" ixz="0" iyy="0.001891" iyz="0" izz="0.00375" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </visual>
+    <collision name="rear_left_wheel__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="rear_left_wheel__visual_2">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </collision>
+    <collision name="rear_left_wheel__visual_3">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="rear_left_wheel__visual_4">
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="rear_left_wheel__visual_5">
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="rear_left_wheel__visual_6">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="rear_right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="0.75" />
+      <inertia ixx="0.001891" ixy="0" ixz="0" iyy="0.001891" iyz="0" izz="0.00375" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </visual>
+    <collision name="rear_right_wheel__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="rear_right_wheel__visual_2">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </collision>
+    <collision name="rear_right_wheel__visual_3">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="rear_right_wheel__visual_4">
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="rear_right_wheel__visual_5">
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="rear_right_wheel__visual_6">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="front_left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="0.75" />
+      <inertia ixx="0.001891" ixy="0" ixz="0" iyy="0.001891" iyz="0" izz="0.00375" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </visual>
+    <collision name="front_left_wheel__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="front_left_wheel__visual_2">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </collision>
+    <collision name="front_left_wheel__visual_3">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="front_left_wheel__visual_4">
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="front_left_wheel__visual_5">
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="front_left_wheel__visual_6">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="front_right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="0.75" />
+      <inertia ixx="0.001891" ixy="0" ixz="0" iyy="0.001891" iyz="0" izz="0.00375" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </visual>
+    <collision name="front_right_wheel__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.1" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="front_right_wheel__visual_2">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.015" />
+      </geometry>
+    </collision>
+    <collision name="front_right_wheel__visual_3">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="front_right_wheel__visual_4">
+      <origin xyz="0 -0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="front_right_wheel__visual_5">
+      <origin xyz="0 0.006 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.086" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="front_right_wheel__visual_6">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.007" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="steering_joint" type="revolute">
+    <origin xyz="0.48 0 0.44" rpy="0 0 0" />
+    <parent link="base_frame" />
+    <child link="steering_assembly" />
+    <axis xyz="0 0 1" />
+    <limit effort="12" velocity="2.5" lower="-0.75" upper="0.75" />
+  </joint>
+  <joint name="rear_left_roll" type="continuous">
+    <origin xyz="0.1 -0.214 0.1" rpy="0 0 0" />
+    <parent link="base_frame" />
+    <child link="rear_left_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="18" />
+  </joint>
+  <joint name="rear_right_roll" type="continuous">
+    <origin xyz="0.1 0.214 0.1" rpy="0 0 0" />
+    <parent link="base_frame" />
+    <child link="rear_right_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="18" />
+  </joint>
+  <joint name="front_left_roll" type="continuous">
+    <origin xyz="0.18 -0.132 -0.34" rpy="0 0 0" />
+    <parent link="steering_assembly" />
+    <child link="front_left_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="18" />
+  </joint>
+  <joint name="front_right_roll" type="continuous">
+    <origin xyz="0.18 0.132 -0.34" rpy="0 0 0" />
+    <parent link="steering_assembly" />
+    <child link="front_right_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="18" />
+  </joint>
+</robot>

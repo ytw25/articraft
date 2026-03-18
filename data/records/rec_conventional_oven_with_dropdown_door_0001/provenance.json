@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_conventional_oven_with_dropdown_door_0001",
+  "generation": {
+    "provider": "openai",
+    "model_id": "gpt-5.4",
+    "thinking_level": "high",
+    "openai_transport": "http",
+    "openai_reasoning_summary": null,
+    "max_turns": 30
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt.txt",
+    "system_prompt_sha256": "3033b3ce7a030caa705472ab368115c5cb2720a043410a587218146701938291",
+    "sdk_docs_mode": "legacy_import"
+  },
+  "sdk": {
+    "sdk_package": "sdk",
+    "sdk_version": "legacy_final_10k",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "unknown",
+    "platform": "unknown",
+    "git_commit": null,
+    "uv_lock_sha256": null
+  },
+  "run_summary": {
+    "turn_count": 8,
+    "tool_call_count": null,
+    "compile_attempt_count": null,
+    "final_status": "success"
+  },
+  "materialization": {
+    "fingerprint_inputs": {
+      "model_py_sha256": "03d4db662f72ad508457e6d444cfda2576727f6e3a830ab1d33a0dc8137f8d86",
+      "model_urdf_sha256": "8664e525eb3bb5e2a197f407d06f6e5052accb120d8d3434fddf6aa02c0b70fe",
+      "sdk_fingerprint": null,
+      "materializer_version": "v1"
+    }
+  }
+}

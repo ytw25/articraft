@@ -1,0 +1,106 @@
+<robot name="linear_extension_module">
+  <material name="frame_gray">
+    <color rgba="0.56 0.58 0.61 1" />
+  </material>
+  <material name="slider_dark">
+    <color rgba="0.24 0.26 0.3 1" />
+  </material>
+  <material name="slider_light">
+    <color rgba="0.75 0.77 0.8 1" />
+  </material>
+  <link name="frame">
+    <inertial>
+      <origin xyz="0.25 0 0.02" rpy="0 0 0" />
+      <mass value="2.4" />
+      <inertia ixx="0.00544" ixy="0" ixz="0" iyy="0.05032" iyz="0" izz="0.05512" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/frame.glb" />
+      </geometry>
+      <material name="frame_gray" />
+    </visual>
+    <collision>
+      <origin xyz="0.25 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5 0.16 0.006" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.25 0.077 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5 0.006 0.04" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.25 -0.077 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5 0.006 0.04" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.006 0 0.019" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.148 0.026" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="stage1">
+    <inertial>
+      <origin xyz="0.165 0 0.012" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.000753333" ixy="0" ixz="0" iyy="0.009123" iyz="0" izz="0.00978033" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/stage1.glb" />
+      </geometry>
+      <material name="slider_dark" />
+    </visual>
+    <collision>
+      <origin xyz="0.165 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.33 0.092 0.02" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.005 0 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.1 0.018" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="stage2">
+    <inertial>
+      <origin xyz="0.115 0 0.01" rpy="0 0 0" />
+      <mass value="0.65" />
+      <inertia ixx="0.000351217" ixy="0" ixz="0" iyy="0.00288708" iyz="0" izz="0.00319497" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/stage2.glb" />
+      </geometry>
+      <material name="slider_light" />
+    </visual>
+    <collision>
+      <origin xyz="0.115 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.23 0.078 0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="frame_to_stage1" type="prismatic">
+    <origin xyz="0.012 0 0.008" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="stage1" />
+    <axis xyz="1 0 0" />
+    <limit effort="120" velocity="0.25" lower="0" upper="0.16" />
+  </joint>
+  <joint name="stage1_to_stage2" type="prismatic">
+    <origin xyz="0.01 0 0.015" rpy="0 0 0" />
+    <parent link="stage1" />
+    <child link="stage2" />
+    <axis xyz="1 0 0" />
+    <limit effort="80" velocity="0.25" lower="0" upper="0.09" />
+  </joint>
+</robot>

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_air_bike_0001",
+  "created_at": "2026-03-16T01:25:59Z",
+  "updated_at": "2026-03-16T01:25:59Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "air_bike",
+  "source": {
+    "run_id": "run_import_air_bike_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed air bike with a heavy exercise-bike frame, moving handlebars, fan wheel, seat, and crank as",
+    "prompt_preview": "A realistic, highly detailed air bike with a heavy exercise-bike frame, moving handlebars, fan wheel, seat, and crank assembly. The pedals, crank, handlebars..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "d43c40b199ce9f719971e54187084d514eab7418e99bebcf8ab0e9294d5a6daf",
+    "model_py_sha256": "6f950db4517faa4c04e8c453c87e2c49b1c579dc1afe48c2ef7a6188a40e5046",
+    "model_urdf_sha256": "4d1435ac219331cb1ab07101151bd502df25a9417b9aceb74f52712ce7b913c6"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

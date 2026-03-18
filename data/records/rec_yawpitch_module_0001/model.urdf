@@ -1,0 +1,129 @@
+<robot name="compact_camera_gimbal_head">
+  <material name="anodized_black">
+    <color rgba="0.14 0.14 0.16 1" />
+  </material>
+  <material name="machined_aluminum">
+    <color rgba="0.7 0.72 0.75 1" />
+  </material>
+  <material name="bearing_gray">
+    <color rgba="0.36 0.38 0.42 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <mass value="1.1" />
+      <inertia ixx="0.000733333" ixy="0" ixz="0" iyy="0.000733333" iyz="0" izz="0.00117333" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gimbal_base.glb" />
+      </geometry>
+      <material name="anodized_black" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.01" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.019" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.038 0.018" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.034" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.012" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="yaw_stage">
+    <inertial>
+      <origin xyz="0 0 0.026" rpy="0 0 0" />
+      <mass value="0.62" />
+      <inertia ixx="0.000268873" ixy="0" ixz="0" iyy="0.000325707" iyz="0" izz="0.000315167" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gimbal_yaw_stage.glb" />
+      </geometry>
+      <material name="bearing_gray" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.006" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.019" rpy="0 0 0" />
+      <geometry>
+        <box size="0.052 0.03 0.022" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.024 0.036" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.01 0.03" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.024 0.036" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.01 0.03" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="pitch_frame">
+    <inertial>
+      <origin xyz="0.012 0 0.018" rpy="0 0 0" />
+      <mass value="0.46" />
+      <inertia ixx="0.000122667" ixy="0" ixz="0" iyy="0.000223292" iyz="0" izz="0.000223292" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gimbal_pitch_frame.glb" />
+      </geometry>
+      <material name="machined_aluminum" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.024 0.024 0.016" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.008 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.022 0.03" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.016 0 0.031" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.04 0.006" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.034 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.024 0.014" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="yaw_joint" type="revolute">
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="yaw_stage" />
+    <axis xyz="0 0 1" />
+    <limit effort="6" velocity="2.5" lower="-2.6" upper="2.6" />
+  </joint>
+  <joint name="pitch_joint" type="revolute">
+    <origin xyz="0 0 0.04" rpy="0 0 0" />
+    <parent link="yaw_stage" />
+    <child link="pitch_frame" />
+    <axis xyz="0 -1 0" />
+    <limit effort="4" velocity="2.5" lower="-1.1" upper="1.35" />
+  </joint>
+</robot>

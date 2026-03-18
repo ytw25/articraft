@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_bench_vise_with_prismatic_jaw_0001",
+  "created_at": "2026-03-16T01:24:22Z",
+  "updated_at": "2026-03-16T01:24:22Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "bench_vise_with_prismatic_jaw",
+  "source": {
+    "run_id": "run_import_bench_vise_with_prismatic_jaw_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed bench vise with a heavy base, fixed body, sliding jaw, and convincing handle and screw hard",
+    "prompt_preview": "A realistic, highly detailed bench vise with a heavy base, fixed body, sliding jaw, and convincing handle and screw hardware. The jaw motion and handle artic..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "93f1104a2bce631b8bdf016d704258ae23864ada50f3889568ab55b104a3d7e1",
+    "model_py_sha256": "26b978775c4f969015ac6817911258b86b0f7cb4ad4f414957d8bb0e14933dff",
+    "model_urdf_sha256": "269a40cf7fe582d38d7b5fd3c2d9643c12679ce0c69819ccbf63e1d2509559db"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

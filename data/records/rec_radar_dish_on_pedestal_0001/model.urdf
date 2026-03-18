@@ -1,0 +1,463 @@
+<robot name="radar_dish">
+  <link name="pedestal">
+    <inertial>
+      <origin xyz="0 0 0.625" rpy="0 0 0" />
+      <mass value="620" />
+      <inertia ixx="160.172" ixy="0" ixz="0" iyy="160.172" iyz="0" izz="158.885" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.07" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.62" length="0.14" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.23" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.48" length="0.18" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.7" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.22" length="0.78" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 1.15" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.3" length="0.12" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.34 0 0.42" rpy="0 0 0" />
+      <geometry>
+        <box size="0.44 0.34 0.52" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.2 0 1.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.2 0.18" />
+      </geometry>
+    </visual>
+    <collision name="pedestal__visual_1">
+      <origin xyz="0 0 0.07" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.62" length="0.14" />
+      </geometry>
+    </collision>
+    <collision name="pedestal__visual_2">
+      <origin xyz="0 0 0.23" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.48" length="0.18" />
+      </geometry>
+    </collision>
+    <collision name="pedestal__visual_3">
+      <origin xyz="0 0 0.7" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.22" length="0.78" />
+      </geometry>
+    </collision>
+    <collision name="pedestal__visual_4">
+      <origin xyz="0 0 1.15" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.3" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="pedestal__visual_5">
+      <origin xyz="-0.34 0 0.42" rpy="0 0 0" />
+      <geometry>
+        <box size="0.44 0.34 0.52" />
+      </geometry>
+    </collision>
+    <collision name="pedestal__visual_6">
+      <origin xyz="-0.2 0 1.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.2 0.18" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="yaw_head">
+    <inertial>
+      <origin xyz="0 0 0.54" rpy="0 0 0" />
+      <mass value="210" />
+      <inertia ixx="26.712" ixy="0" ixz="0" iyy="31.059" iyz="0" izz="16.947" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.04" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.28" length="0.08" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.14" rpy="0 0 0" />
+      <geometry>
+        <box size="0.7 0.56 0.12" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.04 0 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.48 0.38 0.28" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.34 0 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.28 0.18" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.04 0.23 0.41" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.1 0.26" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.04 -0.23 0.41" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.1 0.26" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.14 0.23 0.66" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.62" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.14 -0.23 0.66" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.62" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.63" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.4 0.08" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.14 0.23 0.84" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.14 -0.23 0.84" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.08 0 0.59" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.22" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.08 0 0.74" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.055" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.2 -0.12 0.53" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.16 0.1" />
+      </geometry>
+    </visual>
+    <collision name="yaw_head__visual_1">
+      <origin xyz="0 0 0.04" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.28" length="0.08" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_2">
+      <origin xyz="0 0 0.14" rpy="0 0 0" />
+      <geometry>
+        <box size="0.7 0.56 0.12" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_3">
+      <origin xyz="-0.04 0 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.48 0.38 0.28" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_4">
+      <origin xyz="-0.34 0 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.28 0.18" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_5">
+      <origin xyz="0.04 0.23 0.41" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.1 0.26" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_6">
+      <origin xyz="0.04 -0.23 0.41" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.1 0.26" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_7">
+      <origin xyz="0.14 0.23 0.66" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.62" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_8">
+      <origin xyz="0.14 -0.23 0.66" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.62" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_9">
+      <origin xyz="0 0 0.63" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.4 0.08" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_10">
+      <origin xyz="0.14 0.23 0.84" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_11">
+      <origin xyz="0.14 -0.23 0.84" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.08" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_12">
+      <origin xyz="-0.08 0 0.59" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.22" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_13">
+      <origin xyz="-0.08 0 0.74" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.055" />
+      </geometry>
+    </collision>
+    <collision name="yaw_head__visual_14">
+      <origin xyz="-0.2 -0.12 0.53" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.16 0.1" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="dish_assembly">
+    <inertial>
+      <origin xyz="0.5 -0.23 0.12" rpy="0 0 0" />
+      <mass value="95" />
+      <inertia ixx="22.6005" ixy="0" ixz="0" iyy="29.5046" iyz="0" izz="10.5521" />
+    </inertial>
+    <visual>
+      <origin xyz="0 -0.23 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.46" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.06 -0.23 0.1" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.16" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/dish_shell.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/feed_arm_top.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/feed_arm_left.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/feed_arm_right.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.74 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.12" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.86 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.16" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.96 -0.23 0.12" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.05" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.7 -0.23 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.1" />
+      </geometry>
+    </visual>
+    <collision name="dish_assembly__visual_1">
+      <origin xyz="0 -0.23 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.46" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_2">
+      <origin xyz="0.06 -0.23 0.1" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.16" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_001">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_002">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_003">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_004">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_005">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_006">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_007">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_3__hull_008">
+      <origin xyz="0.09 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/731ca2b1d0dae9eb1fc75119__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_4__hull_001">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/6a17ebba487c32fb1dcc4fa0__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_4__hull_002">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/6a17ebba487c32fb1dcc4fa0__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_4__hull_003">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/6a17ebba487c32fb1dcc4fa0__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_5__hull_001">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/edaf54029e82f01c8b76296b__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_5__hull_002">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/edaf54029e82f01c8b76296b__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_6__hull_001">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/d68877a0c5f3d442bf52fb05__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_6__hull_002">
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/d68877a0c5f3d442bf52fb05__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_7">
+      <origin xyz="0.74 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.12" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_8">
+      <origin xyz="0.86 -0.23 0.12" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.16" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_9">
+      <origin xyz="0.96 -0.23 0.12" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.05" />
+      </geometry>
+    </collision>
+    <collision name="dish_assembly__visual_10">
+      <origin xyz="0.7 -0.23 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.05 0.1" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="azimuth" type="revolute">
+    <origin xyz="0 0 1.21" rpy="0 0 0" />
+    <parent link="pedestal" />
+    <child link="yaw_head" />
+    <axis xyz="0 0 1" />
+    <limit effort="850" velocity="0.6" lower="-3.14159" upper="3.14159" />
+  </joint>
+  <joint name="elevation" type="revolute">
+    <origin xyz="0.14 0.23 0.84" rpy="0 0 0" />
+    <parent link="yaw_head" />
+    <child link="dish_assembly" />
+    <axis xyz="0 -1 0" />
+    <limit effort="420" velocity="0.8" lower="-0.25" upper="1.05" />
+  </joint>
+</robot>

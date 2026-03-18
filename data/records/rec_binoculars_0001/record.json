@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_binoculars_0001",
+  "created_at": "2026-03-16T17:48:32Z",
+  "updated_at": "2026-03-16T17:48:32Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "binoculars",
+  "source": {
+    "run_id": "run_import_binoculars_20260316-174115-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed pair of binoculars with two parallel optical barrels, a central hinge bridge, textured grip",
+    "prompt_preview": "A realistic, highly detailed pair of binoculars with two parallel optical barrels, a central hinge bridge, textured grip surfaces, and a believable field-opt..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "f051bee7c40f4b8fb1bec7cac2381ac005495ed5fbf9fd90d5141092824e9c67",
+    "model_py_sha256": "3a63c89c14211f388665627f43a3753f50ec607cf89163a455793c482410a764",
+    "model_urdf_sha256": "b4fe4bc5413b1bce8f9a4b3fcc7dfce8b688ba1bafabb04c076e92141bd1892b"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,209 @@
+<robot name="branching_dual_arm">
+  <material name="graphite">
+    <color rgba="0.24 0.25 0.29 1" />
+  </material>
+  <material name="left_branch">
+    <color rgba="0.9 0.46 0.14 1" />
+  </material>
+  <material name="right_branch">
+    <color rgba="0.18 0.47 0.84 1" />
+  </material>
+  <material name="link_dark">
+    <color rgba="0.35 0.37 0.4 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.12" rpy="0 0 0" />
+      <mass value="3.6" />
+      <inertia ixx="0.02316" ixy="0" ixz="0" iyy="0.0408" iyz="0" izz="0.0294" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base_structure.glb" />
+      </geometry>
+      <material name="graphite" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.32 0.14 0.03" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.11" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.1 0.16" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.215" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.08 0.05" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.12 0 0.215" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.08 0.05" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.12 0 0.215" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.08 0.05" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_upper_arm">
+    <inertial>
+      <origin xyz="-0.09 0 0" rpy="0 0 0" />
+      <mass value="0.62" />
+      <inertia ixx="0.000285458" ixy="0" ixz="0" iyy="0.00183029" iyz="0" izz="0.00180317" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/left_upper_arm.glb" />
+      </geometry>
+      <material name="left_branch" />
+    </visual>
+    <collision>
+      <origin xyz="-0.022 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.048 0.052" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.095 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.038 0.048" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.165 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.05 0.055" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_forearm">
+    <inertial>
+      <origin xyz="-0.08 0 0" rpy="0 0 0" />
+      <mass value="0.4" />
+      <inertia ixx="0.000120833" ixy="0" ixz="0" iyy="0.000920833" iyz="0" izz="0.000906667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/left_forearm.glb" />
+      </geometry>
+      <material name="link_dark" />
+    </visual>
+    <collision>
+      <origin xyz="-0.022 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.046 0.048" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.086 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.032 0.042" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.146 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.03 0.038" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_upper_arm">
+    <inertial>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <mass value="0.62" />
+      <inertia ixx="0.000285458" ixy="0" ixz="0" iyy="0.00183029" iyz="0" izz="0.00180317" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/right_upper_arm.glb" />
+      </geometry>
+      <material name="right_branch" />
+    </visual>
+    <collision>
+      <origin xyz="0.022 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.048 0.052" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.095 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.038 0.048" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.165 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.05 0.055" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_forearm">
+    <inertial>
+      <origin xyz="0.08 0 0" rpy="0 0 0" />
+      <mass value="0.4" />
+      <inertia ixx="0.000120833" ixy="0" ixz="0" iyy="0.000920833" iyz="0" izz="0.000906667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/right_forearm.glb" />
+      </geometry>
+      <material name="link_dark" />
+    </visual>
+    <collision>
+      <origin xyz="0.022 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.046 0.048" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.086 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.032 0.042" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.146 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.03 0.038" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_left_upper" type="revolute">
+    <origin xyz="-0.15 0 0.215" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="left_upper_arm" />
+    <axis xyz="0 1 0" />
+    <limit effort="12" velocity="1.4" lower="0" upper="1.2" />
+  </joint>
+  <joint name="left_upper_to_forearm" type="revolute">
+    <origin xyz="-0.18 0 0" rpy="0 0 0" />
+    <parent link="left_upper_arm" />
+    <child link="left_forearm" />
+    <axis xyz="0 1 0" />
+    <limit effort="9" velocity="1.8" lower="0" upper="1.45" />
+  </joint>
+  <joint name="base_to_right_upper" type="revolute">
+    <origin xyz="0.15 0 0.215" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="right_upper_arm" />
+    <axis xyz="0 -1 0" />
+    <limit effort="12" velocity="1.4" lower="0" upper="1.2" />
+  </joint>
+  <joint name="right_upper_to_forearm" type="revolute">
+    <origin xyz="0.18 0 0" rpy="0 0 0" />
+    <parent link="right_upper_arm" />
+    <child link="right_forearm" />
+    <axis xyz="0 -1 0" />
+    <limit effort="9" velocity="1.8" lower="0" upper="1.45" />
+  </joint>
+</robot>

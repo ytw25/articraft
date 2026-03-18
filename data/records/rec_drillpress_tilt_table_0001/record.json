@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_drillpress_tilt_table_0001",
+  "created_at": "2026-03-17T02:44:32Z",
+  "updated_at": "2026-03-17T02:44:32Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "drillpress_tilt_table",
+  "source": {
+    "run_id": "run_import_drillpress_tilt_table_20260317-023258-drillpress-tilt-table-0001",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed drill-press tilt table with a robust mounting structure, flat work surface, and convincing ",
+    "prompt_preview": "A realistic, highly detailed drill-press tilt table with a robust mounting structure, flat work surface, and convincing adjustment hardware. The table tilt a..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "6582ba606692e5af3e3b3a9d0bf3bfe24db9229623b9247165a4af2d713c6d06",
+    "model_py_sha256": "d29266336de996a319f465f9df9855a2ef57860e32f393e02e3ebe7a34f37435",
+    "model_urdf_sha256": "09aff8da2b30a8fe4a5a690462d1e1ad24913478a0ce02619c333b3a8da4419b"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

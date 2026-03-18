@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_flatbed_scanner_with_hinged_lid_0001",
+  "created_at": "2026-03-17T02:43:02Z",
+  "updated_at": "2026-03-17T02:43:02Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "flatbed_scanner_with_hinged_lid",
+  "source": {
+    "run_id": "run_import_flatbed_scanner_with_hinged_lid_20260317-023258-flatbed-scanner-with-hinged-lid-0001",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed flatbed scanner with a low-profile body, glass scan bed, hinged lid, and believable control",
+    "prompt_preview": "A realistic, highly detailed flatbed scanner with a low-profile body, glass scan bed, hinged lid, and believable control area. The lid articulates naturally,..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "7a45556f1c71b93c4e9cb470b77b971d7a0353bff7d659995bc5c7bd445f620d",
+    "model_py_sha256": "ea894b19ae01213f127e64d2e9decd19373629c75c7c647f58fff811488fb15a",
+    "model_urdf_sha256": "75e3d2651324a6bb6506471378bb739d60579b1d9b2e17d52195ae29b7bd7251"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_rotary_base_with_vertical_slide_0002",
+  "created_at": "2026-03-12T18:30:13Z",
+  "updated_at": "2026-03-12T18:30:13Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "rotary_base_with_vertical_slide",
+  "source": {
+    "run_id": "run_import_rotary_base_with_vertical_slide_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A rotary base with a vertical linear slide mounted above it, combining one yaw axis and one prismatic lift axis in a com",
+    "prompt_preview": "A rotary base with a vertical linear slide mounted above it, combining one yaw axis and one prismatic lift axis in a compact machine module."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "ed52965c0df9de43d0627f80a1d2a68c6de5ed068c4fdc3cd668cfa3e41cfb26",
+    "model_py_sha256": "4ec19f4544bd4bac4911e2f213a11b50707948abde86ff6d0842e4b27a8714d8",
+    "model_urdf_sha256": "f63892ade5f38418b994c72f65cd7d957cf5646bb60ca76baf42e6befb0bca62"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

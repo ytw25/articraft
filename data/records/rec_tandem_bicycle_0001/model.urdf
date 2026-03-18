@@ -1,0 +1,1092 @@
+<robot name="tandem_bicycle">
+  <link name="main_frame">
+    <inertial>
+      <origin xyz="0.08 0 0.54" rpy="0 0 0" />
+      <mass value="18" />
+      <inertia ixx="1.2342" ixy="0" ixz="0" iyy="5.5992" iyz="0" izz="4.5102" />
+    </inertial>
+    <visual>
+      <origin xyz="0.62 0 0.79" rpy="0 0.321751 3.14159" />
+      <geometry>
+        <cylinder radius="0.026" length="0.189737" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.305 0 0.84" rpy="0 1.71024 3.14159" />
+      <geometry>
+        <cylinder radius="0.022" length="0.575587" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.2 0 0.79" rpy="0 1.61622 3.14159" />
+      <geometry>
+        <cylinder radius="0.022" length="0.440454" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.365 0 0.495" rpy="0 2.19436 3.14159" />
+      <geometry>
+        <cylinder radius="0.024" length="0.70214" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.15 0 0.29" rpy="0 1.5708 3.14159" />
+      <geometry>
+        <cylinder radius="0.028" length="0.46" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.05 0 0.545" rpy="0 0.117109 3.14159" />
+      <geometry>
+        <cylinder radius="0.026" length="0.513517" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.4 0 0.535" rpy="0 0.081452 3.14159" />
+      <geometry>
+        <cylinder radius="0.028" length="0.49163" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.18 0 0.545" rpy="0 2.47649 3.14159" />
+      <geometry>
+        <cylinder radius="0.017" length="0.648151" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.545 0.014 0.315" rpy="0 1.42047 -3.11735" />
+      <geometry>
+        <cylinder radius="0.012" length="0.333862" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.545 -0.014 0.315" rpy="0 1.42047 3.11735" />
+      <geometry>
+        <cylinder radius="0.012" length="0.333862" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.565 0.0175 0.5675" rpy="0 2.53944 3.02148" />
+      <geometry>
+        <cylinder radius="0.01" length="0.515703" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.565 -0.0175 0.5675" rpy="0 2.53944 -3.02148" />
+      <geometry>
+        <cylinder radius="0.01" length="0.515703" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.075 0 0.765" rpy="0 1.82812 3.14159" />
+      <geometry>
+        <cylinder radius="0.015" length="0.196469" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.87" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.44 0 0.84" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.1" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.08 0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.08 -0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.38 0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.38 -0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.71 0.01 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.055" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.71 -0.01 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.055" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.92" rpy="-0.08 0 0" />
+      <geometry>
+        <mesh filename="meshes/saddle.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.44 0 0.89" rpy="-0.06 0 0" />
+      <geometry>
+        <mesh filename="meshes/saddle.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.28 0 0.73" rpy="0 0 0.08" />
+      <geometry>
+        <mesh filename="meshes/stoker_bar.glb" />
+      </geometry>
+    </visual>
+    <collision name="main_frame__visual_1">
+      <origin xyz="0.62 0 0.79" rpy="0 0.321751 3.14159" />
+      <geometry>
+        <cylinder radius="0.026" length="0.189737" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_2">
+      <origin xyz="0.305 0 0.84" rpy="0 1.71024 3.14159" />
+      <geometry>
+        <cylinder radius="0.022" length="0.575587" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_3">
+      <origin xyz="-0.2 0 0.79" rpy="0 1.61622 3.14159" />
+      <geometry>
+        <cylinder radius="0.022" length="0.440454" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_4">
+      <origin xyz="0.365 0 0.495" rpy="0 2.19436 3.14159" />
+      <geometry>
+        <cylinder radius="0.024" length="0.70214" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_5">
+      <origin xyz="-0.15 0 0.29" rpy="0 1.5708 3.14159" />
+      <geometry>
+        <cylinder radius="0.028" length="0.46" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_6">
+      <origin xyz="0.05 0 0.545" rpy="0 0.117109 3.14159" />
+      <geometry>
+        <cylinder radius="0.026" length="0.513517" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_7">
+      <origin xyz="-0.4 0 0.535" rpy="0 0.081452 3.14159" />
+      <geometry>
+        <cylinder radius="0.028" length="0.49163" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_8">
+      <origin xyz="-0.18 0 0.545" rpy="0 2.47649 3.14159" />
+      <geometry>
+        <cylinder radius="0.017" length="0.648151" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_9">
+      <origin xyz="-0.545 0.014 0.315" rpy="0 1.42047 -3.11735" />
+      <geometry>
+        <cylinder radius="0.012" length="0.333862" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_10">
+      <origin xyz="-0.545 -0.014 0.315" rpy="0 1.42047 3.11735" />
+      <geometry>
+        <cylinder radius="0.012" length="0.333862" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_11">
+      <origin xyz="-0.565 0.0175 0.5675" rpy="0 2.53944 3.02148" />
+      <geometry>
+        <cylinder radius="0.01" length="0.515703" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_12">
+      <origin xyz="-0.565 -0.0175 0.5675" rpy="0 2.53944 -3.02148" />
+      <geometry>
+        <cylinder radius="0.01" length="0.515703" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_13">
+      <origin xyz="-0.075 0 0.765" rpy="0 1.82812 3.14159" />
+      <geometry>
+        <cylinder radius="0.015" length="0.196469" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_14">
+      <origin xyz="0 0 0.87" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_15">
+      <origin xyz="-0.44 0 0.84" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.1" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_16">
+      <origin xyz="0.08 0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_17">
+      <origin xyz="0.08 -0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_18">
+      <origin xyz="-0.38 0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_19">
+      <origin xyz="-0.38 -0.018 0.29" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_20">
+      <origin xyz="-0.71 0.01 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.055" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_21">
+      <origin xyz="-0.71 -0.01 0.34" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.055" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_22__hull_001">
+      <origin xyz="0 0 0.92" rpy="-0.08 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/1dfa43b3c4b96ac2de59724d__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_23__hull_001">
+      <origin xyz="-0.44 0 0.89" rpy="-0.06 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/1dfa43b3c4b96ac2de59724d__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_24__hull_001">
+      <origin xyz="-0.28 0 0.73" rpy="0 0 0.08" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/846f823c2af3b28dfe8bf978__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_24__hull_002">
+      <origin xyz="-0.28 0 0.73" rpy="0 0 0.08" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/846f823c2af3b28dfe8bf978__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_24__hull_003">
+      <origin xyz="-0.28 0 0.73" rpy="0 0 0.08" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/846f823c2af3b28dfe8bf978__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="main_frame__visual_24__hull_004">
+      <origin xyz="-0.28 0 0.73" rpy="0 0 0.08" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/846f823c2af3b28dfe8bf978__hull_004.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="front_fork">
+    <inertial>
+      <origin xyz="0.14 0 -0.24" rpy="0 0 0" />
+      <mass value="3.4" />
+      <inertia ixx="0.179633" ixy="0" ixz="0" iyy="0.22236" iyz="0" izz="0.0572333" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.0056921 0 0.0170763" rpy="0 -0.321751 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.032" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.065 0 0.115" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/captain_bar.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.059 0 0.097" rpy="0 0.737049 3.14159" />
+      <geometry>
+        <cylinder radius="0.012" length="0.175568" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.118 0 0.162" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.044 0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/fork_spine.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.185 0 -0.285" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.052 0.03" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.239 0.0225 -0.409" rpy="0 2.76037 -0.24036" />
+      <geometry>
+        <cylinder radius="0.012" length="0.282264" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.239 -0.0225 -0.409" rpy="0 2.76037 0.24036" />
+      <geometry>
+        <cylinder radius="0.012" length="0.282264" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.245 0 -0.405" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.078" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.29 0.01 -0.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.052" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.29 -0.01 -0.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.052" />
+      </geometry>
+    </visual>
+    <collision name="front_fork__visual_1">
+      <origin xyz="-0.0056921 0 0.0170763" rpy="0 -0.321751 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.032" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_2__hull_001">
+      <origin xyz="-0.065 0 0.115" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c82bd144a9c60c7333bf8d9f__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_2__hull_002">
+      <origin xyz="-0.065 0 0.115" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c82bd144a9c60c7333bf8d9f__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_2__hull_003">
+      <origin xyz="-0.065 0 0.115" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c82bd144a9c60c7333bf8d9f__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_2__hull_004">
+      <origin xyz="-0.065 0 0.115" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c82bd144a9c60c7333bf8d9f__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_3">
+      <origin xyz="-0.059 0 0.097" rpy="0 0.737049 3.14159" />
+      <geometry>
+        <cylinder radius="0.012" length="0.175568" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_4">
+      <origin xyz="-0.118 0 0.162" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.044 0.028" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_5__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/28f3ad3d3fdf72dccba2e0ec__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_6">
+      <origin xyz="0.185 0 -0.285" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.052 0.03" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_7">
+      <origin xyz="0.239 0.0225 -0.409" rpy="0 2.76037 -0.24036" />
+      <geometry>
+        <cylinder radius="0.012" length="0.282264" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_8">
+      <origin xyz="0.239 -0.0225 -0.409" rpy="0 2.76037 0.24036" />
+      <geometry>
+        <cylinder radius="0.012" length="0.282264" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_9">
+      <origin xyz="0.245 0 -0.405" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.078" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_10">
+      <origin xyz="0.29 0.01 -0.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.052" />
+      </geometry>
+    </collision>
+    <collision name="front_fork__visual_11">
+      <origin xyz="0.29 -0.01 -0.54" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.008 0.052" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="front_wheel">
+    <inertial>
+      <mass value="2.1" />
+      <inertia ixx="0.084175" ixy="0" ixz="0" iyy="0.166635" iyz="0" izz="0.084175" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/front_wheel.glb" />
+      </geometry>
+    </visual>
+    <collision name="front_wheel__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="front_wheel__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_016.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="rear_wheel">
+    <inertial>
+      <origin xyz="0 -0.01 0" rpy="0 0 0" />
+      <mass value="2.5" />
+      <inertia ixx="0.100875" ixy="0" ixz="0" iyy="0.198375" iyz="0" izz="0.100875" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/rear_wheel.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.045 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.006" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.051 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.005" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.057 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.005" />
+      </geometry>
+    </visual>
+    <collision name="rear_wheel__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65a0bc6e5aa24fb1275c9e03__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_2">
+      <origin xyz="0 -0.045 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.006" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_3">
+      <origin xyz="0 -0.051 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.005" />
+      </geometry>
+    </collision>
+    <collision name="rear_wheel__visual_4">
+      <origin xyz="0 -0.057 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.005" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="captain_crankset">
+    <inertial>
+      <mass value="1.7" />
+      <inertia ixx="0.0125233" ixy="0" ixz="0" iyy="0.0273133" iyz="0" izz="0.0261233" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.086" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.08 0.06 0" rpy="0 1.5708 0.302885" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.08 -0.06 0" rpy="0 1.5708 -2.83871" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.043 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.098" length="0.004" />
+      </geometry>
+    </visual>
+    <collision name="captain_crankset__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.086" />
+      </geometry>
+    </collision>
+    <collision name="captain_crankset__visual_2">
+      <origin xyz="0 0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="captain_crankset__visual_3">
+      <origin xyz="0 -0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="captain_crankset__visual_4">
+      <origin xyz="0.08 0.06 0" rpy="0 1.5708 0.302885" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </collision>
+    <collision name="captain_crankset__visual_5">
+      <origin xyz="-0.08 -0.06 0" rpy="0 1.5708 -2.83871" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </collision>
+    <collision name="captain_crankset__visual_6">
+      <origin xyz="0 0.043 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.098" length="0.004" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="stoker_crankset">
+    <inertial>
+      <mass value="1.9" />
+      <inertia ixx="0.0167833" ixy="0" ixz="0" iyy="0.0305267" iyz="0" izz="0.0319833" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.086" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.08 0.06 0" rpy="0 1.5708 0.302885" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.08 -0.06 0" rpy="0 1.5708 -2.83871" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.043 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.098" length="0.004" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.043 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.108" length="0.004" />
+      </geometry>
+    </visual>
+    <collision name="stoker_crankset__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.086" />
+      </geometry>
+    </collision>
+    <collision name="stoker_crankset__visual_2">
+      <origin xyz="0 0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="stoker_crankset__visual_3">
+      <origin xyz="0 -0.03 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="stoker_crankset__visual_4">
+      <origin xyz="0.08 0.06 0" rpy="0 1.5708 0.302885" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </collision>
+    <collision name="stoker_crankset__visual_5">
+      <origin xyz="-0.08 -0.06 0" rpy="0 1.5708 -2.83871" />
+      <geometry>
+        <cylinder radius="0.01" length="0.167631" />
+      </geometry>
+    </collision>
+    <collision name="stoker_crankset__visual_6">
+      <origin xyz="0 0.043 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.098" length="0.004" />
+      </geometry>
+    </collision>
+    <collision name="stoker_crankset__visual_7">
+      <origin xyz="0 -0.043 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.108" length="0.004" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="captain_left_pedal">
+    <inertial>
+      <origin xyz="0.02 0.05 0" rpy="0 0 0" />
+      <mass value="0.28" />
+      <inertia ixx="0.000135333" ixy="0" ixz="0" iyy="0.000303333" iyz="0" izz="0.000396667" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.015 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.022 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </visual>
+    <collision name="captain_left_pedal__visual_1">
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </collision>
+    <collision name="captain_left_pedal__visual_2">
+      <origin xyz="0.015 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </collision>
+    <collision name="captain_left_pedal__visual_3">
+      <origin xyz="-0.022 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="captain_right_pedal">
+    <inertial>
+      <origin xyz="0.02 -0.05 0" rpy="0 0 0" />
+      <mass value="0.28" />
+      <inertia ixx="0.000135333" ixy="0" ixz="0" iyy="0.000303333" iyz="0" izz="0.000396667" />
+    </inertial>
+    <visual>
+      <origin xyz="0 -0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.015 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.022 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </visual>
+    <collision name="captain_right_pedal__visual_1">
+      <origin xyz="0 -0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </collision>
+    <collision name="captain_right_pedal__visual_2">
+      <origin xyz="0.015 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </collision>
+    <collision name="captain_right_pedal__visual_3">
+      <origin xyz="-0.022 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="stoker_left_pedal">
+    <inertial>
+      <origin xyz="0.02 0.05 0" rpy="0 0 0" />
+      <mass value="0.28" />
+      <inertia ixx="0.000135333" ixy="0" ixz="0" iyy="0.000303333" iyz="0" izz="0.000396667" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.015 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.022 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </visual>
+    <collision name="stoker_left_pedal__visual_1">
+      <origin xyz="0 0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </collision>
+    <collision name="stoker_left_pedal__visual_2">
+      <origin xyz="0.015 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </collision>
+    <collision name="stoker_left_pedal__visual_3">
+      <origin xyz="-0.022 0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="stoker_right_pedal">
+    <inertial>
+      <origin xyz="0.02 -0.05 0" rpy="0 0 0" />
+      <mass value="0.28" />
+      <inertia ixx="0.000135333" ixy="0" ixz="0" iyy="0.000303333" iyz="0" izz="0.000396667" />
+    </inertial>
+    <visual>
+      <origin xyz="0 -0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.015 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.022 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </visual>
+    <collision name="stoker_right_pedal__visual_1">
+      <origin xyz="0 -0.02 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.04" />
+      </geometry>
+    </collision>
+    <collision name="stoker_right_pedal__visual_2">
+      <origin xyz="0.015 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.095 0.034 0.014" />
+      </geometry>
+    </collision>
+    <collision name="stoker_right_pedal__visual_3">
+      <origin xyz="-0.022 -0.044 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.01 0.026" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="steer_headset" type="revolute">
+    <origin xyz="0.59 0 0.88" rpy="0 0 0" />
+    <parent link="main_frame" />
+    <child link="front_fork" />
+    <axis xyz="-0.316228 0 0.948683" />
+    <limit effort="20" velocity="2.5" lower="-0.65" upper="0.65" />
+  </joint>
+  <joint name="front_wheel_spin" type="continuous">
+    <origin xyz="0.29 0 -0.54" rpy="0 0 0" />
+    <parent link="front_fork" />
+    <child link="front_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="18" velocity="18" />
+  </joint>
+  <joint name="rear_wheel_spin" type="continuous">
+    <origin xyz="-0.71 0 0.34" rpy="0 0 0" />
+    <parent link="main_frame" />
+    <child link="rear_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="18" velocity="18" />
+  </joint>
+  <joint name="captain_crank_spin" type="continuous">
+    <origin xyz="0.08 0 0.29" rpy="0 0 0" />
+    <parent link="main_frame" />
+    <child link="captain_crankset" />
+    <axis xyz="0 1 0" />
+    <limit effort="25" velocity="14" />
+  </joint>
+  <joint name="stoker_crank_spin" type="continuous">
+    <origin xyz="-0.38 0 0.29" rpy="0 0 0" />
+    <parent link="main_frame" />
+    <child link="stoker_crankset" />
+    <axis xyz="0 1 0" />
+    <limit effort="25" velocity="14" />
+  </joint>
+  <joint name="captain_left_pedal_spin" type="continuous">
+    <origin xyz="0.16 0.085 0" rpy="0 0 0" />
+    <parent link="captain_crankset" />
+    <child link="captain_left_pedal" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="20" />
+  </joint>
+  <joint name="captain_right_pedal_spin" type="continuous">
+    <origin xyz="-0.16 -0.085 0" rpy="0 0 0" />
+    <parent link="captain_crankset" />
+    <child link="captain_right_pedal" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="20" />
+  </joint>
+  <joint name="stoker_left_pedal_spin" type="continuous">
+    <origin xyz="0.16 0.085 0" rpy="0 0 0" />
+    <parent link="stoker_crankset" />
+    <child link="stoker_left_pedal" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="20" />
+  </joint>
+  <joint name="stoker_right_pedal_spin" type="continuous">
+    <origin xyz="-0.16 -0.085 0" rpy="0 0 0" />
+    <parent link="stoker_crankset" />
+    <child link="stoker_right_pedal" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="20" />
+  </joint>
+</robot>

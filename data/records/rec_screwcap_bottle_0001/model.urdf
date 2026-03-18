@@ -1,0 +1,672 @@
+<robot name="screw_cap_bottle">
+  <link name="bottle">
+    <inertial>
+      <origin xyz="0 0 0.111" rpy="0 0 0" />
+      <mass value="0.07" />
+      <inertia ixx="0.00031017" ixy="0" ixz="0" iyy="0.00031017" iyz="0" izz="4.536e-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0335" length="0.01" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.035" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.05" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.074" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0305" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.118" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.035" length="0.06" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.156" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0335" length="0.016" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.171" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.1835" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.011" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.1915" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.005" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.203" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0145" length="0.018" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.216" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.008" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.221" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.061" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.069" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.077" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.085" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.091" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0358" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.145" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0358" length="0.002" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.118" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0358" length="0.068" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.1985" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0164" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.2125" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.0025" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/bottle_neck_thread.glb" />
+      </geometry>
+    </visual>
+    <collision name="bottle__visual_1">
+      <origin xyz="0 0 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0335" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_2">
+      <origin xyz="0 0 0.035" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.05" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_3">
+      <origin xyz="0 0 0.074" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0305" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_4">
+      <origin xyz="0 0 0.118" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.035" length="0.06" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_5">
+      <origin xyz="0 0 0.156" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0335" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_6">
+      <origin xyz="0 0 0.171" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.028" length="0.014" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_7">
+      <origin xyz="0 0 0.1835" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.011" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_8">
+      <origin xyz="0 0 0.1915" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.005" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_9">
+      <origin xyz="0 0 0.203" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0145" length="0.018" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_10">
+      <origin xyz="0 0 0.216" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.008" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_11">
+      <origin xyz="0 0 0.221" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_12">
+      <origin xyz="0 0 0.061" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_13">
+      <origin xyz="0 0 0.069" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_14">
+      <origin xyz="0 0 0.077" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_15">
+      <origin xyz="0 0 0.085" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0317" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_16">
+      <origin xyz="0 0 0.091" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0358" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_17">
+      <origin xyz="0 0 0.145" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0358" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_18">
+      <origin xyz="0 0 0.118" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0358" length="0.068" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_19">
+      <origin xyz="0 0 0.1985" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0164" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_20">
+      <origin xyz="0 0 0.2125" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.0025" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="bottle__visual_21__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/d9964356df52455b05481f63__hull_016.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="cap">
+    <inertial>
+      <origin xyz="0 0 0.013" rpy="0 0 0" />
+      <mass value="0.01" />
+      <inertia ixx="1.56333e-06" ixy="0" ixz="0" iyy="1.56333e-06" iyz="0" izz="2e-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.01625" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0195" length="0.0195" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.0035" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0188" length="0.007" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.0245" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0176" length="0.003" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0187 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0180628 0.00483992 0.015" rpy="0 0 0.261799" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0161947 0.00935 0.015" rpy="0 0 0.523599" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0132229 0.0132229 0.015" rpy="0 0 0.785398" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.00935 0.0161947 0.015" rpy="0 0 1.0472" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.00483992 0.0180628 0.015" rpy="0 0 1.309" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="1.14504e-18 0.0187 0.015" rpy="0 0 1.5708" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.00483992 0.0180628 0.015" rpy="0 0 1.8326" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.00935 0.0161947 0.015" rpy="0 0 2.0944" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0132229 0.0132229 0.015" rpy="0 0 2.35619" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0161947 0.00935 0.015" rpy="0 0 2.61799" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0180628 0.00483992 0.015" rpy="0 0 2.87979" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0187 2.29009e-18 0.015" rpy="0 0 3.14159" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0180628 -0.00483992 0.015" rpy="0 0 3.40339" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0161947 -0.00935 0.015" rpy="0 0 3.66519" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.0132229 -0.0132229 0.015" rpy="0 0 3.92699" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.00935 -0.0161947 0.015" rpy="0 0 4.18879" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.00483992 -0.0180628 0.015" rpy="0 0 4.45059" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-3.43513e-18 -0.0187 0.015" rpy="0 0 4.71239" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.00483992 -0.0180628 0.015" rpy="0 0 4.97419" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.00935 -0.0161947 0.015" rpy="0 0 5.23599" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0132229 -0.0132229 0.015" rpy="0 0 5.49779" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0161947 -0.00935 0.015" rpy="0 0 5.75959" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.0180628 -0.00483992 0.015" rpy="0 0 6.02139" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </visual>
+    <collision name="cap__visual_1">
+      <origin xyz="0 0 0.01625" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0195" length="0.0195" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_2">
+      <origin xyz="0 0 0.0035" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0188" length="0.007" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_3">
+      <origin xyz="0 0 0.0245" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0176" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_4">
+      <origin xyz="0.0187 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_5">
+      <origin xyz="0.0180628 0.00483992 0.015" rpy="0 0 0.261799" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_6">
+      <origin xyz="0.0161947 0.00935 0.015" rpy="0 0 0.523599" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_7">
+      <origin xyz="0.0132229 0.0132229 0.015" rpy="0 0 0.785398" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_8">
+      <origin xyz="0.00935 0.0161947 0.015" rpy="0 0 1.0472" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_9">
+      <origin xyz="0.00483992 0.0180628 0.015" rpy="0 0 1.309" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_10">
+      <origin xyz="1.14504e-18 0.0187 0.015" rpy="0 0 1.5708" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_11">
+      <origin xyz="-0.00483992 0.0180628 0.015" rpy="0 0 1.8326" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_12">
+      <origin xyz="-0.00935 0.0161947 0.015" rpy="0 0 2.0944" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_13">
+      <origin xyz="-0.0132229 0.0132229 0.015" rpy="0 0 2.35619" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_14">
+      <origin xyz="-0.0161947 0.00935 0.015" rpy="0 0 2.61799" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_15">
+      <origin xyz="-0.0180628 0.00483992 0.015" rpy="0 0 2.87979" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_16">
+      <origin xyz="-0.0187 2.29009e-18 0.015" rpy="0 0 3.14159" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_17">
+      <origin xyz="-0.0180628 -0.00483992 0.015" rpy="0 0 3.40339" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_18">
+      <origin xyz="-0.0161947 -0.00935 0.015" rpy="0 0 3.66519" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_19">
+      <origin xyz="-0.0132229 -0.0132229 0.015" rpy="0 0 3.92699" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_20">
+      <origin xyz="-0.00935 -0.0161947 0.015" rpy="0 0 4.18879" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_21">
+      <origin xyz="-0.00483992 -0.0180628 0.015" rpy="0 0 4.45059" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_22">
+      <origin xyz="-3.43513e-18 -0.0187 0.015" rpy="0 0 4.71239" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_23">
+      <origin xyz="0.00483992 -0.0180628 0.015" rpy="0 0 4.97419" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_24">
+      <origin xyz="0.00935 -0.0161947 0.015" rpy="0 0 5.23599" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_25">
+      <origin xyz="0.0132229 -0.0132229 0.015" rpy="0 0 5.49779" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_26">
+      <origin xyz="0.0161947 -0.00935 0.015" rpy="0 0 5.75959" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+    <collision name="cap__visual_27">
+      <origin xyz="0.0180628 -0.00483992 0.015" rpy="0 0 6.02139" />
+      <geometry>
+        <box size="0.0018 0.0036 0.014" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="cap_thread" type="revolute">
+    <origin xyz="0 0 0.196" rpy="0 0 0" />
+    <parent link="bottle" />
+    <child link="cap" />
+    <axis xyz="0 0 1" />
+    <limit effort="1" velocity="10" lower="0" upper="9.42478" />
+  </joint>
+</robot>

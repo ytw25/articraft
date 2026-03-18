@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_branching_tree_with_two_independent_rotary_branches_0002",
+  "created_at": "2026-03-12T18:18:41Z",
+  "updated_at": "2026-03-12T18:18:41Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "branching_tree_with_two_independent_rotary_branches",
+  "source": {
+    "run_id": "run_import_branching_tree_with_two_independent_rotary_branches_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A Y-shaped mechanical tree with two independent rotary branches, straight structural members, and simple joint hubs.",
+    "prompt_preview": "A Y-shaped mechanical tree with two independent rotary branches, straight structural members, and simple joint hubs."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "188ecded331f7117b78ad8ace0fb3f49124da120a286b923050ad0bed974ff9d",
+    "model_py_sha256": "ca4e0962e279c41ec5269b9478b356919d839c9e374097a5a9dc4e267366d684",
+    "model_urdf_sha256": "23f55c56fbc6380065425ef54c80da51f1c73a84bf1e538594f921e6bc64e8f0"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

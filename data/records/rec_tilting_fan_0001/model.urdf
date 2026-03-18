@@ -1,0 +1,679 @@
+<robot name="tilting_household_fan">
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.0155" rpy="0 0 0" />
+      <mass value="2.8" />
+      <inertia ixx="0.022403" ixy="0" ixz="0" iyy="0.022403" iyz="0" izz="0.0443576" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tilting_fan_base_shell.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.002" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.144" length="0.004" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.045" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.141" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.22" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.206" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.05 0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.09 0 0.288" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.05 0.185" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.09 0 0.288" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.05 0.185" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.37" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.19" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.045 0.036" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.075 0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.02 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.003 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.014 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.031 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.048 0.045 0.047" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.01" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.053 0.046 0.044" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.01 0.004" />
+      </geometry>
+    </visual>
+    <collision name="base__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c1f6e6c1ff8d974750303d91__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_2">
+      <origin xyz="0 0 0.002" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.144" length="0.004" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_3">
+      <origin xyz="0 0 0.045" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.029" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_4">
+      <origin xyz="0 0 0.141" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.22" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_5">
+      <origin xyz="0 0 0.206" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.05 0.022" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_6">
+      <origin xyz="-0.09 0 0.288" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.05 0.185" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_7">
+      <origin xyz="0.09 0 0.288" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.05 0.185" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_8">
+      <origin xyz="0 0 0.37" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.19" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_9">
+      <origin xyz="0 0.045 0.036" rpy="0 0 0" />
+      <geometry>
+        <box size="0.12 0.075 0.012" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_10">
+      <origin xyz="-0.02 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_11">
+      <origin xyz="-0.003 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_12">
+      <origin xyz="0.014 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_13">
+      <origin xyz="0.031 0.052 0.0455" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.016 0.007" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_14">
+      <origin xyz="-0.048 0.045 0.047" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.014" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="base__visual_15">
+      <origin xyz="0.053 0.046 0.044" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.01 0.004" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="head">
+    <inertial>
+      <origin xyz="0 0.07 0" rpy="1.5708 0 0" />
+      <mass value="1.15" />
+      <inertia ixx="0.00658375" ixy="0" ixz="0" iyy="0.00658375" iyz="0" izz="0.0069575" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/tilting_fan_motor_housing.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.032 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.104" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.02 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.024" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.084 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.046" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.101 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.048" length="0.008" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.007" length="0.18" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.097 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.108 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.008" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.097 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.014" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.108 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.008" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.02 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.022" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.02 0.047" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.012" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/tilting_fan_rear_grille.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/tilting_fan_front_grille.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.145 0.129 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.10253 0.129 0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="8.87869e-18 0.129 0.145" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.10253 0.129 0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.145 0.129 1.77574e-17" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-0.10253 0.129 -0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="-2.66361e-17 0.129 -0.145" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.10253 0.129 -0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.161 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.006" />
+      </geometry>
+    </visual>
+    <collision name="head__visual_1__hull_001">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/8640eee5663a3c94e13d5dab__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_2">
+      <origin xyz="0 0.032 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.104" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_3">
+      <origin xyz="0 -0.02 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.024" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_4">
+      <origin xyz="0 0.084 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.046" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_5">
+      <origin xyz="0 0.101 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.048" length="0.008" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_6">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.007" length="0.18" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_7">
+      <origin xyz="-0.097 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.014" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_8">
+      <origin xyz="-0.108 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.008" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_9">
+      <origin xyz="0.097 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.014" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_10">
+      <origin xyz="0.108 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.008" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_11">
+      <origin xyz="0 -0.02 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_12">
+      <origin xyz="0 -0.02 0.047" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_001">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_002">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_003">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_004">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_005">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_006">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_007">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_008">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_009">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_010">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_011">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_011.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_012">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_012.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_013">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_013.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_014">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_014.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_015">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_015.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_13__hull_016">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/c52aff79dcd44c2ab12d9625__hull_016.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_14__hull_001">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/dd2dce15855d494516e16701__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_14__hull_002">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/dd2dce15855d494516e16701__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_14__hull_003">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/dd2dce15855d494516e16701__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_14__hull_004">
+      <origin xyz="0 0.07 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/dd2dce15855d494516e16701__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_15">
+      <origin xyz="0.145 0.129 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_16">
+      <origin xyz="0.10253 0.129 0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_17">
+      <origin xyz="8.87869e-18 0.129 0.145" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_18">
+      <origin xyz="-0.10253 0.129 0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_19">
+      <origin xyz="-0.145 0.129 1.77574e-17" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_20">
+      <origin xyz="-0.10253 0.129 -0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_21">
+      <origin xyz="-2.66361e-17 0.129 -0.145" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_22">
+      <origin xyz="0.10253 0.129 -0.10253" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.058" />
+      </geometry>
+    </collision>
+    <collision name="head__visual_23">
+      <origin xyz="0 0.161 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="rotor">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="0.24" />
+      <inertia ixx="0.00074168" ixy="0" ixz="0" iyy="0.00074168" iyz="0" izz="0.001452" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.028" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 -0.012 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.02" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tilting_fan_blade.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 2.0944 0" />
+      <geometry>
+        <mesh filename="meshes/tilting_fan_blade.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 4.18879 0" />
+      <geometry>
+        <mesh filename="meshes/tilting_fan_blade.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/tilting_fan_spinner.glb" />
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0 0.034 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.009" />
+      </geometry>
+    </visual>
+    <collision name="rotor__visual_1">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_2">
+      <origin xyz="0 -0.012 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.02" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_3__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ece0fd9b1dafac276ad1c4f__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_4__hull_001">
+      <origin xyz="0 0 0" rpy="0 2.0944 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ece0fd9b1dafac276ad1c4f__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_5__hull_001">
+      <origin xyz="0 0 0" rpy="0 4.18879 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ece0fd9b1dafac276ad1c4f__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_6__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/187d634520d765ec7097fb9b__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="rotor__visual_7">
+      <origin xyz="0 0.034 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.009" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="head_tilt" type="revolute">
+    <origin xyz="0 0 0.37" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="head" />
+    <axis xyz="1 0 0" />
+    <limit effort="8" velocity="2.5" lower="-0.45" upper="0.6" />
+  </joint>
+  <joint name="fan_spin" type="continuous">
+    <origin xyz="0 0.095 0" rpy="0 0 0" />
+    <parent link="head" />
+    <child link="rotor" />
+    <axis xyz="0 1 0" />
+    <limit effort="3" velocity="18" />
+  </joint>
+</robot>

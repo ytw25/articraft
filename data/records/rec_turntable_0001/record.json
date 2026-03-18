@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_turntable_0001",
+  "created_at": "2026-03-16T13:20:45Z",
+  "updated_at": "2026-03-16T13:20:45Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "turntable",
+  "source": {
+    "run_id": "run_import_turntable_20260316-131259-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed turntable with a low rectangular plinth, a circular platter, a pivoted tonearm, a compact c",
+    "prompt_preview": "A realistic, highly detailed turntable with a low rectangular plinth, a circular platter, a pivoted tonearm, a compact cartridge head, and convincing hi-fi e..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "4f3eb70b80810dfc4ff07f377bcde19a04b71574ab4ef6e09979bc6fd01c2933",
+    "model_py_sha256": "7a21d1049f99189f179b802384c63c17c9c7b57d90ca12b867d907ff89b7b18a",
+    "model_urdf_sha256": "6232141d9797540db4132e7eace0a32710326655c97925b62c4f162fd9934def"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

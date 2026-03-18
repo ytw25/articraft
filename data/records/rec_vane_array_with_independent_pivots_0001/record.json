@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_vane_array_with_independent_pivots_0001",
+  "created_at": "2026-03-12T18:36:05Z",
+  "updated_at": "2026-03-12T18:36:05Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "vane_array_with_independent_pivots",
+  "source": {
+    "run_id": "run_import_vane_array_with_independent_pivots_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "An adjustable louver-style mechanism composed of independent pivoting vanes, modeled with parallel shafts and neat mecha",
+    "prompt_preview": "An adjustable louver-style mechanism composed of independent pivoting vanes, modeled with parallel shafts and neat mechanical spacing."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "629d27ee450d3376f470cfed0445f3486b9ef93b1ba73539adb81282c8c925c0",
+    "model_py_sha256": "c1313b9b07e5c3471a19a81be90fa2fd2ccdddcaa88d1502c1497f95583405db",
+    "model_urdf_sha256": "5a8b373d285aa8d2db10eaf16db7d964c2d9152fa0a7100ca06bc3ad9a92f3fe"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

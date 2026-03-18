@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_offsetaxis_rotary_stack_0002",
+  "created_at": "2026-03-12T18:39:12Z",
+  "updated_at": "2026-03-12T18:39:12Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "offsetaxis_rotary_stack",
+  "source": {
+    "run_id": "run_import_offsetaxis_rotary_stack_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "An offset-axis rotary stack with serial revolute modules whose axes are parallel but laterally displaced, using brackete",
+    "prompt_preview": "An offset-axis rotary stack with serial revolute modules whose axes are parallel but laterally displaced, using bracketed spacers and rigid side plates."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "4f3ebb657eb3944ea9e4b1647f57e7ee89a521f0319a30a7611c7491f4ec605d",
+    "model_py_sha256": "a3ebf861e1f00057382429a2fb2b7f64e48a6650216389ba0932c874a1c92e98",
+    "model_urdf_sha256": "d5c10da595d3aa1d89daf0693db2f96ffe3c89a9bc32940806b0278a7d4b0216"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

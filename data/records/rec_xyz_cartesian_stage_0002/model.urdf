@@ -1,0 +1,378 @@
+<robot name="xyz_cartesian_stage">
+  <material name="anodized_black">
+    <color rgba="0.16 0.17 0.2 1" />
+    </material>
+  <material name="machined_aluminum">
+    <color rgba="0.72 0.74 0.77 1" />
+    </material>
+  <material name="rail_steel">
+    <color rgba="0.56 0.58 0.62 1" />
+    </material>
+  <material name="plate_blue">
+    <color rgba="0.22 0.35 0.66 1" />
+    </material>
+  <material name="dark_trim">
+    <color rgba="0.1 0.11 0.13 1" />
+    </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.022" rpy="0 0 0" />
+      <mass value="6.5" />
+      <inertia ixx="0.0349028" ixy="0" ixz="0" iyy="0.0712487" iyz="0" izz="0.104054" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.36 0.25 0.03" />
+        </geometry>
+      <material name="anodized_black" />
+      </visual>
+    <visual>
+      <origin xyz="0 -0.092 0.005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.028 0.01" />
+        </geometry>
+      <material name="dark_trim" />
+      </visual>
+    <visual>
+      <origin xyz="0 0.092 0.005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.028 0.01" />
+        </geometry>
+      <material name="dark_trim" />
+      </visual>
+    <visual>
+      <origin xyz="0 -0.078 0.037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.024 0.014" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 0.078 0.037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.024 0.014" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <visual>
+      <origin xyz="-0.145 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.16 0.022" />
+        </geometry>
+      <material name="dark_trim" />
+      </visual>
+    <collision name="base__visual_1">
+      <origin xyz="0 0 0.015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.36 0.25 0.03" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_2">
+      <origin xyz="0 -0.092 0.005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.028 0.01" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_3">
+      <origin xyz="0 0.092 0.005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.028 0.01" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_4">
+      <origin xyz="0 -0.078 0.037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.024 0.014" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_5">
+      <origin xyz="0 0.078 0.037" rpy="0 0 0" />
+      <geometry>
+        <box size="0.28 0.024 0.014" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_6">
+      <origin xyz="-0.145 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.16 0.022" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="x_gantry">
+    <inertial>
+      <origin xyz="0 0 0.033" rpy="0 0 0" />
+      <mass value="2.8" />
+      <inertia ixx="0.00996427" ixy="0" ixz="0" iyy="0.00905427" iyz="0" izz="0.0177567" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.19 0.2 0.028" />
+        </geometry>
+      <material name="machined_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.041" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.19 0.012" />
+        </geometry>
+      <material name="anodized_black" />
+      </visual>
+    <visual>
+      <origin xyz="-0.032 0 0.053" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.18 0.012" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.032 0 0.053" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.18 0.012" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 -0.085 0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.145 0.02 0.01" />
+        </geometry>
+      <material name="dark_trim" />
+      </visual>
+    <visual>
+      <origin xyz="0 0.085 0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.145 0.02 0.01" />
+        </geometry>
+      <material name="dark_trim" />
+      </visual>
+    <collision name="x_gantry__visual_1">
+      <origin xyz="0 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.19 0.2 0.028" />
+        </geometry>
+      </collision>
+    <collision name="x_gantry__visual_2">
+      <origin xyz="0 0 0.041" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.19 0.012" />
+        </geometry>
+      </collision>
+    <collision name="x_gantry__visual_3">
+      <origin xyz="-0.032 0 0.053" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.18 0.012" />
+        </geometry>
+      </collision>
+    <collision name="x_gantry__visual_4">
+      <origin xyz="0.032 0 0.053" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.18 0.012" />
+        </geometry>
+      </collision>
+    <collision name="x_gantry__visual_5">
+      <origin xyz="0 -0.085 0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.145 0.02 0.01" />
+        </geometry>
+      </collision>
+    <collision name="x_gantry__visual_6">
+      <origin xyz="0 0.085 0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.145 0.02 0.01" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="y_saddle">
+    <inertial>
+      <origin xyz="0.006 0 0.098" rpy="0 0 0" />
+      <mass value="1.9" />
+      <inertia ixx="0.0088692" ixy="0" ixz="0" iyy="0.00879383" iyz="0" izz="0.00448463" />
+      </inertial>
+    <visual>
+      <origin xyz="-0.016 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.12 0.024" />
+        </geometry>
+      <material name="machined_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="-0.012 0 0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.094 0.1 0.016" />
+        </geometry>
+      <material name="anodized_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.021 -0.033 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.024 0.18" />
+        </geometry>
+      <material name="machined_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.021 0.033 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.024 0.18" />
+        </geometry>
+      <material name="machined_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.035 0 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.084 0.15" />
+        </geometry>
+      <material name="anodized_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.021 0 0.202" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.09 0.016" />
+        </geometry>
+      <material name="anodized_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.038 -0.033 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.024 0.15" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0.038 0.033 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.024 0.15" />
+        </geometry>
+      <material name="rail_steel" />
+      </visual>
+    <collision name="y_saddle__visual_1">
+      <origin xyz="-0.016 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <box size="0.112 0.12 0.024" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_2">
+      <origin xyz="-0.012 0 0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.094 0.1 0.016" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_3">
+      <origin xyz="0.021 -0.033 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.024 0.18" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_4">
+      <origin xyz="0.021 0.033 0.12" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.024 0.18" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_5">
+      <origin xyz="0.035 0 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.084 0.15" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_6">
+      <origin xyz="0.021 0 0.202" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.09 0.016" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_7">
+      <origin xyz="0.038 -0.033 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.024 0.15" />
+        </geometry>
+      </collision>
+    <collision name="y_saddle__visual_8">
+      <origin xyz="0.038 0.033 0.105" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.024 0.15" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="z_carriage">
+    <inertial>
+      <origin xyz="0.048 0 -0.016" rpy="0 0 0" />
+      <mass value="0.9" />
+      <inertia ixx="0.00159097" ixy="0" ixz="0" iyy="0.00174217" iyz="0" izz="0.0010638" />
+      </inertial>
+    <visual>
+      <origin xyz="0.019 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.076 0.09" />
+        </geometry>
+      <material name="machined_aluminum" />
+      </visual>
+    <visual>
+      <origin xyz="0.053 0 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.05 0.014" />
+        </geometry>
+      <material name="anodized_black" />
+      </visual>
+    <visual>
+      <origin xyz="0.075 0 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.078 0.078" />
+        </geometry>
+      <material name="plate_blue" />
+      </visual>
+    <visual>
+      <origin xyz="0.085 0 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.024" />
+        </geometry>
+      <material name="dark_trim" />
+      </visual>
+    <collision name="z_carriage__visual_1">
+      <origin xyz="0.019 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.076 0.09" />
+        </geometry>
+      </collision>
+    <collision name="z_carriage__visual_2">
+      <origin xyz="0.053 0 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.05 0.014" />
+        </geometry>
+      </collision>
+    <collision name="z_carriage__visual_3">
+      <origin xyz="0.075 0 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.078 0.078" />
+        </geometry>
+      </collision>
+    <collision name="z_carriage__visual_4">
+      <origin xyz="0.085 0 -0.038" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.024 0.024" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="base_to_x" type="prismatic">
+    <origin xyz="0 0 0.037" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="x_gantry" />
+    <axis xyz="1 0 0" />
+    <limit effort="120" velocity="0.25" lower="-0.075" upper="0.075" />
+    </joint>
+  <joint name="x_to_y" type="prismatic">
+    <origin xyz="0 0 0.053" rpy="0 0 0" />
+    <parent link="x_gantry" />
+    <child link="y_saddle" />
+    <axis xyz="0 1 0" />
+    <limit effort="90" velocity="0.2" lower="-0.04" upper="0.04" />
+    </joint>
+  <joint name="y_to_z" type="prismatic">
+    <origin xyz="0.038 0 0.1" rpy="0 0 0" />
+    <parent link="y_saddle" />
+    <child link="z_carriage" />
+    <axis xyz="0 0 1" />
+    <limit effort="70" velocity="0.18" lower="-0.045" upper="0.045" />
+    </joint>
+  </robot>

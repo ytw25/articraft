@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_lounge_chair_with_independent_backrest_and_footrest_0001",
+  "created_at": "2026-03-16T01:23:07Z",
+  "updated_at": "2026-03-16T01:23:07Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "lounge_chair_with_independent_backrest_and_footrest",
+  "source": {
+    "run_id": "run_import_lounge_chair_with_independent_backrest_and_footrest_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed lounge chair with a substantial seat, independently adjustable backrest, separate footrest,",
+    "prompt_preview": "A realistic, highly detailed lounge chair with a substantial seat, independently adjustable backrest, separate footrest, and a refined upholstered furniture..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "401df83dda11574ff03885328a0011edf4c32826fdc929dd01eee67fb17b7f97",
+    "model_py_sha256": "81ade4800826f405a4f81c22c118779ac53bd346a525f119f9daaa65e84a932b",
+    "model_urdf_sha256": "a51ef3910df8f51b18267ccc2144fc98d9d1dd84c807c1421fe55023050b3930"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

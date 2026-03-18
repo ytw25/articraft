@@ -1,0 +1,469 @@
+<robot name="retractable_utility_knife">
+  <material name="body_yellow">
+    <color rgba="0.9 0.75 0.16 1" />
+    </material>
+  <material name="grip_black">
+    <color rgba="0.09 0.09 0.1 1" />
+    </material>
+  <material name="slider_black">
+    <color rgba="0.14 0.15 0.16 1" />
+    </material>
+  <material name="steel">
+    <color rgba="0.69 0.71 0.74 1" />
+    </material>
+  <material name="dark_steel">
+    <color rgba="0.44 0.47 0.51 1" />
+    </material>
+  <material name="blade_steel">
+    <color rgba="0.84 0.86 0.88 1" />
+    </material>
+  <link name="handle">
+    <inertial>
+      <mass value="0.24" />
+      <inertia ixx="4.24e-05" ixy="0" ixz="0" iyy="0.0006052" iyz="0" izz="0.00062056" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/utility_knife_handle_shell.obj" />
+        </geometry>
+      <material name="body_yellow">
+        <color rgba="0.9 0.75 0.16 1" />
+        </material>
+      </visual>
+    <visual name="rear_cap">
+      <origin xyz="-0.082 0 -0.0015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.022 0.016" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="track_insert">
+      <origin xyz="0 0 0.0115" rpy="0 0 0" />
+      <geometry>
+        <box size="0.097 0.01 0.003" />
+        </geometry>
+      <material name="grip_black">
+        <color rgba="0.09 0.09 0.1 1" />
+        </material>
+      </visual>
+    <visual name="left_track_rail">
+      <origin xyz="0 0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.096 0.003 0.003" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="right_track_rail">
+      <origin xyz="0 -0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.096 0.003 0.003" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="nose_shoe">
+      <origin xyz="0.069 0 0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.02 0.006" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="nose_left_cheek">
+      <origin xyz="0.068 0.0085 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.012" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="nose_right_cheek">
+      <origin xyz="0.068 -0.0085 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.012" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="nose_left_top_guide">
+      <origin xyz="0.069 0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.003" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="nose_right_top_guide">
+      <origin xyz="0.069 -0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.003" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="left_grip_panel">
+      <origin xyz="0 0.0167 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/utility_knife_side_grip.obj" />
+        </geometry>
+      <material name="grip_black">
+        <color rgba="0.09 0.09 0.1 1" />
+        </material>
+      </visual>
+    <visual name="right_grip_panel">
+      <origin xyz="0 -0.0167 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/utility_knife_side_grip.obj" />
+        </geometry>
+      <material name="grip_black">
+        <color rgba="0.09 0.09 0.1 1" />
+        </material>
+      </visual>
+    <visual name="rear_spine_pad">
+      <origin xyz="-0.043 0 0.0117" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.012 0.0025" />
+        </geometry>
+      <material name="grip_black">
+        <color rgba="0.09 0.09 0.1 1" />
+        </material>
+      </visual>
+    <visual name="left_fastener_-0.040">
+      <origin xyz="-0.04 0.0171 0.002" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.44 0.47 0.51 1" />
+        </material>
+      </visual>
+    <visual name="right_fastener_-0.040">
+      <origin xyz="-0.04 -0.0171 0.002" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.44 0.47 0.51 1" />
+        </material>
+      </visual>
+    <visual name="left_fastener_0.006">
+      <origin xyz="0.006 0.0171 -0.0012" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.44 0.47 0.51 1" />
+        </material>
+      </visual>
+    <visual name="right_fastener_0.006">
+      <origin xyz="0.006 -0.0171 -0.0012" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.44 0.47 0.51 1" />
+        </material>
+      </visual>
+    <collision name="handle__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/95cb76e7781f9f93812b9bc6__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="handle__rear_cap">
+      <origin xyz="-0.082 0 -0.0015" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.022 0.016" />
+        </geometry>
+      </collision>
+    <collision name="handle__track_insert">
+      <origin xyz="0 0 0.0115" rpy="0 0 0" />
+      <geometry>
+        <box size="0.097 0.01 0.003" />
+        </geometry>
+      </collision>
+    <collision name="handle__left_track_rail">
+      <origin xyz="0 0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.096 0.003 0.003" />
+        </geometry>
+      </collision>
+    <collision name="handle__right_track_rail">
+      <origin xyz="0 -0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.096 0.003 0.003" />
+        </geometry>
+      </collision>
+    <collision name="handle__nose_shoe">
+      <origin xyz="0.069 0 0.002" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.02 0.006" />
+        </geometry>
+      </collision>
+    <collision name="handle__nose_left_cheek">
+      <origin xyz="0.068 0.0085 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.012" />
+        </geometry>
+      </collision>
+    <collision name="handle__nose_right_cheek">
+      <origin xyz="0.068 -0.0085 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.012" />
+        </geometry>
+      </collision>
+    <collision name="handle__nose_left_top_guide">
+      <origin xyz="0.069 0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.003" />
+        </geometry>
+      </collision>
+    <collision name="handle__nose_right_top_guide">
+      <origin xyz="0.069 -0.006 0.0136" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.003 0.003" />
+        </geometry>
+      </collision>
+    <collision name="handle__left_grip_panel__hull_001">
+      <origin xyz="0 0.0167 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3d863f0f2bb0191025693904__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="handle__right_grip_panel__hull_001">
+      <origin xyz="0 -0.0167 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/3d863f0f2bb0191025693904__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="handle__rear_spine_pad">
+      <origin xyz="-0.043 0 0.0117" rpy="0 0 0" />
+      <geometry>
+        <box size="0.032 0.012 0.0025" />
+        </geometry>
+      </collision>
+    <collision name="handle__left_fastener__0_040">
+      <origin xyz="-0.04 0.0171 0.002" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      </collision>
+    <collision name="handle__right_fastener__0_040">
+      <origin xyz="-0.04 -0.0171 0.002" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      </collision>
+    <collision name="handle__left_fastener_0_006">
+      <origin xyz="0.006 0.0171 -0.0012" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      </collision>
+    <collision name="handle__right_fastener_0_006">
+      <origin xyz="0.006 -0.0171 -0.0012" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0018" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="blade_carrier">
+    <inertial>
+      <origin xyz="0.01 0 0" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="2.16667e-06" ixy="0" ixz="0" iyy="3.45667e-05" iyz="0" izz="3.51e-05" />
+      </inertial>
+    <visual name="carrier_sled">
+      <geometry>
+        <box size="0.072 0.014 0.01" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.44 0.47 0.51 1" />
+        </material>
+      </visual>
+    <visual name="carrier_left_runner">
+      <origin xyz="-0.002 0.0052 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.0032 0.004" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="carrier_right_runner">
+      <origin xyz="-0.002 -0.0052 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.0032 0.004" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="blade_clamp">
+      <origin xyz="0.029 0 -0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.026 0.016 0.008" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="clamp_left_cheek">
+      <origin xyz="0.021 0.0055 0.0005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.0025 0.006" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="clamp_right_cheek">
+      <origin xyz="0.021 -0.0055 0.0005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.0025 0.006" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="thumb_slider_base">
+      <origin xyz="-0.006 0 0.0075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.01 0.004" />
+        </geometry>
+      <material name="slider_black">
+        <color rgba="0.14 0.15 0.16 1" />
+        </material>
+      </visual>
+    <visual name="thumb_slider_top">
+      <origin xyz="-0.006 0 0.011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.008 0.003" />
+        </geometry>
+      <material name="slider_black">
+        <color rgba="0.14 0.15 0.16 1" />
+        </material>
+      </visual>
+    <visual name="thumb_grip_rib_-0.011">
+      <origin xyz="-0.011 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0022 0.0084 0.0012" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="thumb_grip_rib_-0.006">
+      <origin xyz="-0.006 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0022 0.0084 0.0012" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="thumb_grip_rib_-0.001">
+      <origin xyz="-0.001 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0022 0.0084 0.0012" />
+        </geometry>
+      <material name="steel">
+        <color rgba="0.69 0.71 0.74 1" />
+        </material>
+      </visual>
+    <visual name="utility_blade">
+      <geometry>
+        <mesh filename="meshes/utility_knife_blade.obj" />
+        </geometry>
+      <material name="blade_steel">
+        <color rgba="0.84 0.86 0.88 1" />
+        </material>
+      </visual>
+    <collision name="blade_carrier__carrier_sled">
+      <geometry>
+        <box size="0.072 0.014 0.01" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__carrier_left_runner">
+      <origin xyz="-0.002 0.0052 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.0032 0.004" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__carrier_right_runner">
+      <origin xyz="-0.002 -0.0052 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.0032 0.004" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__blade_clamp">
+      <origin xyz="0.029 0 -0.001" rpy="0 0 0" />
+      <geometry>
+        <box size="0.026 0.016 0.008" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__clamp_left_cheek">
+      <origin xyz="0.021 0.0055 0.0005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.0025 0.006" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__clamp_right_cheek">
+      <origin xyz="0.021 -0.0055 0.0005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.0025 0.006" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__thumb_slider_base">
+      <origin xyz="-0.006 0 0.0075" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.01 0.004" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__thumb_slider_top">
+      <origin xyz="-0.006 0 0.011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.008 0.003" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__thumb_grip_rib__0_011">
+      <origin xyz="-0.011 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0022 0.0084 0.0012" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__thumb_grip_rib__0_006">
+      <origin xyz="-0.006 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0022 0.0084 0.0012" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__thumb_grip_rib__0_001">
+      <origin xyz="-0.001 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0022 0.0084 0.0012" />
+        </geometry>
+      </collision>
+    <collision name="blade_carrier__utility_blade__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/440defea704726f467bc7299__hull_001.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="blade_slide" type="prismatic">
+    <origin xyz="0 0 0.008" rpy="0 0 0" />
+    <parent link="handle" />
+    <child link="blade_carrier" />
+    <axis xyz="1 0 0" />
+    <limit effort="35" velocity="0.25" lower="0" upper="0.055" />
+    </joint>
+  </robot>

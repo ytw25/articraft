@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_range_hood_with_articulated_controls_0001",
+  "created_at": "2026-03-16T01:22:51Z",
+  "updated_at": "2026-03-16T01:22:51Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "range_hood_with_articulated_controls",
+  "source": {
+    "run_id": "run_import_range_hood_with_articulated_controls_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed kitchen range hood with a metal canopy, visible intake or filter area, and integrated contr",
+    "prompt_preview": "A realistic, highly detailed kitchen range hood with a metal canopy, visible intake or filter area, and integrated control features on the front or underside..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "de26ead0ec27bd79f76ab6f8322672230c6416361392ae516d71bf45628a2332",
+    "model_py_sha256": "a30d64bc20c807b0df9c0ea55bf14b736153a18d78758b27d77623e27bc1661d",
+    "model_urdf_sha256": "d0770d520d5495d91c10a850e64dd9a424c47f1534d80156ff73e79f250c554a"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

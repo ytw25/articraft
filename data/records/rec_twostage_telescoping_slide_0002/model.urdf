@@ -1,0 +1,105 @@
+<robot name="two_stage_telescoping_slide">
+  <material name="zinc">
+    <color rgba="0.8 0.82 0.86 1" />
+  </material>
+  <material name="rail_steel">
+    <color rgba="0.6 0.63 0.68 1" />
+  </material>
+  <material name="dark_steel">
+    <color rgba="0.39 0.41 0.45 1" />
+  </material>
+  <link name="base_plate">
+    <inertial>
+      <origin xyz="0.09 0 -0.003" rpy="0 0 0" />
+      <mass value="0.75" />
+      <inertia ixx="0.0002425" ixy="0" ixz="0" iyy="0.00202725" iyz="0" izz="0.00226525" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base_plate.glb" />
+      </geometry>
+      <material name="zinc" />
+    </visual>
+    <collision>
+      <origin xyz="0.09 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.062 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="outer_rail">
+    <inertial>
+      <origin xyz="0.12 0 0.013" rpy="0 0 0" />
+      <mass value="0.42" />
+      <inertia ixx="3.5e-05" ixy="0" ixz="0" iyy="0.00203966" iyz="0" izz="0.00202734" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/outer_rail.glb" />
+      </geometry>
+      <material name="rail_steel" />
+    </visual>
+    <collision>
+      <origin xyz="0.12 0 0.013" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.018 0.026" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle_rail">
+    <inertial>
+      <origin xyz="0.09 0 0.009" rpy="0 0 0" />
+      <mass value="0.28" />
+      <inertia ixx="1.15033e-05" ixy="0" ixz="0" iyy="0.00076356" iyz="0" izz="0.000759943" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle_rail.glb" />
+      </geometry>
+      <material name="dark_steel" />
+    </visual>
+    <collision>
+      <origin xyz="0.09 0 0.009" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.013 0.018" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="inner_rail">
+    <inertial>
+      <origin xyz="0.065 0 0.00525" rpy="0 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="2.86875e-06" ixy="0" ixz="0" iyy="0.000255154" iyz="0" izz="0.000254715" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/inner_rail.glb" />
+      </geometry>
+      <material name="rail_steel" />
+    </visual>
+    <collision>
+      <origin xyz="0.065 0 0.00525" rpy="0 0 0" />
+      <geometry>
+        <box size="0.13 0.009 0.0105" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_outer" type="fixed">
+    <parent link="base_plate" />
+    <child link="outer_rail" />
+  </joint>
+  <joint name="outer_to_middle" type="prismatic">
+    <origin xyz="0.016 0 0.003" rpy="0 0 0" />
+    <parent link="outer_rail" />
+    <child link="middle_rail" />
+    <axis xyz="1 0 0" />
+    <limit effort="120" velocity="0.4" lower="0" upper="0.11" />
+  </joint>
+  <joint name="middle_to_inner" type="prismatic">
+    <origin xyz="0.014 0 0.0035" rpy="0 0 0" />
+    <parent link="middle_rail" />
+    <child link="inner_rail" />
+    <axis xyz="1 0 0" />
+    <limit effort="90" velocity="0.45" lower="0" upper="0.09" />
+  </joint>
+</robot>

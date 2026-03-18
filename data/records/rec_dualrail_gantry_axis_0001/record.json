@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_dualrail_gantry_axis_0001",
+  "created_at": "2026-03-16T13:56:03Z",
+  "updated_at": "2026-03-16T13:56:03Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "dualrail_gantry_axis",
+  "source": {
+    "run_id": "run_import_dualrail_gantry_axis_20260316-135037-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic dual-rail gantry axis with two parallel linear rails, a bridging carriage, exposed guide blocks, and a clean",
+    "prompt_preview": "A realistic dual-rail gantry axis with two parallel linear rails, a bridging carriage, exposed guide blocks, and a clean CNC or automation-stage appearance...."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "c1bba7ecac6bd3378cf740367048b6aff0f82afdcc33fcd6091177fb1ad189ed",
+    "model_py_sha256": "f91f3780249fb90d32b427f27ad64405f3eea469805739342f319f747a0e067a",
+    "model_urdf_sha256": "47ab0319e41d51ee85fd0e80884b4e0251c1baea9e0bf0abebda512e29538791"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

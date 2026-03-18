@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_branching_tree_with_three_independent_rotary_branches_0001",
+  "created_at": "2026-03-12T18:16:33Z",
+  "updated_at": "2026-03-12T18:16:33Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "branching_tree_with_three_independent_rotary_branches",
+  "source": {
+    "run_id": "run_import_branching_tree_with_three_independent_rotary_branches_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A radial base supporting three separate revolute branches, each with simple rigid links and compact bearing housings.",
+    "prompt_preview": "A radial base supporting three separate revolute branches, each with simple rigid links and compact bearing housings."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "e1c8e28dc5df900a535bb4dd9f8786c54c1a586f12e38cfd0a13f10bd3b314cc",
+    "model_py_sha256": "d469d18a14b5272d1cc74577e65b709d04c489ed31f3c79246382974e5ce44fd",
+    "model_urdf_sha256": "1cc3e147988c6e68fd3e56c9ed810cd2d7f453aea15422e52983c3366ab4500c"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

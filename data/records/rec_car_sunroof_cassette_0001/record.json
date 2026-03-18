@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_car_sunroof_cassette_0001",
+  "created_at": "2026-03-16T14:57:20Z",
+  "updated_at": "2026-03-16T14:57:20Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "car_sunroof_cassette",
+  "source": {
+    "run_id": "run_import_car_sunroof_cassette_20260316-145137-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed car sunroof cassette with a framed roof opening, a sliding glass panel, visible side rails,",
+    "prompt_preview": "A realistic, highly detailed car sunroof cassette with a framed roof opening, a sliding glass panel, visible side rails, and a believable automotive-roof-mod..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "f1817cd964ffb49477fec4b6f86acfeca1edf88d613f440d92c3f812d9d91bd0",
+    "model_py_sha256": "70d67f99f6f0f5490c278bbaaf8bb37433751596cfdf946a192e138da557ddd4",
+    "model_urdf_sha256": "96509fe83ca9a76dee95c7317e9bfe7e4828adba17a963a64312125f7537343f"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

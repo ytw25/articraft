@@ -1,0 +1,194 @@
+<robot name="compact_articulated_digit">
+  <material name="mount_dark">
+    <color rgba="0.15 0.16 0.18 1" />
+  </material>
+  <material name="plate_aluminum">
+    <color rgba="0.72 0.74 0.78 1" />
+  </material>
+  <link name="base_mount">
+    <inertial>
+      <origin xyz="0 0 -0.016" rpy="0 0 0" />
+      <mass value="0.18" />
+      <inertia ixx="2.136e-05" ixy="0" ixz="0" iyy="1.99537e-05" iyz="0" izz="1.05938e-05" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base_mount.glb" />
+      </geometry>
+      <material name="mount_dark" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.0147" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01344 0.0192 0.024" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 -0.0307" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0175 0.02 0.008" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.00515 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.003552" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.00515 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.003552" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="proximal">
+    <inertial>
+      <origin xyz="0 0 0.0175" rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia ixx="4.41241e-06" ixy="0" ixz="0" iyy="4.12653e-06" iyz="0" izz="3.7228e-07" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/proximal.glb" />
+      </geometry>
+      <material name="plate_aluminum" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.016645" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0036 0.009936 0.02771" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.004992" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.00515 0.035" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.003552" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.00515 0.0323" rpy="0 0 0" />
+      <geometry>
+        <box size="0.00352 0.003404 0.004725" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.00515 0.035" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.003552" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.00515 0.0323" rpy="0 0 0" />
+      <geometry>
+        <box size="0.00352 0.003404 0.004725" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle">
+    <inertial>
+      <origin xyz="0 0 0.0135" rpy="0 0 0" />
+      <mass value="0.03" />
+      <inertia ixx="2.0341e-06" ixy="0" ixz="0" iyy="1.8549e-06" iyz="0" izz="2.44e-07" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/middle.glb" />
+      </geometry>
+      <material name="plate_aluminum" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.012645" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0036 0.0092 0.01971" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.004992" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.00515 0.027" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.003552" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.00515 0.0243" rpy="0 0 0" />
+      <geometry>
+        <box size="0.00352 0.003404 0.004725" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.00515 0.027" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.003552" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.00515 0.0243" rpy="0 0 0" />
+      <geometry>
+        <box size="0.00352 0.003404 0.004725" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="distal">
+    <inertial>
+      <origin xyz="0 0 0.0115" rpy="0 0 0" />
+      <mass value="0.022" />
+      <inertia ixx="1.10117e-06" ixy="0" ixz="0" iyy="9.93593e-07" iyz="0" izz="1.55099e-07" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/distal.glb" />
+      </geometry>
+      <material name="plate_aluminum" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.011725" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0036 0.008464 0.01787" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.004185" length="0.004992" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.02219" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.003375" length="0.006624" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_proximal" type="revolute">
+    <parent link="base_mount" />
+    <child link="proximal" />
+    <axis xyz="0 1 0" />
+    <limit effort="3" velocity="4" lower="0" upper="1.35" />
+  </joint>
+  <joint name="proximal_to_middle" type="revolute">
+    <origin xyz="0 0 0.035" rpy="0 0 0" />
+    <parent link="proximal" />
+    <child link="middle" />
+    <axis xyz="0 1 0" />
+    <limit effort="2.5" velocity="5" lower="0" upper="1.5" />
+  </joint>
+  <joint name="middle_to_distal" type="revolute">
+    <origin xyz="0 0 0.027" rpy="0 0 0" />
+    <parent link="middle" />
+    <child link="distal" />
+    <axis xyz="0 1 0" />
+    <limit effort="2" velocity="5" lower="0" upper="1.35" />
+  </joint>
+</robot>

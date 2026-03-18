@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_easel_0001",
+  "created_at": "2026-03-16T01:23:54Z",
+  "updated_at": "2026-03-16T01:23:54Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "easel",
+  "source": {
+    "run_id": "run_import_easel_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed artist's easel with a stable support frame, canvas rest, and practical adjustment hardware.",
+    "prompt_preview": "A realistic, highly detailed artist's easel with a stable support frame, canvas rest, and practical adjustment hardware. The folding or height-adjustment mot..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "6895b8c981032b50a2c24f0a11238e9c7e6f25beafffdbd4089b6e0e382029dd",
+    "model_py_sha256": "d4c7109c5099699904636bf4c7f07538165eee8910503cb788389b2b539b5472",
+    "model_urdf_sha256": "2cfe31109e0ad236a1e7e16d559c1045d5c7a1d79a7ba415d123e8fd0d45db30"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

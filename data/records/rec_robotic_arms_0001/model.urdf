@@ -1,0 +1,1659 @@
+<robot name="robotic_arm">
+  <material name="ceramic">
+    <color rgba="0.87 0.88 0.9 1" />
+  </material>
+  <material name="graphite">
+    <color rgba="0.17 0.18 0.2 1" />
+  </material>
+  <material name="titanium">
+    <color rgba="0.66 0.69 0.72 1" />
+  </material>
+  <material name="copper">
+    <color rgba="0.75 0.44 0.25 1" />
+  </material>
+  <material name="elastomer">
+    <color rgba="0.06 0.06 0.07 1" />
+  </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.054" rpy="0 0 0" />
+      <mass value="18" />
+      <inertia ixx="0.140008" ixy="0" ixz="0" iyy="0.140008" iyz="0" izz="0.245025" />
+    </inertial>
+    <visual name="base_shell">
+      <geometry>
+        <mesh filename="meshes/robotic_arm_base_shell.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="slew_ring">
+      <origin xyz="0 0 0.101" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.104" length="0.012" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="service_panel">
+      <origin xyz="-0.09 0 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.072 0.026 0.046" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="base_accent_band">
+      <origin xyz="0.074 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.124 0.006" />
+      </geometry>
+      <material name="copper">
+        <color rgba="0.75 0.44 0.25 1" />
+      </material>
+    </visual>
+    <collision name="base__base_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4534faabeadad852a005d216__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="base__slew_ring">
+      <origin xyz="0 0 0.101" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.104" length="0.012" />
+      </geometry>
+    </collision>
+    <collision name="base__service_panel">
+      <origin xyz="-0.09 0 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.072 0.026 0.046" />
+      </geometry>
+    </collision>
+    <collision name="base__base_accent_band">
+      <origin xyz="0.074 0 0.024" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.124 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="turret">
+    <inertial>
+      <origin xyz="0 0 0.112" rpy="0 0 0" />
+      <mass value="8" />
+      <inertia ixx="0.0447173" ixy="0" ixz="0" iyy="0.0472747" iyz="0" izz="0.0250907" />
+    </inertial>
+    <visual name="turret_column">
+      <origin xyz="0 0 0.08" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.16" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="slew_drive_housing">
+      <origin xyz="0 0 0.008" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.062" length="0.016" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="left_yoke_cheek">
+      <origin xyz="0 -0.055 0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.082 0.018 0.154" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="right_yoke_cheek">
+      <origin xyz="0 0.055 0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.082 0.018 0.154" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="yoke_bridge">
+      <origin xyz="-0.022 0 0.192" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.128 0.044" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="left_shoulder_cap">
+      <origin xyz="0 -0.064 0.192" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.01" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="right_shoulder_cap">
+      <origin xyz="0 0.064 0.192" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.01" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="turret_front_accent">
+      <origin xyz="0.044 0 0.092" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.076 0.094" />
+      </geometry>
+      <material name="copper">
+        <color rgba="0.75 0.44 0.25 1" />
+      </material>
+    </visual>
+    <collision name="turret__turret_column">
+      <origin xyz="0 0 0.08" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.16" />
+      </geometry>
+    </collision>
+    <collision name="turret__slew_drive_housing">
+      <origin xyz="0 0 0.008" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.062" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="turret__left_yoke_cheek">
+      <origin xyz="0 -0.055 0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.082 0.018 0.154" />
+      </geometry>
+    </collision>
+    <collision name="turret__right_yoke_cheek">
+      <origin xyz="0 0.055 0.116" rpy="0 0 0" />
+      <geometry>
+        <box size="0.082 0.018 0.154" />
+      </geometry>
+    </collision>
+    <collision name="turret__yoke_bridge">
+      <origin xyz="-0.022 0 0.192" rpy="0 0 0" />
+      <geometry>
+        <box size="0.04 0.128 0.044" />
+      </geometry>
+    </collision>
+    <collision name="turret__left_shoulder_cap">
+      <origin xyz="0 -0.064 0.192" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="turret__right_shoulder_cap">
+      <origin xyz="0 0.064 0.192" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="turret__turret_front_accent">
+      <origin xyz="0.044 0 0.092" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.076 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="upper_arm">
+    <inertial>
+      <origin xyz="0.17 0 0.004" rpy="0 0 0" />
+      <mass value="6.2" />
+      <inertia ixx="0.0188191" ixy="0" ixz="0" iyy="0.0741541" iyz="0" izz="0.078585" />
+    </inertial>
+    <visual name="upper_arm_shell">
+      <geometry>
+        <mesh filename="meshes/robotic_arm_upper_arm_shell.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="shoulder_hub">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.086" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="elbow_cap">
+      <origin xyz="0.33 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.072" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="extensor_spine">
+      <origin xyz="0.164 0 0.044" rpy="0 0 0" />
+      <geometry>
+        <box size="0.164 0.022 0.018" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="upper_arm_side_trace">
+      <origin xyz="0.134 -0.043 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.126 0.008 0.03" />
+      </geometry>
+      <material name="copper">
+        <color rgba="0.75 0.44 0.25 1" />
+      </material>
+    </visual>
+    <visual name="bicep_service_channel">
+      <origin xyz="0.19 0.038 -0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.096 0.014 0.02" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <collision name="upper_arm__upper_arm_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/339f1c4d33dbc238d2f04f73__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="upper_arm__shoulder_hub">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.086" />
+      </geometry>
+    </collision>
+    <collision name="upper_arm__elbow_cap">
+      <origin xyz="0.33 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.072" />
+      </geometry>
+    </collision>
+    <collision name="upper_arm__extensor_spine">
+      <origin xyz="0.164 0 0.044" rpy="0 0 0" />
+      <geometry>
+        <box size="0.164 0.022 0.018" />
+      </geometry>
+    </collision>
+    <collision name="upper_arm__upper_arm_side_trace">
+      <origin xyz="0.134 -0.043 0.014" rpy="0 0 0" />
+      <geometry>
+        <box size="0.126 0.008 0.03" />
+      </geometry>
+    </collision>
+    <collision name="upper_arm__bicep_service_channel">
+      <origin xyz="0.19 0.038 -0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.096 0.014 0.02" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="forearm">
+    <inertial>
+      <origin xyz="0.145 0 0.004" rpy="0 0 0" />
+      <mass value="4.8" />
+      <inertia ixx="0.0099536" ixy="0" ixz="0" iyy="0.0429376" iyz="0" izz="0.0448912" />
+    </inertial>
+    <visual name="forearm_shell">
+      <geometry>
+        <mesh filename="meshes/robotic_arm_forearm_shell.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="elbow_hub">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.074" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="wrist_cap">
+      <origin xyz="0.29 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.06" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="forearm_tendon_channel">
+      <origin xyz="0.148 0 0.034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.122 0.02 0.016" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="forearm_side_trace">
+      <origin xyz="0.128 0.038 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.102 0.008 0.026" />
+      </geometry>
+      <material name="copper">
+        <color rgba="0.75 0.44 0.25 1" />
+      </material>
+    </visual>
+    <visual name="ulnar_service_band">
+      <origin xyz="0.214 -0.03 -0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.074 0.018 0.014" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <collision name="forearm__forearm_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/6fc422ca563c13735e36a22d__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="forearm__elbow_hub">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.074" />
+      </geometry>
+    </collision>
+    <collision name="forearm__wrist_cap">
+      <origin xyz="0.29 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.06" />
+      </geometry>
+    </collision>
+    <collision name="forearm__forearm_tendon_channel">
+      <origin xyz="0.148 0 0.034" rpy="0 0 0" />
+      <geometry>
+        <box size="0.122 0.02 0.016" />
+      </geometry>
+    </collision>
+    <collision name="forearm__forearm_side_trace">
+      <origin xyz="0.128 0.038 0.008" rpy="0 0 0" />
+      <geometry>
+        <box size="0.102 0.008 0.026" />
+      </geometry>
+    </collision>
+    <collision name="forearm__ulnar_service_band">
+      <origin xyz="0.214 -0.03 -0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.074 0.018 0.014" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wrist_pitch">
+    <inertial>
+      <origin xyz="0.05 0 0.006" rpy="0 0 0" />
+      <mass value="2" />
+      <inertia ixx="0.00229667" ixy="0" ixz="0" iyy="0.00321133" iyz="0" izz="0.00326667" />
+    </inertial>
+    <visual name="wrist_shell">
+      <geometry>
+        <mesh filename="meshes/robotic_arm_wrist_shell.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="wrist_pitch_hub">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.066" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="wrist_roll_flange">
+      <origin xyz="0.094 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.023" length="0.016" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="wrist_mid_band">
+      <origin xyz="0.056 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.018" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <collision name="wrist_pitch__wrist_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/bdcb536ebc42c90feb2bc61c__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_pitch__wrist_pitch_hub">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.066" />
+      </geometry>
+    </collision>
+    <collision name="wrist_pitch__wrist_roll_flange">
+      <origin xyz="0.094 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.023" length="0.016" />
+      </geometry>
+    </collision>
+    <collision name="wrist_pitch__wrist_mid_band">
+      <origin xyz="0.056 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.018" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wrist_roll">
+    <inertial>
+      <origin xyz="0.05 0 0" rpy="0 0 0" />
+      <mass value="1.6" />
+      <inertia ixx="0.00187947" ixy="0" ixz="0" iyy="0.00266293" iyz="0" izz="0.00345013" />
+    </inertial>
+    <visual name="roll_spindle">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.06" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="roll_rear_collar">
+      <origin xyz="-0.012 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.036" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="palm_shell">
+      <geometry>
+        <mesh filename="meshes/robotic_arm_hand_shell.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="knuckle_bridge">
+      <origin xyz="0.095 0 0.021" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.09" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="radial_tendon_cover">
+      <origin xyz="0.055 -0.023 0.018" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.046" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="center_tendon_cover">
+      <origin xyz="0.059 0.004 0.019" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.04" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.17 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual name="thumb_saddle">
+      <origin xyz="0.024 -0.04 -0.009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.013" />
+      </geometry>
+      <material name="copper">
+        <color rgba="0.75 0.44 0.25 1" />
+      </material>
+    </visual>
+    <visual name="thumb_saddle_spine">
+      <origin xyz="0.027 -0.04 -0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.022" />
+      </geometry>
+      <material name="copper">
+        <color rgba="0.75 0.44 0.25 1" />
+      </material>
+    </visual>
+    <collision name="wrist_roll__roll_spindle">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.06" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__roll_rear_collar">
+      <origin xyz="-0.012 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.025" length="0.036" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_007.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_008.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_009.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__palm_shell__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0ebdd1a4c1d4a3f05309bd11__hull_010.obj" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__knuckle_bridge">
+      <origin xyz="0.095 0 0.021" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0066" length="0.09" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__radial_tendon_cover">
+      <origin xyz="0.055 -0.023 0.018" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.046" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__center_tendon_cover">
+      <origin xyz="0.059 0.004 0.019" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.04" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__thumb_saddle">
+      <origin xyz="0.024 -0.04 -0.009" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.013" />
+      </geometry>
+    </collision>
+    <collision name="wrist_roll__thumb_saddle_spine">
+      <origin xyz="0.027 -0.04 -0.01" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.022" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_proximal">
+    <inertial>
+      <origin xyz="0.023 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="6.53813e-06" ixy="0" ixz="0" iyy="3.40344e-05" iyz="0" izz="3.24875e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/index_proximal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00828" length="0.02244" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="index_proximal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4b6c47fc9e1e5995ef9756d5__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_proximal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4b6c47fc9e1e5995ef9756d5__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_proximal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4b6c47fc9e1e5995ef9756d5__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_proximal__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4b6c47fc9e1e5995ef9756d5__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_proximal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00828" length="0.02244" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_middle">
+    <inertial>
+      <origin xyz="0.01426 0 0" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="3.66e-06" ixy="0" ixz="0" iyy="1.14055e-05" iyz="0" izz="1.07455e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/index_middle.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007176" length="0.01938" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="index_middle__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/9f85035791d6e40fcc5195f2__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_middle__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/9f85035791d6e40fcc5195f2__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_middle__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/9f85035791d6e40fcc5195f2__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_middle__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/9f85035791d6e40fcc5195f2__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_middle__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007176" length="0.01938" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_distal">
+    <inertial>
+      <origin xyz="0.01104 0 0" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="1.69687e-06" ixy="0" ixz="0" iyy="7.41881e-06" iyz="0" izz="7.24068e-06" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/index_distal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006256" length="0.01632" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="pad_core">
+      <origin xyz="0.0286 0 -0.0018" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0092" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <visual name="pad_tip">
+      <origin xyz="0.0334 0 -0.0015" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0021" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <collision name="index_distal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5e4880f2e751c60984e8c41c__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_distal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5e4880f2e751c60984e8c41c__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_distal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/5e4880f2e751c60984e8c41c__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="index_distal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006256" length="0.01632" />
+      </geometry>
+    </collision>
+    <collision name="index_distal__pad_core">
+      <origin xyz="0.0286 0 -0.0018" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0024" length="0.0092" />
+      </geometry>
+    </collision>
+    <collision name="index_distal__pad_tip">
+      <origin xyz="0.0334 0 -0.0015" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0021" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle_proximal">
+    <inertial>
+      <origin xyz="0.02576 0 0" rpy="0 0 0" />
+      <mass value="0.13" />
+      <inertia ixx="8.75333e-06" ixy="0" ixz="0" iyy="4.89536e-05" iyz="0" izz="4.72202e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/middle_proximal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.008648" length="0.02448" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="middle_proximal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ccf6c121bff1d47d8ceb67ec__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_proximal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ccf6c121bff1d47d8ceb67ec__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_proximal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ccf6c121bff1d47d8ceb67ec__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_proximal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.008648" length="0.02448" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle_middle">
+    <inertial>
+      <origin xyz="0.01656 0 0" rpy="0 0 0" />
+      <mass value="0.09" />
+      <inertia ixx="4.74937e-06" ixy="0" ixz="0" iyy="1.62927e-05" iyz="0" izz="1.5627e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/middle_middle.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007544" length="0.0204" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="middle_middle__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2c9b88047b362527abf52f73__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_middle__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2c9b88047b362527abf52f73__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_middle__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2c9b88047b362527abf52f73__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_middle__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/2c9b88047b362527abf52f73__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_middle__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007544" length="0.0204" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="middle_distal">
+    <inertial>
+      <origin xyz="0.01288 0 0" rpy="0 0 0" />
+      <mass value="0.06" />
+      <inertia ixx="2.33125e-06" ixy="0" ixz="0" iyy="1.07848e-05" iyz="0" izz="1.0556e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/middle_distal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00644" length="0.01734" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="pad_core">
+      <origin xyz="0.0326 0 -0.00192" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00256" length="0.0092" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <visual name="pad_tip">
+      <origin xyz="0.0374 0 -0.0016" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00224" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <collision name="middle_distal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e51ac78a0a3943f17f32d01__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_distal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e51ac78a0a3943f17f32d01__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_distal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e51ac78a0a3943f17f32d01__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="middle_distal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00644" length="0.01734" />
+      </geometry>
+    </collision>
+    <collision name="middle_distal__pad_core">
+      <origin xyz="0.0326 0 -0.00192" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00256" length="0.0092" />
+      </geometry>
+    </collision>
+    <collision name="middle_distal__pad_tip">
+      <origin xyz="0.0374 0 -0.0016" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00224" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="ring_proximal">
+    <inertial>
+      <origin xyz="0.02392 0 0" rpy="0 0 0" />
+      <mass value="0.12" />
+      <inertia ixx="7.3e-06" ixy="0" ixz="0" iyy="3.94564e-05" iyz="0" izz="3.79364e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/ring_proximal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00828" length="0.02346" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="ring_proximal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/993e698bf749392ba1034776__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_proximal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/993e698bf749392ba1034776__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_proximal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/993e698bf749392ba1034776__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_proximal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00828" length="0.02346" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="ring_middle">
+    <inertial>
+      <origin xyz="0.01564 0 0" rpy="0 0 0" />
+      <mass value="0.085" />
+      <inertia ixx="4.12604e-06" ixy="0" ixz="0" iyy="1.39397e-05" iyz="0" izz="1.32172e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/ring_middle.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007268" length="0.01938" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="ring_middle__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/88a43f5193a6ac730d76c4b6__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_middle__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/88a43f5193a6ac730d76c4b6__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_middle__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/88a43f5193a6ac730d76c4b6__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_middle__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/88a43f5193a6ac730d76c4b6__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_middle__shell__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/88a43f5193a6ac730d76c4b6__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_middle__shell__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/88a43f5193a6ac730d76c4b6__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_middle__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007268" length="0.01938" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="ring_distal">
+    <inertial>
+      <origin xyz="0.01196 0 0" rpy="0 0 0" />
+      <mass value="0.055" />
+      <inertia ixx="1.99948e-06" ixy="0" ixz="0" iyy="8.97198e-06" iyz="0" izz="8.76917e-06" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/ring_distal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006256" length="0.01632" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="pad_core">
+      <origin xyz="0.0306 0 -0.00186" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00248" length="0.0092" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <visual name="pad_tip">
+      <origin xyz="0.0354 0 -0.00155" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00217" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <collision name="ring_distal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/682c5e1ce83af831593c9ae5__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_distal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/682c5e1ce83af831593c9ae5__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_distal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/682c5e1ce83af831593c9ae5__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="ring_distal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006256" length="0.01632" />
+      </geometry>
+    </collision>
+    <collision name="ring_distal__pad_core">
+      <origin xyz="0.0306 0 -0.00186" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00248" length="0.0092" />
+      </geometry>
+    </collision>
+    <collision name="ring_distal__pad_tip">
+      <origin xyz="0.0354 0 -0.00155" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00217" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="little_proximal">
+    <inertial>
+      <origin xyz="0.02024 0 0" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="3.56167e-06" ixy="0" ixz="0" iyy="1.89871e-05" iyz="0" izz="1.82287e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/little_proximal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007176" length="0.01938" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="little_proximal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37ce8ce622287d558d73d671__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_proximal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37ce8ce622287d558d73d671__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_proximal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/37ce8ce622287d558d73d671__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_proximal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.007176" length="0.01938" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="little_middle">
+    <inertial>
+      <origin xyz="0.01288 0 0" rpy="0 0 0" />
+      <mass value="0.055" />
+      <inertia ixx="1.87573e-06" ixy="0" ixz="0" iyy="6.22638e-06" iyz="0" izz="5.89982e-06" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/little_middle.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006256" length="0.01632" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="little_middle__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65ce5bab12d98dde44ac7733__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_middle__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65ce5bab12d98dde44ac7733__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_middle__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65ce5bab12d98dde44ac7733__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_middle__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65ce5bab12d98dde44ac7733__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_middle__shell__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65ce5bab12d98dde44ac7733__hull_005.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_middle__shell__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/65ce5bab12d98dde44ac7733__hull_006.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_middle__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006256" length="0.01632" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="little_distal">
+    <inertial>
+      <origin xyz="0.01012 0 0" rpy="0 0 0" />
+      <mass value="0.038" />
+      <inertia ixx="1.01805e-06" ixy="0" ixz="0" iyy="4.86555e-06" iyz="0" izz="4.72935e-06" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/little_distal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00552" length="0.01428" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="pad_core">
+      <origin xyz="0.0266 0 -0.00162" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00216" length="0.0092" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <visual name="pad_tip">
+      <origin xyz="0.0314 0 -0.00135" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00189" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <collision name="little_distal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/713759a2f156d3138748fbe3__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_distal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/713759a2f156d3138748fbe3__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_distal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/713759a2f156d3138748fbe3__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="little_distal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.00552" length="0.01428" />
+      </geometry>
+    </collision>
+    <collision name="little_distal__pad_core">
+      <origin xyz="0.0266 0 -0.00162" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00216" length="0.0092" />
+      </geometry>
+    </collision>
+    <collision name="little_distal__pad_tip">
+      <origin xyz="0.0314 0 -0.00135" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00189" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_metacarpal">
+    <inertial>
+      <origin xyz="0.01656 0 0" rpy="0 0 0" />
+      <mass value="0.09" />
+      <inertia ixx="5.43e-06" ixy="0" ixz="0" iyy="1.68933e-05" iyz="0" izz="1.63233e-05" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/thumb_metacarpal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.008096" length="0.02142" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="thumb_metacarpal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ae709b6a276deeb4e187ebbd__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_metacarpal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ae709b6a276deeb4e187ebbd__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_metacarpal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ae709b6a276deeb4e187ebbd__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_metacarpal__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/ae709b6a276deeb4e187ebbd__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_metacarpal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.008096" length="0.02142" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_proximal">
+    <inertial>
+      <origin xyz="0.01288 0 0" rpy="0 0 0" />
+      <mass value="0.065" />
+      <inertia ixx="2.95208e-06" ixy="0" ixz="0" iyy="7.85658e-06" iyz="0" izz="7.67783e-06" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/thumb_proximal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006992" length="0.01836" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <collision name="thumb_proximal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e2dcea47c82fa04266c8679__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_proximal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e2dcea47c82fa04266c8679__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_proximal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e2dcea47c82fa04266c8679__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_proximal__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/4e2dcea47c82fa04266c8679__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_proximal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006992" length="0.01836" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_distal">
+    <inertial>
+      <origin xyz="0.01012 0 0" rpy="0 0 0" />
+      <mass value="0.045" />
+      <inertia ixx="1.47e-06" ixy="0" ixz="0" iyy="5.9021e-06" iyz="0" izz="5.9021e-06" />
+    </inertial>
+    <visual name="shell">
+      <geometry>
+        <mesh filename="meshes/thumb_distal.glb" />
+      </geometry>
+      <material name="ceramic">
+        <color rgba="0.87 0.88 0.9 1" />
+      </material>
+    </visual>
+    <visual name="hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005888" length="0.0153" />
+      </geometry>
+      <material name="titanium">
+        <color rgba="0.66 0.69 0.72 1" />
+      </material>
+    </visual>
+    <visual name="pad_core">
+      <origin xyz="0.0266 0 -0.00168" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00224" length="0.0092" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <visual name="pad_tip">
+      <origin xyz="0.0314 0 -0.0014" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00196" />
+      </geometry>
+      <material name="elastomer">
+        <color rgba="0.06 0.06 0.07 1" />
+      </material>
+    </visual>
+    <collision name="thumb_distal__shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/315294e59fd3356ba50caedf__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_distal__shell__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/315294e59fd3356ba50caedf__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_distal__shell__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/315294e59fd3356ba50caedf__hull_003.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_distal__shell__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/315294e59fd3356ba50caedf__hull_004.obj" />
+      </geometry>
+    </collision>
+    <collision name="thumb_distal__hinge_spool">
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.005888" length="0.0153" />
+      </geometry>
+    </collision>
+    <collision name="thumb_distal__pad_core">
+      <origin xyz="0.0266 0 -0.00168" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.00224" length="0.0092" />
+      </geometry>
+    </collision>
+    <collision name="thumb_distal__pad_tip">
+      <origin xyz="0.0314 0 -0.0014" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.00196" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="index_mcp_pitch" type="revolute">
+    <origin xyz="0.098 -0.034 0.01" rpy="0 0 -0.06" />
+    <parent link="wrist_roll" />
+    <child link="index_proximal" />
+    <axis xyz="0 1 0" />
+    <limit effort="12" velocity="4.6" lower="0" upper="1.2" />
+  </joint>
+  <joint name="index_pip_pitch" type="revolute">
+    <origin xyz="0.05 0 0" rpy="0 0 0" />
+    <parent link="index_proximal" />
+    <child link="index_middle" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="5" lower="0" upper="1.38" />
+  </joint>
+  <joint name="index_dip_pitch" type="revolute">
+    <origin xyz="0.031 0 0" rpy="0 0 0" />
+    <parent link="index_middle" />
+    <child link="index_distal" />
+    <axis xyz="0 1 0" />
+    <limit effort="5" velocity="5.4" lower="0" upper="1.05" />
+  </joint>
+  <joint name="middle_mcp_pitch" type="revolute">
+    <origin xyz="0.104 -0.01 0.012" rpy="0 0 -0.01" />
+    <parent link="wrist_roll" />
+    <child link="middle_proximal" />
+    <axis xyz="0 1 0" />
+    <limit effort="12" velocity="4.6" lower="0" upper="1.24" />
+  </joint>
+  <joint name="middle_pip_pitch" type="revolute">
+    <origin xyz="0.056 0 0" rpy="0 0 0" />
+    <parent link="middle_proximal" />
+    <child link="middle_middle" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="5" lower="0" upper="1.42" />
+  </joint>
+  <joint name="middle_dip_pitch" type="revolute">
+    <origin xyz="0.036 0 0" rpy="0 0 0" />
+    <parent link="middle_middle" />
+    <child link="middle_distal" />
+    <axis xyz="0 1 0" />
+    <limit effort="5" velocity="5.4" lower="0" upper="1.08" />
+  </joint>
+  <joint name="ring_mcp_pitch" type="revolute">
+    <origin xyz="0.102 0.016 0.01" rpy="0 0 0.03" />
+    <parent link="wrist_roll" />
+    <child link="ring_proximal" />
+    <axis xyz="0 1 0" />
+    <limit effort="12" velocity="4.6" lower="0" upper="1.26" />
+  </joint>
+  <joint name="ring_pip_pitch" type="revolute">
+    <origin xyz="0.052 0 0" rpy="0 0 0" />
+    <parent link="ring_proximal" />
+    <child link="ring_middle" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="5" lower="0" upper="1.4" />
+  </joint>
+  <joint name="ring_dip_pitch" type="revolute">
+    <origin xyz="0.034 0 0" rpy="0 0 0" />
+    <parent link="ring_middle" />
+    <child link="ring_distal" />
+    <axis xyz="0 1 0" />
+    <limit effort="5" velocity="5.4" lower="0" upper="1.06" />
+  </joint>
+  <joint name="little_mcp_pitch" type="revolute">
+    <origin xyz="0.094 0.04 0.006" rpy="0 0 0.1" />
+    <parent link="wrist_roll" />
+    <child link="little_proximal" />
+    <axis xyz="0 1 0" />
+    <limit effort="12" velocity="4.6" lower="0" upper="1.3" />
+  </joint>
+  <joint name="little_pip_pitch" type="revolute">
+    <origin xyz="0.044 0 0" rpy="0 0 0" />
+    <parent link="little_proximal" />
+    <child link="little_middle" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="5" lower="0" upper="1.42" />
+  </joint>
+  <joint name="little_dip_pitch" type="revolute">
+    <origin xyz="0.028 0 0" rpy="0 0 0" />
+    <parent link="little_middle" />
+    <child link="little_distal" />
+    <axis xyz="0 1 0" />
+    <limit effort="5" velocity="5.4" lower="0" upper="1.1" />
+  </joint>
+  <joint name="thumb_cmc_pitch" type="revolute">
+    <origin xyz="0.028 -0.044 -0.01" rpy="0 -0.28 -0.92" />
+    <parent link="wrist_roll" />
+    <child link="thumb_metacarpal" />
+    <axis xyz="0 1 0" />
+    <limit effort="12" velocity="4.6" lower="0" upper="1.05" />
+  </joint>
+  <joint name="thumb_mcp_pitch" type="revolute">
+    <origin xyz="0.036 0 0" rpy="0 0 0" />
+    <parent link="thumb_metacarpal" />
+    <child link="thumb_proximal" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="5" lower="0" upper="1.18" />
+  </joint>
+  <joint name="thumb_ip_pitch" type="revolute">
+    <origin xyz="0.028 0 0" rpy="0 0 0" />
+    <parent link="thumb_proximal" />
+    <child link="thumb_distal" />
+    <axis xyz="0 1 0" />
+    <limit effort="5" velocity="5.4" lower="0" upper="1" />
+  </joint>
+  <joint name="base_yaw" type="revolute">
+    <origin xyz="0 0 0.108" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="turret" />
+    <axis xyz="0 0 1" />
+    <limit effort="180" velocity="1.8" lower="-3.14159" upper="3.14159" />
+  </joint>
+  <joint name="shoulder_joint" type="revolute">
+    <origin xyz="0 0 0.192" rpy="0 0 0" />
+    <parent link="turret" />
+    <child link="upper_arm" />
+    <axis xyz="0 -1 0" />
+    <limit effort="140" velocity="1.6" lower="-0.25" upper="1.25" />
+  </joint>
+  <joint name="elbow_joint" type="revolute">
+    <origin xyz="0.33 0 0" rpy="0 0 0" />
+    <parent link="upper_arm" />
+    <child link="forearm" />
+    <axis xyz="0 -1 0" />
+    <limit effort="120" velocity="1.9" lower="0" upper="1.35" />
+  </joint>
+  <joint name="wrist_pitch_joint" type="revolute">
+    <origin xyz="0.29 0 0" rpy="0 0 0" />
+    <parent link="forearm" />
+    <child link="wrist_pitch" />
+    <axis xyz="0 -1 0" />
+    <limit effort="55" velocity="2.5" lower="-1.5" upper="1.5" />
+  </joint>
+  <joint name="wrist_roll_joint" type="revolute">
+    <origin xyz="0.1 0 0" rpy="0 0 0" />
+    <parent link="wrist_pitch" />
+    <child link="wrist_roll" />
+    <axis xyz="1 0 0" />
+    <limit effort="40" velocity="3.5" lower="-3.14159" upper="3.14159" />
+  </joint>
+</robot>

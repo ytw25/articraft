@@ -1,0 +1,146 @@
+<robot name="staggered_rotary_assembly">
+  <material name="housing_dark">
+    <color rgba="0.18 0.19 0.22 1" />
+  </material>
+  <material name="machined_aluminum">
+    <color rgba="0.77 0.79 0.82 1" />
+  </material>
+  <link name="base_housing">
+    <inertial>
+      <origin xyz="0 0 0.028" rpy="0 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.0016854" ixy="0" ixz="0" iyy="0.0022854" iyz="0" izz="0.00303" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base_housing.glb" />
+      </geometry>
+      <material name="housing_dark" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.022" rpy="0 0 0" />
+      <geometry>
+        <box size="0.108 0.088 0.044" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.022" length="0.012" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="shoulder_module">
+    <inertial>
+      <origin xyz="0.044 0 0.027" rpy="0 0 0" />
+      <mass value="1.1" />
+      <inertia ixx="0.000716467" ixy="0" ixz="0" iyy="0.000977167" iyz="0" izz="0.00115903" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/shoulder_module.glb" />
+      </geometry>
+      <material name="housing_dark" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.026" length="0.008" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.055 0 0.03" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.068 0.044" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="elbow_module">
+    <inertial>
+      <origin xyz="0.089 0.012 0.005" rpy="0 0 0" />
+      <mass value="0.85" />
+      <inertia ixx="0.000375417" ixy="0" ixz="0" iyy="0.00238142" iyz="0" izz="0.00248257" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/elbow_link.glb" />
+      </geometry>
+      <material name="machined_aluminum" />
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/elbow_actuator.glb" />
+      </geometry>
+      <material name="housing_dark" />
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.042 0.028 0.042" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.0805 0.0065 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.131 0.031 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.15 0.024 0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.052 0.058 0.042" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wrist_module">
+    <inertial>
+      <origin xyz="0.055 0.013 0" rpy="0 0 0" />
+      <mass value="0.45" />
+      <inertia ixx="0.0001614" ixy="0" ixz="0" iyy="0.00051375" iyz="0" izz="0.00055515" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_housing.glb" />
+      </geometry>
+      <material name="housing_dark" />
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/wrist_fork.glb" />
+      </geometry>
+      <material name="machined_aluminum" />
+    </visual>
+    <collision>
+      <origin xyz="0.024 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.042 0.05 0.038" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.073 0.024 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.075 0.03 0.034" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_yaw" type="revolute">
+    <origin xyz="0 0 0.056" rpy="0 0 0" />
+    <parent link="base_housing" />
+    <child link="shoulder_module" />
+    <axis xyz="0 0 1" />
+    <limit effort="12" velocity="2.5" lower="-1.6" upper="1.6" />
+  </joint>
+  <joint name="shoulder_pitch" type="revolute">
+    <origin xyz="0.085 0 0.031" rpy="0 0 0" />
+    <parent link="shoulder_module" />
+    <child link="elbow_module" />
+    <axis xyz="0 1 0" />
+    <limit effort="8" velocity="2" lower="-1" upper="0.45" />
+  </joint>
+  <joint name="wrist_roll" type="revolute">
+    <origin xyz="0.176 0.024 0.01" rpy="0 0 0" />
+    <parent link="elbow_module" />
+    <child link="wrist_module" />
+    <axis xyz="1 0 0" />
+    <limit effort="4" velocity="3" lower="-1.8" upper="1.8" />
+  </joint>
+</robot>

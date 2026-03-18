@@ -1,0 +1,293 @@
+<robot name="desk_mounted_microphone_boom">
+  <material name="matte_black">
+    <color rgba="0.11 0.11 0.12 1" />
+    </material>
+  <material name="satin_silver">
+    <color rgba="0.73 0.75 0.78 1" />
+    </material>
+  <material name="dark_polymer">
+    <color rgba="0.16 0.16 0.18 1" />
+    </material>
+  <material name="mic_body">
+    <color rgba="0.33 0.35 0.38 1" />
+    </material>
+  <material name="charcoal_grille">
+    <color rgba="0.08 0.08 0.09 1" />
+    </material>
+  <link name="base">
+    <inertial>
+      <origin xyz="-0.006 0 -0.048" rpy="0 0 0" />
+      <mass value="1.6" />
+      <inertia ixx="0.00246667" ixy="0" ixz="0" iyy="0.00226667" iyz="0" izz="0.00150667" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base_clamp.obj" />
+        </geometry>
+      <material name="matte_black" />
+      </visual>
+    <collision name="base__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="base__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/base_clamp__9033af868f7a313d__hull_010.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="lower_arm">
+    <inertial>
+      <origin xyz="0.175 0 0.006" rpy="0 0 0" />
+      <mass value="0.45" />
+      <inertia ixx="0.000135937" ixy="0" ixz="0" iyy="0.00480187" iyz="0" izz="0.00478594" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/lower_arm.obj" />
+        </geometry>
+      <material name="satin_silver" />
+      </visual>
+    <collision name="lower_arm__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/lower_arm__6f14059d5c458bcf__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="lower_arm__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/lower_arm__6f14059d5c458bcf__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="lower_arm__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/lower_arm__6f14059d5c458bcf__hull_003.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="upper_arm">
+    <inertial>
+      <origin xyz="0.165 0 0.004" rpy="0 0 0" />
+      <mass value="0.36" />
+      <inertia ixx="8.688e-05" ixy="0" ixz="0" iyy="0.003315" iyz="0" izz="0.00330588" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/upper_arm.obj" />
+        </geometry>
+      <material name="satin_silver" />
+      </visual>
+    <collision name="upper_arm__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/upper_arm__a63ced444cf2d273__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="upper_arm__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/upper_arm__a63ced444cf2d273__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="upper_arm__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/upper_arm__a63ced444cf2d273__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="upper_arm__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/upper_arm__a63ced444cf2d273__hull_004.obj" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="microphone">
+    <inertial>
+      <origin xyz="0.095 0 0" rpy="0 0 0" />
+      <mass value="0.24" />
+      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.000628" iyz="0" izz="0.000628" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/microphone_mount.obj" />
+        </geometry>
+      <material name="dark_polymer" />
+      </visual>
+    <visual>
+      <origin xyz="0.084 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.082" />
+        </geometry>
+      <material name="mic_body" />
+      </visual>
+    <visual>
+      <origin xyz="0.139 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0185" length="0.028" />
+        </geometry>
+      <material name="charcoal_grille" />
+      </visual>
+    <visual>
+      <origin xyz="0.153 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0185" />
+        </geometry>
+      <material name="charcoal_grille" />
+      </visual>
+    <collision name="microphone__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_001.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_002.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_003.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_004">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_004.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_005">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_005.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_006">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_006.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_007">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_007.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_008">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_008.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_009">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_009.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_010">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_010.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_011">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_011.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_012">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_012.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_013">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_013.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_014">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_014.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_015">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_015.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_1__hull_016">
+      <geometry>
+        <mesh filename="meshes/collision/cache/microphone_mount__7a6b3e3d2d1f8bb2__hull_016.obj" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_2">
+      <origin xyz="0.084 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.021" length="0.082" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_3">
+      <origin xyz="0.139 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0185" length="0.028" />
+        </geometry>
+      </collision>
+    <collision name="microphone__visual_4">
+      <origin xyz="0.153 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0185" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="base_yaw" type="revolute">
+    <parent link="base" />
+    <child link="lower_arm" />
+    <axis xyz="0 0 1" />
+    <limit effort="12" velocity="2" lower="-1.75" upper="1.75" />
+    </joint>
+  <joint name="elbow_pitch" type="revolute">
+    <origin xyz="0.34 0 0" rpy="0 0 0" />
+    <parent link="lower_arm" />
+    <child link="upper_arm" />
+    <axis xyz="0 -1 0" />
+    <limit effort="8" velocity="2.5" lower="-0.7" upper="1.15" />
+    </joint>
+  <joint name="wrist_pitch" type="revolute">
+    <origin xyz="0.32 0 0" rpy="0 0 0" />
+    <parent link="upper_arm" />
+    <child link="microphone" />
+    <axis xyz="0 -1 0" />
+    <limit effort="4" velocity="3" lower="-1" upper="0.75" />
+    </joint>
+  </robot>

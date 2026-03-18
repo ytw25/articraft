@@ -1,0 +1,233 @@
+<robot name="precision_louver_shutter">
+  <material name="frame_finish">
+    <color rgba="0.16 0.18 0.2 1" />
+  </material>
+  <material name="slat_finish">
+    <color rgba="0.8 0.82 0.84 1" />
+  </material>
+  <link name="frame">
+    <inertial>
+      <mass value="7.5" />
+      <inertia ixx="0.76525" ixy="0" ixz="0" iyy="1.2625" iyz="0" izz="0.51525" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/frame.glb" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <collision>
+      <origin xyz="-0.4275 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.12 1.1" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.4275 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.045 0.12 1.1" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 0.5225" rpy="0 0 0" />
+      <geometry>
+        <box size="0.81 0.12 0.055" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0 -0.5225" rpy="0 0 0" />
+      <geometry>
+        <box size="0.81 0.12 0.055" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_01">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_02">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_03">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_04">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_05">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_06">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="slat_07">
+    <inertial>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <mass value="0.32" />
+      <inertia ixx="0.000222827" ixy="0" ixz="0" iyy="0.0174538" iyz="0" izz="0.0172446" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/slat.glb" />
+      </geometry>
+      <material name="slat_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.402 0.007 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.094" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="frame_to_slat_01" type="revolute">
+    <origin xyz="-0.402 0 -0.39" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_01" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+  <joint name="frame_to_slat_02" type="revolute">
+    <origin xyz="-0.402 0 -0.26" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_02" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+  <joint name="frame_to_slat_03" type="revolute">
+    <origin xyz="-0.402 0 -0.13" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_03" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+  <joint name="frame_to_slat_04" type="revolute">
+    <origin xyz="-0.402 0 0" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_04" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+  <joint name="frame_to_slat_05" type="revolute">
+    <origin xyz="-0.402 0 0.13" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_05" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+  <joint name="frame_to_slat_06" type="revolute">
+    <origin xyz="-0.402 0 0.26" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_06" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+  <joint name="frame_to_slat_07" type="revolute">
+    <origin xyz="-0.402 0 0.39" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="slat_07" />
+    <axis xyz="1 0 0" />
+    <limit effort="2.5" velocity="2" lower="-1.05" upper="1.05" />
+  </joint>
+</robot>

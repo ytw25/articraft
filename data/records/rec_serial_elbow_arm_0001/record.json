@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_serial_elbow_arm_0001",
+  "created_at": "2026-03-12T18:30:51Z",
+  "updated_at": "2026-03-12T18:30:51Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "serial_elbow_arm",
+  "source": {
+    "run_id": "run_import_serial_elbow_arm_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "An industrial pick-and-place arm with two main revolute joints and a short forearm, using straight mechanical links and ",
+    "prompt_preview": "An industrial pick-and-place arm with two main revolute joints and a short forearm, using straight mechanical links and visible joint hubs."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "193b42a963d2cf0afb6e1a34f11e92375ff89fa8d1c26adca497c80ff0fa37fd",
+    "model_py_sha256": "11107e3513e88f623917ca6e609712736e27315012f0f5ea2c3c617b5ffd63aa",
+    "model_urdf_sha256": "984b0c46b4f8e9b79a3e60130c86a54297f79bb7b06d0923941fbbd9a1f3fd11"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

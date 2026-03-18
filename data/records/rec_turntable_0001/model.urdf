@@ -1,0 +1,393 @@
+<robot name="hifi_turntable">
+  <link name="plinth">
+    <inertial>
+      <origin xyz="0 0 0.029" rpy="0 0 0" />
+      <mass value="6.8" />
+      <inertia ixx="0.0713229" ixy="0" ixz="0" iyy="0.121813" iyz="0" izz="0.189323" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/turntable_plinth.glb" />
+      </geometry>
+      <material name="satin_black">
+        <color rgba="0.08 0.08 0.09 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.0565" rpy="0 0 0" />
+      <geometry>
+        <box size="0.446 0.336 0.003" />
+      </geometry>
+      <material name="brushed_aluminum">
+        <color rgba="0.73 0.73 0.75 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.15 -0.09 0.059" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.04 0.002" />
+      </geometry>
+      <material name="brushed_aluminum">
+        <color rgba="0.73 0.73 0.75 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.045 0 0.057" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.042" length="0.004" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.18 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.185 -0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+      <material name="dark_rubber">
+        <color rgba="0.12 0.12 0.12 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.185 0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+      <material name="dark_rubber">
+        <color rgba="0.12 0.12 0.12 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.185 -0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+      <material name="dark_rubber">
+        <color rgba="0.12 0.12 0.12 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.185 0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+      <material name="dark_rubber">
+        <color rgba="0.12 0.12 0.12 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.18 -0.12 0.059" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.002" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.185 -0.12 0.059" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.002" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <collision name="plinth__visual_1__hull_001">
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/collision/cache/864e1768bd2fc8bfd6c004de__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_2">
+      <origin xyz="0 0 0.0565" rpy="0 0 0" />
+      <geometry>
+        <box size="0.446 0.336 0.003" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_3">
+      <origin xyz="0.15 -0.09 0.059" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.04 0.002" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_4">
+      <origin xyz="-0.045 0 0.057" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.042" length="0.004" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_5">
+      <origin xyz="-0.185 -0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_6">
+      <origin xyz="-0.185 0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_7">
+      <origin xyz="0.185 -0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_8">
+      <origin xyz="0.185 0.13 0.005" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.01" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_9">
+      <origin xyz="-0.18 -0.12 0.059" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.002" />
+      </geometry>
+    </collision>
+    <collision name="plinth__visual_10">
+      <origin xyz="0.185 -0.12 0.059" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.002" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="platter">
+    <inertial>
+      <origin xyz="0 0 0.01" rpy="0 0 0" />
+      <mass value="1.9" />
+      <inertia ixx="0.0100502" ixy="0" ixz="0" iyy="0.0100502" iyz="0" izz="0.0199737" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/turntable_platter.glb" />
+      </geometry>
+      <material name="brushed_aluminum">
+        <color rgba="0.73 0.73 0.75 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.0215" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.136" length="0.003" />
+      </geometry>
+      <material name="dark_rubber">
+        <color rgba="0.12 0.12 0.12 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.002" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.18 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.029" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0028" length="0.012" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <collision name="platter__visual_1__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/23421ae02dd20a1cae61df45__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="platter__visual_2">
+      <origin xyz="0 0 0.0215" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.136" length="0.003" />
+      </geometry>
+    </collision>
+    <collision name="platter__visual_3">
+      <origin xyz="0 0 0.021" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.002" />
+      </geometry>
+    </collision>
+    <collision name="platter__visual_4">
+      <origin xyz="0 0 0.029" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0028" length="0.012" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="tonearm">
+    <inertial>
+      <origin xyz="-0.015 0.1 0.025" rpy="0 0 0" />
+      <mass value="0.35" />
+      <inertia ixx="0.000259583" ixy="0" ixz="0" iyy="0.00252583" iyz="0" izz="0.00263958" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.011" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.022" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.18 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.006" />
+      </geometry>
+      <material name="brushed_aluminum">
+        <color rgba="0.73 0.73 0.75 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.031" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.018" />
+      </geometry>
+      <material name="brushed_aluminum">
+        <color rgba="0.73 0.73 0.75 1" />
+      </material>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/turntable_tonearm_tube.glb" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.015 0 0.039" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0032" length="0.03" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.04 0 0.039" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.028" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.18 0.18 0.2 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.086 0.228 0.0405" rpy="0 0 -0.32" />
+      <geometry>
+        <box size="0.03 0.018 0.005" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.092 0.235 0.0365" rpy="0 0 -0.32" />
+      <geometry>
+        <box size="0.014 0.011 0.007" />
+      </geometry>
+      <material name="cartridge_red">
+        <color rgba="0.54 0.07 0.05 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="-0.098 0.24 0.0338" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.001" length="0.0035" />
+      </geometry>
+      <material name="steel">
+        <color rgba="0.64 0.65 0.67 1" />
+      </material>
+    </visual>
+    <visual>
+      <origin xyz="0.014 0.012 0.002" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.004" />
+      </geometry>
+      <material name="graphite">
+        <color rgba="0.18 0.18 0.2 1" />
+      </material>
+    </visual>
+    <collision name="tonearm__visual_1">
+      <origin xyz="0 0 0.011" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.015" length="0.022" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_2">
+      <origin xyz="0 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.006" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_3">
+      <origin xyz="0 0 0.031" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.018" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_4__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/0545a11f79deb73a515f5e0c__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_5">
+      <origin xyz="0.015 0 0.039" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.0032" length="0.03" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_6">
+      <origin xyz="0.04 0 0.039" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.028" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_7">
+      <origin xyz="-0.086 0.228 0.0405" rpy="0 0 -0.32" />
+      <geometry>
+        <box size="0.03 0.018 0.005" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_8">
+      <origin xyz="-0.092 0.235 0.0365" rpy="0 0 -0.32" />
+      <geometry>
+        <box size="0.014 0.011 0.007" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_9">
+      <origin xyz="-0.098 0.24 0.0338" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.001" length="0.0035" />
+      </geometry>
+    </collision>
+    <collision name="tonearm__visual_10">
+      <origin xyz="0.014 0.012 0.002" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.004" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="platter_spin" type="continuous">
+    <origin xyz="-0.045 0 0.064" rpy="0 0 0" />
+    <parent link="plinth" />
+    <child link="platter" />
+    <axis xyz="0 0 1" />
+    <limit effort="0.6" velocity="8" />
+  </joint>
+  <joint name="tonearm_pivot" type="revolute">
+    <origin xyz="0.155 -0.09 0.058" rpy="0 0 0" />
+    <parent link="plinth" />
+    <child link="tonearm" />
+    <axis xyz="0 0 1" />
+    <limit effort="0.8" velocity="1.8" lower="0" upper="0.92" />
+  </joint>
+</robot>

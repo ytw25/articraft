@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_cantilever_articulated_arm_0001",
+  "created_at": "2026-03-12T18:17:33Z",
+  "updated_at": "2026-03-12T18:17:33Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "cantilever_articulated_arm",
+  "source": {
+    "run_id": "run_import_cantilever_articulated_arm_20260312-181201-20260312-seed-prompts-v1",
+    "prompt_batch_id": "20260312_seed_prompts_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A cantilevered articulated arm extending from one side support, with serial revolute joints and stout structural links s",
+    "prompt_preview": "A cantilevered articulated arm extending from one side support, with serial revolute joints and stout structural links sized like industrial hardware."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "c5b607e93bc66345418184618478539e447ab42ead22ad8047b5f943de5449e9",
+    "model_py_sha256": "2b4c8a3f81e6a356486bf64edec71797e6705d5ccd62582cfded7a11291ba686",
+    "model_urdf_sha256": "d6e77bee41a8bd4e0e7e7d9c126c6536c8d03523a11aa53206c558ec20287cfa"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_missile_launcher_0001",
+  "created_at": "2026-03-16T17:47:49Z",
+  "updated_at": "2026-03-16T17:47:49Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "missile_launcher",
+  "source": {
+    "run_id": "run_import_missile_launcher_20260316-174115-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed missile launcher assembly with a rigid support base, an elevating launcher frame, multiple ",
+    "prompt_preview": "A realistic, highly detailed missile launcher assembly with a rigid support base, an elevating launcher frame, multiple cylindrical launch tubes, and a belie..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "46372cfd0a3436e9846aa4c7f077989e7882cae7d9fbdb175ebe89c0ae756067",
+    "model_py_sha256": "59d8e2c8e3277a0729f03d7d3025e04c6442edcaabcb78b41f99168287bcab13",
+    "model_urdf_sha256": "0265966e3909823c259f420ded48597ce909d862f885c30e1b45de154bb4e9ec"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "missing"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

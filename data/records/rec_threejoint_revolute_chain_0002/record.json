@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_threejoint_revolute_chain_0002",
+  "created_at": "2026-03-17T02:41:07Z",
+  "updated_at": "2026-03-17T02:41:07Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "threejoint_revolute_chain",
+  "source": {
+    "run_id": "run_import_threejoint_revolute_chain_20260317-023258-threejoint-revolute-chain-0002",
+    "prompt_batch_id": "threejoint_revolute_chain_0002",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A desk-mounted microphone boom with three serial revolute joints and a compact microphone body at the end.",
+    "prompt_preview": "A desk-mounted microphone boom with three serial revolute joints and a compact microphone body at the end."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "89d90a613fd1d0963b9ce5171a067bedd7c5c264740e2cb944d0bc15701b7f7e",
+    "model_py_sha256": "d0addf51704f2c948579b270332037fbd00139150f3370efbcca3d3de5da7655",
+    "model_urdf_sha256": "352ca497dafbda7bba3ba80311646efe12823f42165feb063b9da522b68cd1f7"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

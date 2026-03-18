@@ -1,0 +1,194 @@
+<robot name="usb_flash_drive">
+  <material name="matte_black">
+    <color rgba="0.11 0.12 0.13 1" />
+  </material>
+  <material name="graphite_trim">
+    <color rgba="0.2 0.21 0.23 1" />
+  </material>
+  <material name="brushed_steel">
+    <color rgba="0.77 0.79 0.81 1" />
+  </material>
+  <material name="polished_steel">
+    <color rgba="0.9 0.91 0.93 1" />
+  </material>
+  <material name="dark_polymer">
+    <color rgba="0.05 0.05 0.06 1" />
+  </material>
+  <material name="smoked_window">
+    <color rgba="0.3 0.48 0.7 0.55" />
+  </material>
+  <link name="body">
+    <inertial>
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <mass value="0.018" />
+      <inertia ixx="6.36e-07" ixy="0" ixz="0" iyy="3.9e-06" iyz="0" izz="4.236e-06" />
+    </inertial>
+    <visual name="body_shell">
+      <geometry>
+        <mesh filename="meshes/usb_flash_drive_body.glb" />
+      </geometry>
+      <material name="matte_black">
+        <color rgba="0.11 0.12 0.13 1" />
+      </material>
+    </visual>
+    <visual name="front_band">
+      <origin xyz="0.0172 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0016 0.01818 0.008" />
+      </geometry>
+      <material name="graphite_trim">
+        <color rgba="0.2 0.21 0.23 1" />
+      </material>
+    </visual>
+    <visual name="usb_shell">
+      <origin xyz="0.0238 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.012 0.0048" />
+      </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.77 0.79 0.81 1" />
+      </material>
+    </visual>
+    <visual name="usb_tongue">
+      <origin xyz="0.0243 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0095 0.009 0.0012" />
+      </geometry>
+      <material name="dark_polymer">
+        <color rgba="0.05 0.05 0.06 1" />
+      </material>
+    </visual>
+    <visual name="pivot_pin">
+      <origin xyz="-0.014 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0016" length="0.0092" />
+      </geometry>
+      <material name="polished_steel">
+        <color rgba="0.9 0.91 0.93 1" />
+      </material>
+    </visual>
+    <visual name="pivot_head_top">
+      <origin xyz="-0.014 0 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0041" length="0.0006" />
+      </geometry>
+      <material name="polished_steel">
+        <color rgba="0.9 0.91 0.93 1" />
+      </material>
+    </visual>
+    <visual name="pivot_head_bottom">
+      <origin xyz="-0.014 0 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0041" length="0.0006" />
+      </geometry>
+      <material name="polished_steel">
+        <color rgba="0.9 0.91 0.93 1" />
+      </material>
+    </visual>
+    <collision name="body__body_shell__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/be05bf8e49aef6267ad3cebe__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="body__front_band">
+      <origin xyz="0.0172 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0016 0.01818 0.008" />
+      </geometry>
+    </collision>
+    <collision name="body__usb_shell">
+      <origin xyz="0.0238 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.012 0.0048" />
+      </geometry>
+    </collision>
+    <collision name="body__usb_tongue">
+      <origin xyz="0.0243 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0095 0.009 0.0012" />
+      </geometry>
+    </collision>
+    <collision name="body__pivot_pin">
+      <origin xyz="-0.014 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0016" length="0.0092" />
+      </geometry>
+    </collision>
+    <collision name="body__pivot_head_top">
+      <origin xyz="-0.014 0 0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0041" length="0.0006" />
+      </geometry>
+    </collision>
+    <collision name="body__pivot_head_bottom">
+      <origin xyz="-0.014 0 -0.0037" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0041" length="0.0006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="status_window">
+    <inertial>
+      <origin xyz="0 0 0.0004" rpy="0 0 0" />
+      <mass value="0.0002" />
+      <inertia ixx="1.41333e-10" ixy="0" ixz="0" iyy="3.94667e-10" iyz="0" izz="5.14667e-10" />
+    </inertial>
+    <visual name="status_window_lens">
+      <origin xyz="0 0 0.0004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0048 0.0028 0.0008" />
+      </geometry>
+      <material name="smoked_window">
+        <color rgba="0.3 0.48 0.7 0.55" />
+      </material>
+    </visual>
+    <collision name="status_window__status_window_lens">
+      <origin xyz="0 0 0.0004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0048 0.0028 0.0008" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="cover">
+    <inertial>
+      <origin xyz="0.022 0 0" rpy="0 0 0" />
+      <mass value="0.009" />
+      <inertia ixx="3.8427e-07" ixy="0" ixz="0" iyy="1.53627e-06" iyz="0" izz="1.752e-06" />
+    </inertial>
+    <visual name="swivel_cover">
+      <geometry>
+        <mesh filename="meshes/usb_flash_drive_cover.glb" />
+      </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.77 0.79 0.81 1" />
+      </material>
+    </visual>
+    <collision name="cover__swivel_cover__hull_001">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c19c956aa5c1dfa7fcc404d6__hull_001.obj" />
+      </geometry>
+    </collision>
+    <collision name="cover__swivel_cover__hull_002">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c19c956aa5c1dfa7fcc404d6__hull_002.obj" />
+      </geometry>
+    </collision>
+    <collision name="cover__swivel_cover__hull_003">
+      <geometry>
+        <mesh filename="meshes/collision/cache/c19c956aa5c1dfa7fcc404d6__hull_003.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="body_to_status_window" type="fixed">
+    <origin xyz="-0.0045 0 0.004" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="status_window" />
+  </joint>
+  <joint name="body_to_cover" type="revolute">
+    <origin xyz="-0.014 0 0" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="cover" />
+    <axis xyz="0 0 1" />
+    <limit effort="1.5" velocity="6" lower="0" upper="3.14159" />
+  </joint>
+</robot>

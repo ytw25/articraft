@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_kick_scooter_0001",
+  "created_at": "2026-03-16T01:20:06Z",
+  "updated_at": "2026-03-16T01:20:06Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "kick_scooter",
+  "source": {
+    "run_id": "run_import_kick_scooter_20260316-011021-realism-articulation-v1",
+    "prompt_batch_id": "realism_articulation_v1",
+    "prompt_index": 1
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "A realistic, highly detailed kick scooter with a narrow deck, upright steering column, handlebar, fork, and small urban ",
+    "prompt_preview": "A realistic, highly detailed kick scooter with a narrow deck, upright steering column, handlebar, fork, and small urban wheels. The steering and rolling part..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "model_urdf": "model.urdf",
+    "compile_report_json": "compile_report.json",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs",
+    "assets_dir": "assets"
+  },
+  "hashes": {
+    "prompt_sha256": "60b140d3e53c9628ca3fdf5bb531444c9d18713f90f59b391002bf665c101a97",
+    "model_py_sha256": "4abc777b0dc802d4aeac0963124a8bf2b972ae6e40da8eeb98a7903aaead4583",
+    "model_urdf_sha256": "a84235b0c1e763d4bff2d036a315adb8705caf2c2cc53f39e26f7a11e9926557"
+  },
+  "derived_assets": {
+    "assets_dir": "assets",
+    "materialization_status": "available"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

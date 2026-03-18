@@ -1,0 +1,328 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from sdk_hybrid import (
+    ArticulatedObject,
+    ArticulationType,
+    Box,
+    Cylinder,
+    Inertial,
+    MotionLimits,
+    Origin,
+    TestContext,
+    TestReport,
+    cadquery_available,
+    mesh_from_cadquery,
+)
+
+HERE = Path(__file__).resolve().parent
+MESH_DIR = HERE / "meshes"
+MESH_DIR.mkdir(exist_ok=True)
+
+
+# >>> USER_CODE_START
+# In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
+from math import pi
+
+HALF_PI = pi / 2.0
+
+
+def _build_visual_meshes() -> dict[str, object]:
+    if not cadquery_available():
+        return {}
+
+    import cadquery as cq
+
+    base_plate = cq.Workplane("XY").box(0.22, 0.14, 0.028, centered=(True, True, False))
+    rear_support = (
+        cq.Workplane("XY")
+        .box(0.04, 0.05, 0.05, centered=(True, True, False))
+        .translate((-0.078, 0.0, 0.028))
+    )
+    lower_bridge = (
+        cq.Workplane("XY")
+        .box(0.026, 0.032, 0.018, centered=(True, True, False))
+        .translate((-0.067, 0.0, 0.028))
+    )
+    left_ear = (
+        cq.Workplane("XY")
+        .box(0.014, 0.008, 0.054, centered=(True, True, False))
+        .translate((-0.056, 0.019, 0.028))
+    )
+    right_ear = (
+        cq.Workplane("XY")
+        .box(0.014, 0.008, 0.054, centered=(True, True, False))
+        .translate((-0.056, -0.019, 0.028))
+    )
+    base_shape = base_plate.union(rear_support).union(lower_bridge).union(left_ear).union(right_ear)
+
+    outer_sleeve = cq.Workplane("XY").box(0.185, 0.036, 0.034, centered=(False, True, True))
+    sleeve_pocket = (
+        cq.Workplane("XY")
+        .box(0.155, 0.024, 0.022, centered=(False, True, True))
+        .translate((0.018, 0.0, 0.0))
+    )
+    hinge_knuckle = cq.Workplane("XZ").circle(0.017).extrude(0.016, both=True)
+    hinge_cheek = (
+        cq.Workplane("XY")
+        .box(0.024, 0.024, 0.024, centered=(True, True, True))
+        .translate((0.01, 0.0, 0.0))
+    )
+    outer_arm_shape = outer_sleeve.cut(sleeve_pocket).union(hinge_knuckle).union(hinge_cheek)
+
+    slider_shape = (
+        cq.Workplane("XY")
+        .box(0.19, 0.024, 0.02, centered=(False, True, True))
+        .union(
+            cq.Workplane("XY")
+            .box(0.022, 0.028, 0.022, centered=(False, True, True))
+            .translate((0.168, 0.0, 0.0))
+        )
+    )
+
+    head_body = (
+        cq.Workplane("YZ").circle(0.034).extrude(0.022, both=True).translate((0.235, 0.0, 0.01))
+    )
+    head_neck = (
+        cq.Workplane("XY")
+        .box(0.04, 0.03, 0.034, centered=(False, True, True))
+        .translate((0.185, 0.0, 0.01))
+    )
+    handle_bar = (
+        cq.Workplane("XY")
+        .box(0.05, 0.01, 0.012, centered=(True, True, True))
+        .translate((0.235, 0.0, 0.052))
+    )
+    handle_post_left = (
+        cq.Workplane("XY")
+        .box(0.01, 0.01, 0.022, centered=(True, True, False))
+        .translate((0.215, 0.0, 0.03))
+    )
+    handle_post_right = (
+        cq.Workplane("XY")
+        .box(0.01, 0.01, 0.022, centered=(True, True, False))
+        .translate((0.255, 0.0, 0.03))
+    )
+    lamp_head_shape = (
+        head_body.union(head_neck)
+        .union(handle_bar)
+        .union(handle_post_left)
+        .union(handle_post_right)
+    )
+
+    return {
+        "base": mesh_from_cadquery(base_shape, MESH_DIR / "work_light_base.obj"),
+        "outer_arm": mesh_from_cadquery(outer_arm_shape, MESH_DIR / "work_light_outer_arm.obj"),
+        "slider": mesh_from_cadquery(slider_shape, MESH_DIR / "work_light_slider.obj"),
+        "head": mesh_from_cadquery(lamp_head_shape, MESH_DIR / "work_light_head.obj"),
+    }
+
+
+def build_object_model() -> ArticulatedObject:
+    model = ArticulatedObject(name="hinged_work_light")
+
+    model.material("dark_body", rgba=(0.16, 0.17, 0.19, 1.0))
+    model.material("arm_yellow", rgba=(0.92, 0.77, 0.16, 1.0))
+    model.material("lamp_gray", rgba=(0.67, 0.69, 0.72, 1.0))
+    model.material("lens", rgba=(0.85, 0.92, 0.98, 0.4))
+
+    meshes = _build_visual_meshes()
+
+    base = model.part("base")
+    if "base" in meshes:
+        base.visual(meshes["base"], material="dark_body")
+    else:
+        base.visual(
+            Box((0.22, 0.14, 0.028)),
+            origin=Origin(xyz=(0.0, 0.0, 0.014)),
+            material="dark_body",
+        )
+        base.visual(
+            Box((0.04, 0.05, 0.05)),
+            origin=Origin(xyz=(-0.078, 0.0, 0.053)),
+            material="dark_body",
+        )
+        base.visual(
+            Box((0.014, 0.008, 0.054)),
+            origin=Origin(xyz=(-0.056, 0.019, 0.055)),
+            material="dark_body",
+        )
+        base.visual(
+            Box((0.014, 0.008, 0.054)),
+            origin=Origin(xyz=(-0.056, -0.019, 0.055)),
+            material="dark_body",
+        )
+    base.collision(Box((0.22, 0.14, 0.028)), origin=Origin(xyz=(0.0, 0.0, 0.014)))
+    base.collision(Box((0.04, 0.05, 0.012)), origin=Origin(xyz=(-0.078, 0.0, 0.034)))
+    base.collision(
+        Box((0.014, 0.008, 0.054)),
+        origin=Origin(xyz=(-0.056, 0.019, 0.055)),
+    )
+    base.collision(
+        Box((0.014, 0.008, 0.054)),
+        origin=Origin(xyz=(-0.056, -0.019, 0.055)),
+    )
+    base.inertial = Inertial.from_geometry(
+        Box((0.22, 0.14, 0.08)),
+        mass=2.4,
+        origin=Origin(xyz=(0.0, 0.0, 0.04)),
+    )
+
+    outer_arm = model.part("outer_arm")
+    if "outer_arm" in meshes:
+        outer_arm.visual(meshes["outer_arm"], material="arm_yellow")
+    else:
+        outer_arm.visual(
+            Box((0.185, 0.036, 0.034)),
+            origin=Origin(xyz=(0.0925, 0.0, 0.0)),
+            material="arm_yellow",
+        )
+        outer_arm.visual(
+            Cylinder(radius=0.017, length=0.032),
+            origin=Origin(rpy=(HALF_PI, 0.0, 0.0)),
+            material="arm_yellow",
+        )
+    outer_arm.collision(
+        Box((0.185, 0.022, 0.026)),
+        origin=Origin(xyz=(0.0925, 0.0, 0.0)),
+    )
+    outer_arm.collision(
+        Cylinder(radius=0.012, length=0.01),
+        origin=Origin(rpy=(HALF_PI, 0.0, 0.0)),
+    )
+    outer_arm.inertial = Inertial.from_geometry(
+        Box((0.2, 0.04, 0.04)),
+        mass=0.65,
+        origin=Origin(xyz=(0.09, 0.0, 0.0)),
+    )
+
+    inner_slide = model.part("inner_slide")
+    if "slider" in meshes:
+        inner_slide.visual(meshes["slider"], material="arm_yellow")
+        inner_slide.visual(meshes["head"], material="lamp_gray")
+    else:
+        inner_slide.visual(
+            Box((0.19, 0.024, 0.02)),
+            origin=Origin(xyz=(0.095, 0.0, 0.0)),
+            material="arm_yellow",
+        )
+        inner_slide.visual(
+            Cylinder(radius=0.034, length=0.044),
+            origin=Origin(xyz=(0.235, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),
+            material="lamp_gray",
+        )
+        inner_slide.visual(
+            Box((0.04, 0.03, 0.034)),
+            origin=Origin(xyz=(0.205, 0.0, 0.01)),
+            material="lamp_gray",
+        )
+    inner_slide.visual(
+        Cylinder(radius=0.028, length=0.004),
+        origin=Origin(xyz=(0.259, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),
+        material="lens",
+    )
+    inner_slide.collision(
+        Box((0.19, 0.018, 0.018)),
+        origin=Origin(xyz=(0.095, 0.0, 0.0)),
+    )
+    inner_slide.collision(
+        Box((0.04, 0.026, 0.03)),
+        origin=Origin(xyz=(0.205, 0.0, 0.01)),
+    )
+    inner_slide.collision(
+        Cylinder(radius=0.034, length=0.044),
+        origin=Origin(xyz=(0.235, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),
+    )
+    inner_slide.inertial = Inertial.from_geometry(
+        Box((0.28, 0.07, 0.08)),
+        mass=0.75,
+        origin=Origin(xyz=(0.17, 0.0, 0.015)),
+    )
+
+    model.articulation(
+        "base_tilt",
+        ArticulationType.REVOLUTE,
+        parent="base",
+        child="outer_arm",
+        origin=Origin(xyz=(-0.056, 0.0, 0.062)),
+        axis=(0.0, -1.0, 0.0),
+        motion_limits=MotionLimits(
+            lower=0.0,
+            upper=1.25,
+            effort=12.0,
+            velocity=1.2,
+        ),
+    )
+    model.articulation(
+        "arm_extension",
+        ArticulationType.PRISMATIC,
+        parent="outer_arm",
+        child="inner_slide",
+        origin=Origin(xyz=(0.04, 0.0, 0.0)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            lower=0.0,
+            upper=0.12,
+            effort=20.0,
+            velocity=0.15,
+        ),
+    )
+
+    return model
+
+
+def run_tests() -> TestReport:
+    ctx = TestContext(object_model, asset_root=HERE)
+    ctx.check_model_valid()
+    ctx.check_mesh_files_exist()
+    ctx.check_joint_origin_near_geometry(tol=0.02)
+    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.allow_overlap(
+        "outer_arm",
+        "inner_slide",
+        reason="The telescoping rail intentionally nests inside the outer sleeve.",
+    )
+    ctx.check_no_overlaps(
+        max_pose_samples=128,
+        overlap_tol=0.003,
+        overlap_volume_tol=0.0,
+    )
+    ctx.expect_joint_motion_axis(
+        "base_tilt",
+        "outer_arm",
+        world_axis="z",
+        direction="positive",
+        min_delta=0.05,
+    )
+    ctx.expect_joint_motion_axis(
+        "arm_extension",
+        "inner_slide",
+        world_axis="x",
+        direction="positive",
+        min_delta=0.05,
+    )
+
+    with ctx.pose(base_tilt=0.0, arm_extension=0.0):
+        ctx.expect_aabb_gap_z("outer_arm", "base", max_gap=0.005, max_penetration=0.04)
+        ctx.expect_aabb_gap_z("inner_slide", "base", max_gap=0.005, max_penetration=0.05)
+        ctx.expect_aabb_overlap_xy("outer_arm", "base", min_overlap=0.02)
+        ctx.expect_aabb_overlap_xy("inner_slide", "base", min_overlap=0.02)
+        ctx.expect_aabb_overlap_xy("inner_slide", "outer_arm", min_overlap=0.02)
+
+    with ctx.pose(base_tilt=0.0, arm_extension=0.12):
+        ctx.expect_aabb_gap_z("inner_slide", "base", max_gap=0.005, max_penetration=0.05)
+        ctx.expect_aabb_overlap_xy("inner_slide", "outer_arm", min_overlap=0.015)
+        ctx.expect_xy_distance("inner_slide", "outer_arm", max_dist=0.25)
+
+    with ctx.pose(base_tilt=1.25, arm_extension=0.12):
+        ctx.expect_above("outer_arm", "base", min_clearance=0.04)
+        ctx.expect_above("inner_slide", "base", min_clearance=0.08)
+        ctx.expect_aabb_gap_z("inner_slide", "base", max_gap=0.4, max_penetration=0.0)
+
+    return ctx.report()
+
+
+# >>> USER_CODE_END
+
+object_model = build_object_model()

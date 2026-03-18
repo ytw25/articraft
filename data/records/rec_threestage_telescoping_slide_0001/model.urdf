@@ -1,0 +1,142 @@
+<robot name="long_reach_linear_slide">
+  <material name="rail_oxide">
+    <color rgba="0.26 0.28 0.31 1" />
+  </material>
+  <material name="ground_steel">
+    <color rgba="0.63 0.66 0.7 1" />
+  </material>
+  <material name="carriage_silver">
+    <color rgba="0.8 0.82 0.85 1" />
+  </material>
+  <material name="polymer_black">
+    <color rgba="0.09 0.09 0.1 1" />
+  </material>
+  <link name="base_section">
+    <inertial>
+      <origin xyz="0.45 0 0.035" rpy="0 0 0" />
+      <mass value="6.8" />
+      <inertia ixx="0.00844333" ixy="0" ixz="0" iyy="0.461777" iyz="0" izz="0.464667" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/base_section.glb" />
+      </geometry>
+      <material name="rail_oxide" />
+    </visual>
+    <visual>
+      <origin xyz="0.89 0 0.005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.05 0.01" />
+      </geometry>
+      <material name="polymer_black" />
+    </visual>
+    <collision>
+      <origin xyz="0.45 -0.047 0.035" rpy="0 0 0" />
+      <geometry>
+        <box size="0.9 0.006 0.07" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.45 0.047 0.035" rpy="0 0 0" />
+      <geometry>
+        <box size="0.9 0.006 0.07" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.45 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.9 0.088 0.008" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="mid_section">
+    <inertial>
+      <origin xyz="0.36 0 0.027" rpy="0 0 0" />
+      <mass value="4.1" />
+      <inertia ixx="0.0034071" ixy="0" ixz="0" iyy="0.178116" iyz="0" izz="0.179531" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/mid_section.glb" />
+      </geometry>
+      <material name="ground_steel" />
+    </visual>
+    <visual>
+      <origin xyz="0.012 0 0.004" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.042 0.008" />
+      </geometry>
+      <material name="polymer_black" />
+    </visual>
+    <collision>
+      <origin xyz="0.36 -0.0395 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.72 0.005 0.054" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.36 0.0395 0.027" rpy="0 0 0" />
+      <geometry>
+        <box size="0.72 0.005 0.054" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.36 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.72 0.074 0.006" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="inner_section">
+    <inertial>
+      <origin xyz="0.27 0 0.041" rpy="0 0 0" />
+      <mass value="2.7" />
+      <inertia ixx="0.0025533" ixy="0" ixz="0" iyy="0.0671229" iyz="0" izz="0.0666504" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/inner_section.glb" />
+      </geometry>
+      <material name="carriage_silver" />
+    </visual>
+    <visual>
+      <origin xyz="0.53 0 0.047" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.086 0.01" />
+      </geometry>
+      <material name="polymer_black" />
+    </visual>
+    <collision>
+      <origin xyz="0.27 -0.03175 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.54 0.0045 0.042" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.27 0.03175 0.021" rpy="0 0 0" />
+      <geometry>
+        <box size="0.54 0.0045 0.042" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.27 0 0.0025" rpy="0 0 0" />
+      <geometry>
+        <box size="0.54 0.059 0.005" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_to_mid" type="prismatic">
+    <origin xyz="0.05 0 0.01" rpy="0 0 0" />
+    <parent link="base_section" />
+    <child link="mid_section" />
+    <axis xyz="1 0 0" />
+    <limit effort="250" velocity="0.4" lower="0" upper="0.42" />
+  </joint>
+  <joint name="mid_to_inner" type="prismatic">
+    <origin xyz="0.06 0 0.008" rpy="0 0 0" />
+    <parent link="mid_section" />
+    <child link="inner_section" />
+    <axis xyz="1 0 0" />
+    <limit effort="180" velocity="0.45" lower="0" upper="0.32" />
+  </joint>
+</robot>

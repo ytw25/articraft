@@ -1,0 +1,1055 @@
+<robot name="drawer_cabinet">
+  <material name="oak_veneer">
+    <color rgba="0.55 0.43 0.31 1" />
+    </material>
+  <material name="birch_plywood">
+    <color rgba="0.76 0.69 0.56 1" />
+    </material>
+  <material name="back_panel">
+    <color rgba="0.46 0.37 0.28 1" />
+    </material>
+  <material name="graphite_runner">
+    <color rgba="0.14 0.14 0.15 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.74 0.76 0.78 1" />
+    </material>
+  <link name="carcass">
+    <inertial>
+      <origin xyz="0 0 0.46" rpy="0 0 0" />
+      <mass value="42" />
+      <inertia ixx="3.7688" ixy="0" ixz="0" iyy="5.432" iyz="0" izz="3.276" />
+      </inertial>
+    <visual name="left_side">
+      <origin xyz="-0.411 0 0.46" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.48 0.92" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="right_side">
+      <origin xyz="0.411 0 0.46" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.48 0.92" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="bottom_panel">
+      <origin xyz="0 0.006 0.066" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.468 0.022" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="top_panel">
+      <origin xyz="0 0.006 0.908" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.468 0.024" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="rear_panel">
+      <origin xyz="0 -0.234 0.4755" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.841" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="plinth_front">
+      <origin xyz="0 0.181 0.0245" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.018 0.049" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="plinth_left">
+      <origin xyz="-0.411 0.215 0.0245" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.05 0.049" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="plinth_right">
+      <origin xyz="0.411 0.215 0.0245" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.05 0.049" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="drawer_top_runner_left">
+      <origin xyz="-0.397 0.034 0.8175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_top_runner_right">
+      <origin xyz="0.397 0.034 0.8175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_upper_runner_left">
+      <origin xyz="-0.397 0.034 0.6695" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_upper_runner_right">
+      <origin xyz="0.397 0.034 0.6695" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_lower_runner_left">
+      <origin xyz="-0.397 0.034 0.4765" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_lower_runner_right">
+      <origin xyz="0.397 0.034 0.4765" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_bottom_runner_left">
+      <origin xyz="-0.397 0.034 0.237" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_bottom_runner_right">
+      <origin xyz="0.397 0.034 0.237" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="drawer_top_web_front">
+      <origin xyz="0 0.095 0.751" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.05 0.028" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="drawer_top_web_back">
+      <origin xyz="0 -0.16 0.751" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.034 0.028" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="drawer_upper_web_front">
+      <origin xyz="0 0.095 0.588" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.05 0.028" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="drawer_upper_web_back">
+      <origin xyz="0 -0.16 0.588" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.034 0.028" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="drawer_lower_web_front">
+      <origin xyz="0 0.095 0.365" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.05 0.028" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <visual name="drawer_lower_web_back">
+      <origin xyz="0 -0.16 0.365" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.034 0.028" />
+        </geometry>
+      <material name="back_panel">
+        <color rgba="0.46 0.37 0.28 1" />
+        </material>
+      </visual>
+    <collision name="carcass__left_side">
+      <origin xyz="-0.411 0 0.46" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.48 0.92" />
+        </geometry>
+      </collision>
+    <collision name="carcass__right_side">
+      <origin xyz="0.411 0 0.46" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.48 0.92" />
+        </geometry>
+      </collision>
+    <collision name="carcass__bottom_panel">
+      <origin xyz="0 0.006 0.066" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.468 0.022" />
+        </geometry>
+      </collision>
+    <collision name="carcass__top_panel">
+      <origin xyz="0 0.006 0.908" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.468 0.024" />
+        </geometry>
+      </collision>
+    <collision name="carcass__rear_panel">
+      <origin xyz="0 -0.234 0.4755" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.012 0.841" />
+        </geometry>
+      </collision>
+    <collision name="carcass__plinth_front">
+      <origin xyz="0 0.181 0.0245" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.018 0.049" />
+        </geometry>
+      </collision>
+    <collision name="carcass__plinth_left">
+      <origin xyz="-0.411 0.215 0.0245" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.05 0.049" />
+        </geometry>
+      </collision>
+    <collision name="carcass__plinth_right">
+      <origin xyz="0.411 0.215 0.0245" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.05 0.049" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_top_runner_left">
+      <origin xyz="-0.397 0.034 0.8175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_top_runner_right">
+      <origin xyz="0.397 0.034 0.8175" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_upper_runner_left">
+      <origin xyz="-0.397 0.034 0.6695" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_upper_runner_right">
+      <origin xyz="0.397 0.034 0.6695" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_lower_runner_left">
+      <origin xyz="-0.397 0.034 0.4765" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_lower_runner_right">
+      <origin xyz="0.397 0.034 0.4765" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_bottom_runner_left">
+      <origin xyz="-0.397 0.034 0.237" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_bottom_runner_right">
+      <origin xyz="0.397 0.034 0.237" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.29 0.018" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_top_web_front">
+      <origin xyz="0 0.095 0.751" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.05 0.028" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_top_web_back">
+      <origin xyz="0 -0.16 0.751" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.034 0.028" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_upper_web_front">
+      <origin xyz="0 0.095 0.588" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.05 0.028" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_upper_web_back">
+      <origin xyz="0 -0.16 0.588" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.034 0.028" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_lower_web_front">
+      <origin xyz="0 0.095 0.365" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.05 0.028" />
+        </geometry>
+      </collision>
+    <collision name="carcass__drawer_lower_web_back">
+      <origin xyz="0 -0.16 0.365" rpy="0 0 0" />
+      <geometry>
+        <box size="0.804 0.034 0.028" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="drawer_top">
+    <inertial>
+      <origin xyz="0.388 0.011 0" rpy="0 0 0" />
+      <mass value="4.05" />
+      <inertia ixx="0.0545228" ixy="0" ixz="0" iyy="0.218046" iyz="0" izz="0.262021" />
+      </inertial>
+    <visual name="front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.125" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.095" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.095" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.095" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="bottom">
+      <origin xyz="0.388 -0.004 -0.0355" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.0295" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.0295" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.3355 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.4405 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.388 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.105" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <collision name="drawer_top__front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.125" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.095" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.095" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.095" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__bottom">
+      <origin xyz="0.388 -0.004 -0.0355" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.0295" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.0295" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__visual_8">
+      <origin xyz="0.3355 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__visual_9">
+      <origin xyz="0.4405 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_top__visual_10">
+      <origin xyz="0.388 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.105" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="drawer_upper">
+    <inertial>
+      <origin xyz="0.388 0.011 0" rpy="0 0 0" />
+      <mass value="4.35" />
+      <inertia ixx="0.0616065" ixy="0" ixz="0" iyy="0.237242" iyz="0" izz="0.28143" />
+      </inertial>
+    <visual name="front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.155" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.125" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.125" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.125" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="bottom">
+      <origin xyz="0.388 -0.004 -0.0505" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.0445" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.0445" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.3255 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.4505 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.388 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.125" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <collision name="drawer_upper__front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.155" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.125" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.125" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.125" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__bottom">
+      <origin xyz="0.388 -0.004 -0.0505" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.0445" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.0445" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__visual_8">
+      <origin xyz="0.3255 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__visual_9">
+      <origin xyz="0.4505 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_upper__visual_10">
+      <origin xyz="0.388 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.125" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="drawer_lower">
+    <inertial>
+      <origin xyz="0.388 0.011 0" rpy="0 0 0" />
+      <mass value="4.95" />
+      <inertia ixx="0.0792615" ixy="0" ixz="0" iyy="0.279123" iyz="0" izz="0.320248" />
+      </inertial>
+    <visual name="front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.215" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.185" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.185" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.185" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="bottom">
+      <origin xyz="0.388 -0.004 -0.0805" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.0745" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.0745" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.3105 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.4655 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.388 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.155" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <collision name="drawer_lower__front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.215" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.185" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.185" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.185" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__bottom">
+      <origin xyz="0.388 -0.004 -0.0805" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.0745" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.0745" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__visual_8">
+      <origin xyz="0.3105 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__visual_9">
+      <origin xyz="0.4655 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_lower__visual_10">
+      <origin xyz="0.388 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.155" />
+        </geometry>
+      </collision>
+    </link>
+  <link name="drawer_bottom">
+    <inertial>
+      <origin xyz="0.388 0.011 0" rpy="0 0 0" />
+      <mass value="5.28" />
+      <inertia ixx="0.0912683" ixy="0" ixz="0" iyy="0.304454" iyz="0" izz="0.341598" />
+      </inertial>
+    <visual name="front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.248" />
+        </geometry>
+      <material name="oak_veneer">
+        <color rgba="0.55 0.43 0.31 1" />
+        </material>
+      </visual>
+    <visual name="side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.218" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.218" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.218" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="bottom">
+      <origin xyz="0.388 -0.004 -0.097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      <material name="birch_plywood">
+        <color rgba="0.76 0.69 0.56 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.091" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.091" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      <material name="graphite_runner">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.18758 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.30258 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.24508 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.115" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.47342 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.58842 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.53092 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.115" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.74 0.76 0.78 1" />
+        </material>
+      </visual>
+    <collision name="drawer_bottom__front">
+      <origin xyz="0.388 0.19 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.794 0.022 0.248" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__side_left">
+      <origin xyz="0.006 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.218" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__side_right">
+      <origin xyz="0.77 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.36 0.218" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__back">
+      <origin xyz="0.388 -0.174 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.012 0.218" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__bottom">
+      <origin xyz="0.388 -0.004 -0.097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.752 0.34 0.008" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__slide_strip_left">
+      <origin xyz="0.016 -0.01 -0.091" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__slide_strip_right">
+      <origin xyz="0.76 -0.01 -0.091" rpy="0 0 0" />
+      <geometry>
+        <box size="0.008 0.2592 0.01" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__visual_8">
+      <origin xyz="0.18758 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__visual_9">
+      <origin xyz="0.30258 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__visual_10">
+      <origin xyz="0.24508 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.115" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__visual_11">
+      <origin xyz="0.47342 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__visual_12">
+      <origin xyz="0.58842 0.21 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0036" length="0.018" />
+        </geometry>
+      </collision>
+    <collision name="drawer_bottom__visual_13">
+      <origin xyz="0.53092 0.219 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.115" />
+        </geometry>
+      </collision>
+    </link>
+  <joint name="carcass_to_drawer_top" type="prismatic">
+    <origin xyz="-0.388 0.034 0.8175" rpy="0 0 0" />
+    <parent link="carcass" />
+    <child link="drawer_top" />
+    <axis xyz="0 1 0" />
+    <limit effort="80" velocity="0.4" lower="0" upper="0.26" />
+    </joint>
+  <joint name="carcass_to_drawer_upper" type="prismatic">
+    <origin xyz="-0.388 0.034 0.6695" rpy="0 0 0" />
+    <parent link="carcass" />
+    <child link="drawer_upper" />
+    <axis xyz="0 1 0" />
+    <limit effort="80" velocity="0.4" lower="0" upper="0.27" />
+    </joint>
+  <joint name="carcass_to_drawer_lower" type="prismatic">
+    <origin xyz="-0.388 0.034 0.4765" rpy="0 0 0" />
+    <parent link="carcass" />
+    <child link="drawer_lower" />
+    <axis xyz="0 1 0" />
+    <limit effort="80" velocity="0.4" lower="0" upper="0.29" />
+    </joint>
+  <joint name="carcass_to_drawer_bottom" type="prismatic">
+    <origin xyz="-0.388 0.034 0.237" rpy="0 0 0" />
+    <parent link="carcass" />
+    <child link="drawer_bottom" />
+    <axis xyz="0 1 0" />
+    <limit effort="80" velocity="0.4" lower="0" upper="0.31" />
+    </joint>
+  </robot>

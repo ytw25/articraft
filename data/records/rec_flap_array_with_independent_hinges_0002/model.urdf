@@ -1,0 +1,350 @@
+<robot name="multi_flap_frame">
+  <material name="frame_finish">
+    <color rgba="0.23 0.26 0.3 1" />
+  </material>
+  <material name="flap_finish">
+    <color rgba="0.84 0.86 0.89 1" />
+  </material>
+  <link name="frame">
+    <inertial>
+      <mass value="4.8" />
+      <inertia ixx="0.108474" ixy="0" ixz="0" iyy="0.231354" iyz="0" izz="0.3392" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/frame.glb" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <collision>
+      <origin xyz="-0.3525 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.52 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.3525 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.055 0.52 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 -0.2325 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.65 0.055 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0 0.2325 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.65 0.055 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.032 0.41 0.028" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.65 0.032 0.028" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="flap_top_left">
+    <inertial>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.000868417" ixy="0" ixz="0" iyy="0.00246642" iyz="0" izz="0.00333342" />
+    </inertial>
+    <visual>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 -0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.0238 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.2808 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.155" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.003025 0 -0.00195" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0088 0.155 0.004" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.0132 0.155 0.0132" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="flap_top_right">
+    <inertial>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.000868417" ixy="0" ixz="0" iyy="0.00246642" iyz="0" izz="0.00333342" />
+    </inertial>
+    <visual>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 -0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.0238 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.2808 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.155" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.003025 0 -0.00195" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0088 0.155 0.004" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.0132 0.155 0.0132" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="flap_bottom_left">
+    <inertial>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.000868417" ixy="0" ixz="0" iyy="0.00246642" iyz="0" izz="0.00333342" />
+    </inertial>
+    <visual>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 -0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.0238 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.2808 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.155" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.003025 0 -0.00195" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0088 0.155 0.004" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.0132 0.155 0.0132" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="flap_bottom_right">
+    <inertial>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <mass value="0.34" />
+      <inertia ixx="0.000868417" ixy="0" ixz="0" iyy="0.00246642" iyz="0" izz="0.00333342" />
+    </inertial>
+    <visual>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.1523 -0.0685 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.267 0.01 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.0238 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.2808 0 -0.0011" rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.147 0.0012" />
+      </geometry>
+      <material name="flap_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0055" length="0.155" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <visual>
+      <origin xyz="0.003025 0 -0.00195" rpy="0 0 0" />
+      <geometry>
+        <box size="0.0088 0.155 0.004" />
+      </geometry>
+      <material name="frame_finish" />
+    </visual>
+    <collision>
+      <origin xyz="0.1523 0 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.295 0.175 0.005" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.0132 0.155 0.0132" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="frame_to_flap_top_left" type="revolute">
+    <origin xyz="-0.323 0.1105 0.0207" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="flap_top_left" />
+    <axis xyz="0 -1 0" />
+    <limit effort="3" velocity="1.5" lower="0" upper="1.35" />
+  </joint>
+  <joint name="frame_to_flap_top_right" type="revolute">
+    <origin xyz="0.018 0.1105 0.0207" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="flap_top_right" />
+    <axis xyz="0 -1 0" />
+    <limit effort="3" velocity="1.5" lower="0" upper="1.35" />
+  </joint>
+  <joint name="frame_to_flap_bottom_left" type="revolute">
+    <origin xyz="-0.323 -0.1105 0.0207" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="flap_bottom_left" />
+    <axis xyz="0 -1 0" />
+    <limit effort="3" velocity="1.5" lower="0" upper="1.35" />
+  </joint>
+  <joint name="frame_to_flap_bottom_right" type="revolute">
+    <origin xyz="0.018 -0.1105 0.0207" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="flap_bottom_right" />
+    <axis xyz="0 -1 0" />
+    <limit effort="3" velocity="1.5" lower="0" upper="1.35" />
+  </joint>
+</robot>

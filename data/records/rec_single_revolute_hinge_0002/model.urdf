@@ -1,0 +1,82 @@
+<robot name="garden_gate">
+  <material name="painted_wood">
+    <color rgba="0.58 0.42 0.28 1" />
+  </material>
+  <material name="galvanized_steel">
+    <color rgba="0.45 0.48 0.52 1" />
+  </material>
+  <link name="frame">
+    <inertial>
+      <origin xyz="0 0 0.725" rpy="0 0 0" />
+      <mass value="18" />
+      <inertia ixx="3.1719" ixy="0" ixz="0" iyy="5.2779" iyz="0" izz="2.1423" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/frame_posts.glb" />
+      </geometry>
+      <material name="painted_wood" />
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/frame_hardware.glb" />
+      </geometry>
+      <material name="galvanized_steel" />
+    </visual>
+    <collision>
+      <origin xyz="-0.55 0 0.725" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.09 1.45" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.55 0 0.725" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.09 1.45" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.455 0.065 0.3" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.03 0.08" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="leaf">
+    <inertial>
+      <origin xyz="0.47 0 0.36" rpy="0 0 0" />
+      <mass value="11" />
+      <inertia ixx="1.32147" ixy="0" ixz="0" iyy="2.12997" iyz="0" izz="0.811433" />
+    </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leaf_wood.glb" />
+      </geometry>
+      <material name="painted_wood" />
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/leaf_hardware.glb" />
+      </geometry>
+      <material name="galvanized_steel" />
+    </visual>
+    <collision>
+      <origin xyz="0.485 0 0.36" rpy="0 0 0" />
+      <geometry>
+        <box size="0.91 0.04 1.2" />
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.08" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="frame_to_leaf" type="revolute">
+    <origin xyz="-0.455 0.065 0.3" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="leaf" />
+    <axis xyz="0 0 1" />
+    <limit effort="25" velocity="1.2" lower="0" upper="1.35" />
+  </joint>
+</robot>
