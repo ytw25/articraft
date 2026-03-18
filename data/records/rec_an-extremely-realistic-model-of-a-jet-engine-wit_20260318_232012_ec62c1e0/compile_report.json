@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_an-extremely-realistic-model-of-a-jet-engine-wit_20260318_232012_ec62c1e0",
+  "status": "success",
+  "urdf_path": "model.urdf",
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (non-blocking): geometry overlap check reported overlaps.\nGeometry overlap check failed: part AABBs intersect at sampled articulation poses. worst_pair=('core_rotor'[0], 'engine_case'[16]) min_overlap_depth=0.03982m overlap_volume=0.001166m^3 pose_index=0 pose=(core_spin=0, engine_case_to_core_casing=0, fan_spin=0). elem_a=(name='core_rotor__shaft_and_drum__hull_001' origin_xyz=(0.0, 0.0, 0.0) origin_rpy=(0.0, 0.0, 0.0) geom=Mesh) elem_b=(name='engine_case__stator_frame__hull_001' origin_xyz=(0.0, 0.0, 0.0) origin_rpy=(0.0, 0.0, 0.0) geom=Mesh). hint: try moving 'engine_case' by ~-0.04482m along world x (or adjust the responsible articulation origin/limits / collision origins). Note: this QC is conservative (bounding boxes); concave mesh collisions can yield false positives. Fix by adjusting articulation origins/limits and/or visual/collision origins so parts do not interpenetrate in the rest pose or across the articulated range.\nIf this overlap is acceptable (e.g., conservative false-positive), explicitly allow the specific pair in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)` and then run `ctx.check_no_overlaps(...)` so the allowance is tracked; otherwise adjust geometry/joints."
+    }
+  ],
+  "checks_run": [
+    "compile_urdf"
+  ],
+  "overlap_allowances": [],
+  "metrics": {
+    "turn_count": 8,
+    "tool_call_count": 7,
+    "compile_attempt_count": 5
+  }
+}
