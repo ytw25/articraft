@@ -30,7 +30,7 @@ dataset-validate:
 dataset-manifest:
     uv run articraft-dataset --repo-root . build-manifest
 
-viewer:
+viewer mode="prod" api_host=host api_port=port:
     #!/usr/bin/env bash
     set -euo pipefail
     if ! command -v npm >/dev/null 2>&1; then
@@ -40,18 +40,47 @@ viewer:
     if [ ! -d viewer/web/node_modules ]; then
       npm --prefix viewer/web install
     fi
-    npm --prefix viewer/web run build
     uv run articraft-dataset --repo-root . validate
     uv run articraft-dataset --repo-root . build-manifest
-    (
-      for _ in {1..60}; do
-        if curl -fsS http://{{host}}:{{port}}/health >/dev/null; then
-          open http://{{host}}:{{port}}/ >/dev/null 2>&1 || uv run python -m webbrowser http://{{host}}:{{port}}/ >/dev/null 2>&1 || true
-          exit 0
-        fi
-        sleep 0.25
-      done
-    ) >/dev/null 2>&1 &
+    case "{{mode}}" in
+      prod)
+        npm --prefix viewer/web run build
+        (
+          for _ in {1..60}; do
+            if curl -fsS http://{{api_host}}:{{api_port}}/health >/dev/null; then
+              open http://{{api_host}}:{{api_port}}/ >/dev/null 2>&1 || uv run python -m webbrowser http://{{api_host}}:{{api_port}}/ >/dev/null 2>&1 || true
+              exit 0
+            fi
+            sleep 0.25
+          done
+        ) >/dev/null 2>&1 &
+        exec uv run uvicorn viewer.api.app:app --reload --host {{api_host}} --port {{api_port}}
+        ;;
+      dev)
+        (
+          for _ in {1..60}; do
+            if curl -fsS http://127.0.0.1:5173 >/dev/null; then
+              open http://127.0.0.1:5173/ >/dev/null 2>&1 || uv run python -m webbrowser http://127.0.0.1:5173/ >/dev/null 2>&1 || true
+              exit 0
+            fi
+            sleep 0.25
+          done
+        ) >/dev/null 2>&1 &
+        trap 'if [ -n "${api_pid:-}" ]; then kill "$api_pid" >/dev/null 2>&1 || true; fi' EXIT INT TERM
+        uv run uvicorn viewer.api.app:app --reload --host {{api_host}} --port {{api_port}} &
+        api_pid=$!
+        ARTICRAFT_VIEWER_API_HOST={{api_host}} ARTICRAFT_VIEWER_API_PORT={{api_port}} exec npm --prefix viewer/web run dev
+        ;;
+      *)
+        echo "Unknown viewer mode: {{mode}}. Expected 'prod' or 'dev'." >&2
+        exit 1
+        ;;
+    esac
+
+viewer-dev api_host=host api_port=port:
+    exec just viewer dev {{api_host}} {{api_port}}
+
+viewer-api:
     exec uv run uvicorn viewer.api.app:app --reload --host {{host}} --port {{port}}
 
 viewer-web-install:

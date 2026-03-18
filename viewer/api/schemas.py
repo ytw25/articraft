@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class HealthResponse(BaseModel):
@@ -17,9 +17,11 @@ class RecordSummaryResponse(BaseModel):
     updated_at: str | None = None
     provider: str | None = None
     model_id: str | None = None
+    turn_count: int | None = None
+    total_cost_usd: float | None = None
     category_slug: str | None = None
     run_id: str | None = None
-    collections: list[str] = []
+    collections: list[str] = Field(default_factory=list)
     materialization_status: str | None = None
     has_compile_report: bool = False
     has_provenance: bool = False
@@ -30,7 +32,7 @@ class WorkbenchEntryResponse(BaseModel):
     record_id: str
     added_at: str
     label: str | None = None
-    tags: list[str] = []
+    tags: list[str] = Field(default_factory=list)
     archived: bool = False
     record: RecordSummaryResponse | None = None
 
@@ -68,7 +70,7 @@ class RunResultResponse(BaseModel):
     compile_attempt_count: int | None = None
     record_dir: str | None = None
     staging_dir: str | None = None
-    raw: dict[str, Any] = {}
+    raw: dict[str, Any] = Field(default_factory=dict)
 
 
 class RecordDetailResponse(BaseModel):

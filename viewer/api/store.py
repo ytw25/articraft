@@ -28,6 +28,16 @@ def _parse_sort_key(value: str | None) -> str:
     return value or ""
 
 
+def _coerce_int(value: Any) -> int | None:
+    return value if isinstance(value, int) else None
+
+
+def _coerce_float(value: Any) -> float | None:
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
 class ViewerStore:
     def __init__(self, repo_root: Path) -> None:
         self.repo_root = repo_root.resolve()
@@ -66,6 +76,22 @@ class ViewerStore:
         compile_name = artifacts.get("compile_report_json") or "compile_report.json"
         provenance_name = artifacts.get("provenance_json") or "provenance.json"
         cost_name = artifacts.get("cost_json")
+        provenance = self.repo.read_json(record_dir / str(provenance_name))
+        cost = self.repo.read_json(record_dir / str(cost_name)) if cost_name else None
+
+        turn_count: int | None = None
+        if isinstance(provenance, dict):
+            run_summary = provenance.get("run_summary")
+            if isinstance(run_summary, dict):
+                turn_count = _coerce_int(run_summary.get("turn_count"))
+
+        total_cost_usd: float | None = None
+        if isinstance(cost, dict):
+            total = cost.get("total")
+            if isinstance(total, dict):
+                costs_usd = total.get("costs_usd")
+                if isinstance(costs_usd, dict):
+                    total_cost_usd = _coerce_float(costs_usd.get("total"))
 
         return RecordSummaryResponse(
             record_id=record_id,
@@ -75,6 +101,8 @@ class ViewerStore:
             updated_at=record.get("updated_at"),
             provider=record.get("provider"),
             model_id=record.get("model_id"),
+            turn_count=turn_count,
+            total_cost_usd=total_cost_usd,
             category_slug=record.get("category_slug"),
             run_id=source.get("run_id"),
             collections=[str(item) for item in record.get("collections", [])],
@@ -185,7 +213,11 @@ class ViewerStore:
 
         return sorted(
             summaries,
-            key=lambda item: (_parse_sort_key(item.updated_at), _parse_sort_key(item.created_at), item.run_id),
+            key=lambda item: (
+                _parse_sort_key(item.updated_at),
+                _parse_sort_key(item.created_at),
+                item.run_id,
+            ),
             reverse=True,
         )
 
