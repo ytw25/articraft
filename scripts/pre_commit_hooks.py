@@ -9,7 +9,9 @@ MAX_FILE_SIZE_BYTES = 1_000_000
 REPO_ROOT = Path(__file__).resolve().parent.parent
 FORBIDDEN_PATHS = (
     re.compile(r"(^|/)\.env(\..*)?$"),
-    re.compile(r"^data/"),
+    re.compile(r"^data/cache/"),
+    re.compile(r"^data/local/"),
+    re.compile(r"^data/records/[^/]+/assets(?:/|$)"),
 )
 SECRET_PATTERNS = (
     ("OpenAI API key assignment", re.compile(r"OPENAI_API_KEY\s*=\s*['\"]?[^'\"\s]+")),
