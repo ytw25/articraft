@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_model-a-smooth-outer-shell-for-a-compact-wireles_20260319_174508_666392_8e075f21",
+  "generation": {
+    "provider": "openai",
+    "model_id": "gpt-5.4",
+    "thinking_level": "high",
+    "openai_transport": "http",
+    "openai_reasoning_summary": "auto",
+    "max_turns": 30
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt_openai.txt",
+    "system_prompt_sha256": "fbf1751e8a0c00d2f8182d18c5d7670a339e81941f17c0a49309868731186048",
+    "sdk_docs_mode": "full"
+  },
+  "sdk": {
+    "sdk_package": "sdk",
+    "sdk_version": "workspace",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "3.11.14",
+    "platform": "darwin-arm64",
+    "git_commit": "c35ec8a81123349f3aa33a51e85a29f8dc155d1c",
+    "uv_lock_sha256": "c781a0255607a571d89df1fe05a0974ab0e56afe50d086810a15de7a2ba492ac"
+  },
+  "run_summary": {
+    "turn_count": 8,
+    "tool_call_count": 7,
+    "compile_attempt_count": 5,
+    "final_status": "success"
+  },
+  "materialization": {
+    "fingerprint_inputs": {
+      "model_py_sha256": "3d263f9459727218a1f29de556424f2c2226aadc50f41debaa748cd7e8cb45e6",
+      "model_urdf_sha256": "6829f7826b2be468d08529928336ec655ba1c268b605001103f137a32d6871e4",
+      "sdk_fingerprint": null,
+      "materializer_version": "v1"
+    }
+  }
+}
