@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState, type JSX } from "react";
+import { useCallback, useState, type JSX } from "react";
 
-import type { SourceFilter } from "@/lib/types";
 import { useViewer, useViewerDispatch } from "@/lib/viewer-context";
 import { BulkActionBar } from "@/components/browser/BulkActionBar";
 import { ExplorerFilters } from "@/components/browser/ExplorerFilters";
@@ -8,21 +7,11 @@ import { RecordSearch } from "@/components/browser/RecordSearch";
 import { RecordList } from "@/components/browser/RecordList";
 import { StagingList } from "@/components/browser/StagingList";
 
-type BrowserTab = SourceFilter | "staging";
-
 export function RecordBrowser(): JSX.Element {
-  const { sourceFilter, loading, error, selection, multiSelection } = useViewer();
+  const { browserTab, loading, error, multiSelection } = useViewer();
   const dispatch = useViewerDispatch();
-  const [activeTab, setActiveTab] = useState<BrowserTab>(sourceFilter);
   const [visibleRecordIds, setVisibleRecordIds] = useState<string[]>([]);
   const handleVisibleIdsChange = useCallback((ids: string[]) => setVisibleRecordIds(ids), []);
-  useEffect(() => {
-    if (selection?.kind === "staging") {
-      setActiveTab("staging");
-      return;
-    }
-    setActiveTab(sourceFilter);
-  }, [selection, sourceFilter]);
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
@@ -31,11 +20,10 @@ export function RecordBrowser(): JSX.Element {
           <button
             type="button"
             onClick={() => {
-              dispatch({ type: "SET_SOURCE_FILTER", payload: "workbench" });
-              setActiveTab("workbench");
+              dispatch({ type: "SET_BROWSER_TAB", payload: "workbench" });
             }}
             className={`relative px-3 py-3 text-[11px] font-medium tracking-[0.01em] transition-colors duration-150 ${
-              activeTab === "workbench"
+              browserTab === "workbench"
                 ? "text-[var(--text-primary)] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[1.5px] after:rounded-full after:bg-[var(--text-primary)]"
                 : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
             }`}
@@ -45,11 +33,10 @@ export function RecordBrowser(): JSX.Element {
           <button
             type="button"
             onClick={() => {
-              dispatch({ type: "SET_SOURCE_FILTER", payload: "dataset" });
-              setActiveTab("dataset");
+              dispatch({ type: "SET_BROWSER_TAB", payload: "dataset" });
             }}
             className={`relative px-3 py-3 text-[11px] font-medium tracking-[0.01em] transition-colors duration-150 ${
-              activeTab === "dataset"
+              browserTab === "dataset"
                 ? "text-[var(--text-primary)] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[1.5px] after:rounded-full after:bg-[var(--text-primary)]"
                 : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
             }`}
@@ -58,9 +45,9 @@ export function RecordBrowser(): JSX.Element {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("staging")}
+            onClick={() => dispatch({ type: "SET_BROWSER_TAB", payload: "staging" })}
             className={`relative px-3 py-3 text-[11px] font-medium tracking-[0.01em] transition-colors duration-150 ${
-              activeTab === "staging"
+              browserTab === "staging"
                 ? "text-[var(--success)] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[1.5px] after:rounded-full after:bg-[var(--success)]"
                 : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
             }`}
@@ -76,7 +63,7 @@ export function RecordBrowser(): JSX.Element {
         </div>
       ) : null}
 
-      {activeTab === "staging" ? (
+      {browserTab === "staging" ? (
         <>
           <div className="space-y-2 border-b border-[var(--border-default)] px-3 py-3">
             <RecordSearch placeholder="Search staging objects…" />

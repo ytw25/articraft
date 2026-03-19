@@ -172,6 +172,7 @@ export type ViewerSelection =
   | { kind: "staging"; runId: string; recordId: string };
 
 export type SourceFilter = "workbench" | "dataset";
+export type BrowserTab = SourceFilter | "staging";
 export type TimeFilter = "any" | "24h" | "7d" | "30d" | "90d";
 export type CostFilter = {
   min: number | null;
@@ -189,6 +190,7 @@ export type ViewerState = {
   loading: boolean;
   error: string | null;
   searchQuery: string;
+  browserTab: BrowserTab;
   sourceFilter: SourceFilter;
   timeFilter: TimeFilter;
   modelFilter: string | null;
@@ -208,6 +210,7 @@ export type ViewerAction =
         selectedRecordId: string | null;
         selectedInspectorTab: InspectorTab;
         searchQuery: string;
+        browserTab: BrowserTab;
         sourceFilter: SourceFilter;
         timeFilter: TimeFilter;
         modelFilter: string | null;
@@ -227,6 +230,7 @@ export type ViewerAction =
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null }
   | { type: "SET_SEARCH"; payload: string }
+  | { type: "SET_BROWSER_TAB"; payload: BrowserTab }
   | { type: "SET_SOURCE_FILTER"; payload: SourceFilter }
   | { type: "SET_TIME_FILTER"; payload: TimeFilter }
   | { type: "SET_MODEL_FILTER"; payload: string | null }

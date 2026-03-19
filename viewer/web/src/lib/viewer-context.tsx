@@ -11,6 +11,7 @@ import {
 
 import { fetchBootstrap, fetchStagingEntries } from "@/lib/api";
 import type {
+  BrowserTab,
   CostFilter,
   InspectorTab,
   RatingFilter,
@@ -26,6 +27,7 @@ import type {
 const URL_QUERY_PARAMS = {
   record: "record",
   staging: "staging",
+  browser: "browser",
   tab: "tab",
   search: "q",
   source: "source",
@@ -39,6 +41,7 @@ const URL_QUERY_PARAMS = {
 } as const;
 
 const INSPECTOR_TABS = ["inspect", "render", "code", "metadata"] as const satisfies readonly InspectorTab[];
+const BROWSER_TABS = ["workbench", "dataset", "staging"] as const satisfies readonly BrowserTab[];
 const SOURCE_FILTERS = ["workbench", "dataset"] as const satisfies readonly SourceFilter[];
 const TIME_FILTERS = ["any", "24h", "7d", "30d", "90d"] as const satisfies readonly TimeFilter[];
 const RATING_FILTERS = ["any", "1", "2", "3", "4", "5", "unrated"] as const satisfies readonly RatingFilter[];
@@ -51,6 +54,7 @@ type ViewerUrlState = Pick<
   | "selectedRecordId"
   | "selectedInspectorTab"
   | "searchQuery"
+  | "browserTab"
   | "sourceFilter"
   | "timeFilter"
   | "modelFilter"
@@ -65,6 +69,7 @@ const defaultViewerUrlState: ViewerUrlState = {
   selectedRecordId: null,
   selectedInspectorTab: "inspect",
   searchQuery: "",
+  browserTab: "workbench",
   sourceFilter: "workbench",
   timeFilter: "any",
   modelFilter: null,
@@ -147,11 +152,18 @@ function readViewerUrlState(): ViewerUrlState {
       defaultViewerUrlState.selectedInspectorTab,
     );
     const searchQuery = params.get(URL_QUERY_PARAMS.search) ?? defaultViewerUrlState.searchQuery;
-    const sourceFilter = parseEnumParam(
+    const parsedSourceFilter = parseEnumParam(
       params.get(URL_QUERY_PARAMS.source),
       SOURCE_FILTERS,
       defaultViewerUrlState.sourceFilter,
     );
+    const parsedBrowserTab = parseEnumParam(
+      params.get(URL_QUERY_PARAMS.browser),
+      BROWSER_TABS,
+      selection?.kind === "staging" ? "staging" : parsedSourceFilter,
+    );
+    const sourceFilter =
+      parsedBrowserTab === "staging" ? parsedSourceFilter : parsedBrowserTab;
     const timeFilter = parseEnumParam(
       params.get(URL_QUERY_PARAMS.time),
       TIME_FILTERS,
@@ -182,6 +194,7 @@ function readViewerUrlState(): ViewerUrlState {
       selectedRecordId,
       selectedInspectorTab,
       searchQuery,
+      browserTab: parsedBrowserTab,
       sourceFilter,
       timeFilter,
       modelFilter: modelFilter && modelFilter.trim() ? modelFilter : null,
@@ -226,7 +239,9 @@ function syncViewerStateToUrl(state: ViewerUrlState): void {
     url.searchParams.delete(URL_QUERY_PARAMS.search);
   }
 
-  if (state.sourceFilter !== defaultViewerUrlState.sourceFilter) {
+  url.searchParams.set(URL_QUERY_PARAMS.browser, state.browserTab);
+
+  if (state.browserTab === "staging" && state.sourceFilter !== defaultViewerUrlState.sourceFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.source, state.sourceFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.source);
@@ -490,8 +505,27 @@ function viewerReducer(state: ViewerState, action: ViewerAction): ViewerState {
       return { ...state, error: action.payload, loading: false };
     case "SET_SEARCH":
       return { ...state, searchQuery: action.payload, multiSelection: new Set() };
+    case "SET_BROWSER_TAB":
+      if (action.payload === "staging") {
+        return { ...state, browserTab: action.payload };
+      }
+      return {
+        ...state,
+        browserTab: action.payload,
+        sourceFilter: action.payload,
+        modelFilter: null,
+        selectedRunId: null,
+        multiSelection: new Set(),
+      };
     case "SET_SOURCE_FILTER":
-      return { ...state, sourceFilter: action.payload, modelFilter: null, selectedRunId: null, multiSelection: new Set() };
+      return {
+        ...state,
+        browserTab: action.payload,
+        sourceFilter: action.payload,
+        modelFilter: null,
+        selectedRunId: null,
+        multiSelection: new Set(),
+      };
     case "SET_TIME_FILTER":
       return { ...state, timeFilter: action.payload };
     case "SET_MODEL_FILTER":
@@ -618,6 +652,7 @@ export function ViewerProvider({ children }: { children: ReactNode }): JSX.Eleme
       selectedRecordId: state.selectedRecordId,
       selectedInspectorTab: state.selectedInspectorTab,
       searchQuery: state.searchQuery,
+      browserTab: state.browserTab,
       sourceFilter: state.sourceFilter,
       timeFilter: state.timeFilter,
       modelFilter: state.modelFilter,
@@ -631,6 +666,7 @@ export function ViewerProvider({ children }: { children: ReactNode }): JSX.Eleme
     state.costFilter,
     state.modelFilter,
     state.ratingFilter,
+    state.browserTab,
     state.searchQuery,
     state.selectedInspectorTab,
     state.selectedRecordId,
