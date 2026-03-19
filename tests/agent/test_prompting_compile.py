@@ -1,17 +1,10 @@
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
-
 from agent.prompts.compile import compile_prompt_variant, find_stale_prompts
 from agent.prompts.spec import iter_prompt_variants
 
 
-def main() -> None:
+def test_prompt_outputs_are_current() -> None:
     stale = find_stale_prompts()
     assert not stale, f"Generated prompts are stale: {[variant.output.name for variant in stale]}"
 
@@ -26,7 +19,3 @@ def main() -> None:
     assert "read_code" in compiled_by_name["designer_system_prompt_gemini.txt"]
     assert "write_code" not in compiled_by_name["designer_system_prompt_gemini.txt"]
     assert "sdk_hybrid" in compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
-
-
-if __name__ == "__main__":
-    main()

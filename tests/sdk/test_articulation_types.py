@@ -1,22 +1,8 @@
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
+import pytest
 
 from sdk import ArticulatedObject, MotionLimits, ValidationError
-
-
-def expect_validation_error(model: ArticulatedObject, message: str) -> None:
-    try:
-        model.validate(strict=True)
-    except ValidationError as exc:
-        assert message in str(exc)
-    else:
-        raise AssertionError(f"Expected ValidationError containing: {message}")
 
 
 def test_unknown_articulation_type() -> None:
@@ -24,12 +10,8 @@ def test_unknown_articulation_type() -> None:
     base = model.part("base")
     slider = model.part("slider")
 
-    try:
+    with pytest.raises(ValidationError, match="Unknown articulation type"):
         model.articulation("base_to_slider", "planar", parent=base, child=slider)
-    except ValidationError as exc:
-        assert "Unknown articulation type" in str(exc)
-    else:
-        raise AssertionError("Expected planar articulations to be rejected")
 
 
 def test_continuous_requires_motion_limits() -> None:
@@ -37,10 +19,12 @@ def test_continuous_requires_motion_limits() -> None:
     base = model.part("base")
     mast = model.part("mast")
     model.articulation("mast_slew", "continuous", parent=base, child=mast)
-    expect_validation_error(
-        model,
-        "must set motion_limits=MotionLimits(effort=..., velocity=...)",
-    )
+
+    with pytest.raises(
+        ValidationError,
+        match="must set motion_limits=MotionLimits\\(effort=..., velocity=...\\)",
+    ):
+        model.validate(strict=True)
 
 
 def test_continuous_forbids_lower_upper_limits() -> None:
@@ -59,7 +43,9 @@ def test_continuous_forbids_lower_upper_limits() -> None:
             upper=1.0,
         ),
     )
-    expect_validation_error(model, "cannot include lower/upper limits")
+
+    with pytest.raises(ValidationError, match="cannot include lower/upper limits"):
+        model.validate(strict=True)
 
 
 def test_continuous_accepts_effort_velocity_only() -> None:
@@ -74,14 +60,3 @@ def test_continuous_accepts_effort_velocity_only() -> None:
         motion_limits=MotionLimits(effort=12.0, velocity=1.5),
     )
     model.validate(strict=True)
-
-
-def main() -> None:
-    test_unknown_articulation_type()
-    test_continuous_requires_motion_limits()
-    test_continuous_forbids_lower_upper_limits()
-    test_continuous_accepts_effort_velocity_only()
-
-
-if __name__ == "__main__":
-    main()

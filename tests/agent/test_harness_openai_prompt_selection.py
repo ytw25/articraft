@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 
 from agent.prompts import (
     DESIGNER_PROMPT_NAME,
@@ -19,7 +14,7 @@ from agent.prompts import (
 from agent.runner import build_provider_payload_preview
 
 
-def main() -> None:
+def test_openai_prompt_resolution_and_payload_preview() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
     resolved = resolve_system_prompt_path(
@@ -62,6 +57,8 @@ def main() -> None:
     assert "## sdk/_docs/common/00_quickstart.md" in docs_message
     assert "## sdk/_docs/common/80_testing.md" in docs_message
 
+
+def test_openai_hybrid_payload_preview_includes_hybrid_docs() -> None:
     hybrid_docs_message = build_provider_payload_preview(
         "a pair of scissors",
         provider="openai",
@@ -74,6 +71,10 @@ def main() -> None:
     assert "## sdk/_docs/common/00_quickstart.md" in hybrid_docs_message
     assert "## sdk/_docs/cadquery/35_cadquery.md" in hybrid_docs_message
     assert "## sdk/_docs/common/80_testing.md" in hybrid_docs_message
+
+
+def test_gemini_prompt_resolution_and_payload_preview() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
 
     gemini_resolved = resolve_system_prompt_path(
         DESIGNER_PROMPT_NAME,
@@ -101,7 +102,3 @@ def main() -> None:
     assert "Use ONLY `read_code` and `edit_code`" in gemini_instructions
     assert 'old_string=""' in gemini_instructions
     assert "write_code" not in gemini_instructions
-
-
-if __name__ == "__main__":
-    main()

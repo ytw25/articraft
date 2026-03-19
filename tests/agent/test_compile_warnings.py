@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 
 from agent.compiler import _warn_geometry_scale_anomalies
 from agent.harness import ArticraftAgent
@@ -74,13 +69,3 @@ def test_harness_injects_important_compile_warnings() -> None:
     assert injected is True
     assert conversation
     assert "IMPORTANT" in conversation[0]["content"]
-
-
-def main() -> None:
-    test_absurd_dimension_warning()
-    test_outlier_dimension_warning()
-    test_harness_injects_important_compile_warnings()
-
-
-if __name__ == "__main__":
-    main()

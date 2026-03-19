@@ -1,18 +1,12 @@
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 
 from agent.prompts import (
     DESIGNER_PROMPT_NAME,
     GEMINI_DESIGNER_PROMPT_NAME,
-    HYBRID_OPENAI_DESIGNER_PROMPT_NAME,
     HYBRID_GEMINI_DESIGNER_PROMPT_NAME,
+    HYBRID_OPENAI_DESIGNER_PROMPT_NAME,
     OPENAI_DESIGNER_PROMPT_NAME,
     load_system_prompt_text,
     provider_system_prompt_suffix,
@@ -20,7 +14,7 @@ from agent.prompts import (
 )
 
 
-def main() -> None:
+def test_system_prompt_resolution_variants() -> None:
     repo_root = Path(__file__).resolve().parents[2]
 
     resolved = resolve_system_prompt_path(
@@ -61,9 +55,7 @@ def main() -> None:
     )
     assert gemini_hybrid_resolved.name == HYBRID_GEMINI_DESIGNER_PROMPT_NAME
 
+
+def test_provider_system_prompt_suffixes() -> None:
     assert provider_system_prompt_suffix("openai") == ""
     assert provider_system_prompt_suffix("gemini") == ""
-
-
-if __name__ == "__main__":
-    main()

@@ -5,13 +5,8 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from fastapi.testclient import TestClient
-
-if __package__ in {None, ""}:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
 
 from storage.repo import StorageRepo
 from viewer.api.app import create_app
@@ -380,126 +375,117 @@ def _build_synthetic_final_10k(source_root: Path) -> None:
     _write_text(source_root / "REJECTED_CATEGORIES.txt", "# None\n")
 
 
-def main() -> None:
-    with TemporaryDirectory() as source_tmpdir, TemporaryDirectory() as repo_tmpdir:
-        source_root = Path(source_tmpdir) / "final_10k"
-        repo_root = Path(repo_tmpdir)
-        _build_synthetic_final_10k(source_root)
+def test_migrate_final_10k_import_and_replace(tmp_path: Path) -> None:
+    source_root = tmp_path / "source" / "final_10k"
+    repo_root = tmp_path / "repo"
+    _build_synthetic_final_10k(source_root)
 
-        dry_run = subprocess.run(
-            [
-                sys.executable,
-                str(SCRIPT_PATH),
-                "--source-root",
-                str(source_root),
-                "--repo-root",
-                str(repo_root),
-                "--dry-run",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        assert dry_run.returncode == 0, dry_run.stdout + dry_run.stderr
-        assert "categories=202" in dry_run.stdout
-        assert "accepted_items=256" in dry_run.stdout
-        assert "runs=212" in dry_run.stdout
+    dry_run = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--source-root",
+            str(source_root),
+            "--repo-root",
+            str(repo_root),
+            "--dry-run",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert dry_run.returncode == 0, dry_run.stdout + dry_run.stderr
+    assert "categories=202" in dry_run.stdout
+    assert "accepted_items=256" in dry_run.stdout
+    assert "runs=212" in dry_run.stdout
 
-        imported = subprocess.run(
-            [
-                sys.executable,
-                str(SCRIPT_PATH),
-                "--source-root",
-                str(source_root),
-                "--repo-root",
-                str(repo_root),
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        assert imported.returncode == 0, imported.stdout + imported.stderr
+    imported = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--source-root",
+            str(source_root),
+            "--repo-root",
+            str(repo_root),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert imported.returncode == 0, imported.stdout + imported.stderr
 
-        repo = StorageRepo(repo_root)
-        category_payload = repo.read_json(repo.layout.category_metadata_path("category_000"))
-        assert category_payload is not None
-        assert "target_count" not in category_payload
-        assert "remaining_count" not in category_payload
-        assert category_payload["target_sdk_version"] == "base"
-        assert category_payload["current_count"] == 2
-        assert repo.layout.prompt_batch_path("category_000", "realism_articulation_v1").exists()
+    repo = StorageRepo(repo_root)
+    category_payload = repo.read_json(repo.layout.category_metadata_path("category_000"))
+    assert category_payload is not None
+    assert "target_count" not in category_payload
+    assert "remaining_count" not in category_payload
+    assert category_payload["target_sdk_version"] == "base"
+    assert category_payload["current_count"] == 2
+    assert repo.layout.prompt_batch_path("category_000", "realism_articulation_v1").exists()
 
-        missing_mesh_record = repo.read_json(
-            repo.layout.record_metadata_path("rec_category_000_0001")
-        )
-        assert missing_mesh_record is not None
-        assert missing_mesh_record["derived_assets"]["materialization_status"] == "missing"
-        assert missing_mesh_record["rating"] == 4
+    missing_mesh_record = repo.read_json(repo.layout.record_metadata_path("rec_category_000_0001"))
+    assert missing_mesh_record is not None
+    assert missing_mesh_record["derived_assets"]["materialization_status"] == "missing"
+    assert missing_mesh_record["rating"] == 4
 
-        available_mesh_record = repo.read_json(
-            repo.layout.record_metadata_path("rec_category_001_0001")
-        )
-        assert available_mesh_record is not None
-        assert available_mesh_record["derived_assets"]["materialization_status"] == "available"
-        assert available_mesh_record["rating"] == 5
-        assert repo.layout.record_asset_meshes_dir("rec_category_001_0001").exists()
-        rewritten_cache_manifest = (
-            repo.layout.record_asset_meshes_dir("rec_category_001_0001")
-            / "collision"
-            / "cache"
-            / "mesh_hash_0001.json"
-        )
-        if rewritten_cache_manifest.exists():
-            rewritten_cache_payload = json.loads(
-                rewritten_cache_manifest.read_text(encoding="utf-8")
-            )
-            assert rewritten_cache_payload["mesh"].startswith(str(repo_root.resolve()))
-            assert "synthetic_final_10k" not in rewritten_cache_payload["mesh"]
+    available_mesh_record = repo.read_json(
+        repo.layout.record_metadata_path("rec_category_001_0001")
+    )
+    assert available_mesh_record is not None
+    assert available_mesh_record["derived_assets"]["materialization_status"] == "available"
+    assert available_mesh_record["rating"] == 5
+    assert repo.layout.record_asset_meshes_dir("rec_category_001_0001").exists()
+    rewritten_cache_manifest = (
+        repo.layout.record_asset_meshes_dir("rec_category_001_0001")
+        / "collision"
+        / "cache"
+        / "mesh_hash_0001.json"
+    )
+    if rewritten_cache_manifest.exists():
+        rewritten_cache_payload = json.loads(rewritten_cache_manifest.read_text(encoding="utf-8"))
+        assert rewritten_cache_payload["mesh"].startswith(str(repo_root.resolve()))
+        assert "synthetic_final_10k" not in rewritten_cache_payload["mesh"]
 
-        dataset_manifest = repo.read_json(repo.layout.dataset_manifest_path())
-        assert dataset_manifest is not None
-        assert len(dataset_manifest["generated"]) == ITEM_COUNT
-        assert dataset_manifest["generated"][0]["name"] == "ds_category_000_0001"
+    dataset_manifest = repo.read_json(repo.layout.dataset_manifest_path())
+    assert dataset_manifest is not None
+    assert len(dataset_manifest["generated"]) == ITEM_COUNT
+    assert dataset_manifest["generated"][0]["name"] == "ds_category_000_0001"
 
-        viewer_store = ViewerStore(repo_root)
-        assert len(viewer_store.list_dataset_entries()) == ITEM_COUNT
-        assert len(viewer_store.list_runs()) == RUN_COUNT
+    viewer_store = ViewerStore(repo_root)
+    assert len(viewer_store.list_dataset_entries()) == ITEM_COUNT
+    assert len(viewer_store.list_runs()) == RUN_COUNT
 
-        client = TestClient(create_app(repo_root=repo_root))
-        trace_response = client.get("/api/records/rec_category_000_0001/traces/conversation.jsonl")
-        assert trace_response.status_code == 200
-        assert '"role":"assistant"' in trace_response.text
-        assert repo.layout.record_traces_dir("rec_category_000_0001").exists()
-        assert not list(repo.layout.runs_root.glob("*/staging/rec_category_000_0001/traces"))
+    client = TestClient(create_app(repo_root=repo_root))
+    trace_response = client.get("/api/records/rec_category_000_0001/traces/conversation.jsonl")
+    assert trace_response.status_code == 200
+    assert '"role":"assistant"' in trace_response.text
+    assert repo.layout.record_traces_dir("rec_category_000_0001").exists()
+    assert not list(repo.layout.runs_root.glob("*/staging/rec_category_000_0001/traces"))
 
-        bootstrap = client.get("/api/bootstrap").json()
-        assert len(bootstrap["dataset_entries"]) == ITEM_COUNT
-        assert len(bootstrap["runs"]) == RUN_COUNT
+    bootstrap = client.get("/api/bootstrap").json()
+    assert len(bootstrap["dataset_entries"]) == ITEM_COUNT
+    assert len(bootstrap["runs"]) == RUN_COUNT
 
-        workbench_path = repo.layout.local_workbench_path()
-        workbench_path.parent.mkdir(parents=True, exist_ok=True)
-        workbench_path.write_text(
-            '{"entries":[{"record_id":"rec_category_000_0001"}]}\n', encoding="utf-8"
-        )
+    workbench_path = repo.layout.local_workbench_path()
+    workbench_path.parent.mkdir(parents=True, exist_ok=True)
+    workbench_path.write_text(
+        '{"entries":[{"record_id":"rec_category_000_0001"}]}\n', encoding="utf-8"
+    )
 
-        replaced = subprocess.run(
-            [
-                sys.executable,
-                str(SCRIPT_PATH),
-                "--source-root",
-                str(source_root),
-                "--repo-root",
-                str(repo_root),
-                "--replace-data",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        assert replaced.returncode == 0, replaced.stdout + replaced.stderr
-        assert workbench_path.exists()
-        assert '"rec_category_000_0001"' in workbench_path.read_text(encoding="utf-8")
-
-
-if __name__ == "__main__":
-    main()
+    replaced = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT_PATH),
+            "--source-root",
+            str(source_root),
+            "--repo-root",
+            str(repo_root),
+            "--replace-data",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert replaced.returncode == 0, replaced.stdout + replaced.stderr
+    assert workbench_path.exists()
+    assert '"rec_category_000_0001"' in workbench_path.read_text(encoding="utf-8")

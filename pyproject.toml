@@ -43,8 +43,13 @@ packages = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
+    "pytest>=8.4.0",
     "ruff>=0.11.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
 
 [tool.ruff]
 line-length = 100
