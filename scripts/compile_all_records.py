@@ -6,6 +6,7 @@ import multiprocessing as mp
 import os
 import queue
 import re
+import resource
 import subprocess
 import time
 from collections import deque
@@ -39,6 +40,8 @@ _DEFAULT_MEM_PER_WORKER_GB = 3.0
 _DEFAULT_VISUAL_MEM_PER_WORKER_GB = 1.5
 _DEFAULT_RESERVE_MEM_GB = 2.0
 _VISUAL_AUTO_WORKER_HARD_CAP = 512
+_OPEN_FILE_WORKER_RESERVE = 64
+_OPEN_FILE_WORKER_FD_BUDGET = 4
 _COMPILE_TARGETS = {"full", "visual"}
 _BASE_BULK_PRELOAD_MODULES = ("agent.compiler", "viewer.api.store")
 _CADQUERY_BULK_PRELOAD_MODULES = ("cadquery", "OCP", "sdk_hybrid")
@@ -85,6 +88,15 @@ class WorkerState:
     task_queue: Any
     assigned: CompileCandidate | None = None
     started_at: float | None = None
+
+
+@dataclass(slots=True, frozen=True)
+class OpenFileWorkerCap:
+    worker_cap: int
+    soft_limit: int
+    open_files: int
+    reserve_files: int
+    per_worker_budget: int
 
 
 def _normalize_compile_target(target: str) -> str:
@@ -436,6 +448,46 @@ def _memory_budget_bytes() -> int | None:
     return _available_memory_bytes()
 
 
+def _open_file_soft_limit() -> int | None:
+    if not hasattr(resource, "RLIMIT_NOFILE"):
+        return None
+    try:
+        soft_limit, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+    except Exception:
+        return None
+    if not isinstance(soft_limit, int) or soft_limit <= 0:
+        return None
+    return soft_limit
+
+
+def _current_open_file_count() -> int | None:
+    for fd_root in ("/dev/fd", "/proc/self/fd"):
+        try:
+            return len(os.listdir(fd_root))
+        except OSError:
+            continue
+    return None
+
+
+def _open_file_worker_cap() -> OpenFileWorkerCap | None:
+    soft_limit = _open_file_soft_limit()
+    open_files = _current_open_file_count()
+    if soft_limit is None or open_files is None:
+        return None
+    usable = soft_limit - open_files - _OPEN_FILE_WORKER_RESERVE
+    if usable <= 0:
+        worker_cap = 1
+    else:
+        worker_cap = max(1, usable // _OPEN_FILE_WORKER_FD_BUDGET)
+    return OpenFileWorkerCap(
+        worker_cap=worker_cap,
+        soft_limit=soft_limit,
+        open_files=open_files,
+        reserve_files=_OPEN_FILE_WORKER_RESERVE,
+        per_worker_budget=_OPEN_FILE_WORKER_FD_BUDGET,
+    )
+
+
 def _auto_worker_memory_cap(
     *,
     reserve_mem_gb: float,
@@ -478,22 +530,33 @@ def _resolve_worker_count(
 
     normalized = str(raw_value).strip().lower()
     cpu_count = _logical_cpu_count()
+    open_file_cap = _open_file_worker_cap()
     if normalized == "max":
-        return max(1, candidate_count)
+        resolved = max(1, candidate_count)
+        if open_file_cap is not None:
+            resolved = min(resolved, open_file_cap.worker_cap)
+        return resolved
 
     if normalized == "auto":
         if target == "visual":
             # Visual compile throughput is dominated by interpreter/module startup and
             # many records are lightweight. Favor aggressive fan-out here; explicit
             # numeric overrides still win if the caller wants something different.
-            return max(1, min(candidate_count, _VISUAL_AUTO_WORKER_HARD_CAP))
+            resolved = max(1, min(candidate_count, _VISUAL_AUTO_WORKER_HARD_CAP))
+            if open_file_cap is not None:
+                resolved = min(resolved, open_file_cap.worker_cap)
+            return resolved
         memory_cap = _auto_worker_memory_cap(
             reserve_mem_gb=reserve_mem_gb,
             mem_per_worker_gb=mem_per_worker_gb,
         )
         if memory_cap is None:
-            return max(1, min(candidate_count, cpu_count))
-        return max(1, min(candidate_count, cpu_count, memory_cap))
+            resolved = max(1, min(candidate_count, cpu_count))
+        else:
+            resolved = max(1, min(candidate_count, cpu_count, memory_cap))
+        if open_file_cap is not None:
+            resolved = min(resolved, open_file_cap.worker_cap)
+        return resolved
 
     try:
         requested = int(normalized)
@@ -504,7 +567,10 @@ def _resolve_worker_count(
 
     if requested <= 0:
         raise ValueError("Concurrency must be a positive integer, or one of: auto, max.")
-    return min(candidate_count, requested)
+    resolved = min(candidate_count, requested)
+    if open_file_cap is not None:
+        resolved = min(resolved, open_file_cap.worker_cap)
+    return resolved
 
 
 def _format_gib(value: int) -> str:
@@ -524,6 +590,7 @@ def _build_concurrency_message(
     total_bytes = _total_memory_bytes()
     available_bytes = _available_memory_bytes()
     normalized = str(requested).strip().lower()
+    open_file_cap = _open_file_worker_cap()
     message = (
         f"Using {resolved_workers} worker"
         f"{'' if resolved_workers == 1 else 's'} "
@@ -532,16 +599,32 @@ def _build_concurrency_message(
     )
     if normalized == "auto" and target == "visual":
         message += f", visual auto mode=throughput-first, hard cap {_VISUAL_AUTO_WORKER_HARD_CAP}"
+        if open_file_cap is not None:
+            message += (
+                f", open files soft limit {open_file_cap.soft_limit}, "
+                f"open now {open_file_cap.open_files}, fd cap {open_file_cap.worker_cap}"
+            )
         message += ")."
         return message
     if normalized == "max":
-        message += ", explicit max fan-out)."
+        message += ", explicit max fan-out"
+        if open_file_cap is not None:
+            message += (
+                f", open files soft limit {open_file_cap.soft_limit}, "
+                f"open now {open_file_cap.open_files}, fd cap {open_file_cap.worker_cap}"
+            )
+        message += ")."
         return message
     if total_bytes is not None:
         message += f", host memory {_format_gib(total_bytes)}"
     if available_bytes is not None:
         message += f", approx available now {_format_gib(available_bytes)}"
     message += f", reserve {reserve_mem_gb:.1f} GiB, budget {mem_per_worker_gb:.1f} GiB/worker)."
+    if open_file_cap is not None:
+        message = message[:-1] + (
+            f", open files soft limit {open_file_cap.soft_limit}, "
+            f"open now {open_file_cap.open_files}, fd cap {open_file_cap.worker_cap})."
+        )
     return message
 
 
