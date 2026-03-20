@@ -22,6 +22,8 @@ from agent.prompts import normalize_sdk_package
 
 logger = logging.getLogger(__name__)
 
+_COMPILE_TARGETS = {"full", "visual", "collision"}
+
 _EXCEPTION_PREFIX_RE = re.compile(r"^(?:[A-Za-z_][A-Za-z0-9_]*(?:Error|Exception)):\s*")
 _GEOMETRY_QC_MARKERS = (
     "isolated parts detected",
@@ -59,6 +61,7 @@ def compile_urdf(
     sdk_package: str = "sdk",
     run_checks: bool = True,
     ignore_geom_qc: bool = False,
+    target: str = "full",
 ) -> str:
     """Execute a generated script and return the exported XML payload."""
     report = compile_urdf_report_maybe_timeout(
@@ -66,13 +69,28 @@ def compile_urdf(
         sdk_package=sdk_package,
         run_checks=run_checks,
         ignore_geom_qc=ignore_geom_qc,
+        target=target,
     )
     for warning in report.warnings:
         logger.warning("%s", warning)
     return report.urdf_xml
 
 
-def _extract_urdf_xml(globals_dict: dict, *, sdk_package: str = "sdk") -> str | None:
+def _normalize_compile_target(target: str) -> str:
+    target_key = str(target).strip().lower()
+    if target_key not in _COMPILE_TARGETS:
+        supported = ", ".join(sorted(_COMPILE_TARGETS))
+        raise ValueError(f"Unsupported compile target {target!r}. Expected one of: {supported}")
+    return target_key
+
+
+def _extract_urdf_xml(
+    globals_dict: dict,
+    *,
+    sdk_package: str = "sdk",
+    target: str = "full",
+) -> str | None:
+    target_key = _normalize_compile_target(target)
     object_model = globals_dict.get("object_model")
     urdf_xml: str | None = None
     try:
@@ -89,7 +107,11 @@ def _extract_urdf_xml(globals_dict: dict, *, sdk_package: str = "sdk") -> str | 
             except Exception:
                 params = {}
             if "asset_root" in params:
-                urdf_xml = compile_object_to_urdf_xml(object_model, asset_root=asset_root)
+                urdf_xml = compile_object_to_urdf_xml(
+                    object_model,
+                    asset_root=asset_root,
+                    include_generated_collisions=target_key != "visual",
+                )
             else:
                 urdf_xml = compile_object_to_urdf_xml(object_model)
             globals_dict["urdf_xml"] = urdf_xml
@@ -157,8 +179,10 @@ def compile_urdf_report(
     sdk_package: str = "sdk",
     run_checks: bool = True,
     ignore_geom_qc: bool = False,
+    target: str = "full",
 ) -> CompileReport:
     """Execute a generated script and return export XML plus non-blocking warnings."""
+    target_key = _normalize_compile_target(target)
     repo_root = Path(__file__).resolve().parents[1]
     script_path = script_path.resolve()
     prev_cwd = Path.cwd()
@@ -182,29 +206,36 @@ def compile_urdf_report(
                 warnings=warnings,
                 sdk_package=sdk_package,
             )
-            overlap_warning = _validate_geometry_overlaps(
-                globals_dict,
-                script_dir=script_path.parent,
-                sdk_package=sdk_package,
-            )
-            if overlap_warning:
-                warnings.append(overlap_warning)
-
-            warnings.extend(
-                _validate_unsupported_parts(
+            overlap_warning = None
+            if target_key != "visual":
+                overlap_warning = _validate_geometry_overlaps(
                     globals_dict,
                     script_dir=script_path.parent,
                     sdk_package=sdk_package,
                 )
-            )
+                if overlap_warning:
+                    warnings.append(overlap_warning)
 
-            test_report = _run_required_tests(
-                globals_dict,
-                overlap_warning=overlap_warning,
-                sdk_package=sdk_package,
-            )
+                warnings.extend(
+                    _validate_unsupported_parts(
+                        globals_dict,
+                        script_dir=script_path.parent,
+                        sdk_package=sdk_package,
+                    )
+                )
+
+                if target_key == "full":
+                    test_report = _run_required_tests(
+                        globals_dict,
+                        overlap_warning=overlap_warning,
+                        sdk_package=sdk_package,
+                    )
         except Exception as exc:
-            urdf_xml = _extract_urdf_xml(globals_dict, sdk_package=sdk_package)
+            urdf_xml = _extract_urdf_xml(
+                globals_dict,
+                sdk_package=sdk_package,
+                target=target_key,
+            )
             signal_bundle = build_compile_signal_bundle(
                 status="failure",
                 warnings=warnings,
@@ -238,7 +269,11 @@ def compile_urdf_report(
                     )
             raise wrapped from exc
 
-    urdf_xml = _extract_urdf_xml(globals_dict, sdk_package=sdk_package)
+    urdf_xml = _extract_urdf_xml(
+        globals_dict,
+        sdk_package=sdk_package,
+        target=target_key,
+    )
     if not isinstance(urdf_xml, str):
         raise ValueError("object_model must compile into an exportable XML payload")
     signal_bundle = build_compile_signal_bundle(
@@ -435,6 +470,7 @@ def _compile_worker(
     sdk_package: str,
     run_checks: bool,
     ignore_geom_qc: bool,
+    target: str,
     conn: object,
 ) -> None:
     try:
@@ -443,6 +479,7 @@ def _compile_worker(
             sdk_package=sdk_package,
             run_checks=run_checks,
             ignore_geom_qc=ignore_geom_qc,
+            target=target,
         )
         payload = {
             "ok": True,
@@ -480,6 +517,7 @@ def compile_urdf_report_maybe_timeout(
     sdk_package: str = "sdk",
     run_checks: bool = True,
     ignore_geom_qc: bool = False,
+    target: str = "full",
 ) -> CompileReport:
     """
     Run `compile_urdf_report` with a hard timeout to prevent indefinite hangs.
@@ -493,13 +531,14 @@ def compile_urdf_report_maybe_timeout(
             sdk_package=sdk_package,
             run_checks=run_checks,
             ignore_geom_qc=ignore_geom_qc,
+            target=target,
         )
 
     ctx = mp.get_context("spawn")
     parent_conn, child_conn = ctx.Pipe(duplex=False)
     proc = ctx.Process(
         target=_compile_worker,
-        args=(str(script_path), sdk_package, run_checks, ignore_geom_qc, child_conn),
+        args=(str(script_path), sdk_package, run_checks, ignore_geom_qc, target, child_conn),
         daemon=True,
     )
     proc.start()

@@ -1,0 +1,56 @@
+<robot name="observation_wheel">
+  <link name="support">
+    <inertial>
+      <origin xyz="0 0 0.14" rpy="0 0 0" />
+      <mass value="4800" />
+      <inertia ixx="10031.4" ixy="0" ixz="0" iyy="1631.36" iyz="0" izz="11600" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.14" rpy="0 0 0" />
+      <geometry>
+        <box size="2 5 0.28" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.38" rpy="0 0 0" />
+      <geometry>
+        <box size="1.3 1.75 0.2" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 -1.25 0.36" rpy="0 0 0" />
+      <geometry>
+        <box size="0.92 0.72 0.16" />
+        </geometry>
+      </visual>
+    <visual>
+      <origin xyz="0 1.25 0.36" rpy="0 0 0" />
+      <geometry>
+        <box size="0.92 0.72 0.16" />
+        </geometry>
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/support_frame.obj" />
+        </geometry>
+      </visual>
+    </link>
+  <link name="wheel">
+    <inertial>
+      <mass value="2600" />
+      <inertia ixx="18054.8" ixy="0" ixz="0" iyy="9832.33" iyz="0" izz="8434.83" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/wheel_assembly.obj" />
+        </geometry>
+      </visual>
+    </link>
+  <joint name="wheel_spin" type="continuous">
+    <origin xyz="0 0 3.75" rpy="0 0 0" />
+    <parent link="support" />
+    <child link="wheel" />
+    <axis xyz="1 0 0" />
+    <limit effort="18000" velocity="0.45" />
+    </joint>
+  </robot>

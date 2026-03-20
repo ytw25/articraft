@@ -1,0 +1,856 @@
+<robot name="professional_camera_lens">
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.0615" rpy="0 0 0" />
+      <mass value="1.05" />
+      <inertia ixx="0.00200121" ixy="0" ixz="0" iyy="0.00200121" iyz="0" izz="0.00135484" />
+      </inertial>
+    <visual name="mount_flange">
+      <origin xyz="0 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.034" length="0.006" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.59 0.61 1" />
+        </material>
+      </visual>
+    <visual name="mount_gasket">
+      <origin xyz="0 0 0.008" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.004" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="rear_barrel">
+      <origin xyz="0 0 0.023" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.026" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="switch_plate">
+      <origin xyz="0.038 0 0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.004 0.018" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="switch_slider">
+      <origin xyz="0.043 0 0.043" rpy="0 0 0" />
+      <geometry>
+        <box size="0.009 0.005 0.007" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.59 0.61 1" />
+        </material>
+      </visual>
+    <visual name="mid_barrel">
+      <origin xyz="0 0 0.06" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.034" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="distance_mark_1">
+      <origin xyz="0.0445 -0.01 0.062" rpy="0 0 0" />
+      <geometry>
+        <box size="0.003 0.006 0.01" />
+        </geometry>
+      <material name="engraving_white">
+        <color rgba="0.92 0.92 0.9 1" />
+        </material>
+      </visual>
+    <visual name="distance_mark_2">
+      <origin xyz="0.0445 -0.003 0.062" rpy="0 0 0" />
+      <geometry>
+        <box size="0.003 0.004 0.01" />
+        </geometry>
+      <material name="engraving_white">
+        <color rgba="0.92 0.92 0.9 1" />
+        </material>
+      </visual>
+    <visual name="branding_band">
+      <origin xyz="0 0 0.0855" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.047" length="0.017" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="accent_ring">
+      <origin xyz="0 0 0.0925" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0476" length="0.0012" />
+        </geometry>
+      <material name="anodized_gold">
+        <color rgba="0.62 0.54 0.23 1" />
+        </material>
+      </visual>
+    <visual name="front_shoulder">
+      <origin xyz="0 0 0.1085" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.029" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="front_trim">
+      <origin xyz="0 0 0.122" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0508" length="0.002" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="mount_alignment_dot">
+      <origin xyz="0.0505 0 0.097" rpy="0 0 0" />
+      <geometry>
+        <box size="0.003 0.003 0.003" />
+        </geometry>
+      <material name="alignment_red">
+        <color rgba="0.74 0.08 0.08 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="zoom_ring">
+    <inertial>
+      <origin xyz="0 0 0.019" rpy="0 0 0" />
+      <mass value="0.24" />
+      <inertia ixx="0.00019112" ixy="0" ixz="0" iyy="0.00019112" iyz="0" izz="0.00032448" />
+      </inertial>
+    <visual name="zoom_rear_shell">
+      <origin xyz="0 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.048" length="0.006" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="zoom_grip_core">
+      <origin xyz="0 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.05" length="0.028" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_front_shell">
+      <origin xyz="0 0 0.034" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.047" length="0.008" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_00">
+      <origin xyz="0.051 0 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_01">
+      <origin xyz="0.0498855 0.0106035 0.02" rpy="0 0 0.20944" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_02">
+      <origin xyz="0.0465908 0.0207436 0.02" rpy="0 0 0.418879" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_03">
+      <origin xyz="0.0412599 0.029977 0.02" rpy="0 0 0.628319" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_04">
+      <origin xyz="0.0341257 0.0379004 0.02" rpy="0 0 0.837758" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_05">
+      <origin xyz="0.0255 0.0441673 0.02" rpy="0 0 1.0472" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_06">
+      <origin xyz="0.0157599 0.0485039 0.02" rpy="0 0 1.25664" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_07">
+      <origin xyz="0.00533095 0.0507206 0.02" rpy="0 0 1.46608" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_08">
+      <origin xyz="-0.00533095 0.0507206 0.02" rpy="0 0 1.67552" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_09">
+      <origin xyz="-0.0157599 0.0485039 0.02" rpy="0 0 1.88496" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_10">
+      <origin xyz="-0.0255 0.0441673 0.02" rpy="0 0 2.0944" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_11">
+      <origin xyz="-0.0341257 0.0379004 0.02" rpy="0 0 2.30383" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_12">
+      <origin xyz="-0.0412599 0.029977 0.02" rpy="0 0 2.51327" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_13">
+      <origin xyz="-0.0465908 0.0207436 0.02" rpy="0 0 2.72271" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_14">
+      <origin xyz="-0.0498855 0.0106035 0.02" rpy="0 0 2.93215" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_15">
+      <origin xyz="-0.051 2.88942e-17 0.02" rpy="0 0 3.14159" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_16">
+      <origin xyz="-0.0498855 -0.0106035 0.02" rpy="0 0 3.35103" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_17">
+      <origin xyz="-0.0465908 -0.0207436 0.02" rpy="0 0 3.56047" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_18">
+      <origin xyz="-0.0412599 -0.029977 0.02" rpy="0 0 3.76991" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_19">
+      <origin xyz="-0.0341257 -0.0379004 0.02" rpy="0 0 3.97935" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_20">
+      <origin xyz="-0.0255 -0.0441673 0.02" rpy="0 0 4.18879" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_21">
+      <origin xyz="-0.0157599 -0.0485039 0.02" rpy="0 0 4.39823" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_22">
+      <origin xyz="-0.00533095 -0.0507206 0.02" rpy="0 0 4.60767" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_23">
+      <origin xyz="0.00533095 -0.0507206 0.02" rpy="0 0 4.81711" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_24">
+      <origin xyz="0.0157599 -0.0485039 0.02" rpy="0 0 5.02655" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_25">
+      <origin xyz="0.0255 -0.0441673 0.02" rpy="0 0 5.23599" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_26">
+      <origin xyz="0.0341257 -0.0379004 0.02" rpy="0 0 5.44543" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_27">
+      <origin xyz="0.0412599 -0.029977 0.02" rpy="0 0 5.65487" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_28">
+      <origin xyz="0.0465908 -0.0207436 0.02" rpy="0 0 5.86431" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_rib_29">
+      <origin xyz="0.0498855 -0.0106035 0.02" rpy="0 0 6.07375" />
+      <geometry>
+        <box size="0.004 0.0045 0.022" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="zoom_index_marker">
+      <origin xyz="0.051 0 0.031" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.011 0.006" />
+        </geometry>
+      <material name="engraving_white">
+        <color rgba="0.92 0.92 0.9 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="focus_ring">
+    <inertial>
+      <origin xyz="0 0 0.021" rpy="0 0 0" />
+      <mass value="0.31" />
+      <inertia ixx="0.000243214" ixy="0" ixz="0" iyy="0.000243214" iyz="0" izz="0.000395289" />
+      </inertial>
+    <visual name="focus_rear_shell">
+      <origin xyz="0 0 0.003" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.047" length="0.006" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="focus_grip_core">
+      <origin xyz="0 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.049" length="0.024" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="front_filter_ring">
+      <origin xyz="0 0 0.033" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.046" length="0.01" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="front_bezel">
+      <origin xyz="0 0 0.04" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.048" length="0.004" />
+        </geometry>
+      <material name="matte_black">
+        <color rgba="0.08 0.08 0.09 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_00">
+      <origin xyz="0.0495607 0.004336 0.0175" rpy="0 0 0.0872665" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_01">
+      <origin xyz="0.0480548 0.0128762 0.0175" rpy="0 0 0.261799" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_02">
+      <origin xyz="0.0450888 0.0210253 0.0175" rpy="0 0 0.436332" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_03">
+      <origin xyz="0.0407528 0.0285354 0.0175" rpy="0 0 0.610865" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_04">
+      <origin xyz="0.0351786 0.0351786 0.0175" rpy="0 0 0.785398" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_05">
+      <origin xyz="0.0285354 0.0407528 0.0175" rpy="0 0 0.959931" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_06">
+      <origin xyz="0.0210253 0.0450888 0.0175" rpy="0 0 1.13446" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_07">
+      <origin xyz="0.0128762 0.0480548 0.0175" rpy="0 0 1.309" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_08">
+      <origin xyz="0.004336 0.0495607 0.0175" rpy="0 0 1.48353" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_09">
+      <origin xyz="-0.004336 0.0495607 0.0175" rpy="0 0 1.65806" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_10">
+      <origin xyz="-0.0128762 0.0480548 0.0175" rpy="0 0 1.8326" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_11">
+      <origin xyz="-0.0210253 0.0450888 0.0175" rpy="0 0 2.00713" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_12">
+      <origin xyz="-0.0285354 0.0407528 0.0175" rpy="0 0 2.18166" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_13">
+      <origin xyz="-0.0351786 0.0351786 0.0175" rpy="0 0 2.35619" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_14">
+      <origin xyz="-0.0407528 0.0285354 0.0175" rpy="0 0 2.53073" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_15">
+      <origin xyz="-0.0450888 0.0210253 0.0175" rpy="0 0 2.70526" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_16">
+      <origin xyz="-0.0480548 0.0128762 0.0175" rpy="0 0 2.87979" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_17">
+      <origin xyz="-0.0495607 0.004336 0.0175" rpy="0 0 3.05433" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_18">
+      <origin xyz="-0.0495607 -0.004336 0.0175" rpy="0 0 3.22886" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_19">
+      <origin xyz="-0.0480548 -0.0128762 0.0175" rpy="0 0 3.40339" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_20">
+      <origin xyz="-0.0450888 -0.0210253 0.0175" rpy="0 0 3.57792" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_21">
+      <origin xyz="-0.0407528 -0.0285354 0.0175" rpy="0 0 3.75246" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_22">
+      <origin xyz="-0.0351786 -0.0351786 0.0175" rpy="0 0 3.92699" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_23">
+      <origin xyz="-0.0285354 -0.0407528 0.0175" rpy="0 0 4.10152" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_24">
+      <origin xyz="-0.0210253 -0.0450888 0.0175" rpy="0 0 4.27606" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_25">
+      <origin xyz="-0.0128762 -0.0480548 0.0175" rpy="0 0 4.45059" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_26">
+      <origin xyz="-0.004336 -0.0495607 0.0175" rpy="0 0 4.62512" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_27">
+      <origin xyz="0.004336 -0.0495607 0.0175" rpy="0 0 4.79966" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_28">
+      <origin xyz="0.0128762 -0.0480548 0.0175" rpy="0 0 4.97419" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_29">
+      <origin xyz="0.0210253 -0.0450888 0.0175" rpy="0 0 5.14872" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_30">
+      <origin xyz="0.0285354 -0.0407528 0.0175" rpy="0 0 5.32325" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_31">
+      <origin xyz="0.0351786 -0.0351786 0.0175" rpy="0 0 5.49779" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_32">
+      <origin xyz="0.0407528 -0.0285354 0.0175" rpy="0 0 5.67232" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_33">
+      <origin xyz="0.0450888 -0.0210253 0.0175" rpy="0 0 5.84685" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_34">
+      <origin xyz="0.0480548 -0.0128762 0.0175" rpy="0 0 6.02139" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_rib_35">
+      <origin xyz="0.0495607 -0.004336 0.0175" rpy="0 0 6.19592" />
+      <geometry>
+        <box size="0.0035 0.0032 0.019" />
+        </geometry>
+      <material name="rubber_black">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    <visual name="focus_throw_tab">
+      <origin xyz="0.0505 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.012 0.006" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual name="front_element">
+      <origin xyz="0 0 0.0345" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.043" length="0.009" />
+        </geometry>
+      <material name="coated_glass">
+        <color rgba="0.12 0.19 0.22 0.38" />
+        </material>
+      </visual>
+    <visual name="coating_reflection">
+      <origin xyz="0 0 0.026" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.037" length="0.004" />
+        </geometry>
+      <material name="warm_glass">
+        <color rgba="0.25 0.2 0.08 0.24" />
+        </material>
+      </visual>
+    <visual name="rear_visible_element">
+      <origin xyz="0 0 0.018" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.031" length="0.006" />
+        </geometry>
+      <material name="coated_glass">
+        <color rgba="0.12 0.19 0.22 0.38" />
+        </material>
+      </visual>
+    </link>
+  <joint name="base_to_zoom_ring" type="revolute">
+    <origin xyz="0 0 0.123" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="zoom_ring" />
+    <axis xyz="0 0 1" />
+    <limit effort="0.8" velocity="4" lower="-1.35" upper="1.35" />
+    </joint>
+  <joint name="zoom_ring_to_focus_ring" type="revolute">
+    <origin xyz="0 0 0.038" rpy="0 0 0" />
+    <parent link="zoom_ring" />
+    <child link="focus_ring" />
+    <axis xyz="0 0 1" />
+    <limit effort="0.8" velocity="5" lower="-2.2" upper="2.2" />
+    </joint>
+  </robot>

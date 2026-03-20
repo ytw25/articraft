@@ -1,0 +1,206 @@
+<robot name="floor_lamp">
+  <link name="base">
+    <inertial>
+      <origin xyz="0 0 0.014" rpy="0 0 0" />
+      <mass value="8.5" />
+      <inertia ixx="0.0561765" ixy="0" ixz="0" iyy="0.0561765" iyz="0" izz="0.111537" />
+      </inertial>
+    <visual name="floor_ring">
+      <origin xyz="0 0 0.002" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.166" length="0.004" />
+        </geometry>
+      <material name="soft_rubber">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    <visual name="weighted_disc">
+      <origin xyz="0 0 0.014" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.162" length="0.024" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.21 0.22 0.24 1" />
+        </material>
+      </visual>
+    <visual name="top_cover">
+      <origin xyz="0 0 0.031" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.136" length="0.01" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="stem_socket">
+      <origin xyz="0 0 0.051" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.032" length="0.03" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="upright">
+    <inertial>
+      <origin xyz="0 0 0.695" rpy="0 0 0" />
+      <mass value="2.8" />
+      <inertia ixx="0.451026" ixy="0" ixz="0" iyy="0.451026" iyz="0" izz="0.0004046" />
+      </inertial>
+    <visual name="lower_insert">
+      <origin xyz="0 0 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.06" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    <visual name="main_stem">
+      <origin xyz="0 0 0.725" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="1.33" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="upper_sleeve">
+      <origin xyz="0 0 1.335" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.017" length="0.11" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    <visual name="head_neck">
+      <origin xyz="0.028 0 1.39" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.011" length="0.055" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="pivot_pin">
+      <origin xyz="0.056 0 1.39" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.08" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    <visual name="left_cheek">
+      <origin xyz="0.048 0.028 1.39" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.05" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.21 0.22 0.24 1" />
+        </material>
+      </visual>
+    <visual name="right_cheek">
+      <origin xyz="0.048 -0.028 1.39" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.014 0.05" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.21 0.22 0.24 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="head">
+    <inertial>
+      <origin xyz="0.107 0 0" rpy="0 1.5708 0" />
+      <mass value="1.2" />
+      <inertia ixx="0.0056317" ixy="0" ixz="0" iyy="0.0056317" iyz="0" izz="0.0020184" />
+      </inertial>
+    <visual name="pivot_hub">
+      <origin xyz="0 0 0" rpy="-1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.018" length="0.07" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    <visual name="left_yoke">
+      <origin xyz="0.039 0.031 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.086 0.014 0.038" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.21 0.22 0.24 1" />
+        </material>
+      </visual>
+    <visual name="right_yoke">
+      <origin xyz="0.039 -0.031 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.086 0.014 0.038" />
+        </geometry>
+      <material name="dark_steel">
+        <color rgba="0.21 0.22 0.24 1" />
+        </material>
+      </visual>
+    <visual name="knuckle_collar">
+      <origin xyz="0.02 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.033" length="0.044" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    <visual name="head_shell">
+      <origin xyz="0.12 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/floor_lamp_head_shell.obj" />
+        </geometry>
+      <material name="satin_black">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="bezel_ring">
+      <origin xyz="0.196 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.058" length="0.015" />
+        </geometry>
+      <material name="brushed_brass">
+        <color rgba="0.68 0.58 0.34 1" />
+        </material>
+      </visual>
+    <visual name="lens">
+      <origin xyz="0.204 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.047" length="0.006" />
+        </geometry>
+      <material name="diffuser">
+        <color rgba="0.96 0.91 0.8 0.45" />
+        </material>
+      </visual>
+    <visual name="top_switch">
+      <origin xyz="0.138 0 0.053" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.024 0.006" />
+        </geometry>
+      <material name="soft_rubber">
+        <color rgba="0.07 0.07 0.08 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="base_mount" type="fixed">
+    <origin xyz="0 0 0.036" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="upright" />
+    </joint>
+  <joint name="head_tilt" type="revolute">
+    <origin xyz="0.056 0 1.39" rpy="0 0 0" />
+    <parent link="upright" />
+    <child link="head" />
+    <axis xyz="0 -1 0" />
+    <limit effort="8" velocity="1.2" lower="-0.9" upper="0.55" />
+    </joint>
+  </robot>

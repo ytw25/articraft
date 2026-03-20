@@ -1,0 +1,47 @@
+<robot name="fidget_spinner">
+  <material name="frame_black">
+    <color rgba="0.11 0.12 0.14 1" />
+    </material>
+  <material name="satin_graphite">
+    <color rgba="0.19 0.2 0.22 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.73 0.74 0.77 1" />
+    </material>
+  <link name="hub">
+    <inertial>
+      <mass value="0.028" />
+      <inertia ixx="1.33819e-06" ixy="0" ixz="0" iyy="1.33819e-06" iyz="0" izz="1.78766e-06" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/hub.obj" />
+        </geometry>
+      <material name="satin_graphite" />
+      </visual>
+    </link>
+  <link name="spinner">
+    <inertial>
+      <mass value="0.112" />
+      <inertia ixx="5.47191e-05" ixy="0" ixz="0" iyy="5.47191e-05" iyz="0" izz="0.000108416" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/spinner_frame.obj" />
+        </geometry>
+      <material name="frame_black" />
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/spinner_accents.obj" />
+        </geometry>
+      <material name="brushed_steel" />
+      </visual>
+    </link>
+  <joint name="hub_to_spinner" type="continuous">
+    <parent link="hub" />
+    <child link="spinner" />
+    <axis xyz="0 0 1" />
+    <limit effort="0.2" velocity="60" />
+    </joint>
+  </robot>

@@ -1,0 +1,403 @@
+<robot name="furniture_cabinet">
+  <material name="walnut_veneer">
+    <color rgba="0.42 0.29 0.19 1" />
+    </material>
+  <material name="oiled_oak">
+    <color rgba="0.63 0.52 0.36 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.72 0.73 0.74 1" />
+    </material>
+  <material name="dark_iron">
+    <color rgba="0.2 0.2 0.22 1" />
+    </material>
+  <link name="cabinet_body">
+    <inertial>
+      <origin xyz="0 0 0.52" rpy="0 0 0" />
+      <mass value="42" />
+      <inertia ixx="3.3278" ixy="0" ixz="0" iyy="7.8857" iyz="0" izz="5.7927" />
+      </inertial>
+    <visual name="left_side">
+      <origin xyz="-0.589 0 0.505" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.42 0.85" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="right_side">
+      <origin xyz="0.589 0 0.505" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.42 0.85" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="top_cap">
+      <origin xyz="0 0 0.945" rpy="0 0 0" />
+      <geometry>
+        <box size="1.216 0.42 0.03" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="bottom_panel">
+      <origin xyz="0 0 0.091" rpy="0 0 0" />
+      <geometry>
+        <box size="1.156 0.42 0.022" />
+        </geometry>
+      <material name="oiled_oak">
+        <color rgba="0.63 0.52 0.36 1" />
+        </material>
+      </visual>
+    <visual name="back_panel">
+      <origin xyz="0 -0.205 0.516" rpy="0 0 0" />
+      <geometry>
+        <box size="1.156 0.01 0.828" />
+        </geometry>
+      <material name="oiled_oak">
+        <color rgba="0.63 0.52 0.36 1" />
+        </material>
+      </visual>
+    <visual name="top_face_rail">
+      <origin xyz="0 0.197 0.9" rpy="0 0 0" />
+      <geometry>
+        <box size="1.156 0.026 0.06" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="bottom_face_rail">
+      <origin xyz="0 0.197 0.1075" rpy="0 0 0" />
+      <geometry>
+        <box size="1.156 0.026 0.055" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="interior_shelf">
+      <origin xyz="0 0 0.5" rpy="0 0 0" />
+      <geometry>
+        <box size="1.156 0.4 0.022" />
+        </geometry>
+      <material name="oiled_oak">
+        <color rgba="0.63 0.52 0.36 1" />
+        </material>
+      </visual>
+    <visual name="left_hinge_leaf_0.280">
+      <origin xyz="-0.602 0.186 0.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="left_hinge_barrel_0.280">
+      <origin xyz="-0.5985 0.208 0.28" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="right_hinge_leaf_0.280">
+      <origin xyz="0.602 0.186 0.28" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="right_hinge_barrel_0.280">
+      <origin xyz="0.5985 0.208 0.28" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="left_hinge_leaf_0.740">
+      <origin xyz="-0.602 0.186 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="left_hinge_barrel_0.740">
+      <origin xyz="-0.5985 0.208 0.74" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="right_hinge_leaf_0.740">
+      <origin xyz="0.602 0.186 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.004 0.05 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="right_hinge_barrel_0.740">
+      <origin xyz="0.5985 0.208 0.74" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.005" length="0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="plinth">
+    <inertial>
+      <origin xyz="0 0 -0.04" rpy="0 0 0" />
+      <mass value="6" />
+      <inertia ixx="0.061" ixy="0" ixz="0" iyy="0.6304" iyz="0" izz="0.685" />
+      </inertial>
+    <visual name="front_kick">
+      <origin xyz="0 0.161 -0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="1.12 0.018 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="left_return">
+      <origin xyz="-0.561 0 -0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.34 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="right_return">
+      <origin xyz="0.561 0 -0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.34 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="center_support">
+      <origin xyz="0 0 -0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.34 0.08" />
+        </geometry>
+      <material name="oiled_oak">
+        <color rgba="0.63 0.52 0.36 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="left_door">
+    <inertial>
+      <origin xyz="0.29975 0.015 0" rpy="0 0 0" />
+      <mass value="7.5" />
+      <inertia ixx="0.430865" ixy="0" ixz="0" iyy="0.651456" iyz="0" izz="0.221196" />
+      </inertial>
+    <visual name="door_slab">
+      <origin xyz="0.29975 0.015 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5945 0.022 0.83" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="outer_stile">
+      <origin xyz="0.0375 0.0275 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.004 0.775" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="inner_stile">
+      <origin xyz="0.562 0.0275 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.004 0.775" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="top_rail">
+      <origin xyz="0.29975 0.0275 0.375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4605 0.004 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="bottom_rail">
+      <origin xyz="0.29975 0.0275 -0.375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4605 0.004 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="center_panel">
+      <origin xyz="0.29975 0.019 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4145 0.012 0.63" />
+        </geometry>
+      <material name="oiled_oak">
+        <color rgba="0.63 0.52 0.36 1" />
+        </material>
+      </visual>
+    <visual name="hinge_leaf_-0.230">
+      <origin xyz="0.0085 0.024 -0.23" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.028 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="hinge_leaf_+0.230">
+      <origin xyz="0.0085 0.024 0.23" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.028 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="pull_handle">
+      <origin xyz="0.522 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/cabinet_pull.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.72 0.73 0.74 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="right_door">
+    <inertial>
+      <origin xyz="-0.29975 0.015 0" rpy="0 0 0" />
+      <mass value="7.5" />
+      <inertia ixx="0.430865" ixy="0" ixz="0" iyy="0.651456" iyz="0" izz="0.221196" />
+      </inertial>
+    <visual name="door_slab">
+      <origin xyz="-0.29975 0.015 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.5945 0.022 0.83" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="outer_stile">
+      <origin xyz="-0.0375 0.0275 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.004 0.775" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="inner_stile">
+      <origin xyz="-0.562 0.0275 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.004 0.775" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="top_rail">
+      <origin xyz="-0.29975 0.0275 0.375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4605 0.004 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="bottom_rail">
+      <origin xyz="-0.29975 0.0275 -0.375" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4605 0.004 0.08" />
+        </geometry>
+      <material name="walnut_veneer">
+        <color rgba="0.42 0.29 0.19 1" />
+        </material>
+      </visual>
+    <visual name="center_panel">
+      <origin xyz="-0.29975 0.019 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.4145 0.012 0.63" />
+        </geometry>
+      <material name="oiled_oak">
+        <color rgba="0.63 0.52 0.36 1" />
+        </material>
+      </visual>
+    <visual name="hinge_leaf_-0.230">
+      <origin xyz="-0.0085 0.024 -0.23" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.028 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="hinge_leaf_+0.230">
+      <origin xyz="-0.0085 0.024 0.23" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.028 0.095" />
+        </geometry>
+      <material name="dark_iron">
+        <color rgba="0.2 0.2 0.22 1" />
+        </material>
+      </visual>
+    <visual name="pull_handle">
+      <origin xyz="-0.522 0.026 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/cabinet_pull.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.72 0.73 0.74 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="body_to_plinth" type="fixed">
+    <origin xyz="0 0 0.08" rpy="0 0 0" />
+    <parent link="cabinet_body" />
+    <child link="plinth" />
+    </joint>
+  <joint name="left_door_hinge" type="revolute">
+    <origin xyz="-0.5985 0.208 0.51" rpy="0 0 0" />
+    <parent link="cabinet_body" />
+    <child link="left_door" />
+    <axis xyz="0 0 1" />
+    <limit effort="18" velocity="1.4" lower="0" upper="1.7" />
+    </joint>
+  <joint name="right_door_hinge" type="revolute">
+    <origin xyz="0.5985 0.208 0.51" rpy="0 0 0" />
+    <parent link="cabinet_body" />
+    <child link="right_door" />
+    <axis xyz="0 0 -1" />
+    <limit effort="18" velocity="1.4" lower="0" upper="1.7" />
+    </joint>
+  </robot>

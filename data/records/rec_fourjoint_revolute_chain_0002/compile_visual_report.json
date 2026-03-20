@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "record_id": "rec_fourjoint_revolute_chain_0002",
+  "status": "failure",
+  "urdf_path": "model.visual.urdf",
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "ImportError: cannot import name 'cadquery_available' from 'sdk_hybrid' (/Users/matthewzhou/articraft/sdk_hybrid/__init__.py)"
+    }
+  ],
+  "checks_run": [
+    "compile_visual"
+  ],
+  "metrics": {
+    "target": "visual"
+  }
+}

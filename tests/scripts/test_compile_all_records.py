@@ -78,21 +78,21 @@ def test_strict_bulk_compile_keeps_geometry_qc_detail_rows() -> None:
     )
 
 
-def test_non_strict_summary_uses_issue_label() -> None:
+def test_summary_uses_failure_label() -> None:
     table = _build_summary_table(
         scanned=10,
         skipped_missing_script=1,
         candidates=2,
         compiled=1,
         failed=1,
-        failure_label="Non-blocking issues",
+        failure_label="Failed",
     )
     console = Console(record=True, width=120)
     console.print(table)
 
     rendered = console.export_text()
 
-    assert "Non-blocking issues" in rendered
+    assert "Failed" in rendered
 
 
 def test_collect_candidates_skips_primitive_only_success_records_without_assets(tmp_path) -> None:
@@ -196,3 +196,83 @@ def test_collect_candidates_queues_broken_success_records_missing_model_script(t
     assert len(candidates) == 1
     assert candidates[0].record_id == record_id
     assert candidates[0].reason == "missing model.py"
+
+
+def test_collect_candidates_visual_target_skips_legacy_full_compile_reports(tmp_path) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+
+    record_id = "rec_visual_skip"
+    record_dir = repo.layout.record_dir(record_id)
+    record_dir.mkdir(parents=True, exist_ok=True)
+    (record_dir / "model.py").write_text("object_model = None\n", encoding="utf-8")
+    (record_dir / "model.urdf").write_text(
+        "<robot name='primitive'><link name='base'><visual><geometry><box size='1 1 1'/></geometry></visual></link></robot>",
+        encoding="utf-8",
+    )
+    (record_dir / "record.json").write_text(
+        json.dumps(
+            {
+                "artifacts": {
+                    "model_py": "model.py",
+                    "model_urdf": "model.urdf",
+                    "compile_report_json": "compile_report.json",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (record_dir / "compile_report.json").write_text(
+        json.dumps({"status": "success"}),
+        encoding="utf-8",
+    )
+
+    candidates, skipped_missing_script = _collect_candidates(
+        tmp_path,
+        force=False,
+        target="visual",
+    )
+
+    assert skipped_missing_script == 0
+    assert candidates == []
+
+
+def test_collect_candidates_full_target_queues_visual_only_reports_for_upgrade(tmp_path) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+
+    record_id = "rec_visual_upgrade"
+    record_dir = repo.layout.record_dir(record_id)
+    record_dir.mkdir(parents=True, exist_ok=True)
+    (record_dir / "model.py").write_text("object_model = None\n", encoding="utf-8")
+    (record_dir / "model.urdf").write_text(
+        "<robot name='primitive'><link name='base'><visual><geometry><box size='1 1 1'/></geometry></visual></link></robot>",
+        encoding="utf-8",
+    )
+    (record_dir / "record.json").write_text(
+        json.dumps(
+            {
+                "artifacts": {
+                    "model_py": "model.py",
+                    "model_urdf": "model.urdf",
+                    "compile_report_json": "compile_report.json",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    (record_dir / "compile_report.json").write_text(
+        json.dumps({"status": "success", "metrics": {"compile_level": "visual"}}),
+        encoding="utf-8",
+    )
+
+    candidates, skipped_missing_script = _collect_candidates(
+        tmp_path,
+        force=False,
+        target="full",
+    )
+
+    assert skipped_missing_script == 0
+    assert len(candidates) == 1
+    assert candidates[0].record_id == record_id
+    assert candidates[0].reason == "compile level is visual"

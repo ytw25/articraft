@@ -41,9 +41,41 @@ _GEOMETRY_QC_MARKERS = (
     "expect_above",
     "expect_joint_motion_axis",
 )
+_COMPILE_TARGETS = {"full", "visual"}
 
 
-def _collect_candidates(repo_root: Path, *, force: bool) -> tuple[list[CompileCandidate], int]:
+def _normalize_compile_target(target: str) -> str:
+    target_key = str(target).strip().lower()
+    if target_key not in _COMPILE_TARGETS:
+        supported = ", ".join(sorted(_COMPILE_TARGETS))
+        raise ValueError(f"Unsupported compile target {target!r}. Expected one of: {supported}")
+    return target_key
+
+
+def _compile_status(payload: object) -> str | None:
+    if isinstance(payload, dict) and isinstance(payload.get("status"), str):
+        return str(payload.get("status"))
+    return None
+
+
+def _compile_level(payload: object) -> str | None:
+    if not isinstance(payload, dict) or payload.get("status") != "success":
+        return None
+    metrics = payload.get("metrics")
+    if isinstance(metrics, dict):
+        value = metrics.get("compile_level")
+        if isinstance(value, str) and value in {"visual", "full"}:
+            return value
+    return "full"
+
+
+def _collect_candidates(
+    repo_root: Path,
+    *,
+    force: bool,
+    target: str = "full",
+) -> tuple[list[CompileCandidate], int]:
+    target_key = _normalize_compile_target(target)
     repo = StorageRepo(repo_root)
     records_root = repo.layout.records_root
     if not records_root.exists():
@@ -59,13 +91,9 @@ def _collect_candidates(repo_root: Path, *, force: bool) -> tuple[list[CompileCa
         script_path = artifact_paths["model_py"]
         urdf_path = artifact_paths["model_urdf"]
         compile_report_path = artifact_paths["compile_report_json"]
-
         compile_report = repo.read_json(compile_report_path)
-        compile_status = (
-            str(compile_report.get("status"))
-            if isinstance(compile_report, dict) and isinstance(compile_report.get("status"), str)
-            else None
-        )
+        compile_status = _compile_status(compile_report)
+        compile_level = _compile_level(compile_report)
 
         if not script_path.exists():
             if isinstance(record, dict) or compile_status is not None or urdf_path.exists():
@@ -104,6 +132,16 @@ def _collect_candidates(repo_root: Path, *, force: bool) -> tuple[list[CompileCa
                 CompileCandidate(
                     record_id=record_id,
                     reason=f"compile status is {label}",
+                    force=True,
+                )
+            )
+            continue
+
+        if target_key == "full" and compile_level != "full":
+            candidates.append(
+                CompileCandidate(
+                    record_id=record_id,
+                    reason="compile level is visual",
                     force=True,
                 )
             )
@@ -198,6 +236,12 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Exit non-zero if any record compile fails.",
     )
+    parser.add_argument(
+        "--target",
+        choices=sorted(_COMPILE_TARGETS),
+        default="full",
+        help="Compile target to build.",
+    )
     return parser
 
 
@@ -205,6 +249,7 @@ def main() -> int:
     parser = _build_parser()
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
+    target_key = _normalize_compile_target(args.target)
     console = Console()
 
     repo = StorageRepo(repo_root)
@@ -213,7 +258,11 @@ def main() -> int:
         if repo.layout.records_root.exists()
         else 0
     )
-    candidates, skipped_missing_script = _collect_candidates(repo_root, force=args.force)
+    candidates, skipped_missing_script = _collect_candidates(
+        repo_root,
+        force=args.force,
+        target=target_key,
+    )
 
     if not candidates:
         console.print(
@@ -223,7 +272,7 @@ def main() -> int:
                 candidates=0,
                 compiled=0,
                 failed=0,
-                failure_label="Failed" if args.strict else "Non-blocking issues",
+                failure_label="Failed",
             )
         )
         console.print("[green]No records need compilation.[/green]")
@@ -243,7 +292,7 @@ def main() -> int:
                 candidates=len(candidates),
                 compiled=0,
                 failed=0,
-                failure_label="Failed" if args.strict else "Non-blocking issues",
+                failure_label="Failed",
             )
         )
         return 0
@@ -271,12 +320,13 @@ def main() -> int:
                     candidate.record_id,
                     force=candidate.force,
                     ignore_geom_qc=not args.strict,
+                    validate=args.strict,
+                    target=target_key,
                 )
-            except Exception as exc:
-                failures.append((candidate.record_id, str(exc)))
-            else:
                 if result.compiled:
                     compiled += 1
+            except Exception as exc:
+                failures.append((candidate.record_id, str(exc)))
             finally:
                 progress.advance(task_id)
 
@@ -287,42 +337,22 @@ def main() -> int:
             candidates=len(candidates),
             compiled=compiled,
             failed=len(failures),
-            failure_label="Failed" if args.strict else "Non-blocking issues",
+            failure_label="Failed",
         )
     )
 
     if failures:
-        reported_failures: list[tuple[str, str]] = []
-        suppressed_issue_count = 0
+        failure_table = Table(title="Compile Failures")
+        failure_table.add_column("Record ID")
+        failure_table.add_column("Error")
         for record_id, error in failures:
-            if _should_suppress_bulk_compile_error(record_id, error, strict=args.strict):
-                suppressed_issue_count += 1
-                continue
-            reported_failures.append((record_id, error))
-
-        if reported_failures:
-            failure_table = Table(
-                title="Compile Failures" if args.strict else "Compile Issues (non-blocking)"
+            failure_table.add_row(
+                record_id,
+                _format_bulk_compile_error(record_id, error, strict=args.strict),
             )
-            failure_table.add_column("Record ID")
-            failure_table.add_column("Error")
-            for record_id, error in reported_failures:
-                failure_table.add_row(
-                    record_id,
-                    _format_bulk_compile_error(record_id, error, strict=args.strict),
-                )
-            console.print(failure_table)
-        if suppressed_issue_count:
-            console.print(
-                "[yellow]Suppressed detailed output for "
-                f"{suppressed_issue_count} non-blocking geometry QC issue(s).[/yellow]"
-            )
-        if args.strict:
-            return 1
-        console.print(
-            "[yellow]Finished compiling queued records with non-blocking failures.[/yellow]"
-        )
-        return 0
+        console.print(failure_table)
+        console.print("[red]Finished compiling queued records with failures.[/red]")
+        return 1
 
     console.print("[green]Finished compiling queued records.[/green]")
     return 0

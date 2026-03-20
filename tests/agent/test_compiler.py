@@ -152,3 +152,51 @@ def test_compile_urdf_report_does_not_ignore_non_geometry_failures(tmp_path: Pat
 
     with pytest.raises(RuntimeError, match="Missing required `run_tests\\(\\)`"):
         compile_urdf_report(script_path, ignore_geom_qc=True)
+
+
+def test_compile_urdf_report_visual_target_skips_generated_collisions(tmp_path: Path) -> None:
+    script_path = tmp_path / "model.py"
+    script_path.write_text(
+        "\n".join(
+            [
+                "from __future__ import annotations",
+                "",
+                "from sdk import ArticulatedObject, Box, Origin",
+                "",
+                "object_model = ArticulatedObject(name='visual_only')",
+                "base = object_model.part('base')",
+                "base.visual(Box((0.1, 0.1, 0.1)), origin=Origin(xyz=(0.0, 0.0, 0.05)))",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = compile_urdf_report(script_path, target="visual")
+
+    assert "<visual" in report.urdf_xml
+    assert "<collision" not in report.urdf_xml
+    assert report.signal_bundle.status == "success"
+
+
+def test_compile_urdf_report_collision_target_includes_generated_collisions(tmp_path: Path) -> None:
+    script_path = tmp_path / "model.py"
+    script_path.write_text(
+        "\n".join(
+            [
+                "from __future__ import annotations",
+                "",
+                "from sdk import ArticulatedObject, Box, Origin",
+                "",
+                "object_model = ArticulatedObject(name='collision_only')",
+                "base = object_model.part('base')",
+                "base.visual(Box((0.1, 0.1, 0.1)), origin=Origin(xyz=(0.0, 0.0, 0.05)))",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    report = compile_urdf_report(script_path, target="collision", run_checks=False)
+
+    assert "<visual" in report.urdf_xml
+    assert "<collision" in report.urdf_xml
+    assert report.signal_bundle.status == "success"

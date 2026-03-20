@@ -1,0 +1,554 @@
+<robot name="drill_press_tilt_table">
+  <material name="cast_iron">
+    <color rgba="0.23 0.24 0.25 1" />
+    </material>
+  <material name="machined_steel">
+    <color rgba="0.68 0.7 0.72 1" />
+    </material>
+  <material name="steel_dark">
+    <color rgba="0.43 0.45 0.47 1" />
+    </material>
+  <material name="black_oxide">
+    <color rgba="0.12 0.12 0.13 1" />
+    </material>
+  <material name="black_plastic">
+    <color rgba="0.05 0.05 0.05 1" />
+    </material>
+  <link name="mount">
+    <inertial>
+      <origin xyz="0 0.09 0.095" rpy="0 0 0" />
+      <mass value="10.5" />
+      <inertia ixx="0.0854" ixy="0" ixz="0" iyy="0.05215" iyz="0" izz="0.06755" />
+      </inertial>
+    <visual name="column_stub">
+      <origin xyz="0 0 0.09" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.038" length="0.18" />
+        </geometry>
+      <material name="machined_steel">
+        <color rgba="0.68 0.7 0.72 1" />
+        </material>
+      </visual>
+    <visual name="column_collar">
+      <origin xyz="0 0 0.065" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.058" length="0.075" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="clamp_body">
+      <origin xyz="0.05 0 0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.044 0.07" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="rear_clamp_ear">
+      <origin xyz="0.094 -0.013 0.085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.018 0.028" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="front_clamp_ear">
+      <origin xyz="0.094 0.013 0.085" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.018 0.028" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="clamp_bolt">
+      <origin xyz="0.094 0 0.085" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0065" length="0.052" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="clamp_bolt_head_rear">
+      <origin xyz="0.094 -0.029 0.085" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.006" />
+        </geometry>
+      <material name="steel_dark">
+        <color rgba="0.43 0.45 0.47 1" />
+        </material>
+      </visual>
+    <visual name="clamp_bolt_head_front">
+      <origin xyz="0.094 0.029 0.085" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.006" />
+        </geometry>
+      <material name="steel_dark">
+        <color rgba="0.43 0.45 0.47 1" />
+        </material>
+      </visual>
+    <visual name="support_arm_casting">
+      <origin xyz="0 0.05 0.103" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/drill_press_arm_casting.obj" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="support_web">
+      <origin xyz="0 0.085 0.093" rpy="0 0 0" />
+      <geometry>
+        <box size="0.024 0.09 0.068" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_gusset">
+      <origin xyz="-0.026 0.09 0.083" rpy="0.58 0 0" />
+      <geometry>
+        <box size="0.014 0.1 0.052" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_gusset">
+      <origin xyz="0.026 0.09 0.083" rpy="0.58 0 0" />
+      <geometry>
+        <box size="0.014 0.1 0.052" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="rear_pivot_bridge">
+      <origin xyz="0 0.174 0.128" rpy="0 0 0" />
+      <geometry>
+        <box size="0.086 0.016 0.034" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_pivot_rib">
+      <origin xyz="-0.028 0.16 0.114" rpy="0.28 0 0" />
+      <geometry>
+        <box size="0.024 0.034 0.052" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_pivot_rib">
+      <origin xyz="0.028 0.16 0.114" rpy="0.28 0 0" />
+      <geometry>
+        <box size="0.024 0.034 0.052" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="yoke">
+    <inertial>
+      <origin xyz="0 0 -0.01" rpy="0 0 0" />
+      <mass value="5.8" />
+      <inertia ixx="0.0151283" ixy="0" ixz="0" iyy="0.028275" iyz="0" izz="0.0294833" />
+      </inertial>
+    <visual name="left_cheek">
+      <origin xyz="-0.091 0.051 0.043" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.095 0.105" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_pivot_boss">
+      <origin xyz="-0.091 0.045 0.045" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.033" length="0.026" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_upper_boss">
+      <origin xyz="-0.091 0.089 0.081" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.02" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_lower_boss">
+      <origin xyz="-0.091 0.005 0.009" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.02" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_cheek">
+      <origin xyz="0.091 0.051 0.043" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.095 0.105" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_pivot_boss">
+      <origin xyz="0.091 0.045 0.045" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.033" length="0.026" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_upper_boss">
+      <origin xyz="0.091 0.089 0.081" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.02" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_lower_boss">
+      <origin xyz="0.091 0.005 0.009" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.024" length="0.02" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="lower_bridge">
+      <geometry>
+        <box size="0.164 0.028 0.028" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="front_tie">
+      <origin xyz="0 0.093 -0.005" rpy="0 0 0" />
+      <geometry>
+        <box size="0.19 0.022 0.02" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="pivot_axle">
+      <origin xyz="0 0.045 0.045" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.182" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="tilt_scale_plate">
+      <origin xyz="0 -0.015 0.053" rpy="0 0 0" />
+      <geometry>
+        <box size="0.17 0.05 0.006" />
+        </geometry>
+      <material name="steel_dark">
+        <color rgba="0.43 0.45 0.47 1" />
+        </material>
+      </visual>
+    <visual name="scale_marker_strip">
+      <origin xyz="0 -0.025 0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.13 0.006 0.008" />
+        </geometry>
+      <material name="machined_steel">
+        <color rgba="0.68 0.7 0.72 1" />
+        </material>
+      </visual>
+    <visual name="tilt_stop_pin">
+      <origin xyz="0.06 -0.015 0.064" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.03" />
+        </geometry>
+      <material name="machined_steel">
+        <color rgba="0.68 0.7 0.72 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="table">
+    <inertial>
+      <origin xyz="0 0.038 0.048" rpy="0 0 0" />
+      <mass value="8.6" />
+      <inertia ixx="0.0499517" ixy="0" ixz="0" iyy="0.0915183" iyz="0" izz="0.124127" />
+      </inertial>
+    <visual name="trunnion_hub">
+      <origin xyz="0 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.164" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_trunnion_collar">
+      <origin xyz="-0.072 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.022" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_trunnion_collar">
+      <origin xyz="0.072 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.022" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="table_surface">
+      <origin xyz="0 0.038 0.055" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/drill_press_table_top.obj" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="central_pedestal">
+      <origin xyz="0 0.02 0.025" rpy="0 0 0" />
+      <geometry>
+        <box size="0.056 0.1 0.05" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="cross_rib">
+      <origin xyz="0 0.01 0.022" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2 0.03 0.03" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_rib">
+      <origin xyz="-0.108 0.03 0.025" rpy="-0.4 0 0" />
+      <geometry>
+        <box size="0.022 0.118 0.04" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="right_rib">
+      <origin xyz="0.108 0.03 0.025" rpy="-0.4 0 0" />
+      <geometry>
+        <box size="0.022 0.118 0.04" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="front_stiffener">
+      <origin xyz="0 0.12 0.036" rpy="0 0 0" />
+      <geometry>
+        <box size="0.22 0.018 0.016" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="rear_web">
+      <origin xyz="0 -0.04 0.02" rpy="0 0 0" />
+      <geometry>
+        <box size="0.14 0.018 0.026" />
+        </geometry>
+      <material name="cast_iron">
+        <color rgba="0.23 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual name="left_t_slot_wear_strip">
+      <origin xyz="-0.095 0.04 0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.18 0.002" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="center_t_slot_wear_strip">
+      <origin xyz="0 0.04 0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.18 0.002" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="right_t_slot_wear_strip">
+      <origin xyz="0.095 0.04 0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.18 0.002" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="center_insert">
+      <origin xyz="0 0.038 0.065" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.019" length="0.002" />
+        </geometry>
+      <material name="machined_steel">
+        <color rgba="0.68 0.7 0.72 1" />
+        </material>
+      </visual>
+    <visual name="rear_alignment_slot">
+      <origin xyz="0 -0.02 0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.24 0.014 0.002" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="tilt_pointer">
+      <origin xyz="0 -0.068 0.016" rpy="0 0 0" />
+      <geometry>
+        <box size="0.016 0.03 0.004" />
+        </geometry>
+      <material name="machined_steel">
+        <color rgba="0.68 0.7 0.72 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="left_lock_handle">
+    <inertial>
+      <origin xyz="-0.02 0.024 0.01" rpy="0 0 0" />
+      <mass value="0.3" />
+      <inertia ixx="0.000185" ixy="0" ixz="0" iyy="0.000185" iyz="0" izz="0.000245" />
+      </inertial>
+    <visual name="left_lock_handle_shaft">
+      <origin xyz="-0.01 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.007" length="0.034" />
+        </geometry>
+      <material name="steel_dark">
+        <color rgba="0.43 0.45 0.47 1" />
+        </material>
+      </visual>
+    <visual name="left_lock_handle_hub">
+      <origin xyz="-0.022 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.02" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="left_lock_handle_lever">
+      <origin xyz="-0.028 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/drill_press_lock_lever.obj" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="left_lock_handle_ball">
+      <origin xyz="-0.028 0.034 -0.012" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.01" />
+        </geometry>
+      <material name="black_plastic">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="right_lock_handle">
+    <inertial>
+      <origin xyz="0.02 0.024 0.01" rpy="0 0 0" />
+      <mass value="0.3" />
+      <inertia ixx="0.000185" ixy="0" ixz="0" iyy="0.000185" iyz="0" izz="0.000245" />
+      </inertial>
+    <visual name="right_lock_handle_shaft">
+      <origin xyz="0.01 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.007" length="0.034" />
+        </geometry>
+      <material name="steel_dark">
+        <color rgba="0.43 0.45 0.47 1" />
+        </material>
+      </visual>
+    <visual name="right_lock_handle_hub">
+      <origin xyz="0.022 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.016" length="0.02" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="right_lock_handle_lever">
+      <origin xyz="0.028 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="assets/meshes/drill_press_lock_lever.obj" />
+        </geometry>
+      <material name="black_oxide">
+        <color rgba="0.12 0.12 0.13 1" />
+        </material>
+      </visual>
+    <visual name="right_lock_handle_ball">
+      <origin xyz="0.028 0.034 -0.012" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.01" />
+        </geometry>
+      <material name="black_plastic">
+        <color rgba="0.05 0.05 0.05 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="mount_to_yoke" type="fixed">
+    <origin xyz="0 0.187 0.128" rpy="0 0 0" />
+    <parent link="mount" />
+    <child link="yoke" />
+    </joint>
+  <joint name="table_tilt" type="revolute">
+    <origin xyz="0 0.045 0.045" rpy="0 0 0" />
+    <parent link="yoke" />
+    <child link="table" />
+    <axis xyz="1 0 0" />
+    <limit effort="180" velocity="1.5" lower="-0.785398" upper="0.785398" />
+    </joint>
+  <joint name="left_handle_spin" type="continuous">
+    <origin xyz="-0.102 0.045 0.045" rpy="0 0 0" />
+    <parent link="yoke" />
+    <child link="left_lock_handle" />
+    <axis xyz="1 0 0" />
+    <limit effort="28" velocity="8" />
+    </joint>
+  <joint name="right_handle_spin" type="continuous">
+    <origin xyz="0.102 0.045 0.045" rpy="0 0 0" />
+    <parent link="yoke" />
+    <child link="right_lock_handle" />
+    <axis xyz="1 0 0" />
+    <limit effort="28" velocity="8" />
+    </joint>
+  </robot>

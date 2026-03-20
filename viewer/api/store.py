@@ -186,6 +186,36 @@ def _remove_path_if_exists(path: Path) -> None:
     path.unlink()
 
 
+def _compile_level_from_report(report: dict[str, Any] | None) -> str | None:
+    if not isinstance(report, dict):
+        return None
+    status = report.get("status")
+    if status != "success":
+        return None
+    metrics = report.get("metrics")
+    if isinstance(metrics, dict):
+        value = metrics.get("compile_level")
+        if isinstance(value, str) and value in {"visual", "full"}:
+            return value
+    # Backward compatibility: legacy successful reports were always full compiles.
+    return "full"
+
+
+def _compile_report_satisfies_target(
+    report: dict[str, Any] | None,
+    *,
+    target: str,
+) -> bool:
+    level = _compile_level_from_report(report)
+    if level is None:
+        return False
+    if target == "full":
+        return level == "full"
+    if target == "visual":
+        return level in {"visual", "full"}
+    raise ValueError(f"Unsupported materialization target: {target!r}")
+
+
 @dataclass(slots=True, frozen=True)
 class MaterializeRecordAssetsResult:
     record_id: str
@@ -281,6 +311,9 @@ class ViewerStore:
         compile_path: Path,
         status: str,
         warnings: list[str],
+        compile_level: str,
+        validation_level: str,
+        checks_run: list[str] | None = None,
     ) -> None:
         existing_report = self.repo.read_json(compile_path)
         metrics = (
@@ -289,13 +322,15 @@ class ViewerStore:
             and isinstance(existing_report.get("metrics"), dict)
             else {}
         )
+        metrics["compile_level"] = compile_level
+        metrics["validation_level"] = validation_level
         report = StorageCompileReport(
             schema_version=1,
             record_id=record_id,
             status=status,
             urdf_path="model.urdf",
             warnings=[CompileWarning(code="warning", message=warning) for warning in warnings],
-            checks_run=["compile_urdf"],
+            checks_run=list(checks_run or ["compile_urdf"]),
             metrics=metrics,
         )
         self.records.write_compile_report(record_id, report)
@@ -349,7 +384,11 @@ class ViewerStore:
         *,
         force: bool = False,
         ignore_geom_qc: bool = True,
+        validate: bool = False,
+        target: str = "full",
     ) -> MaterializeRecordAssetsResult:
+        if target not in {"full", "visual"}:
+            raise ValueError(f"Unsupported materialization target: {target!r}")
         record = self.records.load_record(record_id)
         if not isinstance(record, dict):
             raise FileNotFoundError(f"Record not found: {record_id}")
@@ -368,7 +407,7 @@ class ViewerStore:
         if (
             urdf_path.exists()
             and not force
-            and existing_compile_status == "success"
+            and _compile_report_satisfies_target(compile_report, target=target)
             and materialization_status == "available"
         ):
             return MaterializeRecordAssetsResult(
@@ -403,7 +442,7 @@ class ViewerStore:
             if (
                 urdf_path.exists()
                 and not force
-                and existing_compile_status == "success"
+                and _compile_report_satisfies_target(compile_report, target=target)
                 and materialization_status == "available"
             ):
                 return MaterializeRecordAssetsResult(
@@ -424,11 +463,22 @@ class ViewerStore:
             from agent.compiler import compile_urdf_report_maybe_timeout
 
             sdk_package = str(refreshed_record.get("sdk_package") or "sdk")
+            run_checks = bool(validate and target == "full")
+            validation_level = "full" if run_checks else "none"
+            checks_run = (
+                ["compile_visual"]
+                if target == "visual"
+                else ["compile_urdf"]
+                if run_checks
+                else ["compile_urdf_fast"]
+            )
             try:
                 compile_result = compile_urdf_report_maybe_timeout(
                     model_path,
                     sdk_package=sdk_package,
-                    ignore_geom_qc=ignore_geom_qc,
+                    ignore_geom_qc=ignore_geom_qc if run_checks else False,
+                    run_checks=run_checks,
+                    target="visual" if target == "visual" else "full",
                 )
             except Exception as exc:
                 warnings = getattr(exc, "warnings", None)
@@ -442,6 +492,9 @@ class ViewerStore:
                     compile_path=compile_path,
                     status="failure",
                     warnings=warning_lines,
+                    compile_level=target,
+                    validation_level=validation_level,
+                    checks_run=checks_run,
                 )
                 self._update_record_compile_metadata(
                     record_id=record_id,
@@ -459,6 +512,9 @@ class ViewerStore:
                 compile_path=compile_path,
                 status="success",
                 warnings=warning_lines,
+                compile_level=target,
+                validation_level=validation_level,
+                checks_run=checks_run,
             )
             materialization_status = self._update_record_compile_metadata(
                 record_id=record_id,

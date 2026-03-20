@@ -1,0 +1,801 @@
+<robot name="louvered_shutter_assembly">
+  <material name="painted_wood">
+    <color rgba="0.93 0.93 0.9 1" />
+    </material>
+  <material name="warm_white_trim">
+    <color rgba="0.97 0.97 0.95 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.58 0.6 0.62 1" />
+    </material>
+  <material name="dark_hardware">
+    <color rgba="0.16 0.17 0.18 1" />
+    </material>
+  <link name="frame">
+    <inertial>
+      <origin xyz="0 0 0.74" rpy="0 0 0" />
+      <mass value="8" />
+      <inertia ixx="1.46228" ixy="0" ixz="0" iyy="1.84533" iyz="0" izz="0.387083" />
+      </inertial>
+    <visual name="left_jamb">
+      <origin xyz="-0.3475 0 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.065 0.055 1.48" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="right_jamb">
+      <origin xyz="0.3475 0 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.065 0.055 1.48" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="head">
+      <origin xyz="0 0 1.4475" rpy="0 0 0" />
+      <geometry>
+        <box size="0.63 0.055 0.065" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="sill">
+      <origin xyz="0 0 0.0325" rpy="0 0 0" />
+      <geometry>
+        <box size="0.63 0.055 0.065" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="left_outer_trim">
+      <origin xyz="-0.407 0.0235 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.074 0.008 1.48" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="right_outer_trim">
+      <origin xyz="0.407 0.0235 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.074 0.008 1.48" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="head_trim">
+      <origin xyz="0 0.0235 1.439" rpy="0 0 0" />
+      <geometry>
+        <box size="0.78 0.008 0.082" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="sill_trim">
+      <origin xyz="0 0.0235 0.045" rpy="0 0 0" />
+      <geometry>
+        <box size="0.78 0.01 0.09" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_plate_1">
+      <origin xyz="-0.334 0.034 0.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.014 0.12" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_lower_1">
+      <origin xyz="-0.316 0.0365 0.208" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_upper_1">
+      <origin xyz="-0.316 0.0365 0.272" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_plate_2">
+      <origin xyz="-0.334 0.034 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.014 0.12" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_lower_2">
+      <origin xyz="-0.316 0.0365 0.708" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_upper_2">
+      <origin xyz="-0.316 0.0365 0.772" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_plate_3">
+      <origin xyz="-0.334 0.034 1.24" rpy="0 0 0" />
+      <geometry>
+        <box size="0.036 0.014 0.12" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_lower_3">
+      <origin xyz="-0.316 0.0365 1.208" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="frame_hinge_upper_3">
+      <origin xyz="-0.316 0.0365 1.272" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="strike_plate">
+      <origin xyz="0.324 0.0195 0.74" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.008 0.06" />
+        </geometry>
+      <material name="dark_hardware">
+        <color rgba="0.16 0.17 0.18 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="shutter_leaf">
+    <inertial>
+      <origin xyz="0.313 0.01 0" rpy="0 0 0" />
+      <mass value="4.8" />
+      <inertia ixx="0.705843" ixy="0" ixz="0" iyy="0.854274" iyz="0" izz="0.14925" />
+      </inertial>
+    <visual name="left_stile">
+      <origin xyz="0.047 0.01 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.032 1.328" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="left_stile_bead">
+      <origin xyz="0.047 0.023 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.006 1.278" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="right_stile">
+      <origin xyz="0.579 0.01 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.078 0.032 1.328" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="right_stile_bead">
+      <origin xyz="0.579 0.023 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.06 0.006 1.278" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="top_rail">
+      <origin xyz="0.313 0.01 0.609" rpy="0 0 0" />
+      <geometry>
+        <box size="0.454 0.032 0.11" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="bottom_rail">
+      <origin xyz="0.313 0.01 -0.609" rpy="0 0 0" />
+      <geometry>
+        <box size="0.454 0.032 0.11" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="top_rail_bead">
+      <origin xyz="0.313 0.023 0.609" rpy="0 0 0" />
+      <geometry>
+        <box size="0.434 0.006 0.092" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="bottom_rail_bead">
+      <origin xyz="0.313 0.023 -0.609" rpy="0 0 0" />
+      <geometry>
+        <box size="0.434 0.006 0.092" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="leaf_hinge_plate_1">
+      <origin xyz="0.018 0.024 -0.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.016 0.112" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="leaf_hinge_knuckle_1">
+      <origin xyz="0 0.0365 -0.5" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.034" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="leaf_hinge_plate_2">
+      <origin xyz="0.018 0.024 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.016 0.112" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="leaf_hinge_knuckle_2">
+      <origin xyz="0 0.0365 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.034" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="leaf_hinge_plate_3">
+      <origin xyz="0.018 0.024 0.5" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.016 0.112" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="leaf_hinge_knuckle_3">
+      <origin xyz="0 0.0365 0.5" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.0045" length="0.034" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.58 0.6 0.62 1" />
+        </material>
+      </visual>
+    <visual name="pull_backplate">
+      <origin xyz="0.579 0.03 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.008 0.06" />
+        </geometry>
+      <material name="dark_hardware">
+        <color rgba="0.16 0.17 0.18 1" />
+        </material>
+      </visual>
+    <visual name="pull_stem">
+      <origin xyz="0.579 0.04 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.016" />
+        </geometry>
+      <material name="dark_hardware">
+        <color rgba="0.16 0.17 0.18 1" />
+        </material>
+      </visual>
+    <visual name="pull_knob">
+      <origin xyz="0.579 0.048 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.008" />
+        </geometry>
+      <material name="dark_hardware">
+        <color rgba="0.16 0.17 0.18 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_01">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_01">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_01">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_01">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_02">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_02">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_02">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_02">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_03">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_03">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_03">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_03">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_04">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_04">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_04">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_04">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_05">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_05">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_05">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_05">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_06">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_06">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_06">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_06">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_07">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_07">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_07">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_07">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_08">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_08">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_08">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_08">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_09">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_09">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_09">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_09">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_10">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_10">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_10">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_10">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="slat_11">
+    <inertial>
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <mass value="0.11" />
+      <inertia ixx="5.709e-05" ixy="0" ixz="0" iyy="0.00175069" iyz="0" izz="0.00169624" />
+      </inertial>
+    <visual name="slat_core_11">
+      <origin xyz="0.222 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.43 0.006 0.068" />
+        </geometry>
+      <material name="painted_wood">
+        <color rgba="0.93 0.93 0.9 1" />
+        </material>
+      </visual>
+    <visual name="slat_front_round_11">
+      <origin xyz="0.222 0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    <visual name="slat_back_round_11">
+      <origin xyz="0.222 -0.003 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.003" length="0.43" />
+        </geometry>
+      <material name="warm_white_trim">
+        <color rgba="0.97 0.97 0.95 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="frame_to_shutter" type="revolute">
+    <origin xyz="-0.316 0.0365 0.74" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="shutter_leaf" />
+    <axis xyz="0 0 1" />
+    <limit effort="12" velocity="1.6" lower="0" upper="1.15" />
+    </joint>
+  <joint name="slat_01_tilt" type="revolute">
+    <origin xyz="0.086 0.01 -0.46" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_01" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_02_tilt" type="revolute">
+    <origin xyz="0.086 0.01 -0.368" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_02" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_03_tilt" type="revolute">
+    <origin xyz="0.086 0.01 -0.276" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_03" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_04_tilt" type="revolute">
+    <origin xyz="0.086 0.01 -0.184" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_04" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_05_tilt" type="revolute">
+    <origin xyz="0.086 0.01 -0.092" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_05" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_06_tilt" type="revolute">
+    <origin xyz="0.086 0.01 -5.55112e-17" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_06" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_07_tilt" type="revolute">
+    <origin xyz="0.086 0.01 0.092" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_07" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_08_tilt" type="revolute">
+    <origin xyz="0.086 0.01 0.184" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_08" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_09_tilt" type="revolute">
+    <origin xyz="0.086 0.01 0.276" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_09" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_10_tilt" type="revolute">
+    <origin xyz="0.086 0.01 0.368" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_10" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="slat_11_tilt" type="revolute">
+    <origin xyz="0.086 0.01 0.46" rpy="0 0 0" />
+    <parent link="shutter_leaf" />
+    <child link="slat_11" />
+    <axis xyz="1 0 0" />
+    <limit effort="1.5" velocity="5" lower="-0.55" upper="0.55" />
+    </joint>
+  </robot>

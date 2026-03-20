@@ -1,0 +1,172 @@
+<robot name="hand_truck_dolly">
+  <material name="painted_steel">
+    <color rgba="0.17 0.18 0.2 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.55 0.57 0.6 1" />
+    </material>
+  <material name="black_rubber">
+    <color rgba="0.08 0.08 0.08 1" />
+    </material>
+  <material name="dark_polymer">
+    <color rgba="0.14 0.14 0.15 1" />
+    </material>
+  <link name="frame">
+    <inertial>
+      <origin xyz="0 0.018 0.63" rpy="0 0 0" />
+      <mass value="7.8" />
+      <inertia ixx="0.91442" ixy="0" ixz="0" iyy="1.05482" iyz="0" izz="0.15912" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/frame.obj" />
+        </geometry>
+      <material name="painted_steel">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="toe_plate">
+    <inertial>
+      <origin xyz="0 0.12 0.018" rpy="0 0 0" />
+      <mass value="2.1" />
+      <inertia ixx="0.012355" ixy="0" ixz="0" iyy="0.0216475" iyz="0" izz="0.0311675" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/toe_plate.obj" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.55 0.57 0.6 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="toe_extension">
+    <inertial>
+      <origin xyz="0 0.065 0.006" rpy="0 0 0" />
+      <mass value="0.8" />
+      <inertia ixx="0.00134833" ixy="0" ixz="0" iyy="0.00454833" iyz="0" izz="0.00581333" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0.055 -0.003" rpy="0 0 0" />
+      <geometry>
+        <box size="0.26 0.13 0.006" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.55 0.57 0.6 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.12 0.007" rpy="0 0 0" />
+      <geometry>
+        <box size="0.26 0.006 0.018" />
+        </geometry>
+      <material name="painted_steel">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.06 0.003" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.006" length="0.2" />
+        </geometry>
+      <material name="painted_steel">
+        <color rgba="0.17 0.18 0.2 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="left_wheel">
+    <inertial>
+      <origin xyz="0.026 0 0" rpy="0 1.5708 0" />
+      <mass value="1.9" />
+      <inertia ixx="0.00842333" ixy="0" ixz="0" iyy="0.00842333" iyz="0" izz="0.016055" />
+      </inertial>
+    <visual>
+      <origin xyz="0.026 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.13" length="0.05" />
+        </geometry>
+      <material name="black_rubber">
+        <color rgba="0.08 0.08 0.08 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.026 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.036" />
+        </geometry>
+      <material name="dark_polymer">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.026 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.044" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.55 0.57 0.6 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="right_wheel">
+    <inertial>
+      <origin xyz="-0.026 0 0" rpy="0 1.5708 0" />
+      <mass value="1.9" />
+      <inertia ixx="0.00842333" ixy="0" ixz="0" iyy="0.00842333" iyz="0" izz="0.016055" />
+      </inertial>
+    <visual>
+      <origin xyz="-0.026 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.13" length="0.05" />
+        </geometry>
+      <material name="black_rubber">
+        <color rgba="0.08 0.08 0.08 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.026 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.07" length="0.036" />
+        </geometry>
+      <material name="dark_polymer">
+        <color rgba="0.14 0.14 0.15 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.026 0 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.044" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.55 0.57 0.6 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="frame_to_toe_plate" type="fixed">
+    <origin xyz="0 0.03 0.055" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="toe_plate" />
+    </joint>
+  <joint name="toe_extension_hinge" type="revolute">
+    <origin xyz="0 0.235 0" rpy="0 0 0" />
+    <parent link="toe_plate" />
+    <child link="toe_extension" />
+    <axis xyz="1 0 0" />
+    <limit effort="12" velocity="2.5" lower="0" upper="1.35" />
+    </joint>
+  <joint name="left_wheel_spin" type="continuous">
+    <origin xyz="0.235 0 0.165" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="left_wheel" />
+    <axis xyz="1 0 0" />
+    <limit effort="18" velocity="20" />
+    </joint>
+  <joint name="right_wheel_spin" type="continuous">
+    <origin xyz="-0.235 0 0.165" rpy="0 0 0" />
+    <parent link="frame" />
+    <child link="right_wheel" />
+    <axis xyz="1 0 0" />
+    <limit effort="18" velocity="20" />
+    </joint>
+  </robot>

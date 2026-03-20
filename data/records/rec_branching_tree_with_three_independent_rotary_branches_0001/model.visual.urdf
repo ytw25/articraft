@@ -1,0 +1,80 @@
+<robot name="radial_three_branch_base">
+  <material name="base_metal">
+    <color rgba="0.56 0.59 0.62 1" />
+    </material>
+  <material name="branch_metal">
+    <color rgba="0.27 0.31 0.36 1" />
+    </material>
+  <link name="base">
+    <inertial>
+      <mass value="1.5" />
+      <inertia ixx="0.001482" ixy="0" ixz="0" iyy="0.001482" iyz="0" izz="0.002883" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/radial_base.obj" />
+        </geometry>
+      <material name="base_metal" />
+      </visual>
+    </link>
+  <link name="branch_1">
+    <inertial>
+      <origin xyz="0.066 0 0.014" rpy="0 0 0" />
+      <mass value="0.22" />
+      <inertia ixx="1.70867e-05" ixy="0" ixz="0" iyy="0.000202987" iyz="0" izz="0.000210687" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/revolute_branch.obj" />
+        </geometry>
+      <material name="branch_metal" />
+      </visual>
+    </link>
+  <link name="branch_2">
+    <inertial>
+      <origin xyz="0.066 0 0.014" rpy="0 0 0" />
+      <mass value="0.22" />
+      <inertia ixx="1.70867e-05" ixy="0" ixz="0" iyy="0.000202987" iyz="0" izz="0.000210687" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/revolute_branch.obj" />
+        </geometry>
+      <material name="branch_metal" />
+      </visual>
+    </link>
+  <link name="branch_3">
+    <inertial>
+      <origin xyz="0.066 0 0.014" rpy="0 0 0" />
+      <mass value="0.22" />
+      <inertia ixx="1.70867e-05" ixy="0" ixz="0" iyy="0.000202987" iyz="0" izz="0.000210687" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/revolute_branch.obj" />
+        </geometry>
+      <material name="branch_metal" />
+      </visual>
+    </link>
+  <joint name="base_to_branch_1" type="revolute">
+    <origin xyz="0.078 0 0.019" rpy="0 0 0" />
+    <parent link="base" />
+    <child link="branch_1" />
+    <axis xyz="0 0 1" />
+    <limit effort="6" velocity="1.4" lower="-0.35" upper="0.45" />
+    </joint>
+  <joint name="base_to_branch_2" type="revolute">
+    <origin xyz="-0.039 0.06755 0.019" rpy="0 0 2.0944" />
+    <parent link="base" />
+    <child link="branch_2" />
+    <axis xyz="0 0 1" />
+    <limit effort="6" velocity="1.4" lower="-0.4" upper="0.4" />
+    </joint>
+  <joint name="base_to_branch_3" type="revolute">
+    <origin xyz="-0.039 -0.06755 0.019" rpy="0 0 4.18879" />
+    <parent link="base" />
+    <child link="branch_3" />
+    <axis xyz="0 0 1" />
+    <limit effort="6" velocity="1.4" lower="-0.45" upper="0.35" />
+    </joint>
+  </robot>

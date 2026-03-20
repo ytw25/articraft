@@ -1,0 +1,1211 @@
+<robot name="open_wagon_cart">
+  <material name="weathered_wood">
+    <color rgba="0.58 0.41 0.24 1" />
+    </material>
+  <material name="painted_metal">
+    <color rgba="0.18 0.24 0.25 1" />
+    </material>
+  <material name="brushed_steel">
+    <color rgba="0.67 0.68 0.7 1" />
+    </material>
+  <material name="rubber_tire">
+    <color rgba="0.07 0.07 0.07 1" />
+    </material>
+  <link name="body">
+    <inertial>
+      <origin xyz="0 0 0.275" rpy="0 0 0" />
+      <mass value="18" />
+      <inertia ixx="0.2892" ixy="0" ixz="0" iyy="0.6492" iyz="0" izz="0.7932" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0.272" rpy="0 0 0" />
+      <geometry>
+        <box size="0.62 0.38 0.022" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.105 0.287" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.058 0.01" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.035 0.287" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.058 0.01" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.035 0.287" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.058 0.01" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.105 0.287" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.058 0.01" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.018 0.11" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.18 -0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.11" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.11" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.18 -0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.11" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.58 0.018 0.11" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.18 0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.11" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.11" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.18 0.181 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.02 0.022 0.11" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.301 0 0.333" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.344 0.1" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.301 -0.1 0.333" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.024 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.301 0.1 0.333" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.024 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.301 0 0.333" rpy="0 0 0" />
+      <geometry>
+        <box size="0.018 0.344 0.1" />
+        </geometry>
+      <material name="weathered_wood">
+        <color rgba="0.58 0.41 0.24 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.301 -0.1 0.333" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.024 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.301 0.1 0.333" rpy="0 0 0" />
+      <geometry>
+        <box size="0.022 0.024 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.295 -0.172 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.028 0.132" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.295 0.172 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.028 0.132" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.295 -0.172 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.028 0.132" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.295 0.172 0.338" rpy="0 0 0" />
+      <geometry>
+        <box size="0.028 0.028 0.132" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.115 0.248" rpy="0 0 0" />
+      <geometry>
+        <box size="0.52 0.028 0.026" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.115 0.248" rpy="0 0 0" />
+      <geometry>
+        <box size="0.52 0.028 0.026" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.21 0 0.248" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.27 0.026" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.2 0 0.248" rpy="0 0 0" />
+      <geometry>
+        <box size="0.07 0.27 0.026" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.24 0 0.235" rpy="0 0 0" />
+      <geometry>
+        <box size="0.09 0.1 0.028" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.24 0 0.209" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.024" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.24 0 0.189" rpy="0 0 0" />
+      <geometry>
+        <box size="0.11 0.12 0.016" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.24 0 0.201" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.452 0.028" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.24 0 0.222" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.1 0.042" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.24 -0.219 0.165" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.022 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.24 -0.255 0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.05" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.24 0.219 0.165" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.022 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.24 0.255 0.12" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.05" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="front_steer">
+    <inertial>
+      <origin xyz="0.04 0 -0.06" rpy="0 0 0" />
+      <mass value="6" />
+      <inertia ixx="0.072" ixy="0" ixz="0" iyy="0.0314" iyz="0" izz="0.089" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 -0.01" rpy="0 0 0" />
+      <geometry>
+        <box size="0.11 0.12 0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.034" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.03" length="0.03" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.16 0.1 0.042" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.081" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.452 0.032" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.085 0 -0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.11 0.09 0.028" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.219 -0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.022 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.255 -0.06" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.05" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.132 -0.022 -0.052" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.042" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.219 -0.065" rpy="0 0 0" />
+      <geometry>
+        <box size="0.08 0.022 0.1" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.255 -0.06" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.012" length="0.05" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.132 0.022 -0.052" rpy="0 0 0" />
+      <geometry>
+        <box size="0.03 0.01 0.042" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.125 0 -0.055" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.018" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="handle">
+    <inertial>
+      <origin xyz="0.18 0 0.028" rpy="0 0 0" />
+      <mass value="2" />
+      <inertia ixx="0.00273333" ixy="0" ixz="0" iyy="0.0251333" iyz="0" izz="0.0257333" />
+      </inertial>
+    <visual>
+      <geometry>
+        <box size="0.028 0.058 0.022" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.17 -0.038 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.34" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.33 -0.038 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.06" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.17 0.038 0" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.009" length="0.34" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.33 0.038 0.03" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.008" length="0.06" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.33 0 0.058" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.1" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.33 0 0.058" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.013" length="0.07" />
+        </geometry>
+      <material name="rubber_tire">
+        <color rgba="0.07 0.07 0.07 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="rear_left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.0067446" ixy="0" ixz="0" iyy="0.0067446" iyz="0" izz="0.01296" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.042" />
+        </geometry>
+      <material name="rubber_tire">
+        <color rgba="0.07 0.07 0.07 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.094" length="0.035" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.054" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 0.0410122" rpy="0 0.785398 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.058 0 3.55148e-18" rpy="0 1.5708 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 -0.0410122" rpy="0 2.35619 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="7.10295e-18 0 -0.058" rpy="0 3.14159 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 -0.0410122" rpy="0 3.92699 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0 -1.06544e-17" rpy="0 4.71239 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 0.0410122" rpy="0 5.49779 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="rear_right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.0067446" ixy="0" ixz="0" iyy="0.0067446" iyz="0" izz="0.01296" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.042" />
+        </geometry>
+      <material name="rubber_tire">
+        <color rgba="0.07 0.07 0.07 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.094" length="0.035" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.054" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 0.0410122" rpy="0 0.785398 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.058 0 3.55148e-18" rpy="0 1.5708 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 -0.0410122" rpy="0 2.35619 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="7.10295e-18 0 -0.058" rpy="0 3.14159 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 -0.0410122" rpy="0 3.92699 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0 -1.06544e-17" rpy="0 4.71239 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 0.0410122" rpy="0 5.49779 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="front_left_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.0067446" ixy="0" ixz="0" iyy="0.0067446" iyz="0" izz="0.01296" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.042" />
+        </geometry>
+      <material name="rubber_tire">
+        <color rgba="0.07 0.07 0.07 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.094" length="0.035" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.054" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 0.0410122" rpy="0 0.785398 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.058 0 3.55148e-18" rpy="0 1.5708 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 -0.0410122" rpy="0 2.35619 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="7.10295e-18 0 -0.058" rpy="0 3.14159 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 -0.0410122" rpy="0 3.92699 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0 -1.06544e-17" rpy="0 4.71239 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 0.0410122" rpy="0 5.49779 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="front_right_wheel">
+    <inertial>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <mass value="1.8" />
+      <inertia ixx="0.0067446" ixy="0" ixz="0" iyy="0.0067446" iyz="0" izz="0.01296" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.12" length="0.042" />
+        </geometry>
+      <material name="rubber_tire">
+        <color rgba="0.07 0.07 0.07 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.094" length="0.035" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.036" length="0.054" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 -0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.015 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.053" length="0.008" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.026 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.02" length="0.012" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0.036 0" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+        </geometry>
+      <material name="brushed_steel">
+        <color rgba="0.67 0.68 0.7 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.058" rpy="0 0 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 0.0410122" rpy="0 0.785398 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.058 0 3.55148e-18" rpy="0 1.5708 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="0.0410122 0 -0.0410122" rpy="0 2.35619 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="7.10295e-18 0 -0.058" rpy="0 3.14159 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 -0.0410122" rpy="0 3.92699 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.058 0 -1.06544e-17" rpy="0 4.71239 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    <visual>
+      <origin xyz="-0.0410122 0 0.0410122" rpy="0 5.49779 0" />
+      <geometry>
+        <box size="0.012 0.01 0.078" />
+        </geometry>
+      <material name="painted_metal">
+        <color rgba="0.18 0.24 0.25 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="front_steer_swivel" type="revolute">
+    <origin xyz="0.24 0 0.18" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="front_steer" />
+    <axis xyz="0 0 1" />
+    <limit effort="25" velocity="2.5" lower="-0.55" upper="0.55" />
+    </joint>
+  <joint name="pull_handle_pitch" type="revolute">
+    <origin xyz="0.125 0 -0.055" rpy="0 0 0" />
+    <parent link="front_steer" />
+    <child link="handle" />
+    <axis xyz="0 -1 0" />
+    <limit effort="12" velocity="2.5" lower="-0.75" upper="0.45" />
+    </joint>
+  <joint name="rear_left_wheel_spin" type="continuous">
+    <origin xyz="-0.24 0.255 0.12" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="rear_left_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="15" velocity="20" />
+    </joint>
+  <joint name="rear_right_wheel_spin" type="continuous">
+    <origin xyz="-0.24 -0.255 0.12" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="rear_right_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="15" velocity="20" />
+    </joint>
+  <joint name="front_left_wheel_spin" type="continuous">
+    <origin xyz="0 0.255 -0.06" rpy="0 0 0" />
+    <parent link="front_steer" />
+    <child link="front_left_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="15" velocity="20" />
+    </joint>
+  <joint name="front_right_wheel_spin" type="continuous">
+    <origin xyz="0 -0.255 -0.06" rpy="0 0 0" />
+    <parent link="front_steer" />
+    <child link="front_right_wheel" />
+    <axis xyz="0 1 0" />
+    <limit effort="15" velocity="20" />
+    </joint>
+  </robot>

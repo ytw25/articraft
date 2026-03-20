@@ -30,11 +30,16 @@ def compile_object_to_urdf_xml(
     *,
     pretty: bool = True,
     asset_root: str | os.PathLike[str] | Path | None = None,
+    include_generated_collisions: bool = True,
 ) -> str:
     object_model.validate(strict=True)
-    compiled_model = compile_object_model_with_generated_collisions(
-        object_model,
-        asset_root=asset_root,
+    compiled_model = (
+        compile_object_model_with_generated_collisions(
+            object_model,
+            asset_root=asset_root,
+        )
+        if include_generated_collisions
+        else object_model
     )
     root = ET.Element("robot", {"name": object_model.name})
 
@@ -203,15 +208,23 @@ def _articulation_element(articulation: Articulation) -> ET.Element:
             "effort": _format_float(articulation.motion_limits.effort),
             "velocity": _format_float(articulation.motion_limits.velocity),
         }
-        if joint_type in {
-            ArticulationType.REVOLUTE,
-            ArticulationType.PRISMATIC,
-        } and articulation.motion_limits.lower is not None:
+        if (
+            joint_type
+            in {
+                ArticulationType.REVOLUTE,
+                ArticulationType.PRISMATIC,
+            }
+            and articulation.motion_limits.lower is not None
+        ):
             limit_attrs["lower"] = _format_float(articulation.motion_limits.lower)
-        if joint_type in {
-            ArticulationType.REVOLUTE,
-            ArticulationType.PRISMATIC,
-        } and articulation.motion_limits.upper is not None:
+        if (
+            joint_type
+            in {
+                ArticulationType.REVOLUTE,
+                ArticulationType.PRISMATIC,
+            }
+            and articulation.motion_limits.upper is not None
+        ):
             limit_attrs["upper"] = _format_float(articulation.motion_limits.upper)
         ET.SubElement(elem, "limit", limit_attrs)
 

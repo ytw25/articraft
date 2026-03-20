@@ -1,0 +1,116 @@
+<robot name="realistic_turbofan_engine">
+  <material name="nacelle_paint">
+    <color rgba="0.95 0.96 0.98 1" />
+    </material>
+  <material name="intake_lip_titanium">
+    <color rgba="0.79 0.81 0.84 1" />
+    </material>
+  <material name="duct_primer_gray">
+    <color rgba="0.24 0.25 0.27 1" />
+    </material>
+  <material name="compressor_steel">
+    <color rgba="0.58 0.61 0.64 1" />
+    </material>
+  <material name="burnt_nozzle_alloy">
+    <color rgba="0.42 0.38 0.34 1" />
+    </material>
+  <material name="spinner_alloy">
+    <color rgba="0.72 0.74 0.77 1" />
+    </material>
+  <material name="fan_blade_composite">
+    <color rgba="0.18 0.19 0.22 1" />
+    </material>
+  <link name="nacelle">
+    <inertial>
+      <origin xyz="1.53 0 0" rpy="0 1.5708 0" />
+      <mass value="2450" />
+      <inertia ixx="2396.9" ixy="0" ixz="0" iyy="2396.9" iyz="0" izz="970.322" />
+      </inertial>
+    <visual name="outer_shell">
+      <geometry>
+        <mesh filename="assets/meshes/engine_outer_shell.obj" />
+        </geometry>
+      <material name="nacelle_paint">
+        <color rgba="0.95 0.96 0.98 1" />
+        </material>
+      </visual>
+    <visual name="intake_lip">
+      <geometry>
+        <mesh filename="assets/meshes/engine_intake_lip.obj" />
+        </geometry>
+      <material name="intake_lip_titanium">
+        <color rgba="0.79 0.81 0.84 1" />
+        </material>
+      </visual>
+    <visual name="intake_liner">
+      <geometry>
+        <mesh filename="assets/meshes/engine_intake_liner.obj" />
+        </geometry>
+      <material name="duct_primer_gray">
+        <color rgba="0.24 0.25 0.27 1" />
+        </material>
+      </visual>
+    <visual name="core_structure">
+      <geometry>
+        <mesh filename="assets/meshes/engine_core_structure.obj" />
+        </geometry>
+      <material name="compressor_steel">
+        <color rgba="0.58 0.61 0.64 1" />
+        </material>
+      </visual>
+    <visual name="hot_liner">
+      <geometry>
+        <mesh filename="assets/meshes/engine_hot_liner.obj" />
+        </geometry>
+      <material name="burnt_nozzle_alloy">
+        <color rgba="0.42 0.38 0.34 1" />
+        </material>
+      </visual>
+    <visual name="exhaust_band">
+      <geometry>
+        <mesh filename="assets/meshes/engine_exhaust_band.obj" />
+        </geometry>
+      <material name="burnt_nozzle_alloy">
+        <color rgba="0.42 0.38 0.34 1" />
+        </material>
+      </visual>
+    <visual name="pylon">
+      <geometry>
+        <mesh filename="assets/meshes/engine_pylon.obj" />
+        </geometry>
+      <material name="nacelle_paint">
+        <color rgba="0.95 0.96 0.98 1" />
+        </material>
+      </visual>
+    </link>
+  <link name="fan_rotor">
+    <inertial>
+      <origin xyz="-0.18 0 0" rpy="0 1.5708 0" />
+      <mass value="340" />
+      <inertia ixx="49.9318" ixy="0" ixz="0" iyy="49.9318" iyz="0" izz="85.697" />
+      </inertial>
+    <visual name="rotor_metal">
+      <geometry>
+        <mesh filename="assets/meshes/engine_rotor_metal.obj" />
+        </geometry>
+      <material name="spinner_alloy">
+        <color rgba="0.72 0.74 0.77 1" />
+        </material>
+      </visual>
+    <visual name="fan_blades">
+      <geometry>
+        <mesh filename="assets/meshes/engine_fan_blades.obj" />
+        </geometry>
+      <material name="fan_blade_composite">
+        <color rgba="0.18 0.19 0.22 1" />
+        </material>
+      </visual>
+    </link>
+  <joint name="fan_spin" type="continuous">
+    <origin xyz="0.505 0 0" rpy="0 0 0" />
+    <parent link="nacelle" />
+    <child link="fan_rotor" />
+    <axis xyz="1 0 0" />
+    <limit effort="180" velocity="320" />
+    </joint>
+  </robot>

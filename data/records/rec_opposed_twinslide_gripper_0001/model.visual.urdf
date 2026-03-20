@@ -1,0 +1,162 @@
+<robot name="opposed_twin_slide_gripper">
+  <material name="body_dark">
+    <color rgba="0.18 0.19 0.21 1" />
+    </material>
+  <material name="body_mid">
+    <color rgba="0.3 0.33 0.37 1" />
+    </material>
+  <material name="jaw_alloy">
+    <color rgba="0.7 0.72 0.75 1" />
+    </material>
+  <material name="guide_steel">
+    <color rgba="0.82 0.84 0.87 1" />
+    </material>
+  <material name="fastener">
+    <color rgba="0.56 0.58 0.62 1" />
+    </material>
+  <material name="grip_pad">
+    <color rgba="0.14 0.15 0.16 1" />
+    </material>
+  <link name="body">
+    <inertial>
+      <origin xyz="0 -0.01 0" rpy="0 0 0" />
+      <mass value="1.35" />
+      <inertia ixx="0.00083745" ixy="0" ixz="0" iyy="0.0013572" iyz="0" izz="0.00138465" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/gripper_body.obj" />
+        </geometry>
+      <material name="body_dark" />
+      </visual>
+    <visual>
+      <origin xyz="-0.024 0.0175 -0.016" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0032" length="0.004" />
+        </geometry>
+      <material name="fastener" />
+      </visual>
+    <visual>
+      <origin xyz="-0.024 0.0175 0.016" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0032" length="0.004" />
+        </geometry>
+      <material name="fastener" />
+      </visual>
+    <visual>
+      <origin xyz="0.024 0.0175 -0.016" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0032" length="0.004" />
+        </geometry>
+      <material name="fastener" />
+      </visual>
+    <visual>
+      <origin xyz="0.024 0.0175 0.016" rpy="1.5708 0 0" />
+      <geometry>
+        <cylinder radius="0.0032" length="0.004" />
+        </geometry>
+      <material name="fastener" />
+      </visual>
+    </link>
+  <link name="guide_rails">
+    <inertial>
+      <origin xyz="0 -0.001 0" rpy="0 0 0" />
+      <mass value="0.22" />
+      <inertia ixx="3.96733e-05" ixy="0" ixz="0" iyy="0.000314233" iyz="0" izz="0.000289227" />
+      </inertial>
+    <visual>
+      <origin xyz="0 0.004 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.034 0.01 0.038" />
+        </geometry>
+      <material name="body_mid" />
+      </visual>
+    <visual>
+      <origin xyz="-0.037 -0.006 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.008 0.038" />
+        </geometry>
+      <material name="body_mid" />
+      </visual>
+    <visual>
+      <origin xyz="0.037 -0.006 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.014 0.008 0.038" />
+        </geometry>
+      <material name="body_mid" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 -0.015" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.124" />
+        </geometry>
+      <material name="guide_steel" />
+      </visual>
+    <visual>
+      <origin xyz="0 0 0.015" rpy="0 1.5708 0" />
+      <geometry>
+        <cylinder radius="0.004" length="0.124" />
+        </geometry>
+      <material name="guide_steel" />
+      </visual>
+    </link>
+  <link name="left_jaw">
+    <inertial>
+      <origin xyz="0 0.024 0" rpy="0 0 0" />
+      <mass value="0.24" />
+      <inertia ixx="9.608e-05" ixy="0" ixz="0" iyy="8.136e-05" iyz="0" izz="8.528e-05" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/left_jaw.obj" />
+        </geometry>
+      <material name="jaw_alloy" />
+      </visual>
+    <visual>
+      <origin xyz="0.023 0.028 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.012 0.028" />
+        </geometry>
+      <material name="grip_pad" />
+      </visual>
+    </link>
+  <link name="right_jaw">
+    <inertial>
+      <origin xyz="0 0.024 0" rpy="0 0 0" />
+      <mass value="0.24" />
+      <inertia ixx="9.608e-05" ixy="0" ixz="0" iyy="8.136e-05" iyz="0" izz="8.528e-05" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/right_jaw.obj" />
+        </geometry>
+      <material name="jaw_alloy" />
+      </visual>
+    <visual>
+      <origin xyz="-0.023 0.028 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.006 0.012 0.028" />
+        </geometry>
+      <material name="grip_pad" />
+      </visual>
+    </link>
+  <joint name="body_to_guide_rails" type="fixed">
+    <origin xyz="0 0.017 0" rpy="0 0 0" />
+    <parent link="body" />
+    <child link="guide_rails" />
+    </joint>
+  <joint name="left_slide" type="prismatic">
+    <origin xyz="-0.037 0 0" rpy="0 0 0" />
+    <parent link="guide_rails" />
+    <child link="left_jaw" />
+    <axis xyz="-1 0 0" />
+    <limit effort="120" velocity="0.2" lower="0" upper="0.018" />
+    </joint>
+  <joint name="right_slide" type="prismatic">
+    <origin xyz="0.037 0 0" rpy="0 0 0" />
+    <parent link="guide_rails" />
+    <child link="right_jaw" />
+    <axis xyz="1 0 0" />
+    <limit effort="120" velocity="0.2" lower="0" upper="0.018" />
+    </joint>
+  </robot>

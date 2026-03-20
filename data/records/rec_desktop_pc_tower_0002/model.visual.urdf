@@ -1,0 +1,86 @@
+<robot name="enthusiast_pc_tower">
+  <material name="case_charcoal">
+    <color rgba="0.12 0.13 0.14 1" />
+    </material>
+  <material name="case_mesh">
+    <color rgba="0.06 0.07 0.08 1" />
+    </material>
+  <material name="glass_smoke">
+    <color rgba="0.52 0.62 0.68 0.28" />
+    </material>
+  <material name="io_shield">
+    <color rgba="0.63 0.64 0.66 1" />
+    </material>
+  <link name="chassis">
+    <inertial>
+      <origin xyz="0 0 -0.009" rpy="0 0 0" />
+      <mass value="10.5" />
+      <inertia ixx="0.40253" ixy="0" ixz="0" iyy="0.269705" iyz="0" izz="0.229469" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/pc_tower_chassis.obj" />
+        </geometry>
+      <material name="case_charcoal" />
+      </visual>
+    <visual>
+      <origin xyz="-0.06 0.2269 0.095" rpy="0 0 0" />
+      <geometry>
+        <box size="0.048 0.0012 0.128" />
+        </geometry>
+      <material name="io_shield" />
+      </visual>
+    </link>
+  <link name="side_panel">
+    <inertial>
+      <origin xyz="0 0.2105 0" rpy="0 0 0" />
+      <mass value="2.2" />
+      <inertia ixx="0.0714564" ixy="0" ixz="0" iyy="0.0389651" iyz="0" izz="0.0324971" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/pc_tower_side_panel_frame.obj" />
+        </geometry>
+      <material name="case_charcoal" />
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/pc_tower_side_panel_glass.obj" />
+        </geometry>
+      <material name="glass_smoke" />
+      </visual>
+    </link>
+  <link name="front_door">
+    <inertial>
+      <origin xyz="-0.1085 0 0" rpy="0 0 0" />
+      <mass value="0.95" />
+      <inertia ixx="0.0156782" ixy="0" ixz="0" iyy="0.0194049" iyz="0" izz="0.00372915" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/pc_tower_front_door_frame.obj" />
+        </geometry>
+      <material name="case_charcoal" />
+      </visual>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/pc_tower_front_door_mesh.obj" />
+        </geometry>
+      <material name="case_mesh" />
+      </visual>
+    </link>
+  <joint name="chassis_to_side_panel" type="revolute">
+    <origin xyz="-0.1165 -0.2105 0" rpy="0 0 0" />
+    <parent link="chassis" />
+    <child link="side_panel" />
+    <axis xyz="0 0 1" />
+    <limit effort="8" velocity="1.5" lower="0" upper="1.35" />
+    </joint>
+  <joint name="chassis_to_front_door" type="revolute">
+    <origin xyz="0.1055 -0.2255 0" rpy="0 0 0" />
+    <parent link="chassis" />
+    <child link="front_door" />
+    <axis xyz="0 0 1" />
+    <limit effort="4" velocity="1.5" lower="0" upper="1.15" />
+    </joint>
+  </robot>

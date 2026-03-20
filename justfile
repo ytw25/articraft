@@ -394,68 +394,31 @@ compile record_dir:
     #!/usr/bin/env bash
     set -euo pipefail
     record_dir={{ quote(record_dir) }}
-    sdk_package={{ quote(sdk_package) }}
-    script_path="$record_dir/model.py"
-    urdf_path="$record_dir/model.urdf"
-    if [ ! -f "$script_path" ]; then
-      echo "Record model not found: $script_path" >&2
+    if [ ! -f "$record_dir/model.py" ]; then
+      echo "Record model not found: $record_dir/model.py" >&2
       exit 1
     fi
-    RECORD_SCRIPT="$script_path" RECORD_URDF="$urdf_path" RECORD_SDK="$sdk_package" uv run python - <<'PY'
-    import os
-    from pathlib import Path
+    uv run python scripts/materialize_record.py --repo-root . "$record_dir"
 
-    from agent.compiler import compile_urdf_report
-
-    script = Path(os.environ["RECORD_SCRIPT"]).resolve()
-    urdf_path = Path(os.environ["RECORD_URDF"]).resolve()
-    sdk_package = os.environ["RECORD_SDK"]
-    report = compile_urdf_report(
-        script,
-        sdk_package=sdk_package,
-        ignore_geom_qc=True,
-    )
-    urdf_path.write_text(report.urdf_xml, encoding="utf-8")
-    print(f"Recompiled {script}")
-    print(f"Wrote URDF to {urdf_path}")
-    if report.warnings:
-        print(f"Warnings: {len(report.warnings)}")
-        for warning in report.warnings:
-            print(f"- {warning.splitlines()[0]}")
-    else:
-        print("Warnings: 0")
-    PY
+compile-visual record_dir:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    record_dir={{ quote(record_dir) }}
+    if [ ! -f "$record_dir/model.py" ]; then
+      echo "Record model not found: $record_dir/model.py" >&2
+      exit 1
+    fi
+    uv run python scripts/materialize_record.py --repo-root . --target visual "$record_dir"
 
 compile-strict record_dir:
     #!/usr/bin/env bash
     set -euo pipefail
     record_dir={{ quote(record_dir) }}
-    sdk_package={{ quote(sdk_package) }}
-    script_path="$record_dir/model.py"
-    urdf_path="$record_dir/model.urdf"
-    if [ ! -f "$script_path" ]; then
-      echo "Record model not found: $script_path" >&2
+    if [ ! -f "$record_dir/model.py" ]; then
+      echo "Record model not found: $record_dir/model.py" >&2
       exit 1
     fi
-    RECORD_SCRIPT="$script_path" RECORD_URDF="$urdf_path" RECORD_SDK="$sdk_package" uv run python - <<'PY'
-    from pathlib import Path
-    import os
-    from agent.compiler import compile_urdf_report
-
-    script = Path(os.environ["RECORD_SCRIPT"]).resolve()
-    urdf_path = Path(os.environ["RECORD_URDF"]).resolve()
-    sdk_package = os.environ["RECORD_SDK"]
-    report = compile_urdf_report(script, sdk_package=sdk_package)
-    urdf_path.write_text(report.urdf_xml, encoding="utf-8")
-    print(f"Recompiled {script}")
-    print(f"Wrote URDF to {urdf_path}")
-    if report.warnings:
-        print(f"Warnings: {len(report.warnings)}")
-        for warning in report.warnings:
-            print(f"- {warning.splitlines()[0]}")
-    else:
-        print("Warnings: 0")
-    PY
+    uv run python scripts/materialize_record.py --repo-root . --validate --strict-geom-qc "$record_dir"
 
 compile-unsafe record_dir:
     #!/usr/bin/env bash
@@ -491,6 +454,9 @@ compile-unsafe record_dir:
 
 compile-all:
     uv run python scripts/compile_all_records.py --repo-root .
+
+compile-all-visual:
+    uv run python scripts/compile_all_records.py --repo-root . --target visual
 
 force-compile-all:
     uv run python scripts/compile_all_records.py --repo-root . --force

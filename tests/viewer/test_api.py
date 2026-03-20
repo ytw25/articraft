@@ -662,9 +662,13 @@ def test_viewer_api_ensures_record_assets_on_demand(
         *,
         sdk_package: str = "sdk",
         ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
     ) -> SimpleNamespace:
         compile_calls.append(script_path)
-        assert ignore_geom_qc is True
+        assert ignore_geom_qc is False
+        assert run_checks is False
+        assert target == "full"
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
         (meshes_dir / "part.obj").write_text(
@@ -772,9 +776,13 @@ def test_viewer_api_persists_compiled_urdf_for_nonblocking_geometry_qc(
         *,
         sdk_package: str = "sdk",
         ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
     ) -> SimpleNamespace:
         compile_calls.append(script_path)
-        assert ignore_geom_qc is True
+        assert ignore_geom_qc is False
+        assert run_checks is False
+        assert target == "full"
         return SimpleNamespace(
             urdf_xml=(
                 "<robot name='qc'>"
@@ -969,9 +977,13 @@ def test_viewer_api_rebuilds_missing_assets_even_with_successful_urdf(
         *,
         sdk_package: str = "sdk",
         ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
     ) -> SimpleNamespace:
         compile_calls.append(script_path)
-        assert ignore_geom_qc is True
+        assert ignore_geom_qc is False
+        assert run_checks is False
+        assert target == "full"
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
         (meshes_dir / "part.obj").write_text(
@@ -1084,9 +1096,13 @@ def test_viewer_api_rebuilds_missing_assets_for_assets_prefixed_mesh_paths(
         *,
         sdk_package: str = "sdk",
         ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
     ) -> SimpleNamespace:
         compile_calls.append(script_path)
-        assert ignore_geom_qc is True
+        assert ignore_geom_qc is False
+        assert run_checks is False
+        assert target == "full"
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
         (meshes_dir / "part.obj").write_text(
@@ -1193,9 +1209,13 @@ def test_viewer_store_force_materialize_clears_stale_derived_outputs(
         *,
         sdk_package: str = "sdk",
         ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
     ) -> SimpleNamespace:
         compile_calls.append(script_path)
-        assert ignore_geom_qc is True
+        assert ignore_geom_qc is False
+        assert run_checks is False
+        assert target == "full"
 
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
@@ -1239,3 +1259,226 @@ def test_viewer_store_force_materialize_clears_stale_derived_outputs(
     assert not (repo.layout.record_asset_glb_dir("rec_force_assets_001") / "stale.glb").exists()
     assert (repo.layout.record_asset_viewer_dir("rec_force_assets_001") / "fresh.json").exists()
     assert not (repo.layout.record_asset_viewer_dir("rec_force_assets_001") / "stale.json").exists()
+
+
+def test_viewer_store_visual_materialize_can_be_upgraded_to_full(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+    record_store = RecordStore(repo)
+
+    record = Record(
+        schema_version=1,
+        record_id="rec_visual_upgrade_001",
+        created_at="2026-03-19T10:00:00Z",
+        updated_at="2026-03-19T10:00:00Z",
+        rating=None,
+        kind="generated_model",
+        prompt_kind="single_prompt",
+        category_slug="hinges",
+        source=SourceRef(run_id="run_visual_upgrade_001"),
+        sdk_package="sdk",
+        provider="openai",
+        model_id="gpt-5.4",
+        display=DisplayMetadata(
+            title="Visual then full model",
+            prompt_preview="record upgraded from visual-only to full compile",
+        ),
+        artifacts=RecordArtifacts(
+            prompt_txt="prompt.txt",
+            prompt_series_json=None,
+            model_py="model.py",
+            model_urdf="model.urdf",
+            compile_report_json="compile_report.json",
+            provenance_json="provenance.json",
+            cost_json=None,
+        ),
+        collections=["workbench"],
+    )
+    record_store.write_record(record)
+    record_dir = repo.layout.record_dir("rec_visual_upgrade_001")
+    (record_dir / "prompt.txt").write_text("upgrade visual compile", encoding="utf-8")
+    (record_dir / "model.py").write_text("from __future__ import annotations\n", encoding="utf-8")
+    repo.write_json(
+        record_dir / "provenance.json",
+        {
+            "schema_version": 1,
+            "record_id": "rec_visual_upgrade_001",
+            "materialization": {
+                "fingerprint_inputs": {
+                    "model_py_sha256": None,
+                    "model_urdf_sha256": None,
+                }
+            },
+        },
+    )
+
+    compile_calls: list[tuple[Path, bool, str]] = []
+
+    def fake_compile(
+        script_path: Path,
+        *,
+        sdk_package: str = "sdk",
+        ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
+    ) -> SimpleNamespace:
+        compile_calls.append((script_path, run_checks, target))
+        meshes_dir = script_path.parent / "assets" / "meshes"
+        meshes_dir.mkdir(parents=True, exist_ok=True)
+        (meshes_dir / "part.obj").write_text(
+            "o tri\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n",
+            encoding="utf-8",
+        )
+        if target == "visual":
+            return SimpleNamespace(
+                urdf_xml=(
+                    "<robot name='visual'>"
+                    "<link name='base'>"
+                    "<visual><geometry><mesh filename='assets/meshes/part.obj'/></geometry></visual>"
+                    "</link>"
+                    "</robot>"
+                ),
+                warnings=[],
+            )
+        return SimpleNamespace(
+            urdf_xml=(
+                "<robot name='full'>"
+                "<link name='base'>"
+                "<visual><geometry><mesh filename='assets/meshes/part.obj'/></geometry></visual>"
+                "<collision><geometry><box size='1 1 1'/></geometry></collision>"
+                "</link>"
+                "</robot>"
+            ),
+            warnings=[],
+        )
+
+    monkeypatch.setattr(
+        "agent.compiler.compile_urdf_report_maybe_timeout",
+        fake_compile,
+    )
+
+    viewer_store = ViewerStore(tmp_path)
+
+    visual_result = viewer_store.materialize_record_assets(
+        "rec_visual_upgrade_001",
+        force=True,
+        target="visual",
+    )
+    assert visual_result.compiled is True
+    compile_report = repo.read_json(record_dir / "compile_report.json")
+    assert compile_report["metrics"]["compile_level"] == "visual"
+    assert "<collision" not in (record_dir / "model.urdf").read_text(encoding="utf-8")
+
+    full_result = viewer_store.materialize_record_assets("rec_visual_upgrade_001", target="full")
+    assert full_result.compiled is True
+    compile_report = repo.read_json(record_dir / "compile_report.json")
+    assert compile_report["metrics"]["compile_level"] == "full"
+    assert "<collision" in (record_dir / "model.urdf").read_text(encoding="utf-8")
+    assert compile_calls == [
+        (record_dir / "model.py", False, "visual"),
+        (record_dir / "model.py", False, "full"),
+    ]
+
+
+def test_viewer_store_full_materialize_can_enable_validation(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+    record_store = RecordStore(repo)
+
+    record = Record(
+        schema_version=1,
+        record_id="rec_full_validate_001",
+        created_at="2026-03-20T10:00:00Z",
+        updated_at="2026-03-20T10:00:00Z",
+        rating=None,
+        kind="generated_model",
+        prompt_kind="single_prompt",
+        category_slug="hinges",
+        source=SourceRef(run_id="run_full_validate_001"),
+        sdk_package="sdk",
+        provider="openai",
+        model_id="gpt-5.4",
+        display=DisplayMetadata(
+            title="Validated full model",
+            prompt_preview="record compiled with validation enabled",
+        ),
+        artifacts=RecordArtifacts(
+            prompt_txt="prompt.txt",
+            prompt_series_json=None,
+            model_py="model.py",
+            model_urdf="model.urdf",
+            compile_report_json="compile_report.json",
+            provenance_json="provenance.json",
+            cost_json=None,
+        ),
+        collections=["workbench"],
+    )
+    record_store.write_record(record)
+    record_dir = repo.layout.record_dir("rec_full_validate_001")
+    (record_dir / "prompt.txt").write_text("validated full compile", encoding="utf-8")
+    (record_dir / "model.py").write_text("from __future__ import annotations\n", encoding="utf-8")
+    repo.write_json(
+        record_dir / "provenance.json",
+        {
+            "schema_version": 1,
+            "record_id": "rec_full_validate_001",
+            "materialization": {
+                "fingerprint_inputs": {
+                    "model_py_sha256": None,
+                    "model_urdf_sha256": None,
+                }
+            },
+        },
+    )
+
+    compile_calls: list[tuple[Path, bool, bool, str]] = []
+
+    def fake_compile(
+        script_path: Path,
+        *,
+        sdk_package: str = "sdk",
+        ignore_geom_qc: bool = False,
+        run_checks: bool = True,
+        target: str = "full",
+    ) -> SimpleNamespace:
+        compile_calls.append((script_path, ignore_geom_qc, run_checks, target))
+        return SimpleNamespace(
+            urdf_xml=(
+                "<robot name='validated'>"
+                "<link name='base'>"
+                "<visual><geometry><box size='1 1 1'/></geometry></visual>"
+                "<collision><geometry><box size='1 1 1'/></geometry></collision>"
+                "</link>"
+                "</robot>"
+            ),
+            warnings=[],
+        )
+
+    monkeypatch.setattr(
+        "agent.compiler.compile_urdf_report_maybe_timeout",
+        fake_compile,
+    )
+
+    viewer_store = ViewerStore(tmp_path)
+
+    result = viewer_store.materialize_record_assets(
+        "rec_full_validate_001",
+        force=True,
+        validate=True,
+        ignore_geom_qc=False,
+        target="full",
+    )
+
+    assert result.compiled is True
+    assert compile_calls == [
+        (record_dir / "model.py", False, True, "full"),
+    ]
+    compile_report = repo.read_json(record_dir / "compile_report.json")
+    assert compile_report["metrics"]["compile_level"] == "full"
+    assert compile_report["metrics"]["validation_level"] == "full"

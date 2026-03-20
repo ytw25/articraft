@@ -1,0 +1,100 @@
+<robot name="dual_finger_gripper">
+  <material name="palm_gray">
+    <color rgba="0.24 0.26 0.3 1" />
+    </material>
+  <material name="finger_aluminum">
+    <color rgba="0.72 0.75 0.79 1" />
+    </material>
+  <link name="palm">
+    <inertial>
+      <mass value="0.45" />
+      <inertia ixx="6e-05" ixy="0" ixz="0" iyy="0.00027375" iyz="0" izz="0.00029055" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/palm.obj" />
+        </geometry>
+      <material name="palm_gray" />
+      </visual>
+    </link>
+  <link name="left_proximal">
+    <inertial>
+      <origin xyz="0 0.018 0" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="9.30667e-06" ixy="0" ixz="0" iyy="1.33333e-06" iyz="0" izz="9.30667e-06" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/left_proximal.obj" />
+        </geometry>
+      <material name="finger_aluminum" />
+      </visual>
+    </link>
+  <link name="left_distal">
+    <inertial>
+      <origin xyz="0 0.011 0" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="2.35417e-06" ixy="0" ixz="0" iyy="6.04167e-07" iyz="0" izz="2.28333e-06" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/left_distal.obj" />
+        </geometry>
+      <material name="finger_aluminum" />
+      </visual>
+    </link>
+  <link name="right_proximal">
+    <inertial>
+      <origin xyz="0 0.018 0" rpy="0 0 0" />
+      <mass value="0.08" />
+      <inertia ixx="9.30667e-06" ixy="0" ixz="0" iyy="1.33333e-06" iyz="0" izz="9.30667e-06" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/right_proximal.obj" />
+        </geometry>
+      <material name="finger_aluminum" />
+      </visual>
+    </link>
+  <link name="right_distal">
+    <inertial>
+      <origin xyz="0 0.011 0" rpy="0 0 0" />
+      <mass value="0.05" />
+      <inertia ixx="2.35417e-06" ixy="0" ixz="0" iyy="6.04167e-07" iyz="0" izz="2.28333e-06" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/right_distal.obj" />
+        </geometry>
+      <material name="finger_aluminum" />
+      </visual>
+    </link>
+  <joint name="palm_to_left_proximal" type="revolute">
+    <origin xyz="-0.034 0.006 0.017" rpy="0 0 0" />
+    <parent link="palm" />
+    <child link="left_proximal" />
+    <axis xyz="0 0 -1" />
+    <limit effort="3" velocity="3" lower="0" upper="0.42" />
+    </joint>
+  <joint name="left_proximal_to_left_distal" type="revolute">
+    <origin xyz="0 0.036 0" rpy="0 0 0" />
+    <parent link="left_proximal" />
+    <child link="left_distal" />
+    <axis xyz="0 0 -1" />
+    <limit effort="2" velocity="3" lower="0" upper="0.34" />
+    </joint>
+  <joint name="palm_to_right_proximal" type="revolute">
+    <origin xyz="0.034 0.006 0.017" rpy="0 0 0" />
+    <parent link="palm" />
+    <child link="right_proximal" />
+    <axis xyz="0 0 1" />
+    <limit effort="3" velocity="3" lower="0" upper="0.42" />
+    </joint>
+  <joint name="right_proximal_to_right_distal" type="revolute">
+    <origin xyz="0 0.036 0" rpy="0 0 0" />
+    <parent link="right_proximal" />
+    <child link="right_distal" />
+    <axis xyz="0 0 1" />
+    <limit effort="2" velocity="3" lower="0" upper="0.34" />
+    </joint>
+  </robot>

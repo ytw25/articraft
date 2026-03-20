@@ -104,7 +104,13 @@ If you just cloned the repo and want to avoid first-click compile pauses in the 
 just compile-all
 ```
 
-This walks the saved records, recompiles the ones that still need generated artifacts, and shows a progress bar while it runs.
+This walks the saved records, quickly materializes viewer-ready `model.urdf` + mesh assets for the ones that still need generated artifacts, and shows a progress bar while it runs.
+
+If you want the slower validation-heavy path instead, use:
+
+```bash
+just compile-all-strict
+```
 
 For live frontend development:
 
@@ -138,6 +144,12 @@ Precompile all saved records that are still missing generated artifacts:
 
 ```bash
 just compile-all
+```
+
+Run the validation-heavy bulk path:
+
+```bash
+just compile-all-strict
 ```
 
 ## 8. Run A Dataset Batch From CSV

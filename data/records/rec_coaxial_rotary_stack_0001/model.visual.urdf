@@ -1,0 +1,63 @@
+<robot name="nested_industrial_turntable">
+  <material name="machine_base">
+    <color rgba="0.2 0.22 0.24 1" />
+    </material>
+  <material name="bearing_steel">
+    <color rgba="0.62 0.65 0.69 1" />
+    </material>
+  <material name="tooling_orange">
+    <color rgba="0.83 0.39 0.1 1" />
+    </material>
+  <link name="pedestal_base">
+    <inertial>
+      <origin xyz="0 0 -0.09" rpy="0 0 0" />
+      <mass value="18" />
+      <inertia ixx="0.143212" ixy="0" ixz="0" iyy="0.143212" iyz="0" izz="0.189225" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/pedestal_base.obj" />
+        </geometry>
+      <material name="machine_base" />
+      </visual>
+    </link>
+  <link name="slew_carrier">
+    <inertial>
+      <origin xyz="0 0 0.028" rpy="0 0 0" />
+      <mass value="7.5" />
+      <inertia ixx="0.04975" ixy="0" ixz="0" iyy="0.04975" iyz="0" izz="0.084375" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/slew_carrier.obj" />
+        </geometry>
+      <material name="bearing_steel" />
+      </visual>
+    </link>
+  <link name="top_platter">
+    <inertial>
+      <origin xyz="0 0 0.024" rpy="0 0 0" />
+      <mass value="4.2" />
+      <inertia ixx="0.0171069" ixy="0" ixz="0" iyy="0.0171069" iyz="0" izz="0.0312564" />
+      </inertial>
+    <visual>
+      <geometry>
+        <mesh filename="assets/meshes/top_platter.obj" />
+        </geometry>
+      <material name="tooling_orange" />
+      </visual>
+    </link>
+  <joint name="base_to_slew" type="revolute">
+    <parent link="pedestal_base" />
+    <child link="slew_carrier" />
+    <axis xyz="0 0 1" />
+    <limit effort="80" velocity="1.2" lower="-2.6" upper="2.6" />
+    </joint>
+  <joint name="slew_to_platter" type="revolute">
+    <origin xyz="0 0 0.06" rpy="0 0 0" />
+    <parent link="slew_carrier" />
+    <child link="top_platter" />
+    <axis xyz="0 0 1" />
+    <limit effort="45" velocity="2" lower="-3" upper="3" />
+    </joint>
+  </robot>
