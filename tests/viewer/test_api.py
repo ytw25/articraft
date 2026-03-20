@@ -668,7 +668,7 @@ def test_viewer_api_ensures_record_assets_on_demand(
         compile_calls.append(script_path)
         assert ignore_geom_qc is False
         assert run_checks is False
-        assert target == "full"
+        assert target == "visual"
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
         (meshes_dir / "part.obj").write_text(
@@ -786,7 +786,7 @@ def test_viewer_api_persists_compiled_urdf_for_nonblocking_geometry_qc(
         compile_calls.append(script_path)
         assert ignore_geom_qc is False
         assert run_checks is False
-        assert target == "full"
+        assert target == "visual"
         return SimpleNamespace(
             urdf_xml=(
                 "<robot name='qc'>"
@@ -991,7 +991,7 @@ def test_viewer_api_rebuilds_missing_assets_even_with_successful_urdf(
         compile_calls.append(script_path)
         assert ignore_geom_qc is False
         assert run_checks is False
-        assert target == "full"
+        assert target == "visual"
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
         (meshes_dir / "part.obj").write_text(
@@ -1114,7 +1114,7 @@ def test_viewer_api_rebuilds_missing_assets_for_assets_prefixed_mesh_paths(
         compile_calls.append(script_path)
         assert ignore_geom_qc is False
         assert run_checks is False
-        assert target == "full"
+        assert target == "visual"
         meshes_dir = script_path.parent / "assets" / "meshes"
         meshes_dir.mkdir(parents=True, exist_ok=True)
         (meshes_dir / "part.obj").write_text(

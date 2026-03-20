@@ -142,6 +142,7 @@ def create_app(*, repo_root: Path | None = None) -> FastAPI:
             await asyncio.to_thread(
                 app.state.viewer_store.materialize_record_assets,
                 record_id,
+                target="visual",
             )
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -162,6 +163,7 @@ def create_app(*, repo_root: Path | None = None) -> FastAPI:
                 app.state.viewer_store.materialize_record_assets,
                 record_id,
                 force=True,
+                target="visual",
             )
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
