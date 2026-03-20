@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import multiprocessing as mp
 import os
 import queue
@@ -24,14 +25,23 @@ from rich.progress import (
 )
 from rich.table import Table
 
-from agent.mp_utils import get_mp_context
+from agent.mp_utils import (
+    configured_mp_start_method_override,
+    get_mp_context,
+    mp_start_method_env_var,
+    resolve_mp_start_method,
+)
 from storage.materialize import infer_materialization_status, record_artifact_paths
 from storage.repo import StorageRepo
 
 _GIB = 1024**3
 _DEFAULT_MEM_PER_WORKER_GB = 3.0
+_DEFAULT_VISUAL_MEM_PER_WORKER_GB = 1.5
 _DEFAULT_RESERVE_MEM_GB = 2.0
+_VISUAL_AUTO_WORKER_HARD_CAP = 512
 _COMPILE_TARGETS = {"full", "visual"}
+_BASE_BULK_PRELOAD_MODULES = ("agent.compiler", "viewer.api.store")
+_CADQUERY_BULK_PRELOAD_MODULES = ("cadquery", "OCP", "sdk_hybrid")
 _EXCEPTION_PREFIX_RE = re.compile(r"^(?:[A-Za-z_][A-Za-z0-9_]*(?:Error|Exception)):\s*")
 _GEOMETRY_QC_MARKERS = (
     "isolated parts detected",
@@ -54,6 +64,7 @@ class CompileCandidate:
     force: bool = False
     estimated_mesh_bytes: int = 0
     mesh_file_count: int = 0
+    sdk_package: str = "sdk"
 
 
 @dataclass(slots=True, frozen=True)
@@ -129,6 +140,7 @@ def _make_candidate(
     record_id: str,
     reason: str,
     force: bool,
+    sdk_package: str,
 ) -> CompileCandidate:
     estimated_mesh_bytes, mesh_file_count = _estimate_visual_mesh_footprint(repo, record_id)
     return CompileCandidate(
@@ -137,7 +149,17 @@ def _make_candidate(
         force=force,
         estimated_mesh_bytes=estimated_mesh_bytes,
         mesh_file_count=mesh_file_count,
+        sdk_package=sdk_package,
     )
+
+
+def _normalize_sdk_package(value: object) -> str:
+    normalized = str(value or "sdk").strip().lower()
+    if normalized in {"sdk_hybrid", "hybrid"}:
+        return "sdk_hybrid"
+    if normalized in {"sdk", "base"}:
+        return "sdk"
+    return normalized or "sdk"
 
 
 def _collect_candidates(
@@ -158,6 +180,9 @@ def _collect_candidates(
     for record_dir in sorted(path for path in records_root.iterdir() if path.is_dir()):
         record_id = record_dir.name
         record = repo.read_json(repo.layout.record_metadata_path(record_id))
+        sdk_package = _normalize_sdk_package(
+            record.get("sdk_package") if isinstance(record, dict) else "sdk"
+        )
         artifact_paths = record_artifact_paths(repo, record_id, record=record)
         script_path = artifact_paths["model_py"]
         urdf_path = artifact_paths["model_urdf"]
@@ -174,6 +199,7 @@ def _collect_candidates(
                         record_id=record_id,
                         reason="missing model.py",
                         force=False,
+                        sdk_package=sdk_package,
                     )
                 )
                 continue
@@ -187,6 +213,7 @@ def _collect_candidates(
                     record_id=record_id,
                     reason="forced",
                     force=True,
+                    sdk_package=sdk_package,
                 )
             )
             continue
@@ -200,6 +227,7 @@ def _collect_candidates(
                     record_id=record_id,
                     reason="missing model.urdf",
                     force=False,
+                    sdk_package=sdk_package,
                 )
             )
             continue
@@ -211,6 +239,7 @@ def _collect_candidates(
                     record_id=record_id,
                     reason="missing generated assets",
                     force=False,
+                    sdk_package=sdk_package,
                 )
             )
             continue
@@ -223,6 +252,7 @@ def _collect_candidates(
                     record_id=record_id,
                     reason=f"compile status is {label}",
                     force=True,
+                    sdk_package=sdk_package,
                 )
             )
             continue
@@ -234,6 +264,7 @@ def _collect_candidates(
                     record_id=record_id,
                     reason="compile level is visual",
                     force=True,
+                    sdk_package=sdk_package,
                 )
             )
 
@@ -405,23 +436,64 @@ def _memory_budget_bytes() -> int | None:
     return _available_memory_bytes()
 
 
+def _auto_worker_memory_cap(
+    *,
+    reserve_mem_gb: float,
+    mem_per_worker_gb: float,
+) -> int | None:
+    if reserve_mem_gb < 0:
+        raise ValueError("Reserve memory must be zero or greater.")
+    if mem_per_worker_gb <= 0:
+        raise ValueError("Memory per worker must be greater than zero.")
+
+    budget_bytes = _available_memory_bytes()
+    if budget_bytes is None:
+        budget_bytes = _memory_budget_bytes()
+    if budget_bytes is None:
+        return None
+
+    reserve_bytes = int(reserve_mem_gb * _GIB)
+    worker_bytes = max(int(mem_per_worker_gb * _GIB), 1)
+    usable_bytes = budget_bytes - reserve_bytes
+    if usable_bytes <= 0:
+        return 1
+    return max(1, usable_bytes // worker_bytes)
+
+
 def _resolve_worker_count(
     raw_value: str,
     *,
     candidate_count: int,
     reserve_mem_gb: float,
     mem_per_worker_gb: float,
+    target: str = "full",
 ) -> int:
     if candidate_count <= 0:
         return 1
 
+    if reserve_mem_gb < 0:
+        raise ValueError("Reserve memory must be zero or greater.")
+    if mem_per_worker_gb <= 0:
+        raise ValueError("Memory per worker must be greater than zero.")
+
     normalized = str(raw_value).strip().lower()
     cpu_count = _logical_cpu_count()
     if normalized == "max":
-        return max(1, min(candidate_count, cpu_count))
+        return max(1, candidate_count)
 
     if normalized == "auto":
-        return max(1, min(candidate_count, cpu_count))
+        if target == "visual":
+            # Visual compile throughput is dominated by interpreter/module startup and
+            # many records are lightweight. Favor aggressive fan-out here; explicit
+            # numeric overrides still win if the caller wants something different.
+            return max(1, min(candidate_count, _VISUAL_AUTO_WORKER_HARD_CAP))
+        memory_cap = _auto_worker_memory_cap(
+            reserve_mem_gb=reserve_mem_gb,
+            mem_per_worker_gb=mem_per_worker_gb,
+        )
+        if memory_cap is None:
+            return max(1, min(candidate_count, cpu_count))
+        return max(1, min(candidate_count, cpu_count, memory_cap))
 
     try:
         requested = int(normalized)
@@ -443,23 +515,83 @@ def _build_concurrency_message(
     *,
     requested: str,
     resolved_workers: int,
+    target: str,
+    candidate_count: int,
     reserve_mem_gb: float,
     mem_per_worker_gb: float,
 ) -> str:
     cpu_count = _logical_cpu_count()
     total_bytes = _total_memory_bytes()
     available_bytes = _available_memory_bytes()
+    normalized = str(requested).strip().lower()
     message = (
         f"Using {resolved_workers} worker"
         f"{'' if resolved_workers == 1 else 's'} "
-        f"(`--concurrency={requested}`, {cpu_count} logical CPUs"
+        f"(`--concurrency={requested}`, target={target}, queued records={candidate_count}, "
+        f"{cpu_count} logical CPUs"
     )
+    if normalized == "auto" and target == "visual":
+        message += f", visual auto mode=throughput-first, hard cap {_VISUAL_AUTO_WORKER_HARD_CAP}"
+        message += ")."
+        return message
+    if normalized == "max":
+        message += ", explicit max fan-out)."
+        return message
     if total_bytes is not None:
         message += f", host memory {_format_gib(total_bytes)}"
     if available_bytes is not None:
         message += f", approx available now {_format_gib(available_bytes)}"
     message += f", reserve {reserve_mem_gb:.1f} GiB, budget {mem_per_worker_gb:.1f} GiB/worker)."
     return message
+
+
+def _build_multiprocessing_message(
+    *,
+    start_method: str,
+    preload_modules: tuple[str, ...],
+) -> str:
+    env_name = mp_start_method_env_var()
+    raw_override = configured_mp_start_method_override()
+    override_label = raw_override if raw_override is not None else "<unset>"
+    message = f"Multiprocessing: {env_name}={override_label}, effective start method={start_method}"
+    if start_method == "forkserver" and preload_modules:
+        message += ", forkserver preload=[" + ", ".join(preload_modules) + "]"
+    elif start_method == "fork" and preload_modules:
+        message += ", parent preload=[" + ", ".join(preload_modules) + "]"
+    return message
+
+
+def _effective_mem_per_worker_gb(*, target: str, requested_mem_per_worker_gb: float) -> float:
+    if (
+        target == "visual"
+        and abs(float(requested_mem_per_worker_gb) - _DEFAULT_MEM_PER_WORKER_GB) < 1e-9
+    ):
+        return _DEFAULT_VISUAL_MEM_PER_WORKER_GB
+    return float(requested_mem_per_worker_gb)
+
+
+def _bulk_compile_preload_modules(candidates: list[CompileCandidate]) -> tuple[str, ...]:
+    modules = list(_BASE_BULK_PRELOAD_MODULES)
+    if any(candidate.sdk_package == "sdk_hybrid" for candidate in candidates):
+        modules.extend(_CADQUERY_BULK_PRELOAD_MODULES)
+
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for module_name in modules:
+        normalized = str(module_name).strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(normalized)
+    return tuple(deduped)
+
+
+def _preload_modules_in_parent(module_names: tuple[str, ...]) -> None:
+    for module_name in module_names:
+        try:
+            importlib.import_module(module_name)
+        except Exception:
+            continue
 
 
 def _worker_loop(
@@ -617,7 +749,11 @@ def _run_compile_pool(
     worker_timeout_seconds: float,
     console: Console,
 ) -> tuple[int, list[tuple[str, str]]]:
-    ctx = get_mp_context()
+    preload_modules = _bulk_compile_preload_modules(candidates)
+    start_method = resolve_mp_start_method(prefer_fork=True)
+    if start_method == "fork":
+        _preload_modules_in_parent(preload_modules)
+    ctx = get_mp_context(prefer_fork=True, forkserver_preload=preload_modules)
     result_queue = ctx.Queue()
     workers: dict[int, WorkerState] = {}
     pending: deque[CompileCandidate] = deque(_sort_candidates_for_compile(candidates))
@@ -875,12 +1011,18 @@ def main() -> int:
         )
         return 0
 
+    effective_mem_per_worker_gb = _effective_mem_per_worker_gb(
+        target=target_key,
+        requested_mem_per_worker_gb=float(args.mem_per_worker_gb),
+    )
+
     try:
         worker_count = _resolve_worker_count(
             args.concurrency,
             candidate_count=len(candidates),
             reserve_mem_gb=float(args.reserve_mem_gb),
-            mem_per_worker_gb=float(args.mem_per_worker_gb),
+            mem_per_worker_gb=effective_mem_per_worker_gb,
+            target=target_key,
         )
     except ValueError as exc:
         parser.error(str(exc))
@@ -889,9 +1031,18 @@ def main() -> int:
         _build_concurrency_message(
             requested=args.concurrency,
             resolved_workers=worker_count,
+            target=target_key,
+            candidate_count=len(candidates),
             reserve_mem_gb=float(args.reserve_mem_gb),
-            mem_per_worker_gb=float(args.mem_per_worker_gb),
+            mem_per_worker_gb=effective_mem_per_worker_gb,
         )
+    )
+    console.print(
+        _build_multiprocessing_message(
+            start_method=resolve_mp_start_method(prefer_fork=True),
+            preload_modules=_bulk_compile_preload_modules(candidates),
+        ),
+        markup=False,
     )
     if float(args.worker_timeout_seconds) > 0:
         console.print(

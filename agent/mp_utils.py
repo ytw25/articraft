@@ -2,19 +2,32 @@ from __future__ import annotations
 
 import multiprocessing as mp
 import os
+from typing import Sequence
 
 _MP_START_METHOD_ENV = "ARTICRAFT_MP_START_METHOD"
 _DEFAULT_START_METHODS = ("forkserver", "spawn")
 
 
-def resolve_mp_start_method() -> str:
+def mp_start_method_env_var() -> str:
+    return _MP_START_METHOD_ENV
+
+
+def configured_mp_start_method_override() -> str | None:
+    raw_override = os.environ.get(_MP_START_METHOD_ENV)
+    if raw_override is None:
+        return None
+    normalized = raw_override.strip()
+    return normalized or None
+
+
+def resolve_mp_start_method(*, prefer_fork: bool = False) -> str:
     available = tuple(mp.get_all_start_methods())
     if not available:
         raise RuntimeError("No multiprocessing start methods are available on this platform.")
 
-    raw_override = os.environ.get(_MP_START_METHOD_ENV)
-    if raw_override is not None and raw_override.strip():
-        start_method = raw_override.strip().lower()
+    raw_override = configured_mp_start_method_override()
+    if raw_override is not None:
+        start_method = raw_override.lower()
         if start_method not in available:
             supported = ", ".join(available)
             raise ValueError(
@@ -22,6 +35,9 @@ def resolve_mp_start_method() -> str:
                 f"{_MP_START_METHOD_ENV}. Supported values: {supported}."
             )
         return start_method
+
+    if prefer_fork and "fork" in available:
+        return "fork"
 
     # Prefer forkserver over spawn on Unix because it avoids repeated interpreter
     # bootstrap while still avoiding the hazards of plain fork in a live process.
@@ -31,5 +47,18 @@ def resolve_mp_start_method() -> str:
     return available[0]
 
 
-def get_mp_context() -> mp.context.BaseContext:
-    return mp.get_context(resolve_mp_start_method())
+def get_mp_context(
+    *,
+    prefer_fork: bool = False,
+    forkserver_preload: Sequence[str] | None = None,
+) -> mp.context.BaseContext:
+    start_method = resolve_mp_start_method(prefer_fork=prefer_fork)
+    if (
+        start_method == "forkserver"
+        and forkserver_preload
+        and hasattr(mp, "set_forkserver_preload")
+    ):
+        modules = [str(name).strip() for name in forkserver_preload if str(name).strip()]
+        if modules:
+            mp.set_forkserver_preload(modules)
+    return mp.get_context(start_method)

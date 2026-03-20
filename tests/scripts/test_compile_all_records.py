@@ -6,8 +6,11 @@ from rich.console import Console
 
 from scripts.compile_all_records import (
     CompileCandidate,
+    _build_concurrency_message,
+    _build_multiprocessing_message,
     _build_summary_table,
     _collect_candidates,
+    _effective_mem_per_worker_gb,
     _format_bulk_compile_error,
     _limit_candidates,
     _resolve_worker_count,
@@ -99,6 +102,94 @@ def test_summary_uses_failure_label() -> None:
     assert "Failed" in rendered
 
 
+def test_multiprocessing_message_includes_override_and_effective_method(monkeypatch) -> None:
+    monkeypatch.setenv("ARTICRAFT_MP_START_METHOD", "spawn")
+
+    message = _build_multiprocessing_message(
+        start_method="spawn",
+        preload_modules=("agent.compiler", "viewer.api.store"),
+    )
+
+    assert "ARTICRAFT_MP_START_METHOD=spawn" in message
+    assert "effective start method=spawn" in message
+
+
+def test_multiprocessing_message_shows_preload_for_forkserver(monkeypatch) -> None:
+    monkeypatch.delenv("ARTICRAFT_MP_START_METHOD", raising=False)
+
+    message = _build_multiprocessing_message(
+        start_method="forkserver",
+        preload_modules=("agent.compiler", "cadquery"),
+    )
+
+    assert "ARTICRAFT_MP_START_METHOD=<unset>" in message
+    assert "forkserver preload=[agent.compiler, cadquery]" in message
+
+
+def test_multiprocessing_message_renders_literal_brackets() -> None:
+    console = Console(record=True, width=160)
+    console.print(
+        _build_multiprocessing_message(
+            start_method="fork",
+            preload_modules=("agent.compiler", "viewer.api.store", "cadquery"),
+        ),
+        markup=False,
+    )
+
+    rendered = console.export_text()
+
+    assert "parent preload=[agent.compiler, viewer.api.store, cadquery]" in rendered
+
+
+def test_effective_mem_per_worker_uses_lower_visual_default() -> None:
+    assert _effective_mem_per_worker_gb(target="visual", requested_mem_per_worker_gb=3.0) == 1.5
+
+
+def test_effective_mem_per_worker_preserves_explicit_override_for_visual() -> None:
+    assert _effective_mem_per_worker_gb(target="visual", requested_mem_per_worker_gb=2.25) == 2.25
+
+
+def test_effective_mem_per_worker_preserves_full_default() -> None:
+    assert _effective_mem_per_worker_gb(target="full", requested_mem_per_worker_gb=3.0) == 3.0
+
+
+def test_build_concurrency_message_for_visual_auto_shows_throughput_mode(monkeypatch) -> None:
+    monkeypatch.setattr("scripts.compile_all_records._logical_cpu_count", lambda: 14)
+
+    message = _build_concurrency_message(
+        requested="auto",
+        resolved_workers=264,
+        target="visual",
+        candidate_count=264,
+        reserve_mem_gb=2.0,
+        mem_per_worker_gb=1.5,
+    )
+
+    assert "Using 264 workers" in message
+    assert "target=visual" in message
+    assert "queued records=264" in message
+    assert "visual auto mode=throughput-first" in message
+    assert "hard cap 512" in message
+    assert "budget" not in message
+
+
+def test_build_concurrency_message_for_max_shows_explicit_fanout(monkeypatch) -> None:
+    monkeypatch.setattr("scripts.compile_all_records._logical_cpu_count", lambda: 14)
+
+    message = _build_concurrency_message(
+        requested="max",
+        resolved_workers=20,
+        target="full",
+        candidate_count=20,
+        reserve_mem_gb=2.0,
+        mem_per_worker_gb=3.0,
+    )
+
+    assert "Using 20 workers" in message
+    assert "explicit max fan-out" in message
+    assert "budget" not in message
+
+
 def test_sort_candidates_for_compile_prefers_heavier_records() -> None:
     candidates = [
         CompileCandidate(
@@ -142,7 +233,41 @@ def test_limit_candidates_applies_after_heavy_first_sort() -> None:
     ]
 
 
-def test_resolve_worker_count_auto_uses_logical_cpu_floor(monkeypatch) -> None:
+def test_resolve_worker_count_auto_for_visual_uses_throughput_first_fanout(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "scripts.compile_all_records._logical_cpu_count",
+        lambda: 12,
+    )
+
+    resolved = _resolve_worker_count(
+        "auto",
+        candidate_count=264,
+        reserve_mem_gb=1.0,
+        mem_per_worker_gb=2.0,
+        target="visual",
+    )
+
+    assert resolved == 264
+
+
+def test_resolve_worker_count_max_means_maximum_fanout(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "scripts.compile_all_records._logical_cpu_count",
+        lambda: 12,
+    )
+
+    resolved = _resolve_worker_count(
+        "max",
+        candidate_count=20,
+        reserve_mem_gb=1.0,
+        mem_per_worker_gb=2.0,
+        target="visual",
+    )
+
+    assert resolved == 20
+
+
+def test_resolve_worker_count_auto_for_full_uses_memory_cap(monkeypatch) -> None:
     monkeypatch.setattr(
         "scripts.compile_all_records._logical_cpu_count",
         lambda: 12,
@@ -161,9 +286,37 @@ def test_resolve_worker_count_auto_uses_logical_cpu_floor(monkeypatch) -> None:
         candidate_count=20,
         reserve_mem_gb=1.0,
         mem_per_worker_gb=2.0,
+        target="full",
     )
 
-    assert resolved == 12
+    assert resolved == 1
+
+
+def test_resolve_worker_count_auto_falls_back_to_total_memory_when_available_unknown(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "scripts.compile_all_records._logical_cpu_count",
+        lambda: 12,
+    )
+    monkeypatch.setattr(
+        "scripts.compile_all_records._total_memory_bytes",
+        lambda: 10 * 1024**3,
+    )
+    monkeypatch.setattr(
+        "scripts.compile_all_records._available_memory_bytes",
+        lambda: None,
+    )
+
+    resolved = _resolve_worker_count(
+        "auto",
+        candidate_count=20,
+        reserve_mem_gb=2.0,
+        mem_per_worker_gb=2.0,
+        target="full",
+    )
+
+    assert resolved == 4
 
 
 def test_collect_candidates_skips_primitive_only_success_records_without_assets(tmp_path) -> None:
