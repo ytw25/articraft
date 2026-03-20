@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_cantilever_articulated_arm_0002",
   "created_at": "2026-03-12T18:17:38Z",
   "updated_at": "2026-03-20T22:37:51Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "040afefb97e8d5986b1cabe8ec3c42e112a082a674a99fb5b7c0f885690fab3d",
-    "model_py_sha256": "bf113c859c22466c7e6d7fe1fcac6c4e8a364220df1729306a36ddce7ecffdaa",
-    "model_urdf_sha256": "c57edb0f85e9109ae6de41dbcacd3f1b9284691f9c5ee729404cc28bffef5f9c"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "bf113c859c22466c7e6d7fe1fcac6c4e8a364220df1729306a36ddce7ecffdaa"
   },
   "collections": [
     "dataset"

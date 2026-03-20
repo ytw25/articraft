@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_dual_independent_finger_chains_0002",
   "created_at": "2026-03-12T18:19:42Z",
   "updated_at": "2026-03-20T22:37:51Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "eb5348ebce14dac414f2a59904c8ed19fe8b82afa2d3e9d65deb0d129821b008",
-    "model_py_sha256": "1d09c60fec384e2a04d9a6ae39a85365cf693ba50f971071d3f9b41db11aef64",
-    "model_urdf_sha256": "5be3d5bd08d3fa27591edbbb88b783455efd1350cf55e1c6e4bc71652b61cd50"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "1d09c60fec384e2a04d9a6ae39a85365cf693ba50f971071d3f9b41db11aef64"
   },
   "collections": [
     "dataset"

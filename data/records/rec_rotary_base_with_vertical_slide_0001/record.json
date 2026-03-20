@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_rotary_base_with_vertical_slide_0001",
   "created_at": "2026-03-12T18:28:53Z",
   "updated_at": "2026-03-20T22:37:48Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "e91210dc82eb00d8f02ffc064f4b366373190d83954a7c5ffcd6727f34448daf",
-    "model_py_sha256": "19b03abe605ff16bb7d0749f9db36a4d6a6a53071e8cb8d767f35e2c2a440660",
-    "model_urdf_sha256": "0d63832161160f8bf0547ba6b537f5397baf93eccfbb077ca71cfd34076bfd0b"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "19b03abe605ff16bb7d0749f9db36a4d6a6a53071e8cb8d767f35e2c2a440660"
   },
   "collections": [
     "dataset"

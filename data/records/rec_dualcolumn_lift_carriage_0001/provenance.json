@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_dualcolumn_lift_carriage_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "0497fd257537fba6cbce0d5329c814afab72f6297f61722dc2ac885f6765b746",
-      "model_urdf_sha256": "b3c7109149e7f21d5acea6ed2b2b115ac53a4a7c751faf5b3b6afd05ecaf1b3e",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

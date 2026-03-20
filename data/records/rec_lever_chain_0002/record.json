@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_lever_chain_0002",
   "created_at": "2026-03-12T18:20:01Z",
   "updated_at": "2026-03-20T22:37:48Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "ea7c6afebd6f0d8a77f3791d1164211701630ffc1eaaf716941564e256fff8a6",
-    "model_py_sha256": "dcca07bc0ba69a0c534481e4fa6ef0d541ef0f197e0b342b592ccd02527385b6",
-    "model_urdf_sha256": "13aad5f557bd7a98edc75fa5711fbec612c5327bc4393c25e8c58165beabe633"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "dcca07bc0ba69a0c534481e4fa6ef0d541ef0f197e0b342b592ccd02527385b6"
   },
   "collections": [
     "dataset"

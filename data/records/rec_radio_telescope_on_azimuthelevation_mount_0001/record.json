@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_radio_telescope_on_azimuthelevation_mount_0001",
   "created_at": "2026-03-17T02:40:23Z",
   "updated_at": "2026-03-20T22:37:44Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "549a35ae1f46d4ad5d86e247c265f539e47cbb03fe8c0664f0a4179146c58449",
-    "model_py_sha256": "e1a76de3526aefc7c2e3bc2177baaffd1cd9d0a742fb507fb26edd375f21bb8f",
-    "model_urdf_sha256": "d08da81429706eeb2fdc2664d17d316c68f97bce9f98aeff781e029c9f8176f7"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "e1a76de3526aefc7c2e3bc2177baaffd1cd9d0a742fb507fb26edd375f21bb8f"
   },
   "collections": [
     "dataset"

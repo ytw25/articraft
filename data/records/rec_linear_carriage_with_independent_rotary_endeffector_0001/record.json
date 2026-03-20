@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_linear_carriage_with_independent_rotary_endeffector_0001",
   "created_at": "2026-03-12T18:18:22Z",
   "updated_at": "2026-03-20T22:37:49Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "59f760679ca5e0df25f840a737b6712f791109de05322f57cc0516b614ad10ff",
-    "model_py_sha256": "0211e4bb0184d40ca289e14c59d1ced0cc83a1812174e66cbb7d92d2648a834d",
-    "model_urdf_sha256": "b3489c0f9562c54f1c30c625978d057db38fd48450d977a6134606d0e4a751d1"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "0211e4bb0184d40ca289e14c59d1ced0cc83a1812174e66cbb7d92d2648a834d"
   },
   "collections": [
     "dataset"

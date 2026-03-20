@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_serial_elbow_arm_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "8792618dab5332290ce59bb5dfa3364272c852b5c1fc99bb689a04d39c9ea492",
-      "model_urdf_sha256": "63d4757d06c30a51b83b4b4538519480fc519984ac863dbe9556de92501b4798",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

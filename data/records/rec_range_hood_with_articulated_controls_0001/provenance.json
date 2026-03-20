@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_range_hood_with_articulated_controls_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "86b19ff9dcde4839973bbc34f08eb696bed145e856610a229433b3f297c24ab5",
-      "model_urdf_sha256": "4eba3561ea476a001152ce0c03283f50e29ec09f52bb01145abb0082fbf6190c",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

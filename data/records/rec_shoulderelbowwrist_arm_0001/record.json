@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_shoulderelbowwrist_arm_0001",
   "created_at": "2026-03-12T18:30:13Z",
   "updated_at": "2026-03-20T22:37:52Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "30ef36009e47bb4b33713045a75b4533310bf702a067d74067f73568e45ca5bd",
-    "model_py_sha256": "f8642de3c5459de095b7144d99daa3070ae9b66605e7ab849820dc93ff5d3d78",
-    "model_urdf_sha256": "8bcdb0b633330b722b65853b469f6caf7f04180c966c8a606ba8a9684ea0f00d"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "f8642de3c5459de095b7144d99daa3070ae9b66605e7ab849820dc93ff5d3d78"
   },
   "collections": [
     "dataset"

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_orthogonal_yz_stage_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "fda7099b20ad277a338f431c7c5b3ca2e24a4a3cd4360dee43020fb021c98274",
-      "model_urdf_sha256": "e180237e9de8d0114973d07c126d72090debc357347a1f1284bec53b992b8064",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

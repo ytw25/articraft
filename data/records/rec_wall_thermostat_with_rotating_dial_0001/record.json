@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_wall_thermostat_with_rotating_dial_0001",
   "created_at": "2026-03-17T02:38:07Z",
   "updated_at": "2026-03-20T22:37:51Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "51ef119a1ec1dd35854f88c9ce3c3f35a68d81b6d0b67e73bfe0a0cac13171d5",
-    "model_py_sha256": "c173b4992c41ea6617306a0b9160a37db5470846e933bde9c1dfa6de555af97b",
-    "model_urdf_sha256": "e7f0628b09ba6ea6c372bc0950ce812b41a38fc7edf82bac50b8a56c1ae2bc94"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "c173b4992c41ea6617306a0b9160a37db5470846e933bde9c1dfa6de555af97b"
   },
   "collections": [
     "dataset"

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_jet_engine_0001",
   "created_at": "2026-03-16T01:19:50Z",
   "updated_at": "2026-03-20T22:37:44Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "94271a87c6ffc493e647232731231434de3a3d5a24edecfe2ccf68abc5d9f3d7",
-    "model_py_sha256": "43435d14921fa57da12f1d0d23d2fd1fd8887323eaeac596c38abe7104b2f5db",
-    "model_urdf_sha256": "a1e09ba22bf66078558d0923c839e7fdaa07395babe919bd22937852e1d62a55"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "43435d14921fa57da12f1d0d23d2fd1fd8887323eaeac596c38abe7104b2f5db"
   },
   "collections": [
     "dataset"

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_dualrail_gantry_axis_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "65236ac7beb8c5f0f90c0f0129abf3b610c3da80e1a3872a3a03f5bd83f0ce54",
-      "model_urdf_sha256": "46520fe02f88aa53ff92beb7c63962d35bdbb318ec7f2aba87b6e06de77f7333",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

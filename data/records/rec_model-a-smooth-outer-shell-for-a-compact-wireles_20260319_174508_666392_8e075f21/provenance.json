@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_model-a-smooth-outer-shell-for-a-compact-wireles_20260319_174508_666392_8e075f21",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": 7,
     "compile_attempt_count": 5,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "c10c51da177d26f348c85e5f97b66d2114d77b0ce09a5f2d83757b17a46ce197",
-      "model_urdf_sha256": "ebb32680d26c7040f0b56e512fa9b380f4ab7379d07167ea96927197d5d3473a",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

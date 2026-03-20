@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_vane_array_with_independent_pivots_0001",
   "created_at": "2026-03-12T18:36:05Z",
   "updated_at": "2026-03-20T22:37:50Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "629d27ee450d3376f470cfed0445f3486b9ef93b1ba73539adb81282c8c925c0",
-    "model_py_sha256": "5b52534efb2b0bf5a13322b251d4ba7ea618aef16f272449354eb5f3066734ae",
-    "model_urdf_sha256": "ed31bff7539f7c3e4e2d544f4f00c8e84f130ba59e2ec11896dacfada8f6a173"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "5b52534efb2b0bf5a13322b251d4ba7ea618aef16f272449354eb5f3066734ae"
   },
   "collections": [
     "dataset"

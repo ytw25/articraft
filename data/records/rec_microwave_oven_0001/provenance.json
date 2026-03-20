@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_microwave_oven_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "70537b48e1af3cc5091fb4f39824371d2ba4513a4e2d564fbbbc610660ccd3aa",
-      "model_urdf_sha256": "d34b39a58527ef8f4109f996fae1f6a8c778b830858e78d52d6ad14ce9bd7a36",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_an-extremely-realistic-model-of-a-jet-engine-wit_20260318_232012_ec62c1e0",
   "created_at": "2026-03-18T23:20:12Z",
   "updated_at": "2026-03-20T22:37:44Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "e6babef968e6051851f3df916b4e938af57b4edc86d9529f294798da36537d10",
-    "model_py_sha256": "834cc3f44df255fac0adc1485a0ea5d84f02867d811e1383514bf2823c586f6d",
-    "model_urdf_sha256": "1dd4a236f66e42db515870f6528962752e32aa97f7855385523e6ac1c25c7061"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "834cc3f44df255fac0adc1485a0ea5d84f02867d811e1383514bf2823c586f6d"
   },
   "collections": [
     "dataset"

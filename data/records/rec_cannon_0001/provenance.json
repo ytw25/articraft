@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_cannon_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "3a30602e6c14d007143612441914c303757b2d23409e3ca7d5bd72c0d688f1b1",
-      "model_urdf_sha256": "2999ee472317893819917a88b626622db71458dd3edcd479772c6aec1f62ca1f",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_desk_with_drawer_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "3662dcc24920a6ddb129563c3831599f31fa32d386c8238c1303a61aa1401f45",
-      "model_urdf_sha256": "aed6d2ee78c0986f7d6324a132a71506a0210670e4d1534f23589314ea6270d4",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

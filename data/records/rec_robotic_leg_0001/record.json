@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_robotic_leg_0001",
   "created_at": "2026-03-16T15:58:16Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "e4a4ce17e5565ee5540bf681486cfc4e72bb2cdfd6c3192aee0b28923ef880c7",
-    "model_py_sha256": "6a7a04478bdce8d863b1e0c825dc396438e68a3f813beb75805cd81779b6420c",
-    "model_urdf_sha256": "6a52a899ccef42d9f88bd9837cfd233e68d9558af7fb631339d3f5e745e6c4ca"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "6a7a04478bdce8d863b1e0c825dc396438e68a3f813beb75805cd81779b6420c"
   },
   "collections": [
     "dataset"

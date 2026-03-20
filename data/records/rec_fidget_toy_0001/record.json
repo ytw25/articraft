@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_fidget_toy_0001",
   "created_at": "2026-03-16T18:20:38Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "3fa00f2e9482ab315f793bb1fe218b9e3dddd4f6b852092c178c38eba405540d",
-    "model_py_sha256": "c03f66cfb1314d6bb87bf82bd761dabfb514c8bd31427285b53fc1379cee20f1",
-    "model_urdf_sha256": "572b270ef3438c6c0a7b5cc38165ffa8c959bb559dec957b942201e4e974503a"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "c03f66cfb1314d6bb87bf82bd761dabfb514c8bd31427285b53fc1379cee20f1"
   },
   "collections": [
     "dataset"

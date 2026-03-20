@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_yawpitch_module_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "dfa41188f3ddffcc2e321e62f78eaa45287a1e955ade281b5ffebabc6ec36779",
-      "model_urdf_sha256": "6a9c42439ddf07e4c690b5e0359b6e4ce479cfad64064c758a770da0667c9757",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

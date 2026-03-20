@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_missile_launcher_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "6b61dfed825ed37803f09d554ca70c05b81115dfc56ff717e82d5de5cf0cb48f",
-      "model_urdf_sha256": "02e2cec52d91f0b40ed03b87beac89b0b77739f69b973a99ddb4a8138aa724a1",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

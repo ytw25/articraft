@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_remote_weapon_station_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "efb74213ab428beb2923a28cafb7c808f05e06e54957a6e47d50894850e40646",
-      "model_urdf_sha256": "f0438922023a36269d6afb8333067e64ba25df61d69e36e019956d97da9c456f",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

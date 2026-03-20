@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_xyz_cartesian_stage_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "4024e80b9dc9b3f083717b74afc80b727b5d5004a8ca6a72b5df9d8b6112556e",
-      "model_urdf_sha256": "fc0d1277654614c3819ee47f1f0a46c5310a4ae30d2321167d827589632cbeee",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

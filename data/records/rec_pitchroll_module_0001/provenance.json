@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_pitchroll_module_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "8697367b0efa40b5c807360866e08749e52aac8eea626762cb5c6abaea2a450a",
-      "model_urdf_sha256": "24d04ea1ec116e90d036cec64171e71222db49375c2447ffdc8417095297fd6d",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

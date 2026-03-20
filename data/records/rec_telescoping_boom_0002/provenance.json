@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_telescoping_boom_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "52ccf9d79be7d83024a3dd97f454cd5643c58d90748a73cfaaa169ac25d3a777",
-      "model_urdf_sha256": "b48abbd7952df8345079b1ba61c3ce719bce296e781ab6ec1a43411be9fcc2ef",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

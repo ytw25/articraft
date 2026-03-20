@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_coaxial_rotary_stack_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "d468d227cfdd0e76eec5189e3021db27c9cb21dc0d0c375a0449efa927ffd3e8",
-      "model_urdf_sha256": "d461bfacf8e6d71cd2b4c14eea617f3c7174dcbd9d26e65fabb9df5c4ac6444c",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

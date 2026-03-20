@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_tackle_box_with_simple_hinged_lid_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "e7f7ebc17748c28bfcf12bf5becfeb0af52058f35ce15259961d165fd7523bc2",
-      "model_urdf_sha256": "6482b3d3aff0479691b23eba462556aa78d5e044278b9f283c826f39bfb5654d",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

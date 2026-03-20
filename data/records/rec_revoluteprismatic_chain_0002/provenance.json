@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_revoluteprismatic_chain_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "52ec4b71ac55bbc8212049a0289a6e4c156d294ff3ba0a9604b10671f0da5117",
-      "model_urdf_sha256": "0bcb366c447db09994abe04dbe2e4807e418e51b119696b2fc699cdddf0dee5f",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

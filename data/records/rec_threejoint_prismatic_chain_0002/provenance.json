@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_threejoint_prismatic_chain_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "b1dc243664bcdcaffee89df15cc16d261694c1002d031597bb575921e47db068",
-      "model_urdf_sha256": "57ea22a587a49b86e698226772832cb856e6fe1c513d771bf0a4e60aef6203e6",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

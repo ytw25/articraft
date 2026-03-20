@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_lever_chain_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "e1e41367fb3f9633206d5d700b39c1eabc9db864fd836c6660439505ff63f02a",
-      "model_urdf_sha256": "e85f062de330bd41b1547a7664132c1b405cd9aa746ce2df01e1ba1cd5d0cde2",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

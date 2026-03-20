@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_vane_array_with_independent_pivots_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "5b52534efb2b0bf5a13322b251d4ba7ea618aef16f272449354eb5f3066734ae",
-      "model_urdf_sha256": "ed31bff7539f7c3e4e2d544f4f00c8e84f130ba59e2ec11896dacfada8f6a173",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

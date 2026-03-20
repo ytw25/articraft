@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_bicycle_fork_and_handlebar_assembly_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "1ab23e0707282c0ed0b48d2d75458827d6f46ba6732d46f559f543e43632426f",
-      "model_urdf_sha256": "f032d918abb4815a4ae0b9015147ad35074098258277a372c16076a980266071",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

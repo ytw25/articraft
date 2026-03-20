@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_tandem_bicycle_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "8456e2fe9dd5bb2e45a65fae8fcd34d3f944fbc898fe396950c564eb29361629",
-      "model_urdf_sha256": "3e93e35a7a9d4c62ef2239bf6589728632b889df5eb9677a6ae6d8d77a43a399",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

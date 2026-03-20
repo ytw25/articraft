@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_single_continuous_rotary_shaft_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "48a340b363d3d2dae307982210b00b9e45d02bd374f4496476c5ae28119b5665",
-      "model_urdf_sha256": "66c00c8a2477695072f865cfc812ef24b441288bebff3b13f023b50a58cf97a6",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

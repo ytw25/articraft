@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_tilt_mechanism_0002",
   "created_at": "2026-03-12T18:38:41Z",
   "updated_at": "2026-03-20T22:37:48Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "ac13b11aee6aa3fac520a1d55b0ed925083743a35cd6016087f56af4cdf75ad4",
-    "model_py_sha256": "e6dfd2706a8c75bf26debdf89194ea3bd5b3cc7cf73857f478a98c7ceccfa73a",
-    "model_urdf_sha256": "b722d59f47f3a018a63ff66e3142afe6ad201be60fd0f21490c5b7dfd2923c95"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "e6dfd2706a8c75bf26debdf89194ea3bd5b3cc7cf73857f478a98c7ceccfa73a"
   },
   "collections": [
     "dataset"

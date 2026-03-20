@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_padlock_with_shackle_0001",
   "created_at": "2026-03-16T14:57:19Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "c4285b8a0e0c9a83b2200973ae0838188b85ca6d77b5bf10e5f60da4a1b5e594",
-    "model_py_sha256": "b45b6fe95d8f7809bc6a967e2f802a5b258d230186005723ff472197b7c7de80",
-    "model_urdf_sha256": "97596fd0ee1fa1f336b0205bc0140ccee45a33bac111370d948ad35b4dc678f1"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "b45b6fe95d8f7809bc6a967e2f802a5b258d230186005723ff472197b7c7de80"
   },
   "collections": [
     "dataset"

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_sliding_window_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "9b5dadaa3f5c1b0e022b32d0cb6a028b228cba2963ea5fabd03a827158b0ee32",
-      "model_urdf_sha256": "91dc8e736e15ec6222105a22860b26b2d3c70a8e4c93b20e5854276ccd2227d3",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

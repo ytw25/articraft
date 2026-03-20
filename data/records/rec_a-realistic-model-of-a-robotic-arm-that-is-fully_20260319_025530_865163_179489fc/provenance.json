@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_a-realistic-model-of-a-robotic-arm-that-is-fully_20260319_025530_865163_179489fc",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": 12,
     "compile_attempt_count": 6,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "8490de00529cedc1eb53e6b527e4623318829ac88742b29181fe78750d995ed0",
-      "model_urdf_sha256": "07c87d7682bfd4097eb2cbec20cdd5359f6c25925e7130f1f3465909f8537efb",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

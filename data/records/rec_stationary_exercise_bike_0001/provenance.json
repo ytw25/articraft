@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_stationary_exercise_bike_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "580b0a0a95c0f9f889a7004106568ef0ab7193776afd9a1c9ba4a2bf6d825020",
-      "model_urdf_sha256": "819c806fc94d8d35cc80ab9018b30fd0f06413b864ac3fab267687b0a656f669",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

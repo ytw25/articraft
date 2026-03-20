@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_storm_shutter_assembly_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "1b20b7ccf27de12f9db07860b36527013935d4aa78a3d9f6999198a9482dc9b3",
-      "model_urdf_sha256": "4af35165fc4d2e365ed0411271f43a8658c6c1eea720db4510b60a17e453c052",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

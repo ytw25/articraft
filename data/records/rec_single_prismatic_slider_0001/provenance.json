@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_single_prismatic_slider_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "b07d512474450b578127a19f1f760f678a6c6484fb92b5011c99914c3755f0e2",
-      "model_urdf_sha256": "d44ab62a9252841ec7894f8e997dc6186d6973d7f519805b8002d9cdd406de5e",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

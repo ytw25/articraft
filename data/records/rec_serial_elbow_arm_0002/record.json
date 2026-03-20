@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_serial_elbow_arm_0002",
   "created_at": "2026-03-12T18:31:30Z",
   "updated_at": "2026-03-20T22:37:49Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "7032f57bc5276172c73b6e83b976a6d2bb81afe4ff8bea4a47b041793e2baf13",
-    "model_py_sha256": "93991d25cc362795d1485d1a139571981c010e910b30dbe987b873a2021121fa",
-    "model_urdf_sha256": "cb503002b58d100647becb963f6d7266c4b5b53b6238afbda3ed5e395e02fe82"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "93991d25cc362795d1485d1a139571981c010e910b30dbe987b873a2021121fa"
   },
   "collections": [
     "dataset"

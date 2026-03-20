@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_bench_vise_with_prismatic_jaw_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "39493424a5a21cb3dd72b350abb510913f762060f5bef6804a3b2d1d0d5fd9c4",
-      "model_urdf_sha256": "e342c43022c794c664e478b09db25b687a568bd895d0eb48c36fd97eac38624b",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

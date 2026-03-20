@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_a-realistic-swing-top-bottle-with-a-detailed-and_20260319_141207_331655_c458bc0d",
   "created_at": "2026-03-19T14:12:07Z",
   "updated_at": "2026-03-20T22:37:44Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "f28c9e0a9fc1c88f1c6ad6d5a245f7da8d24e97ebf2cec5b82f39de55f9ce62b",
-    "model_py_sha256": "28e7bfa726b8b7c1f50467fc8143228aa0d1089ed12bf406482781a273721f70",
-    "model_urdf_sha256": "97d54de6b46f425308f99acd163b1675f39ee7c0f400f93ab5d4dd12bf6e375a"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "28e7bfa726b8b7c1f50467fc8143228aa0d1089ed12bf406482781a273721f70"
   },
   "collections": [
     "workbench"

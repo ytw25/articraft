@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_twojoint_revolute_chain_0001",
   "created_at": "2026-03-12T16:03:58Z",
   "updated_at": "2026-03-20T22:37:49Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "5d74a6c3c9d5c4046e07f7e7e6d34a33a7fec0a846d951eb3fb7780a518dd712",
-    "model_py_sha256": "f05629fef12be556d7e3e7867a8ea692b0baa2d689ad3e41b7322d23e5126308",
-    "model_urdf_sha256": "7a4aa42464b3544248b1d1297417a7dd0c1c9ceb543cf5a579247c781aa0491c"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "f05629fef12be556d7e3e7867a8ea692b0baa2d689ad3e41b7322d23e5126308"
   },
   "collections": [
     "dataset"

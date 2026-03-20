@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_single_revolute_hinge_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "cf0fd2e520e1c508ea35eb82c10aa1b856884b3641448e644d3672523f4b7409",
-      "model_urdf_sha256": "aabd4516dd09a0dd403c9916fafdc3045a3f32d104a53e0599244ac5c65fac0a",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

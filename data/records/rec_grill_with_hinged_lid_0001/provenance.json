@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_grill_with_hinged_lid_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "5a3af55510a63523dbd1d29bc3da82c77a0cda68d377853dd14d56a23c56b3e2",
-      "model_urdf_sha256": "26bbdf35383f7c5b75dae2e6d3f0bcc7743b1ba6050925f6e6067efc666b8a2c",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

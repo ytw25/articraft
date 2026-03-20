@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_sliding_security_gate_0001",
   "created_at": "2026-03-16T01:20:58Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "69a7bcd9f228a8783b8400bdab091b91b165bbdb513ec9165865c8c2dc573b1c",
-    "model_py_sha256": "8bbebec3b30b3b8192c10e67cf5957214d449adf1fcba0c657e4bea5d4dd65c6",
-    "model_urdf_sha256": "780300b9df6e10d2814621b34781b39bc65b09793b9f756310012e775e7e8703"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "8bbebec3b30b3b8192c10e67cf5957214d449adf1fcba0c657e4bea5d4dd65c6"
   },
   "collections": [
     "dataset"

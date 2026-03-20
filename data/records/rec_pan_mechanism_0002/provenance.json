@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_pan_mechanism_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "7696f592c11689269dc9c00ed9bd699cdfc0effae1eddc0a86c524ab5837011c",
-      "model_urdf_sha256": "f329b646ba3681800bdf8e66263d2336e122ee939683f5f4627e97dc08a6d650",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_crane_tower_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "1bf520a56609b64cb2977d897103e14a223745f2efc1f62364f778e2ba8a6f0a",
-      "model_urdf_sha256": "f4bcbd6b7ac12f52018395853e0b65e50bd42108457a9e2b0af28aa9ce68310d",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

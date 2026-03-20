@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_articulated_task_lamp_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "9584fa500810e48d7d455669051aff003980e5ce3a52382b5b4fc002db14a8cc",
-      "model_urdf_sha256": "65079d2ea246ccf09dfea237a67fae08fede7e5f83ecbc7cb7f0fac51f1aebe2",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

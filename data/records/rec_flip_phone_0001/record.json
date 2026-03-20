@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_flip_phone_0001",
   "created_at": "2026-03-16T14:59:21Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "d2901f027571faef711078f98fc2b78b2889cf5ddd971fe553ef2323423fc984",
-    "model_py_sha256": "405f5a8fe163830182bbe975dca20b0966ceea966f274bad2ab868e449cea076",
-    "model_urdf_sha256": "638f0211acbea8444497856242c45815086e9efaa903696fb6b96ffa257cdfca"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "405f5a8fe163830182bbe975dca20b0966ceea966f274bad2ab868e449cea076"
   },
   "collections": [
     "dataset"

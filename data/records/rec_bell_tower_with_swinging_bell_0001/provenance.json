@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_bell_tower_with_swinging_bell_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "7576952fb829f56d84eedd5b0b82be2732c008f43a17a077606633b2a7709cf6",
-      "model_urdf_sha256": "422cc7a9017544a3c81b135728436c53f8d526b2e9214588f89c1a70cb4d2de8",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

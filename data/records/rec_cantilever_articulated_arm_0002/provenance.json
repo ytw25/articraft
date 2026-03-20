@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_cantilever_articulated_arm_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "bf113c859c22466c7e6d7fe1fcac6c4e8a364220df1729306a36ddce7ecffdaa",
-      "model_urdf_sha256": "c57edb0f85e9109ae6de41dbcacd3f1b9284691f9c5ee729404cc28bffef5f9c",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

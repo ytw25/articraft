@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_yawpitch_module_0002",
   "created_at": "2026-03-12T18:41:57Z",
   "updated_at": "2026-03-20T22:37:48Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "ea3660d81cd7ecdaf471db08dfd8b2ef338223c3530bd218d1d9da43b355ebfb",
-    "model_py_sha256": "dbe2a2f7a0f643091c39bf99bf1e9d172a7b50f3732b88ae8c1f80faacce0251",
-    "model_urdf_sha256": "bc3d9d262ec94ff954de83f10d1d4d3bf4374b72075c6145664d6391eb5c1191"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "dbe2a2f7a0f643091c39bf99bf1e9d172a7b50f3732b88ae8c1f80faacce0251"
   },
   "collections": [
     "dataset"

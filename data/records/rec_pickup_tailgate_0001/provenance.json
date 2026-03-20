@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_pickup_tailgate_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "33db796a8024e912a4a9e647edd7c1f543a61418288c09e1fc524888fd8be66e",
-      "model_urdf_sha256": "c22423ad0f44c4423e64f2ecbf2c4670fa2968df8ee455a722db7c28e9e31e94",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

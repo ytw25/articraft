@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_recumbent_bicycle_0001",
   "created_at": "2026-03-17T02:50:48Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "e07a11f3435a9a493d87e156e65d485232aa3d3deebc7916a89857d396902a4b",
-    "model_py_sha256": "4b4d6df6ea8905a49dc619adf4ffa38157dd4364b4260e9e1ab953524fb35986",
-    "model_urdf_sha256": "25a10586fbe73a0bce51d4ad94ab110d55037270f037176e79261a914ff08944"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "4b4d6df6ea8905a49dc619adf4ffa38157dd4364b4260e9e1ab953524fb35986"
   },
   "collections": [
     "dataset"

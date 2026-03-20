@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_refrigerator_with_hinged_doors_0001",
   "created_at": "2026-03-16T01:22:13Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "e2d3055554b381301f02ed7e520ad508ddcd17473bad9333ba096cc20c3e5496",
-    "model_py_sha256": "1c53a0a08a3dbefe345ef1a09febd69c0b05ccfe8ab307f828b3b118c897d146",
-    "model_urdf_sha256": "1b40d8c75977d438484e560cda2934ef3f274a9ea491056d2743b3373c5ada6c"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "1c53a0a08a3dbefe345ef1a09febd69c0b05ccfe8ab307f828b3b118c897d146"
   },
   "collections": [
     "dataset"

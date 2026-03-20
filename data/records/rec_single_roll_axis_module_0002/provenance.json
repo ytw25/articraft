@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_single_roll_axis_module_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "fa4cf39cfe9e45ffdcd5b1e49eb680e4448d0310c931c94182c8efdbc66c37b3",
-      "model_urdf_sha256": "eb37c2c2fbf718071e564ee667331d8a6772f7761589af5c3883d10a8845675b",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

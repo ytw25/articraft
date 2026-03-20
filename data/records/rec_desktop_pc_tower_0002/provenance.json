@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_desktop_pc_tower_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "0dee2e709535ce3c21ddac145d5ca5f85d2dc915f175717b7bf22d4134cf26f4",
-      "model_urdf_sha256": "2581f3116b1839e21a3f1c84fecbb4e94cb5728bf25443d6f9a606438feb2cf6",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_bicycle_dropper_seatpost_assembly_0001",
   "created_at": "2026-03-17T12:30:38Z",
   "updated_at": "2026-03-20T22:37:44Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "62ad727bae9f8b2a5e7cf63d9b175aaf9d546da36320bbf3f7700a336fdc0458",
-    "model_py_sha256": "825776359d8594341b913b0936232d8917a0e4396e51f1a0354fa2c756d4619b",
-    "model_urdf_sha256": "a92a6e7f6b6a0b62ddaf678ccf37edff0a77dbdd210a8cce8816dbf70f26aec1"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "825776359d8594341b913b0936232d8917a0e4396e51f1a0354fa2c756d4619b"
   },
   "collections": [
     "dataset"

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_a-realistic-highly-detailed-tower-crane-with-a-t_20260319_032439_282817_5916181a",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": 9,
     "compile_attempt_count": 5,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "ae48527398168b7acbd5db1cc92a064d1d807af25a549d36f87ce54f58090261",
-      "model_urdf_sha256": "0e8c23ccf6e722d4893935efebdc2c6732d991cfc8527a16a82e94ce19935644",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

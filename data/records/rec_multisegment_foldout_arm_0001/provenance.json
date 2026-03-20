@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_multisegment_foldout_arm_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "7110abd2d1fe00964fd204d3ee49c4f01fd4a91e2debcf5062be10374bad05f6",
-      "model_urdf_sha256": "12052932dd1cdc897141a9e39186836f026077b6da59bce1443e8286607a7ec6",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

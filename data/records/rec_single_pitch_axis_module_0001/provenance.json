@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_single_pitch_axis_module_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "1cb96526e2d2e0e23c45083b5d602dd5534707723b044d4c20e657b55adf01c5",
-      "model_urdf_sha256": "1f3e7f6c80f02dd342520fb6b76d0e4a1d4b9bdc257349b7913c1b99c7cab96c",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

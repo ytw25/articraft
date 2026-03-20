@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_miter_saw_arm_assembly_0001",
   "created_at": "2026-03-16T01:18:45Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "684a8430578a99a0becb49b16d0a34bce3d5512fb05f077036dc837950bb5357",
-    "model_py_sha256": "0a4872efe039b2483393daf61a20a17e6a445a20847ea94a4d57b27bf23cccd0",
-    "model_urdf_sha256": "eaf902c943ffa67ba37116b773598d955f55cf21538452d0b9cd285130772ef7"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "0a4872efe039b2483393daf61a20a17e6a445a20847ea94a4d57b27bf23cccd0"
   },
   "collections": [
     "dataset"

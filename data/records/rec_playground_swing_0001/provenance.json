@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_playground_swing_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "2c40a53e3e435ee16907a6903e28abfe99738b8fc2fc19d3ec6b8e35bc67e399",
-      "model_urdf_sha256": "200b7bf6cd5b1b3a0c0fe4749f2e6b611ece62c38bd08970c2d18c10d64c7f6b",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

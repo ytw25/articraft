@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_flap_array_with_independent_hinges_0002",
   "created_at": "2026-03-12T18:19:55Z",
   "updated_at": "2026-03-20T22:37:46Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "fa4464e42077c56d0081cbffd96e695f4e57c10fb18582de4bab6eb144219eb8",
-    "model_py_sha256": "fc071f4c9c14696621b378c4d18e4e29f0fed85b0aa11e74a252bfbea74c7e47",
-    "model_urdf_sha256": "fa15d07720d112e24bc66bf5e55f4c68ae702700a7ca4e2460ea3b83b86328f9"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "fc071f4c9c14696621b378c4d18e4e29f0fed85b0aa11e74a252bfbea74c7e47"
   },
   "collections": [
     "dataset"

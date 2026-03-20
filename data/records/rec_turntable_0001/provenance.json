@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_turntable_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "d3dd677b9415ddc81fef9a3ae4cc1dc993b2aedbad3e8a26406156a4653087d5",
-      "model_urdf_sha256": "a919e99c95b94a67b5c5d59e126b5ef37eaea5ef929c62813477b5db3d264b5d",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

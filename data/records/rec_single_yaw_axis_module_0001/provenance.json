@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_single_yaw_axis_module_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "cdc7a76e842ec5076f86fa0836d48510ec90eba2fc52c8f8b8263dec34edacf5",
-      "model_urdf_sha256": "e02e174b6b93043ee11911bfab5650206f0cf55ae182fd8233a3d5f75e210553",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

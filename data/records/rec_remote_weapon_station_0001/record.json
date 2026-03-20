@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_remote_weapon_station_0001",
   "created_at": "2026-03-17T02:42:01Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "0c44c9821ac30c5db4ce7634559853ca938b4420cb671c4eae78505328d27d04",
-    "model_py_sha256": "efb74213ab428beb2923a28cafb7c808f05e06e54957a6e47d50894850e40646",
-    "model_urdf_sha256": "f0438922023a36269d6afb8333067e64ba25df61d69e36e019956d97da9c456f"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "efb74213ab428beb2923a28cafb7c808f05e06e54957a6e47d50894850e40646"
   },
   "collections": [
     "dataset"

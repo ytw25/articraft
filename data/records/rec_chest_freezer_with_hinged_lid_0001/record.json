@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_chest_freezer_with_hinged_lid_0001",
   "created_at": "2026-03-17T02:40:33Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "48683ffc5980dc19f85ec228ae5ac84e8db7f2485ad50186d974c2009ac1b2a1",
-    "model_py_sha256": "5d486e572e800644fc19640da9d09990efc968b07c1869a49371187bc5087d8f",
-    "model_urdf_sha256": "66ea414261c9607d6b3d55d065ef2118653f7a924317cdffb49f1df555120ff3"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "5d486e572e800644fc19640da9d09990efc968b07c1869a49371187bc5087d8f"
   },
   "collections": [
     "dataset"

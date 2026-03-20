@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_offsetaxis_rotary_stack_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "bc237f36134fe80ce10ad50b60a6c7bb4c9638d816c876c0040602f694ef534b",
-      "model_urdf_sha256": "3d1adc9bae2123cbb07a7ba3775090f8cd17fd16b9e04166e7a921e353e09fcb",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

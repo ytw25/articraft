@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_vacuum_cleaner_with_articulated_wand_0001",
   "created_at": "2026-03-16T01:19:22Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "de6c68e25010a8528c8a2cf4ad01bee2b8ab396c30f13c225a3a0b3a8bc1d45c",
-    "model_py_sha256": "51cdc38adc828d21973f224b89138cdf6eb71d5879d3afbf0c35f0f74ad9baf1",
-    "model_urdf_sha256": "1995140181719910f7450c438cc75671fa7eaa656bd56e6b701fc08543a31b8e"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "51cdc38adc828d21973f224b89138cdf6eb71d5879d3afbf0c35f0f74ad9baf1"
   },
   "collections": [
     "dataset"

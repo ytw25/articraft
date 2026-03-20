@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_shutterslat_stack_with_independent_pivots_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "1e667b5147f666963e194e2dee3a837c36da6301702edc282d68e6ab66c957ad",
-      "model_urdf_sha256": "2648be9fb409d203d9d0115b467b91051c67faa69e6f10b4f709480ddc4a20b7",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

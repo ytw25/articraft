@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_twojoint_revolute_chain_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "f05629fef12be556d7e3e7867a8ea692b0baa2d689ad3e41b7322d23e5126308",
-      "model_urdf_sha256": "7a4aa42464b3544248b1d1297417a7dd0c1c9ceb543cf5a579247c781aa0491c",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

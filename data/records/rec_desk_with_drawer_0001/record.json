@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_desk_with_drawer_0001",
   "created_at": "2026-03-16T22:33:32Z",
   "updated_at": "2026-03-20T22:37:45Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "d8ec8d2c550cf2076f69cce4e739c4824048a93afdb89431babdfa54b605e2b6",
-    "model_py_sha256": "3662dcc24920a6ddb129563c3831599f31fa32d386c8238c1303a61aa1401f45",
-    "model_urdf_sha256": "aed6d2ee78c0986f7d6324a132a71506a0210670e4d1534f23589314ea6270d4"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "3662dcc24920a6ddb129563c3831599f31fa32d386c8238c1303a61aa1401f45"
   },
   "collections": [
     "dataset"

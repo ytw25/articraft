@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_jet_engine_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "43435d14921fa57da12f1d0d23d2fd1fd8887323eaeac596c38abe7104b2f5db",
-      "model_urdf_sha256": "a1e09ba22bf66078558d0923c839e7fdaa07395babe919bd22937852e1d62a55",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_frontload_washing_machine_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "983bb8a0ea30b287753197e05802cb39aa4ee87ec04f897204388d7755391b28",
-      "model_urdf_sha256": "b3a8e8d35cb5a7fa802db75eb37068159dc0ebf525be033b94b492e801da7548",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

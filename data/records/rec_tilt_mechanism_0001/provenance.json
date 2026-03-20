@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_tilt_mechanism_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "c23473425e0a697012d1518a27a7db6a63d0eb75ce005e290cd3536aa406957f",
-      "model_urdf_sha256": "62199082b0d6ef48ec5f8c3eff9791a0bd3eec153bfc8dfaf71e226064de69ef",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

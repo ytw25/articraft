@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_a-realistic-model-of-an-internet-router-with-4-a_20260319_144436_012112_dbdd0d7d",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": 4,
     "compile_attempt_count": 3,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "323eaeb233f93a9018a3818b87b4855a60c33cc7e5bc111c6f138f20d3dbd109",
-      "model_urdf_sha256": "3078a6b0ff4e17a27f27e4a54c746c8736f5ad1a5d809ffa8efd637b9ccb192b",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

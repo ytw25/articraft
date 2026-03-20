@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_recumbent_bicycle_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "4b4d6df6ea8905a49dc619adf4ffa38157dd4364b4260e9e1ab953524fb35986",
-      "model_urdf_sha256": "25a10586fbe73a0bce51d4ad94ab110d55037270f037176e79261a914ff08944",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

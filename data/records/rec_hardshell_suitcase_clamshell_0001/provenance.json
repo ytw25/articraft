@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_hardshell_suitcase_clamshell_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "7517fb3e7e8f5c1ea730caa738aa08da3b274c85211d366bd027c8bc23797870",
-      "model_urdf_sha256": "90cda5b0632b95027d0a50b77b1a71164905f31e236f17d5150190f439da4a59",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_gear_assemblies_0001",
   "created_at": "2026-03-16T01:50:43Z",
   "updated_at": "2026-03-20T22:37:53Z",
@@ -23,21 +23,13 @@
     "prompt_txt": "prompt.txt",
     "prompt_series_json": null,
     "model_py": "model.py",
-    "model_urdf": "model.urdf",
-    "compile_report_json": "compile_report.json",
     "provenance_json": "provenance.json",
     "cost_json": "cost.json",
-    "inputs_dir": "inputs",
-    "assets_dir": "assets"
+    "inputs_dir": "inputs"
   },
   "hashes": {
     "prompt_sha256": "37165a66aed700d44221118104ac0c59d3a99d4f2dd8bfbc2ac26c0fa38d3084",
-    "model_py_sha256": "ff0f62ee06ee1fffa15875ebc7fb2031a6566e23cd56229ecf75538a41851b31",
-    "model_urdf_sha256": "a456c5b1154e804860bdd9832fd25f1970508ed9ccd6cfa8b780b168604ab7ae"
-  },
-  "derived_assets": {
-    "assets_dir": "assets",
-    "materialization_status": "available"
+    "model_py_sha256": "ff0f62ee06ee1fffa15875ebc7fb2031a6566e23cd56229ecf75538a41851b31"
   },
   "collections": [
     "dataset"

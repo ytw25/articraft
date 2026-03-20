@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_wall_thermostat_with_rotating_dial_0002",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "4193dcadf825022dc18b317421c9bf1ad3528864a049435c14fdacf89a10904d",
-      "model_urdf_sha256": "6fe54006508d68bc4a701663fc9a6f28609dcf12d24e60b4051a63c7bb50a29e",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }

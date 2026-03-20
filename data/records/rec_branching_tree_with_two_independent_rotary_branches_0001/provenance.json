@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_id": "rec_branching_tree_with_two_independent_rotary_branches_0001",
   "generation": {
     "provider": "openai",
@@ -30,13 +30,5 @@
     "tool_call_count": null,
     "compile_attempt_count": null,
     "final_status": "success"
-  },
-  "materialization": {
-    "fingerprint_inputs": {
-      "model_py_sha256": "f238b725600808b4794ea6b2f1dfcca39cfec65792eff3b03fcb34cb345618f2",
-      "model_urdf_sha256": "e3d9e229f52288b2dbd2a5669863256460eb2a66e8d850e962ca658908c40451",
-      "sdk_fingerprint": null,
-      "materializer_version": "v1"
-    }
   }
 }
