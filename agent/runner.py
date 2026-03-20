@@ -1327,6 +1327,7 @@ async def _run_from_input_impl(
                     else None
                 ),
             )
+        await asyncio.to_thread(_remove_tree_if_exists, context.staging_dir)
     except Exception as exc:
         finished_at = _utc_now()
         result_row = {
@@ -1758,6 +1759,7 @@ async def rerun_record_in_place(
                     else None
                 ),
             )
+        await asyncio.to_thread(_remove_tree_if_exists, context.staging_dir)
     except Exception as exc:
         finished_at = _utc_now()
         run_store.write_run(

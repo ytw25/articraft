@@ -82,7 +82,7 @@ def test_workbench_run_and_rerun_persist_runtime_artifacts(
     results_lines = (run_dirs[0] / "results.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(results_lines) == 1
     assert json.loads(results_lines[0])["record_id"] == record_dir.name
-    assert not (run_dirs[0] / "staging" / record_dir.name / "traces").exists()
+    assert not (run_dirs[0] / "staging" / record_dir.name).exists()
     assert not (repo_root / "outputs").exists()
 
     original_record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
@@ -147,6 +147,7 @@ def test_workbench_run_and_rerun_persist_runtime_artifacts(
     latest_results = (run_dirs[-1] / "results.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(latest_results) == 1
     assert json.loads(latest_results[0])["record_id"] == record_dir.name
+    assert not (run_dirs[-1] / "staging" / record_dir.name).exists()
 
 
 def test_dataset_run_and_rerun_preserve_dataset_metadata(
@@ -210,6 +211,7 @@ def test_dataset_run_and_rerun_preserve_dataset_metadata(
     assert run_metadata["status"] == "success"
     assert run_metadata["collection"] == "dataset"
     assert run_metadata["run_mode"] == "dataset_single"
+    assert not (run_dirs[0] / "staging" / record_dir.name).exists()
 
     original_run_id = record["source"]["run_id"]
     original_promoted_at = dataset_entry["promoted_at"]
@@ -259,6 +261,7 @@ def test_dataset_run_and_rerun_preserve_dataset_metadata(
     assert latest_run_metadata["status"] == "success"
     assert latest_run_metadata["collection"] == "dataset"
     assert latest_run_metadata["run_mode"] == "dataset_single"
+    assert not (run_dirs[-1] / "staging" / record_dir.name).exists()
 
 
 def test_workbench_run_succeeds_when_persisted_input_image_disappears(
@@ -305,3 +308,4 @@ def test_workbench_run_succeeds_when_persisted_input_image_disappears(
     results = (run_dir / "results.jsonl").read_text(encoding="utf-8").splitlines()
     assert len(results) == 1
     assert json.loads(results[0])["status"] == "success"
+    assert not (run_dir / "staging" / record_dir.name).exists()
