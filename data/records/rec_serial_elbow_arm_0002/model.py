@@ -193,7 +193,6 @@ def build_object_model() -> ArticulatedObject:
         mass=2.1,
         origin=Origin(xyz=(0.0, 0.0, BASE_SIZE[2] / 2.0)),
     )
-    base.qc_collision(Box((0.012, 0.030, 0.012)), origin=Origin(xyz=(0.0, 0.0, SHOULDER_AXIS_Z)))
 
     upper_arm = model.part("upper_arm")
     _add_visual_mesh(upper_arm, _make_upper_arm_shape(), "compact_elbow_arm_upper.obj", "arm_blue")
@@ -205,10 +204,6 @@ def build_object_model() -> ArticulatedObject:
         mass=0.68,
         origin=Origin(xyz=(UPPER_ARM_LENGTH / 2.0, 0.0, 0.0)),
     )
-    upper_arm.qc_collision(Box((0.012, 0.024, 0.024)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    upper_arm.qc_collision(
-        Box((0.010, 0.024, 0.024)), origin=Origin(xyz=(UPPER_ARM_LENGTH, 0.0, 0.0))
-    )
 
     forearm = model.part("forearm")
     _add_visual_mesh(forearm, _make_forearm_shape(), "compact_elbow_arm_forearm.obj", "dark_metal")
@@ -219,8 +214,6 @@ def build_object_model() -> ArticulatedObject:
         mass=0.44,
         origin=Origin(xyz=(FOREARM_LENGTH / 2.0, 0.0, 0.0)),
     )
-    forearm.qc_collision(Box((0.010, 0.022, 0.022)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    forearm.qc_collision(Box((0.010, 0.022, 0.022)), origin=Origin(xyz=(FOREARM_LENGTH, 0.0, 0.0)))
 
     tool_plate = model.part("tool_plate")
     _add_visual_mesh(
@@ -233,7 +226,6 @@ def build_object_model() -> ArticulatedObject:
         mass=0.12,
         origin=Origin(xyz=(0.0135, 0.0, 0.0)),
     )
-    tool_plate.qc_collision(Box((0.010, 0.026, 0.026)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
 
     model.articulation(
         "shoulder_joint",

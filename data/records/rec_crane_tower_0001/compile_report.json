@@ -5,12 +5,11 @@
   "urdf_path": "model.urdf",
   "warnings": [],
   "checks_run": [
-    "legacy_import"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 7,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.5030515
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

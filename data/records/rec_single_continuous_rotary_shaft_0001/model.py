@@ -13,7 +13,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -55,9 +54,6 @@ COLLAR_TOP_Z = BASE_TOP_Z + COLLAR_HEIGHT
 
 
 def _make_base_visual_mesh():
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     lower_body = (
@@ -93,9 +89,6 @@ def _make_base_visual_mesh():
 
 
 def _make_wheelhead_visual_mesh():
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     wheelhead = cq.Workplane("XY").circle(WHEELHEAD_HUB_RADIUS).extrude(WHEELHEAD_HUB_HEIGHT)
@@ -117,45 +110,15 @@ def _make_wheelhead_visual_mesh():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="pottery_wheel")
+    model = ArticulatedObject(name="pottery_wheel", assets=ASSETS)
 
     model.material("body_gray", rgba=(0.26, 0.28, 0.31, 1.0))
     model.material("trim_black", rgba=(0.08, 0.08, 0.09, 1.0))
     model.material("steel", rgba=(0.72, 0.74, 0.77, 1.0))
     model.material("wheelhead", rgba=(0.80, 0.82, 0.84, 1.0))
 
-    base_visual_mesh = _make_base_visual_mesh()
-    wheelhead_visual_mesh = _make_wheelhead_visual_mesh()
-
     base = model.part("base")
-    if base_visual_mesh is not None:
-        base.visual(base_visual_mesh, material="body_gray")
-    else:
-        base.visual(
-            Box((BASE_WIDTH, BASE_DEPTH, LOWER_BODY_HEIGHT)),
-            origin=Origin(xyz=(0.0, 0.0, LOWER_BODY_HEIGHT / 2.0)),
-            material="body_gray",
-        )
-        base.visual(
-            Box((UPPER_BODY_WIDTH, UPPER_BODY_DEPTH, UPPER_BODY_HEIGHT)),
-            origin=Origin(xyz=(0.0, 0.0, LOWER_BODY_HEIGHT + (UPPER_BODY_HEIGHT / 2.0))),
-            material="body_gray",
-        )
-        base.visual(
-            Cylinder(radius=PAN_OUTER_RADIUS, length=PAN_HEIGHT),
-            origin=Origin(xyz=(0.0, 0.0, BASE_TOP_Z + (PAN_HEIGHT / 2.0))),
-            material="trim_black",
-        )
-        base.visual(
-            Cylinder(radius=COLLAR_RADIUS, length=COLLAR_HEIGHT),
-            origin=Origin(xyz=(0.0, 0.0, BASE_TOP_Z + (COLLAR_HEIGHT / 2.0))),
-            material="steel",
-        )
-
-
-
-
-
+    base.visual(_make_base_visual_mesh(), material="body_gray")
     base.inertial = Inertial.from_geometry(
         Box((0.44, 0.32, 0.31)),
         mass=18.0,
@@ -182,28 +145,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     wheelhead = model.part("wheelhead")
-    if wheelhead_visual_mesh is not None:
-        wheelhead.visual(wheelhead_visual_mesh, material="wheelhead")
-    else:
-        wheelhead.visual(
-            Cylinder(radius=WHEELHEAD_HUB_RADIUS, length=WHEELHEAD_HUB_HEIGHT),
-            origin=Origin(xyz=(0.0, 0.0, WHEELHEAD_HUB_HEIGHT / 2.0)),
-            material="steel",
-        )
-        wheelhead.visual(
-            Cylinder(radius=WHEELHEAD_RADIUS, length=WHEELHEAD_THICKNESS),
-            origin=Origin(
-                xyz=(
-                    0.0,
-                    0.0,
-                    WHEELHEAD_HUB_HEIGHT + (WHEELHEAD_THICKNESS / 2.0),
-                )
-            ),
-            material="wheelhead",
-        )
-
-
-
+    wheelhead.visual(_make_wheelhead_visual_mesh(), material="wheelhead")
     wheelhead.inertial = Inertial.from_geometry(
         Cylinder(
             radius=WHEELHEAD_RADIUS,

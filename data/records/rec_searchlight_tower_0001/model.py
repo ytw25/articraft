@@ -26,8 +26,8 @@ from sdk import (
     wire_from_points,
 )
 
-HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
 
 
 def _merge_geometries(geometries: list[MeshGeometry]) -> MeshGeometry:

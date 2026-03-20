@@ -147,10 +147,6 @@ def _configure_link_physics(
         xyz=(0.0, 0.0, collision_size[2] / 2.0),
     )
 
-    part.qc_collision(
-        Box((width * 0.72, depth * 0.72, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, 0.006)),
-    )
     part.inertial = Inertial.from_geometry(
         Box(collision_size),
         mass=mass,

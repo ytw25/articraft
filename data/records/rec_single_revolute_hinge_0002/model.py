@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -22,12 +21,8 @@ MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
+import cadquery as cq
 import math
-
-if cadquery_available():
-    import cadquery as cq
-else:
-    cq = None
 
 
 POST_SIZE = 0.09
@@ -56,8 +51,6 @@ LEAF_CENTER_LOCAL_Z = GATE_BOTTOM_Z + (GATE_HEIGHT / 2.0) - HINGE_ORIGIN_Z
 
 
 def _require_cadquery():
-    if cq is None:
-        raise RuntimeError("CadQuery is required for the garden gate hybrid model.")
     return cq
 
 
@@ -242,7 +235,7 @@ def _make_leaf_hardware_shape():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="garden_gate")
+    model = ArticulatedObject(name="garden_gate", assets=ASSETS)
 
     model.material("painted_wood", rgba=(0.58, 0.42, 0.28, 1.0))
     model.material("galvanized_steel", rgba=(0.45, 0.48, 0.52, 1.0))

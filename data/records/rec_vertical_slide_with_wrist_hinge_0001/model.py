@@ -79,11 +79,6 @@ def build_object_model() -> ArticulatedObject:
         .cut(cq.Workplane("XY").box(0.040, 0.032, 0.022).translate((0.0, 0.035, 0.145)))
     )
     _add_mesh_visual(carriage, carriage_shape, "vertical_slide_carriage.obj", "carriage_light")
-
-
-
-    carriage.qc_collision(Box((0.030, 0.030, 0.030)), origin=Origin(xyz=(0.0, 0.000, 0.000)))
-    carriage.qc_collision(Box((0.030, 0.030, 0.030)), origin=Origin(xyz=(0.0, 0.035, 0.145)))
     carriage.inertial = Inertial.from_geometry(
         Box((0.130, 0.060, 0.190)),
         mass=1.6,
@@ -102,10 +97,6 @@ def build_object_model() -> ArticulatedObject:
         .union(cq.Workplane("XY").circle(0.010).extrude(0.028).translate((0.0, 0.095, -0.203)))
     )
     _add_mesh_visual(wrist, wrist_shape, "vertical_slide_wrist.obj", "tool_dark")
-
-
-
-    wrist.qc_collision(Box((0.028, 0.028, 0.028)), origin=Origin(xyz=(0.0, 0.000, 0.000)))
     wrist.inertial = Inertial.from_geometry(
         Box((0.060, 0.050, 0.180)),
         mass=0.8,

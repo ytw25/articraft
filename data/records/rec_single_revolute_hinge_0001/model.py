@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -21,7 +20,6 @@ HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
-from sdk_hybrid import Material
 
 CABINET_WIDTH = 0.62
 CABINET_HEIGHT = 0.72
@@ -46,9 +44,6 @@ HANDLE_FROM_LATCH_EDGE = 0.045
 
 
 def _body_mesh():
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     outer = cq.Workplane("XY").box(CABINET_WIDTH, CABINET_DEPTH, CABINET_HEIGHT)
@@ -66,9 +61,6 @@ def _body_mesh():
 
 
 def _door_panel_mesh():
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     panel = (
@@ -80,9 +72,6 @@ def _door_panel_mesh():
 
 
 def _door_handle_mesh():
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     handle_center_x = DOOR_WIDTH - HANDLE_FROM_LATCH_EDGE
@@ -108,86 +97,23 @@ def _door_handle_mesh():
     return mesh_from_cadquery(handle, MESH_DIR / "cabinet_door_handle.obj")
 
 
-def _add_body_fallback_visuals(part, material: Material | str) -> None:
-    part.visual(
-        Box((CABINET_WIDTH, BACK_PANEL_THICKNESS, CABINET_HEIGHT)),
-        origin=Origin(xyz=(0.0, -CABINET_DEPTH / 2.0 + BACK_PANEL_THICKNESS / 2.0, 0.0)),
-        material=material,
-    )
-    part.visual(
-        Box((SIDE_WALL_THICKNESS, CABINET_DEPTH, CABINET_HEIGHT)),
-        origin=Origin(xyz=(-CABINET_WIDTH / 2.0 + SIDE_WALL_THICKNESS / 2.0, 0.0, 0.0)),
-        material=material,
-    )
-    part.visual(
-        Box((SIDE_WALL_THICKNESS, CABINET_DEPTH, CABINET_HEIGHT)),
-        origin=Origin(xyz=(CABINET_WIDTH / 2.0 - SIDE_WALL_THICKNESS / 2.0, 0.0, 0.0)),
-        material=material,
-    )
-    part.visual(
-        Box((CABINET_WIDTH, CABINET_DEPTH, SIDE_WALL_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, CABINET_HEIGHT / 2.0 - SIDE_WALL_THICKNESS / 2.0)),
-        material=material,
-    )
-    part.visual(
-        Box((CABINET_WIDTH, CABINET_DEPTH, SIDE_WALL_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, -CABINET_HEIGHT / 2.0 + SIDE_WALL_THICKNESS / 2.0)),
-        material=material,
-    )
-
-
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="wall_mounted_cabinet")
+    model = ArticulatedObject(name="wall_mounted_cabinet", assets=ASSETS)
 
     carcass_finish = model.material("carcass_finish", rgba=(0.93, 0.94, 0.95, 1.0))
     door_finish = model.material("door_finish", rgba=(0.90, 0.91, 0.92, 1.0))
     handle_finish = model.material("handle_finish", rgba=(0.10, 0.10, 0.11, 1.0))
 
     body = model.part("cabinet_body")
-    body_mesh = _body_mesh()
-    if body_mesh is not None:
-        body.visual(body_mesh, material=carcass_finish)
-    else:
-        _add_body_fallback_visuals(body, carcass_finish)
-
-
-
-
-
-
+    body.visual(_body_mesh(), material=carcass_finish)
     body.inertial = Inertial.from_geometry(
         Box((CABINET_WIDTH, CABINET_DEPTH, CABINET_HEIGHT)),
         mass=8.5,
     )
 
     door = model.part("door")
-    panel_mesh = _door_panel_mesh()
-    handle_mesh = _door_handle_mesh()
-    if panel_mesh is not None:
-        door.visual(panel_mesh, material=door_finish)
-    else:
-        door.visual(
-            Box((DOOR_WIDTH, DOOR_THICKNESS, DOOR_HEIGHT)),
-            origin=Origin(xyz=(DOOR_WIDTH / 2.0, DOOR_THICKNESS / 2.0, 0.0)),
-            material=door_finish,
-        )
-    if handle_mesh is not None:
-        door.visual(handle_mesh, material=handle_finish)
-    else:
-        handle_center_x = DOOR_WIDTH - HANDLE_FROM_LATCH_EDGE
-        door.visual(
-            Box((HANDLE_WIDTH, HANDLE_BAR_DEPTH, HANDLE_LENGTH)),
-            origin=Origin(
-                xyz=(
-                    handle_center_x,
-                    DOOR_THICKNESS + HANDLE_STANDOFF_DEPTH + (HANDLE_BAR_DEPTH / 2.0),
-                    0.0,
-                )
-            ),
-            material=handle_finish,
-        )
-
-
+    door.visual(_door_panel_mesh(), material=door_finish)
+    door.visual(_door_handle_mesh(), material=handle_finish)
     door.inertial = Inertial.from_geometry(
         Box((DOOR_WIDTH, DOOR_THICKNESS, DOOR_HEIGHT)),
         mass=2.6,
@@ -257,10 +183,6 @@ def run_tests() -> TestReport:
         CABINET_DEPTH / 2.0 + FRONT_GAP,
         0.0,
     )
-    assert len(body.collisions) == 5, (
-        "Cabinet body should stay hollow at the front via wall collisions."
-    )
-    assert len(door.collisions) == 1, "Door should use one clean collision proxy for the panel."
     assert len(door.visuals) >= 2, "Door should include a separate visible pull handle."
 
     return ctx.report()

@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -21,11 +20,7 @@ HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
-HAS_CADQUERY = cadquery_available()
-if HAS_CADQUERY:
-    import cadquery as cq
-else:
-    cq = None
+import cadquery as cq
 
 SHOULDER_Z = 0.23
 UPPER_ARM_LENGTH = 0.24
@@ -33,8 +28,6 @@ FOREARM_LENGTH = 0.20
 
 
 def _visual_mesh(filename, builder):
-    if cq is None:
-        return None
     return mesh_from_cadquery(builder(), MESH_DIR / filename)
 
 
@@ -67,57 +60,23 @@ def _build_tool_shape():
 
 
 def _add_base_visuals(part):
-    mesh = _visual_mesh("base.obj", _build_base_shape)
-    if mesh is not None:
-        part.visual(mesh, material="graphite")
-        return
-    part.visual(Box((0.20, 0.14, 0.04)), origin=Origin(xyz=(0.0, 0.0, 0.02)), material="graphite")
-    part.visual(Box((0.08, 0.10, 0.15)), origin=Origin(xyz=(0.0, 0.0, 0.115)), material="graphite")
-    part.visual(
-        Box((0.06, 0.12, 0.025)), origin=Origin(xyz=(0.0, 0.0, 0.2025)), material="graphite"
-    )
+    part.visual(_visual_mesh("base.obj", _build_base_shape), material="graphite")
 
 
 def _add_upper_arm_visuals(part):
-    mesh = _visual_mesh("upper_arm.obj", _build_upper_arm_shape)
-    if mesh is not None:
-        part.visual(mesh, material="arm_paint")
-        return
-    part.visual(Box((0.04, 0.08, 0.06)), origin=Origin(xyz=(0.02, 0.0, 0.0)), material="arm_paint")
-    part.visual(
-        Box((0.18, 0.045, 0.04)), origin=Origin(xyz=(0.125, 0.0, 0.0)), material="arm_paint"
-    )
-    part.visual(Box((0.04, 0.07, 0.055)), origin=Origin(xyz=(0.22, 0.0, 0.0)), material="arm_paint")
+    part.visual(_visual_mesh("upper_arm.obj", _build_upper_arm_shape), material="arm_paint")
 
 
 def _add_forearm_visuals(part):
-    mesh = _visual_mesh("forearm.obj", _build_forearm_shape)
-    if mesh is not None:
-        part.visual(mesh, material="arm_paint")
-        return
-    part.visual(Box((0.04, 0.07, 0.05)), origin=Origin(xyz=(0.02, 0.0, 0.0)), material="arm_paint")
-    part.visual(Box((0.15, 0.04, 0.035)), origin=Origin(xyz=(0.10, 0.0, 0.0)), material="arm_paint")
-    part.visual(
-        Box((0.035, 0.06, 0.04)), origin=Origin(xyz=(0.1825, 0.0, 0.0)), material="arm_paint"
-    )
+    part.visual(_visual_mesh("forearm.obj", _build_forearm_shape), material="arm_paint")
 
 
 def _add_tool_visuals(part):
-    mesh = _visual_mesh("tool_block.obj", _build_tool_shape)
-    if mesh is not None:
-        part.visual(mesh, material="tool_steel")
-        return
-    part.visual(Box((0.02, 0.06, 0.03)), origin=Origin(xyz=(0.01, 0.0, 0.0)), material="tool_steel")
-    part.visual(
-        Box((0.06, 0.05, 0.025)), origin=Origin(xyz=(0.05, 0.0, 0.0)), material="tool_steel"
-    )
-    part.visual(
-        Box((0.02, 0.03, 0.015)), origin=Origin(xyz=(0.085, 0.0, 0.0)), material="tool_steel"
-    )
+    part.visual(_visual_mesh("tool_block.obj", _build_tool_shape), material="tool_steel")
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="simple_robot_arm")
+    model = ArticulatedObject(name="simple_robot_arm", assets=ASSETS)
 
     model.material("graphite", rgba=(0.20, 0.22, 0.25, 1.0))
     model.material("arm_paint", rgba=(0.86, 0.46, 0.12, 1.0))

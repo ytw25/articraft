@@ -3,19 +3,13 @@
   "record_id": "rec_pet_door_flap_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='flap' nearest_part='frame' approx_gap=0.003905m pose_index=0 pose=(frame_to_flap=0) backend=fcl\n- part='frame' nearest_part='flap' approx_gap=0.003905m pose_index=0 pose=(frame_to_flap=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 15,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.742216
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

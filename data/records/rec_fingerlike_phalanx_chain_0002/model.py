@@ -79,14 +79,6 @@ def _add_visual_mesh(part, shape, filename: str, material: str) -> None:
     part.visual(mesh_from_cadquery(shape, filename, assets=ASSETS), material=material)
 
 
-def _add_anchor(part, *, x: float, y: float, z: float, name: str) -> None:
-    part.qc_collision(
-        Box((0.004, 0.004, 0.004)),
-        origin=Origin(xyz=(x, y, z)),
-        name=name,
-    )
-
-
 def _make_base_mount_shape():
     block_center_z = -((0.5 * BASE_BLOCK_Z) + (0.60 * HINGE_RADIUS))
     pad_center_z = -(BASE_BLOCK_Z + (0.5 * BASE_PAD_Z) + (0.60 * HINGE_RADIUS))
@@ -270,13 +262,6 @@ def build_object_model() -> ArticulatedObject:
         mass=0.022,
         has_distal_joint=False,
     )
-
-    _add_anchor(base_mount, x=0.0, y=0.0, z=0.0, name="base_mount_joint_anchor")
-    _add_anchor(proximal, x=0.0, y=0.0, z=0.0, name="proximal_root_anchor")
-    _add_anchor(proximal, x=0.0, y=0.0, z=PROXIMAL_SPAN, name="proximal_tip_anchor")
-    _add_anchor(middle, x=0.0, y=0.0, z=0.0, name="middle_root_anchor")
-    _add_anchor(middle, x=0.0, y=0.0, z=MIDDLE_SPAN, name="middle_tip_anchor")
-    _add_anchor(distal, x=0.0, y=0.0, z=0.0, name="distal_root_anchor")
 
     model.articulation(
         "base_to_proximal",

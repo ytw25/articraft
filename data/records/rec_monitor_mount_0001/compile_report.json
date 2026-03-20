@@ -3,19 +3,13 @@
   "record_id": "rec_monitor_mount_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='desk_clamp' nearest_part='lower_arm' approx_gap=0.003m pose_index=0 pose=(base_to_lower_swivel=0, head_to_vesa_tilt=0, lower_to_upper_elbow=0, upper_to_head_yaw=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 8,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.5977135
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

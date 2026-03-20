@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -58,8 +57,6 @@ DISPLAY_MASS = 1.8
 
 
 def _require_cadquery():
-    if not cadquery_available():
-        raise RuntimeError("CadQuery is required for the hybrid monitor-mount model.")
     import cadquery as cq
 
     return cq
@@ -239,7 +236,7 @@ def _display_center_world(slide_x: float, tilt_angle: float):
 def build_object_model() -> ArticulatedObject:
     cq = _require_cadquery()
 
-    model = ArticulatedObject(name="sliding_monitor_mount")
+    model = ArticulatedObject(name="sliding_monitor_mount", assets=ASSETS)
     model.material("anodized_aluminum", rgba=(0.73, 0.75, 0.79, 1.0))
     model.material("powder_coat", rgba=(0.18, 0.19, 0.21, 1.0))
     model.material("display_black", rgba=(0.09, 0.09, 0.1, 1.0))

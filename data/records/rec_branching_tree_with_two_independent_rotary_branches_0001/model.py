@@ -201,8 +201,6 @@ def build_object_model() -> ArticulatedObject:
     base = model.part("base")
     _add_visual_mesh(base, _make_base_visual(), "base_structure.obj", "graphite")
     _add_base_collisions(base)
-    base.qc_collision(Box((0.03, 0.03, 0.03)), origin=Origin(xyz=(-SHOULDER_X, 0.0, SHOULDER_Z)))
-    base.qc_collision(Box((0.03, 0.03, 0.03)), origin=Origin(xyz=(SHOULDER_X, 0.0, SHOULDER_Z)))
     base.inertial = Inertial.from_geometry(
         Box((0.28, 0.14, 0.24)),
         mass=3.6,

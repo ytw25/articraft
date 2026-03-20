@@ -14,7 +14,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -23,10 +22,7 @@ HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
-if cadquery_available():
-    import cadquery as cq
-else:
-    cq = None
+import cadquery as cq
 
 
 BASE_RADIUS = 0.11
@@ -45,8 +41,6 @@ ELBOW_LIMITS = (-1.05, 1.05)
 
 
 def _require_cadquery():
-    if cq is None:
-        raise RuntimeError("CadQuery is required to author the lamp visual meshes.")
     return cq
 
 
@@ -142,7 +136,7 @@ def _build_shade_shape():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="reading_lamp")
+    model = ArticulatedObject(name="reading_lamp", assets=ASSETS)
 
     model.material("powder_black", rgba=(0.12, 0.12, 0.14, 1.0))
     model.material("warm_brass", rgba=(0.66, 0.56, 0.29, 1.0))

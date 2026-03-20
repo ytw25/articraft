@@ -21,8 +21,8 @@ from sdk import (
     TestReport,
 )
 
-HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
 
 
 def _material(name: str, rgba: tuple[float, float, float, float]):

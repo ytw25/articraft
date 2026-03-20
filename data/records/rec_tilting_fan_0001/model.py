@@ -28,8 +28,8 @@ from sdk import (
     mesh_from_geometry,
 )
 
-HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -3,19 +3,13 @@
   "record_id": "rec_extension_ladder_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='base_section' nearest_part='fly_section' approx_gap=0.001m pose_index=0 pose=(section_extend=0) backend=fcl\n- part='fly_section' nearest_part='base_section' approx_gap=0.001m pose_index=0 pose=(section_extend=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 8,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.7260075
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

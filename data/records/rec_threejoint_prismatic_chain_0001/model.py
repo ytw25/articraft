@@ -7,13 +7,11 @@ from sdk_hybrid import (
     ArticulatedObject,
     ArticulationType,
     Box,
-    Cylinder,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -22,10 +20,7 @@ HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
-try:
-    import cadquery as cq
-except Exception:  # pragma: no cover - fallback if cadquery is unavailable
-    cq = None
+import cadquery as cq
 
 
 BASE_OUTER_X = 0.040
@@ -70,9 +65,6 @@ def _tube_shape(
     collar_height: float = 0.0,
     collar_growth: float = 0.0,
 ):
-    if cq is None:
-        raise RuntimeError("CadQuery is required for mesh generation")
-
     outer = (
         cq.Workplane("XY")
         .box(outer_x, outer_y, height, centered=(True, True, False))
@@ -117,9 +109,6 @@ def _tube_shape(
 
 
 def _top_stage_shape():
-    if cq is None:
-        raise RuntimeError("CadQuery is required for mesh generation")
-
     bottom_z = -UPPER_EMBED
     sleeve = _tube_shape(
         outer_x=UPPER_OUTER_X,
@@ -149,24 +138,8 @@ def _top_stage_shape():
     return sleeve.union(cap).union(tip)
 
 
-def _add_rectangular_tube_collisions(
-    part,
-    *,
-    outer_x: float,
-    outer_y: float,
-    wall: float,
-    height: float,
-    bottom_z: float,
-):
-    center_z = _tube_center_z(bottom_z, height)
-
-
-
-
-
-
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="telescoping_antenna_mast")
+    model = ArticulatedObject(name="telescoping_antenna_mast", assets=ASSETS)
 
     aluminum = model.material("aluminum", rgba=(0.76, 0.78, 0.82, 1.0))
     dark_mount = model.material("dark_mount", rgba=(0.18, 0.18, 0.20, 1.0))
@@ -175,8 +148,8 @@ def build_object_model() -> ArticulatedObject:
     middle = model.part("middle_section")
     upper = model.part("upper_section")
 
-    if cadquery_available() and cq is not None:
-        base_mesh = mesh_from_cadquery(
+    base.visual(
+        mesh_from_cadquery(
             _tube_shape(
                 outer_x=BASE_OUTER_X,
                 outer_y=BASE_OUTER_Y,
@@ -197,8 +170,11 @@ def build_object_model() -> ArticulatedObject:
                 .translate((0.0, 0.0, -BASE_HEIGHT - 0.067))
             ),
             MESH_DIR / "base_section.obj",
-        )
-        middle_mesh = mesh_from_cadquery(
+        ),
+        material=dark_mount,
+    )
+    middle.visual(
+        mesh_from_cadquery(
             _tube_shape(
                 outer_x=MIDDLE_OUTER_X,
                 outer_y=MIDDLE_OUTER_Y,
@@ -209,68 +185,13 @@ def build_object_model() -> ArticulatedObject:
                 collar_growth=0.002,
             ),
             MESH_DIR / "middle_section.obj",
-        )
-        upper_mesh = mesh_from_cadquery(_top_stage_shape(), MESH_DIR / "upper_section.obj")
-
-        base.visual(base_mesh, material=dark_mount)
-        middle.visual(middle_mesh, material=aluminum)
-        upper.visual(upper_mesh, material=aluminum)
-    else:  # pragma: no cover - lightweight fallback
-        base.visual(
-            Box((BASE_OUTER_X, BASE_OUTER_Y, BASE_HEIGHT)),
-            origin=_box_origin((0.0, 0.0, -0.5 * BASE_HEIGHT)),
-            material=dark_mount,
-        )
-        base.visual(
-            Box((0.062, 0.048, 0.067)),
-            origin=_box_origin((0.0, 0.0, -BASE_HEIGHT - 0.0335)),
-            material=dark_mount,
-        )
-        middle.visual(
-            Box((MIDDLE_OUTER_X, MIDDLE_OUTER_Y, MIDDLE_HEIGHT)),
-            origin=_box_origin((0.0, 0.0, -MIDDLE_EMBED + (0.5 * MIDDLE_HEIGHT))),
-            material=aluminum,
-        )
-        upper.visual(
-            Box((UPPER_OUTER_X, UPPER_OUTER_Y, UPPER_HEIGHT)),
-            origin=_box_origin((0.0, 0.0, -UPPER_EMBED + (0.5 * UPPER_HEIGHT))),
-            material=aluminum,
-        )
-        upper.visual(
-            Cylinder(radius=ANTENNA_TIP_RADIUS, length=ANTENNA_TIP_LENGTH),
-            origin=_box_origin(
-                (
-                    0.0,
-                    0.0,
-                    -UPPER_EMBED + UPPER_HEIGHT + TOP_CAP_HEIGHT + (0.5 * ANTENNA_TIP_LENGTH),
-                )
-            ),
-            material=aluminum,
-        )
-
-    _add_rectangular_tube_collisions(
-        base,
-        outer_x=BASE_OUTER_X,
-        outer_y=BASE_OUTER_Y,
-        wall=BASE_WALL,
-        height=BASE_HEIGHT,
-        bottom_z=-BASE_HEIGHT,
+        ),
+        material=aluminum,
     )
-
-
-
-    _add_rectangular_tube_collisions(
-        middle,
-        outer_x=MIDDLE_OUTER_X,
-        outer_y=MIDDLE_OUTER_Y,
-        wall=MIDDLE_WALL,
-        height=MIDDLE_HEIGHT,
-        bottom_z=-MIDDLE_EMBED,
+    upper.visual(
+        mesh_from_cadquery(_top_stage_shape(), MESH_DIR / "upper_section.obj"),
+        material=aluminum,
     )
-
-
-
-
 
     base.inertial = Inertial.from_geometry(
         Box((0.078, 0.060, 0.407)),

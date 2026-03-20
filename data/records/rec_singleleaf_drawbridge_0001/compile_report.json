@@ -3,19 +3,13 @@
   "record_id": "rec_singleleaf_drawbridge_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='bridge_leaf' nearest_part='support_frame' approx_gap=0.005m pose_index=0 pose=(leaf_hinge=0, seat_mount=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 9,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.985702
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

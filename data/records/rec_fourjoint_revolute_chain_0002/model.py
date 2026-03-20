@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -37,9 +36,6 @@ SENSOR_LENS_ORIGIN = (0.296, 0.0, 0.004)
 
 
 def _build_base_mesh():
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     foot = (
@@ -61,9 +57,6 @@ def _build_base_mesh():
 
 
 def _build_segment_mesh(name: str, length: float):
-    if not cadquery_available():
-        return None
-
     import cadquery as cq
 
     beam_length = max(length - 0.07, length * 0.72)
@@ -94,28 +87,7 @@ def _build_segment_mesh(name: str, length: float):
 
 
 def _add_base_geometry(base_part) -> None:
-    base_mesh = _build_base_mesh()
-    if base_mesh is not None:
-        base_part.visual(base_mesh, material="base_gray")
-    else:
-        base_part.visual(
-            Box((0.18, 0.16, 0.08)),
-            origin=Origin(xyz=(0.0, 0.0, 0.04)),
-            material="base_gray",
-        )
-        base_part.visual(
-            Box((0.05, 0.06, 0.10)),
-            origin=Origin(xyz=(-0.01, 0.0, 0.05)),
-            material="base_gray",
-        )
-        base_part.visual(
-            Box((0.04, 0.08, 0.04)),
-            origin=Origin(xyz=(0.0, 0.0, ARM_BASE_Z)),
-            material="steel_dark",
-        )
-
-
-
+    base_part.visual(_build_base_mesh(), material="base_gray")
     base_part.inertial = Inertial.from_geometry(
         Box((0.18, 0.16, 0.12)),
         mass=10.5,
@@ -132,25 +104,7 @@ def _add_segment_geometry(
     mass: float,
     has_sensor_head: bool = False,
 ) -> None:
-    segment_mesh = _build_segment_mesh(name, length)
-    if segment_mesh is not None:
-        part.visual(segment_mesh, material=material)
-    else:
-        part.visual(
-            Box((max(length - 0.07, 0.10), BEAM_WIDTH, BEAM_HEIGHT)),
-            origin=Origin(xyz=(length / 2.0, 0.0, 0.0)),
-            material=material,
-        )
-        part.visual(
-            Box((0.026, 0.07, 0.034)),
-            origin=Origin(xyz=(0.0, 0.0, 0.0)),
-            material=material,
-        )
-        part.visual(
-            Box((0.026, 0.07, 0.034)),
-            origin=Origin(xyz=(length, 0.0, 0.0)),
-            material=material,
-        )
+    part.visual(_build_segment_mesh(name, length), material=material)
 
     if has_sensor_head:
         part.visual(
@@ -208,7 +162,7 @@ def _add_segment_geometry(
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="long_reach_inspection_arm")
+    model = ArticulatedObject(name="long_reach_inspection_arm", assets=ASSETS)
 
     model.material("base_gray", rgba=(0.27, 0.29, 0.32, 1.0))
     model.material("steel_dark", rgba=(0.16, 0.18, 0.21, 1.0))

@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -22,6 +21,7 @@ MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
+import cadquery as cq
 
 BASE_DIMS = {
     "length": 0.48,
@@ -154,48 +154,19 @@ def _make_stage3_shape(cq):
     return shape
 
 
-def _add_channel_collisions(part, dims: dict[str, float]) -> None:
-    length = dims["length"]
-    width = dims["width"]
-    floor_t = dims["floor_t"]
-    floor_width = dims["floor_width"]
-    rail_t = dims["rail_t"]
-    rail_h = dims["rail_h"]
-    rear_beam_t = dims["rear_beam_t"]
-    rear_beam_h = dims["rear_beam_h"]
-
-
-
-
-
-
-
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="warehouse_shuttle")
+    model = ArticulatedObject(name="warehouse_shuttle", assets=ASSETS)
 
     model.material("frame_graphite", rgba=(0.19, 0.21, 0.24, 1.0))
     model.material("stage_outer", rgba=(0.67, 0.70, 0.73, 1.0))
     model.material("stage_inner", rgba=(0.78, 0.80, 0.82, 1.0))
     model.material("shuttle_orange", rgba=(0.93, 0.47, 0.12, 1.0))
 
-    use_cadquery = cadquery_available()
-    cq = None
-    if use_cadquery:
-        import cadquery as cq  # type: ignore
-
     base = model.part("base")
-    if use_cadquery and cq is not None:
-        base.visual(
-            mesh_from_cadquery(_make_base_shape(cq), MESH_DIR / "warehouse_shuttle_base.obj"),
-            material="frame_graphite",
-        )
-    else:
-        base.visual(
-            Box((BASE_DIMS["length"], BASE_DIMS["width"], BASE_DIMS["height"])),
-            origin=_box_origin(BASE_DIMS["length"], BASE_DIMS["height"]),
-            material="frame_graphite",
-        )
-    _add_channel_collisions(base, BASE_DIMS)
+    base.visual(
+        mesh_from_cadquery(_make_base_shape(cq), MESH_DIR / "warehouse_shuttle_base.obj"),
+        material="frame_graphite",
+    )
 
     base.inertial = Inertial.from_geometry(
         Box((BASE_DIMS["length"], BASE_DIMS["width"], BASE_DIMS["height"])),
@@ -204,18 +175,10 @@ def build_object_model() -> ArticulatedObject:
     )
 
     stage1 = model.part("stage1")
-    if use_cadquery and cq is not None:
-        stage1.visual(
-            mesh_from_cadquery(_make_stage1_shape(cq), MESH_DIR / "warehouse_shuttle_stage1.obj"),
-            material="stage_outer",
-        )
-    else:
-        stage1.visual(
-            Box((STAGE1_DIMS["length"], STAGE1_DIMS["width"], STAGE1_DIMS["height"])),
-            origin=_box_origin(STAGE1_DIMS["length"], STAGE1_DIMS["height"]),
-            material="stage_outer",
-        )
-    _add_channel_collisions(stage1, STAGE1_DIMS)
+    stage1.visual(
+        mesh_from_cadquery(_make_stage1_shape(cq), MESH_DIR / "warehouse_shuttle_stage1.obj"),
+        material="stage_outer",
+    )
     stage1.inertial = Inertial.from_geometry(
         Box((STAGE1_DIMS["length"], STAGE1_DIMS["width"], STAGE1_DIMS["height"])),
         mass=6.5,
@@ -223,18 +186,10 @@ def build_object_model() -> ArticulatedObject:
     )
 
     stage2 = model.part("stage2")
-    if use_cadquery and cq is not None:
-        stage2.visual(
-            mesh_from_cadquery(_make_stage2_shape(cq), MESH_DIR / "warehouse_shuttle_stage2.obj"),
-            material="stage_inner",
-        )
-    else:
-        stage2.visual(
-            Box((STAGE2_DIMS["length"], STAGE2_DIMS["width"], STAGE2_DIMS["height"])),
-            origin=_box_origin(STAGE2_DIMS["length"], STAGE2_DIMS["height"]),
-            material="stage_inner",
-        )
-    _add_channel_collisions(stage2, STAGE2_DIMS)
+    stage2.visual(
+        mesh_from_cadquery(_make_stage2_shape(cq), MESH_DIR / "warehouse_shuttle_stage2.obj"),
+        material="stage_inner",
+    )
     stage2.inertial = Inertial.from_geometry(
         Box((STAGE2_DIMS["length"], STAGE2_DIMS["width"], STAGE2_DIMS["height"])),
         mass=3.4,
@@ -242,18 +197,10 @@ def build_object_model() -> ArticulatedObject:
     )
 
     stage3 = model.part("stage3")
-    if use_cadquery and cq is not None:
-        stage3.visual(
-            mesh_from_cadquery(_make_stage3_shape(cq), MESH_DIR / "warehouse_shuttle_stage3.obj"),
-            material="shuttle_orange",
-        )
-    else:
-        stage3.visual(
-            Box((STAGE3_DIMS["length"], STAGE3_DIMS["width"], STAGE3_DIMS["height"])),
-            origin=_box_origin(STAGE3_DIMS["length"], STAGE3_DIMS["height"]),
-            material="shuttle_orange",
-        )
-    _add_channel_collisions(stage3, STAGE3_DIMS)
+    stage3.visual(
+        mesh_from_cadquery(_make_stage3_shape(cq), MESH_DIR / "warehouse_shuttle_stage3.obj"),
+        material="shuttle_orange",
+    )
 
     stage3.inertial = Inertial.from_geometry(
         Box((STAGE3_DIMS["length"], STAGE3_DIMS["width"], STAGE3_DIMS["height"])),

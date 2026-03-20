@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -193,7 +192,7 @@ def _build_inner_stage_tray_mesh():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="nested_linear_equipment_rack")
+    model = ArticulatedObject(name="nested_linear_equipment_rack", assets=ASSETS)
 
     model.material("rack_steel", rgba=(0.28, 0.30, 0.34, 1.0))
     model.material("slide_dark", rgba=(0.16, 0.17, 0.19, 1.0))
@@ -202,14 +201,7 @@ def build_object_model() -> ArticulatedObject:
     model.material("accent", rgba=(0.84, 0.22, 0.10, 1.0))
 
     base = model.part("rack_base")
-    if cadquery_available():
-        base.visual(_build_rack_frame_mesh(), material="rack_steel")
-    else:
-        base.visual(
-            Box((RACK_DEPTH, RACK_WIDTH, RACK_HEIGHT)),
-            origin=_origin((0.5 * RACK_DEPTH, 0.0, 0.5 * RACK_HEIGHT)),
-            material="rack_steel",
-        )
+    base.visual(_build_rack_frame_mesh(), material="rack_steel")
     base.visual(
         Box((0.14, 0.26, 0.02)),
         origin=_origin((0.12, 0.0, TRAY_SUPPORT_Z - 0.01)),
@@ -229,14 +221,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     outer = model.part("outer_slide_stage")
-    if cadquery_available():
-        outer.visual(_build_outer_stage_mesh(), material="slide_dark")
-    else:
-        outer.visual(
-            Box((OUTER_STAGE_LENGTH, OUTER_STAGE_WIDTH, 0.09)),
-            origin=_origin((0.5 * OUTER_STAGE_LENGTH, 0.0, 0.045)),
-            material="slide_dark",
-        )
+    outer.visual(_build_outer_stage_mesh(), material="slide_dark")
     outer.visual(
         Box((0.012, 0.24, 0.018)),
         origin=_origin((OUTER_STAGE_LENGTH + 0.006, 0.0, 0.050)),
@@ -254,14 +239,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     inner = model.part("inner_slide_stage")
-    if cadquery_available():
-        inner.visual(_build_inner_stage_tray_mesh(), material="slide_dark")
-    else:
-        inner.visual(
-            Box((INNER_STAGE_LENGTH, INNER_STAGE_WIDTH, 0.06)),
-            origin=_origin((0.5 * INNER_STAGE_LENGTH, 0.0, 0.030)),
-            material="slide_dark",
-        )
+    inner.visual(_build_inner_stage_tray_mesh(), material="slide_dark")
     inner.visual(
         Box(EQUIPMENT_MODULE_SIZE), origin=_origin(EQUIPMENT_MODULE_CENTER), material="equipment"
     )

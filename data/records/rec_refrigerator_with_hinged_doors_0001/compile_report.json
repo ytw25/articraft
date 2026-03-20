@@ -3,19 +3,13 @@
   "record_id": "rec_refrigerator_with_hinged_doors_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='left_door' nearest_part='cabinet' approx_gap=0.002m pose_index=0 pose=(freezer_drawer_slide=0, left_door_hinge=0, right_door_hinge=0) backend=fcl\n- part='right_door' nearest_part='cabinet' approx_gap=0.002m pose_index=0 pose=(freezer_drawer_slide=0, left_door_hinge=0, right_door_hinge=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 11,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.8190555
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

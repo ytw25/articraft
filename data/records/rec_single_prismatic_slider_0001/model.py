@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -91,20 +90,13 @@ def _build_carriage_mesh():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="machine_tool_linear_stage")
+    model = ArticulatedObject(name="machine_tool_linear_stage", assets=ASSETS)
     model.material("rail_steel", rgba=(0.60, 0.63, 0.68, 1.0))
     model.material("carriage_steel", rgba=(0.72, 0.74, 0.78, 1.0))
     model.material("wiper_black", rgba=(0.08, 0.08, 0.09, 1.0))
 
     rail = model.part("rail")
-    if cadquery_available():
-        rail.visual(_build_rail_mesh(), material="rail_steel")
-    else:
-        rail.visual(
-            Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
-            origin=Origin(xyz=(0.0, 0.0, -RAIL_HEIGHT / 2.0)),
-            material="rail_steel",
-        )
+    rail.visual(_build_rail_mesh(), material="rail_steel")
 
     rail.inertial = Inertial.from_geometry(
         Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
@@ -113,14 +105,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     carriage = model.part("carriage")
-    if cadquery_available():
-        carriage.visual(_build_carriage_mesh(), material="carriage_steel")
-    else:
-        carriage.visual(
-            Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, CARRIAGE_HEIGHT)),
-            origin=Origin(xyz=(0.0, 0.0, CARRIAGE_HEIGHT / 2.0)),
-            material="carriage_steel",
-        )
+    carriage.visual(_build_carriage_mesh(), material="carriage_steel")
     carriage.visual(
         Box((WIPER_THICKNESS, CARRIAGE_WIDTH * 0.90, WIPER_HEIGHT)),
         origin=Origin(

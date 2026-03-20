@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -21,10 +20,7 @@ HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
-try:
-    import cadquery as cq
-except Exception:  # pragma: no cover - cadquery is optional at import time
-    cq = None
+import cadquery as cq
 
 
 PI = 3.141592653589793
@@ -49,14 +45,8 @@ PAD_SIZE = (0.012, 0.09, 0.06)
 PAD_CENTER_X = WRIST_BODY_LENGTH + WRIST_MOUNT_THICKNESS + 0.001 + (PAD_SIZE[0] / 2.0)
 
 
-def _has_cadquery() -> bool:
-    return cq is not None and cadquery_available()
-
-
-def _mesh_or_fallback(shape, filename: str, fallback):
-    if _has_cadquery():
-        return mesh_from_cadquery(shape, MESH_DIR / filename)
-    return fallback
+def _mesh(shape, filename: str):
+    return mesh_from_cadquery(shape, MESH_DIR / filename)
 
 
 def _make_base_shape():
@@ -120,27 +110,14 @@ def _make_wrist_body_shape():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="task_arm")
+    model = ArticulatedObject(name="task_arm", assets=ASSETS)
 
     model.material("base_gray", rgba=(0.23, 0.24, 0.27, 1.0))
     model.material("arm_silver", rgba=(0.77, 0.79, 0.83, 1.0))
     model.material("pad_black", rgba=(0.11, 0.12, 0.13, 1.0))
 
     base = model.part("base")
-    if _has_cadquery():
-        base.visual(
-            _mesh_or_fallback(_make_base_shape(), "base.obj", Box((0.18, 0.16, SHOULDER_Z))),
-            material="base_gray",
-        )
-    else:
-        base.visual(
-            Box((0.18, 0.16, SHOULDER_Z)),
-            origin=Origin(xyz=(0.0, 0.0, SHOULDER_Z / 2.0)),
-            material="base_gray",
-        )
-
-
-    base.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, SHOULDER_Z - 0.004)))
+    base.visual(_mesh(_make_base_shape(), "base.obj"), material="base_gray")
     base.inertial = Inertial.from_geometry(
         Box((0.18, 0.16, SHOULDER_Z)),
         mass=4.5,
@@ -148,26 +125,10 @@ def build_object_model() -> ArticulatedObject:
     )
 
     upper_arm = model.part("upper_arm")
-    if _has_cadquery():
-        upper_arm.visual(
-            _mesh_or_fallback(
-                _make_arm_link_shape(UPPER_ARM_LENGTH, 0.038, 0.03, 0.028, 0.048),
-                "upper_arm.obj",
-                Box((UPPER_ARM_LENGTH + 0.056, 0.048, 0.056)),
-            ),
-            material="arm_silver",
-        )
-    else:
-        upper_arm.visual(
-            Box((UPPER_ARM_LENGTH + 0.056, 0.048, 0.056)),
-            origin=Origin(xyz=(UPPER_ARM_LENGTH / 2.0, 0.0, 0.0)),
-            material="arm_silver",
-        )
-
-
-
-    upper_arm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    upper_arm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(UPPER_ARM_LENGTH, 0.0, 0.0)))
+    upper_arm.visual(
+        _mesh(_make_arm_link_shape(UPPER_ARM_LENGTH, 0.038, 0.03, 0.028, 0.048), "upper_arm.obj"),
+        material="arm_silver",
+    )
     upper_arm.inertial = Inertial.from_geometry(
         Box((UPPER_ARM_LENGTH, 0.045, 0.04)),
         mass=1.2,
@@ -175,26 +136,10 @@ def build_object_model() -> ArticulatedObject:
     )
 
     forearm = model.part("forearm")
-    if _has_cadquery():
-        forearm.visual(
-            _mesh_or_fallback(
-                _make_arm_link_shape(FOREARM_LENGTH, 0.034, 0.028, 0.026, 0.044),
-                "forearm.obj",
-                Box((FOREARM_LENGTH + 0.052, 0.044, 0.052)),
-            ),
-            material="arm_silver",
-        )
-    else:
-        forearm.visual(
-            Box((FOREARM_LENGTH + 0.052, 0.044, 0.052)),
-            origin=Origin(xyz=(FOREARM_LENGTH / 2.0, 0.0, 0.0)),
-            material="arm_silver",
-        )
-
-
-
-    forearm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    forearm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(FOREARM_LENGTH, 0.0, 0.0)))
+    forearm.visual(
+        _mesh(_make_arm_link_shape(FOREARM_LENGTH, 0.034, 0.028, 0.026, 0.044), "forearm.obj"),
+        material="arm_silver",
+    )
     forearm.inertial = Inertial.from_geometry(
         Box((FOREARM_LENGTH, 0.04, 0.036)),
         mass=0.95,
@@ -202,28 +147,10 @@ def build_object_model() -> ArticulatedObject:
     )
 
     wrist_pad = model.part("wrist_pad")
-    if _has_cadquery():
-        wrist_pad.visual(
-            _mesh_or_fallback(
-                _make_wrist_body_shape(),
-                "wrist_body.obj",
-                Box((WRIST_BODY_LENGTH + WRIST_MOUNT_THICKNESS + 0.048, 0.046, 0.048)),
-            ),
-            material="arm_silver",
-        )
-    else:
-        wrist_pad.visual(
-            Box((WRIST_BODY_LENGTH + WRIST_MOUNT_THICKNESS + 0.048, 0.046, 0.048)),
-            origin=Origin(xyz=((WRIST_BODY_LENGTH + WRIST_MOUNT_THICKNESS) / 2.0, 0.0, 0.0)),
-            material="arm_silver",
-        )
+    wrist_pad.visual(_mesh(_make_wrist_body_shape(), "wrist_body.obj"), material="arm_silver")
     wrist_pad.visual(
         Box(PAD_SIZE), origin=Origin(xyz=(PAD_CENTER_X, 0.0, 0.0)), material="pad_black"
     )
-
-
-
-    wrist_pad.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
     wrist_pad.inertial = Inertial.from_geometry(
         Box((PAD_CENTER_X + (PAD_SIZE[0] / 2.0), 0.06, 0.05)),
         mass=0.45,

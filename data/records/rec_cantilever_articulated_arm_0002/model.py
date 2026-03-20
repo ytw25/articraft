@@ -57,14 +57,6 @@ def _box_collision(
     pass
 
 
-def _qc_anchor(
-    part,
-    xyz: tuple[float, float, float],
-    size: tuple[float, float, float] = (0.02, 0.02, 0.02),
-) -> None:
-    part.qc_collision(Box(size), origin=Origin(xyz=xyz))
-
-
 def _pedestal_shape() -> cq.Workplane:
     foot = _filleted_box((0.30, 0.26, 0.05), (0.0, 0.0, -0.145), 0.010)
     column = _filleted_box((0.22, 0.18, 0.25), (0.0, 0.0, -0.005), 0.012)
@@ -116,7 +108,6 @@ def build_object_model() -> ArticulatedObject:
     _box_collision(pedestal, (0.30, 0.26, 0.05), (0.0, 0.0, -0.145))
     _box_collision(pedestal, (0.22, 0.18, 0.25), (0.0, 0.0, -0.005))
     _box_collision(pedestal, (0.16, 0.16, 0.05), (0.0, 0.0, 0.145))
-    _qc_anchor(pedestal, (0.0, 0.0, PEDESTAL_TOP_Z - 0.01), size=(0.03, 0.03, 0.02))
     pedestal.inertial = Inertial.from_geometry(
         Box((0.26, 0.22, 0.30)),
         mass=18.0,
@@ -127,7 +118,6 @@ def build_object_model() -> ArticulatedObject:
     _box_collision(yaw_housing, (0.18, 0.20, 0.08), (0.0, 0.0, 0.04))
     _box_collision(yaw_housing, (0.12, 0.12, 0.04), (0.0, 0.0, 0.10))
     _box_collision(yaw_housing, (0.06, 0.12, 0.10), (0.10, 0.0, 0.08))
-    _qc_anchor(yaw_housing, SHOULDER_OFFSET, size=(0.024, 0.024, 0.024))
     yaw_housing.inertial = Inertial.from_geometry(
         Box((0.18, 0.20, 0.13)),
         mass=4.2,
@@ -139,8 +129,6 @@ def build_object_model() -> ArticulatedObject:
     _box_collision(upper_arm, (0.12, 0.14, 0.14), (0.04, 0.0, 0.0))
     _box_collision(upper_arm, (0.30, 0.05, 0.05), (0.22, 0.0, 0.0))
     _box_collision(upper_arm, (0.10, 0.10, 0.10), (0.36, 0.0, 0.0))
-    _qc_anchor(upper_arm, (0.0, 0.0, 0.0), size=(0.02, 0.02, 0.02))
-    _qc_anchor(upper_arm, (ELBOW_X, 0.0, 0.0), size=(0.02, 0.02, 0.02))
     upper_arm.inertial = Inertial.from_geometry(
         Box((0.42, 0.12, 0.12)),
         mass=4.8,
@@ -152,8 +140,6 @@ def build_object_model() -> ArticulatedObject:
     _box_collision(forearm, (0.11, 0.11, 0.11), (0.045, 0.0, 0.0))
     _box_collision(forearm, (0.24, 0.05, 0.05), (0.17, 0.0, 0.0))
     _box_collision(forearm, (0.07, 0.09, 0.09), (0.315, 0.0, 0.0))
-    _qc_anchor(forearm, (0.0, 0.0, 0.0), size=(0.02, 0.02, 0.02))
-    _qc_anchor(forearm, (WRIST_X, 0.0, 0.0), size=(0.018, 0.018, 0.018))
     forearm.inertial = Inertial.from_geometry(
         Box((0.34, 0.11, 0.10)),
         mass=3.2,
@@ -165,7 +151,6 @@ def build_object_model() -> ArticulatedObject:
     _box_collision(tool_head, (0.10, 0.08, 0.08), (0.04, 0.0, 0.0))
     _box_collision(tool_head, (0.12, 0.04, 0.04), (0.10, 0.0, 0.0))
     _box_collision(tool_head, (0.05, 0.10, 0.08), (0.17, 0.0, 0.0))
-    _qc_anchor(tool_head, (0.0, 0.0, 0.0), size=(0.018, 0.018, 0.018))
     tool_head.inertial = Inertial.from_geometry(
         Box((0.22, 0.10, 0.08)),
         mass=1.1,

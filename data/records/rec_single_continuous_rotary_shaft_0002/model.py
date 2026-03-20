@@ -14,7 +14,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -188,7 +187,7 @@ def _make_buff_wheel_mesh():
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="belt_driven_buffing_wheel")
+    model = ArticulatedObject(name="belt_driven_buffing_wheel", assets=ASSETS)
 
     model.material("machine_green", rgba=(0.18, 0.31, 0.23, 1.0))
     model.material("steel", rgba=(0.68, 0.70, 0.73, 1.0))
@@ -198,57 +197,18 @@ def build_object_model() -> ArticulatedObject:
     housing = model.part("motor_housing")
     spindle = model.part("spindle")
 
-    if cadquery_available():
-        housing.visual(
-            mesh_from_cadquery(_make_housing_body_mesh(), MESH_DIR / "motor_housing.obj"),
-            material="machine_green",
-        )
-        spindle.visual(
-            mesh_from_cadquery(_make_spindle_steel_mesh(), MESH_DIR / "spindle_steel.obj"),
-            material="steel",
-        )
-        spindle.visual(
-            mesh_from_cadquery(_make_buff_wheel_mesh(), MESH_DIR / "buff_wheel.obj"),
-            material="buff_cloth",
-        )
-    else:
-        housing.visual(Box(BASE_SIZE), origin=Origin(xyz=BASE_CENTER), material="machine_green")
-        housing.visual(
-            Box(MOTOR_FOOT_SIZE), origin=Origin(xyz=MOTOR_FOOT_CENTER), material="machine_green"
-        )
-        housing.visual(
-            Cylinder(radius=MOTOR_BODY_RADIUS, length=MOTOR_BODY_LENGTH),
-            origin=Origin(xyz=MOTOR_BODY_CENTER, rpy=(0.0, PI / 2.0, 0.0)),
-            material="machine_green",
-        )
-        housing.visual(
-            Box(PEDESTAL_SIZE), origin=Origin(xyz=PEDESTAL_CENTER), material="machine_green"
-        )
-        housing.visual(
-            Cylinder(radius=BEARING_RADIUS, length=BEARING_LENGTH),
-            origin=Origin(xyz=SPINDLE_ORIGIN, rpy=(0.0, PI / 2.0, 0.0)),
-            material="machine_green",
-        )
-        spindle.visual(
-            Cylinder(radius=SPINDLE_SHAFT_RADIUS, length=SPINDLE_SHAFT_LENGTH),
-            origin=Origin(xyz=(0.035, 0.0, 0.0), rpy=(0.0, PI / 2.0, 0.0)),
-            material="steel",
-        )
-        spindle.visual(
-            Cylinder(radius=DRIVEN_PULLEY_RADIUS, length=DRIVEN_PULLEY_LENGTH),
-            origin=Origin(xyz=DRIVEN_PULLEY_CENTER_LOCAL, rpy=(0.0, PI / 2.0, 0.0)),
-            material="steel",
-        )
-        spindle.visual(
-            Cylinder(radius=BUFF_WHEEL_RADIUS, length=BUFF_WHEEL_LENGTH),
-            origin=Origin(xyz=BUFF_WHEEL_CENTER_LOCAL, rpy=(0.0, PI / 2.0, 0.0)),
-            material="buff_cloth",
-        )
-        spindle.visual(
-            Cylinder(radius=BUFF_SEAM_RADIUS, length=BUFF_SEAM_LENGTH),
-            origin=Origin(xyz=BUFF_SEAM_CENTER_LOCAL, rpy=(0.0, PI / 2.0, 0.0)),
-            material="buff_cloth",
-        )
+    housing.visual(
+        mesh_from_cadquery(_make_housing_body_mesh(), MESH_DIR / "motor_housing.obj"),
+        material="machine_green",
+    )
+    spindle.visual(
+        mesh_from_cadquery(_make_spindle_steel_mesh(), MESH_DIR / "spindle_steel.obj"),
+        material="steel",
+    )
+    spindle.visual(
+        mesh_from_cadquery(_make_buff_wheel_mesh(), MESH_DIR / "buff_wheel.obj"),
+        material="buff_cloth",
+    )
 
     housing.visual(
         Cylinder(radius=MOTOR_PULLEY_RADIUS, length=MOTOR_PULLEY_LENGTH),

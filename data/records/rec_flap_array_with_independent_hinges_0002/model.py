@@ -105,15 +105,6 @@ def _add_frame_collisions(frame_part) -> None:
     pass
 
 
-def _add_frame_qc_hinge_targets(frame_part) -> None:
-    for _, _, (center_x, center_y) in FLAP_LAYOUT:
-        hinge_x = center_x - OPENING_W / 2.0 + HINGE_AXIS_INSET
-        frame_part.qc_collision(
-            Box((0.012, BARREL_LEN, 0.010)),
-            origin=Origin(xyz=(hinge_x, center_y, FRAME_T / 2.0)),
-        )
-
-
 def _configure_flap_part(flap_part) -> None:
     panel_origin_x = PANEL_START_X + FLAP_W / 2.0
     bead_inset = 0.014
@@ -158,12 +149,6 @@ def _configure_flap_part(flap_part) -> None:
         origin=Origin(xyz=(BARREL_R * 0.55, 0.0, PANEL_Z_OFFSET * 0.65)),
         material="frame_finish",
     )
-
-
-    flap_part.qc_collision(
-        Box((BARREL_R * 2.4, BARREL_LEN, BARREL_R * 2.4)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
     flap_part.inertial = Inertial.from_geometry(
         Box((FLAP_W, FLAP_D, PANEL_T)),
         mass=0.34,
@@ -181,7 +166,6 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_frame_shape(), "frame.obj", assets=ASSETS), material="frame_finish"
     )
     _add_frame_collisions(frame)
-    _add_frame_qc_hinge_targets(frame)
     frame.inertial = Inertial.from_geometry(Box((FRAME_W, FRAME_D, FRAME_T)), mass=4.8)
 
     for part_name, joint_name, (center_x, center_y) in FLAP_LAYOUT:

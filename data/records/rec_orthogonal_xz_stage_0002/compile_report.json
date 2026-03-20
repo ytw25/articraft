@@ -3,19 +3,13 @@
   "record_id": "rec_orthogonal_xz_stage_0002",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (non-blocking materialization): URDF tests failed:\n- check_no_overlaps(samples=192,ignore_adjacent=False,ignore_fixed=True): Overlaps detected:\npair=('x_stage','z_stage') pose_index=0 min_depth=0.003 vol=2.88e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.003 vol=2.88e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.011 vol=3.872e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.011 vol=3.872e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.012 vol=2.304e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.003 vol=2.88e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.003 vol=2.88e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\npair=('x_stage','z_stage') pose_index=0 min_depth=0.011 vol=3.872e-06 pose={'base_to_x': 0.0, 'x_to_z': 0.0}\n... (58 more)\n- expect_aabb_gap(x_stage,base,axis=z): gap_z=-0.01 min_gap=-0.001 max_gap=0.004 max_penetration=0.001 pose={}"
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 5,
-    "legacy_prompt_index": 2,
-    "total_cost_usd": 0.367394
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

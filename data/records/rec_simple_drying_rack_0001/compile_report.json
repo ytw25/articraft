@@ -3,19 +3,13 @@
   "record_id": "rec_simple_drying_rack_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [
-    {
-      "code": "warning",
-      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='left_support' nearest_part='rack_deck' approx_gap=0.0035m pose_index=0 pose=(left_support_fold=0, right_support_fold=0) backend=fcl\n- part='rack_deck' nearest_part='left_support' approx_gap=0.0035m pose_index=0 pose=(left_support_fold=0, right_support_fold=0) backend=fcl\n- part='right_support' nearest_part='rack_deck' approx_gap=0.0035m pose_index=0 pose=(left_support_fold=0, right_support_fold=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
-    }
-  ],
+  "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 6,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.532527
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }

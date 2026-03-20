@@ -110,9 +110,6 @@ def build_object_model() -> ArticulatedObject:
     frame = model.part("frame")
     frame.visual(frame_mesh, material="rail_finish")
 
-
-
-
     frame.inertial = Inertial.from_geometry(
         Box((FRAME_WIDTH, RAIL_DEPTH, FRAME_HEIGHT)),
         mass=2.8,
@@ -121,21 +118,10 @@ def build_object_model() -> ArticulatedObject:
     for index, (slat_name, slat_z) in enumerate(zip(SLAT_NAMES, SLAT_ZS)):
         slat = model.part(slat_name)
         slat.visual(slat_mesh, material="slat_finish")
-
-        slat.qc_collision(
-            Box((0.012, 0.012, 0.012)),
-            name=f"{slat_name}_hinge_anchor",
-        )
         slat.inertial = Inertial.from_geometry(
             Box((INNER_WIDTH, SLAT_CHORD * 0.9, SLAT_THICKNESS * 0.85)),
             mass=0.18,
             origin=Origin(xyz=(RAIL_THICKNESS * 0.5 + INNER_WIDTH * 0.5, SLAT_AXIS_OFFSET_Y, 0.0)),
-        )
-
-        frame.qc_collision(
-            Box((0.012, 0.012, 0.012)),
-            origin=Origin(xyz=(LEFT_BEARING_X, 0.0, slat_z)),
-            name=f"{slat_name}_frame_anchor",
         )
 
         model.articulation(

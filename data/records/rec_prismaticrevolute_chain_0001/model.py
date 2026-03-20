@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -80,8 +79,6 @@ FLAP_UPPER = 1.3
 
 
 def _require_cadquery():
-    if not cadquery_available():
-        raise RuntimeError("CadQuery is required to author the fixture visuals.")
     import cadquery as cq
 
     return cq
@@ -224,7 +221,7 @@ def _build_flap_shape(cq):
 def build_object_model() -> ArticulatedObject:
     cq = _require_cadquery()
 
-    model = ArticulatedObject(name="inspection_fixture")
+    model = ArticulatedObject(name="inspection_fixture", assets=ASSETS)
     model.material("fixture_base", rgba=(0.42, 0.44, 0.48, 1.0))
     model.material("fixture_carriage", rgba=(0.78, 0.46, 0.14, 1.0))
     model.material("fixture_flap", rgba=(0.92, 0.77, 0.16, 1.0))

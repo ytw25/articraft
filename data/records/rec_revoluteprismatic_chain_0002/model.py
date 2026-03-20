@@ -13,7 +13,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -29,9 +28,6 @@ HALF_PI = pi / 2.0
 
 
 def _build_visual_meshes() -> dict[str, object]:
-    if not cadquery_available():
-        return {}
-
     import cadquery as cq
 
     base_plate = cq.Workplane("XY").box(0.22, 0.14, 0.028, centered=(True, True, False))
@@ -120,7 +116,7 @@ def _build_visual_meshes() -> dict[str, object]:
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="hinged_work_light")
+    model = ArticulatedObject(name="hinged_work_light", assets=ASSETS)
 
     model.material("dark_body", rgba=(0.16, 0.17, 0.19, 1.0))
     model.material("arm_yellow", rgba=(0.92, 0.77, 0.16, 1.0))
@@ -130,33 +126,7 @@ def build_object_model() -> ArticulatedObject:
     meshes = _build_visual_meshes()
 
     base = model.part("base")
-    if "base" in meshes:
-        base.visual(meshes["base"], material="dark_body")
-    else:
-        base.visual(
-            Box((0.22, 0.14, 0.028)),
-            origin=Origin(xyz=(0.0, 0.0, 0.014)),
-            material="dark_body",
-        )
-        base.visual(
-            Box((0.04, 0.05, 0.05)),
-            origin=Origin(xyz=(-0.078, 0.0, 0.053)),
-            material="dark_body",
-        )
-        base.visual(
-            Box((0.014, 0.008, 0.054)),
-            origin=Origin(xyz=(-0.056, 0.019, 0.055)),
-            material="dark_body",
-        )
-        base.visual(
-            Box((0.014, 0.008, 0.054)),
-            origin=Origin(xyz=(-0.056, -0.019, 0.055)),
-            material="dark_body",
-        )
-
-
-
-
+    base.visual(meshes["base"], material="dark_body")
     base.inertial = Inertial.from_geometry(
         Box((0.22, 0.14, 0.08)),
         mass=2.4,
@@ -164,21 +134,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     outer_arm = model.part("outer_arm")
-    if "outer_arm" in meshes:
-        outer_arm.visual(meshes["outer_arm"], material="arm_yellow")
-    else:
-        outer_arm.visual(
-            Box((0.185, 0.036, 0.034)),
-            origin=Origin(xyz=(0.0925, 0.0, 0.0)),
-            material="arm_yellow",
-        )
-        outer_arm.visual(
-            Cylinder(radius=0.017, length=0.032),
-            origin=Origin(rpy=(HALF_PI, 0.0, 0.0)),
-            material="arm_yellow",
-        )
-
-
+    outer_arm.visual(meshes["outer_arm"], material="arm_yellow")
     outer_arm.inertial = Inertial.from_geometry(
         Box((0.2, 0.04, 0.04)),
         mass=0.65,
@@ -186,25 +142,8 @@ def build_object_model() -> ArticulatedObject:
     )
 
     inner_slide = model.part("inner_slide")
-    if "slider" in meshes:
-        inner_slide.visual(meshes["slider"], material="arm_yellow")
-        inner_slide.visual(meshes["head"], material="lamp_gray")
-    else:
-        inner_slide.visual(
-            Box((0.19, 0.024, 0.02)),
-            origin=Origin(xyz=(0.095, 0.0, 0.0)),
-            material="arm_yellow",
-        )
-        inner_slide.visual(
-            Cylinder(radius=0.034, length=0.044),
-            origin=Origin(xyz=(0.235, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),
-            material="lamp_gray",
-        )
-        inner_slide.visual(
-            Box((0.04, 0.03, 0.034)),
-            origin=Origin(xyz=(0.205, 0.0, 0.01)),
-            material="lamp_gray",
-        )
+    inner_slide.visual(meshes["slider"], material="arm_yellow")
+    inner_slide.visual(meshes["head"], material="lamp_gray")
     inner_slide.visual(
         Cylinder(radius=0.028, length=0.004),
         origin=Origin(xyz=(0.259, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),

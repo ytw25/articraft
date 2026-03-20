@@ -26,8 +26,8 @@ from sdk import (
     superellipse_side_loft,
 )
 
-HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
 
 ROTOR_LAYOUT = {
     "front_left": (-0.165, 0.140, 0.020),

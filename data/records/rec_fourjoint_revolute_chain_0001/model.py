@@ -12,7 +12,6 @@ from sdk_hybrid import (
     Origin,
     TestContext,
     TestReport,
-    cadquery_available,
     mesh_from_cadquery,
 )
 
@@ -21,14 +20,7 @@ HERE = ASSETS.asset_root
 MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
-import math
-
-from sdk_hybrid import Cylinder
-
-if cadquery_available():
-    import cadquery as cq
-else:
-    cq = None
+import cadquery as cq
 
 
 BASE_SIZE = (0.16, 0.14, 0.09)
@@ -39,9 +31,7 @@ LINK_HEIGHT_Z = 0.02
 LINK1_Z_OFFSET = 0.014
 
 
-def _maybe_mesh(name: str, solid):
-    if cq is None:
-        return None
+def _mesh(name: str, solid):
     return mesh_from_cadquery(solid, MESH_DIR / f"{name}.obj")
 
 
@@ -82,23 +72,8 @@ def _sensor_visual_shape():
     return mast.union(body).union(visor).union(lens)
 
 
-def _add_base_visuals(part, *, base_material: str, accent_material: str) -> None:
-    mesh = _maybe_mesh("deployable_arm_base", _base_visual_shape()) if cq is not None else None
-    if mesh is not None:
-        part.visual(mesh, material=base_material)
-        return
-
-    part.visual(Box(BASE_SIZE), material=base_material)
-    part.visual(
-        Cylinder(radius=0.055, length=0.014),
-        origin=Origin(xyz=(0.0, 0.0, BASE_TOP_Z - 0.007)),
-        material=accent_material,
-    )
-    part.visual(
-        Cylinder(radius=0.038, length=0.03),
-        origin=Origin(xyz=(0.0, 0.0, BASE_TOP_Z - 0.015)),
-        material=accent_material,
-    )
+def _add_base_visuals(part, *, base_material: str) -> None:
+    part.visual(_mesh("deployable_arm_base", _base_visual_shape()), material=base_material)
 
 
 def _add_arm_visuals(
@@ -110,83 +85,21 @@ def _add_arm_visuals(
     z_offset: float = 0.0,
     root_turntable: bool = False,
 ) -> None:
-    mesh = (
-        _maybe_mesh(
-            name, _arm_visual_shape(length, z_offset=z_offset, root_turntable=root_turntable)
-        )
-        if cq is not None
-        else None
-    )
-    if mesh is not None:
-        part.visual(mesh, material=material)
-        return
-
-    beam_length = max(length - 0.036, 0.02)
     part.visual(
-        Box((beam_length, 0.034, 0.02)),
-        origin=Origin(xyz=(0.018 + (beam_length / 2.0), 0.0, z_offset)),
+        _mesh(name, _arm_visual_shape(length, z_offset=z_offset, root_turntable=root_turntable)),
         material=material,
     )
-    part.visual(
-        Cylinder(radius=0.022, length=0.05),
-        origin=Origin(xyz=(0.024, 0.0, z_offset), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=material,
-    )
-    part.visual(
-        Cylinder(radius=0.022, length=0.05),
-        origin=Origin(
-            xyz=(length - 0.022, 0.0, z_offset),
-            rpy=(-math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=material,
-    )
-    if root_turntable:
-        part.visual(
-            Cylinder(radius=0.03, length=0.026),
-            origin=Origin(xyz=(0.0, 0.0, 0.015)),
-            material=material,
-        )
 
 
-def _add_sensor_visuals(part, *, body_material: str, lens_material: str) -> None:
-    mesh = (
-        _maybe_mesh("deployable_arm_sensor_pod", _sensor_visual_shape()) if cq is not None else None
-    )
-    if mesh is not None:
-        part.visual(mesh, material=body_material)
-        return
-
-    part.visual(
-        Box((0.022, 0.026, 0.018)),
-        origin=Origin(xyz=(0.014, 0.0, 0.028)),
-        material=body_material,
-    )
-    part.visual(
-        Box((0.052, 0.04, 0.03)),
-        origin=Origin(xyz=(0.036, 0.0, 0.052)),
-        material=body_material,
-    )
-    part.visual(
-        Box((0.03, 0.048, 0.008)),
-        origin=Origin(xyz=(0.03, 0.0, 0.069)),
-        material=body_material,
-    )
-    part.visual(
-        Cylinder(radius=0.011, length=0.014),
-        origin=Origin(xyz=(0.069, 0.0, 0.052), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=lens_material,
-    )
-
-
-def _add_link_collisions(part, length: float, *, z_offset: float = 0.0) -> None:
-    beam_length = max(length - 0.042, 0.02)
+def _add_sensor_visuals(part, *, body_material: str) -> None:
+    part.visual(_mesh("deployable_arm_sensor_pod", _sensor_visual_shape()), material=body_material)
 
 
 
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="four_link_deployable_arm")
+    model = ArticulatedObject(name="four_link_deployable_arm", assets=ASSETS)
 
     model.material("base_metal", rgba=(0.34, 0.37, 0.41, 1.0))
     model.material("accent_dark", rgba=(0.18, 0.2, 0.23, 1.0))
@@ -196,7 +109,7 @@ def build_object_model() -> ArticulatedObject:
     model.material("sensor_lens", rgba=(0.32, 0.52, 0.68, 1.0))
 
     base = model.part("base")
-    _add_base_visuals(base, base_material="base_metal", accent_material="accent_dark")
+    _add_base_visuals(base, base_material="base_metal")
 
     base.inertial = Inertial.from_geometry(Box(BASE_SIZE), mass=4.5)
 
@@ -209,7 +122,6 @@ def build_object_model() -> ArticulatedObject:
         z_offset=LINK1_Z_OFFSET,
         root_turntable=True,
     )
-    _add_link_collisions(link1, LINK_LENGTHS[0], z_offset=LINK1_Z_OFFSET)
     link1.inertial = Inertial.from_geometry(
         Box((LINK_LENGTHS[0], 0.05, 0.03)),
         mass=1.2,
@@ -223,7 +135,6 @@ def build_object_model() -> ArticulatedObject:
         length=LINK_LENGTHS[1],
         material="arm_metal",
     )
-    _add_link_collisions(link2, LINK_LENGTHS[1])
     link2.inertial = Inertial.from_geometry(
         Box((LINK_LENGTHS[1], 0.05, 0.03)),
         mass=0.95,
@@ -237,7 +148,6 @@ def build_object_model() -> ArticulatedObject:
         length=LINK_LENGTHS[2],
         material="arm_metal",
     )
-    _add_link_collisions(link3, LINK_LENGTHS[2])
     link3.inertial = Inertial.from_geometry(
         Box((LINK_LENGTHS[2], 0.045, 0.028)),
         mass=0.7,
@@ -251,7 +161,6 @@ def build_object_model() -> ArticulatedObject:
         length=LINK_LENGTHS[3],
         material="arm_metal",
     )
-    _add_link_collisions(link4, LINK_LENGTHS[3])
     link4.inertial = Inertial.from_geometry(
         Box((LINK_LENGTHS[3], 0.042, 0.026)),
         mass=0.45,
@@ -259,7 +168,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     sensor_pod = model.part("sensor_pod")
-    _add_sensor_visuals(sensor_pod, body_material="sensor_body", lens_material="sensor_lens")
+    _add_sensor_visuals(sensor_pod, body_material="sensor_body")
 
 
     sensor_pod.inertial = Inertial.from_geometry(
