@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 
@@ -215,32 +215,13 @@ def build_object_model() -> ArticulatedObject:
         origin=_origin((0.12, 0.0, TRAY_SUPPORT_Z - 0.01)),
         material="panel",
     )
-    base.collision(
-        Box((RACK_POST, RACK_POST, RACK_HEIGHT)),
-        origin=_origin((0.5 * RACK_POST, -0.5 * (RACK_WIDTH - RACK_POST), 0.5 * RACK_HEIGHT)),
-    )
-    base.collision(
-        Box((RACK_POST, RACK_POST, RACK_HEIGHT)),
-        origin=_origin((0.5 * RACK_POST, 0.5 * (RACK_WIDTH - RACK_POST), 0.5 * RACK_HEIGHT)),
-    )
-    base.collision(
-        Box((RACK_POST, RACK_POST, RACK_HEIGHT)),
-        origin=_origin(
-            (RACK_DEPTH - 0.5 * RACK_POST, -0.5 * (RACK_WIDTH - RACK_POST), 0.5 * RACK_HEIGHT)
-        ),
-    )
-    base.collision(
-        Box((RACK_POST, RACK_POST, RACK_HEIGHT)),
-        origin=_origin(
-            (RACK_DEPTH - 0.5 * RACK_POST, 0.5 * (RACK_WIDTH - RACK_POST), 0.5 * RACK_HEIGHT)
-        ),
-    )
-    base.collision(Box((0.012, RACK_WIDTH - 0.08, 0.72)), origin=_origin((0.006, 0.0, 0.46)))
-    base.collision(
-        Box((0.08, 0.20, TRAY_SUPPORT_Z)),
-        origin=_origin((OUTER_STAGE_ORIGIN_IN_BASE[0], 0.0, 0.5 * TRAY_SUPPORT_Z)),
-    )
-    base.collision(Box((0.14, 0.26, 0.02)), origin=_origin((0.12, 0.0, TRAY_SUPPORT_Z - 0.01)))
+
+
+
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((RACK_DEPTH, RACK_WIDTH, RACK_HEIGHT)),
         mass=42.0,
@@ -261,22 +242,11 @@ def build_object_model() -> ArticulatedObject:
         origin=_origin((OUTER_STAGE_LENGTH + 0.006, 0.0, 0.050)),
         material="accent",
     )
-    outer.collision(
-        Box((0.64, 0.42, OUTER_STAGE_FLOOR)), origin=_origin((0.32, 0.0, 0.5 * OUTER_STAGE_FLOOR))
-    )
-    outer.collision(
-        Box((0.60, OUTER_STAGE_SIDE, 0.05)),
-        origin=_origin((0.31, -0.5 * (OUTER_STAGE_WIDTH - OUTER_STAGE_SIDE), 0.025)),
-    )
-    outer.collision(
-        Box((0.60, OUTER_STAGE_SIDE, 0.05)),
-        origin=_origin((0.31, 0.5 * (OUTER_STAGE_WIDTH - OUTER_STAGE_SIDE), 0.025)),
-    )
-    outer.collision(Box((0.014, 0.42, 0.05)), origin=_origin((0.007, 0.0, 0.025)))
-    outer.collision(
-        Box((0.10, 0.16, INNER_STAGE_ELEVATION)),
-        origin=_origin((0.08, 0.0, 0.5 * INNER_STAGE_ELEVATION)),
-    )
+
+
+
+
+
     outer.inertial = Inertial.from_geometry(
         Box((OUTER_STAGE_LENGTH, 0.50, 0.10)),
         mass=10.5,
@@ -297,11 +267,9 @@ def build_object_model() -> ArticulatedObject:
     )
     inner.visual(Box((0.22, 0.24, 0.008)), origin=_origin((0.29, 0.0, 0.174)), material="panel")
     inner.visual(Box((0.10, 0.30, 0.012)), origin=_origin((0.47, 0.0, 0.108)), material="accent")
-    inner.collision(
-        Box((0.52, 0.34, INNER_STAGE_FLOOR)), origin=_origin((0.26, 0.0, 0.5 * INNER_STAGE_FLOOR))
-    )
-    inner.collision(Box((0.34, 0.28, 0.16)), origin=_origin(EQUIPMENT_MODULE_CENTER))
-    inner.collision(Box((0.012, 0.34, 0.045)), origin=_origin((0.006, 0.0, 0.0225)))
+
+
+
     inner.inertial = Inertial.from_geometry(
         Box((INNER_STAGE_LENGTH, 0.40, 0.20)),
         mass=8.0,
@@ -339,14 +307,14 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("outer_slide_stage", "rack_base", min_overlap=0.30)
-    ctx.expect_aabb_overlap_xy("inner_slide_stage", "outer_slide_stage", min_overlap=0.25)
-    ctx.expect_aabb_overlap_xy("inner_slide_stage", "rack_base", min_overlap=0.20)
-    ctx.expect_xy_distance("outer_slide_stage", "rack_base", max_dist=0.11)
-    ctx.expect_xy_distance("inner_slide_stage", "outer_slide_stage", max_dist=0.07)
+    ctx.expect_aabb_overlap("outer_slide_stage", "rack_base", axes="xy", min_overlap=0.30)
+    ctx.expect_aabb_overlap("inner_slide_stage", "outer_slide_stage", axes="xy", min_overlap=0.25)
+    ctx.expect_aabb_overlap("inner_slide_stage", "rack_base", axes="xy", min_overlap=0.20)
+    ctx.expect_origin_distance("outer_slide_stage", "rack_base", axes="xy", max_dist=0.11)
+    ctx.expect_origin_distance("inner_slide_stage", "outer_slide_stage", axes="xy", max_dist=0.07)
     ctx.expect_joint_motion_axis(
         "rack_to_outer_stage",
         "outer_slide_stage",
@@ -363,21 +331,21 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(rack_to_outer_stage=OUTER_STAGE_TRAVEL):
-        ctx.expect_aabb_overlap_xy("outer_slide_stage", "rack_base", min_overlap=0.20)
-        ctx.expect_aabb_overlap_xy("inner_slide_stage", "outer_slide_stage", min_overlap=0.25)
-        ctx.expect_xy_distance("outer_slide_stage", "rack_base", max_dist=0.41)
+        ctx.expect_aabb_overlap("outer_slide_stage", "rack_base", axes="xy", min_overlap=0.20)
+        ctx.expect_aabb_overlap("inner_slide_stage", "outer_slide_stage", axes="xy", min_overlap=0.25)
+        ctx.expect_origin_distance("outer_slide_stage", "rack_base", axes="xy", max_dist=0.41)
 
     with ctx.pose(outer_stage_to_inner_stage=INNER_STAGE_TRAVEL):
-        ctx.expect_aabb_overlap_xy("inner_slide_stage", "outer_slide_stage", min_overlap=0.18)
-        ctx.expect_aabb_overlap_xy("inner_slide_stage", "rack_base", min_overlap=0.18)
-        ctx.expect_xy_distance("inner_slide_stage", "rack_base", max_dist=0.41)
+        ctx.expect_aabb_overlap("inner_slide_stage", "outer_slide_stage", axes="xy", min_overlap=0.18)
+        ctx.expect_aabb_overlap("inner_slide_stage", "rack_base", axes="xy", min_overlap=0.18)
+        ctx.expect_origin_distance("inner_slide_stage", "rack_base", axes="xy", max_dist=0.41)
 
     with ctx.pose(
         rack_to_outer_stage=OUTER_STAGE_TRAVEL, outer_stage_to_inner_stage=INNER_STAGE_TRAVEL
     ):
-        ctx.expect_aabb_overlap_xy("inner_slide_stage", "outer_slide_stage", min_overlap=0.15)
-        ctx.expect_aabb_overlap_xy("inner_slide_stage", "rack_base", min_overlap=0.05)
-        ctx.expect_xy_distance("inner_slide_stage", "outer_slide_stage", max_dist=0.31)
+        ctx.expect_aabb_overlap("inner_slide_stage", "outer_slide_stage", axes="xy", min_overlap=0.15)
+        ctx.expect_aabb_overlap("inner_slide_stage", "rack_base", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("inner_slide_stage", "outer_slide_stage", axes="xy", max_dist=0.31)
 
     return ctx.report()
 

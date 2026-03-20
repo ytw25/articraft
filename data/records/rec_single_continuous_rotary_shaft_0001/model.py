@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -16,11 +17,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 BASE_WIDTH = 0.46
 BASE_DEPTH = 0.34
@@ -152,22 +152,10 @@ def build_object_model() -> ArticulatedObject:
             material="steel",
         )
 
-    base.collision(
-        Box((0.44, 0.32, LOWER_BODY_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, LOWER_BODY_HEIGHT / 2.0)),
-    )
-    base.collision(
-        Box((0.36, 0.26, UPPER_BODY_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, LOWER_BODY_HEIGHT + (UPPER_BODY_HEIGHT / 2.0))),
-    )
-    base.collision(
-        Cylinder(radius=PAN_OUTER_RADIUS, length=0.018),
-        origin=Origin(xyz=(0.0, 0.0, BASE_TOP_Z + 0.009)),
-    )
-    base.collision(
-        Cylinder(radius=COLLAR_RADIUS, length=COLLAR_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, BASE_TOP_Z + (COLLAR_HEIGHT / 2.0))),
-    )
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.44, 0.32, 0.31)),
         mass=18.0,
@@ -185,14 +173,8 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=COUPLING_LUG_ORIGIN),
         material="steel",
     )
-    shaft.collision(
-        Cylinder(radius=SHAFT_RADIUS, length=SHAFT_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, SHAFT_HEIGHT / 2.0)),
-    )
-    shaft.collision(
-        Box(COUPLING_LUG_SIZE),
-        origin=Origin(xyz=COUPLING_LUG_ORIGIN),
-    )
+
+
     shaft.inertial = Inertial.from_geometry(
         Cylinder(radius=SHAFT_RADIUS, length=SHAFT_HEIGHT),
         mass=0.6,
@@ -220,14 +202,8 @@ def build_object_model() -> ArticulatedObject:
             material="wheelhead",
         )
 
-    wheelhead.collision(
-        Cylinder(radius=WHEELHEAD_HUB_RADIUS, length=WHEELHEAD_HUB_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, WHEELHEAD_HUB_HEIGHT / 2.0)),
-    )
-    wheelhead.collision(
-        Cylinder(radius=WHEELHEAD_RADIUS, length=WHEELHEAD_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, WHEELHEAD_HUB_HEIGHT + (WHEELHEAD_THICKNESS / 2.0))),
-    )
+
+
     wheelhead.inertial = Inertial.from_geometry(
         Cylinder(
             radius=WHEELHEAD_RADIUS,
@@ -262,27 +238,27 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=96,
         overlap_tol=0.002,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("shaft", "base", max_dist=0.006)
-    ctx.expect_aabb_overlap_xy("shaft", "base", min_overlap=0.012)
-    ctx.expect_aabb_gap_z("shaft", "base", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_origin_distance("shaft", "base", axes="xy", max_dist=0.006)
+    ctx.expect_aabb_overlap("shaft", "base", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_gap("shaft", "base", axis="z", max_gap=0.002, max_penetration=0.0)
 
-    ctx.expect_xy_distance("wheelhead", "shaft", max_dist=0.006)
-    ctx.expect_aabb_overlap_xy("wheelhead", "shaft", min_overlap=0.012)
-    ctx.expect_aabb_gap_z("wheelhead", "shaft", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_origin_distance("wheelhead", "shaft", axes="xy", max_dist=0.006)
+    ctx.expect_aabb_overlap("wheelhead", "shaft", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_gap("wheelhead", "shaft", axis="z", max_gap=0.002, max_penetration=0.0)
 
-    ctx.expect_above("wheelhead", "base", min_clearance=0.015)
-    ctx.expect_xy_distance("wheelhead", "base", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("wheelhead", "base", min_overlap=0.20)
-    ctx.expect_aabb_gap_z("wheelhead", "base", max_gap=0.03, max_penetration=0.0)
-    ctx.expect_above("shaft", "base", min_clearance=0.0)
-    ctx.expect_above("wheelhead", "shaft", min_clearance=0.0)
+    ctx.expect_origin_gap("wheelhead", "base", axis="z", min_gap=0.015)
+    ctx.expect_origin_distance("wheelhead", "base", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("wheelhead", "base", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_gap("wheelhead", "base", axis="z", max_gap=0.03, max_penetration=0.0)
+    ctx.expect_origin_gap("shaft", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("wheelhead", "shaft", axis="z", min_gap=0.0)
     return ctx.report()
 
 

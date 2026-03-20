@@ -252,9 +252,9 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("carriage", "base", max_dist=0.005)
-    ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.10)
-    ctx.expect_aabb_gap_z("carriage", "base", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_origin_distance("carriage", "base", axes="xy", max_dist=0.005)
+    ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_gap("carriage", "base", axis="z", max_gap=0.003, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "gantry_slide",
         "carriage",
@@ -264,12 +264,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(gantry_slide=-SLIDE_LIMIT):
-        ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.08)
-        ctx.expect_aabb_gap_z("carriage", "base", max_gap=0.003, max_penetration=0.0)
+        ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_gap("carriage", "base", axis="z", max_gap=0.003, max_penetration=0.0)
 
     with ctx.pose(gantry_slide=SLIDE_LIMIT):
-        ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.08)
-        ctx.expect_aabb_gap_z("carriage", "base", max_gap=0.003, max_penetration=0.0)
+        ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_gap("carriage", "base", axis="z", max_gap=0.003, max_penetration=0.0)
 
     return ctx.report()
 

@@ -110,22 +110,10 @@ def _add_annular_box_collisions(
     y_center = inner_radius + (wall / 2.0)
     long_span = 2.0 * outer_radius
     short_span = 2.0 * inner_radius
-    part.collision(
-        Box((wall, long_span, height)),
-        origin=Origin(xyz=(x_center, 0.0, z_center)),
-    )
-    part.collision(
-        Box((wall, long_span, height)),
-        origin=Origin(xyz=(-x_center, 0.0, z_center)),
-    )
-    part.collision(
-        Box((short_span, wall, height)),
-        origin=Origin(xyz=(0.0, y_center, z_center)),
-    )
-    part.collision(
-        Box((short_span, wall, height)),
-        origin=Origin(xyz=(0.0, -y_center, z_center)),
-    )
+
+
+
+
 
 
 def _build_pedestal_shape() -> cq.Workplane:
@@ -254,23 +242,11 @@ def build_object_model() -> ArticulatedObject:
     pedestal_base = model.part("pedestal_base")
     pedestal_mesh = mesh_from_cadquery(_build_pedestal_shape(), "pedestal_base.obj", assets=ASSETS)
     pedestal_base.visual(pedestal_mesh, material="machine_base")
-    pedestal_base.collision(
-        Cylinder(radius=0.160, length=0.022),
-        origin=Origin(xyz=(0.0, 0.0, -0.149)),
-    )
-    pedestal_base.collision(
-        Cylinder(radius=0.136, length=0.086),
-        origin=Origin(xyz=(0.0, 0.0, -0.105)),
-    )
-    pedestal_base.collision(
-        Cylinder(radius=0.118, length=0.048),
-        origin=Origin(xyz=(0.0, 0.0, -0.038)),
-    )
-    pedestal_base.collision(
-        Cylinder(radius=0.190, length=0.018),
-        origin=Origin(xyz=(0.0, 0.0, -0.009)),
-    )
-    pedestal_base.collision(Cylinder(radius=0.015, length=0.040))
+
+
+
+
+
     pedestal_base.inertial = Inertial.from_geometry(
         Cylinder(radius=0.145, length=0.180),
         mass=18.0,
@@ -280,12 +256,8 @@ def build_object_model() -> ArticulatedObject:
     slew_carrier = model.part("slew_carrier")
     slew_mesh = mesh_from_cadquery(_build_slew_shape(), "slew_carrier.obj", assets=ASSETS)
     slew_carrier.visual(slew_mesh, material="bearing_steel")
-    slew_carrier.collision(
-        Cylinder(radius=0.176, length=0.022), origin=Origin(xyz=(0.0, 0.0, 0.012))
-    )
-    slew_carrier.collision(
-        Cylinder(radius=0.146, length=0.018), origin=Origin(xyz=(0.0, 0.0, 0.034))
-    )
+
+
     _add_annular_box_collisions(
         slew_carrier,
         inner_radius=0.018,
@@ -293,12 +265,8 @@ def build_object_model() -> ArticulatedObject:
         height=0.032,
         z_center=0.000,
     )
-    slew_carrier.collision(
-        Cylinder(radius=0.090, length=0.010), origin=Origin(xyz=(0.0, 0.0, 0.046))
-    )
-    slew_carrier.collision(
-        Cylinder(radius=0.014, length=0.038), origin=Origin(xyz=(0.0, 0.0, 0.060))
-    )
+
+
     slew_carrier.inertial = Inertial.from_geometry(
         Cylinder(radius=0.150, length=0.110),
         mass=7.5,
@@ -315,15 +283,9 @@ def build_object_model() -> ArticulatedObject:
         height=0.030,
         z_center=0.000,
     )
-    top_platter.collision(
-        Cylinder(radius=0.122, length=0.020), origin=Origin(xyz=(0.0, 0.0, 0.026))
-    )
-    top_platter.collision(
-        Cylinder(radius=0.106, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.042))
-    )
-    top_platter.collision(
-        Cylinder(radius=0.030, length=0.010), origin=Origin(xyz=(0.0, 0.0, 0.052))
-    )
+
+
+
     top_platter.inertial = Inertial.from_geometry(
         Cylinder(radius=0.122, length=0.065),
         mass=4.2,
@@ -368,33 +330,33 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("slew_carrier", "pedestal_base", max_dist=0.005)
-    ctx.expect_xy_distance("top_platter", "pedestal_base", max_dist=0.005)
-    ctx.expect_xy_distance("top_platter", "slew_carrier", max_dist=0.005)
+    ctx.expect_origin_distance("slew_carrier", "pedestal_base", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("top_platter", "pedestal_base", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("top_platter", "slew_carrier", axes="xy", max_dist=0.005)
 
-    ctx.expect_aabb_overlap_xy("slew_carrier", "pedestal_base", min_overlap=0.18)
-    ctx.expect_aabb_overlap_xy("top_platter", "pedestal_base", min_overlap=0.12)
-    ctx.expect_aabb_overlap_xy("top_platter", "slew_carrier", min_overlap=0.12)
+    ctx.expect_aabb_overlap("slew_carrier", "pedestal_base", axes="xy", min_overlap=0.18)
+    ctx.expect_aabb_overlap("top_platter", "pedestal_base", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_overlap("top_platter", "slew_carrier", axes="xy", min_overlap=0.12)
 
-    ctx.expect_aabb_gap_z("slew_carrier", "pedestal_base", max_gap=0.006, max_penetration=0.045)
-    ctx.expect_aabb_gap_z("top_platter", "slew_carrier", max_gap=0.006, max_penetration=0.040)
-    ctx.expect_aabb_gap_z("top_platter", "pedestal_base", max_gap=0.030, max_penetration=0.0)
-    ctx.expect_above("top_platter", "pedestal_base", min_clearance=0.010)
+    ctx.expect_aabb_gap("slew_carrier", "pedestal_base", axis="z", max_gap=0.006, max_penetration=0.045)
+    ctx.expect_aabb_gap("top_platter", "slew_carrier", axis="z", max_gap=0.006, max_penetration=0.040)
+    ctx.expect_aabb_gap("top_platter", "pedestal_base", axis="z", max_gap=0.030, max_penetration=0.0)
+    ctx.expect_origin_gap("top_platter", "pedestal_base", axis="z", min_gap=0.010)
 
     with ctx.pose(base_to_slew=PRIMARY_AXIS_LIMIT):
-        ctx.expect_xy_distance("slew_carrier", "pedestal_base", max_dist=0.005)
-        ctx.expect_aabb_overlap_xy("slew_carrier", "pedestal_base", min_overlap=0.18)
-        ctx.expect_aabb_gap_z("slew_carrier", "pedestal_base", max_gap=0.006, max_penetration=0.045)
-        ctx.expect_above("top_platter", "pedestal_base", min_clearance=0.010)
+        ctx.expect_origin_distance("slew_carrier", "pedestal_base", axes="xy", max_dist=0.005)
+        ctx.expect_aabb_overlap("slew_carrier", "pedestal_base", axes="xy", min_overlap=0.18)
+        ctx.expect_aabb_gap("slew_carrier", "pedestal_base", axis="z", max_gap=0.006, max_penetration=0.045)
+        ctx.expect_origin_gap("top_platter", "pedestal_base", axis="z", min_gap=0.010)
 
     with ctx.pose(base_to_slew=-PRIMARY_AXIS_LIMIT, slew_to_platter=SECONDARY_AXIS_LIMIT):
-        ctx.expect_xy_distance("top_platter", "slew_carrier", max_dist=0.005)
-        ctx.expect_aabb_overlap_xy("top_platter", "slew_carrier", min_overlap=0.12)
-        ctx.expect_aabb_gap_z("top_platter", "slew_carrier", max_gap=0.006, max_penetration=0.040)
-        ctx.expect_above("top_platter", "pedestal_base", min_clearance=0.010)
+        ctx.expect_origin_distance("top_platter", "slew_carrier", axes="xy", max_dist=0.005)
+        ctx.expect_aabb_overlap("top_platter", "slew_carrier", axes="xy", min_overlap=0.12)
+        ctx.expect_aabb_gap("top_platter", "slew_carrier", axis="z", max_gap=0.006, max_penetration=0.040)
+        ctx.expect_origin_gap("top_platter", "pedestal_base", axis="z", min_gap=0.010)
 
     return ctx.report()
 

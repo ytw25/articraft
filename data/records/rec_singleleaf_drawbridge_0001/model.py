@@ -217,8 +217,8 @@ def run_tests() -> TestReport:
         overlap_tol=0.003,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_overlap_xy("bridge_leaf", "bridge_seat", min_overlap=0.68)
-    ctx.expect_xy_distance("bridge_leaf", "bridge_seat", max_dist=2.40)
+    ctx.expect_aabb_overlap("bridge_leaf", "bridge_seat", axes="xy", min_overlap=0.68)
+    ctx.expect_origin_distance("bridge_leaf", "bridge_seat", axes="xy", max_dist=2.40)
     ctx.expect_joint_motion_axis(
         "leaf_hinge",
         "bridge_leaf",
@@ -234,11 +234,11 @@ def run_tests() -> TestReport:
         min_delta=0.90,
     )
     with ctx.pose(leaf_hinge=0.60):
-        ctx.expect_aabb_overlap_xy("bridge_leaf", "bridge_seat", min_overlap=0.55)
-        ctx.expect_xy_distance("bridge_leaf", "bridge_seat", max_dist=2.20)
+        ctx.expect_aabb_overlap("bridge_leaf", "bridge_seat", axes="xy", min_overlap=0.55)
+        ctx.expect_origin_distance("bridge_leaf", "bridge_seat", axes="xy", max_dist=2.20)
     with ctx.pose(leaf_hinge=1.0):
-        ctx.expect_aabb_overlap_xy("bridge_leaf", "bridge_seat", min_overlap=0.24)
-        ctx.expect_xy_distance("bridge_leaf", "bridge_seat", max_dist=1.10)
+        ctx.expect_aabb_overlap("bridge_leaf", "bridge_seat", axes="xy", min_overlap=0.24)
+        ctx.expect_origin_distance("bridge_leaf", "bridge_seat", axes="xy", max_dist=1.10)
     return ctx.report()
 
 

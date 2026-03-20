@@ -26,9 +26,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _make_material(name: str, rgba: tuple[float, float, float, float]) -> Material:
     try:
         return Material(name=name, rgba=rgba)
@@ -298,8 +296,8 @@ def run_tests() -> TestReport:
     assert articulation.motion_limits.lower <= 0.0 + 1e-9
     assert articulation.motion_limits.upper >= 1.30
 
-    ctx.expect_aabb_overlap_xy("lid", "frame", min_overlap=0.20)
-    ctx.expect_aabb_gap_z("lid", "frame", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_overlap("lid", "frame", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_gap("lid", "frame", axis="z", max_gap=0.010, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "frame_to_lid",
         "lid",
@@ -309,10 +307,10 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(frame_to_lid=0.70):
-        ctx.expect_aabb_overlap_xy("lid", "frame", min_overlap=0.12)
+        ctx.expect_aabb_overlap("lid", "frame", axes="xy", min_overlap=0.12)
 
     with ctx.pose(frame_to_lid=1.30):
-        ctx.expect_aabb_overlap_xy("lid", "frame", min_overlap=0.05)
+        ctx.expect_aabb_overlap("lid", "frame", axes="xy", min_overlap=0.05)
 
     return ctx.report()
 

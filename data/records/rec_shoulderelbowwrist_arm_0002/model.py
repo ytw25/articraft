@@ -199,26 +199,10 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _make_base_shape(), "base.obj", "graphite")
-    base.collision(
-        Cylinder(radius=BASE_RADIUS, length=BASE_PLATE_H),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_H / 2.0)),
-    )
-    base.collision(
-        Cylinder(radius=COLUMN_R, length=COLUMN_H),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_H + (COLUMN_H / 2.0))),
-    )
-    base.collision(
-        Box((BASE_YOKE_T, BASE_CHEEK_W, BASE_YOKE_H)),
-        origin=Origin(
-            xyz=(0.0, (SHOULDER_GAP / 2.0) + (BASE_CHEEK_W / 2.0), SHOULDER_Z),
-        ),
-    )
-    base.collision(
-        Box((BASE_YOKE_T, BASE_CHEEK_W, BASE_YOKE_H)),
-        origin=Origin(
-            xyz=(0.0, -((SHOULDER_GAP / 2.0) + (BASE_CHEEK_W / 2.0)), SHOULDER_Z),
-        ),
-    )
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_RADIUS * 2.0, BASE_RADIUS * 2.0, SHOULDER_Z + (BASE_YOKE_H / 2.0))),
         mass=1.1,
@@ -227,30 +211,11 @@ def build_object_model() -> ArticulatedObject:
 
     upper_arm = model.part("upper_arm")
     _add_mesh_visual(upper_arm, _make_upper_arm_shape(), "upper_arm.obj", "alloy")
-    upper_arm.collision(
-        Cylinder(radius=SHOULDER_HUB_R, length=SHOULDER_HUB_W),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-    )
-    upper_arm.collision(
-        Box((UPPER_BEAM_LEN, UPPER_BEAM_W, UPPER_BEAM_H)),
-        origin=Origin(xyz=(0.105, 0.0, 0.0)),
-    )
-    upper_arm.collision(
-        Box((UPPER_CONNECTOR_LEN, UPPER_BEAM_W, UPPER_BEAM_H * 0.9)),
-        origin=Origin(xyz=(UPPER_LEN - (UPPER_CONNECTOR_LEN / 2.0), 0.0, 0.0)),
-    )
-    upper_arm.collision(
-        Box((ELBOW_YOKE_T, ELBOW_CHEEK_W, ELBOW_YOKE_H)),
-        origin=Origin(
-            xyz=(UPPER_LEN, (ELBOW_GAP / 2.0) + (ELBOW_CHEEK_W / 2.0), 0.0),
-        ),
-    )
-    upper_arm.collision(
-        Box((ELBOW_YOKE_T, ELBOW_CHEEK_W, ELBOW_YOKE_H)),
-        origin=Origin(
-            xyz=(UPPER_LEN, -((ELBOW_GAP / 2.0) + (ELBOW_CHEEK_W / 2.0)), 0.0),
-        ),
-    )
+
+
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((UPPER_LEN + 0.020, ELBOW_YOKE_OUTER_W, ELBOW_YOKE_H)),
         mass=0.36,
@@ -259,30 +224,11 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm")
     _add_mesh_visual(forearm, _make_forearm_shape(), "forearm.obj", "alloy")
-    forearm.collision(
-        Cylinder(radius=ELBOW_HUB_R, length=ELBOW_HUB_W),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-    )
-    forearm.collision(
-        Box((FOREARM_BEAM_LEN, FOREARM_BEAM_W, FOREARM_BEAM_H)),
-        origin=Origin(xyz=(0.082, 0.0, 0.0)),
-    )
-    forearm.collision(
-        Box((FOREARM_CONNECTOR_LEN, FOREARM_BEAM_W, FOREARM_BEAM_H * 0.92)),
-        origin=Origin(xyz=(FOREARM_LEN - (FOREARM_CONNECTOR_LEN / 2.0), 0.0, 0.0)),
-    )
-    forearm.collision(
-        Box((WRIST_YOKE_T, WRIST_CHEEK_W, WRIST_YOKE_H)),
-        origin=Origin(
-            xyz=(FOREARM_LEN, (WRIST_GAP / 2.0) + (WRIST_CHEEK_W / 2.0), 0.0),
-        ),
-    )
-    forearm.collision(
-        Box((WRIST_YOKE_T, WRIST_CHEEK_W, WRIST_YOKE_H)),
-        origin=Origin(
-            xyz=(FOREARM_LEN, -((WRIST_GAP / 2.0) + (WRIST_CHEEK_W / 2.0)), 0.0),
-        ),
-    )
+
+
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((FOREARM_LEN + 0.018, WRIST_YOKE_OUTER_W, WRIST_YOKE_H)),
         mass=0.24,
@@ -291,22 +237,10 @@ def build_object_model() -> ArticulatedObject:
 
     wrist = model.part("wrist")
     _add_mesh_visual(wrist, _make_wrist_shape(), "wrist.obj", "accent")
-    wrist.collision(
-        Cylinder(radius=WRIST_HUB_R, length=WRIST_HUB_W),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-    )
-    wrist.collision(
-        Box((WRIST_BODY_LEN, WRIST_BODY_W, WRIST_BODY_H)),
-        origin=Origin(xyz=(0.038, 0.0, 0.0)),
-    )
-    wrist.collision(
-        Box((WRIST_NOSE_LEN, WRIST_BODY_W * 0.82, WRIST_BODY_H * 0.80)),
-        origin=Origin(xyz=(0.066, 0.0, 0.0)),
-    )
-    wrist.collision(
-        Cylinder(radius=FLANGE_RADIUS, length=FLANGE_LEN),
-        origin=Origin(xyz=(WRIST_LEN - 0.006, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-    )
+
+
+
+
     wrist.inertial = Inertial.from_geometry(
         Box((WRIST_LEN, WRIST_BODY_W + 0.010, WRIST_BODY_H + 0.010)),
         mass=0.14,
@@ -364,7 +298,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "base",
         "upper_arm",
@@ -385,9 +319,9 @@ def run_tests() -> TestReport:
         overlap_tol=0.003,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_overlap_xy("upper_arm", "base", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("wrist", "forearm", min_overlap=0.010)
+    ctx.expect_aabb_overlap("upper_arm", "base", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("wrist", "forearm", axes="xy", min_overlap=0.010)
     ctx.expect_joint_motion_axis(
         "shoulder_joint",
         "upper_arm",

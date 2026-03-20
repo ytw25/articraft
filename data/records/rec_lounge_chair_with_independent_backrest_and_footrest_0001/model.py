@@ -287,10 +287,10 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("backrest", "base", min_overlap=0.05)
-    ctx.expect_xy_distance("backrest", "base", max_dist=0.42)
-    ctx.expect_aabb_overlap_xy("footrest", "base", min_overlap=0.02)
-    ctx.expect_xy_distance("footrest", "base", max_dist=0.38)
+    ctx.expect_aabb_overlap("backrest", "base", axes="xy", min_overlap=0.05)
+    ctx.expect_origin_distance("backrest", "base", axes="xy", max_dist=0.42)
+    ctx.expect_aabb_overlap("footrest", "base", axes="xy", min_overlap=0.02)
+    ctx.expect_origin_distance("footrest", "base", axes="xy", max_dist=0.38)
     ctx.expect_joint_motion_axis(
         "backrest_hinge",
         "backrest",
@@ -307,17 +307,17 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(backrest_hinge=0.58):
-        ctx.expect_aabb_overlap_xy("backrest", "base", min_overlap=0.04)
-        ctx.expect_xy_distance("backrest", "base", max_dist=0.56)
+        ctx.expect_aabb_overlap("backrest", "base", axes="xy", min_overlap=0.04)
+        ctx.expect_origin_distance("backrest", "base", axes="xy", max_dist=0.56)
 
     with ctx.pose(footrest_hinge=1.05):
-        ctx.expect_aabb_overlap_xy("footrest", "base", min_overlap=0.015)
-        ctx.expect_xy_distance("footrest", "base", max_dist=0.56)
+        ctx.expect_aabb_overlap("footrest", "base", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("footrest", "base", axes="xy", max_dist=0.56)
 
     with ctx.pose(backrest_hinge=0.58, footrest_hinge=1.05):
-        ctx.expect_aabb_overlap_xy("backrest", "base", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("footrest", "base", min_overlap=0.015)
-        ctx.expect_xy_distance("backrest", "footrest", max_dist=0.90)
+        ctx.expect_aabb_overlap("backrest", "base", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("footrest", "base", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("backrest", "footrest", axes="xy", max_dist=0.90)
 
     return ctx.report()
 

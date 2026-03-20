@@ -121,9 +121,9 @@ def build_object_model() -> ArticulatedObject:
 
     mount_base = model.part("mount_base")
     _add_mesh_visual(mount_base, _build_mount_base_shape(), "mount_base.obj", "cast_gray")
-    mount_base.collision(Box((0.140, 0.120, 0.012)), origin=Origin(xyz=(0.0, 0.0, 0.006)))
-    mount_base.collision(Box((0.088, 0.072, 0.046)), origin=Origin(xyz=(0.0, 0.0, 0.035)))
-    mount_base.collision(Cylinder(radius=0.032, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.068)))
+
+
+
     mount_base.inertial = Inertial.from_geometry(
         Box((0.100, 0.090, 0.074)),
         mass=2.2,
@@ -132,10 +132,10 @@ def build_object_model() -> ArticulatedObject:
 
     pan_fork = model.part("pan_fork")
     _add_mesh_visual(pan_fork, _build_pan_fork_shape(), "pan_fork.obj", "cast_gray")
-    pan_fork.collision(Cylinder(radius=0.032, length=0.016), origin=Origin(xyz=(0.0, 0.0, 0.008)))
-    pan_fork.collision(Box((0.056, 0.042, 0.046)), origin=Origin(xyz=(-0.006, 0.0, 0.039)))
-    pan_fork.collision(Box((0.022, 0.008, 0.038)), origin=Origin(xyz=(0.042, 0.022, 0.067)))
-    pan_fork.collision(Box((0.022, 0.008, 0.038)), origin=Origin(xyz=(0.042, -0.022, 0.067)))
+
+
+
+
     pan_fork.inertial = Inertial.from_geometry(
         Box((0.076, 0.050, 0.094)),
         mass=0.95,
@@ -144,11 +144,8 @@ def build_object_model() -> ArticulatedObject:
 
     sensor_head = model.part("sensor_head")
     _add_mesh_visual(sensor_head, _build_sensor_head_shape(), "sensor_head.obj", "equipment_black")
-    sensor_head.collision(
-        Cylinder(radius=0.008, length=0.028),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-    )
-    sensor_head.collision(Box((0.052, 0.032, 0.030)), origin=Origin(xyz=(0.100, 0.0, 0.0)))
+
+
     sensor_head.inertial = Inertial.from_geometry(
         Box((0.118, 0.042, 0.050)),
         mass=0.75,
@@ -182,7 +179,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -192,27 +189,27 @@ def run_tests() -> TestReport:
         "tilt_joint", "sensor_head", world_axis="z", direction="positive", min_delta=0.04
     )
 
-    ctx.expect_xy_distance("pan_fork", "mount_base", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("pan_fork", "mount_base", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("pan_fork", "mount_base", max_gap=0.02, max_penetration=0.001)
-    ctx.expect_aabb_gap_z("sensor_head", "mount_base", max_gap=0.18, max_penetration=0.0)
-    ctx.expect_xy_distance("sensor_head", "pan_fork", max_dist=0.14)
+    ctx.expect_origin_distance("pan_fork", "mount_base", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("pan_fork", "mount_base", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("pan_fork", "mount_base", axis="z", max_gap=0.02, max_penetration=0.001)
+    ctx.expect_aabb_gap("sensor_head", "mount_base", axis="z", max_gap=0.18, max_penetration=0.0)
+    ctx.expect_origin_distance("sensor_head", "pan_fork", axes="xy", max_dist=0.14)
 
     with ctx.pose(pan_joint=1.35):
-        ctx.expect_xy_distance("pan_fork", "mount_base", max_dist=0.01)
-        ctx.expect_aabb_overlap_xy("pan_fork", "mount_base", min_overlap=0.03)
-        ctx.expect_aabb_gap_z("sensor_head", "mount_base", max_gap=0.18, max_penetration=0.0)
+        ctx.expect_origin_distance("pan_fork", "mount_base", axes="xy", max_dist=0.01)
+        ctx.expect_aabb_overlap("pan_fork", "mount_base", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_gap("sensor_head", "mount_base", axis="z", max_gap=0.18, max_penetration=0.0)
 
     with ctx.pose(tilt_joint=-0.35):
-        ctx.expect_aabb_gap_z("sensor_head", "mount_base", max_gap=0.10, max_penetration=0.0)
-        ctx.expect_xy_distance("sensor_head", "pan_fork", max_dist=0.13)
+        ctx.expect_aabb_gap("sensor_head", "mount_base", axis="z", max_gap=0.10, max_penetration=0.0)
+        ctx.expect_origin_distance("sensor_head", "pan_fork", axes="xy", max_dist=0.13)
 
     with ctx.pose(tilt_joint=0.55):
-        ctx.expect_aabb_gap_z("sensor_head", "mount_base", max_gap=0.20, max_penetration=0.0)
-        ctx.expect_xy_distance("sensor_head", "pan_fork", max_dist=0.16)
+        ctx.expect_aabb_gap("sensor_head", "mount_base", axis="z", max_gap=0.20, max_penetration=0.0)
+        ctx.expect_origin_distance("sensor_head", "pan_fork", axes="xy", max_dist=0.16)
 
     with ctx.pose(pan_joint=-1.8, tilt_joint=-0.35):
-        ctx.expect_aabb_gap_z("sensor_head", "mount_base", max_gap=0.10, max_penetration=0.0)
+        ctx.expect_aabb_gap("sensor_head", "mount_base", axis="z", max_gap=0.10, max_penetration=0.0)
 
     return ctx.report()
 

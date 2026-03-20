@@ -115,18 +115,9 @@ def _add_slide_collisions(
     floor: float,
 ):
     wall_y = (outer_width - wall) / 2.0
-    part.collision(
-        Box((length, wall, outer_height)),
-        origin=Origin(xyz=(length / 2.0, -wall_y, outer_height / 2.0)),
-    )
-    part.collision(
-        Box((length, wall, outer_height)),
-        origin=Origin(xyz=(length / 2.0, wall_y, outer_height / 2.0)),
-    )
-    part.collision(
-        Box((length, outer_width - 2.0 * wall, floor)),
-        origin=Origin(xyz=(length / 2.0, 0.0, floor / 2.0)),
-    )
+
+
+
 
 
 def _make_base_shape():
@@ -384,19 +375,19 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("mid_section", "base_section", min_overlap=0.06)
-    ctx.expect_aabb_overlap_xy("inner_section", "mid_section", min_overlap=0.05)
-    ctx.expect_aabb_overlap_xy("inner_section", "base_section", min_overlap=0.04)
-    ctx.expect_xy_distance("mid_section", "base_section", max_dist=0.05)
-    ctx.expect_xy_distance("inner_section", "mid_section", max_dist=0.07)
-    ctx.expect_xy_distance("inner_section", "base_section", max_dist=0.12)
+    ctx.expect_aabb_overlap("mid_section", "base_section", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_overlap("inner_section", "mid_section", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_overlap("inner_section", "base_section", axes="xy", min_overlap=0.04)
+    ctx.expect_origin_distance("mid_section", "base_section", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("inner_section", "mid_section", axes="xy", max_dist=0.07)
+    ctx.expect_origin_distance("inner_section", "base_section", axes="xy", max_dist=0.12)
     ctx.expect_joint_motion_axis(
         "base_to_mid",
         "mid_section",

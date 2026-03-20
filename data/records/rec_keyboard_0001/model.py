@@ -397,18 +397,18 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("top_frame", "case_lower", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("switch_plate", "case_lower", min_overlap=0.08)
-    ctx.expect_aabb_gap_z("top_frame", "case_lower", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("switch_plate", "case_lower", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("key_q", "switch_plate", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("key_enter", "switch_plate", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("key_space", "switch_plate", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("key_arrow_right", "switch_plate", min_overlap=0.01)
-    ctx.expect_aabb_gap_z("key_q", "switch_plate", max_gap=0.005, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("key_enter", "switch_plate", max_gap=0.005, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("key_space", "switch_plate", max_gap=0.005, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("key_arrow_right", "switch_plate", max_gap=0.005, max_penetration=0.0)
+    ctx.expect_aabb_overlap("top_frame", "case_lower", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("switch_plate", "case_lower", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_gap("top_frame", "case_lower", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_gap("switch_plate", "case_lower", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_overlap("key_q", "switch_plate", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("key_enter", "switch_plate", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("key_space", "switch_plate", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("key_arrow_right", "switch_plate", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_gap("key_q", "switch_plate", axis="z", max_gap=0.005, max_penetration=0.0)
+    ctx.expect_aabb_gap("key_enter", "switch_plate", axis="z", max_gap=0.005, max_penetration=0.0)
+    ctx.expect_aabb_gap("key_space", "switch_plate", axis="z", max_gap=0.005, max_penetration=0.0)
+    ctx.expect_aabb_gap("key_arrow_right", "switch_plate", axis="z", max_gap=0.005, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "key_a_press", "key_a", world_axis="z", direction="negative", min_delta=0.0015
     )
@@ -420,16 +420,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(key_a_press=PRESS_TRAVEL):
-        ctx.expect_aabb_gap_z("key_a", "switch_plate", max_gap=0.0025, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("key_a", "switch_plate", min_overlap=0.01)
+        ctx.expect_aabb_gap("key_a", "switch_plate", axis="z", max_gap=0.0025, max_penetration=0.0)
+        ctx.expect_aabb_overlap("key_a", "switch_plate", axes="xy", min_overlap=0.01)
 
     with ctx.pose(key_enter_press=PRESS_TRAVEL):
-        ctx.expect_aabb_gap_z("key_enter", "switch_plate", max_gap=0.0025, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("key_enter", "switch_plate", min_overlap=0.015)
+        ctx.expect_aabb_gap("key_enter", "switch_plate", axis="z", max_gap=0.0025, max_penetration=0.0)
+        ctx.expect_aabb_overlap("key_enter", "switch_plate", axes="xy", min_overlap=0.015)
 
     with ctx.pose(key_space_press=PRESS_TRAVEL):
-        ctx.expect_aabb_gap_z("key_space", "switch_plate", max_gap=0.0025, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("key_space", "switch_plate", min_overlap=0.015)
+        ctx.expect_aabb_gap("key_space", "switch_plate", axis="z", max_gap=0.0025, max_penetration=0.0)
+        ctx.expect_aabb_overlap("key_space", "switch_plate", axes="xy", min_overlap=0.015)
 
     return ctx.report()
 

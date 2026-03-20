@@ -596,28 +596,28 @@ def run_tests() -> TestReport:
         min_delta=0.18,
     )
 
-    ctx.expect_aabb_gap_z("left_door", "freezer_drawer", max_gap=0.012, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("right_door", "freezer_drawer", max_gap=0.012, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("left_door", "freezer_drawer", min_overlap=0.04)
-    ctx.expect_aabb_overlap_xy("right_door", "freezer_drawer", min_overlap=0.04)
-    ctx.expect_aabb_overlap_xy("freezer_drawer", "cabinet", min_overlap=0.20)
+    ctx.expect_aabb_gap("left_door", "freezer_drawer", axis="z", max_gap=0.012, max_penetration=0.0)
+    ctx.expect_aabb_gap("right_door", "freezer_drawer", axis="z", max_gap=0.012, max_penetration=0.0)
+    ctx.expect_aabb_overlap("left_door", "freezer_drawer", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_overlap("right_door", "freezer_drawer", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_overlap("freezer_drawer", "cabinet", axes="xy", min_overlap=0.20)
 
     with ctx.pose(left_door_hinge=1.35):
-        ctx.expect_aabb_gap_z("left_door", "freezer_drawer", max_gap=0.012, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("right_door", "freezer_drawer", min_overlap=0.04)
+        ctx.expect_aabb_gap("left_door", "freezer_drawer", axis="z", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("right_door", "freezer_drawer", axes="xy", min_overlap=0.04)
 
     with ctx.pose(right_door_hinge=1.35):
-        ctx.expect_aabb_gap_z("right_door", "freezer_drawer", max_gap=0.012, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("left_door", "freezer_drawer", min_overlap=0.04)
+        ctx.expect_aabb_gap("right_door", "freezer_drawer", axis="z", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("left_door", "freezer_drawer", axes="xy", min_overlap=0.04)
 
     with ctx.pose(freezer_drawer_slide=0.34):
-        ctx.expect_aabb_gap_z("left_door", "freezer_drawer", max_gap=0.012, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("right_door", "freezer_drawer", max_gap=0.012, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("freezer_drawer", "cabinet", min_overlap=0.10)
+        ctx.expect_aabb_gap("left_door", "freezer_drawer", axis="z", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_gap("right_door", "freezer_drawer", axis="z", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("freezer_drawer", "cabinet", axes="xy", min_overlap=0.10)
 
     with ctx.pose(left_door_hinge=1.20, right_door_hinge=1.20, freezer_drawer_slide=0.22):
-        ctx.expect_aabb_gap_z("left_door", "freezer_drawer", max_gap=0.016, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("right_door", "freezer_drawer", max_gap=0.016, max_penetration=0.0)
+        ctx.expect_aabb_gap("left_door", "freezer_drawer", axis="z", max_gap=0.016, max_penetration=0.0)
+        ctx.expect_aabb_gap("right_door", "freezer_drawer", axis="z", max_gap=0.016, max_penetration=0.0)
 
     return ctx.report()
 

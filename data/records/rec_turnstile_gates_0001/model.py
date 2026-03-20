@@ -257,14 +257,14 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("control_head", "body", min_overlap=0.10)
-    ctx.expect_xy_distance("control_head", "body", max_dist=0.08)
-    ctx.expect_xy_distance("control_head", "rotor", max_dist=0.16)
+    ctx.expect_aabb_overlap("control_head", "body", axes="xy", min_overlap=0.10)
+    ctx.expect_origin_distance("control_head", "body", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("control_head", "rotor", axes="xy", max_dist=0.16)
 
     for angle in (0.0, math.pi / 3.0, 2.0 * math.pi / 3.0, 4.0 * math.pi / 3.0):
         with ctx.pose(tripod_rotation=angle):
-            ctx.expect_aabb_overlap_xy("rotor", "body", min_overlap=0.02)
-            ctx.expect_xy_distance("rotor", "body", max_dist=0.24)
+            ctx.expect_aabb_overlap("rotor", "body", axes="xy", min_overlap=0.02)
+            ctx.expect_origin_distance("rotor", "body", axes="xy", max_dist=0.24)
 
     return ctx.report()
 

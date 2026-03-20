@@ -406,24 +406,24 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(lid_hinge=0.0, winder_spin=0.0):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.18)
-        ctx.expect_aabb_gap_z("lid", "body", max_gap=0.004, max_penetration=0.008)
-        ctx.expect_aabb_overlap_xy("winder_rotor", "body", min_overlap=0.05)
-        ctx.expect_xy_distance("winder_rotor", "body", max_dist=0.055)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.18)
+        ctx.expect_aabb_gap("lid", "body", axis="z", max_gap=0.004, max_penetration=0.008)
+        ctx.expect_aabb_overlap("winder_rotor", "body", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("winder_rotor", "body", axes="xy", max_dist=0.055)
 
     with ctx.pose(lid_hinge=1.18, winder_spin=0.0):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.07)
-        ctx.expect_xy_distance("lid", "body", max_dist=0.12)
-        ctx.expect_aabb_overlap_xy("winder_rotor", "body", min_overlap=0.05)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.07)
+        ctx.expect_origin_distance("lid", "body", axes="xy", max_dist=0.12)
+        ctx.expect_aabb_overlap("winder_rotor", "body", axes="xy", min_overlap=0.05)
 
     with ctx.pose(lid_hinge=0.6, winder_spin=math.pi / 2.0):
-        ctx.expect_aabb_overlap_xy("winder_rotor", "body", min_overlap=0.05)
-        ctx.expect_xy_distance("winder_rotor", "body", max_dist=0.055)
+        ctx.expect_aabb_overlap("winder_rotor", "body", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("winder_rotor", "body", axes="xy", max_dist=0.055)
 
     with ctx.pose(lid_hinge=1.0, winder_spin=math.pi):
-        ctx.expect_aabb_overlap_xy("winder_rotor", "body", min_overlap=0.05)
-        ctx.expect_xy_distance("winder_rotor", "body", max_dist=0.055)
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.08)
+        ctx.expect_aabb_overlap("winder_rotor", "body", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("winder_rotor", "body", axes="xy", max_dist=0.055)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.08)
 
     return ctx.report()
 

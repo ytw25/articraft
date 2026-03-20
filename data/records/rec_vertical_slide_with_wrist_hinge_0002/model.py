@@ -144,28 +144,28 @@ def build_object_model() -> ArticulatedObject:
     _add_visual_mesh(carriage, _make_carriage_shape(), "carriage.obj", "painted_steel")
     _add_visual_mesh(wrist, _make_wrist_shape(), "wrist.obj", "safety_orange")
 
-    column.collision(Box((0.22, 0.14, 0.04)), origin=Origin(xyz=(0.0, 0.0, 0.02)))
-    column.collision(Box((0.16, 0.014, 0.44)), origin=Origin(xyz=(0.0, -0.020, 0.26)))
-    column.collision(Box((0.18, 0.05, 0.025)), origin=Origin(xyz=(0.0, -0.005, 0.4925)))
+
+
+
     column.inertial = Inertial.from_geometry(
         Box((0.22, 0.14, 0.50)),
         mass=11.0,
         origin=Origin(xyz=(0.0, -0.006, 0.25)),
     )
 
-    carriage.collision(Box((0.15, 0.024, 0.086)), origin=Origin(xyz=(0.0, 0.018, 0.0)))
-    carriage.collision(Box((0.072, 0.028, 0.072)), origin=Origin(xyz=(0.0, 0.046, 0.0)))
-    carriage.collision(Box((0.016, 0.048, 0.048)), origin=Origin(xyz=(0.0, 0.060, 0.0)))
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.15, 0.060, 0.090)),
         mass=2.6,
         origin=Origin(xyz=(0.0, 0.022, 0.0)),
     )
 
-    wrist.collision(Box((0.070, 0.014, 0.060)), origin=Origin(xyz=(0.0, 0.007, 0.0)))
-    wrist.collision(Box((0.10, 0.060, 0.060)), origin=Origin(xyz=(0.0, 0.033, 0.0)))
-    wrist.collision(Box((0.050, 0.080, 0.022)), origin=Origin(xyz=(0.0, 0.074, 0.0)))
-    wrist.collision(Box((0.052, 0.012, 0.052)), origin=Origin(xyz=(0.0, 0.115, 0.0)))
+
+
+
+
     wrist.inertial = Inertial.from_geometry(
         Box((0.10, 0.121, 0.08)),
         mass=1.4,
@@ -210,7 +210,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -229,16 +229,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(z_slide=0.0, wrist_pitch=0.0):
-        ctx.expect_xy_distance("carriage", "column", max_dist=0.02)
-        ctx.expect_aabb_overlap_xy("carriage", "column", min_overlap=0.05)
-        ctx.expect_aabb_overlap_xy("wrist", "carriage", min_overlap=0.02)
+        ctx.expect_origin_distance("carriage", "column", axes="xy", max_dist=0.02)
+        ctx.expect_aabb_overlap("carriage", "column", axes="xy", min_overlap=0.05)
+        ctx.expect_aabb_overlap("wrist", "carriage", axes="xy", min_overlap=0.02)
 
     with ctx.pose(z_slide=0.22, wrist_pitch=0.0):
-        ctx.expect_xy_distance("carriage", "column", max_dist=0.02)
-        ctx.expect_aabb_overlap_xy("carriage", "column", min_overlap=0.05)
+        ctx.expect_origin_distance("carriage", "column", axes="xy", max_dist=0.02)
+        ctx.expect_aabb_overlap("carriage", "column", axes="xy", min_overlap=0.05)
 
     with ctx.pose(z_slide=0.18, wrist_pitch=0.75):
-        ctx.expect_aabb_overlap_xy("wrist", "carriage", min_overlap=0.02)
+        ctx.expect_aabb_overlap("wrist", "carriage", axes="xy", min_overlap=0.02)
 
     return ctx.report()
 

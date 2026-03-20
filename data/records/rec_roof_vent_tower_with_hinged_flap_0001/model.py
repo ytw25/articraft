@@ -26,14 +26,14 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 PI = math.pi
 
 
 def _mesh_path(filename: str) -> Path:
     if hasattr(ASSETS, "mesh_path"):
         return Path(ASSETS.mesh_path(filename))
-    mesh_dir = HERE / "meshes"
+    mesh_dir = ASSETS.mesh_dir
     mesh_dir.mkdir(parents=True, exist_ok=True)
     return mesh_dir / filename
 

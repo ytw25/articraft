@@ -98,22 +98,10 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_frame_shape(), "frame.obj", assets=ASSETS),
         material="frame_powdercoat",
     )
-    frame.collision(
-        Box((SIDE_RAIL_WIDTH, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
-        origin=Origin(xyz=(-(OPENING_WIDTH / 2.0 + SIDE_RAIL_WIDTH / 2.0), 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((SIDE_RAIL_WIDTH, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
-        origin=Origin(xyz=((OPENING_WIDTH / 2.0 + SIDE_RAIL_WIDTH / 2.0), 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((OPENING_WIDTH, FRAME_DEPTH, TOP_RAIL_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, OPENING_HEIGHT / 2.0 + TOP_RAIL_HEIGHT / 2.0)),
-    )
-    frame.collision(
-        Box((OPENING_WIDTH, FRAME_DEPTH, TOP_RAIL_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, -(OPENING_HEIGHT / 2.0 + TOP_RAIL_HEIGHT / 2.0))),
-    )
+
+
+
+
     frame.inertial = Inertial.from_geometry(
         Box((FRAME_OUTER_WIDTH, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
         mass=3.6,
@@ -127,23 +115,8 @@ def build_object_model() -> ArticulatedObject:
             mesh_from_cadquery(_make_louver_shape(), f"{part_name}.obj", assets=ASSETS),
             material="blade_aluminum",
         )
-        vane.collision(
-            Cylinder(radius=LOUVER_SHAFT_RADIUS * 0.95, length=OPENING_WIDTH),
-            origin=Origin(
-                xyz=(OPENING_WIDTH / 2.0, 0.0, 0.0),
-                rpy=(0.0, math.pi / 2.0, 0.0),
-            ),
-        )
-        vane.collision(
-            Box((LOUVER_BODY_LENGTH, LOUVER_CHORD * 0.90, LOUVER_COLLISION_THICKNESS)),
-            origin=Origin(
-                xyz=(
-                    LOUVER_BODY_X_OFFSET + LOUVER_BODY_LENGTH / 2.0,
-                    LOUVER_BODY_Y_OFFSET,
-                    LOUVER_BODY_Z_OFFSET,
-                )
-            ),
-        )
+
+
         vane.inertial = Inertial.from_geometry(
             Box((LOUVER_BODY_LENGTH, LOUVER_CHORD * 0.90, LOUVER_COLLISION_THICKNESS)),
             mass=0.22 + 0.01 * index,
@@ -179,7 +152,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.002,
@@ -187,11 +160,11 @@ def run_tests() -> TestReport:
     )
 
     for vane_name in LOUVER_NAMES:
-        ctx.expect_aabb_overlap_xy(vane_name, "frame", min_overlap=0.04)
+        ctx.expect_aabb_overlap(vane_name, "frame", axes="xy", min_overlap=0.04)
 
     for upper, lower in zip(LOUVER_NAMES, LOUVER_NAMES[1:]):
-        ctx.expect_above(upper, lower, min_clearance=0.03)
-        ctx.expect_aabb_gap_z(upper, lower, max_gap=0.08, max_penetration=0.0)
+        ctx.expect_origin_gap(upper, lower, axis="z", min_gap=0.03)
+        ctx.expect_aabb_gap(upper, lower, axis="z", max_gap=0.08, max_penetration=0.0)
 
     for joint_name, vane_name in zip(LOUVER_JOINT_NAMES, LOUVER_NAMES):
         ctx.expect_joint_motion_axis(

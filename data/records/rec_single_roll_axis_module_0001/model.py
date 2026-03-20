@@ -158,37 +158,12 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_motor_shape(), "roll_stage_motor.obj", assets=ASSETS),
         material="motor_black",
     )
-    base.collision(
-        Box((BASE_LEN, BASE_WIDTH, BASE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_THICKNESS / 2.0)),
-    )
+
     lower_support_height = AXIS_HEIGHT - PHYSICAL_CLEARANCE - BASE_THICKNESS
     upper_support_height = SUPPORT_TOP_Z - (AXIS_HEIGHT + PHYSICAL_CLEARANCE)
     for x_pos in (-SUPPORT_SPAN / 2.0, SUPPORT_SPAN / 2.0):
-        base.collision(
-            Box((SUPPORT_THICKNESS, SUPPORT_WIDTH, lower_support_height)),
-            origin=Origin(
-                xyz=(
-                    x_pos,
-                    0.0,
-                    BASE_THICKNESS + lower_support_height / 2.0,
-                )
-            ),
-        )
-        base.collision(
-            Box((SUPPORT_THICKNESS, SUPPORT_WIDTH * 0.85, upper_support_height)),
-            origin=Origin(
-                xyz=(
-                    x_pos,
-                    0.0,
-                    AXIS_HEIGHT + PHYSICAL_CLEARANCE + upper_support_height / 2.0,
-                )
-            ),
-        )
-    base.collision(
-        Box((0.05, 0.046, 0.046)),
-        origin=Origin(xyz=(-0.115, 0.0, AXIS_HEIGHT)),
-    )
+        pass
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_LEN, BASE_WIDTH, SUPPORT_TOP_Z)),
         mass=1.6,
@@ -204,24 +179,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_sensor_flag_shape(), "sensor_tube_flag.obj", assets=ASSETS),
         material="signal_amber",
     )
-    sensor_tube.collision(
-        Cylinder(radius=SHAFT_RADIUS, length=SHAFT_LENGTH),
-        origin=Origin(
-            xyz=(SHAFT_START_X + SHAFT_LENGTH / 2.0, 0.0, 0.0),
-            rpy=(0.0, pi / 2.0, 0.0),
-        ),
-    )
-    sensor_tube.collision(
-        Cylinder(radius=TUBE_RADIUS, length=TUBE_LENGTH),
-        origin=Origin(
-            xyz=(TUBE_START_X + TUBE_LENGTH / 2.0, 0.0, 0.0),
-            rpy=(0.0, pi / 2.0, 0.0),
-        ),
-    )
-    sensor_tube.collision(
-        Box((0.036, 0.018, 0.022)),
-        origin=Origin(xyz=(0.084, 0.0, 0.028)),
-    )
+
+
+
     sensor_tube.inertial = Inertial.from_geometry(
         Cylinder(radius=TUBE_RADIUS, length=0.15),
         mass=0.42,
@@ -251,13 +211,13 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_overlap_xy("sensor_tube", "base", min_overlap=0.04)
+    ctx.expect_aabb_overlap("sensor_tube", "base", axes="xy", min_overlap=0.04)
     ctx.expect_joint_motion_axis(
         "tube_roll",
         "sensor_tube",

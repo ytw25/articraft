@@ -382,10 +382,10 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("turntable", "base", min_overlap=0.22)
-    ctx.expect_xy_distance("turntable", "base", max_dist=0.025)
-    ctx.expect_aabb_overlap_xy("saw_arm", "base", min_overlap=0.06)
-    ctx.expect_aabb_overlap_xy("saw_arm", "turntable", min_overlap=0.05)
+    ctx.expect_aabb_overlap("turntable", "base", axes="xy", min_overlap=0.22)
+    ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.025)
+    ctx.expect_aabb_overlap("saw_arm", "base", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_overlap("saw_arm", "turntable", axes="xy", min_overlap=0.05)
     ctx.expect_joint_motion_axis(
         "saw_arm_tilt",
         "saw_arm",
@@ -395,30 +395,30 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(saw_arm_tilt=-0.07):
-        ctx.expect_aabb_overlap_xy("saw_arm", "turntable", min_overlap=0.06)
-        ctx.expect_xy_distance("saw_arm", "turntable", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("saw_arm", "base", min_overlap=0.04)
+        ctx.expect_aabb_overlap("saw_arm", "turntable", axes="xy", min_overlap=0.06)
+        ctx.expect_origin_distance("saw_arm", "turntable", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("saw_arm", "base", axes="xy", min_overlap=0.04)
 
     with ctx.pose(saw_arm_tilt=0.95):
-        ctx.expect_aabb_overlap_xy("saw_arm", "base", min_overlap=0.05)
-        ctx.expect_xy_distance("saw_arm", "base", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("saw_arm", "turntable", min_overlap=0.03)
+        ctx.expect_aabb_overlap("saw_arm", "base", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("saw_arm", "base", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("saw_arm", "turntable", axes="xy", min_overlap=0.03)
 
     with ctx.pose(miter_rotation=-0.82):
-        ctx.expect_aabb_overlap_xy("turntable", "base", min_overlap=0.22)
-        ctx.expect_xy_distance("turntable", "base", max_dist=0.03)
+        ctx.expect_aabb_overlap("turntable", "base", axes="xy", min_overlap=0.22)
+        ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.03)
 
     with ctx.pose(miter_rotation=0.82):
-        ctx.expect_aabb_overlap_xy("turntable", "base", min_overlap=0.22)
-        ctx.expect_xy_distance("turntable", "base", max_dist=0.03)
+        ctx.expect_aabb_overlap("turntable", "base", axes="xy", min_overlap=0.22)
+        ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.03)
 
     with ctx.pose(miter_rotation=-0.82, saw_arm_tilt=-0.07):
-        ctx.expect_aabb_overlap_xy("saw_arm", "turntable", min_overlap=0.05)
-        ctx.expect_xy_distance("saw_arm", "turntable", max_dist=0.22)
+        ctx.expect_aabb_overlap("saw_arm", "turntable", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("saw_arm", "turntable", axes="xy", max_dist=0.22)
 
     with ctx.pose(miter_rotation=0.82, saw_arm_tilt=-0.07):
-        ctx.expect_aabb_overlap_xy("saw_arm", "turntable", min_overlap=0.05)
-        ctx.expect_xy_distance("saw_arm", "turntable", max_dist=0.22)
+        ctx.expect_aabb_overlap("saw_arm", "turntable", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("saw_arm", "turntable", axes="xy", max_dist=0.22)
 
     return ctx.report()
 

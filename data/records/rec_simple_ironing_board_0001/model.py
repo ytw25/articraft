@@ -297,12 +297,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("front_frame", "board", min_overlap=0.14)
-    ctx.expect_aabb_overlap_xy("rear_frame", "board", min_overlap=0.14)
-    ctx.expect_aabb_overlap_xy("front_frame", "rear_frame", min_overlap=0.10)
-    ctx.expect_aabb_gap_z("board", "front_frame", max_gap=0.025, max_penetration=0.008)
-    ctx.expect_aabb_gap_z("board", "rear_frame", max_gap=0.025, max_penetration=0.008)
-    ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.24)
+    ctx.expect_aabb_overlap("front_frame", "board", axes="xy", min_overlap=0.14)
+    ctx.expect_aabb_overlap("rear_frame", "board", axes="xy", min_overlap=0.14)
+    ctx.expect_aabb_overlap("front_frame", "rear_frame", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_gap("board", "front_frame", axis="z", max_gap=0.025, max_penetration=0.008)
+    ctx.expect_aabb_gap("board", "rear_frame", axis="z", max_gap=0.025, max_penetration=0.008)
+    ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.24)
     ctx.expect_joint_motion_axis(
         "front_frame_hinge",
         "front_frame",
@@ -319,19 +319,19 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(front_frame_hinge=1.10):
-        ctx.expect_aabb_overlap_xy("front_frame", "board", min_overlap=0.10)
-        ctx.expect_aabb_overlap_xy("front_frame", "rear_frame", min_overlap=0.08)
-        ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.24)
+        ctx.expect_aabb_overlap("front_frame", "board", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_overlap("front_frame", "rear_frame", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.24)
 
     with ctx.pose(rear_frame_hinge=1.10):
-        ctx.expect_aabb_overlap_xy("rear_frame", "board", min_overlap=0.10)
-        ctx.expect_aabb_overlap_xy("front_frame", "rear_frame", min_overlap=0.08)
-        ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.24)
+        ctx.expect_aabb_overlap("rear_frame", "board", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_overlap("front_frame", "rear_frame", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.24)
 
     with ctx.pose(front_frame_hinge=1.10, rear_frame_hinge=1.10):
-        ctx.expect_aabb_overlap_xy("front_frame", "board", min_overlap=0.08)
-        ctx.expect_aabb_overlap_xy("rear_frame", "board", min_overlap=0.08)
-        ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.22)
+        ctx.expect_aabb_overlap("front_frame", "board", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_overlap("rear_frame", "board", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.22)
 
     return ctx.report()
 

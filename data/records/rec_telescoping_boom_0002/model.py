@@ -182,19 +182,10 @@ def _add_tube_collisions(part, length: float, outer_w: float, outer_h: float, wa
     center_z = _section_center_z(outer_h, wall)
     inner_h = outer_h - 2.0 * wall
     x_center = length / 2.0
-    part.collision(Box((length, outer_w, wall)), origin=Origin(xyz=(x_center, 0.0, 0.0)))
-    part.collision(
-        Box((length, outer_w, wall)),
-        origin=Origin(xyz=(x_center, 0.0, _bottom_wall_center_z(outer_h, wall))),
-    )
-    part.collision(
-        Box((length, wall, inner_h)),
-        origin=Origin(xyz=(x_center, outer_w / 2.0 - wall / 2.0, center_z)),
-    )
-    part.collision(
-        Box((length, wall, inner_h)),
-        origin=Origin(xyz=(x_center, -(outer_w / 2.0 - wall / 2.0), center_z)),
-    )
+
+
+
+
 
 
 def build_object_model() -> ArticulatedObject:
@@ -208,10 +199,7 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(base_shape, "base_section.obj", assets=ASSETS), material="boom_steel"
     )
     _add_tube_collisions(base, BASE_LEN, BASE_OUTER_W, BASE_OUTER_H, BASE_WALL)
-    base.collision(
-        Box((0.17, 0.092, 0.018)),
-        origin=Origin(xyz=(0.11, 0.0, _bottom_surface_z(BASE_OUTER_H, BASE_WALL) - 0.009)),
-    )
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_LEN, BASE_OUTER_W, BASE_OUTER_H + 0.02)),
         mass=4.6,
@@ -252,18 +240,9 @@ def build_object_model() -> ArticulatedObject:
         material="tool_dark",
     )
     _add_tube_collisions(inner_stage, INNER_LEN, INNER_OUTER_W, INNER_OUTER_H, INNER_WALL)
-    inner_stage.collision(
-        Box((BEAM_LEN, BEAM_W, BEAM_H)),
-        origin=Origin(xyz=(BEAM_X_CENTER, 0.0, BEAM_CENTER_Z)),
-    )
-    inner_stage.collision(
-        Box((HEAD_LEN, HEAD_W, HEAD_H)),
-        origin=Origin(xyz=(HEAD_CENTER_X, 0.0, HEAD_CENTER_Z)),
-    )
-    inner_stage.collision(
-        Box((0.028, 0.028, 0.015)),
-        origin=Origin(xyz=(ROLLER_CENTER_X, 0.0, ROLLER_CENTER_Z)),
-    )
+
+
+
     inner_stage.inertial = Inertial.from_geometry(
         Box((HEAD_X_START + HEAD_LEN, INNER_OUTER_W, 0.075)),
         mass=1.15,
@@ -307,13 +286,13 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.001, overlap_volume_tol=0.0)
-    ctx.expect_aabb_overlap_xy("mid_stage", "base", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("inner_stage", "mid_stage", min_overlap=0.06)
-    ctx.expect_aabb_overlap_xy("inner_stage", "base", min_overlap=0.03)
-    ctx.expect_xy_distance("mid_stage", "base", max_dist=0.08)
-    ctx.expect_xy_distance("inner_stage", "mid_stage", max_dist=0.08)
+    ctx.expect_aabb_overlap("mid_stage", "base", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("inner_stage", "mid_stage", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_overlap("inner_stage", "base", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("mid_stage", "base", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("inner_stage", "mid_stage", axes="xy", max_dist=0.08)
     ctx.expect_joint_motion_axis(
         "base_to_mid_stage",
         "mid_stage",

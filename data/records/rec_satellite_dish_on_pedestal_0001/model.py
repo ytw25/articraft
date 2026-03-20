@@ -269,9 +269,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.005, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("azimuth_stage", "pedestal", min_overlap=0.12)
-    ctx.expect_xy_distance("azimuth_stage", "pedestal", max_dist=0.03)
-    ctx.expect_aabb_gap_z("azimuth_stage", "pedestal", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_aabb_overlap("azimuth_stage", "pedestal", axes="xy", min_overlap=0.12)
+    ctx.expect_origin_distance("azimuth_stage", "pedestal", axes="xy", max_dist=0.03)
+    ctx.expect_aabb_gap("azimuth_stage", "pedestal", axis="z", max_gap=0.01, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "elevation_tilt",
         "dish_assembly",
@@ -314,10 +314,10 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose(elevation_tilt=0.95):
-        ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.04)
+        ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.04)
 
     with ctx.pose(elevation_tilt=0.90):
-        ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.04)
+        ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.04)
 
     with ctx.pose(azimuth_slew=-0.8, elevation_tilt=0.90):
         dish_combo = ctx.part_world_position("dish_assembly")

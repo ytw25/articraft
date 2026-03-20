@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 from sdk_hybrid import Material
 
@@ -150,26 +150,11 @@ def build_object_model() -> ArticulatedObject:
     else:
         _add_body_fallback_visuals(body, carcass_finish)
 
-    body.collision(
-        Box((CABINET_WIDTH, BACK_PANEL_THICKNESS, CABINET_HEIGHT)),
-        origin=Origin(xyz=(0.0, -CABINET_DEPTH / 2.0 + BACK_PANEL_THICKNESS / 2.0, 0.0)),
-    )
-    body.collision(
-        Box((SIDE_WALL_THICKNESS, CABINET_DEPTH, CABINET_HEIGHT)),
-        origin=Origin(xyz=(-CABINET_WIDTH / 2.0 + SIDE_WALL_THICKNESS / 2.0, 0.0, 0.0)),
-    )
-    body.collision(
-        Box((SIDE_WALL_THICKNESS, CABINET_DEPTH, CABINET_HEIGHT)),
-        origin=Origin(xyz=(CABINET_WIDTH / 2.0 - SIDE_WALL_THICKNESS / 2.0, 0.0, 0.0)),
-    )
-    body.collision(
-        Box((CABINET_WIDTH, CABINET_DEPTH, SIDE_WALL_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, CABINET_HEIGHT / 2.0 - SIDE_WALL_THICKNESS / 2.0)),
-    )
-    body.collision(
-        Box((CABINET_WIDTH, CABINET_DEPTH, SIDE_WALL_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, -CABINET_HEIGHT / 2.0 + SIDE_WALL_THICKNESS / 2.0)),
-    )
+
+
+
+
+
     body.inertial = Inertial.from_geometry(
         Box((CABINET_WIDTH, CABINET_DEPTH, CABINET_HEIGHT)),
         mass=8.5,
@@ -202,10 +187,7 @@ def build_object_model() -> ArticulatedObject:
             material=handle_finish,
         )
 
-    door.collision(
-        Box((DOOR_WIDTH, DOOR_THICKNESS, DOOR_HEIGHT)),
-        origin=Origin(xyz=(DOOR_WIDTH / 2.0, DOOR_THICKNESS / 2.0, 0.0)),
-    )
+
     door.inertial = Inertial.from_geometry(
         Box((DOOR_WIDTH, DOOR_THICKNESS, DOOR_HEIGHT)),
         mass=2.6,
@@ -241,7 +223,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.002,

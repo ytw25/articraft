@@ -27,7 +27,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = Path(ASSETS.asset_root)
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -228,8 +228,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("wiper_arm", "base_mount", min_overlap=0.010)
-    ctx.expect_aabb_overlap_xy("blade_support", "wiper_arm", min_overlap=0.006)
+    ctx.expect_aabb_overlap("wiper_arm", "base_mount", axes="xy", min_overlap=0.010)
+    ctx.expect_aabb_overlap("blade_support", "wiper_arm", axes="xy", min_overlap=0.006)
     ctx.expect_joint_motion_axis(
         "wiper_sweep",
         "wiper_arm",
@@ -246,21 +246,21 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(wiper_sweep=-0.45):
-        ctx.expect_aabb_overlap_xy("wiper_arm", "base_mount", min_overlap=0.010)
-        ctx.expect_aabb_overlap_xy("blade_support", "wiper_arm", min_overlap=0.006)
+        ctx.expect_aabb_overlap("wiper_arm", "base_mount", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_overlap("blade_support", "wiper_arm", axes="xy", min_overlap=0.006)
 
     with ctx.pose(wiper_sweep=1.15):
-        ctx.expect_aabb_overlap_xy("wiper_arm", "base_mount", min_overlap=0.010)
-        ctx.expect_aabb_overlap_xy("blade_support", "wiper_arm", min_overlap=0.006)
+        ctx.expect_aabb_overlap("wiper_arm", "base_mount", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_overlap("blade_support", "wiper_arm", axes="xy", min_overlap=0.006)
 
     with ctx.pose(blade_pitch=-0.26):
-        ctx.expect_aabb_overlap_xy("blade_support", "wiper_arm", min_overlap=0.006)
+        ctx.expect_aabb_overlap("blade_support", "wiper_arm", axes="xy", min_overlap=0.006)
 
     with ctx.pose(blade_pitch=0.26):
-        ctx.expect_aabb_overlap_xy("blade_support", "wiper_arm", min_overlap=0.006)
+        ctx.expect_aabb_overlap("blade_support", "wiper_arm", axes="xy", min_overlap=0.006)
 
     with ctx.pose({"wiper_sweep": 1.05, "blade_pitch": 0.20}):
-        ctx.expect_aabb_overlap_xy("blade_support", "wiper_arm", min_overlap=0.006)
+        ctx.expect_aabb_overlap("blade_support", "wiper_arm", axes="xy", min_overlap=0.006)
 
     return ctx.report()
 

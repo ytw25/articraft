@@ -263,13 +263,13 @@ def run_tests() -> TestReport:
 
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_gap_z("lower_arm", "desk_clamp", max_gap=0.01, max_penetration=0.008)
-    ctx.expect_aabb_overlap_xy("lower_arm", "desk_clamp", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("upper_arm", "lower_arm", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("head", "upper_arm", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("head", "vesa_plate", min_overlap=0.02)
-    ctx.expect_xy_distance("head", "vesa_plate", max_dist=0.09)
-    ctx.expect_above("vesa_plate", "desk_clamp", min_clearance=0.02)
+    ctx.expect_aabb_gap("lower_arm", "desk_clamp", axis="z", max_gap=0.01, max_penetration=0.008)
+    ctx.expect_aabb_overlap("lower_arm", "desk_clamp", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("upper_arm", "lower_arm", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("head", "upper_arm", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("head", "vesa_plate", axes="xy", min_overlap=0.02)
+    ctx.expect_origin_distance("head", "vesa_plate", axes="xy", max_dist=0.09)
+    ctx.expect_origin_gap("vesa_plate", "desk_clamp", axis="z", min_gap=0.02)
 
     ctx.expect_joint_motion_axis(
         "base_to_lower_swivel",
@@ -287,30 +287,30 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(lower_to_upper_elbow=1.2):
-        ctx.expect_above("upper_arm", "lower_arm", min_clearance=0.01)
-        ctx.expect_above("head", "lower_arm", min_clearance=0.05)
-        ctx.expect_above("vesa_plate", "desk_clamp", min_clearance=0.10)
+        ctx.expect_origin_gap("upper_arm", "lower_arm", axis="z", min_gap=0.01)
+        ctx.expect_origin_gap("head", "lower_arm", axis="z", min_gap=0.05)
+        ctx.expect_origin_gap("vesa_plate", "desk_clamp", axis="z", min_gap=0.10)
 
     with ctx.pose(base_to_lower_swivel=1.1):
-        ctx.expect_aabb_gap_z("lower_arm", "desk_clamp", max_gap=0.02, max_penetration=0.008)
-        ctx.expect_above("vesa_plate", "desk_clamp", min_clearance=0.02)
-        ctx.expect_xy_distance("head", "vesa_plate", max_dist=0.09)
+        ctx.expect_aabb_gap("lower_arm", "desk_clamp", axis="z", max_gap=0.02, max_penetration=0.008)
+        ctx.expect_origin_gap("vesa_plate", "desk_clamp", axis="z", min_gap=0.02)
+        ctx.expect_origin_distance("head", "vesa_plate", axes="xy", max_dist=0.09)
 
     with ctx.pose(upper_to_head_yaw=1.2):
-        ctx.expect_aabb_overlap_xy("head", "upper_arm", min_overlap=0.01)
-        ctx.expect_xy_distance("head", "vesa_plate", max_dist=0.09)
+        ctx.expect_aabb_overlap("head", "upper_arm", axes="xy", min_overlap=0.01)
+        ctx.expect_origin_distance("head", "vesa_plate", axes="xy", max_dist=0.09)
 
     with ctx.pose(head_to_vesa_tilt=0.8):
-        ctx.expect_aabb_overlap_xy("head", "vesa_plate", min_overlap=0.02)
-        ctx.expect_xy_distance("head", "vesa_plate", max_dist=0.09)
+        ctx.expect_aabb_overlap("head", "vesa_plate", axes="xy", min_overlap=0.02)
+        ctx.expect_origin_distance("head", "vesa_plate", axes="xy", max_dist=0.09)
 
     with ctx.pose(head_to_vesa_tilt=-0.5):
-        ctx.expect_aabb_overlap_xy("head", "vesa_plate", min_overlap=0.02)
-        ctx.expect_xy_distance("head", "vesa_plate", max_dist=0.09)
+        ctx.expect_aabb_overlap("head", "vesa_plate", axes="xy", min_overlap=0.02)
+        ctx.expect_origin_distance("head", "vesa_plate", axes="xy", max_dist=0.09)
 
     with ctx.pose({"base_to_lower_swivel": -1.0, "lower_to_upper_elbow": 1.0}):
-        ctx.expect_above("head", "desk_clamp", min_clearance=0.06)
-        ctx.expect_above("vesa_plate", "desk_clamp", min_clearance=0.05)
+        ctx.expect_origin_gap("head", "desk_clamp", axis="z", min_gap=0.06)
+        ctx.expect_origin_gap("vesa_plate", "desk_clamp", axis="z", min_gap=0.05)
 
     return ctx.report()
 

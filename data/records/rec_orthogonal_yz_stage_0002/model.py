@@ -153,26 +153,12 @@ def build_object_model() -> ArticulatedObject:
     base_frame_visual, base_rails_visual = _make_base_frame_visual()
     _add_visual_mesh(base, base_frame_visual, "base_frame.obj", "frame_dark")
     _add_visual_mesh(base, base_rails_visual, "base_rails.obj", "rail_steel")
-    base.collision(
-        Box((BASE_DEPTH_X, BASE_WIDTH_Y, BASE_BEAM_T)), origin=Origin(xyz=(0.0, 0.0, 0.02))
-    )
-    base.collision(
-        Box((BASE_DEPTH_X, BASE_WIDTH_Y, BASE_BEAM_T)), origin=Origin(xyz=(0.0, 0.0, 0.40))
-    )
-    base.collision(
-        Box((BASE_DEPTH_X, BASE_SIDE_T, BASE_HEIGHT_Z - 2.0 * BASE_BEAM_T)),
-        origin=Origin(xyz=(0.0, -0.17, 0.21)),
-    )
-    base.collision(
-        Box((BASE_DEPTH_X, BASE_SIDE_T, BASE_HEIGHT_Z - 2.0 * BASE_BEAM_T)),
-        origin=Origin(xyz=(0.0, 0.17, 0.21)),
-    )
-    base.collision(
-        Box((0.008, Y_RAIL_LENGTH, 0.010)), origin=Origin(xyz=(Y_RAIL_X, 0.0, Y_LOWER_RAIL_Z))
-    )
-    base.collision(
-        Box((0.008, Y_RAIL_LENGTH, 0.010)), origin=Origin(xyz=(Y_RAIL_X, 0.0, Y_UPPER_RAIL_Z))
-    )
+
+
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_DEPTH_X, BASE_WIDTH_Y, BASE_HEIGHT_Z)),
         mass=12.0,
@@ -184,24 +170,14 @@ def build_object_model() -> ArticulatedObject:
     _add_visual_mesh(y_stage, y_frame_visual, "y_stage_frame.obj", "carriage_aluminum")
     _add_visual_mesh(y_stage, y_guides_visual, "y_stage_guides.obj", "guide_block")
     _add_visual_mesh(y_stage, y_rails_visual, "y_stage_rails.obj", "rail_steel")
-    y_stage.collision(Box((0.014, 0.050, 0.024)), origin=Origin(xyz=(-0.012, 0.0, 0.0)))
-    y_stage.collision(Box((0.014, 0.050, 0.024)), origin=Origin(xyz=(-0.012, 0.0, 0.08)))
-    y_stage.collision(Box((0.014, 0.090, 0.18)), origin=Origin(xyz=(-0.020, 0.0, 0.11)))
-    y_stage.collision(Box((0.040, 0.160, 0.040)), origin=Origin(xyz=(-0.006, 0.0, 0.29)))
-    y_stage.collision(Box((0.040, 0.030, 0.240)), origin=Origin(xyz=(-0.006, -0.065, 0.15)))
-    y_stage.collision(Box((0.040, 0.030, 0.240)), origin=Origin(xyz=(-0.006, 0.065, 0.15)))
-    y_stage.collision(
-        Box((0.008, 0.010, Y_STAGE_VERTICAL_RAIL_LENGTH)),
-        origin=Origin(
-            xyz=(Y_STAGE_VERTICAL_RAIL_X, -Y_STAGE_VERTICAL_RAIL_Y, Y_STAGE_FRAME_BASE_Z + 0.09)
-        ),
-    )
-    y_stage.collision(
-        Box((0.008, 0.010, Y_STAGE_VERTICAL_RAIL_LENGTH)),
-        origin=Origin(
-            xyz=(Y_STAGE_VERTICAL_RAIL_X, Y_STAGE_VERTICAL_RAIL_Y, Y_STAGE_FRAME_BASE_Z + 0.09)
-        ),
-    )
+
+
+
+
+
+
+
+
     y_stage.inertial = Inertial.from_geometry(
         Box((0.04, 0.16, 0.28)),
         mass=3.5,
@@ -212,11 +188,11 @@ def build_object_model() -> ArticulatedObject:
     z_carriage_visual, z_guides_visual = _make_z_stage_visual()
     _add_visual_mesh(z_stage, z_carriage_visual, "z_stage_carriage.obj", "carriage_aluminum")
     _add_visual_mesh(z_stage, z_guides_visual, "z_stage_guides.obj", "guide_block")
-    z_stage.collision(Box((0.010, 0.020, 0.040)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    z_stage.collision(Box((0.010, 0.020, 0.040)), origin=Origin(xyz=(0.0, 0.10, 0.0)))
-    z_stage.collision(Box((0.018, 0.14, 0.09)), origin=Origin(xyz=(0.020, 0.05, -0.03)))
-    z_stage.collision(Box((0.014, 0.11, 0.05)), origin=Origin(xyz=(0.036, 0.05, 0.035)))
-    z_stage.collision(Box((0.010, 0.08, 0.02)), origin=Origin(xyz=(0.046, 0.05, -0.085)))
+
+
+
+
+
     z_stage.inertial = Inertial.from_geometry(
         Box((0.05, 0.15, 0.10)),
         mass=1.6,
@@ -260,13 +236,13 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.003, overlap_volume_tol=0.0)
-    ctx.expect_xy_distance("y_stage", "base_frame", max_dist=0.06)
-    ctx.expect_aabb_overlap_xy("y_stage", "base_frame", min_overlap=0.025)
-    ctx.expect_xy_distance("z_stage", "y_stage", max_dist=0.09)
-    ctx.expect_aabb_overlap_xy("z_stage", "y_stage", min_overlap=0.008)
-    ctx.expect_xy_distance("z_stage", "base_frame", max_dist=0.10)
+    ctx.expect_origin_distance("y_stage", "base_frame", axes="xy", max_dist=0.06)
+    ctx.expect_aabb_overlap("y_stage", "base_frame", axes="xy", min_overlap=0.025)
+    ctx.expect_origin_distance("z_stage", "y_stage", axes="xy", max_dist=0.09)
+    ctx.expect_aabb_overlap("z_stage", "y_stage", axes="xy", min_overlap=0.008)
+    ctx.expect_origin_distance("z_stage", "base_frame", axes="xy", max_dist=0.10)
     ctx.expect_joint_motion_axis(
         "base_to_y_stage",
         "y_stage",

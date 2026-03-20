@@ -146,7 +146,7 @@ def _configure_link_physics(
     collision_origin = Origin(
         xyz=(0.0, 0.0, collision_size[2] / 2.0),
     )
-    part.collision(Box(collision_size), origin=collision_origin)
+
     part.qc_collision(
         Box((width * 0.72, depth * 0.72, 0.012)),
         origin=Origin(xyz=(0.0, 0.0, 0.006)),
@@ -236,15 +236,10 @@ def build_object_model() -> ArticulatedObject:
 
     palm = model.part("palm")
     _add_visual_mesh(palm, _make_palm_shape(), "palm.obj", "anodized_black")
-    palm.collision(Box(PALM_MAIN))
+
     for rail_x in PALM_RAIL_X:
-        palm.collision(
-            Box(PALM_RAIL),
-            origin=Origin(
-                xyz=(rail_x, 0.0, PALM_MAIN[2] / 2.0 + PALM_RAIL[2] / 2.0),
-            ),
-        )
-    palm.collision(Box(THUMB_SADDLE), origin=Origin(xyz=THUMB_SADDLE_CENTER))
+        pass
+
     palm.inertial = Inertial.from_geometry(Box(PALM_MAIN), mass=0.82)
 
     for spec in FINGER_SPECS:
@@ -258,39 +253,39 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.004,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_above("index_prox", "palm", min_clearance=0.0)
-    ctx.expect_above("middle_prox", "palm", min_clearance=0.0)
-    ctx.expect_above("ring_prox", "palm", min_clearance=0.0)
-    ctx.expect_above("index_dist", "palm", min_clearance=0.025)
-    ctx.expect_above("middle_dist", "palm", min_clearance=0.030)
-    ctx.expect_above("ring_dist", "palm", min_clearance=0.022)
+    ctx.expect_origin_gap("index_prox", "palm", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("middle_prox", "palm", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("ring_prox", "palm", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("index_dist", "palm", axis="z", min_gap=0.025)
+    ctx.expect_origin_gap("middle_dist", "palm", axis="z", min_gap=0.030)
+    ctx.expect_origin_gap("ring_dist", "palm", axis="z", min_gap=0.022)
 
-    ctx.expect_aabb_gap_z("index_prox", "palm", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("middle_prox", "palm", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("ring_prox", "palm", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("index_dist", "index_prox", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("middle_dist", "middle_prox", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("ring_dist", "ring_prox", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("thumb_dist", "thumb_prox", max_gap=0.010, max_penetration=0.012)
+    ctx.expect_aabb_gap("index_prox", "palm", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("middle_prox", "palm", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("ring_prox", "palm", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("index_dist", "index_prox", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("middle_dist", "middle_prox", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("ring_dist", "ring_prox", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("thumb_dist", "thumb_prox", axis="z", max_gap=0.010, max_penetration=0.012)
 
-    ctx.expect_aabb_overlap_xy("index_prox", "palm", min_overlap=0.008)
-    ctx.expect_aabb_overlap_xy("middle_prox", "palm", min_overlap=0.009)
-    ctx.expect_aabb_overlap_xy("ring_prox", "palm", min_overlap=0.008)
-    ctx.expect_aabb_overlap_xy("index_dist", "index_prox", min_overlap=0.008)
-    ctx.expect_aabb_overlap_xy("middle_dist", "middle_prox", min_overlap=0.009)
-    ctx.expect_aabb_overlap_xy("ring_dist", "ring_prox", min_overlap=0.008)
+    ctx.expect_aabb_overlap("index_prox", "palm", axes="xy", min_overlap=0.008)
+    ctx.expect_aabb_overlap("middle_prox", "palm", axes="xy", min_overlap=0.009)
+    ctx.expect_aabb_overlap("ring_prox", "palm", axes="xy", min_overlap=0.008)
+    ctx.expect_aabb_overlap("index_dist", "index_prox", axes="xy", min_overlap=0.008)
+    ctx.expect_aabb_overlap("middle_dist", "middle_prox", axes="xy", min_overlap=0.009)
+    ctx.expect_aabb_overlap("ring_dist", "ring_prox", axes="xy", min_overlap=0.008)
 
-    ctx.expect_xy_distance("index_dist", "index_prox", max_dist=0.05)
-    ctx.expect_xy_distance("middle_dist", "middle_prox", max_dist=0.05)
-    ctx.expect_xy_distance("ring_dist", "ring_prox", max_dist=0.05)
-    ctx.expect_xy_distance("thumb_dist", "thumb_prox", max_dist=0.05)
+    ctx.expect_origin_distance("index_dist", "index_prox", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("middle_dist", "middle_prox", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("ring_dist", "ring_prox", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("thumb_dist", "thumb_prox", axes="xy", max_dist=0.05)
 
     ctx.expect_joint_motion_axis(
         "palm_to_index_prox",

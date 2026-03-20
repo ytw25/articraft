@@ -131,9 +131,9 @@ def build_object_model() -> ArticulatedObject:
 
     base_housing = model.part("base_housing")
     _add_visual_mesh(base_housing, _make_base_housing_shape(), "base_housing.obj", "housing_gray")
-    base_housing.collision(Box((0.058, 0.050, 0.028)), origin=Origin(xyz=(0.0, 0.0, -0.030)))
-    base_housing.collision(Box((0.028, 0.012, 0.026)), origin=Origin(xyz=(0.0, 0.023, -0.004)))
-    base_housing.collision(Box((0.028, 0.012, 0.026)), origin=Origin(xyz=(0.0, -0.023, -0.004)))
+
+
+
     base_housing.inertial = Inertial.from_geometry(
         Box((0.062, 0.054, 0.040)),
         mass=0.72,
@@ -142,16 +142,11 @@ def build_object_model() -> ArticulatedObject:
 
     pitch_link = model.part("pitch_link")
     _add_visual_mesh(pitch_link, _make_pitch_link_shape(), "pitch_link.obj", "plate_blue")
-    pitch_link.collision(Box((0.036, 0.012, 0.064)), origin=Origin(xyz=(0.0, 0.0, 0.047)))
-    pitch_link.collision(
-        Cylinder(radius=0.0085, length=0.104),
-        origin=Origin(rpy=(HALF_PI, 0.0, 0.0)),
-    )
-    pitch_link.collision(
-        Cylinder(radius=0.024, length=0.022), origin=Origin(xyz=(0.0, 0.0, ROLL_AXIS_Z))
-    )
-    pitch_link.collision(Box((0.010, 0.028, 0.016)), origin=Origin(xyz=(0.015, 0.0, ROLL_AXIS_Z)))
-    pitch_link.collision(Box((0.010, 0.028, 0.016)), origin=Origin(xyz=(-0.015, 0.0, ROLL_AXIS_Z)))
+
+
+
+
+
     pitch_link.inertial = Inertial.from_geometry(
         Box((0.048, 0.040, 0.090)),
         mass=0.38,
@@ -160,17 +155,10 @@ def build_object_model() -> ArticulatedObject:
 
     roll_stage = model.part("roll_stage")
     _add_visual_mesh(roll_stage, _make_roll_stage_shape(), "roll_stage.obj", "rotor_dark")
-    roll_stage.collision(
-        Cylinder(radius=0.015, length=0.048),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
-    roll_stage.collision(
-        Cylinder(radius=0.0105, length=0.040), origin=Origin(xyz=(0.0, 0.0, 0.022))
-    )
-    roll_stage.collision(Box((0.056, 0.034, 0.022)), origin=Origin(xyz=(0.028, 0.0, 0.036)))
-    roll_stage.collision(
-        Cylinder(radius=0.010, length=0.020), origin=Origin(xyz=(0.052, 0.0, 0.050))
-    )
+
+
+
+
     roll_stage.inertial = Inertial.from_geometry(
         Box((0.058, 0.036, 0.052)),
         mass=0.27,
@@ -206,7 +194,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.001, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -216,25 +204,25 @@ def run_tests() -> TestReport:
         "roll_joint", "roll_stage", world_axis="y", direction="positive", min_delta=0.012
     )
 
-    ctx.expect_xy_distance("pitch_link", "base_housing", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("pitch_link", "base_housing", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("pitch_link", "base_housing", max_gap=0.020, max_penetration=0.020)
+    ctx.expect_origin_distance("pitch_link", "base_housing", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("pitch_link", "base_housing", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("pitch_link", "base_housing", axis="z", max_gap=0.020, max_penetration=0.020)
 
-    ctx.expect_xy_distance("roll_stage", "pitch_link", max_dist=0.035)
-    ctx.expect_aabb_overlap_xy("roll_stage", "pitch_link", min_overlap=0.020)
-    ctx.expect_above("roll_stage", "base_housing", min_clearance=0.040)
+    ctx.expect_origin_distance("roll_stage", "pitch_link", axes="xy", max_dist=0.035)
+    ctx.expect_aabb_overlap("roll_stage", "pitch_link", axes="xy", min_overlap=0.020)
+    ctx.expect_origin_gap("roll_stage", "base_housing", axis="z", min_gap=0.040)
 
     with ctx.pose(pitch_hinge=0.9):
-        ctx.expect_above("roll_stage", "base_housing", min_clearance=0.045)
-        ctx.expect_xy_distance("roll_stage", "pitch_link", max_dist=0.075)
+        ctx.expect_origin_gap("roll_stage", "base_housing", axis="z", min_gap=0.045)
+        ctx.expect_origin_distance("roll_stage", "pitch_link", axes="xy", max_dist=0.075)
 
     with ctx.pose(pitch_hinge=-0.9):
-        ctx.expect_aabb_overlap_xy("pitch_link", "base_housing", min_overlap=0.015)
-        ctx.expect_aabb_gap_z("pitch_link", "base_housing", max_gap=0.030, max_penetration=0.022)
+        ctx.expect_aabb_overlap("pitch_link", "base_housing", axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_gap("pitch_link", "base_housing", axis="z", max_gap=0.030, max_penetration=0.022)
 
     with ctx.pose(roll_joint=1.57):
-        ctx.expect_xy_distance("roll_stage", "pitch_link", max_dist=0.035)
-        ctx.expect_aabb_overlap_xy("roll_stage", "pitch_link", min_overlap=0.018)
+        ctx.expect_origin_distance("roll_stage", "pitch_link", axes="xy", max_dist=0.035)
+        ctx.expect_aabb_overlap("roll_stage", "pitch_link", axes="xy", min_overlap=0.018)
 
     return ctx.report()
 

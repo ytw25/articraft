@@ -26,8 +26,8 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
 
 REAR_AXLE = (-0.71, 0.0, 0.34)
 FRONT_AXLE = (0.88, 0.0, 0.34)
@@ -569,10 +569,10 @@ def run_tests() -> TestReport:
 
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("front_wheel", "front_fork", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("rear_wheel", "main_frame", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("captain_crankset", "main_frame", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("stoker_crankset", "main_frame", min_overlap=0.02)
+    ctx.expect_aabb_overlap("front_wheel", "front_fork", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("rear_wheel", "main_frame", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("captain_crankset", "main_frame", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("stoker_crankset", "main_frame", axes="xy", min_overlap=0.02)
 
     rear_pos = ctx.part_world_position("rear_wheel")
     front_pos = ctx.part_world_position("front_wheel")
@@ -599,10 +599,10 @@ def run_tests() -> TestReport:
 
     with ctx.pose(steer_headset=0.45):
         steer_left = ctx.part_world_position("front_wheel")
-        ctx.expect_aabb_overlap_xy("front_wheel", "front_fork", min_overlap=0.015)
+        ctx.expect_aabb_overlap("front_wheel", "front_fork", axes="xy", min_overlap=0.015)
     with ctx.pose(steer_headset=-0.45):
         steer_right = ctx.part_world_position("front_wheel")
-        ctx.expect_aabb_overlap_xy("front_wheel", "front_fork", min_overlap=0.015)
+        ctx.expect_aabb_overlap("front_wheel", "front_fork", axes="xy", min_overlap=0.015)
     assert steer_left[1] * steer_right[1] < 0.0, (
         "steering should sweep the front wheel to opposite sides"
     )

@@ -23,8 +23,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 FRAME_WIDTH = 0.760
 FRAME_HEIGHT = 1.480
 FRAME_DEPTH = 0.055
@@ -409,7 +408,7 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("shutter_leaf", "frame", min_overlap=0.008)
+    ctx.expect_aabb_overlap("shutter_leaf", "frame", axes="xy", min_overlap=0.008)
     ctx.expect_joint_motion_axis(
         "frame_to_shutter",
         "shutter_leaf",
@@ -419,10 +418,10 @@ def run_tests() -> TestReport:
     )
 
     for slat_name in ("slat_02", "slat_06", "slat_10"):
-        ctx.expect_aabb_overlap_xy(slat_name, "shutter_leaf", min_overlap=0.008)
+        ctx.expect_aabb_overlap(slat_name, "shutter_leaf", axes="xy", min_overlap=0.008)
 
     for upper, lower in (("slat_02", "slat_01"), ("slat_06", "slat_05"), ("slat_11", "slat_10")):
-        ctx.expect_aabb_gap_z(upper, lower, max_gap=0.026, max_penetration=0.0)
+        ctx.expect_aabb_gap(upper, lower, axis="z", max_gap=0.026, max_penetration=0.0)
 
     closed_mid_slat = ctx.part_world_position("slat_06")
     closed_upper_slat = ctx.part_world_position("slat_10")
@@ -447,7 +446,7 @@ def run_tests() -> TestReport:
         assert abs(open_upper_slat[1] - open_mid_slat[1]) < 0.012, (
             "All louvers should remain aligned within the opened shutter leaf."
         )
-        ctx.expect_aabb_overlap_xy("slat_06", "shutter_leaf", min_overlap=0.008)
+        ctx.expect_aabb_overlap("slat_06", "shutter_leaf", axes="xy", min_overlap=0.008)
 
     with ctx.pose(_all_slat_pose(0.50)):
         for upper, lower in (
@@ -455,7 +454,7 @@ def run_tests() -> TestReport:
             ("slat_07", "slat_06"),
             ("slat_11", "slat_10"),
         ):
-            ctx.expect_aabb_gap_z(upper, lower, max_gap=0.032, max_penetration=0.0)
+            ctx.expect_aabb_gap(upper, lower, axis="z", max_gap=0.032, max_penetration=0.0)
         opened_pack_zs = [
             ctx.part_world_position(f"slat_{index:02d}")[2] for index in range(1, SLAT_COUNT + 1)
         ]
@@ -464,7 +463,7 @@ def run_tests() -> TestReport:
 
     with ctx.pose(_all_slat_pose(-0.45)):
         for slat_name in ("slat_01", "slat_06", "slat_11"):
-            ctx.expect_aabb_overlap_xy(slat_name, "shutter_leaf", min_overlap=0.008)
+            ctx.expect_aabb_overlap(slat_name, "shutter_leaf", axes="xy", min_overlap=0.008)
 
     with ctx.pose({"frame_to_shutter": 1.10, **_all_slat_pose(0.45)}):
         swung_open_slat = ctx.part_world_position("slat_06")
@@ -478,7 +477,7 @@ def run_tests() -> TestReport:
         assert swung_open_upper[1] > closed_upper_slat[1] + 0.055, (
             "Upper louvers should swing outward together with the rest of the panel."
         )
-        ctx.expect_aabb_overlap_xy("slat_10", "shutter_leaf", min_overlap=0.008)
+        ctx.expect_aabb_overlap("slat_10", "shutter_leaf", axes="xy", min_overlap=0.008)
 
     return ctx.report()
 

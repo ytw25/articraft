@@ -24,7 +24,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -280,12 +280,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("pan_head", "mast", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("pan_head", "mast", min_overlap=0.13)
-    ctx.expect_aabb_gap_z("pan_head", "mast", max_gap=0.012, max_penetration=0.003)
+    ctx.expect_origin_distance("pan_head", "mast", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("pan_head", "mast", axes="xy", min_overlap=0.13)
+    ctx.expect_aabb_gap("pan_head", "mast", axis="z", max_gap=0.012, max_penetration=0.003)
 
-    ctx.expect_aabb_overlap_xy("camera_head", "pan_head", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("camera_head", "mast", min_overlap=0.05)
+    ctx.expect_aabb_overlap("camera_head", "pan_head", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("camera_head", "mast", axes="xy", min_overlap=0.05)
     ctx.expect_joint_motion_axis(
         "camera_tilt",
         "camera_head",
@@ -295,23 +295,23 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(camera_tilt=-0.6):
-        ctx.expect_aabb_overlap_xy("camera_head", "pan_head", min_overlap=0.07)
-        ctx.expect_aabb_overlap_xy("camera_head", "mast", min_overlap=0.05)
+        ctx.expect_aabb_overlap("camera_head", "pan_head", axes="xy", min_overlap=0.07)
+        ctx.expect_aabb_overlap("camera_head", "mast", axes="xy", min_overlap=0.05)
 
     with ctx.pose(camera_tilt=0.4):
-        ctx.expect_aabb_overlap_xy("camera_head", "pan_head", min_overlap=0.06)
-        ctx.expect_aabb_overlap_xy("camera_head", "mast", min_overlap=0.04)
+        ctx.expect_aabb_overlap("camera_head", "pan_head", axes="xy", min_overlap=0.06)
+        ctx.expect_aabb_overlap("camera_head", "mast", axes="xy", min_overlap=0.04)
 
     with ctx.pose(camera_pan=math.pi / 2.0):
-        ctx.expect_aabb_overlap_xy("pan_head", "mast", min_overlap=0.13)
-        ctx.expect_aabb_overlap_xy("camera_head", "mast", min_overlap=0.05)
+        ctx.expect_aabb_overlap("pan_head", "mast", axes="xy", min_overlap=0.13)
+        ctx.expect_aabb_overlap("camera_head", "mast", axes="xy", min_overlap=0.05)
 
     with ctx.pose(camera_pan=-math.pi / 2.0, camera_tilt=-0.35):
-        ctx.expect_aabb_overlap_xy("camera_head", "pan_head", min_overlap=0.06)
-        ctx.expect_aabb_overlap_xy("camera_head", "mast", min_overlap=0.05)
+        ctx.expect_aabb_overlap("camera_head", "pan_head", axes="xy", min_overlap=0.06)
+        ctx.expect_aabb_overlap("camera_head", "mast", axes="xy", min_overlap=0.05)
 
     with ctx.pose(camera_pan=2.5, camera_tilt=0.35):
-        ctx.expect_aabb_overlap_xy("camera_head", "mast", min_overlap=0.04)
+        ctx.expect_aabb_overlap("camera_head", "mast", axes="xy", min_overlap=0.04)
 
     return ctx.report()
 

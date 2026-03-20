@@ -102,9 +102,9 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     base.visual(_mesh(base_shape, "gimbal_base.obj"), material="anodized_black")
-    base.collision(Cylinder(radius=0.040, length=0.010), origin=Origin(xyz=(0.0, 0.0, 0.005)))
-    base.collision(Box((0.050, 0.038, 0.018)), origin=Origin(xyz=(0.0, 0.0, 0.019)))
-    base.collision(Cylinder(radius=0.018, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.034)))
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.080, 0.080, 0.040)),
         mass=1.10,
@@ -113,10 +113,10 @@ def build_object_model() -> ArticulatedObject:
 
     yaw_stage = model.part("yaw_stage")
     yaw_stage.visual(_mesh(yaw_shape, "gimbal_yaw_stage.obj"), material="bearing_gray")
-    yaw_stage.collision(Cylinder(radius=0.028, length=0.006), origin=Origin(xyz=(0.0, 0.0, 0.003)))
-    yaw_stage.collision(Box((0.052, 0.030, 0.022)), origin=Origin(xyz=(0.0, 0.0, 0.019)))
-    yaw_stage.collision(Box((0.014, 0.010, 0.030)), origin=Origin(xyz=(0.0, 0.024, 0.036)))
-    yaw_stage.collision(Box((0.014, 0.010, 0.030)), origin=Origin(xyz=(0.0, -0.024, 0.036)))
+
+
+
+
     yaw_stage.inertial = Inertial.from_geometry(
         Box((0.060, 0.050, 0.052)),
         mass=0.62,
@@ -125,10 +125,10 @@ def build_object_model() -> ArticulatedObject:
 
     pitch_frame = model.part("pitch_frame")
     pitch_frame.visual(_mesh(pitch_shape, "gimbal_pitch_frame.obj"), material="machined_aluminum")
-    pitch_frame.collision(Box((0.024, 0.024, 0.016)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    pitch_frame.collision(Box((0.012, 0.022, 0.030)), origin=Origin(xyz=(-0.008, 0.0, 0.015)))
-    pitch_frame.collision(Box((0.055, 0.040, 0.006)), origin=Origin(xyz=(0.016, 0.0, 0.031)))
-    pitch_frame.collision(Box((0.016, 0.024, 0.014)), origin=Origin(xyz=(0.034, 0.0, 0.020)))
+
+
+
+
     pitch_frame.inertial = Inertial.from_geometry(
         Box((0.065, 0.040, 0.040)),
         mass=0.46,
@@ -163,16 +163,16 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("yaw_stage", "base", max_dist=0.003)
-    ctx.expect_aabb_overlap_xy("yaw_stage", "base", min_overlap=0.025)
-    ctx.expect_aabb_gap_z("yaw_stage", "base", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_origin_distance("yaw_stage", "base", axes="xy", max_dist=0.003)
+    ctx.expect_aabb_overlap("yaw_stage", "base", axes="xy", min_overlap=0.025)
+    ctx.expect_aabb_gap("yaw_stage", "base", axis="z", max_gap=0.006, max_penetration=0.0)
 
-    ctx.expect_above("pitch_frame", "base", min_clearance=0.02)
-    ctx.expect_aabb_overlap_xy("pitch_frame", "yaw_stage", min_overlap=0.015)
-    ctx.expect_aabb_gap_z("pitch_frame", "base", max_gap=0.080, max_penetration=0.0)
+    ctx.expect_origin_gap("pitch_frame", "base", axis="z", min_gap=0.02)
+    ctx.expect_aabb_overlap("pitch_frame", "yaw_stage", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_gap("pitch_frame", "base", axis="z", max_gap=0.080, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "yaw_joint",

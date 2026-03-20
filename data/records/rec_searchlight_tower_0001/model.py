@@ -26,7 +26,7 @@ from sdk import (
     wire_from_points,
 )
 
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
 
 
@@ -461,13 +461,13 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("turret", "tower_base", max_dist=0.08)
-    ctx.expect_aabb_overlap_xy("turret", "tower_base", min_overlap=0.20)
-    ctx.expect_aabb_gap_z("turret", "tower_base", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_xy_distance("lamp_head", "turret", max_dist=0.28)
-    ctx.expect_xy_distance("lamp_head", "tower_base", max_dist=0.30)
-    ctx.expect_aabb_overlap_xy("lamp_head", "tower_base", min_overlap=0.18)
-    ctx.expect_aabb_overlap_xy("lamp_head", "turret", min_overlap=0.10)
+    ctx.expect_origin_distance("turret", "tower_base", axes="xy", max_dist=0.08)
+    ctx.expect_aabb_overlap("turret", "tower_base", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_gap("turret", "tower_base", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_distance("lamp_head", "turret", axes="xy", max_dist=0.28)
+    ctx.expect_origin_distance("lamp_head", "tower_base", axes="xy", max_dist=0.30)
+    ctx.expect_aabb_overlap("lamp_head", "tower_base", axes="xy", min_overlap=0.18)
+    ctx.expect_aabb_overlap("lamp_head", "turret", axes="xy", min_overlap=0.10)
     ctx.expect_joint_motion_axis(
         "searchlight_yaw",
         "lamp_head",
@@ -484,24 +484,24 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(searchlight_pitch=0.9):
-        ctx.expect_xy_distance("lamp_head", "tower_base", max_dist=0.34)
-        ctx.expect_aabb_overlap_xy("lamp_head", "tower_base", min_overlap=0.10)
-        ctx.expect_aabb_overlap_xy("lamp_head", "turret", min_overlap=0.08)
+        ctx.expect_origin_distance("lamp_head", "tower_base", axes="xy", max_dist=0.34)
+        ctx.expect_aabb_overlap("lamp_head", "tower_base", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_overlap("lamp_head", "turret", axes="xy", min_overlap=0.08)
 
     with ctx.pose(searchlight_pitch=-0.30):
-        ctx.expect_xy_distance("lamp_head", "tower_base", max_dist=0.35)
-        ctx.expect_aabb_overlap_xy("lamp_head", "tower_base", min_overlap=0.12)
-        ctx.expect_aabb_overlap_xy("lamp_head", "turret", min_overlap=0.10)
+        ctx.expect_origin_distance("lamp_head", "tower_base", axes="xy", max_dist=0.35)
+        ctx.expect_aabb_overlap("lamp_head", "tower_base", axes="xy", min_overlap=0.12)
+        ctx.expect_aabb_overlap("lamp_head", "turret", axes="xy", min_overlap=0.10)
 
     with ctx.pose(searchlight_yaw=1.5):
-        ctx.expect_xy_distance("turret", "tower_base", max_dist=0.08)
-        ctx.expect_xy_distance("lamp_head", "tower_base", max_dist=0.32)
-        ctx.expect_aabb_overlap_xy("lamp_head", "tower_base", min_overlap=0.10)
+        ctx.expect_origin_distance("turret", "tower_base", axes="xy", max_dist=0.08)
+        ctx.expect_origin_distance("lamp_head", "tower_base", axes="xy", max_dist=0.32)
+        ctx.expect_aabb_overlap("lamp_head", "tower_base", axes="xy", min_overlap=0.10)
 
     with ctx.pose(searchlight_yaw=-1.2, searchlight_pitch=0.85):
-        ctx.expect_xy_distance("lamp_head", "tower_base", max_dist=0.35)
-        ctx.expect_aabb_overlap_xy("lamp_head", "tower_base", min_overlap=0.08)
-        ctx.expect_aabb_overlap_xy("lamp_head", "turret", min_overlap=0.08)
+        ctx.expect_origin_distance("lamp_head", "tower_base", axes="xy", max_dist=0.35)
+        ctx.expect_aabb_overlap("lamp_head", "tower_base", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_overlap("lamp_head", "turret", axes="xy", min_overlap=0.08)
 
     return ctx.report()
 

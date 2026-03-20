@@ -299,13 +299,13 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("bracket", "gpu_body", min_overlap=0.001)
-    ctx.expect_aabb_overlap_xy("fan_left", "gpu_body", min_overlap=0.004)
-    ctx.expect_aabb_overlap_xy("fan_center", "gpu_body", min_overlap=0.004)
-    ctx.expect_aabb_overlap_xy("fan_right", "gpu_body", min_overlap=0.004)
-    ctx.expect_xy_distance("fan_center", "gpu_body", max_dist=0.02)
-    ctx.expect_xy_distance("fan_left", "fan_center", max_dist=0.09)
-    ctx.expect_xy_distance("fan_center", "fan_right", max_dist=0.09)
+    ctx.expect_aabb_overlap("bracket", "gpu_body", axes="xy", min_overlap=0.001)
+    ctx.expect_aabb_overlap("fan_left", "gpu_body", axes="xy", min_overlap=0.004)
+    ctx.expect_aabb_overlap("fan_center", "gpu_body", axes="xy", min_overlap=0.004)
+    ctx.expect_aabb_overlap("fan_right", "gpu_body", axes="xy", min_overlap=0.004)
+    ctx.expect_origin_distance("fan_center", "gpu_body", axes="xy", max_dist=0.02)
+    ctx.expect_origin_distance("fan_left", "fan_center", axes="xy", max_dist=0.09)
+    ctx.expect_origin_distance("fan_center", "fan_right", axes="xy", max_dist=0.09)
 
     for pose in (
         {"fan_left_spin": 0.0, "fan_center_spin": 0.0, "fan_right_spin": 0.0},
@@ -313,11 +313,11 @@ def run_tests() -> TestReport:
         {"fan_left_spin": 2.40, "fan_center_spin": 0.95, "fan_right_spin": 1.70},
     ):
         with ctx.pose(pose):
-            ctx.expect_aabb_overlap_xy("fan_left", "gpu_body", min_overlap=0.004)
-            ctx.expect_aabb_overlap_xy("fan_center", "gpu_body", min_overlap=0.004)
-            ctx.expect_aabb_overlap_xy("fan_right", "gpu_body", min_overlap=0.004)
-            ctx.expect_xy_distance("fan_left", "fan_center", max_dist=0.09)
-            ctx.expect_xy_distance("fan_center", "fan_right", max_dist=0.09)
+            ctx.expect_aabb_overlap("fan_left", "gpu_body", axes="xy", min_overlap=0.004)
+            ctx.expect_aabb_overlap("fan_center", "gpu_body", axes="xy", min_overlap=0.004)
+            ctx.expect_aabb_overlap("fan_right", "gpu_body", axes="xy", min_overlap=0.004)
+            ctx.expect_origin_distance("fan_left", "fan_center", axes="xy", max_dist=0.09)
+            ctx.expect_origin_distance("fan_center", "fan_right", axes="xy", max_dist=0.09)
 
     return ctx.report()
 

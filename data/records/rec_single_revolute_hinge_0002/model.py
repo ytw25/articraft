@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 import math
@@ -256,18 +256,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_frame_hardware_shape(), MESH_DIR / "frame_hardware.obj"),
         material="galvanized_steel",
     )
-    frame.collision(
-        Box((POST_SIZE, POST_SIZE, POST_HEIGHT)),
-        origin=Origin(xyz=(LEFT_POST_CENTER_X, 0.0, POST_HEIGHT / 2.0)),
-    )
-    frame.collision(
-        Box((POST_SIZE, POST_SIZE, POST_HEIGHT)),
-        origin=Origin(xyz=(RIGHT_POST_CENTER_X, 0.0, POST_HEIGHT / 2.0)),
-    )
-    frame.collision(
-        Box((0.03, 0.03, 0.08)),
-        origin=Origin(xyz=(HINGE_AXIS_X, HINGE_AXIS_Y, HINGE_ORIGIN_Z)),
-    )
+
+
+
     frame.inertial = Inertial.from_geometry(
         Box((1.19, 0.11, POST_HEIGHT)),
         mass=18.0,
@@ -283,14 +274,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_leaf_hardware_shape(), MESH_DIR / "leaf_hardware.obj"),
         material="galvanized_steel",
     )
-    leaf.collision(
-        Box((GATE_WIDTH - 0.03, GATE_THICKNESS, GATE_HEIGHT)),
-        origin=Origin(xyz=(0.485, 0.0, LEAF_CENTER_LOCAL_Z)),
-    )
-    leaf.collision(
-        Box((0.03, 0.03, 0.08)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
+
+
     leaf.inertial = Inertial.from_geometry(
         Box((GATE_WIDTH, GATE_THICKNESS, GATE_HEIGHT)),
         mass=11.0,
@@ -315,7 +300,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(

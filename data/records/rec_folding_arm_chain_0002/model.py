@@ -100,18 +100,9 @@ def _add_flat_bar_part(
     part.visual(mesh, origin=Origin(xyz=(0.0, 0.0, z_layer)), material=material_name)
 
     body_len = max(0.040, span - (2.0 * EYELET_RADIUS))
-    part.collision(
-        Box((body_len, BAR_WEB_WIDTH, BAR_THICKNESS)),
-        origin=Origin(xyz=(span / 2.0, 0.0, z_layer)),
-    )
-    part.collision(
-        Cylinder(radius=COLLISION_EYELET_RADIUS, length=BAR_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, z_layer)),
-    )
-    part.collision(
-        Cylinder(radius=COLLISION_EYELET_RADIUS, length=BAR_THICKNESS),
-        origin=Origin(xyz=(span, 0.0, z_layer)),
-    )
+
+
+
     part.inertial = Inertial.from_geometry(
         Box((span, 2.0 * EYELET_RADIUS, BAR_THICKNESS)),
         mass=0.95 * span,
@@ -130,18 +121,9 @@ def build_object_model() -> ArticulatedObject:
     base = model.part("base")
     base_mesh = mesh_from_cadquery(_make_base_mount_shape(), "base_mount.obj", assets=ASSETS)
     base.visual(base_mesh, origin=Origin(xyz=(0.0, 0.0, BASE_LAYER_Z)), material="gunmetal")
-    base.collision(
-        Box((0.130, 0.080, 0.016)),
-        origin=Origin(xyz=(-0.070, 0.0, BASE_LAYER_Z)),
-    )
-    base.collision(
-        Box((0.052, 0.048, 0.018)),
-        origin=Origin(xyz=(-0.024, 0.0, BASE_LAYER_Z)),
-    )
-    base.collision(
-        Cylinder(radius=0.018, length=BAR_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, BASE_LAYER_Z)),
-    )
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.130, 0.080, 0.018)),
         mass=2.4,
@@ -160,14 +142,8 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.0, 0.0, TOOL_LAYER_Z)),
         material="machine_black",
     )
-    tool_plate.collision(
-        Box((0.084, 0.056, BAR_THICKNESS)),
-        origin=Origin(xyz=(0.052, 0.0, TOOL_LAYER_Z)),
-    )
-    tool_plate.collision(
-        Cylinder(radius=COLLISION_EYELET_RADIUS, length=BAR_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, TOOL_LAYER_Z)),
-    )
+
+
     tool_plate.inertial = Inertial.from_geometry(
         Box((0.102, 0.056, BAR_THICKNESS)),
         mass=0.22,
@@ -226,20 +202,20 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("base", "arm_1", min_overlap=0.014)
-    ctx.expect_aabb_overlap_xy("arm_1", "arm_2", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("arm_2", "arm_3", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("arm_3", "arm_4", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("arm_4", "tool_plate", min_overlap=0.012)
+    ctx.expect_aabb_overlap("base", "arm_1", axes="xy", min_overlap=0.014)
+    ctx.expect_aabb_overlap("arm_1", "arm_2", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("arm_2", "arm_3", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("arm_3", "arm_4", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("arm_4", "tool_plate", axes="xy", min_overlap=0.012)
 
-    ctx.expect_aabb_gap_z("arm_1", "base", max_gap=0.006, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("arm_1", "arm_2", max_gap=0.006, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("arm_3", "arm_2", max_gap=0.006, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("arm_3", "arm_4", max_gap=0.006, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("tool_plate", "arm_4", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_gap("arm_1", "base", axis="z", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_gap("arm_1", "arm_2", axis="z", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_gap("arm_3", "arm_2", axis="z", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_gap("arm_3", "arm_4", axis="z", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_gap("tool_plate", "arm_4", axis="z", max_gap=0.006, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "base_to_arm_1", "arm_1", world_axis="y", direction="positive", min_delta=0.03
@@ -254,10 +230,10 @@ def run_tests() -> TestReport:
         "arm_3_to_arm_4", "arm_4", world_axis="y", direction="positive", min_delta=0.02
     )
 
-    ctx.expect_xy_distance("arm_1", "arm_2", max_dist=0.25)
-    ctx.expect_xy_distance("arm_2", "arm_3", max_dist=0.21)
-    ctx.expect_xy_distance("arm_3", "arm_4", max_dist=0.18)
-    ctx.expect_xy_distance("arm_4", "tool_plate", max_dist=0.15)
+    ctx.expect_origin_distance("arm_1", "arm_2", axes="xy", max_dist=0.25)
+    ctx.expect_origin_distance("arm_2", "arm_3", axes="xy", max_dist=0.21)
+    ctx.expect_origin_distance("arm_3", "arm_4", axes="xy", max_dist=0.18)
+    ctx.expect_origin_distance("arm_4", "tool_plate", axes="xy", max_dist=0.15)
     return ctx.report()
 
 

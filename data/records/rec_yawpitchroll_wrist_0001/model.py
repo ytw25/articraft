@@ -165,14 +165,8 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _build_base_shape(), "wrist_base.obj", "machined_steel")
-    base.collision(
-        Cylinder(radius=BASE_RADIUS, length=BASE_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, BASE_HEIGHT / 2.0)),
-    )
-    base.collision(
-        Cylinder(radius=PEDESTAL_RADIUS, length=PEDESTAL_HEIGHT + 0.008),
-        origin=Origin(xyz=(0.0, 0.0, BASE_HEIGHT + (PEDESTAL_HEIGHT + 0.008) / 2.0)),
-    )
+
+
     base.inertial = Inertial.from_geometry(
         Cylinder(radius=BASE_RADIUS, length=BASE_HEIGHT + PEDESTAL_HEIGHT + 0.008),
         mass=1.2,
@@ -181,16 +175,10 @@ def build_object_model() -> ArticulatedObject:
 
     yaw_ring = model.part("yaw_ring")
     _add_mesh_visual(yaw_ring, _build_yaw_ring_shape(), "wrist_yaw_ring.obj", "anodized_black")
-    yaw_ring.collision(Cylinder(radius=0.020, length=0.016), origin=Origin(xyz=(0.0, 0.0, 0.004)))
-    yaw_ring.collision(
-        Box((0.012, 0.018, 0.080)), origin=Origin(xyz=(0.0, 0.040, YAW_RING_CENTER_Z))
-    )
-    yaw_ring.collision(
-        Box((0.012, 0.018, 0.080)), origin=Origin(xyz=(0.0, -0.040, YAW_RING_CENTER_Z))
-    )
-    yaw_ring.collision(
-        Box((0.012, 0.064, 0.016)), origin=Origin(xyz=(0.0, 0.0, YAW_RING_CENTER_Z + 0.039))
-    )
+
+
+
+
     yaw_ring.inertial = Inertial.from_geometry(
         Box((0.020, 0.100, 0.086)),
         mass=0.55,
@@ -201,25 +189,10 @@ def build_object_model() -> ArticulatedObject:
     _add_mesh_visual(
         pitch_yoke, _build_pitch_yoke_shape(), "wrist_pitch_yoke.obj", "machined_steel"
     )
-    pitch_yoke.collision(Box((0.024, 0.010, 0.044)), origin=Origin(xyz=(0.0, 0.0, 0.004)))
-    pitch_yoke.collision(
-        Box((0.024, 0.010, 0.044)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                -PITCH_STAGE_WIDTH,
-                0.0,
-            )
-        ),
-    )
-    pitch_yoke.collision(
-        Box((0.014, PITCH_STAGE_WIDTH - 0.028, 0.028)),
-        origin=Origin(xyz=(ROLL_AXIS_OFFSET_X, ROLL_AXIS_OFFSET_Y, 0.010)),
-    )
-    pitch_yoke.collision(
-        Cylinder(radius=0.015, length=0.018),
-        origin=Origin(xyz=(ROLL_AXIS_OFFSET_X, ROLL_AXIS_OFFSET_Y, 0.0), rpy=(0.0, pi / 2.0, 0.0)),
-    )
+
+
+
+
     pitch_yoke.inertial = Inertial.from_geometry(
         Box((0.040, 0.090, 0.060)),
         mass=0.42,
@@ -228,26 +201,10 @@ def build_object_model() -> ArticulatedObject:
 
     roll_tool = model.part("roll_tool")
     _add_mesh_visual(roll_tool, _build_roll_tool_shape(), "wrist_roll_tool.obj", "tool_face")
-    roll_tool.collision(
-        Cylinder(radius=ROLL_HUB_RADIUS, length=0.018),
-        origin=Origin(rpy=(0.0, pi / 2.0, 0.0)),
-    )
-    roll_tool.collision(
-        Cylinder(radius=ROLL_SHAFT_RADIUS, length=ROLL_SHAFT_LENGTH),
-        origin=Origin(xyz=(ROLL_SHAFT_LENGTH / 2.0, 0.0, 0.0), rpy=(0.0, pi / 2.0, 0.0)),
-    )
-    roll_tool.collision(
-        Cylinder(radius=TOOL_FLANGE_RADIUS, length=TOOL_FLANGE_LENGTH),
-        origin=Origin(
-            xyz=(ROLL_SHAFT_LENGTH + (TOOL_FLANGE_LENGTH / 2.0), 0.0, 0.0), rpy=(0.0, pi / 2.0, 0.0)
-        ),
-    )
-    roll_tool.collision(
-        Cylinder(radius=0.011, length=0.006),
-        origin=Origin(
-            xyz=(ROLL_SHAFT_LENGTH + TOOL_FLANGE_LENGTH + 0.003, 0.0, 0.0), rpy=(0.0, pi / 2.0, 0.0)
-        ),
-    )
+
+
+
+
     roll_tool.inertial = Inertial.from_geometry(
         Box((0.074, 0.044, 0.044)),
         mass=0.28,
@@ -256,10 +213,7 @@ def build_object_model() -> ArticulatedObject:
 
     tool_key = model.part("tool_key")
     _add_mesh_visual(tool_key, _build_tool_key_shape(), "wrist_tool_key.obj", "anodized_black")
-    tool_key.collision(
-        Box((TOOL_KEY_WIDTH_X, TOOL_KEY_WIDTH_Y, TOOL_KEY_HEIGHT_Z)),
-        origin=Origin(xyz=(0.0, 0.0, TOOL_KEY_HEIGHT_Z / 2.0)),
-    )
+
     tool_key.inertial = Inertial.from_geometry(
         Box((TOOL_KEY_WIDTH_X, TOOL_KEY_WIDTH_Y, TOOL_KEY_HEIGHT_Z)),
         mass=0.03,
@@ -311,7 +265,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
 
     ctx.allow_overlap(
         "base", "yaw_ring", reason="compact yaw bearing collar is intentionally nested."
@@ -344,19 +298,19 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("yaw_ring", "base", max_dist=0.006)
-    ctx.expect_aabb_overlap_xy("yaw_ring", "base", min_overlap=0.039)
-    ctx.expect_aabb_gap_z("yaw_ring", "base", max_gap=0.010, max_penetration=0.017)
+    ctx.expect_origin_distance("yaw_ring", "base", axes="xy", max_dist=0.006)
+    ctx.expect_aabb_overlap("yaw_ring", "base", axes="xy", min_overlap=0.039)
+    ctx.expect_aabb_gap("yaw_ring", "base", axis="z", max_gap=0.010, max_penetration=0.017)
 
-    ctx.expect_xy_distance("pitch_yoke", "yaw_ring", max_dist=0.055)
-    ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_ring", min_overlap=0.020)
-    ctx.expect_above("pitch_yoke", "base", min_clearance=0.005)
+    ctx.expect_origin_distance("pitch_yoke", "yaw_ring", axes="xy", max_dist=0.055)
+    ctx.expect_aabb_overlap("pitch_yoke", "yaw_ring", axes="xy", min_overlap=0.020)
+    ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.005)
 
-    ctx.expect_above("roll_tool", "base", min_clearance=0.010)
-    ctx.expect_aabb_gap_z("roll_tool", "base", max_gap=0.120, max_penetration=0.0)
-    ctx.expect_xy_distance("roll_tool", "pitch_yoke", max_dist=0.060)
-    ctx.expect_aabb_overlap_xy("tool_key", "roll_tool", min_overlap=0.012)
-    ctx.expect_aabb_gap_z("tool_key", "roll_tool", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_origin_gap("roll_tool", "base", axis="z", min_gap=0.010)
+    ctx.expect_aabb_gap("roll_tool", "base", axis="z", max_gap=0.120, max_penetration=0.0)
+    ctx.expect_origin_distance("roll_tool", "pitch_yoke", axes="xy", max_dist=0.060)
+    ctx.expect_aabb_overlap("tool_key", "roll_tool", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_gap("tool_key", "roll_tool", axis="z", max_gap=0.001, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "base_to_yaw", "tool_key", world_axis="y", direction="positive", min_delta=0.02
@@ -369,30 +323,30 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(base_to_yaw=YAW_LIMIT):
-        ctx.expect_xy_distance("yaw_ring", "base", max_dist=0.006)
-        ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_ring", min_overlap=0.020)
-        ctx.expect_above("roll_tool", "base", min_clearance=0.010)
-        ctx.expect_above("tool_key", "base", min_clearance=0.010)
+        ctx.expect_origin_distance("yaw_ring", "base", axes="xy", max_dist=0.006)
+        ctx.expect_aabb_overlap("pitch_yoke", "yaw_ring", axes="xy", min_overlap=0.020)
+        ctx.expect_origin_gap("roll_tool", "base", axis="z", min_gap=0.010)
+        ctx.expect_origin_gap("tool_key", "base", axis="z", min_gap=0.010)
 
     with ctx.pose(yaw_to_pitch=PITCH_UPPER_LIMIT):
-        ctx.expect_xy_distance("roll_tool", "yaw_ring", max_dist=0.095)
-        ctx.expect_xy_distance("tool_key", "yaw_ring", max_dist=0.120)
-        ctx.expect_above("pitch_yoke", "base", min_clearance=0.003)
+        ctx.expect_origin_distance("roll_tool", "yaw_ring", axes="xy", max_dist=0.095)
+        ctx.expect_origin_distance("tool_key", "yaw_ring", axes="xy", max_dist=0.120)
+        ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.003)
 
     with ctx.pose(yaw_to_pitch=PITCH_LOWER_LIMIT):
-        ctx.expect_xy_distance("roll_tool", "yaw_ring", max_dist=0.095)
-        ctx.expect_xy_distance("tool_key", "yaw_ring", max_dist=0.120)
-        ctx.expect_above("pitch_yoke", "base", min_clearance=0.003)
+        ctx.expect_origin_distance("roll_tool", "yaw_ring", axes="xy", max_dist=0.095)
+        ctx.expect_origin_distance("tool_key", "yaw_ring", axes="xy", max_dist=0.120)
+        ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.003)
 
     with ctx.pose(pitch_to_roll=ROLL_LIMIT):
-        ctx.expect_above("roll_tool", "base", min_clearance=0.010)
-        ctx.expect_xy_distance("roll_tool", "pitch_yoke", max_dist=0.060)
-        ctx.expect_xy_distance("tool_key", "roll_tool", max_dist=0.080)
+        ctx.expect_origin_gap("roll_tool", "base", axis="z", min_gap=0.010)
+        ctx.expect_origin_distance("roll_tool", "pitch_yoke", axes="xy", max_dist=0.060)
+        ctx.expect_origin_distance("tool_key", "roll_tool", axes="xy", max_dist=0.080)
 
     with ctx.pose(base_to_yaw=-0.9, yaw_to_pitch=0.7, pitch_to_roll=-2.0):
-        ctx.expect_above("roll_tool", "base", min_clearance=0.005)
-        ctx.expect_above("tool_key", "base", min_clearance=0.010)
-        ctx.expect_xy_distance("pitch_yoke", "base", max_dist=0.070)
+        ctx.expect_origin_gap("roll_tool", "base", axis="z", min_gap=0.005)
+        ctx.expect_origin_gap("tool_key", "base", axis="z", min_gap=0.010)
+        ctx.expect_origin_distance("pitch_yoke", "base", axes="xy", max_dist=0.070)
 
     return ctx.report()
 

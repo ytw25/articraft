@@ -197,37 +197,37 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("yaw_head", "pedestal", max_dist=0.12)
-    ctx.expect_aabb_overlap_xy("yaw_head", "pedestal", min_overlap=0.40)
-    ctx.expect_aabb_gap_z("yaw_head", "pedestal", max_gap=0.008, max_penetration=0.0)
-    ctx.expect_xy_distance("dish_assembly", "pedestal", max_dist=0.36)
-    ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.44)
-    ctx.expect_xy_distance("dish_assembly", "yaw_head", max_dist=0.30)
-    ctx.expect_aabb_overlap_xy("dish_assembly", "yaw_head", min_overlap=0.22)
+    ctx.expect_origin_distance("yaw_head", "pedestal", axes="xy", max_dist=0.12)
+    ctx.expect_aabb_overlap("yaw_head", "pedestal", axes="xy", min_overlap=0.40)
+    ctx.expect_aabb_gap("yaw_head", "pedestal", axis="z", max_gap=0.008, max_penetration=0.0)
+    ctx.expect_origin_distance("dish_assembly", "pedestal", axes="xy", max_dist=0.36)
+    ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.44)
+    ctx.expect_origin_distance("dish_assembly", "yaw_head", axes="xy", max_dist=0.30)
+    ctx.expect_aabb_overlap("dish_assembly", "yaw_head", axes="xy", min_overlap=0.22)
     ctx.expect_joint_motion_axis(
         "elevation", "dish_assembly", world_axis="z", direction="positive", min_delta=0.08
     )
 
     with ctx.pose(elevation=-0.2):
-        ctx.expect_xy_distance("dish_assembly", "pedestal", max_dist=0.38)
-        ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.36)
-        ctx.expect_xy_distance("dish_assembly", "yaw_head", max_dist=0.34)
+        ctx.expect_origin_distance("dish_assembly", "pedestal", axes="xy", max_dist=0.38)
+        ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.36)
+        ctx.expect_origin_distance("dish_assembly", "yaw_head", axes="xy", max_dist=0.34)
 
     with ctx.pose(elevation=1.0):
-        ctx.expect_xy_distance("dish_assembly", "pedestal", max_dist=0.60)
-        ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.18)
-        ctx.expect_xy_distance("dish_assembly", "yaw_head", max_dist=0.44)
+        ctx.expect_origin_distance("dish_assembly", "pedestal", axes="xy", max_dist=0.60)
+        ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.18)
+        ctx.expect_origin_distance("dish_assembly", "yaw_head", axes="xy", max_dist=0.44)
 
     with ctx.pose(azimuth=pi / 2.0):
-        ctx.expect_xy_distance("yaw_head", "pedestal", max_dist=0.12)
-        ctx.expect_aabb_overlap_xy("yaw_head", "pedestal", min_overlap=0.40)
-        ctx.expect_xy_distance("dish_assembly", "pedestal", max_dist=0.36)
-        ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.44)
+        ctx.expect_origin_distance("yaw_head", "pedestal", axes="xy", max_dist=0.12)
+        ctx.expect_aabb_overlap("yaw_head", "pedestal", axes="xy", min_overlap=0.40)
+        ctx.expect_origin_distance("dish_assembly", "pedestal", axes="xy", max_dist=0.36)
+        ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.44)
 
     with ctx.pose(azimuth=pi / 2.0, elevation=1.0):
-        ctx.expect_xy_distance("dish_assembly", "pedestal", max_dist=0.60)
-        ctx.expect_aabb_overlap_xy("dish_assembly", "pedestal", min_overlap=0.18)
-        ctx.expect_xy_distance("dish_assembly", "yaw_head", max_dist=0.44)
+        ctx.expect_origin_distance("dish_assembly", "pedestal", axes="xy", max_dist=0.60)
+        ctx.expect_aabb_overlap("dish_assembly", "pedestal", axes="xy", min_overlap=0.18)
+        ctx.expect_origin_distance("dish_assembly", "yaw_head", axes="xy", max_dist=0.44)
 
     return ctx.report()
 

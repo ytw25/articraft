@@ -88,14 +88,12 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_stand_shape(), "stand.obj", assets=ASSETS),
         material="tower_dark",
     )
-    stand.collision(
-        Box((BASE_LENGTH, BASE_WIDTH, BASE_THICKNESS)), origin=Origin(xyz=(0.0, 0.0, 0.006))
-    )
-    stand.collision(Box((0.048, 0.030, 0.070)), origin=Origin(xyz=(-0.006, 0.0, 0.041)))
-    stand.collision(Box((0.034, 0.012, 0.040)), origin=Origin(xyz=(0.0, 0.032, 0.096)))
-    stand.collision(Box((0.034, 0.012, 0.040)), origin=Origin(xyz=(0.0, -0.032, 0.096)))
-    stand.collision(Box((0.012, 0.008, 0.012)), origin=Origin(xyz=(0.0, 0.018, PIVOT_Z)))
-    stand.collision(Box((0.012, 0.008, 0.012)), origin=Origin(xyz=(0.0, -0.018, PIVOT_Z)))
+
+
+
+
+
+
     stand.inertial = Inertial.from_geometry(
         Box((0.18, 0.12, 0.12)), mass=3.8, origin=Origin(xyz=(0.0, 0.0, 0.060))
     )
@@ -105,7 +103,7 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_cradle_shape(), "cradle.obj", assets=ASSETS),
         material="plate_light",
     )
-    cradle.collision(Box((0.140, 0.070, 0.008)), origin=Origin(xyz=(0.0, 0.0, 0.014)))
+
     cradle.inertial = Inertial.from_geometry(
         Box((0.140, 0.076, 0.040)), mass=1.1, origin=Origin(xyz=(0.0, 0.0, 0.020))
     )
@@ -133,12 +131,12 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
-    ctx.expect_xy_distance("cradle", "stand", max_dist=0.015)
-    ctx.expect_above("cradle", "stand", min_clearance=0.08)
-    ctx.expect_aabb_overlap_xy("cradle", "stand", min_overlap=0.040)
-    ctx.expect_aabb_gap_z("cradle", "stand", max_gap=0.020, max_penetration=0.0)
+    ctx.expect_origin_distance("cradle", "stand", axes="xy", max_dist=0.015)
+    ctx.expect_origin_gap("cradle", "stand", axis="z", min_gap=0.08)
+    ctx.expect_aabb_overlap("cradle", "stand", axes="xy", min_overlap=0.040)
+    ctx.expect_aabb_gap("cradle", "stand", axis="z", max_gap=0.020, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "tilt_joint",
         "cradle",

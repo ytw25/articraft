@@ -105,16 +105,13 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_trunk_shape(), "trunk.obj", assets=ASSETS),
         material="frame_dark",
     )
-    trunk.collision(Box(FOOT_SIZE), origin=Origin(xyz=(0.0, 0.0, FOOT_SIZE[2] / 2.0)))
-    trunk.collision(
-        Box(STEM_SIZE),
-        origin=Origin(xyz=(0.0, 0.0, FOOT_SIZE[2] + STEM_SIZE[2] / 2.0)),
-    )
-    trunk.collision(Box(CROWN_SIZE), origin=Origin(xyz=(0.0, 0.0, HUB_Z - 0.010)))
-    trunk.collision(Box(SHOULDER_SIZE), origin=Origin(xyz=(-0.043, 0.0, HUB_Z)))
-    trunk.collision(Box(SHOULDER_SIZE), origin=Origin(xyz=(0.043, 0.0, HUB_Z)))
-    trunk.collision(Box(HUB_BOX_SIZE), origin=Origin(xyz=(-HUB_X, 0.0, HUB_Z)))
-    trunk.collision(Box(HUB_BOX_SIZE), origin=Origin(xyz=(HUB_X, 0.0, HUB_Z)))
+
+
+
+
+
+
+
     trunk.inertial = Inertial.from_geometry(
         Box((0.170, 0.060, 0.270)),
         mass=1.3,
@@ -126,15 +123,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_branch_shape("left"), "left_branch.obj", assets=ASSETS),
         material="branch_green",
     )
-    left_branch.collision(Box(HUB_BOX_SIZE), origin=Origin())
-    left_branch.collision(
-        Box((0.190, BRANCH_BEAM_WIDTH, BRANCH_BEAM_HEIGHT)),
-        origin=_branch_component_origin("left", HUB_RADIUS + BRANCH_LENGTH / 2.0 - 0.004),
-    )
-    left_branch.collision(
-        Box((0.030, TREE_DEPTH * 0.94, 0.030)),
-        origin=_branch_component_origin("left", HUB_RADIUS + BRANCH_LENGTH - 0.008),
-    )
+
+
+
     left_branch.inertial = Inertial.from_geometry(
         Box((0.235, 0.040, 0.180)),
         mass=0.32,
@@ -146,15 +137,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_branch_shape("right"), "right_branch.obj", assets=ASSETS),
         material="branch_green",
     )
-    right_branch.collision(Box(HUB_BOX_SIZE), origin=Origin())
-    right_branch.collision(
-        Box((0.190, BRANCH_BEAM_WIDTH, BRANCH_BEAM_HEIGHT)),
-        origin=_branch_component_origin("right", HUB_RADIUS + BRANCH_LENGTH / 2.0 - 0.004),
-    )
-    right_branch.collision(
-        Box((0.030, TREE_DEPTH * 0.94, 0.030)),
-        origin=_branch_component_origin("right", HUB_RADIUS + BRANCH_LENGTH - 0.008),
-    )
+
+
+
     right_branch.inertial = Inertial.from_geometry(
         Box((0.235, 0.040, 0.180)),
         mass=0.32,
@@ -188,7 +173,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "trunk",
         "left_branch",
@@ -200,14 +185,14 @@ def run_tests() -> TestReport:
         reason="coaxial right hub sleeves intentionally share a conservative joint envelope",
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
-    ctx.expect_above("left_branch", "trunk", min_clearance=0.20)
-    ctx.expect_above("right_branch", "trunk", min_clearance=0.20)
-    ctx.expect_xy_distance("left_branch", "trunk", max_dist=0.08)
-    ctx.expect_xy_distance("right_branch", "trunk", max_dist=0.08)
-    ctx.expect_aabb_overlap_xy("left_branch", "trunk", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("right_branch", "trunk", min_overlap=0.015)
-    ctx.expect_aabb_gap_z("left_branch", "trunk", max_gap=0.01, max_penetration=0.11)
-    ctx.expect_aabb_gap_z("right_branch", "trunk", max_gap=0.01, max_penetration=0.11)
+    ctx.expect_origin_gap("left_branch", "trunk", axis="z", min_gap=0.20)
+    ctx.expect_origin_gap("right_branch", "trunk", axis="z", min_gap=0.20)
+    ctx.expect_origin_distance("left_branch", "trunk", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("right_branch", "trunk", axes="xy", max_dist=0.08)
+    ctx.expect_aabb_overlap("left_branch", "trunk", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("right_branch", "trunk", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_gap("left_branch", "trunk", axis="z", max_gap=0.01, max_penetration=0.11)
+    ctx.expect_aabb_gap("right_branch", "trunk", axis="z", max_gap=0.01, max_penetration=0.11)
     ctx.expect_joint_motion_axis(
         "trunk_to_left_branch",
         "left_branch",

@@ -3,9 +3,14 @@
   "record_id": "rec_pickup_tailgate_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (non-blocking): geometry overlap check reported overlaps.\nGeometry overlap check failed: part AABBs intersect at sampled articulation poses. worst_pair=('body_frame'[2], 'tailgate'[11]) min_overlap_depth=0.05m overlap_volume=0.000275m^3 pose_index=0 pose=(bed_floor_to_body_frame=0, tailgate_hinge=0). elem_a=(name='body_frame__rear_jamb_l' origin_xyz=(-1.41, 0.0, 0.1299999999999999) origin_rpy=(0.0, 0.0, 0.0) geom=Box) elem_b=(name='tailgate__inner_bottom_beam' origin_xyz=(0.0, 0.014, 0.05) origin_rpy=(0.0, 0.0, 0.0) geom=Box). hint: try moving 'tailgate' by ~0.055m along world x (or adjust the responsible articulation origin/limits / collision origins). Note: this QC is conservative (bounding boxes); concave mesh collisions can yield false positives. Fix by adjusting articulation origins/limits and/or visual/collision origins so parts do not interpenetrate in the rest pose or across the articulated range.\nIf this overlap is acceptable (e.g., conservative false-positive), explicitly allow the specific pair in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)` and then run `ctx.warn_if_overlaps(...)` so the allowance is tracked; otherwise adjust geometry/joints."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

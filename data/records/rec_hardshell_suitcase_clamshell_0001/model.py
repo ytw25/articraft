@@ -26,7 +26,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 
 BODY_W = 0.43

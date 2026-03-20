@@ -120,21 +120,9 @@ def _base_shape() -> cq.Workplane:
 def _add_base_part(model: ArticulatedObject):
     base = model.part("base")
     base.visual(mesh_from_cadquery(_base_shape(), "base.obj", assets=ASSETS), material="graphite")
-    base.collision(
-        Box((0.160, 0.085, BASE_THICKNESS)),
-        origin=Origin(xyz=(0.030, 0.0, BASE_THICKNESS / 2.0)),
-    )
+
     pedestal_height = FIRST_JOINT_Z - BASE_THICKNESS - PIVOT_CLEARANCE
-    base.collision(
-        Cylinder(radius=PIVOT_RADIUS * 0.78, length=pedestal_height),
-        origin=Origin(
-            xyz=(
-                0.0,
-                0.0,
-                BASE_THICKNESS + pedestal_height / 2.0,
-            )
-        ),
-    )
+
     base.inertial = Inertial.from_geometry(
         Box((0.160, 0.085, FIRST_JOINT_Z)),
         mass=1.5,
@@ -175,19 +163,10 @@ def _add_lever_part(
     )
 
     strip_length = max(length - 2.1 * pad_radius, 0.012)
-    part.collision(
-        Box((strip_length, width * 0.82, BAR_THICKNESS)),
-        origin=Origin(xyz=(length / 2.0, 0.0, BAR_THICKNESS / 2.0)),
-    )
-    part.collision(
-        Cylinder(radius=pad_radius * 0.66, length=BAR_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, BAR_THICKNESS / 2.0)),
-    )
+
+
     outboard_height = max(BAR_THICKNESS, standoff_height)
-    part.collision(
-        Cylinder(radius=min(pad_radius, tip_radius) * 0.66, length=outboard_height),
-        origin=Origin(xyz=(length, 0.0, outboard_height / 2.0)),
-    )
+
 
     overall_x = length + pad_radius + tip_radius
     center_x = (length + tip_radius - pad_radius) / 2.0
@@ -304,7 +283,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.0005,
@@ -340,35 +319,15 @@ def run_tests() -> TestReport:
         min_delta=0.02,
     )
 
-    ctx.expect_aabb_overlap_xy("input_lever", "base", min_overlap=0.016)
-    ctx.expect_aabb_gap_z(
-        "input_lever",
-        "base",
-        max_gap=0.0015,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_overlap_xy("relay_arm", "input_lever", min_overlap=0.012)
-    ctx.expect_aabb_gap_z(
-        "relay_arm",
-        "input_lever",
-        max_gap=0.0015,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_overlap_xy("follower_arm", "relay_arm", min_overlap=0.011)
-    ctx.expect_aabb_gap_z(
-        "follower_arm",
-        "relay_arm",
-        max_gap=0.0015,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_overlap_xy("output_lever", "follower_arm", min_overlap=0.010)
-    ctx.expect_aabb_gap_z(
-        "output_lever",
-        "follower_arm",
-        max_gap=0.0015,
-        max_penetration=0.0,
-    )
-    ctx.expect_above("output_lever", "base", min_clearance=0.02)
+    ctx.expect_aabb_overlap("input_lever", "base", axes="xy", min_overlap=0.016)
+    ctx.expect_aabb_gap("input_lever", "base", axis="z", max_gap=0.0015, max_penetration=0.0)
+    ctx.expect_aabb_overlap("relay_arm", "input_lever", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_gap("relay_arm", "input_lever", axis="z", max_gap=0.0015, max_penetration=0.0)
+    ctx.expect_aabb_overlap("follower_arm", "relay_arm", axes="xy", min_overlap=0.011)
+    ctx.expect_aabb_gap("follower_arm", "relay_arm", axis="z", max_gap=0.0015, max_penetration=0.0)
+    ctx.expect_aabb_overlap("output_lever", "follower_arm", axes="xy", min_overlap=0.010)
+    ctx.expect_aabb_gap("output_lever", "follower_arm", axis="z", max_gap=0.0015, max_penetration=0.0)
+    ctx.expect_origin_gap("output_lever", "base", axis="z", min_gap=0.02)
     return ctx.report()
 
 

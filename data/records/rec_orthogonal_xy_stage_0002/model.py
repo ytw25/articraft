@@ -227,15 +227,9 @@ def build_object_model() -> ArticulatedObject:
         "x_rails.obj",
         "rail_steel",
     )
-    base.collision(Box((BASE_L, BASE_W, BASE_T)))
-    base.collision(
-        Box((X_RAIL_LEN, X_RAIL_W, X_RAIL_H)),
-        origin=Origin(xyz=(0.0, -X_RAIL_SPACING / 2.0, BASE_T / 2.0 + X_RAIL_H / 2.0)),
-    )
-    base.collision(
-        Box((X_RAIL_LEN, X_RAIL_W, X_RAIL_H)),
-        origin=Origin(xyz=(0.0, X_RAIL_SPACING / 2.0, BASE_T / 2.0 + X_RAIL_H / 2.0)),
-    )
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_L, BASE_W, BASE_T + X_RAIL_H)),
         mass=2.6,
@@ -281,22 +275,10 @@ def build_object_model() -> ArticulatedObject:
     _add_visual_mesh(x_stage, y_rails, "y_rails.obj", "rail_steel")
     for x_offset in (-X_BLOCK_SPACING_X / 2.0, X_BLOCK_SPACING_X / 2.0):
         for y_offset in (-X_RAIL_SPACING / 2.0, X_RAIL_SPACING / 2.0):
-            x_stage.collision(
-                Box((X_BLOCK_L, X_BLOCK_W, X_BLOCK_H)),
-                origin=Origin(xyz=(x_offset, y_offset, X_BLOCK_H / 2.0)),
-            )
-    x_stage.collision(
-        Box((X_CARRIAGE_L, X_CARRIAGE_W, X_CARRIAGE_T)),
-        origin=Origin(xyz=(0.0, 0.0, X_BLOCK_H + X_CARRIAGE_T / 2.0)),
-    )
-    x_stage.collision(
-        Box((Y_RAIL_W, Y_RAIL_LEN, Y_RAIL_H)),
-        origin=Origin(xyz=(-Y_RAIL_SPACING / 2.0, 0.0, X_BLOCK_H + X_CARRIAGE_T + Y_RAIL_H / 2.0)),
-    )
-    x_stage.collision(
-        Box((Y_RAIL_W, Y_RAIL_LEN, Y_RAIL_H)),
-        origin=Origin(xyz=(Y_RAIL_SPACING / 2.0, 0.0, X_BLOCK_H + X_CARRIAGE_T + Y_RAIL_H / 2.0)),
-    )
+            pass
+
+
+
     x_stage.inertial = Inertial.from_geometry(
         Box((X_CARRIAGE_L, X_CARRIAGE_W, Y_JOINT_Z)),
         mass=1.3,
@@ -344,18 +326,9 @@ def build_object_model() -> ArticulatedObject:
     _add_visual_mesh(y_stage, tool_mount, "tool_mount.obj", "rail_steel")
     for x_offset in (-Y_RAIL_SPACING / 2.0, Y_RAIL_SPACING / 2.0):
         for y_offset in (-Y_BLOCK_SPACING_Y / 2.0, Y_BLOCK_SPACING_Y / 2.0):
-            y_stage.collision(
-                Box((Y_BLOCK_L, Y_BLOCK_W, Y_BLOCK_H)),
-                origin=Origin(xyz=(x_offset, y_offset, Y_BLOCK_H / 2.0)),
-            )
-    y_stage.collision(
-        Box((Y_STAGE_L, Y_STAGE_W, Y_STAGE_T)),
-        origin=Origin(xyz=(0.0, 0.0, Y_BLOCK_H + Y_STAGE_T / 2.0)),
-    )
-    y_stage.collision(
-        Box((TOOL_MOUNT_W, TOOL_MOUNT_W, TOOL_MOUNT_H)),
-        origin=Origin(xyz=(0.0, 0.0, Y_BLOCK_H + Y_STAGE_T + TOOL_MOUNT_H / 2.0)),
-    )
+            pass
+
+
     y_stage.inertial = Inertial.from_geometry(
         Box((Y_STAGE_L, Y_STAGE_W, Y_BLOCK_H + Y_STAGE_T + TOOL_MOUNT_H)),
         mass=0.85,
@@ -399,7 +372,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
 
     mesh_dir = Path(MESH_DIR)
     for mesh_name in TOPOLOGY_QC_MESHES:
@@ -411,13 +384,13 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("x_stage", "base", max_dist=0.001)
-    ctx.expect_xy_distance("y_stage", "x_stage", max_dist=0.001)
-    ctx.expect_aabb_gap_z("x_stage", "base", max_gap=0.002, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("y_stage", "x_stage", max_gap=0.002, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("x_stage", "base", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("y_stage", "x_stage", min_overlap=0.06)
-    ctx.expect_above("y_stage", "base", min_clearance=0.02)
+    ctx.expect_origin_distance("x_stage", "base", axes="xy", max_dist=0.001)
+    ctx.expect_origin_distance("y_stage", "x_stage", axes="xy", max_dist=0.001)
+    ctx.expect_aabb_gap("x_stage", "base", axis="z", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_aabb_gap("y_stage", "x_stage", axis="z", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_aabb_overlap("x_stage", "base", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("y_stage", "x_stage", axes="xy", min_overlap=0.06)
+    ctx.expect_origin_gap("y_stage", "base", axis="z", min_gap=0.02)
     ctx.expect_joint_motion_axis(
         "x_slide",
         "x_stage",
@@ -434,28 +407,28 @@ def run_tests() -> TestReport:
     )
 
     with _pose_context(ctx, x_slide=-X_TRAVEL, y_slide=0.0):
-        ctx.expect_aabb_gap_z("x_stage", "base", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("x_stage", "base", min_overlap=0.10)
-        ctx.expect_aabb_gap_z("y_stage", "x_stage", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_gap("x_stage", "base", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_overlap("x_stage", "base", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_gap("y_stage", "x_stage", axis="z", max_gap=0.002, max_penetration=0.0)
 
     with _pose_context(ctx, x_slide=X_TRAVEL, y_slide=0.0):
-        ctx.expect_aabb_gap_z("x_stage", "base", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("x_stage", "base", min_overlap=0.10)
-        ctx.expect_aabb_gap_z("y_stage", "x_stage", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_gap("x_stage", "base", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_overlap("x_stage", "base", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_gap("y_stage", "x_stage", axis="z", max_gap=0.002, max_penetration=0.0)
 
     with _pose_context(ctx, x_slide=0.0, y_slide=-Y_TRAVEL):
-        ctx.expect_aabb_gap_z("y_stage", "x_stage", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("y_stage", "x_stage", min_overlap=0.05)
+        ctx.expect_aabb_gap("y_stage", "x_stage", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_overlap("y_stage", "x_stage", axes="xy", min_overlap=0.05)
 
     with _pose_context(ctx, x_slide=0.0, y_slide=Y_TRAVEL):
-        ctx.expect_aabb_gap_z("y_stage", "x_stage", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("y_stage", "x_stage", min_overlap=0.05)
+        ctx.expect_aabb_gap("y_stage", "x_stage", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_overlap("y_stage", "x_stage", axes="xy", min_overlap=0.05)
 
     with _pose_context(ctx, x_slide=X_TRAVEL, y_slide=Y_TRAVEL):
-        ctx.expect_aabb_gap_z("x_stage", "base", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("y_stage", "x_stage", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("x_stage", "base", min_overlap=0.10)
-        ctx.expect_aabb_overlap_xy("y_stage", "x_stage", min_overlap=0.05)
+        ctx.expect_aabb_gap("x_stage", "base", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_gap("y_stage", "x_stage", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_overlap("x_stage", "base", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_overlap("y_stage", "x_stage", axes="xy", min_overlap=0.05)
 
     return ctx.report()
 

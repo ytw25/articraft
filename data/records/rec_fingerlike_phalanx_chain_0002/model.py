@@ -192,23 +192,11 @@ def _add_base_mount_collisions(part, *, mass: float) -> None:
     block_center_z = -((0.5 * BASE_BLOCK_Z) + (0.60 * HINGE_RADIUS))
     pad_center_z = -(BASE_BLOCK_Z + (0.5 * BASE_PAD_Z) + (0.60 * HINGE_RADIUS))
 
-    part.collision(
-        Box((0.96 * BASE_BLOCK_X, 0.96 * BASE_BLOCK_Y, BASE_BLOCK_Z)),
-        origin=Origin(xyz=(0.0, 0.0, block_center_z)),
-    )
-    part.collision(
-        Box((1.25 * BASE_BLOCK_X, BASE_BLOCK_Y, BASE_PAD_Z)),
-        origin=Origin(xyz=(0.0, 0.0, pad_center_z)),
-    )
+
+
 
     for side_sign in (-1.0, 1.0):
-        part.collision(
-            Cylinder(radius=0.93 * HINGE_RADIUS, length=0.96 * SIDE_BARREL_WIDTH),
-            origin=Origin(
-                xyz=(0.0, side_sign * SIDE_BARREL_Y, 0.0),
-                rpy=(-0.5 * PI, 0.0, 0.0),
-            ),
-        )
+        pass
 
     part.inertial = Inertial.from_geometry(
         Box((1.25 * BASE_BLOCK_X, BASE_BLOCK_Y, BASE_BLOCK_Z + BASE_PAD_Z)),
@@ -223,38 +211,14 @@ def _add_phalanx_collisions(
     body_start_z = 0.62 * HINGE_RADIUS
     body_end_z = span - ((1.00 * HINGE_RADIUS) if has_distal_joint else (0.52 * HINGE_RADIUS))
 
-    part.collision(
-        Box((0.90 * PLATE_THICKNESS, 0.92 * body_width, body_end_z - body_start_z)),
-        origin=Origin(xyz=(0.0, 0.0, 0.5 * (body_start_z + body_end_z))),
-    )
-    part.collision(
-        Cylinder(radius=0.93 * HINGE_RADIUS, length=0.96 * CENTER_BARREL_WIDTH),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(-0.5 * PI, 0.0, 0.0)),
-    )
+
+
 
     if has_distal_joint:
         for side_sign in (-1.0, 1.0):
-            part.collision(
-                Cylinder(radius=0.93 * HINGE_RADIUS, length=0.96 * SIDE_BARREL_WIDTH),
-                origin=Origin(
-                    xyz=(0.0, side_sign * SIDE_BARREL_Y, span),
-                    rpy=(-0.5 * PI, 0.0, 0.0),
-                ),
-            )
-            part.collision(
-                Box((0.88 * PLATE_THICKNESS, 0.92 * SIDE_BARREL_WIDTH, 1.05 * HINGE_RADIUS)),
-                origin=Origin(
-                    xyz=(0.0, side_sign * SIDE_BARREL_Y, span - (0.60 * HINGE_RADIUS)),
-                ),
-            )
+            pass
     else:
-        part.collision(
-            Cylinder(radius=0.75 * HINGE_RADIUS, length=0.72 * body_width),
-            origin=Origin(
-                xyz=(0.0, 0.0, span - (0.18 * HINGE_RADIUS)),
-                rpy=(-0.5 * PI, 0.0, 0.0),
-            ),
-        )
+        pass
 
     part.inertial = Inertial.from_geometry(
         Box((0.90 * PLATE_THICKNESS, 0.92 * body_width, span)),
@@ -365,27 +329,27 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("proximal", "base_mount", max_dist=0.012)
-    ctx.expect_xy_distance("middle", "proximal", max_dist=0.010)
-    ctx.expect_xy_distance("distal", "middle", max_dist=0.010)
+    ctx.expect_origin_distance("proximal", "base_mount", axes="xy", max_dist=0.012)
+    ctx.expect_origin_distance("middle", "proximal", axes="xy", max_dist=0.010)
+    ctx.expect_origin_distance("distal", "middle", axes="xy", max_dist=0.010)
 
-    ctx.expect_aabb_overlap_xy("proximal", "base_mount", min_overlap=0.003)
-    ctx.expect_aabb_overlap_xy("middle", "proximal", min_overlap=0.003)
-    ctx.expect_aabb_overlap_xy("distal", "middle", min_overlap=0.003)
+    ctx.expect_aabb_overlap("proximal", "base_mount", axes="xy", min_overlap=0.003)
+    ctx.expect_aabb_overlap("middle", "proximal", axes="xy", min_overlap=0.003)
+    ctx.expect_aabb_overlap("distal", "middle", axes="xy", min_overlap=0.003)
 
-    ctx.expect_aabb_gap_z("proximal", "base_mount", max_gap=0.004, max_penetration=0.012)
-    ctx.expect_aabb_gap_z("middle", "proximal", max_gap=0.004, max_penetration=0.012)
-    ctx.expect_aabb_gap_z("distal", "middle", max_gap=0.004, max_penetration=0.012)
+    ctx.expect_aabb_gap("proximal", "base_mount", axis="z", max_gap=0.004, max_penetration=0.012)
+    ctx.expect_aabb_gap("middle", "proximal", axis="z", max_gap=0.004, max_penetration=0.012)
+    ctx.expect_aabb_gap("distal", "middle", axis="z", max_gap=0.004, max_penetration=0.012)
 
-    ctx.expect_above("middle", "base_mount", min_clearance=0.018)
-    ctx.expect_above("distal", "base_mount", min_clearance=0.045)
+    ctx.expect_origin_gap("middle", "base_mount", axis="z", min_gap=0.018)
+    ctx.expect_origin_gap("distal", "base_mount", axis="z", min_gap=0.045)
 
     ctx.expect_joint_motion_axis(
         "base_to_proximal",

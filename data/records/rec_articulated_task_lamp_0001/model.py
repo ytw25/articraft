@@ -463,10 +463,10 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("lower_arm", "base", min_overlap=0.03)
-    ctx.expect_xy_distance("lower_arm", "base", max_dist=0.09)
-    ctx.expect_xy_distance("upper_arm", "base", max_dist=0.14)
-    ctx.expect_xy_distance("head", "base", max_dist=0.18)
+    ctx.expect_aabb_overlap("lower_arm", "base", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("lower_arm", "base", axes="xy", max_dist=0.09)
+    ctx.expect_origin_distance("upper_arm", "base", axes="xy", max_dist=0.14)
+    ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.18)
     ctx.expect_joint_motion_axis(
         "shoulder_pitch",
         "lower_arm",
@@ -483,18 +483,18 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(shoulder_pitch=0.18, elbow_pitch=0.72, head_tilt=-0.90):
-        ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.02)
-        ctx.expect_xy_distance("head", "base", max_dist=0.08)
-        ctx.expect_xy_distance("head", "upper_arm", max_dist=0.10)
+        ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.02)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.08)
+        ctx.expect_origin_distance("head", "upper_arm", axes="xy", max_dist=0.10)
 
     with ctx.pose(shoulder_pitch=-0.20, elbow_pitch=0.20, head_tilt=-0.55):
-        ctx.expect_xy_distance("head", "base", max_dist=0.23)
-        ctx.expect_xy_distance("head", "upper_arm", max_dist=0.11)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.23)
+        ctx.expect_origin_distance("head", "upper_arm", axes="xy", max_dist=0.11)
 
     with ctx.pose(shoulder_pitch=0.55, elbow_pitch=0.60, head_tilt=0.20):
-        ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.01)
-        ctx.expect_xy_distance("head", "base", max_dist=0.12)
-        ctx.expect_xy_distance("head", "upper_arm", max_dist=0.11)
+        ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.01)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.12)
+        ctx.expect_origin_distance("head", "upper_arm", axes="xy", max_dist=0.11)
 
     return ctx.report()
 

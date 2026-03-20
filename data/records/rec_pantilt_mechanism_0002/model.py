@@ -126,11 +126,8 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _make_base_shape(), "base.obj", "anodized_gray")
-    base.collision(Box(BASE_SIZE), origin=Origin(xyz=(0.0, 0.0, BASE_SIZE[2] / 2.0)))
-    base.collision(
-        Cylinder(radius=PEDESTAL_RADIUS, length=PEDESTAL_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, BASE_SIZE[2] + PEDESTAL_HEIGHT / 2.0)),
-    )
+
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_SIZE[0], BASE_SIZE[1], BASE_SIZE[2] + PEDESTAL_HEIGHT)),
         mass=0.80,
@@ -139,34 +136,10 @@ def build_object_model() -> ArticulatedObject:
 
     pan_yoke = model.part("pan_yoke")
     _add_mesh_visual(pan_yoke, _make_pan_yoke_shape(), "pan_yoke.obj", "powder_black")
-    pan_yoke.collision(
-        Cylinder(radius=PAN_COLLAR_RADIUS, length=PAN_COLLAR_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, PAN_COLLAR_HEIGHT / 2.0)),
-    )
-    pan_yoke.collision(
-        Box(PAN_DECK_SIZE),
-        origin=Origin(xyz=(0.0, 0.0, PAN_COLLAR_HEIGHT + PAN_DECK_SIZE[2] / 2.0)),
-    )
-    pan_yoke.collision(
-        Box(YOKE_ARM_SIZE),
-        origin=Origin(
-            xyz=(
-                0.0,
-                YOKE_ARM_Y,
-                PAN_COLLAR_HEIGHT + PAN_DECK_SIZE[2] + YOKE_ARM_SIZE[2] / 2.0,
-            )
-        ),
-    )
-    pan_yoke.collision(
-        Box(YOKE_ARM_SIZE),
-        origin=Origin(
-            xyz=(
-                0.0,
-                -YOKE_ARM_Y,
-                PAN_COLLAR_HEIGHT + PAN_DECK_SIZE[2] + YOKE_ARM_SIZE[2] / 2.0,
-            )
-        ),
-    )
+
+
+
+
     pan_yoke.inertial = Inertial.from_geometry(
         Box((0.062, 0.054, 0.068)),
         mass=0.45,
@@ -180,11 +153,8 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(SENSOR_X_OFFSET - 0.048, 0.0, 0.0), rpy=(0.0, HALF_PI, 0.0)),
         material="sensor_glass",
     )
-    sensor_head.collision(Box(SENSOR_BODY_SIZE), origin=Origin(xyz=(SENSOR_X_OFFSET, 0.0, 0.0)))
-    sensor_head.collision(
-        Cylinder(radius=0.011, length=0.014),
-        origin=Origin(xyz=(SENSOR_X_OFFSET - 0.036, 0.0, 0.0), rpy=(0.0, HALF_PI, 0.0)),
-    )
+
+
     sensor_head.inertial = Inertial.from_geometry(
         Box(SENSOR_MASS_PROXY_SIZE),
         mass=0.22,
@@ -228,16 +198,16 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("pan_yoke", "base", max_dist=0.005)
-    ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-    ctx.expect_xy_distance("sensor_head", "pan_yoke", max_dist=0.030)
-    ctx.expect_aabb_overlap_xy("pan_yoke", "base", min_overlap=0.040)
-    ctx.expect_aabb_overlap_xy("sensor_head", "pan_yoke", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("pan_yoke", "base", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_above("sensor_head", "base", min_clearance=0.020)
+    ctx.expect_origin_distance("pan_yoke", "base", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+    ctx.expect_origin_distance("sensor_head", "pan_yoke", axes="xy", max_dist=0.030)
+    ctx.expect_aabb_overlap("pan_yoke", "base", axes="xy", min_overlap=0.040)
+    ctx.expect_aabb_overlap("sensor_head", "pan_yoke", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("pan_yoke", "base", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_origin_gap("sensor_head", "base", axis="z", min_gap=0.020)
     ctx.expect_joint_motion_axis(
         "base_to_pan",
         "sensor_head",
@@ -254,31 +224,31 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(base_to_pan=PAN_LIMIT):
-        ctx.expect_xy_distance("pan_yoke", "base", max_dist=0.005)
-        ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-        ctx.expect_above("sensor_head", "base", min_clearance=0.020)
+        ctx.expect_origin_distance("pan_yoke", "base", axes="xy", max_dist=0.005)
+        ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+        ctx.expect_origin_gap("sensor_head", "base", axis="z", min_gap=0.020)
 
     with ctx.pose(base_to_pan=-PAN_LIMIT):
-        ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-        ctx.expect_aabb_overlap_xy("pan_yoke", "base", min_overlap=0.040)
+        ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+        ctx.expect_aabb_overlap("pan_yoke", "base", axes="xy", min_overlap=0.040)
 
     with ctx.pose(pan_to_sensor=TILT_LOWER):
-        ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-        ctx.expect_above("sensor_head", "base", min_clearance=0.020)
-        ctx.expect_aabb_overlap_xy("sensor_head", "pan_yoke", min_overlap=0.018)
+        ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+        ctx.expect_origin_gap("sensor_head", "base", axis="z", min_gap=0.020)
+        ctx.expect_aabb_overlap("sensor_head", "pan_yoke", axes="xy", min_overlap=0.018)
 
     with ctx.pose(pan_to_sensor=TILT_UPPER):
-        ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-        ctx.expect_above("sensor_head", "base", min_clearance=0.020)
-        ctx.expect_aabb_overlap_xy("sensor_head", "pan_yoke", min_overlap=0.018)
+        ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+        ctx.expect_origin_gap("sensor_head", "base", axis="z", min_gap=0.020)
+        ctx.expect_aabb_overlap("sensor_head", "pan_yoke", axes="xy", min_overlap=0.018)
 
     with ctx.pose(base_to_pan=1.6, pan_to_sensor=TILT_LOWER):
-        ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-        ctx.expect_above("sensor_head", "base", min_clearance=0.020)
+        ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+        ctx.expect_origin_gap("sensor_head", "base", axis="z", min_gap=0.020)
 
     with ctx.pose(base_to_pan=-1.6, pan_to_sensor=TILT_UPPER):
-        ctx.expect_xy_distance("sensor_head", "base", max_dist=0.030)
-        ctx.expect_above("sensor_head", "base", min_clearance=0.020)
+        ctx.expect_origin_distance("sensor_head", "base", axes="xy", max_dist=0.030)
+        ctx.expect_origin_gap("sensor_head", "base", axis="z", min_gap=0.020)
 
     return ctx.report()
 

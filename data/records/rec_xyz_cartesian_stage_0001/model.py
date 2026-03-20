@@ -103,7 +103,7 @@ def build_object_model() -> ArticulatedObject:
         ((-0.305, 0.0, 0.088), (0.028, 0.54, 0.024)),
         ((0.305, 0.0, 0.088), (0.028, 0.54, 0.024)),
     ):
-        base.collision(Box(size), origin=Origin(xyz=center))
+        pass
     base.inertial = Inertial.from_geometry(
         Box((0.84, 0.62, 0.12)),
         mass=18.0,
@@ -125,7 +125,7 @@ def build_object_model() -> ArticulatedObject:
         ((0.305, 0.0, 0.322), (0.70, 0.06, 0.06)),
         ((0.305, -0.035, 0.305), (0.58, 0.022, 0.04)),
     ):
-        gantry.collision(Box(size), origin=Origin(xyz=center))
+        pass
     gantry.inertial = Inertial.from_geometry(
         Box((0.72, 0.14, 0.42)),
         mass=6.5,
@@ -139,7 +139,7 @@ def build_object_model() -> ArticulatedObject:
         ((0.0, 0.02, 0.055), (0.15, 0.06, 0.03)),
         ((0.0, 0.0, -0.08), (0.18, 0.08, 0.02)),
     ):
-        x_carriage.collision(Box(size), origin=Origin(xyz=center))
+        pass
     x_carriage.inertial = Inertial.from_geometry(
         Box((0.18, 0.12, 0.14)),
         mass=2.2,
@@ -153,7 +153,7 @@ def build_object_model() -> ArticulatedObject:
         ((0.0, 0.0, -0.07), (0.07, 0.06, 0.10)),
         ((0.0, 0.0, -0.13), (0.10, 0.08, 0.02)),
     ):
-        z_slide.collision(Box(size), origin=Origin(xyz=center))
+        pass
     z_slide.inertial = Inertial.from_geometry(
         Box((0.16, 0.10, 0.16)),
         mass=1.4,
@@ -196,7 +196,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -221,17 +221,17 @@ def run_tests() -> TestReport:
         min_delta=0.01,
     )
 
-    ctx.expect_xy_distance("x_carriage", "z_slide", max_dist=0.01)
-    ctx.expect_xy_distance("z_slide", "base", max_dist=0.06)
+    ctx.expect_origin_distance("x_carriage", "z_slide", axes="xy", max_dist=0.01)
+    ctx.expect_origin_distance("z_slide", "base", axes="xy", max_dist=0.06)
 
-    ctx.expect_aabb_overlap_xy("gantry", "base", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("x_carriage", "gantry", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("z_slide", "x_carriage", min_overlap=0.02)
+    ctx.expect_aabb_overlap("gantry", "base", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("x_carriage", "gantry", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("z_slide", "x_carriage", axes="xy", min_overlap=0.02)
 
-    ctx.expect_aabb_gap_z("gantry", "base", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_above("gantry", "base", min_clearance=0.0)
-    ctx.expect_above("x_carriage", "base", min_clearance=0.22)
-    ctx.expect_above("z_slide", "base", min_clearance=0.10)
+    ctx.expect_aabb_gap("gantry", "base", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_gap("gantry", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("x_carriage", "base", axis="z", min_gap=0.22)
+    ctx.expect_origin_gap("z_slide", "base", axis="z", min_gap=0.10)
     return ctx.report()
 
 

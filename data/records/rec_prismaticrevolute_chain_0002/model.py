@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 from math import cos, sin
@@ -249,7 +249,7 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_rail_shape(cq), MESH_DIR / "rail.obj"),
         material="anodized_aluminum",
     )
-    rail.collision(Box((RAIL_LENGTH, RAIL_DEPTH, RAIL_HEIGHT)))
+
     rail.inertial = Inertial.from_geometry(
         Box((RAIL_LENGTH, RAIL_DEPTH, RAIL_HEIGHT)),
         mass=RAIL_MASS,
@@ -260,36 +260,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_carriage_shape(cq), MESH_DIR / "carriage.obj"),
         material="powder_coat",
     )
-    carriage.collision(
-        Box((CARRIAGE_WIDTH, CARRIAGE_BODY_DEPTH, CARRIAGE_BODY_HEIGHT)),
-        origin=Origin(xyz=(0.0, CARRIAGE_BODY_DEPTH / 2.0, 0.0)),
-    )
-    carriage.collision(
-        Box(
-            (
-                CARRIAGE_UPRIGHT_WIDTH,
-                CARRIAGE_UPRIGHT_DEPTH,
-                CARRIAGE_UPRIGHT_HEIGHT,
-            )
-        ),
-        origin=Origin(
-            xyz=(
-                0.0,
-                CARRIAGE_UPRIGHT_CENTER_Y,
-                CARRIAGE_UPRIGHT_CENTER_Z,
-            )
-        ),
-    )
-    carriage.collision(
-        Box((CARRIAGE_ARM_WIDTH, CARRIAGE_ARM_DEPTH, CARRIAGE_ARM_HEIGHT)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                CARRIAGE_ARM_CENTER_Y,
-                CARRIAGE_ARM_CENTER_Z,
-            )
-        ),
-    )
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((CARRIAGE_WIDTH, 0.048, 0.082)),
         mass=CARRIAGE_MASS,
@@ -301,10 +274,7 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_display_shape(cq), MESH_DIR / "display_plate.obj"),
         material="display_black",
     )
-    display_plate.collision(
-        Box((DISPLAY_WIDTH, DISPLAY_THICKNESS, DISPLAY_HEIGHT)),
-        origin=Origin(xyz=(0.0, DISPLAY_THICKNESS / 2.0, -DISPLAY_HEIGHT / 2.0)),
-    )
+
     display_plate.inertial = Inertial.from_geometry(
         Box((DISPLAY_WIDTH, DISPLAY_THICKNESS, DISPLAY_HEIGHT)),
         mass=DISPLAY_MASS,
@@ -364,15 +334,15 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_xy_distance("carriage", "rail", max_dist=0.04)
-    ctx.expect_xy_distance("display_plate", "carriage", max_dist=0.08)
-    ctx.expect_xy_distance("display_plate", "rail", max_dist=0.08)
+    ctx.expect_origin_distance("carriage", "rail", axes="xy", max_dist=0.04)
+    ctx.expect_origin_distance("display_plate", "carriage", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("display_plate", "rail", axes="xy", max_dist=0.08)
     ctx.expect_joint_motion_axis(
         "rail_to_carriage",
         "carriage",

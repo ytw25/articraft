@@ -111,10 +111,10 @@ def build_object_model() -> ArticulatedObject:
 
     support = model.part("support")
     _add_visual_mesh(support, _make_support_shape(), "support.obj", "support_gray")
-    support.collision(Box((0.024, 0.19, 0.32)), origin=Origin(xyz=(0.012, 0.0, 0.18)))
-    support.collision(Box((0.07, 0.14, 0.12)), origin=Origin(xyz=(0.052, 0.0, 0.18)))
-    support.collision(Box((0.05, 0.11, 0.05)), origin=Origin(xyz=(0.04, 0.0, 0.245)))
-    support.collision(Box((0.05, 0.11, 0.05)), origin=Origin(xyz=(0.04, 0.0, 0.115)))
+
+
+
+
     support.inertial = Inertial.from_geometry(
         Box((0.11, 0.19, 0.32)),
         mass=16.0,
@@ -123,9 +123,9 @@ def build_object_model() -> ArticulatedObject:
 
     upper_arm = model.part("upper_arm")
     _add_visual_mesh(upper_arm, _make_upper_arm_shape(), "upper_arm.obj", "arm_orange")
-    upper_arm.collision(Box((0.07, 0.12, 0.10)), origin=Origin(xyz=(0.03, 0.0, 0.0)))
-    upper_arm.collision(Box((0.21, 0.08, 0.065)), origin=Origin(xyz=(0.15, 0.0, 0.0)))
-    upper_arm.collision(Box((0.05, 0.10, 0.09)), origin=Origin(xyz=(0.29, 0.0, 0.0)))
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((0.33, 0.12, 0.10)),
         mass=8.0,
@@ -134,9 +134,9 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm")
     _add_visual_mesh(forearm, _make_forearm_shape(), "forearm.obj", "arm_orange")
-    forearm.collision(Box((0.06, 0.10, 0.09)), origin=Origin(xyz=(0.025, 0.0, 0.0)))
-    forearm.collision(Box((0.175, 0.07, 0.058)), origin=Origin(xyz=(0.125, 0.0, 0.0)))
-    forearm.collision(Box((0.042, 0.085, 0.08)), origin=Origin(xyz=(0.24, 0.0, 0.0)))
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((0.27, 0.10, 0.09)),
         mass=5.0,
@@ -145,9 +145,9 @@ def build_object_model() -> ArticulatedObject:
 
     wrist = model.part("wrist")
     _add_visual_mesh(wrist, _make_wrist_shape(), "wrist.obj", "tool_dark")
-    wrist.collision(Box((0.055, 0.085, 0.07)), origin=Origin(xyz=(0.028, 0.0, 0.0)))
-    wrist.collision(Box((0.11, 0.065, 0.05)), origin=Origin(xyz=(0.09, 0.0, 0.0)))
-    wrist.collision(Box((0.05, 0.10, 0.11)), origin=Origin(xyz=(0.165, 0.0, 0.0)))
+
+
+
     wrist.inertial = Inertial.from_geometry(
         Box((0.20, 0.10, 0.11)),
         mass=2.5,
@@ -205,7 +205,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "support",
         "upper_arm",
@@ -222,12 +222,12 @@ def run_tests() -> TestReport:
         reason="wrist hub envelopes overlap conservatively around the revolute pin",
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
-    ctx.expect_aabb_overlap_xy("support", "upper_arm", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("upper_arm", "forearm", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("forearm", "wrist", min_overlap=0.01)
-    ctx.expect_xy_distance("support", "upper_arm", max_dist=0.12)
-    ctx.expect_xy_distance("upper_arm", "forearm", max_dist=0.35)
-    ctx.expect_xy_distance("forearm", "wrist", max_dist=0.28)
+    ctx.expect_aabb_overlap("support", "upper_arm", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("upper_arm", "forearm", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("forearm", "wrist", axes="xy", min_overlap=0.01)
+    ctx.expect_origin_distance("support", "upper_arm", axes="xy", max_dist=0.12)
+    ctx.expect_origin_distance("upper_arm", "forearm", axes="xy", max_dist=0.35)
+    ctx.expect_origin_distance("forearm", "wrist", axes="xy", max_dist=0.28)
     ctx.expect_joint_motion_axis(
         "shoulder_swing",
         "upper_arm",

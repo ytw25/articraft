@@ -366,9 +366,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("upper_drawer", "body", min_overlap=0.12)
-    ctx.expect_aabb_overlap_xy("lower_drawer", "body", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("upper_drawer", "lower_drawer", max_gap=0.10, max_penetration=0.0)
+    ctx.expect_aabb_overlap("upper_drawer", "body", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_overlap("lower_drawer", "body", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("upper_drawer", "lower_drawer", axis="z", max_gap=0.10, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "upper_drawer_slide", "upper_drawer", world_axis="x", direction="positive", min_delta=0.08
     )
@@ -382,7 +382,7 @@ def run_tests() -> TestReport:
         "rear_left_caster_fork",
         "rear_right_caster_fork",
     ):
-        ctx.expect_aabb_gap_z("body", fork_name, max_gap=0.006, max_penetration=0.0)
+        ctx.expect_aabb_gap("body", fork_name, axis="z", max_gap=0.006, max_penetration=0.0)
 
     for wheel_name in (
         "front_left_caster_wheel",
@@ -390,18 +390,18 @@ def run_tests() -> TestReport:
         "rear_left_caster_wheel",
         "rear_right_caster_wheel",
     ):
-        ctx.expect_aabb_overlap_xy(wheel_name, "body", min_overlap=0.010)
+        ctx.expect_aabb_overlap(wheel_name, "body", axes="xy", min_overlap=0.010)
 
     with ctx.pose(upper_drawer_slide=0.230):
-        ctx.expect_aabb_overlap_xy("upper_drawer", "body", min_overlap=0.10)
+        ctx.expect_aabb_overlap("upper_drawer", "body", axes="xy", min_overlap=0.10)
 
     with ctx.pose(lower_drawer_slide=0.230):
-        ctx.expect_aabb_overlap_xy("lower_drawer", "body", min_overlap=0.10)
+        ctx.expect_aabb_overlap("lower_drawer", "body", axes="xy", min_overlap=0.10)
 
     with ctx.pose(upper_drawer_slide=0.230, lower_drawer_slide=0.230):
-        ctx.expect_aabb_overlap_xy("upper_drawer", "body", min_overlap=0.10)
-        ctx.expect_aabb_overlap_xy("lower_drawer", "body", min_overlap=0.10)
-        ctx.expect_aabb_gap_z("upper_drawer", "lower_drawer", max_gap=0.10, max_penetration=0.0)
+        ctx.expect_aabb_overlap("upper_drawer", "body", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_overlap("lower_drawer", "body", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_gap("upper_drawer", "lower_drawer", axis="z", max_gap=0.10, max_penetration=0.0)
 
     with ctx.pose(
         front_left_caster_swivel=math.pi / 4.0,
@@ -411,10 +411,10 @@ def run_tests() -> TestReport:
         front_left_wheel_roll=1.2,
         front_right_wheel_roll=-0.8,
     ):
-        ctx.expect_aabb_gap_z("body", "front_left_caster_fork", max_gap=0.006, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("body", "front_right_caster_fork", max_gap=0.006, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("front_left_caster_wheel", "body", min_overlap=0.010)
-        ctx.expect_aabb_overlap_xy("front_right_caster_wheel", "body", min_overlap=0.010)
+        ctx.expect_aabb_gap("body", "front_left_caster_fork", axis="z", max_gap=0.006, max_penetration=0.0)
+        ctx.expect_aabb_gap("body", "front_right_caster_fork", axis="z", max_gap=0.006, max_penetration=0.0)
+        ctx.expect_aabb_overlap("front_left_caster_wheel", "body", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_overlap("front_right_caster_wheel", "body", axes="xy", min_overlap=0.010)
 
     return ctx.report()
 

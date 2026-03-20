@@ -122,14 +122,11 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_pedestal_shape(), "pedestal.obj", assets=ASSETS),
         material="graphite",
     )
-    pedestal.collision(Box((0.32, 0.24, 0.04)), origin=Origin(xyz=(0.0, 0.0, 0.02)))
-    pedestal.collision(Box((0.11, 0.14, 0.26)), origin=Origin(xyz=(0.0, 0.0, 0.17)))
-    pedestal.collision(Box((0.08, 0.02, 0.12)), origin=Origin(xyz=(0.07, 0.065, 0.32)))
-    pedestal.collision(Box((0.08, 0.02, 0.12)), origin=Origin(xyz=(0.07, -0.065, 0.32)))
-    pedestal.collision(
-        Cylinder(radius=0.032, length=0.03),
-        origin=Origin(xyz=SHOULDER_ORIGIN, rpy=Y_AXIS_CYLINDER_RPY),
-    )
+
+
+
+
+
     pedestal.inertial = Inertial.from_geometry(
         Box((0.32, 0.24, 0.38)),
         mass=18.0,
@@ -141,15 +138,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_upper_arm_shape(), "upper_arm.obj", assets=ASSETS),
         material="safety_orange",
     )
-    upper_arm.collision(Box((0.37, 0.06, 0.05)), origin=Origin(xyz=(0.22, 0.0, 0.0)))
-    upper_arm.collision(
-        Cylinder(radius=0.05, length=0.10),
-        origin=Origin(rpy=Y_AXIS_CYLINDER_RPY),
-    )
-    upper_arm.collision(
-        Cylinder(radius=0.024, length=0.03),
-        origin=Origin(xyz=ELBOW_OFFSET, rpy=Y_AXIS_CYLINDER_RPY),
-    )
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((0.46, 0.10, 0.12)),
         mass=4.8,
@@ -161,12 +152,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_forearm_shape(), "forearm.obj", assets=ASSETS),
         material="tool_black",
     )
-    forearm.collision(Box((0.23, 0.045, 0.04)), origin=Origin(xyz=(0.13, 0.0, 0.0)))
-    forearm.collision(Box((0.05, 0.085, 0.075)), origin=Origin(xyz=(0.275, 0.0, 0.0)))
-    forearm.collision(
-        Cylinder(radius=0.038, length=0.075),
-        origin=Origin(rpy=Y_AXIS_CYLINDER_RPY),
-    )
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((0.31, 0.09, 0.10)),
         mass=2.2,
@@ -210,7 +198,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "pedestal",
         "upper_arm",
@@ -222,12 +210,12 @@ def run_tests() -> TestReport:
         reason="The elbow is modeled with a real spindle nested inside the forearm hub.",
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
-    ctx.expect_xy_distance("upper_arm", "pedestal", max_dist=0.08)
-    ctx.expect_xy_distance("forearm", "pedestal", max_dist=0.55)
-    ctx.expect_above("upper_arm", "pedestal", min_clearance=0.25)
-    ctx.expect_above("forearm", "pedestal", min_clearance=0.25)
-    ctx.expect_aabb_overlap_xy("upper_arm", "pedestal", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.004)
+    ctx.expect_origin_distance("upper_arm", "pedestal", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("forearm", "pedestal", axes="xy", max_dist=0.55)
+    ctx.expect_origin_gap("upper_arm", "pedestal", axis="z", min_gap=0.25)
+    ctx.expect_origin_gap("forearm", "pedestal", axis="z", min_gap=0.25)
+    ctx.expect_aabb_overlap("upper_arm", "pedestal", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.004)
     ctx.expect_joint_motion_axis(
         "pedestal_to_upper_arm",
         "upper_arm",

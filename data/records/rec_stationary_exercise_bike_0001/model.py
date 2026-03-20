@@ -26,7 +26,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 
 
 def _mesh(name: str, geometry) -> object:

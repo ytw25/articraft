@@ -22,7 +22,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 MAX_EXTENSION = 1.40
 
 
@@ -334,13 +334,13 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(section_extend=0.0):
-        ctx.expect_aabb_overlap_xy("fly_section", "base_section", min_overlap=0.01)
+        ctx.expect_aabb_overlap("fly_section", "base_section", axes="xy", min_overlap=0.01)
 
     with ctx.pose(section_extend=0.70):
-        ctx.expect_aabb_overlap_xy("fly_section", "base_section", min_overlap=0.01)
+        ctx.expect_aabb_overlap("fly_section", "base_section", axes="xy", min_overlap=0.01)
 
     with ctx.pose(section_extend=MAX_EXTENSION):
-        ctx.expect_aabb_overlap_xy("fly_section", "base_section", min_overlap=0.01)
+        ctx.expect_aabb_overlap("fly_section", "base_section", axes="xy", min_overlap=0.01)
 
     return ctx.report()
 

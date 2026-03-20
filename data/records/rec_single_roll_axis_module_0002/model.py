@@ -168,29 +168,11 @@ def build_object_model() -> ArticulatedObject:
 
     left_upright = model.part("left_upright")
     _add_mesh_visual(left_upright, _make_left_upright(), "left_upright.obj", "cartridge_dark")
-    left_upright.collision(
-        Box((UPRIGHT_THICKNESS, UPRIGHT_DEPTH, STRUT_HEIGHT)),
-        origin=Origin(xyz=(-UPRIGHT_HALF_THICKNESS, 0.0, STRUT_CENTER_Z)),
-    )
-    left_upright.collision(
-        Box((UPRIGHT_THICKNESS, UPRIGHT_DEPTH, STRUT_HEIGHT)),
-        origin=Origin(xyz=(-UPRIGHT_HALF_THICKNESS, 0.0, -STRUT_CENTER_Z)),
-    )
-    left_upright.collision(
-        Box((UPRIGHT_THICKNESS, CARTRIDGE_DEPTH, CARTRIDGE_HEIGHT)),
-        origin=Origin(xyz=(-UPRIGHT_HALF_THICKNESS, 0.0, 0.0)),
-    )
-    left_upright.collision(
-        Cylinder(radius=INNER_BOSS_RADIUS, length=INNER_BOSS_LENGTH),
-        origin=Origin(xyz=(0.5 * INNER_BOSS_LENGTH, 0.0, 0.0), rpy=X_AXIS_CYLINDER_RPY),
-    )
-    left_upright.collision(
-        Cylinder(radius=OUTER_FLANGE_RADIUS, length=OUTER_FLANGE_LENGTH),
-        origin=Origin(
-            xyz=(-(UPRIGHT_THICKNESS + 0.5 * OUTER_FLANGE_LENGTH), 0.0, 0.0),
-            rpy=X_AXIS_CYLINDER_RPY,
-        ),
-    )
+
+
+
+
+
     left_upright.inertial = Inertial.from_geometry(
         Box((0.020, CARTRIDGE_DEPTH, 0.058)),
         mass=0.18,
@@ -203,10 +185,7 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.5 * BAR_LENGTH, 0.0, BAR_HALF_HEIGHT)),
         material="frame_dark",
     )
-    top_bar.collision(
-        Box((BAR_LENGTH, BAR_DEPTH, BAR_HEIGHT)),
-        origin=Origin(xyz=(0.5 * BAR_LENGTH, 0.0, BAR_HALF_HEIGHT)),
-    )
+
     top_bar.inertial = Inertial.from_geometry(
         Box((BAR_LENGTH, BAR_DEPTH, BAR_HEIGHT)),
         mass=0.12,
@@ -219,10 +198,7 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.5 * BAR_LENGTH, 0.0, -BAR_HALF_HEIGHT)),
         material="frame_dark",
     )
-    bottom_bar.collision(
-        Box((BAR_LENGTH, BAR_DEPTH, BAR_HEIGHT)),
-        origin=Origin(xyz=(0.5 * BAR_LENGTH, 0.0, -BAR_HALF_HEIGHT)),
-    )
+
     bottom_bar.inertial = Inertial.from_geometry(
         Box((BAR_LENGTH, BAR_DEPTH, BAR_HEIGHT)),
         mass=0.12,
@@ -231,29 +207,11 @@ def build_object_model() -> ArticulatedObject:
 
     right_upright = model.part("right_upright")
     _add_mesh_visual(right_upright, _make_right_upright(), "right_upright.obj", "cartridge_dark")
-    right_upright.collision(
-        Box((UPRIGHT_THICKNESS, UPRIGHT_DEPTH, STRUT_HEIGHT)),
-        origin=Origin(xyz=(UPRIGHT_HALF_THICKNESS, 0.0, -STRUT_HALF_HEIGHT)),
-    )
-    right_upright.collision(
-        Box((UPRIGHT_THICKNESS, UPRIGHT_DEPTH, STRUT_HEIGHT)),
-        origin=Origin(xyz=(UPRIGHT_HALF_THICKNESS, 0.0, -0.049)),
-    )
-    right_upright.collision(
-        Box((UPRIGHT_THICKNESS, CARTRIDGE_DEPTH, CARTRIDGE_HEIGHT)),
-        origin=Origin(xyz=(UPRIGHT_HALF_THICKNESS, 0.0, -0.029)),
-    )
-    right_upright.collision(
-        Cylinder(radius=INNER_BOSS_RADIUS, length=INNER_BOSS_LENGTH),
-        origin=Origin(xyz=(-0.5 * INNER_BOSS_LENGTH, 0.0, -0.029), rpy=X_AXIS_CYLINDER_RPY),
-    )
-    right_upright.collision(
-        Cylinder(radius=OUTER_FLANGE_RADIUS, length=OUTER_FLANGE_LENGTH),
-        origin=Origin(
-            xyz=(UPRIGHT_THICKNESS + 0.5 * OUTER_FLANGE_LENGTH, 0.0, -0.029),
-            rpy=X_AXIS_CYLINDER_RPY,
-        ),
-    )
+
+
+
+
+
     right_upright.inertial = Inertial.from_geometry(
         Box((0.020, CARTRIDGE_DEPTH, 0.058)),
         mass=0.18,
@@ -263,23 +221,11 @@ def build_object_model() -> ArticulatedObject:
     rotor = model.part("rotor")
     _add_mesh_visual(rotor, _make_rotor_body(), "rotor_body.obj", "rotor_silver")
     rotor.visual(Box(TAB_SIZE), origin=TAB_ORIGIN, material="index_orange")
-    rotor.collision(
-        Cylinder(radius=SHAFT_RADIUS, length=SHAFT_LENGTH),
-        origin=Origin(xyz=(SHAFT_CENTER_X, 0.0, 0.0), rpy=X_AXIS_CYLINDER_RPY),
-    )
-    rotor.collision(
-        Cylinder(radius=HUB_RADIUS, length=HUB_LENGTH),
-        origin=Origin(xyz=(SHAFT_CENTER_X, 0.0, 0.0), rpy=X_AXIS_CYLINDER_RPY),
-    )
-    rotor.collision(
-        Cylinder(radius=COLLAR_RADIUS, length=COLLAR_LENGTH),
-        origin=Origin(xyz=(LEFT_COLLAR_CENTER_X, 0.0, 0.0), rpy=X_AXIS_CYLINDER_RPY),
-    )
-    rotor.collision(
-        Cylinder(radius=COLLAR_RADIUS, length=COLLAR_LENGTH),
-        origin=Origin(xyz=(RIGHT_COLLAR_CENTER_X, 0.0, 0.0), rpy=X_AXIS_CYLINDER_RPY),
-    )
-    rotor.collision(Box(TAB_SIZE), origin=TAB_ORIGIN)
+
+
+
+
+
     rotor.inertial = Inertial.from_geometry(
         Box((SHAFT_LENGTH, 0.040, 0.052)),
         mass=0.30,
@@ -330,7 +276,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "right_upright",
         "rotor",
@@ -338,13 +284,13 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("left_upright", "rotor", max_dist=0.001)
-    ctx.expect_aabb_gap_z("top_bar", "rotor", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("rotor", "bottom_bar", max_gap=0.015, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("top_bar", "bottom_bar", max_gap=0.080, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("top_bar", "bottom_bar", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("rotor", "top_bar", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("rotor", "bottom_bar", min_overlap=0.020)
+    ctx.expect_origin_distance("left_upright", "rotor", axes="xy", max_dist=0.001)
+    ctx.expect_aabb_gap("top_bar", "rotor", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("rotor", "bottom_bar", axis="z", max_gap=0.015, max_penetration=0.0)
+    ctx.expect_aabb_gap("top_bar", "bottom_bar", axis="z", max_gap=0.080, max_penetration=0.0)
+    ctx.expect_aabb_overlap("top_bar", "bottom_bar", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("rotor", "top_bar", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("rotor", "bottom_bar", axes="xy", min_overlap=0.020)
     ctx.expect_joint_motion_axis(
         "frame_to_rotor",
         "rotor",
@@ -354,16 +300,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(frame_to_rotor=0.5 * pi):
-        ctx.expect_xy_distance("left_upright", "rotor", max_dist=0.001)
-        ctx.expect_aabb_gap_z("top_bar", "rotor", max_gap=0.020, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("rotor", "bottom_bar", max_gap=0.020, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("rotor", "top_bar", min_overlap=0.020)
+        ctx.expect_origin_distance("left_upright", "rotor", axes="xy", max_dist=0.001)
+        ctx.expect_aabb_gap("top_bar", "rotor", axis="z", max_gap=0.020, max_penetration=0.0)
+        ctx.expect_aabb_gap("rotor", "bottom_bar", axis="z", max_gap=0.020, max_penetration=0.0)
+        ctx.expect_aabb_overlap("rotor", "top_bar", axes="xy", min_overlap=0.020)
 
     with ctx.pose(frame_to_rotor=-0.5 * pi):
-        ctx.expect_xy_distance("left_upright", "rotor", max_dist=0.001)
-        ctx.expect_aabb_gap_z("top_bar", "rotor", max_gap=0.020, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("rotor", "bottom_bar", max_gap=0.020, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("rotor", "bottom_bar", min_overlap=0.020)
+        ctx.expect_origin_distance("left_upright", "rotor", axes="xy", max_dist=0.001)
+        ctx.expect_aabb_gap("top_bar", "rotor", axis="z", max_gap=0.020, max_penetration=0.0)
+        ctx.expect_aabb_gap("rotor", "bottom_bar", axis="z", max_gap=0.020, max_penetration=0.0)
+        ctx.expect_aabb_overlap("rotor", "bottom_bar", axes="xy", min_overlap=0.020)
 
     return ctx.report()
 

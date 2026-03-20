@@ -217,9 +217,9 @@ def run_tests() -> TestReport:
         reason="the pump stem telescopes inside the hollow collar and mesh-derived collision hulls may conservatively close the bore",
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
-    ctx.expect_aabb_overlap_xy("pump_head", "body", min_overlap=0.018)
-    ctx.expect_xy_distance("pump_head", "body", max_dist=0.020)
-    ctx.expect_aabb_gap_z("pump_head", "body", max_gap=0.015, max_penetration=0.0)
+    ctx.expect_aabb_overlap("pump_head", "body", axes="xy", min_overlap=0.018)
+    ctx.expect_origin_distance("pump_head", "body", axes="xy", max_dist=0.020)
+    ctx.expect_aabb_gap("pump_head", "body", axis="z", max_gap=0.015, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "pump_stroke",
         "pump_head",
@@ -228,11 +228,11 @@ def run_tests() -> TestReport:
         min_delta=0.008,
     )
     with ctx.pose(pump_stroke=-0.006):
-        ctx.expect_aabb_overlap_xy("pump_head", "body", min_overlap=0.018)
-        ctx.expect_xy_distance("pump_head", "body", max_dist=0.021)
+        ctx.expect_aabb_overlap("pump_head", "body", axes="xy", min_overlap=0.018)
+        ctx.expect_origin_distance("pump_head", "body", axes="xy", max_dist=0.021)
     with ctx.pose(pump_stroke=-0.012):
-        ctx.expect_aabb_overlap_xy("pump_head", "body", min_overlap=0.016)
-        ctx.expect_xy_distance("pump_head", "body", max_dist=0.022)
+        ctx.expect_aabb_overlap("pump_head", "body", axes="xy", min_overlap=0.016)
+        ctx.expect_origin_distance("pump_head", "body", axes="xy", max_dist=0.022)
     return ctx.report()
 
 

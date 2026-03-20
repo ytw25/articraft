@@ -377,7 +377,7 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("lid", "cart_body", min_overlap=0.24)
+    ctx.expect_aabb_overlap("lid", "cart_body", axes="xy", min_overlap=0.24)
 
     def require(condition: bool, message: str) -> None:
         if not condition:
@@ -432,7 +432,7 @@ def run_tests() -> TestReport:
             > 0.5 * (lid_closed.max_z + lid_closed.min_z) + 0.02,
             "The lid mass should visibly rise as the hood opens.",
         )
-        ctx.expect_aabb_overlap_xy("lid", "cart_body", min_overlap=0.06)
+        ctx.expect_aabb_overlap("lid", "cart_body", axes="xy", min_overlap=0.06)
 
     knob_1_rest = part_aabb("knob_1")
     with ctx.pose(knob_1_joint=math.pi):

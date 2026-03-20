@@ -138,10 +138,10 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_base_shape(), "base.obj", assets=ASSETS),
         material="painted_steel",
     )
-    base.collision(Box((0.14, 0.12, 0.018)), origin=Origin(xyz=(0.0, 0.0, -0.111)))
-    base.collision(Box((0.06, 0.06, 0.12)), origin=Origin(xyz=(0.0, 0.0, -0.051)))
-    base.collision(Box((0.045, 0.012, 0.055)), origin=Origin(xyz=(0.0, 0.028, 0.004)))
-    base.collision(Box((0.045, 0.012, 0.055)), origin=Origin(xyz=(0.0, -0.028, 0.004)))
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.14, 0.12, 0.16)),
         mass=3.0,
@@ -153,12 +153,12 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_upper_arm_shape(), "upper_arm.obj", assets=ASSETS),
         material="machined_aluminum",
     )
-    upper_arm.collision(Box((0.050, 0.028, 0.048)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    upper_arm.collision(Box((0.052, 0.050, 0.040)), origin=Origin(xyz=(0.020, 0.0, -0.010)))
-    upper_arm.collision(Box((0.18, 0.036, 0.028)), origin=Origin(xyz=(0.104, 0.0, 0.0)))
-    upper_arm.collision(Box((0.030, 0.032, 0.035)), origin=Origin(xyz=(0.182, 0.0, 0.0)))
-    upper_arm.collision(Box((0.040, 0.010, 0.050)), origin=Origin(xyz=(0.210, 0.019, 0.0)))
-    upper_arm.collision(Box((0.040, 0.010, 0.050)), origin=Origin(xyz=(0.210, -0.019, 0.0)))
+
+
+
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((0.24, 0.06, 0.06)),
         mass=1.2,
@@ -170,11 +170,11 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_forearm_shape(), "forearm.obj", assets=ASSETS),
         material="machined_aluminum",
     )
-    forearm.collision(Box((0.040, 0.026, 0.044)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    forearm.collision(Box((0.15, 0.032, 0.026)), origin=Origin(xyz=(0.082, 0.0, 0.0)))
-    forearm.collision(Box((0.028, 0.028, 0.030)), origin=Origin(xyz=(0.146, 0.0, 0.0)))
-    forearm.collision(Box((0.028, 0.009, 0.040)), origin=Origin(xyz=(0.165, 0.016, 0.0)))
-    forearm.collision(Box((0.028, 0.009, 0.040)), origin=Origin(xyz=(0.165, -0.016, 0.0)))
+
+
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((0.18, 0.05, 0.05)),
         mass=0.8,
@@ -186,10 +186,10 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_tool_shape(), "tool_flange.obj", assets=ASSETS),
         material="tool_black",
     )
-    tool_flange.collision(Box((0.030, 0.022, 0.034)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    tool_flange.collision(Box((0.036, 0.034, 0.034)), origin=Origin(xyz=(0.020, 0.0, 0.0)))
-    tool_flange.collision(Box((0.012, 0.044, 0.044)), origin=Origin(xyz=(0.044, 0.0, 0.0)))
-    tool_flange.collision(Box((0.028, 0.016, 0.016)), origin=Origin(xyz=(0.062, 0.0, 0.0)))
+
+
+
+
     tool_flange.inertial = Inertial.from_geometry(
         Box((0.09, 0.05, 0.05)),
         mass=0.25,
@@ -232,7 +232,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "base",
         "upper_arm",
@@ -245,12 +245,12 @@ def run_tests() -> TestReport:
         "forearm", "tool_flange", reason="wrist yoke wraps the wrist carrier around the hinge axis"
     )
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.002, overlap_volume_tol=0.0)
-    ctx.expect_aabb_overlap_xy("upper_arm", "base", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("tool_flange", "forearm", min_overlap=0.008)
-    ctx.expect_xy_distance("upper_arm", "base", max_dist=0.14)
-    ctx.expect_xy_distance("forearm", "upper_arm", max_dist=0.22)
-    ctx.expect_xy_distance("tool_flange", "forearm", max_dist=0.18)
+    ctx.expect_aabb_overlap("upper_arm", "base", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("tool_flange", "forearm", axes="xy", min_overlap=0.008)
+    ctx.expect_origin_distance("upper_arm", "base", axes="xy", max_dist=0.14)
+    ctx.expect_origin_distance("forearm", "upper_arm", axes="xy", max_dist=0.22)
+    ctx.expect_origin_distance("tool_flange", "forearm", axes="xy", max_dist=0.18)
     ctx.expect_joint_motion_axis(
         "shoulder_hinge",
         "upper_arm",

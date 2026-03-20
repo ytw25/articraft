@@ -217,20 +217,20 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_xy_distance("hub", "spinner", max_dist=0.001)
-    ctx.expect_aabb_overlap_xy("hub", "spinner", min_overlap=0.020)
+    ctx.expect_origin_distance("hub", "spinner", axes="xy", max_dist=0.001)
+    ctx.expect_aabb_overlap("hub", "spinner", axes="xy", min_overlap=0.020)
 
     with ctx.pose(hub_to_spinner=0.7):
-        ctx.expect_xy_distance("hub", "spinner", max_dist=0.001)
-        ctx.expect_aabb_overlap_xy("hub", "spinner", min_overlap=0.020)
+        ctx.expect_origin_distance("hub", "spinner", axes="xy", max_dist=0.001)
+        ctx.expect_aabb_overlap("hub", "spinner", axes="xy", min_overlap=0.020)
 
     with ctx.pose(hub_to_spinner=1.4):
-        ctx.expect_xy_distance("hub", "spinner", max_dist=0.001)
-        ctx.expect_aabb_overlap_xy("hub", "spinner", min_overlap=0.020)
+        ctx.expect_origin_distance("hub", "spinner", axes="xy", max_dist=0.001)
+        ctx.expect_aabb_overlap("hub", "spinner", axes="xy", min_overlap=0.020)
 
     with ctx.pose(hub_to_spinner=2.1):
-        ctx.expect_xy_distance("hub", "spinner", max_dist=0.001)
-        ctx.expect_aabb_overlap_xy("hub", "spinner", min_overlap=0.020)
+        ctx.expect_origin_distance("hub", "spinner", axes="xy", max_dist=0.001)
+        ctx.expect_aabb_overlap("hub", "spinner", axes="xy", min_overlap=0.020)
 
     return ctx.report()
 

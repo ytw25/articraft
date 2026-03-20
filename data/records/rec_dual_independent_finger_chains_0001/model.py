@@ -56,7 +56,7 @@ def _add_mesh_link(
 ):
     part = model.part(name)
     part.visual(mesh_from_cadquery(shape, mesh_name, assets=ASSETS), material=material)
-    part.collision(Box(collision_size), origin=collision_origin)
+
     part.inertial = Inertial.from_geometry(
         Box(collision_size),
         mass=mass,
@@ -194,21 +194,21 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_above("left_proximal", "palm", min_clearance=0.0)
-    ctx.expect_above("right_proximal", "palm", min_clearance=0.0)
-    ctx.expect_aabb_gap_z("left_proximal", "palm", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("right_proximal", "palm", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("left_proximal", "palm", min_overlap=0.008)
-    ctx.expect_aabb_overlap_xy("right_proximal", "palm", min_overlap=0.008)
-    ctx.expect_xy_distance("left_distal", "left_proximal", max_dist=0.05)
-    ctx.expect_xy_distance("right_distal", "right_proximal", max_dist=0.05)
+    ctx.expect_origin_gap("left_proximal", "palm", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("right_proximal", "palm", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("left_proximal", "palm", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_gap("right_proximal", "palm", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_overlap("left_proximal", "palm", axes="xy", min_overlap=0.008)
+    ctx.expect_aabb_overlap("right_proximal", "palm", axes="xy", min_overlap=0.008)
+    ctx.expect_origin_distance("left_distal", "left_proximal", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("right_distal", "right_proximal", axes="xy", max_dist=0.05)
 
     ctx.expect_joint_motion_axis(
         "palm_to_left_proximal",
@@ -243,9 +243,9 @@ def run_tests() -> TestReport:
         palm_to_left_proximal=0.42,
         palm_to_right_proximal=0.42,
     ):
-        ctx.expect_above("left_proximal", "palm", min_clearance=0.0)
-        ctx.expect_above("right_proximal", "palm", min_clearance=0.0)
-        ctx.expect_xy_distance("left_proximal", "right_proximal", max_dist=0.085)
+        ctx.expect_origin_gap("left_proximal", "palm", axis="z", min_gap=0.0)
+        ctx.expect_origin_gap("right_proximal", "palm", axis="z", min_gap=0.0)
+        ctx.expect_origin_distance("left_proximal", "right_proximal", axes="xy", max_dist=0.085)
 
     with ctx.pose(
         palm_to_left_proximal=0.42,
@@ -253,11 +253,11 @@ def run_tests() -> TestReport:
         palm_to_right_proximal=0.42,
         right_proximal_to_right_distal=0.34,
     ):
-        ctx.expect_above("left_distal", "palm", min_clearance=0.0)
-        ctx.expect_above("right_distal", "palm", min_clearance=0.0)
-        ctx.expect_xy_distance("left_distal", "right_distal", max_dist=0.05)
-        ctx.expect_xy_distance("left_distal", "left_proximal", max_dist=0.04)
-        ctx.expect_xy_distance("right_distal", "right_proximal", max_dist=0.04)
+        ctx.expect_origin_gap("left_distal", "palm", axis="z", min_gap=0.0)
+        ctx.expect_origin_gap("right_distal", "palm", axis="z", min_gap=0.0)
+        ctx.expect_origin_distance("left_distal", "right_distal", axes="xy", max_dist=0.05)
+        ctx.expect_origin_distance("left_distal", "left_proximal", axes="xy", max_dist=0.04)
+        ctx.expect_origin_distance("right_distal", "right_proximal", axes="xy", max_dist=0.04)
 
     return ctx.report()
 

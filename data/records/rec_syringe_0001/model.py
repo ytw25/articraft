@@ -51,7 +51,7 @@ def _mesh_path(name: str):
     try:
         return ASSETS.mesh_path(name)
     except AttributeError:
-        return HERE / "meshes" / name
+        return ASSETS.mesh_dir / name
 
 
 def _build_barrel_shell_mesh():
@@ -255,8 +255,8 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.0035, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("plunger", "barrel", max_dist=0.0025)
-    ctx.expect_aabb_overlap_xy("plunger", "barrel", min_overlap=0.022)
+    ctx.expect_origin_distance("plunger", "barrel", axes="xy", max_dist=0.0025)
+    ctx.expect_aabb_overlap("plunger", "barrel", axes="xy", min_overlap=0.022)
     ctx.expect_joint_motion_axis(
         "plunger_slide",
         "plunger",
@@ -268,13 +268,13 @@ def run_tests() -> TestReport:
     rest_plunger_z = ctx.part_world_position("plunger")[2]
 
     with ctx.pose(plunger_slide=PLUNGER_LOWER_LIMIT):
-        ctx.expect_xy_distance("plunger", "barrel", max_dist=0.0025)
-        ctx.expect_aabb_overlap_xy("plunger", "barrel", min_overlap=0.022)
+        ctx.expect_origin_distance("plunger", "barrel", axes="xy", max_dist=0.0025)
+        ctx.expect_aabb_overlap("plunger", "barrel", axes="xy", min_overlap=0.022)
         pressed_plunger_z = ctx.part_world_position("plunger")[2]
 
     with ctx.pose(plunger_slide=PLUNGER_UPPER_LIMIT):
-        ctx.expect_xy_distance("plunger", "barrel", max_dist=0.0025)
-        ctx.expect_aabb_overlap_xy("plunger", "barrel", min_overlap=0.022)
+        ctx.expect_origin_distance("plunger", "barrel", axes="xy", max_dist=0.0025)
+        ctx.expect_aabb_overlap("plunger", "barrel", axes="xy", min_overlap=0.022)
         retracted_plunger_z = ctx.part_world_position("plunger")[2]
 
     if not (retracted_plunger_z < rest_plunger_z < pressed_plunger_z):

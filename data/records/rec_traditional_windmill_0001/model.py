@@ -493,7 +493,7 @@ def run_tests() -> TestReport:
             "Sails should mount just ahead of the windshaft housing with only a small clearance."
         )
 
-    ctx.expect_xy_distance("sails", "body", max_dist=1.05)
+    ctx.expect_origin_distance("sails", "body", axes="xy", max_dist=1.05)
 
     with ctx.pose(sail_spin=math.pi / 4.0):
         ctx.check_no_overlaps(max_pose_samples=1, overlap_tol=0.003, overlap_volume_tol=0.0)

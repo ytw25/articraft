@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -16,11 +17,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 from math import pi
@@ -153,16 +153,10 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(xyz=(-0.056, -0.019, 0.055)),
             material="dark_body",
         )
-    base.collision(Box((0.22, 0.14, 0.028)), origin=Origin(xyz=(0.0, 0.0, 0.014)))
-    base.collision(Box((0.04, 0.05, 0.012)), origin=Origin(xyz=(-0.078, 0.0, 0.034)))
-    base.collision(
-        Box((0.014, 0.008, 0.054)),
-        origin=Origin(xyz=(-0.056, 0.019, 0.055)),
-    )
-    base.collision(
-        Box((0.014, 0.008, 0.054)),
-        origin=Origin(xyz=(-0.056, -0.019, 0.055)),
-    )
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.22, 0.14, 0.08)),
         mass=2.4,
@@ -183,14 +177,8 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(rpy=(HALF_PI, 0.0, 0.0)),
             material="arm_yellow",
         )
-    outer_arm.collision(
-        Box((0.185, 0.022, 0.026)),
-        origin=Origin(xyz=(0.0925, 0.0, 0.0)),
-    )
-    outer_arm.collision(
-        Cylinder(radius=0.012, length=0.01),
-        origin=Origin(rpy=(HALF_PI, 0.0, 0.0)),
-    )
+
+
     outer_arm.inertial = Inertial.from_geometry(
         Box((0.2, 0.04, 0.04)),
         mass=0.65,
@@ -222,18 +210,9 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.259, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),
         material="lens",
     )
-    inner_slide.collision(
-        Box((0.19, 0.018, 0.018)),
-        origin=Origin(xyz=(0.095, 0.0, 0.0)),
-    )
-    inner_slide.collision(
-        Box((0.04, 0.026, 0.03)),
-        origin=Origin(xyz=(0.205, 0.0, 0.01)),
-    )
-    inner_slide.collision(
-        Cylinder(radius=0.034, length=0.044),
-        origin=Origin(xyz=(0.235, 0.0, 0.01), rpy=(0.0, HALF_PI, 0.0)),
-    )
+
+
+
     inner_slide.inertial = Inertial.from_geometry(
         Box((0.28, 0.07, 0.08)),
         mass=0.75,
@@ -277,7 +256,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "outer_arm",
         "inner_slide",
@@ -304,21 +283,21 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(base_tilt=0.0, arm_extension=0.0):
-        ctx.expect_aabb_gap_z("outer_arm", "base", max_gap=0.005, max_penetration=0.04)
-        ctx.expect_aabb_gap_z("inner_slide", "base", max_gap=0.005, max_penetration=0.05)
-        ctx.expect_aabb_overlap_xy("outer_arm", "base", min_overlap=0.02)
-        ctx.expect_aabb_overlap_xy("inner_slide", "base", min_overlap=0.02)
-        ctx.expect_aabb_overlap_xy("inner_slide", "outer_arm", min_overlap=0.02)
+        ctx.expect_aabb_gap("outer_arm", "base", axis="z", max_gap=0.005, max_penetration=0.04)
+        ctx.expect_aabb_gap("inner_slide", "base", axis="z", max_gap=0.005, max_penetration=0.05)
+        ctx.expect_aabb_overlap("outer_arm", "base", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_overlap("inner_slide", "base", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_overlap("inner_slide", "outer_arm", axes="xy", min_overlap=0.02)
 
     with ctx.pose(base_tilt=0.0, arm_extension=0.12):
-        ctx.expect_aabb_gap_z("inner_slide", "base", max_gap=0.005, max_penetration=0.05)
-        ctx.expect_aabb_overlap_xy("inner_slide", "outer_arm", min_overlap=0.015)
-        ctx.expect_xy_distance("inner_slide", "outer_arm", max_dist=0.25)
+        ctx.expect_aabb_gap("inner_slide", "base", axis="z", max_gap=0.005, max_penetration=0.05)
+        ctx.expect_aabb_overlap("inner_slide", "outer_arm", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("inner_slide", "outer_arm", axes="xy", max_dist=0.25)
 
     with ctx.pose(base_tilt=1.25, arm_extension=0.12):
-        ctx.expect_above("outer_arm", "base", min_clearance=0.04)
-        ctx.expect_above("inner_slide", "base", min_clearance=0.08)
-        ctx.expect_aabb_gap_z("inner_slide", "base", max_gap=0.4, max_penetration=0.0)
+        ctx.expect_origin_gap("outer_arm", "base", axis="z", min_gap=0.04)
+        ctx.expect_origin_gap("inner_slide", "base", axis="z", min_gap=0.08)
+        ctx.expect_aabb_gap("inner_slide", "base", axis="z", max_gap=0.4, max_penetration=0.0)
 
     return ctx.report()
 

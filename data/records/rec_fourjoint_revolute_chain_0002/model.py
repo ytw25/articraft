@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 ARM_BASE_Z = 0.12
@@ -114,14 +114,8 @@ def _add_base_geometry(base_part) -> None:
             material="steel_dark",
         )
 
-    base_part.collision(
-        Box((0.18, 0.16, 0.08)),
-        origin=Origin(xyz=(0.0, 0.0, 0.04)),
-    )
-    base_part.collision(
-        Box((0.028, 0.04, 0.044)),
-        origin=Origin(xyz=(0.0, 0.0, 0.08)),
-    )
+
+
     base_part.inertial = Inertial.from_geometry(
         Box((0.18, 0.16, 0.12)),
         mass=10.5,
@@ -188,18 +182,9 @@ def _add_segment_geometry(
         )
 
     collision_length = max(length - (2.0 * JOINT_BARREL_RADIUS), 0.08)
-    part.collision(
-        Box((collision_length, COLLISION_WIDTH, COLLISION_HEIGHT)),
-        origin=Origin(xyz=(length / 2.0, 0.0, 0.0)),
-    )
-    part.collision(
-        Box((2.0 * JOINT_BARREL_RADIUS, 2.0 * JOINT_BARREL_THICKNESS, 2.0 * JOINT_BARREL_RADIUS)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
-    part.collision(
-        Box((2.0 * JOINT_BARREL_RADIUS, 2.0 * JOINT_BARREL_THICKNESS, 2.0 * JOINT_BARREL_RADIUS)),
-        origin=Origin(xyz=(length, 0.0, 0.0)),
-    )
+
+
+
 
     inertial_length = length
     inertial_origin_x = length / 2.0
@@ -207,15 +192,9 @@ def _add_segment_geometry(
     inertial_origin_z = 0.0
     if has_sensor_head:
         pod_origin_x = length + SENSOR_POD_ORIGIN[0] - 0.20
-        part.collision(
-            Box(SENSOR_POD_SIZE),
-            origin=Origin(xyz=(pod_origin_x, 0.0, SENSOR_POD_ORIGIN[2])),
-        )
+
         lens_origin_x = length + SENSOR_LENS_ORIGIN[0] - 0.20
-        part.collision(
-            Box(SENSOR_LENS_SIZE),
-            origin=Origin(xyz=(lens_origin_x, 0.0, SENSOR_LENS_ORIGIN[2])),
-        )
+
         inertial_length = length + 0.14
         inertial_origin_x = (length + 0.14) / 2.0
         inertial_height = 0.04
@@ -343,23 +322,23 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.0025,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("segment_1", "base_mount", min_overlap=0.03)
-    ctx.expect_xy_distance("segment_1", "base_mount", max_dist=0.25)
-    ctx.expect_above("segment_1", "base_mount", min_clearance=0.0)
-    ctx.expect_above("segment_2", "base_mount", min_clearance=0.0)
-    ctx.expect_above("segment_3", "base_mount", min_clearance=0.0)
-    ctx.expect_above("segment_4", "base_mount", min_clearance=0.0)
-    ctx.expect_aabb_gap_z("segment_1", "base_mount", max_gap=0.01, max_penetration=0.012)
-    ctx.expect_aabb_gap_z("segment_2", "base_mount", max_gap=0.01, max_penetration=0.012)
-    ctx.expect_aabb_gap_z("segment_3", "base_mount", max_gap=0.01, max_penetration=0.012)
-    ctx.expect_aabb_gap_z("segment_4", "base_mount", max_gap=0.01, max_penetration=0.012)
+    ctx.expect_aabb_overlap("segment_1", "base_mount", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("segment_1", "base_mount", axes="xy", max_dist=0.25)
+    ctx.expect_origin_gap("segment_1", "base_mount", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("segment_2", "base_mount", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("segment_3", "base_mount", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("segment_4", "base_mount", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("segment_1", "base_mount", axis="z", max_gap=0.01, max_penetration=0.012)
+    ctx.expect_aabb_gap("segment_2", "base_mount", axis="z", max_gap=0.01, max_penetration=0.012)
+    ctx.expect_aabb_gap("segment_3", "base_mount", axis="z", max_gap=0.01, max_penetration=0.012)
+    ctx.expect_aabb_gap("segment_4", "base_mount", axis="z", max_gap=0.01, max_penetration=0.012)
 
     ctx.expect_joint_motion_axis(
         "shoulder_hinge",

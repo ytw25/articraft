@@ -532,79 +532,31 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_gap_z("input_support", "bed", max_gap=0.001, max_penetration=0.001)
-    ctx.expect_aabb_gap_z(
-        "compound_support",
-        "bed",
-        max_gap=0.001,
-        max_penetration=0.001,
-    )
-    ctx.expect_aabb_gap_z(
-        "output_support",
-        "bed",
-        max_gap=0.001,
-        max_penetration=0.001,
-    )
+    ctx.expect_aabb_gap("input_support", "bed", axis="z", max_gap=0.001, max_penetration=0.001)
+    ctx.expect_aabb_gap("compound_support", "bed", axis="z", max_gap=0.001, max_penetration=0.001)
+    ctx.expect_aabb_gap("output_support", "bed", axis="z", max_gap=0.001, max_penetration=0.001)
 
-    ctx.expect_xy_distance("input_gear", "input_support", max_dist=0.002)
-    ctx.expect_xy_distance("compound_cluster", "compound_support", max_dist=0.002)
-    ctx.expect_xy_distance("output_gear", "output_support", max_dist=0.002)
+    ctx.expect_origin_distance("input_gear", "input_support", axes="xy", max_dist=0.002)
+    ctx.expect_origin_distance("compound_cluster", "compound_support", axes="xy", max_dist=0.002)
+    ctx.expect_origin_distance("output_gear", "output_support", axes="xy", max_dist=0.002)
 
-    ctx.expect_aabb_gap_z(
-        "input_gear",
-        "input_support",
-        max_gap=0.0015,
-        max_penetration=JOURNAL_INSERTION + 0.0005,
-    )
-    ctx.expect_aabb_gap_z(
-        "compound_cluster",
-        "compound_support",
-        max_gap=0.0015,
-        max_penetration=JOURNAL_INSERTION + 0.0005,
-    )
-    ctx.expect_aabb_gap_z(
-        "output_gear",
-        "output_support",
-        max_gap=0.0015,
-        max_penetration=JOURNAL_INSERTION + 0.0005,
-    )
+    ctx.expect_aabb_gap("input_gear", "input_support", axis="z", max_gap=0.0015, max_penetration=JOURNAL_INSERTION + 0.0005)
+    ctx.expect_aabb_gap("compound_cluster", "compound_support", axis="z", max_gap=0.0015, max_penetration=JOURNAL_INSERTION + 0.0005)
+    ctx.expect_aabb_gap("output_gear", "output_support", axis="z", max_gap=0.0015, max_penetration=JOURNAL_INSERTION + 0.0005)
 
-    ctx.expect_aabb_overlap_xy("input_gear", "compound_cluster", min_overlap=0.0015)
-    ctx.expect_aabb_overlap_xy("compound_cluster", "output_gear", min_overlap=0.0025)
+    ctx.expect_aabb_overlap("input_gear", "compound_cluster", axes="xy", min_overlap=0.0015)
+    ctx.expect_aabb_overlap("compound_cluster", "output_gear", axes="xy", min_overlap=0.0025)
 
     for input_angle in (-1.2, -0.45, 0.9, 1.7):
         with ctx.pose(_synchronized_pose(input_angle)):
-            ctx.expect_xy_distance("input_gear", "input_support", max_dist=0.002)
-            ctx.expect_xy_distance("compound_cluster", "compound_support", max_dist=0.002)
-            ctx.expect_xy_distance("output_gear", "output_support", max_dist=0.002)
-            ctx.expect_aabb_gap_z(
-                "input_gear",
-                "input_support",
-                max_gap=0.0015,
-                max_penetration=JOURNAL_INSERTION + 0.0005,
-            )
-            ctx.expect_aabb_gap_z(
-                "compound_cluster",
-                "compound_support",
-                max_gap=0.0015,
-                max_penetration=JOURNAL_INSERTION + 0.0005,
-            )
-            ctx.expect_aabb_gap_z(
-                "output_gear",
-                "output_support",
-                max_gap=0.0015,
-                max_penetration=JOURNAL_INSERTION + 0.0005,
-            )
-            ctx.expect_aabb_overlap_xy(
-                "input_gear",
-                "compound_cluster",
-                min_overlap=0.0015,
-            )
-            ctx.expect_aabb_overlap_xy(
-                "compound_cluster",
-                "output_gear",
-                min_overlap=0.0025,
-            )
+            ctx.expect_origin_distance("input_gear", "input_support", axes="xy", max_dist=0.002)
+            ctx.expect_origin_distance("compound_cluster", "compound_support", axes="xy", max_dist=0.002)
+            ctx.expect_origin_distance("output_gear", "output_support", axes="xy", max_dist=0.002)
+            ctx.expect_aabb_gap("input_gear", "input_support", axis="z", max_gap=0.0015, max_penetration=JOURNAL_INSERTION + 0.0005)
+            ctx.expect_aabb_gap("compound_cluster", "compound_support", axis="z", max_gap=0.0015, max_penetration=JOURNAL_INSERTION + 0.0005)
+            ctx.expect_aabb_gap("output_gear", "output_support", axis="z", max_gap=0.0015, max_penetration=JOURNAL_INSERTION + 0.0005)
+            ctx.expect_aabb_overlap("input_gear", "compound_cluster", axes="xy", min_overlap=0.0015)
+            ctx.expect_aabb_overlap("compound_cluster", "output_gear", axes="xy", min_overlap=0.0025)
 
     return ctx.report()
 

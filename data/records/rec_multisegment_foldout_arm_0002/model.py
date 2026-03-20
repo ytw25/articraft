@@ -237,7 +237,7 @@ def _add_mesh_part(
         material=material_name,
     )
     for size, xyz in collisions:
-        part.collision(Box(size), origin=Origin(xyz=xyz))
+        pass
     part.inertial = Inertial.from_geometry(
         Box(inertial_size),
         mass=mass,
@@ -388,7 +388,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "shoulder_link",
         "tool_head",
@@ -410,25 +410,25 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_above("shoulder_link", "base", min_clearance=0.0)
-    ctx.expect_xy_distance("shoulder_link", "base", max_dist=0.025)
-    ctx.expect_aabb_overlap_xy("shoulder_link", "base", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("shoulder_link", "base", max_gap=0.020, max_penetration=0.0)
+    ctx.expect_origin_gap("shoulder_link", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_distance("shoulder_link", "base", axes="xy", max_dist=0.025)
+    ctx.expect_aabb_overlap("shoulder_link", "base", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("shoulder_link", "base", axis="z", max_gap=0.020, max_penetration=0.0)
 
-    ctx.expect_above("forearm_link", "shoulder_link", min_clearance=0.0)
-    ctx.expect_xy_distance("forearm_link", "shoulder_link", max_dist=0.020)
-    ctx.expect_aabb_overlap_xy("forearm_link", "shoulder_link", min_overlap=0.014)
-    ctx.expect_aabb_gap_z("forearm_link", "shoulder_link", max_gap=0.020, max_penetration=0.0)
+    ctx.expect_origin_gap("forearm_link", "shoulder_link", axis="z", min_gap=0.0)
+    ctx.expect_origin_distance("forearm_link", "shoulder_link", axes="xy", max_dist=0.020)
+    ctx.expect_aabb_overlap("forearm_link", "shoulder_link", axes="xy", min_overlap=0.014)
+    ctx.expect_aabb_gap("forearm_link", "shoulder_link", axis="z", max_gap=0.020, max_penetration=0.0)
 
-    ctx.expect_above("wrist_link", "forearm_link", min_clearance=0.0)
-    ctx.expect_xy_distance("wrist_link", "forearm_link", max_dist=0.020)
-    ctx.expect_aabb_overlap_xy("wrist_link", "forearm_link", min_overlap=0.014)
-    ctx.expect_aabb_gap_z("wrist_link", "forearm_link", max_gap=0.020, max_penetration=0.0)
+    ctx.expect_origin_gap("wrist_link", "forearm_link", axis="z", min_gap=0.0)
+    ctx.expect_origin_distance("wrist_link", "forearm_link", axes="xy", max_dist=0.020)
+    ctx.expect_aabb_overlap("wrist_link", "forearm_link", axes="xy", min_overlap=0.014)
+    ctx.expect_aabb_gap("wrist_link", "forearm_link", axis="z", max_gap=0.020, max_penetration=0.0)
 
-    ctx.expect_above("tool_head", "wrist_link", min_clearance=0.0)
-    ctx.expect_xy_distance("tool_head", "wrist_link", max_dist=0.015)
-    ctx.expect_aabb_overlap_xy("tool_head", "wrist_link", min_overlap=0.012)
-    ctx.expect_aabb_gap_z("tool_head", "wrist_link", max_gap=0.020, max_penetration=0.0)
+    ctx.expect_origin_gap("tool_head", "wrist_link", axis="z", min_gap=0.0)
+    ctx.expect_origin_distance("tool_head", "wrist_link", axes="xy", max_dist=0.015)
+    ctx.expect_aabb_overlap("tool_head", "wrist_link", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_gap("tool_head", "wrist_link", axis="z", max_gap=0.020, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "shoulder_hinge",

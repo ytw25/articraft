@@ -22,7 +22,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 HALF_PI = math.pi / 2.0
 
 
@@ -223,10 +223,10 @@ def run_tests() -> TestReport:
         "leaf_lift", "leaf_span", world_axis="x", direction="negative", min_delta=0.15
     )
     with ctx.pose(leaf_lift=0.0):
-        ctx.expect_aabb_overlap_xy("leaf_span", "pier_base", min_overlap=0.10)
+        ctx.expect_aabb_overlap("leaf_span", "pier_base", axes="xy", min_overlap=0.10)
         tip_closed = ctx.part_world_position("tip_signal")
     with ctx.pose(leaf_lift=1.15):
-        ctx.expect_aabb_overlap_xy("leaf_span", "tower_frame", min_overlap=0.08)
+        ctx.expect_aabb_overlap("leaf_span", "tower_frame", axes="xy", min_overlap=0.08)
         tip_open = ctx.part_world_position("tip_signal")
 
     if tip_closed[0] < 1.10:

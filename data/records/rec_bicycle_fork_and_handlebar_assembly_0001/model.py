@@ -24,8 +24,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 HEAD_TILT = 0.30
 HEAD_AXIS = (math.sin(HEAD_TILT), 0.0, math.cos(HEAD_TILT))
 

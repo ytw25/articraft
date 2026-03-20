@@ -24,9 +24,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _midpoint(
     a: tuple[float, float, float], b: tuple[float, float, float]
 ) -> tuple[float, float, float]:
@@ -172,7 +170,7 @@ def _add_triangular_truss(
 
 
 def _build_hook_mesh():
-    mesh_dir = HERE / "meshes"
+    mesh_dir = ASSETS.mesh_dir
     mesh_dir.mkdir(parents=True, exist_ok=True)
     hook_geom = tube_from_spline_points(
         [

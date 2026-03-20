@@ -299,12 +299,12 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_gap_z("ground_track", "curb_base", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("left_post", "curb_base", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("right_post", "curb_base", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("access_pedestal", "curb_base", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("gate_leaf", "ground_track", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("gate_leaf", "ground_track", min_overlap=0.08)
+    ctx.expect_aabb_gap("ground_track", "curb_base", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_gap("left_post", "curb_base", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_gap("right_post", "curb_base", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_gap("access_pedestal", "curb_base", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_gap("gate_leaf", "ground_track", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_overlap("gate_leaf", "ground_track", axes="xy", min_overlap=0.08)
     ctx.expect_joint_motion_axis(
         "gate_slide",
         "gate_leaf",
@@ -334,8 +334,8 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(gate_slide=GATE_TRAVEL):
-        ctx.expect_aabb_gap_z("gate_leaf", "ground_track", max_gap=0.010, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("gate_leaf", "ground_track", min_overlap=0.08)
+        ctx.expect_aabb_gap("gate_leaf", "ground_track", axis="z", max_gap=0.010, max_penetration=0.0)
+        ctx.expect_aabb_overlap("gate_leaf", "ground_track", axes="xy", min_overlap=0.08)
 
         gate_open_aabb = ctx.part_world_aabb("gate_leaf", use="collision")
         track_aabb = ctx.part_world_aabb("ground_track", use="collision")

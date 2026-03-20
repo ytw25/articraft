@@ -26,7 +26,7 @@ from sdk import (
     superellipse_side_loft,
 )
 
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
 
 ROTOR_LAYOUT = {
@@ -457,15 +457,15 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("landing_gear", "body", max_dist=0.015)
-    ctx.expect_aabb_overlap_xy("landing_gear", "body", min_overlap=0.060)
-    ctx.expect_aabb_gap_z("body", "landing_gear", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_origin_distance("landing_gear", "body", axes="xy", max_dist=0.015)
+    ctx.expect_aabb_overlap("landing_gear", "body", axes="xy", min_overlap=0.060)
+    ctx.expect_aabb_gap("body", "landing_gear", axis="z", max_gap=0.010, max_penetration=0.0)
 
-    ctx.expect_xy_distance("gimbal_yaw", "body", max_dist=0.080)
-    ctx.expect_aabb_overlap_xy("gimbal_yaw", "body", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("body", "gimbal_yaw", max_gap=0.012, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("camera_pitch", "body", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("body", "camera_pitch", max_gap=0.080, max_penetration=0.0)
+    ctx.expect_origin_distance("gimbal_yaw", "body", axes="xy", max_dist=0.080)
+    ctx.expect_aabb_overlap("gimbal_yaw", "body", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("body", "gimbal_yaw", axis="z", max_gap=0.012, max_penetration=0.0)
+    ctx.expect_aabb_overlap("camera_pitch", "body", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("body", "camera_pitch", axis="z", max_gap=0.080, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "gimbal_pitch", "camera_pitch", world_axis="z", direction="positive", min_delta=0.01
     )
@@ -477,22 +477,22 @@ def run_tests() -> TestReport:
         ("motor_rear_right", "prop_rear_right"),
     ]
     for motor_name, prop_name in rotor_pairs:
-        ctx.expect_xy_distance(prop_name, motor_name, max_dist=0.003)
-        ctx.expect_aabb_overlap_xy(prop_name, motor_name, min_overlap=0.024)
-        ctx.expect_aabb_gap_z(prop_name, motor_name, max_gap=0.010, max_penetration=0.0)
+        ctx.expect_origin_distance(prop_name, motor_name, axes="xy", max_dist=0.003)
+        ctx.expect_aabb_overlap(prop_name, motor_name, axes="xy", min_overlap=0.024)
+        ctx.expect_aabb_gap(prop_name, motor_name, axis="z", max_gap=0.010, max_penetration=0.0)
 
     with ctx.pose(gimbal_pitch=-0.35):
-        ctx.expect_aabb_overlap_xy("camera_pitch", "body", min_overlap=0.016)
-        ctx.expect_aabb_gap_z("body", "camera_pitch", max_gap=0.075, max_penetration=0.0)
+        ctx.expect_aabb_overlap("camera_pitch", "body", axes="xy", min_overlap=0.016)
+        ctx.expect_aabb_gap("body", "camera_pitch", axis="z", max_gap=0.075, max_penetration=0.0)
 
     with ctx.pose(gimbal_yaw=0.9, gimbal_pitch=0.65):
-        ctx.expect_aabb_overlap_xy("camera_pitch", "body", min_overlap=0.012)
-        ctx.expect_aabb_gap_z("body", "camera_pitch", max_gap=0.100, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("body", "gimbal_yaw", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("camera_pitch", "body", axes="xy", min_overlap=0.012)
+        ctx.expect_aabb_gap("body", "camera_pitch", axis="z", max_gap=0.100, max_penetration=0.0)
+        ctx.expect_aabb_gap("body", "gimbal_yaw", axis="z", max_gap=0.012, max_penetration=0.0)
 
     with ctx.pose(gimbal_yaw=-0.9, gimbal_pitch=-0.2):
-        ctx.expect_aabb_overlap_xy("camera_pitch", "body", min_overlap=0.012)
-        ctx.expect_aabb_gap_z("body", "camera_pitch", max_gap=0.080, max_penetration=0.0)
+        ctx.expect_aabb_overlap("camera_pitch", "body", axes="xy", min_overlap=0.012)
+        ctx.expect_aabb_gap("body", "camera_pitch", axis="z", max_gap=0.080, max_penetration=0.0)
 
     with ctx.pose(
         spin_front_left=math.pi / 2.0,
@@ -501,9 +501,9 @@ def run_tests() -> TestReport:
         spin_rear_right=math.pi / 2.0,
     ):
         for motor_name, prop_name in rotor_pairs:
-            ctx.expect_xy_distance(prop_name, motor_name, max_dist=0.003)
-            ctx.expect_aabb_overlap_xy(prop_name, motor_name, min_overlap=0.020)
-            ctx.expect_aabb_gap_z(prop_name, motor_name, max_gap=0.010, max_penetration=0.0)
+            ctx.expect_origin_distance(prop_name, motor_name, axes="xy", max_dist=0.003)
+            ctx.expect_aabb_overlap(prop_name, motor_name, axes="xy", min_overlap=0.020)
+            ctx.expect_aabb_gap(prop_name, motor_name, axis="z", max_gap=0.010, max_penetration=0.0)
 
     return ctx.report()
 

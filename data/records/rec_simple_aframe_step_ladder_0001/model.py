@@ -20,9 +20,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _tilted_box_center_from_top(
     top_y: float,
     top_z: float,
@@ -254,7 +252,7 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.80)
+    ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.80)
     ctx.expect_joint_motion_axis(
         "front_to_rear_hinge",
         "rear_frame",
@@ -264,10 +262,10 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(front_to_rear_hinge=-0.10):
-        ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.72)
+        ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.72)
 
     with ctx.pose(front_to_rear_hinge=0.16):
-        ctx.expect_xy_distance("front_frame", "rear_frame", max_dist=0.92)
+        ctx.expect_origin_distance("front_frame", "rear_frame", axes="xy", max_dist=0.92)
 
     return ctx.report()
 

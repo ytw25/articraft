@@ -142,19 +142,10 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base_frame")
     base.visual(_mesh(_base_visual_shape(), "base_frame.obj"), material="frame_gray")
-    base.collision(
-        Box((BASE_LENGTH, BASE_WIDTH, BASE_PLATE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_THICKNESS / 2.0)),
-    )
-    base.collision(
-        Box((GUIDE_LENGTH, GUIDE_WIDTH, GUIDE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_THICKNESS + GUIDE_HEIGHT / 2.0)),
-    )
+
+
     for rail_y in (-RAIL_Y, RAIL_Y):
-        base.collision(
-            Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
-            origin=Origin(xyz=(0.0, rail_y, BASE_PLATE_THICKNESS + RAIL_HEIGHT / 2.0)),
-        )
+        pass
     base.inertial = Inertial.from_geometry(
         Box((BASE_LENGTH, BASE_WIDTH, 0.08)),
         mass=5.5,
@@ -163,18 +154,9 @@ def build_object_model() -> ArticulatedObject:
 
     carriage = model.part("slide_carriage")
     carriage.visual(_mesh(_carriage_visual_shape(), "slide_carriage.obj"), material="carriage_blue")
-    carriage.collision(
-        Box((CARRIAGE_BRIDGE_LENGTH, CARRIAGE_BRIDGE_WIDTH, CARRIAGE_BRIDGE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, CARRIAGE_BRIDGE_HEIGHT / 2.0)),
-    )
-    carriage.collision(
-        Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, CARRIAGE_BODY_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, CARRIAGE_BODY_Z)),
-    )
-    carriage.collision(
-        Box((CARRIAGE_FRONT_PLATE_THICKNESS, 0.085, 0.07)),
-        origin=Origin(xyz=(CARRIAGE_FRONT_PLATE_X, 0.0, 0.045)),
-    )
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, 0.06)),
         mass=1.35,
@@ -183,18 +165,9 @@ def build_object_model() -> ArticulatedObject:
 
     tool = model.part("tool_head")
     tool.visual(_mesh(_tool_head_visual_shape(), "tool_head.obj"), material="tool_orange")
-    tool.collision(
-        Box((TOOL_HOUSING_LENGTH, TOOL_HOUSING_WIDTH, TOOL_HOUSING_HEIGHT)),
-        origin=Origin(xyz=(TOOL_HOUSING_LENGTH / 2.0, 0.0, 0.0)),
-    )
-    tool.collision(
-        Box((0.05, 0.03, 0.018)),
-        origin=Origin(xyz=(0.06, 0.0, 0.044)),
-    )
-    tool.collision(
-        Cylinder(radius=TOOL_NOSE_RADIUS, length=TOOL_NOSE_LENGTH),
-        origin=Origin(xyz=(0.1275, 0.0, 0.0), rpy=(0.0, pi / 2.0, 0.0)),
-    )
+
+
+
     tool.inertial = Inertial.from_geometry(
         Box((0.12, TOOL_HOUSING_WIDTH, TOOL_HOUSING_HEIGHT)),
         mass=0.95,
@@ -238,7 +211,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -255,37 +228,37 @@ def run_tests() -> TestReport:
         direction="negative",
         min_delta=0.01,
     )
-    ctx.expect_aabb_overlap_xy("slide_carriage", "base_frame", min_overlap=0.04)
-    ctx.expect_aabb_gap_z("slide_carriage", "base_frame", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_above("tool_head", "base_frame", min_clearance=0.015)
-    ctx.expect_aabb_overlap_xy("tool_head", "base_frame", min_overlap=0.03)
-    ctx.expect_xy_distance("tool_head", "slide_carriage", max_dist=0.13)
+    ctx.expect_aabb_overlap("slide_carriage", "base_frame", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_gap("slide_carriage", "base_frame", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_gap("tool_head", "base_frame", axis="z", min_gap=0.015)
+    ctx.expect_aabb_overlap("tool_head", "base_frame", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("tool_head", "slide_carriage", axes="xy", max_dist=0.13)
 
     with ctx.pose(slide_axis=-SLIDE_TRAVEL):
-        ctx.expect_aabb_overlap_xy("slide_carriage", "base_frame", min_overlap=0.04)
-        ctx.expect_aabb_gap_z("slide_carriage", "base_frame", max_gap=0.01, max_penetration=0.0)
-        ctx.expect_xy_distance("slide_carriage", "base_frame", max_dist=0.10)
-        ctx.expect_above("tool_head", "base_frame", min_clearance=0.015)
+        ctx.expect_aabb_overlap("slide_carriage", "base_frame", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_gap("slide_carriage", "base_frame", axis="z", max_gap=0.01, max_penetration=0.0)
+        ctx.expect_origin_distance("slide_carriage", "base_frame", axes="xy", max_dist=0.10)
+        ctx.expect_origin_gap("tool_head", "base_frame", axis="z", min_gap=0.015)
 
     with ctx.pose(slide_axis=SLIDE_TRAVEL):
-        ctx.expect_aabb_overlap_xy("slide_carriage", "base_frame", min_overlap=0.04)
-        ctx.expect_aabb_gap_z("slide_carriage", "base_frame", max_gap=0.01, max_penetration=0.0)
-        ctx.expect_xy_distance("slide_carriage", "base_frame", max_dist=0.10)
-        ctx.expect_above("tool_head", "base_frame", min_clearance=0.015)
+        ctx.expect_aabb_overlap("slide_carriage", "base_frame", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_gap("slide_carriage", "base_frame", axis="z", max_gap=0.01, max_penetration=0.0)
+        ctx.expect_origin_distance("slide_carriage", "base_frame", axes="xy", max_dist=0.10)
+        ctx.expect_origin_gap("tool_head", "base_frame", axis="z", min_gap=0.015)
 
     with ctx.pose(head_spin=HEAD_ROT_LIMIT):
-        ctx.expect_above("tool_head", "base_frame", min_clearance=0.015)
-        ctx.expect_aabb_overlap_xy("tool_head", "base_frame", min_overlap=0.03)
-        ctx.expect_xy_distance("tool_head", "slide_carriage", max_dist=0.13)
+        ctx.expect_origin_gap("tool_head", "base_frame", axis="z", min_gap=0.015)
+        ctx.expect_aabb_overlap("tool_head", "base_frame", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("tool_head", "slide_carriage", axes="xy", max_dist=0.13)
 
     with ctx.pose(head_spin=-HEAD_ROT_LIMIT):
-        ctx.expect_above("tool_head", "base_frame", min_clearance=0.015)
-        ctx.expect_aabb_overlap_xy("tool_head", "base_frame", min_overlap=0.03)
-        ctx.expect_xy_distance("tool_head", "slide_carriage", max_dist=0.13)
+        ctx.expect_origin_gap("tool_head", "base_frame", axis="z", min_gap=0.015)
+        ctx.expect_aabb_overlap("tool_head", "base_frame", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("tool_head", "slide_carriage", axes="xy", max_dist=0.13)
 
     with ctx.pose(slide_axis=SLIDE_TRAVEL, head_spin=HEAD_ROT_LIMIT):
-        ctx.expect_above("tool_head", "base_frame", min_clearance=0.015)
-        ctx.expect_aabb_overlap_xy("tool_head", "base_frame", min_overlap=0.03)
+        ctx.expect_origin_gap("tool_head", "base_frame", axis="z", min_gap=0.015)
+        ctx.expect_aabb_overlap("tool_head", "base_frame", axes="xy", min_overlap=0.03)
 
     return ctx.report()
 

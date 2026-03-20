@@ -307,13 +307,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("glass_panel", "cassette_frame", min_overlap=0.45)
-    ctx.expect_aabb_gap_z(
-        "glass_panel",
-        "cassette_frame",
-        max_gap=0.010,
-        max_penetration=0.030,
-    )
+    ctx.expect_aabb_overlap("glass_panel", "cassette_frame", axes="xy", min_overlap=0.45)
+    ctx.expect_aabb_gap("glass_panel", "cassette_frame", axis="z", max_gap=0.010, max_penetration=0.030)
     ctx.expect_joint_motion_axis(
         "panel_slide",
         "glass_panel",
@@ -323,22 +318,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(panel_slide=0.17):
-        ctx.expect_aabb_overlap_xy("glass_panel", "cassette_frame", min_overlap=0.44)
-        ctx.expect_aabb_gap_z(
-            "glass_panel",
-            "cassette_frame",
-            max_gap=0.012,
-            max_penetration=0.030,
-        )
+        ctx.expect_aabb_overlap("glass_panel", "cassette_frame", axes="xy", min_overlap=0.44)
+        ctx.expect_aabb_gap("glass_panel", "cassette_frame", axis="z", max_gap=0.012, max_penetration=0.030)
 
     with ctx.pose(panel_slide=0.34):
-        ctx.expect_aabb_overlap_xy("glass_panel", "cassette_frame", min_overlap=0.38)
-        ctx.expect_aabb_gap_z(
-            "glass_panel",
-            "cassette_frame",
-            max_gap=0.014,
-            max_penetration=0.030,
-        )
+        ctx.expect_aabb_overlap("glass_panel", "cassette_frame", axes="xy", min_overlap=0.38)
+        ctx.expect_aabb_gap("glass_panel", "cassette_frame", axis="z", max_gap=0.014, max_penetration=0.030)
 
     return ctx.report()
 

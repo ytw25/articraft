@@ -91,22 +91,10 @@ def build_object_model() -> ArticulatedObject:
 
     frame = model.part("frame")
     frame.visual(frame_mesh, material="frame_finish")
-    frame.collision(
-        Box((SIDE_RAIL_THICKNESS, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
-        origin=Origin(xyz=(LEFT_PIVOT_X, 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((SIDE_RAIL_THICKNESS, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
-        origin=Origin(xyz=(RIGHT_PIVOT_X, 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((INNER_WIDTH, FRAME_DEPTH, TOP_BAR_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, INNER_HEIGHT / 2.0 + TOP_BAR_THICKNESS / 2.0)),
-    )
-    frame.collision(
-        Box((INNER_WIDTH, FRAME_DEPTH, TOP_BAR_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, -INNER_HEIGHT / 2.0 - TOP_BAR_THICKNESS / 2.0)),
-    )
+
+
+
+
     frame.inertial = Inertial.from_geometry(
         Box((FRAME_OUTER_WIDTH, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
         mass=2.4,
@@ -115,16 +103,7 @@ def build_object_model() -> ArticulatedObject:
     for index, (blade_name, z_offset) in enumerate(zip(BLADE_NAMES, BLADE_Z_OFFSETS)):
         blade = model.part(blade_name)
         blade.visual(blade_mesh, material="blade_finish")
-        blade.collision(
-            Box(
-                (
-                    BLADE_COLLISION_LENGTH,
-                    BLADE_COLLISION_CHORD,
-                    BLADE_COLLISION_THICKNESS,
-                )
-            ),
-            origin=Origin(xyz=(BLADE_COLLISION_ORIGIN_X, BLADE_Y_OFFSET, 0.0)),
-        )
+
         blade.inertial = Inertial.from_geometry(
             Box(
                 (
@@ -160,7 +139,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.001,
@@ -168,18 +147,13 @@ def run_tests() -> TestReport:
     )
 
     for blade_name in BLADE_NAMES:
-        ctx.expect_xy_distance(blade_name, "frame", max_dist=0.2)
-        ctx.expect_aabb_overlap_xy(blade_name, "frame", min_overlap=0.012)
+        ctx.expect_origin_distance(blade_name, "frame", axes="xy", max_dist=0.2)
+        ctx.expect_aabb_overlap(blade_name, "frame", axes="xy", min_overlap=0.012)
 
     for upper_blade, lower_blade in zip(BLADE_NAMES[:-1], BLADE_NAMES[1:]):
-        ctx.expect_aabb_gap_z(
-            upper_blade,
-            lower_blade,
-            max_gap=0.06,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_gap(upper_blade, lower_blade, axis="z", max_gap=0.06, max_penetration=0.0)
 
-    ctx.expect_above("blade_1", "blade_5", min_clearance=0.22)
+    ctx.expect_origin_gap("blade_1", "blade_5", axis="z", min_gap=0.22)
 
     for index, blade_name in enumerate(BLADE_NAMES, start=1):
         ctx.expect_joint_motion_axis(

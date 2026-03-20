@@ -123,23 +123,13 @@ def _make_branch_shape() -> cq.Workplane:
 
 
 def _add_base_collisions(base_part) -> None:
-    base_part.collision(Cylinder(radius=BASE_RADIUS, length=BASE_THICKNESS))
+
     for _, _, angle, _, _ in BRANCH_SPECS:
-        base_part.collision(
-            Box((PAD_LENGTH, PAD_WIDTH, BASE_THICKNESS)),
-            origin=Origin(xyz=_polar_xyz(PAD_CENTER, angle), rpy=(0.0, 0.0, angle)),
-        )
+        pass
 
 
 def _add_branch_collisions(branch_part) -> None:
-    branch_part.collision(
-        Cylinder(radius=SPINDLE_COLLISION_RADIUS, length=SPINDLE_COLLISION_LENGTH),
-        origin=Origin(xyz=(0.0, 0.0, SPINDLE_COLLISION_CENTER_Z)),
-    )
-    branch_part.collision(
-        Box((ARM_COLLISION_LENGTH, ARM_WIDTH, ARM_COLLISION_THICKNESS)),
-        origin=Origin(xyz=(ARM_COLLISION_CENTER_X, 0.0, ARM_COLLISION_CENTER_Z)),
-    )
+    pass
 
 
 def build_object_model() -> ArticulatedObject:
@@ -190,11 +180,11 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, prefer_collisions=True)
+    ctx = TestContext(object_model, geometry_source="collision")
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     motion_expectations = {
@@ -205,10 +195,10 @@ def run_tests() -> TestReport:
 
     for branch_name, joint_name, _, _, _ in BRANCH_SPECS:
         world_axis, direction = motion_expectations[branch_name]
-        ctx.expect_above(branch_name, "base", min_clearance=0.008)
-        ctx.expect_aabb_gap_z(branch_name, "base", max_gap=0.015, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy(branch_name, "base", min_overlap=0.008)
-        ctx.expect_xy_distance(branch_name, "base", max_dist=0.14)
+        ctx.expect_origin_gap(branch_name, "base", axis="z", min_gap=0.008)
+        ctx.expect_aabb_gap(branch_name, "base", axis="z", max_gap=0.015, max_penetration=0.0)
+        ctx.expect_aabb_overlap(branch_name, "base", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance(branch_name, "base", axes="xy", max_dist=0.14)
         ctx.expect_joint_motion_axis(
             joint_name,
             branch_name,

@@ -24,7 +24,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 PI = math.pi
 
 WHEEL_RADIUS = 0.085
@@ -255,9 +255,9 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("front_wheel", "front_assembly", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("rear_wheel", "frame", min_overlap=0.020)
-    ctx.expect_xy_distance("front_wheel", "front_assembly", max_dist=0.170)
+    ctx.expect_aabb_overlap("front_wheel", "front_assembly", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("rear_wheel", "frame", axes="xy", min_overlap=0.020)
+    ctx.expect_origin_distance("front_wheel", "front_assembly", axes="xy", max_dist=0.170)
     ctx.expect_joint_motion_axis(
         "steering_head",
         "front_wheel",
@@ -284,13 +284,13 @@ def run_tests() -> TestReport:
     assert 0.100 <= stem_rest[2] <= 0.120, "steering origin should sit at the headset height"
 
     with ctx.pose(steering_head=0.60):
-        ctx.expect_aabb_overlap_xy("front_wheel", "front_assembly", min_overlap=0.020)
+        ctx.expect_aabb_overlap("front_wheel", "front_assembly", axes="xy", min_overlap=0.020)
         left_turn = ctx.part_world_position("front_wheel")
         assert left_turn[1] > 0.055, "positive steering should swing the front wheel to rider-left"
         assert left_turn[0] > 0.330, "the fork rake should keep the front wheel ahead of the deck"
 
     with ctx.pose(steering_head=-0.60):
-        ctx.expect_aabb_overlap_xy("front_wheel", "front_assembly", min_overlap=0.020)
+        ctx.expect_aabb_overlap("front_wheel", "front_assembly", axes="xy", min_overlap=0.020)
         right_turn = ctx.part_world_position("front_wheel")
         assert right_turn[1] < -0.055, (
             "negative steering should swing the front wheel to rider-right"
@@ -308,7 +308,7 @@ def run_tests() -> TestReport:
         assert all(abs(a - b) < 1e-6 for a, b in zip(rear_rest, spun_rear)), (
             "rear wheel rolling should rotate in place without changing axle position"
         )
-        ctx.expect_aabb_overlap_xy("front_wheel", "front_assembly", min_overlap=0.020)
+        ctx.expect_aabb_overlap("front_wheel", "front_assembly", axes="xy", min_overlap=0.020)
 
     return ctx.report()
 

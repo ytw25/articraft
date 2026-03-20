@@ -3,9 +3,14 @@
   "record_id": "rec_louvered_shutter_assembly_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='frame' nearest_part='shutter_leaf' approx_gap=0.002m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='shutter_leaf' nearest_part='frame' approx_gap=0.002m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='slat_01' nearest_part='shutter_leaf' approx_gap=0.007m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='slat_02' nearest_part='shutter_leaf' approx_gap=0.007m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='slat_03' nearest_part='shutter_leaf' approx_gap=0.007m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='slat_04' nearest_part='shutter_leaf' approx_gap=0.007m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='slat_05' nearest_part='shutter_leaf' approx_gap=0.007m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n- part='slat_06' nearest_part='shutter_leaf' approx_gap=0.007m pose_index=0 pose=(frame_to_shutter=0, slat_01_tilt=0, slat_02_tilt=0, slat_03_tilt=0, slat_04_tilt=0, slat_05_tilt=0, slat_06_tilt=0, slat_07_tilt=0, slat_08_tilt=0, slat_09_tilt=0, slat_10_tilt=0, slat_11_tilt=0) backend=fcl\n... (5 more)\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

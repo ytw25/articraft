@@ -273,12 +273,12 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_gap_z("belfry_frame", "pedestal", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("roof", "belfry_frame", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("roof", "belfry_frame", min_overlap=1.15)
-    ctx.expect_aabb_overlap_xy("bell", "pedestal", min_overlap=0.60)
-    ctx.expect_aabb_overlap_xy("bell", "belfry_frame", min_overlap=0.60)
-    ctx.expect_aabb_gap_z("bell", "pedestal", max_gap=0.60, max_penetration=0.0)
+    ctx.expect_aabb_gap("belfry_frame", "pedestal", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_gap("roof", "belfry_frame", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_overlap("roof", "belfry_frame", axes="xy", min_overlap=1.15)
+    ctx.expect_aabb_overlap("bell", "pedestal", axes="xy", min_overlap=0.60)
+    ctx.expect_aabb_overlap("bell", "belfry_frame", axes="xy", min_overlap=0.60)
+    ctx.expect_aabb_gap("bell", "pedestal", axis="z", max_gap=0.60, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "frame_to_bell",
         "bell",
@@ -288,14 +288,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(frame_to_bell=-0.40):
-        ctx.expect_aabb_overlap_xy("bell", "pedestal", min_overlap=0.44)
-        ctx.expect_aabb_overlap_xy("bell", "belfry_frame", min_overlap=0.44)
-        ctx.expect_aabb_gap_z("bell", "pedestal", max_gap=0.55, max_penetration=0.0)
+        ctx.expect_aabb_overlap("bell", "pedestal", axes="xy", min_overlap=0.44)
+        ctx.expect_aabb_overlap("bell", "belfry_frame", axes="xy", min_overlap=0.44)
+        ctx.expect_aabb_gap("bell", "pedestal", axis="z", max_gap=0.55, max_penetration=0.0)
 
     with ctx.pose(frame_to_bell=0.40):
-        ctx.expect_aabb_overlap_xy("bell", "pedestal", min_overlap=0.44)
-        ctx.expect_aabb_overlap_xy("bell", "belfry_frame", min_overlap=0.44)
-        ctx.expect_aabb_gap_z("bell", "pedestal", max_gap=0.55, max_penetration=0.0)
+        ctx.expect_aabb_overlap("bell", "pedestal", axes="xy", min_overlap=0.44)
+        ctx.expect_aabb_overlap("bell", "belfry_frame", axes="xy", min_overlap=0.44)
+        ctx.expect_aabb_gap("bell", "pedestal", axis="z", max_gap=0.55, max_penetration=0.0)
 
     return ctx.report()
 

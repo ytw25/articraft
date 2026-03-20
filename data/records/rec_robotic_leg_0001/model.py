@@ -390,18 +390,18 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("thigh", "hip_mount", min_overlap=0.05)
-    ctx.expect_aabb_gap_z("hip_mount", "thigh", max_gap=0.008, max_penetration=0.025)
-    ctx.expect_xy_distance("thigh", "hip_mount", max_dist=0.05)
+    ctx.expect_aabb_overlap("thigh", "hip_mount", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_gap("hip_mount", "thigh", axis="z", max_gap=0.008, max_penetration=0.025)
+    ctx.expect_origin_distance("thigh", "hip_mount", axes="xy", max_dist=0.05)
 
-    ctx.expect_aabb_overlap_xy("shin", "thigh", min_overlap=0.05)
-    ctx.expect_aabb_gap_z("thigh", "shin", max_gap=0.010, max_penetration=0.045)
-    ctx.expect_xy_distance("shin", "thigh", max_dist=0.03)
+    ctx.expect_aabb_overlap("shin", "thigh", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_gap("thigh", "shin", axis="z", max_gap=0.010, max_penetration=0.045)
+    ctx.expect_origin_distance("shin", "thigh", axes="xy", max_dist=0.03)
 
-    ctx.expect_aabb_overlap_xy("foot", "shin", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("shin", "foot", max_gap=0.012, max_penetration=0.038)
-    ctx.expect_xy_distance("foot", "shin", max_dist=0.08)
-    ctx.expect_xy_distance("foot", "hip_mount", max_dist=0.07)
+    ctx.expect_aabb_overlap("foot", "shin", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("shin", "foot", axis="z", max_gap=0.012, max_penetration=0.038)
+    ctx.expect_origin_distance("foot", "shin", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("foot", "hip_mount", axes="xy", max_dist=0.07)
 
     ctx.expect_joint_motion_axis(
         "hip_pitch",
@@ -426,30 +426,30 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(hip_pitch=0.90):
-        ctx.expect_aabb_overlap_xy("thigh", "hip_mount", min_overlap=0.012)
-        ctx.expect_xy_distance("thigh", "hip_mount", max_dist=0.16)
+        ctx.expect_aabb_overlap("thigh", "hip_mount", axes="xy", min_overlap=0.012)
+        ctx.expect_origin_distance("thigh", "hip_mount", axes="xy", max_dist=0.16)
 
     with ctx.pose(hip_pitch=-0.75):
-        ctx.expect_aabb_overlap_xy("thigh", "hip_mount", min_overlap=0.012)
-        ctx.expect_xy_distance("thigh", "hip_mount", max_dist=0.14)
+        ctx.expect_aabb_overlap("thigh", "hip_mount", axes="xy", min_overlap=0.012)
+        ctx.expect_origin_distance("thigh", "hip_mount", axes="xy", max_dist=0.14)
 
     with ctx.pose(knee_pitch=1.45):
-        ctx.expect_aabb_overlap_xy("shin", "thigh", min_overlap=0.02)
-        ctx.expect_aabb_gap_z("thigh", "shin", max_gap=0.018, max_penetration=0.065)
-        ctx.expect_xy_distance("foot", "hip_mount", max_dist=0.32)
+        ctx.expect_aabb_overlap("shin", "thigh", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_gap("thigh", "shin", axis="z", max_gap=0.018, max_penetration=0.065)
+        ctx.expect_origin_distance("foot", "hip_mount", axes="xy", max_dist=0.32)
 
     with ctx.pose(ankle_pitch=0.55):
-        ctx.expect_aabb_overlap_xy("foot", "shin", min_overlap=0.018)
-        ctx.expect_xy_distance("foot", "shin", max_dist=0.10)
+        ctx.expect_aabb_overlap("foot", "shin", axes="xy", min_overlap=0.018)
+        ctx.expect_origin_distance("foot", "shin", axes="xy", max_dist=0.10)
 
     with ctx.pose(ankle_pitch=-0.55):
-        ctx.expect_aabb_overlap_xy("foot", "shin", min_overlap=0.018)
-        ctx.expect_xy_distance("foot", "shin", max_dist=0.10)
+        ctx.expect_aabb_overlap("foot", "shin", axes="xy", min_overlap=0.018)
+        ctx.expect_origin_distance("foot", "shin", axes="xy", max_dist=0.10)
 
     with ctx.pose({"hip_pitch": 0.75, "knee_pitch": 1.20, "ankle_pitch": -0.20}):
-        ctx.expect_aabb_overlap_xy("shin", "thigh", min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy("foot", "shin", min_overlap=0.016)
-        ctx.expect_xy_distance("foot", "hip_mount", max_dist=0.34)
+        ctx.expect_aabb_overlap("shin", "thigh", axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap("foot", "shin", axes="xy", min_overlap=0.016)
+        ctx.expect_origin_distance("foot", "hip_mount", axes="xy", max_dist=0.34)
 
     return ctx.report()
 

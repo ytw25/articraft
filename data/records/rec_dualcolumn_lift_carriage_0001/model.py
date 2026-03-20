@@ -308,12 +308,12 @@ def run_tests() -> TestReport:
         overlap_tol=0.003,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_overlap_xy("carriage", "base_plinth", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("carriage", "left_column", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("carriage", "right_column", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("carriage", "top_tie", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("top_tie", "left_column", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("top_tie", "right_column", min_overlap=0.03)
+    ctx.expect_aabb_overlap("carriage", "base_plinth", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("carriage", "left_column", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("carriage", "right_column", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("carriage", "top_tie", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("top_tie", "left_column", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("top_tie", "right_column", axes="xy", min_overlap=0.03)
     ctx.expect_joint_motion_axis(
         "carriage_slide",
         "carriage",
@@ -322,27 +322,12 @@ def run_tests() -> TestReport:
         min_delta=0.08,
     )
     with ctx.pose(carriage_slide=0.0):
-        ctx.expect_aabb_gap_z(
-            "carriage",
-            "base_plinth",
-            max_gap=0.18,
-            max_penetration=0.0,
-        )
-        ctx.expect_aabb_gap_z(
-            "top_tie",
-            "carriage",
-            max_gap=0.50,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_gap("carriage", "base_plinth", axis="z", max_gap=0.18, max_penetration=0.0)
+        ctx.expect_aabb_gap("top_tie", "carriage", axis="z", max_gap=0.50, max_penetration=0.0)
     with ctx.pose(carriage_slide=CARRIAGE_TRAVEL):
-        ctx.expect_aabb_overlap_xy("carriage", "left_column", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("carriage", "right_column", min_overlap=0.03)
-        ctx.expect_aabb_gap_z(
-            "top_tie",
-            "carriage",
-            max_gap=0.05,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_overlap("carriage", "left_column", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("carriage", "right_column", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_gap("top_tie", "carriage", axis="z", max_gap=0.05, max_penetration=0.0)
     return ctx.report()
 
 

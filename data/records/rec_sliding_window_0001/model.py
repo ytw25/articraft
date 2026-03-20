@@ -20,8 +20,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 FRAME_W = 1.60
 FRAME_H = 1.25
 FRAME_D = 0.14

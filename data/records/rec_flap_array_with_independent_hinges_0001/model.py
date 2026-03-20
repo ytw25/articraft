@@ -102,47 +102,21 @@ def build_object_model() -> ArticulatedObject:
 
     side_rail_x = OPENING_WIDTH / 2.0 + FRAME_BORDER / 2.0
     top_rail_z = OPENING_HEIGHT / 2.0 + FRAME_BORDER / 2.0
-    frame.collision(
-        Box((FRAME_BORDER, PANEL_DEPTH, PANEL_HEIGHT)),
-        origin=Origin(xyz=(-side_rail_x, 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((FRAME_BORDER, PANEL_DEPTH, PANEL_HEIGHT)),
-        origin=Origin(xyz=(side_rail_x, 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((OPENING_WIDTH, PANEL_DEPTH, FRAME_BORDER)),
-        origin=Origin(xyz=(0.0, 0.0, top_rail_z)),
-    )
-    frame.collision(
-        Box((OPENING_WIDTH, PANEL_DEPTH, FRAME_BORDER)),
-        origin=Origin(xyz=(0.0, 0.0, -top_rail_z)),
-    )
+
+
+
+
 
     for index in range(FLAP_COUNT):
-        frame.collision(
-            Box((OPENING_WIDTH, BRACE_DEPTH, BRACE_HEIGHT)),
-            origin=Origin(xyz=(0.0, BRACE_Y, _hinge_z(index))),
-        )
+        pass
 
     for index in range(FLAP_COUNT):
         flap_name = f"flap_{index + 1}"
         joint_name = f"frame_to_flap_{index + 1}"
         flap = model.part(flap_name)
         flap.visual(flap_mesh, material="flap_finish")
-        flap.collision(
-            Box(
-                (
-                    FLAP_BARREL_LENGTH,
-                    2.0 * FLAP_BARREL_RADIUS,
-                    2.0 * FLAP_BARREL_RADIUS,
-                )
-            )
-        )
-        flap.collision(
-            Box((FLAP_WIDTH, FLAP_PLATE_DEPTH, FLAP_HEIGHT)),
-            origin=Origin(xyz=(0.0, FLAP_PLATE_Y, FLAP_PLATE_CENTER_Z)),
-        )
+
+
         flap.inertial = Inertial.from_geometry(
             Box((FLAP_WIDTH, FLAP_PLATE_DEPTH, FLAP_HEIGHT)),
             mass=0.28,
@@ -172,7 +146,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.002,
@@ -183,8 +157,8 @@ def run_tests() -> TestReport:
     joint_names = [f"frame_to_flap_{index + 1}" for index in range(FLAP_COUNT)]
 
     for flap_name, joint_name in zip(flap_names, joint_names):
-        ctx.expect_xy_distance(flap_name, "frame", max_dist=0.01)
-        ctx.expect_aabb_overlap_xy(flap_name, "frame", min_overlap=0.004)
+        ctx.expect_origin_distance(flap_name, "frame", axes="xy", max_dist=0.01)
+        ctx.expect_aabb_overlap(flap_name, "frame", axes="xy", min_overlap=0.004)
         ctx.expect_joint_motion_axis(
             joint_name,
             flap_name,
@@ -194,12 +168,7 @@ def run_tests() -> TestReport:
         )
 
     for upper_flap, lower_flap in zip(flap_names, flap_names[1:]):
-        ctx.expect_aabb_gap_z(
-            upper_flap,
-            lower_flap,
-            max_gap=0.02,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_gap(upper_flap, lower_flap, axis="z", max_gap=0.02, max_penetration=0.0)
 
     joint_positions = []
     for index, joint_name in enumerate(joint_names):

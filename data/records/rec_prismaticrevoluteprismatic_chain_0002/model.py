@@ -216,12 +216,12 @@ def build_object_model() -> ArticulatedObject:
     base = model.part("base_frame")
     _add_mesh_visual(base, _base_main_shape(), "base_frame_main.obj", "steel")
     _add_mesh_visual(base, _base_cover_shape(), "base_frame_covers.obj", "cover_black")
-    base.collision(Box((0.72, 0.18, 0.018)), origin=Origin(xyz=(0.0, 0.0, -0.009)))
-    base.collision(Box((0.54, 0.026, 0.014)), origin=Origin(xyz=(0.0, 0.0, 0.007)))
-    base.collision(Box((0.58, 0.018, 0.024)), origin=Origin(xyz=(0.0, 0.055, 0.012)))
-    base.collision(Box((0.58, 0.018, 0.024)), origin=Origin(xyz=(0.0, -0.055, 0.012)))
-    base.collision(Box((0.10, 0.14, 0.06)), origin=Origin(xyz=(-0.31, 0.0, 0.03)))
-    base.collision(Box((0.075, 0.10, 0.045)), origin=Origin(xyz=(0.315, 0.0, 0.0225)))
+
+
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.72, 0.18, 0.085)),
         mass=7.2,
@@ -231,11 +231,11 @@ def build_object_model() -> ArticulatedObject:
     carriage = model.part("carriage")
     _add_mesh_visual(carriage, _carriage_main_shape(), "carriage_main.obj", "anodized")
     _add_mesh_visual(carriage, _carriage_cover_shape(), "carriage_cover.obj", "cover_black")
-    carriage.collision(Box((0.17, 0.11, 0.018)), origin=Origin(xyz=(0.0, 0.0, 0.009)))
-    carriage.collision(Box((0.12, 0.022, 0.016)), origin=Origin(xyz=(0.0, 0.042, 0.008)))
-    carriage.collision(Box((0.12, 0.022, 0.016)), origin=Origin(xyz=(0.0, -0.042, 0.008)))
-    carriage.collision(Cylinder(radius=0.038, length=0.026), origin=Origin(xyz=(0.0, 0.0, 0.031)))
-    carriage.collision(Box((0.094, 0.094, 0.008)), origin=Origin(xyz=(0.0, 0.0, 0.048)))
+
+
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.17, 0.11, 0.06)),
         mass=1.9,
@@ -245,9 +245,9 @@ def build_object_model() -> ArticulatedObject:
     elbow = model.part("elbow_stage")
     _add_mesh_visual(elbow, _elbow_main_shape(), "elbow_main.obj", "anodized")
     _add_mesh_visual(elbow, _elbow_cover_shape(), "elbow_cover.obj", "cover_black")
-    elbow.collision(Cylinder(radius=0.05, length=0.03), origin=Origin(xyz=(0.0, 0.0, 0.015)))
-    elbow.collision(Box((0.10, 0.07, 0.04)), origin=Origin(xyz=(0.06, 0.0, 0.02)))
-    elbow.collision(Box((0.24, 0.05, 0.05)), origin=Origin(xyz=(0.19, 0.0, 0.025)))
+
+
+
     elbow.inertial = Inertial.from_geometry(
         Box((0.32, 0.10, 0.08)),
         mass=1.6,
@@ -257,9 +257,9 @@ def build_object_model() -> ArticulatedObject:
     extension = model.part("extension_inner")
     _add_mesh_visual(extension, _extension_main_shape(), "extension_main.obj", "steel")
     _add_mesh_visual(extension, _extension_tool_shape(), "extension_tool.obj", "tool_red")
-    extension.collision(Box((0.24, 0.036, 0.036)), origin=Origin(xyz=(0.12, 0.0, 0.0)))
-    extension.collision(Box((0.012, 0.08, 0.08)), origin=Origin(xyz=(0.246, 0.0, 0.0)))
-    extension.collision(Box((0.05, 0.032, 0.10)), origin=Origin(xyz=(0.279, 0.0, 0.0)))
+
+
+
     extension.inertial = Inertial.from_geometry(
         Box((0.30, 0.08, 0.10)),
         mass=0.9,
@@ -302,20 +302,20 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "elbow_stage",
         "extension_inner",
         reason="the telescoping inner stage is intentionally nested inside the elbow sleeve",
     )
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.003, overlap_volume_tol=0.0)
-    ctx.expect_xy_distance("carriage", "base_frame", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("carriage", "base_frame", min_overlap=0.10)
-    ctx.expect_above("elbow_stage", "base_frame", min_clearance=0.015)
-    ctx.expect_aabb_gap_z("elbow_stage", "carriage", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("elbow_stage", "carriage", min_overlap=0.04)
-    ctx.expect_xy_distance("extension_inner", "elbow_stage", max_dist=0.20)
-    ctx.expect_aabb_overlap_xy("extension_inner", "elbow_stage", min_overlap=0.015)
+    ctx.expect_origin_distance("carriage", "base_frame", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("carriage", "base_frame", axes="xy", min_overlap=0.10)
+    ctx.expect_origin_gap("elbow_stage", "base_frame", axis="z", min_gap=0.015)
+    ctx.expect_aabb_gap("elbow_stage", "carriage", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_aabb_overlap("elbow_stage", "carriage", axes="xy", min_overlap=0.04)
+    ctx.expect_origin_distance("extension_inner", "elbow_stage", axes="xy", max_dist=0.20)
+    ctx.expect_aabb_overlap("extension_inner", "elbow_stage", axes="xy", min_overlap=0.015)
     ctx.expect_joint_motion_axis(
         "base_to_carriage",
         "carriage",

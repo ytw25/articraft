@@ -141,36 +141,21 @@ def _make_finger_shape() -> cq.Workplane:
 
 
 def _add_palm_collisions(palm_part) -> None:
-    palm_part.collision(Box((PALM_LENGTH, PALM_WIDTH, PALM_THICKNESS)))
+
 
     tab_collision_length = TAB_LENGTH - 0.001
     tab_collision_width = TAB_WIDTH - 0.002
     tab_collision_center_x = PALM_LENGTH / 2.0 + tab_collision_length / 2.0 - TAB_OVERLAP
 
     for index, spec in enumerate(FINGER_SPECS):
-        palm_part.collision(
-            Box((tab_collision_length, tab_collision_width, PALM_THICKNESS)),
-            origin=Origin(xyz=(tab_collision_center_x, spec["y"], 0.0)),
-            name=f"palm_tab_collision_{index}",
-        )
+        pass
 
 
 def _configure_finger_part(finger_part, finger_mesh) -> None:
     finger_part.visual(finger_mesh, material="finger_plate")
-    finger_part.collision(
-        Box((FINGER_BASE_COLLISION_SIZE, FINGER_BASE_COLLISION_SIZE, FINGER_THICKNESS)),
-        name="finger_root_collision",
-    )
-    finger_part.collision(
-        Box((FINGER_COLLISION_LENGTH, FINGER_COLLISION_WIDTH, FINGER_THICKNESS)),
-        origin=Origin(xyz=(FINGER_COLLISION_CENTER_X, 0.0, 0.0)),
-        name="finger_body_collision",
-    )
-    finger_part.collision(
-        Box((FINGER_TIP_COLLISION_SIZE, FINGER_TIP_COLLISION_SIZE, FINGER_THICKNESS)),
-        origin=Origin(xyz=(FINGER_TIP_X, 0.0, 0.0)),
-        name="finger_tip_collision",
-    )
+
+
+
     finger_part.inertial = Inertial.from_geometry(
         Box((FINGER_VISUAL_LENGTH, FINGER_VISUAL_WIDTH, FINGER_THICKNESS)),
         mass=FINGER_MASS,
@@ -229,7 +214,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.001,
@@ -237,14 +222,9 @@ def run_tests() -> TestReport:
     )
 
     for spec in FINGER_SPECS:
-        ctx.expect_above(spec["name"], "palm", min_clearance=0.0)
-        ctx.expect_aabb_gap_z(
-            spec["name"],
-            "palm",
-            max_gap=0.002,
-            max_penetration=0.0,
-        )
-        ctx.expect_xy_distance(spec["name"], "palm", max_dist=0.065)
+        ctx.expect_origin_gap(spec["name"], "palm", axis="z", min_gap=0.0)
+        ctx.expect_aabb_gap(spec["name"], "palm", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_origin_distance(spec["name"], "palm", axes="xy", max_dist=0.065)
         ctx.expect_joint_motion_axis(
             spec["joint"],
             spec["name"],
@@ -253,10 +233,10 @@ def run_tests() -> TestReport:
             min_delta=spec["min_delta"],
         )
 
-    ctx.expect_xy_distance("finger_top_outer", "finger_top_inner", max_dist=0.03)
-    ctx.expect_xy_distance("finger_bottom_outer", "finger_bottom_inner", max_dist=0.03)
-    ctx.expect_xy_distance("finger_top_inner", "finger_bottom_inner", max_dist=0.03)
-    ctx.expect_xy_distance("finger_top_outer", "finger_bottom_outer", max_dist=0.07)
+    ctx.expect_origin_distance("finger_top_outer", "finger_top_inner", axes="xy", max_dist=0.03)
+    ctx.expect_origin_distance("finger_bottom_outer", "finger_bottom_inner", axes="xy", max_dist=0.03)
+    ctx.expect_origin_distance("finger_top_inner", "finger_bottom_inner", axes="xy", max_dist=0.03)
+    ctx.expect_origin_distance("finger_top_outer", "finger_bottom_outer", axes="xy", max_dist=0.07)
 
     return ctx.report()
 

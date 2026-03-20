@@ -25,9 +25,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _material(name: str, rgba: tuple[float, float, float, float]) -> Material:
     try:
         return Material(name=name, rgba=rgba)
@@ -235,13 +233,13 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("upright", "base", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("upright", "base", max_gap=0.001, max_penetration=0.035)
+    ctx.expect_aabb_overlap("upright", "base", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("upright", "base", axis="z", max_gap=0.001, max_penetration=0.035)
 
-    ctx.expect_aabb_overlap_xy("head", "upright", min_overlap=0.02)
-    ctx.expect_xy_distance("head", "upright", max_dist=0.16)
-    ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.09)
-    ctx.expect_xy_distance("head", "base", max_dist=0.20)
+    ctx.expect_aabb_overlap("head", "upright", axes="xy", min_overlap=0.02)
+    ctx.expect_origin_distance("head", "upright", axes="xy", max_dist=0.16)
+    ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.09)
+    ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.20)
     ctx.expect_joint_motion_axis(
         "head_tilt",
         "head",
@@ -251,14 +249,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(head_tilt=-0.85):
-        ctx.expect_aabb_overlap_xy("head", "upright", min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.09)
-        ctx.expect_xy_distance("head", "base", max_dist=0.22)
+        ctx.expect_aabb_overlap("head", "upright", axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.09)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.22)
 
     with ctx.pose(head_tilt=0.50):
-        ctx.expect_aabb_overlap_xy("head", "upright", min_overlap=0.02)
-        ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.10)
-        ctx.expect_xy_distance("head", "base", max_dist=0.18)
+        ctx.expect_aabb_overlap("head", "upright", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.10)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.18)
 
     return ctx.report()
 

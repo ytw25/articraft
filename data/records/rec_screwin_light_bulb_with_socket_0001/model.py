@@ -54,7 +54,7 @@ TUNGSTEN = _make_material("tungsten", (0.53, 0.41, 0.18, 1.0))
 
 
 def _mesh_path(name: str):
-    path = ASSETS.mesh_path(name) if hasattr(ASSETS, "mesh_path") else HERE / "meshes" / name
+    path = ASSETS.mesh_path(name) if hasattr(ASSETS, "mesh_path") else ASSETS.mesh_dir / name
     path.parent.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -394,23 +394,23 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("bulb_body", "socket", max_dist=0.0035)
-    ctx.expect_aabb_overlap_xy("bulb_body", "socket", min_overlap=0.026)
-    ctx.expect_xy_distance("bulb_glass", "socket", max_dist=0.004)
-    ctx.expect_aabb_overlap_xy("bulb_glass", "socket", min_overlap=0.040)
-    ctx.expect_aabb_gap_z("bulb_glass", "socket", max_gap=0.010, max_penetration=0.0)
-    ctx.expect_xy_distance("filament_assembly", "bulb_glass", max_dist=0.0025)
-    ctx.expect_aabb_overlap_xy("filament_assembly", "bulb_glass", min_overlap=0.0045)
+    ctx.expect_origin_distance("bulb_body", "socket", axes="xy", max_dist=0.0035)
+    ctx.expect_aabb_overlap("bulb_body", "socket", axes="xy", min_overlap=0.026)
+    ctx.expect_origin_distance("bulb_glass", "socket", axes="xy", max_dist=0.004)
+    ctx.expect_aabb_overlap("bulb_glass", "socket", axes="xy", min_overlap=0.040)
+    ctx.expect_aabb_gap("bulb_glass", "socket", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_origin_distance("filament_assembly", "bulb_glass", axes="xy", max_dist=0.0025)
+    ctx.expect_aabb_overlap("filament_assembly", "bulb_glass", axes="xy", min_overlap=0.0045)
 
     for angle in (0.0, math.tau * 0.5, math.tau * 1.25, math.tau * 2.5):
         with ctx.pose(bulb_screw=angle):
-            ctx.expect_xy_distance("bulb_body", "socket", max_dist=0.0035)
-            ctx.expect_aabb_overlap_xy("bulb_body", "socket", min_overlap=0.026)
-            ctx.expect_xy_distance("bulb_glass", "socket", max_dist=0.004)
-            ctx.expect_aabb_overlap_xy("bulb_glass", "socket", min_overlap=0.040)
-            ctx.expect_aabb_gap_z("bulb_glass", "socket", max_gap=0.010, max_penetration=0.0)
-            ctx.expect_xy_distance("filament_assembly", "bulb_glass", max_dist=0.0025)
-            ctx.expect_aabb_overlap_xy("filament_assembly", "bulb_glass", min_overlap=0.0045)
+            ctx.expect_origin_distance("bulb_body", "socket", axes="xy", max_dist=0.0035)
+            ctx.expect_aabb_overlap("bulb_body", "socket", axes="xy", min_overlap=0.026)
+            ctx.expect_origin_distance("bulb_glass", "socket", axes="xy", max_dist=0.004)
+            ctx.expect_aabb_overlap("bulb_glass", "socket", axes="xy", min_overlap=0.040)
+            ctx.expect_aabb_gap("bulb_glass", "socket", axis="z", max_gap=0.010, max_penetration=0.0)
+            ctx.expect_origin_distance("filament_assembly", "bulb_glass", axes="xy", max_dist=0.0025)
+            ctx.expect_aabb_overlap("filament_assembly", "bulb_glass", axes="xy", min_overlap=0.0045)
 
     return ctx.report()
 

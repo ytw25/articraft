@@ -481,10 +481,10 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("front_dial", "clock_tower", min_overlap=0.015)
-    ctx.expect_xy_distance("front_dial", "hour_hand", max_dist=0.030)
-    ctx.expect_xy_distance("front_dial", "minute_hand", max_dist=0.032)
-    ctx.expect_xy_distance("hour_hand", "minute_hand", max_dist=0.010)
+    ctx.expect_aabb_overlap("front_dial", "clock_tower", axes="xy", min_overlap=0.015)
+    ctx.expect_origin_distance("front_dial", "hour_hand", axes="xy", max_dist=0.030)
+    ctx.expect_origin_distance("front_dial", "minute_hand", axes="xy", max_dist=0.032)
+    ctx.expect_origin_distance("hour_hand", "minute_hand", axes="xy", max_dist=0.010)
 
     tower_pos = ctx.part_world_position("clock_tower")
     dial_pos = ctx.part_world_position("front_dial")

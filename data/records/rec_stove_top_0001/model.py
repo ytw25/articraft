@@ -455,9 +455,9 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("oven_door", "body", min_overlap=0.025)
+    ctx.expect_aabb_overlap("oven_door", "body", axes="xy", min_overlap=0.025)
     with ctx.pose(oven_door_hinge=0.22):
-        ctx.expect_aabb_overlap_xy("oven_door", "body", min_overlap=0.03)
+        ctx.expect_aabb_overlap("oven_door", "body", axes="xy", min_overlap=0.03)
     ctx.expect_joint_motion_axis(
         "oven_door_hinge",
         "oven_door",

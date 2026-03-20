@@ -227,13 +227,13 @@ def run_tests() -> TestReport:
         min_delta=0.20,
     )
     with ctx.pose(mast_to_carriage=0.0):
-        ctx.expect_xy_distance("carriage", "mast", max_dist=0.13)
-        ctx.expect_xy_distance("fork_frame", "carriage", max_dist=0.30)
-        ctx.expect_aabb_overlap_xy("fork_frame", "carriage", min_overlap=0.008)
+        ctx.expect_origin_distance("carriage", "mast", axes="xy", max_dist=0.13)
+        ctx.expect_origin_distance("fork_frame", "carriage", axes="xy", max_dist=0.30)
+        ctx.expect_aabb_overlap("fork_frame", "carriage", axes="xy", min_overlap=0.008)
     with ctx.pose(mast_to_carriage=0.48):
-        ctx.expect_xy_distance("carriage", "mast", max_dist=0.13)
-        ctx.expect_xy_distance("fork_frame", "carriage", max_dist=0.30)
-        ctx.expect_aabb_overlap_xy("fork_frame", "carriage", min_overlap=0.008)
+        ctx.expect_origin_distance("carriage", "mast", axes="xy", max_dist=0.13)
+        ctx.expect_origin_distance("fork_frame", "carriage", axes="xy", max_dist=0.30)
+        ctx.expect_aabb_overlap("fork_frame", "carriage", axes="xy", min_overlap=0.008)
     return ctx.report()
 
 

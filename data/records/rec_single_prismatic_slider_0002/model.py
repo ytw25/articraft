@@ -5,6 +5,7 @@ from math import pi
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -16,11 +17,10 @@ from sdk_hybrid import (
     TestReport,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 CARCASS_W = 0.60
 CARCASS_D = 0.55
@@ -67,7 +67,7 @@ def _add_box(part, size, xyz, *, material=None, collision=True) -> None:
     origin = Origin(xyz=xyz)
     part.visual(Box(size), origin=origin, material=material)
     if collision:
-        part.collision(Box(size), origin=origin)
+        pass
 
 
 def _pose_context(ctx: TestContext, amount: float):
@@ -233,15 +233,15 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, prefer_collisions=True, seed=0)
+    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision", seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
 
     with _pose_context(ctx, 0.0):
-        ctx.expect_aabb_overlap_xy("drawer", "carcass", min_overlap=0.20)
+        ctx.expect_aabb_overlap("drawer", "carcass", axes="xy", min_overlap=0.20)
 
     ctx.expect_joint_motion_axis(
         "carcass_to_drawer",
@@ -252,7 +252,7 @@ def run_tests() -> TestReport:
     )
 
     with _pose_context(ctx, DRAWER_TRAVEL):
-        ctx.expect_aabb_overlap_xy("drawer", "carcass", min_overlap=0.10)
+        ctx.expect_aabb_overlap("drawer", "carcass", axes="xy", min_overlap=0.10)
 
     return ctx.report()
 

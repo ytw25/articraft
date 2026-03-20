@@ -28,8 +28,8 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
 
 
 def _make_material(name: str, rgba: tuple[float, float, float, float]) -> Material:
@@ -387,7 +387,7 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.18)
+    ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.18)
     ctx.expect_joint_motion_axis(
         "lid_hinge",
         "lid",
@@ -397,16 +397,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(lid_hinge=0.20):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.16)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.16)
 
     with ctx.pose(lid_hinge=0.60):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.10)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.10)
 
     with ctx.pose(lid_hinge=1.25):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.04)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.04)
 
     with ctx.pose(lid_hinge=1.35):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.02)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.02)
 
     return ctx.report()
 

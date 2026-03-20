@@ -218,7 +218,7 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("cab", "shaft_frame", min_overlap=1.20)
+    ctx.expect_aabb_overlap("cab", "shaft_frame", axes="xy", min_overlap=1.20)
     ctx.expect_joint_motion_axis(
         "shaft_to_cab",
         "cab",
@@ -247,7 +247,7 @@ def run_tests() -> TestReport:
 
     with ctx.pose(shaft_to_cab=1.20):
         cab_high = ctx.part_world_position("cab")
-        ctx.expect_aabb_overlap_xy("cab", "shaft_frame", min_overlap=1.20)
+        ctx.expect_aabb_overlap("cab", "shaft_frame", axes="xy", min_overlap=1.20)
 
     cab_rise = cab_high[2] - cab_rest[2]
     if cab_rise < 1.0:
@@ -280,7 +280,7 @@ def run_tests() -> TestReport:
     with ctx.pose(shaft_to_cab=1.20, cab_to_left_door=0.31, cab_to_right_door=0.31):
         left_open_high = ctx.part_world_position("left_door")
         right_open_high = ctx.part_world_position("right_door")
-        ctx.expect_aabb_overlap_xy("cab", "shaft_frame", min_overlap=1.20)
+        ctx.expect_aabb_overlap("cab", "shaft_frame", axes="xy", min_overlap=1.20)
 
     if abs((left_open_high[2] - left_open[2]) - cab_rise) > 0.02:
         raise AssertionError("Left door should travel upward together with the cab.")

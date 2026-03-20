@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 
@@ -164,22 +164,10 @@ def _add_channel_collisions(part, dims: dict[str, float]) -> None:
     rear_beam_t = dims["rear_beam_t"]
     rear_beam_h = dims["rear_beam_h"]
 
-    part.collision(
-        Box((length, floor_width, floor_t)),
-        origin=Origin(xyz=(length / 2.0, 0.0, floor_t / 2.0)),
-    )
-    part.collision(
-        Box((length, rail_t, rail_h)),
-        origin=Origin(xyz=(length / 2.0, (width / 2.0) - (rail_t / 2.0), rail_h / 2.0)),
-    )
-    part.collision(
-        Box((length, rail_t, rail_h)),
-        origin=Origin(xyz=(length / 2.0, -(width / 2.0) + (rail_t / 2.0), rail_h / 2.0)),
-    )
-    part.collision(
-        Box((rear_beam_t, floor_width, rear_beam_h)),
-        origin=Origin(xyz=(rear_beam_t / 2.0, 0.0, rear_beam_h / 2.0)),
-    )
+
+
+
+
 
 
 def build_object_model() -> ArticulatedObject:
@@ -208,7 +196,7 @@ def build_object_model() -> ArticulatedObject:
             material="frame_graphite",
         )
     _add_channel_collisions(base, BASE_DIMS)
-    base.collision(Box((0.12, 0.14, 0.022)), origin=Origin(xyz=(0.085, 0.0, 0.049)))
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_DIMS["length"], BASE_DIMS["width"], BASE_DIMS["height"])),
         mass=18.0,
@@ -266,7 +254,7 @@ def build_object_model() -> ArticulatedObject:
             material="shuttle_orange",
         )
     _add_channel_collisions(stage3, STAGE3_DIMS)
-    stage3.collision(Box((0.08, 0.146, 0.010)), origin=Origin(xyz=(0.180, 0.0, 0.009)))
+
     stage3.inertial = Inertial.from_geometry(
         Box((STAGE3_DIMS["length"], STAGE3_DIMS["width"], STAGE3_DIMS["height"])),
         mass=1.8,
@@ -309,18 +297,18 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("stage1", "base", max_dist=0.06)
-    ctx.expect_xy_distance("stage2", "stage1", max_dist=0.06)
-    ctx.expect_xy_distance("stage3", "stage2", max_dist=0.05)
-    ctx.expect_xy_distance("stage3", "base", max_dist=0.16)
+    ctx.expect_origin_distance("stage1", "base", axes="xy", max_dist=0.06)
+    ctx.expect_origin_distance("stage2", "stage1", axes="xy", max_dist=0.06)
+    ctx.expect_origin_distance("stage3", "stage2", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("stage3", "base", axes="xy", max_dist=0.16)
 
-    ctx.expect_aabb_overlap_xy("stage1", "base", min_overlap=0.18)
-    ctx.expect_aabb_overlap_xy("stage2", "stage1", min_overlap=0.12)
-    ctx.expect_aabb_overlap_xy("stage3", "stage2", min_overlap=0.09)
-    ctx.expect_aabb_overlap_xy("stage3", "base", min_overlap=0.08)
+    ctx.expect_aabb_overlap("stage1", "base", axes="xy", min_overlap=0.18)
+    ctx.expect_aabb_overlap("stage2", "stage1", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_overlap("stage3", "stage2", axes="xy", min_overlap=0.09)
+    ctx.expect_aabb_overlap("stage3", "base", axes="xy", min_overlap=0.08)
 
     ctx.expect_joint_motion_axis(
         "base_to_stage1",

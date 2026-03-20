@@ -102,30 +102,7 @@ def _make_flap_shape() -> cq.Workplane:
 
 
 def _add_frame_collisions(frame_part) -> None:
-    frame_part.collision(
-        Box((FRAME_BORDER_X, FRAME_D, FRAME_T)),
-        origin=Origin(xyz=(-FRAME_W / 2.0 + FRAME_BORDER_X / 2.0, 0.0, 0.0)),
-    )
-    frame_part.collision(
-        Box((FRAME_BORDER_X, FRAME_D, FRAME_T)),
-        origin=Origin(xyz=(FRAME_W / 2.0 - FRAME_BORDER_X / 2.0, 0.0, 0.0)),
-    )
-    frame_part.collision(
-        Box((FRAME_W - 2.0 * FRAME_BORDER_X, FRAME_BORDER_Y, FRAME_T)),
-        origin=Origin(xyz=(0.0, -FRAME_D / 2.0 + FRAME_BORDER_Y / 2.0, 0.0)),
-    )
-    frame_part.collision(
-        Box((FRAME_W - 2.0 * FRAME_BORDER_X, FRAME_BORDER_Y, FRAME_T)),
-        origin=Origin(xyz=(0.0, FRAME_D / 2.0 - FRAME_BORDER_Y / 2.0, 0.0)),
-    )
-    frame_part.collision(
-        Box((MULLION_X, FRAME_D - 2.0 * FRAME_BORDER_Y, FRAME_T)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
-    frame_part.collision(
-        Box((FRAME_W - 2.0 * FRAME_BORDER_X, MULLION_Y, FRAME_T)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
+    pass
 
 
 def _add_frame_qc_hinge_targets(frame_part) -> None:
@@ -181,14 +158,8 @@ def _configure_flap_part(flap_part) -> None:
         origin=Origin(xyz=(BARREL_R * 0.55, 0.0, PANEL_Z_OFFSET * 0.65)),
         material="frame_finish",
     )
-    flap_part.collision(
-        Box((FLAP_W, FLAP_D, PANEL_T)),
-        origin=Origin(xyz=(panel_origin_x, 0.0, PANEL_Z_OFFSET)),
-    )
-    flap_part.collision(
-        Box((BARREL_R * 2.4, BARREL_LEN, BARREL_R * 2.4)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
+
+
     flap_part.qc_collision(
         Box((BARREL_R * 2.4, BARREL_LEN, BARREL_R * 2.4)),
         origin=Origin(xyz=(0.0, 0.0, 0.0)),
@@ -246,7 +217,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.002,
@@ -254,9 +225,9 @@ def run_tests() -> TestReport:
     )
 
     for flap_name, joint_name, _ in FLAP_LAYOUT:
-        ctx.expect_above(flap_name, "frame", min_clearance=0.0)
-        ctx.expect_aabb_gap_z(flap_name, "frame", max_gap=0.006, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy(flap_name, "frame", min_overlap=0.035)
+        ctx.expect_origin_gap(flap_name, "frame", axis="z", min_gap=0.0)
+        ctx.expect_aabb_gap(flap_name, "frame", axis="z", max_gap=0.006, max_penetration=0.0)
+        ctx.expect_aabb_overlap(flap_name, "frame", axes="xy", min_overlap=0.035)
         ctx.expect_joint_motion_axis(
             joint_name,
             flap_name,

@@ -40,7 +40,7 @@ def _material(name: str, rgba: tuple[float, float, float, float]) -> Material:
 def _mesh_path(name: str) -> Path:
     if hasattr(ASSETS, "mesh_path"):
         return Path(ASSETS.mesh_path(name))
-    mesh_dir = HERE / "meshes"
+    mesh_dir = ASSETS.mesh_dir
     mesh_dir.mkdir(parents=True, exist_ok=True)
     return mesh_dir / name
 
@@ -318,7 +318,7 @@ def run_tests() -> TestReport:
         "The dolly needs a stable axle track width."
     )
 
-    ctx.expect_xy_distance("left_wheel", "right_wheel", max_dist=0.60)
+    ctx.expect_origin_distance("left_wheel", "right_wheel", axes="xy", max_dist=0.60)
     ctx.expect_joint_motion_axis(
         "toe_extension_hinge",
         "toe_extension",
@@ -328,14 +328,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(toe_extension_hinge=0.0):
-        ctx.expect_aabb_overlap_xy("toe_extension", "toe_plate", min_overlap=0.008)
+        ctx.expect_aabb_overlap("toe_extension", "toe_plate", axes="xy", min_overlap=0.008)
         deployed_ext_pos = ctx.part_world_position("toe_extension")
         assert deployed_ext_pos[1] > toe_plate_pos[1], (
             "Deployed extension should project in front of the main toe plate origin."
         )
 
     with ctx.pose(toe_extension_hinge=1.30):
-        ctx.expect_aabb_overlap_xy("toe_extension", "toe_plate", min_overlap=0.004)
+        ctx.expect_aabb_overlap("toe_extension", "toe_plate", axes="xy", min_overlap=0.004)
 
     with ctx.pose(left_wheel_spin=1.70, right_wheel_spin=-1.10):
         spun_left = ctx.part_world_position("left_wheel")
@@ -346,7 +346,7 @@ def run_tests() -> TestReport:
         assert max(abs(a - b) for a, b in zip(right_wheel_pos, spun_right)) < 1e-6, (
             "Wheel spin should not translate the right wheel center."
         )
-        ctx.expect_xy_distance("left_wheel", "right_wheel", max_dist=0.60)
+        ctx.expect_origin_distance("left_wheel", "right_wheel", axes="xy", max_dist=0.60)
 
     return ctx.report()
 

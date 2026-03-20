@@ -128,8 +128,8 @@ def build_object_model() -> ArticulatedObject:
 
     base_mount = model.part("base_mount")
     _add_visual_mesh(base_mount, _make_base_shape(), "base_mount.obj", "dark_anodized")
-    base_mount.collision(Box((0.030, 0.058, 0.058)), origin=Origin(xyz=(-0.020, 0.0, 0.0)))
-    base_mount.collision(Box((0.010, 0.068, 0.068)), origin=Origin(xyz=(-0.040, 0.0, 0.0)))
+
+
     base_mount.inertial = Inertial.from_geometry(
         Box((0.040, 0.072, 0.072)),
         mass=1.15,
@@ -138,18 +138,14 @@ def build_object_model() -> ArticulatedObject:
 
     yaw_housing = model.part("yaw_housing")
     _add_visual_mesh(yaw_housing, _make_yaw_shape(), "yaw_housing.obj", "dark_anodized")
-    yaw_housing.collision(Box((0.004, 0.030, 0.030)), origin=Origin(xyz=(0.004, 0.0, 0.0)))
-    yaw_housing.collision(Box((0.022, 0.014, 0.060)), origin=Origin(xyz=(0.013, -0.032, 0.0)))
-    yaw_housing.collision(Box((0.022, 0.014, 0.060)), origin=Origin(xyz=(0.013, 0.032, 0.0)))
-    yaw_housing.collision(
-        Box((0.010, 0.008, 0.024)), origin=Origin(xyz=(PITCH_ORIGIN_X, -0.024, 0.0))
-    )
-    yaw_housing.collision(
-        Box((0.010, 0.008, 0.024)), origin=Origin(xyz=(PITCH_ORIGIN_X, 0.024, 0.0))
-    )
-    yaw_housing.collision(Box((0.014, 0.040, 0.014)), origin=Origin(xyz=(0.009, 0.0, 0.030)))
-    yaw_housing.collision(Box((0.014, 0.040, 0.014)), origin=Origin(xyz=(0.009, 0.0, -0.030)))
-    yaw_housing.collision(Box((0.010, 0.008, 0.012)), origin=Origin(xyz=(0.012, 0.049, 0.010)))
+
+
+
+
+
+
+
+
     yaw_housing.inertial = Inertial.from_geometry(
         Box((0.056, 0.108, 0.108)),
         mass=0.80,
@@ -187,13 +183,11 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.050, 0.0, 0.0)),
         material="machined_aluminum",
     )
-    pitch_yoke.collision(
-        Cylinder(radius=0.008, length=0.030), origin=Origin(rpy=(-pi / 2.0, 0.0, 0.0))
-    )
-    pitch_yoke.collision(Box((0.010, 0.022, 0.022)), origin=Origin(xyz=(0.012, 0.0, 0.0)))
-    pitch_yoke.collision(Box((0.018, 0.016, 0.020)), origin=Origin(xyz=(0.024, 0.0, 0.0)))
-    pitch_yoke.collision(Box((0.036, 0.022, 0.008)), origin=Origin(xyz=(0.034, 0.0, 0.018)))
-    pitch_yoke.collision(Box((0.036, 0.022, 0.008)), origin=Origin(xyz=(0.034, 0.0, -0.018)))
+
+
+
+
+
     pitch_yoke.inertial = Inertial.from_geometry(
         Box((0.058, 0.072, 0.062)),
         mass=0.55,
@@ -202,11 +196,9 @@ def build_object_model() -> ArticulatedObject:
 
     roll_head = model.part("roll_head")
     _add_visual_mesh(roll_head, _make_roll_shape(), "roll_head.obj", "brushed_steel")
-    roll_head.collision(
-        Cylinder(radius=0.010, length=0.026), origin=Origin(rpy=(0.0, pi / 2.0, 0.0))
-    )
-    roll_head.collision(Box((0.048, 0.028, 0.028)), origin=Origin(xyz=(0.042, 0.0, 0.0)))
-    roll_head.collision(Box((0.022, 0.020, 0.012)), origin=Origin(xyz=(0.044, 0.032, 0.0)))
+
+
+
     roll_head.inertial = Inertial.from_geometry(
         Box((0.086, 0.056, 0.056)),
         mass=0.45,
@@ -251,7 +243,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "base_mount",
         "pitch_yoke",
@@ -259,10 +251,10 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_housing", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("roll_head", "pitch_yoke", min_overlap=0.010)
-    ctx.expect_xy_distance("pitch_yoke", "yaw_housing", max_dist=0.060)
-    ctx.expect_xy_distance("roll_head", "pitch_yoke", max_dist=0.050)
+    ctx.expect_aabb_overlap("pitch_yoke", "yaw_housing", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("roll_head", "pitch_yoke", axes="xy", min_overlap=0.010)
+    ctx.expect_origin_distance("pitch_yoke", "yaw_housing", axes="xy", max_dist=0.060)
+    ctx.expect_origin_distance("roll_head", "pitch_yoke", axes="xy", max_dist=0.050)
 
     ctx.expect_joint_motion_axis(
         "yaw_axis", "yaw_housing", world_axis="x", direction="negative", min_delta=0.003
@@ -275,28 +267,28 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose({"yaw_axis": YAW_LIMIT}):
-        ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_housing", min_overlap=0.010)
-        ctx.expect_xy_distance("pitch_yoke", "yaw_housing", max_dist=0.060)
+        ctx.expect_aabb_overlap("pitch_yoke", "yaw_housing", axes="xy", min_overlap=0.010)
+        ctx.expect_origin_distance("pitch_yoke", "yaw_housing", axes="xy", max_dist=0.060)
 
     with ctx.pose({"yaw_axis": -YAW_LIMIT}):
-        ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_housing", min_overlap=0.010)
-        ctx.expect_xy_distance("pitch_yoke", "yaw_housing", max_dist=0.060)
+        ctx.expect_aabb_overlap("pitch_yoke", "yaw_housing", axes="xy", min_overlap=0.010)
+        ctx.expect_origin_distance("pitch_yoke", "yaw_housing", axes="xy", max_dist=0.060)
 
     with ctx.pose({"pitch_axis": PITCH_LIMIT}):
-        ctx.expect_aabb_overlap_xy("roll_head", "pitch_yoke", min_overlap=0.008)
-        ctx.expect_xy_distance("roll_head", "pitch_yoke", max_dist=0.070)
+        ctx.expect_aabb_overlap("roll_head", "pitch_yoke", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("roll_head", "pitch_yoke", axes="xy", max_dist=0.070)
 
     with ctx.pose({"pitch_axis": -PITCH_LIMIT}):
-        ctx.expect_aabb_overlap_xy("roll_head", "pitch_yoke", min_overlap=0.008)
-        ctx.expect_xy_distance("roll_head", "pitch_yoke", max_dist=0.070)
+        ctx.expect_aabb_overlap("roll_head", "pitch_yoke", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("roll_head", "pitch_yoke", axes="xy", max_dist=0.070)
 
     with ctx.pose({"roll_axis": pi / 2.0}):
-        ctx.expect_aabb_overlap_xy("roll_head", "pitch_yoke", min_overlap=0.008)
-        ctx.expect_xy_distance("roll_head", "pitch_yoke", max_dist=0.060)
+        ctx.expect_aabb_overlap("roll_head", "pitch_yoke", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("roll_head", "pitch_yoke", axes="xy", max_dist=0.060)
 
     with ctx.pose({"roll_axis": -pi / 2.0}):
-        ctx.expect_aabb_overlap_xy("roll_head", "pitch_yoke", min_overlap=0.008)
-        ctx.expect_xy_distance("roll_head", "pitch_yoke", max_dist=0.060)
+        ctx.expect_aabb_overlap("roll_head", "pitch_yoke", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("roll_head", "pitch_yoke", axes="xy", max_dist=0.060)
 
     return ctx.report()
 

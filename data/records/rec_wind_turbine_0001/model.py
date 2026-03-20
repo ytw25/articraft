@@ -318,28 +318,28 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("nacelle", "tower", max_dist=0.08)
-    ctx.expect_aabb_overlap_xy("nacelle", "tower", min_overlap=1.15)
-    ctx.expect_aabb_gap_z("nacelle", "tower", max_gap=0.008, max_penetration=0.0)
-    ctx.expect_above("nacelle", "tower", min_clearance=39.5)
-    ctx.expect_above("rotor", "tower", min_clearance=40.2)
-    ctx.expect_xy_distance("rotor", "nacelle", max_dist=4.1)
-    ctx.expect_xy_distance("rotor", "tower", max_dist=4.7)
+    ctx.expect_origin_distance("nacelle", "tower", axes="xy", max_dist=0.08)
+    ctx.expect_aabb_overlap("nacelle", "tower", axes="xy", min_overlap=1.15)
+    ctx.expect_aabb_gap("nacelle", "tower", axis="z", max_gap=0.008, max_penetration=0.0)
+    ctx.expect_origin_gap("nacelle", "tower", axis="z", min_gap=39.5)
+    ctx.expect_origin_gap("rotor", "tower", axis="z", min_gap=40.2)
+    ctx.expect_origin_distance("rotor", "nacelle", axes="xy", max_dist=4.1)
+    ctx.expect_origin_distance("rotor", "tower", axes="xy", max_dist=4.7)
 
     with ctx.pose(rotor_spin=math.pi / 2.0):
-        ctx.expect_above("rotor", "tower", min_clearance=40.2)
-        ctx.expect_xy_distance("rotor", "nacelle", max_dist=4.1)
-        ctx.expect_xy_distance("rotor", "tower", max_dist=4.7)
+        ctx.expect_origin_gap("rotor", "tower", axis="z", min_gap=40.2)
+        ctx.expect_origin_distance("rotor", "nacelle", axes="xy", max_dist=4.1)
+        ctx.expect_origin_distance("rotor", "tower", axes="xy", max_dist=4.7)
 
     with ctx.pose(rotor_spin=-math.pi / 2.0):
-        ctx.expect_above("rotor", "tower", min_clearance=40.2)
-        ctx.expect_xy_distance("rotor", "nacelle", max_dist=4.1)
-        ctx.expect_xy_distance("rotor", "tower", max_dist=4.7)
+        ctx.expect_origin_gap("rotor", "tower", axis="z", min_gap=40.2)
+        ctx.expect_origin_distance("rotor", "nacelle", axes="xy", max_dist=4.1)
+        ctx.expect_origin_distance("rotor", "tower", axes="xy", max_dist=4.7)
 
     with ctx.pose(rotor_spin=math.pi):
-        ctx.expect_above("rotor", "tower", min_clearance=40.2)
-        ctx.expect_xy_distance("rotor", "nacelle", max_dist=4.1)
-        ctx.expect_xy_distance("rotor", "tower", max_dist=4.7)
+        ctx.expect_origin_gap("rotor", "tower", axis="z", min_gap=40.2)
+        ctx.expect_origin_distance("rotor", "nacelle", axes="xy", max_dist=4.1)
+        ctx.expect_origin_distance("rotor", "tower", axes="xy", max_dist=4.7)
 
     return ctx.report()
 

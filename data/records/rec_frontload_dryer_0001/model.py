@@ -43,7 +43,7 @@ def _mesh_path(name: str):
     try:
         return ASSETS.mesh_path(name)
     except AttributeError:
-        return HERE / "meshes" / name
+        return ASSETS.mesh_dir / name
 
 
 def _circle_profile(radius: float, segments: int = 72) -> list[tuple[float, float]]:
@@ -435,26 +435,26 @@ def run_tests() -> TestReport:
         direction="positive",
         min_delta=0.002,
     )
-    ctx.expect_aabb_overlap_xy("door", "cabinet", min_overlap=0.003)
-    ctx.expect_aabb_overlap_xy("power_button", "cabinet", min_overlap=0.010)
-    ctx.expect_aabb_overlap_xy("start_button", "cabinet", min_overlap=0.010)
-    ctx.expect_xy_distance("selector_knob", "power_button", max_dist=0.27)
-    ctx.expect_xy_distance("selector_knob", "start_button", max_dist=0.40)
+    ctx.expect_aabb_overlap("door", "cabinet", axes="xy", min_overlap=0.003)
+    ctx.expect_aabb_overlap("power_button", "cabinet", axes="xy", min_overlap=0.010)
+    ctx.expect_aabb_overlap("start_button", "cabinet", axes="xy", min_overlap=0.010)
+    ctx.expect_origin_distance("selector_knob", "power_button", axes="xy", max_dist=0.27)
+    ctx.expect_origin_distance("selector_knob", "start_button", axes="xy", max_dist=0.40)
 
     with ctx.pose(door_hinge=-2.10):
-        ctx.expect_xy_distance("door", "cabinet", max_dist=0.70)
+        ctx.expect_origin_distance("door", "cabinet", axes="xy", max_dist=0.70)
 
     with ctx.pose(selector_dial=2.20):
-        ctx.expect_xy_distance("selector_knob", "power_button", max_dist=0.27)
-        ctx.expect_xy_distance("selector_knob", "start_button", max_dist=0.40)
+        ctx.expect_origin_distance("selector_knob", "power_button", axes="xy", max_dist=0.27)
+        ctx.expect_origin_distance("selector_knob", "start_button", axes="xy", max_dist=0.40)
 
     with ctx.pose(selector_dial=-2.20):
-        ctx.expect_xy_distance("selector_knob", "power_button", max_dist=0.27)
-        ctx.expect_xy_distance("selector_knob", "start_button", max_dist=0.40)
+        ctx.expect_origin_distance("selector_knob", "power_button", axes="xy", max_dist=0.27)
+        ctx.expect_origin_distance("selector_knob", "start_button", axes="xy", max_dist=0.40)
 
     with ctx.pose(power_button_press=0.004, start_button_press=0.004):
-        ctx.expect_aabb_overlap_xy("power_button", "cabinet", min_overlap=0.010)
-        ctx.expect_aabb_overlap_xy("start_button", "cabinet", min_overlap=0.010)
+        ctx.expect_aabb_overlap("power_button", "cabinet", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_overlap("start_button", "cabinet", axes="xy", min_overlap=0.010)
 
     return ctx.report()
 

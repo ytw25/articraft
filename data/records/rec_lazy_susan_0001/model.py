@@ -24,7 +24,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 
 
 def _make_material(name: str, rgba: tuple[float, float, float, float]) -> Material:
@@ -264,14 +264,9 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, math.pi / 2.0, math.pi, 1.5 * math.pi):
         with ctx.pose(lazy_susan_spin=angle):
-            ctx.expect_xy_distance("lazy_susan", "table_base", max_dist=0.005)
-            ctx.expect_aabb_overlap_xy("lazy_susan", "table_base", min_overlap=0.50)
-            ctx.expect_aabb_gap_z(
-                "lazy_susan",
-                "table_base",
-                max_gap=0.001,
-                max_penetration=0.012,
-            )
+            ctx.expect_origin_distance("lazy_susan", "table_base", axes="xy", max_dist=0.005)
+            ctx.expect_aabb_overlap("lazy_susan", "table_base", axes="xy", min_overlap=0.50)
+            ctx.expect_aabb_gap("lazy_susan", "table_base", axis="z", max_gap=0.001, max_penetration=0.012)
 
     return ctx.report()
 

@@ -275,12 +275,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("yoke", "stand", max_dist=0.08)
-    ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-    ctx.expect_xy_distance("lamp", "yoke", max_dist=0.20)
-    ctx.expect_aabb_overlap_xy("yoke", "stand", min_overlap=0.06)
-    ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.04)
-    ctx.expect_aabb_overlap_xy("lamp", "yoke", min_overlap=0.03)
+    ctx.expect_origin_distance("yoke", "stand", axes="xy", max_dist=0.08)
+    ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+    ctx.expect_origin_distance("lamp", "yoke", axes="xy", max_dist=0.20)
+    ctx.expect_aabb_overlap("yoke", "stand", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_overlap("lamp", "yoke", axes="xy", min_overlap=0.03)
     ctx.expect_joint_motion_axis(
         "yoke_tilt",
         "lamp",
@@ -290,41 +290,41 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(stand_pan=1.60):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.04)
-        ctx.expect_aabb_overlap_xy("yoke", "stand", min_overlap=0.06)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_overlap("yoke", "stand", axes="xy", min_overlap=0.06)
 
     with ctx.pose(stand_pan=-1.60):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.04)
-        ctx.expect_aabb_overlap_xy("yoke", "stand", min_overlap=0.06)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_overlap("yoke", "stand", axes="xy", min_overlap=0.06)
 
     with ctx.pose({"stand_pan": 1.85, "yoke_tilt": 0.55}):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("lamp", "yoke", min_overlap=0.03)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("lamp", "yoke", axes="xy", min_overlap=0.03)
 
     with ctx.pose({"stand_pan": -1.85, "yoke_tilt": 0.55}):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("lamp", "yoke", min_overlap=0.03)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("lamp", "yoke", axes="xy", min_overlap=0.03)
 
     with ctx.pose(yoke_tilt=0.60):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-        ctx.expect_xy_distance("lamp", "yoke", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("lamp", "yoke", min_overlap=0.03)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+        ctx.expect_origin_distance("lamp", "yoke", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("lamp", "yoke", axes="xy", min_overlap=0.03)
 
     with ctx.pose(yoke_tilt=-0.95):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.24)
-        ctx.expect_xy_distance("lamp", "yoke", max_dist=0.24)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("lamp", "yoke", min_overlap=0.03)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.24)
+        ctx.expect_origin_distance("lamp", "yoke", axes="xy", max_dist=0.24)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("lamp", "yoke", axes="xy", min_overlap=0.03)
 
     with ctx.pose({"stand_pan": 1.20, "yoke_tilt": 0.55}):
-        ctx.expect_xy_distance("lamp", "stand", max_dist=0.22)
-        ctx.expect_aabb_overlap_xy("lamp", "stand", min_overlap=0.03)
-        ctx.expect_aabb_overlap_xy("lamp", "yoke", min_overlap=0.03)
+        ctx.expect_origin_distance("lamp", "stand", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_overlap("lamp", "stand", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_overlap("lamp", "yoke", axes="xy", min_overlap=0.03)
 
     return ctx.report()
 

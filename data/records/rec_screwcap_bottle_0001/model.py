@@ -23,9 +23,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _helical_points(
     *,
     radius: float,
@@ -217,14 +215,9 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, math.pi, 2.0 * math.pi, 3.0 * math.pi):
         with ctx.pose(cap_thread=angle):
-            ctx.expect_aabb_overlap_xy("cap", "bottle", min_overlap=0.032)
-            ctx.expect_xy_distance("cap", "bottle", max_dist=0.006)
-            ctx.expect_aabb_gap_z(
-                "cap",
-                "bottle",
-                max_gap=0.004,
-                max_penetration=0.032,
-            )
+            ctx.expect_aabb_overlap("cap", "bottle", axes="xy", min_overlap=0.032)
+            ctx.expect_origin_distance("cap", "bottle", axes="xy", max_dist=0.006)
+            ctx.expect_aabb_gap("cap", "bottle", axis="z", max_gap=0.004, max_penetration=0.032)
 
     return ctx.report()
 

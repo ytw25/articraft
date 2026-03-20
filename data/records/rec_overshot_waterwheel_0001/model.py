@@ -115,7 +115,7 @@ def build_object_model() -> ArticulatedObject:
         tubular_segments=56,
     )
     outer_ring.rotate_x(math.pi / 2.0)
-    outer_ring_mesh = mesh_from_geometry(outer_ring, HERE / "meshes" / "waterwheel_outer_ring.obj")
+    outer_ring_mesh = mesh_from_geometry(outer_ring, ASSETS.mesh_dir / "waterwheel_outer_ring.obj")
 
     inner_ring = TorusGeometry(
         radius=0.245,
@@ -124,7 +124,7 @@ def build_object_model() -> ArticulatedObject:
         tubular_segments=48,
     )
     inner_ring.rotate_x(math.pi / 2.0)
-    inner_ring_mesh = mesh_from_geometry(inner_ring, HERE / "meshes" / "waterwheel_inner_ring.obj")
+    inner_ring_mesh = mesh_from_geometry(inner_ring, ASSETS.mesh_dir / "waterwheel_inner_ring.obj")
 
     left_shroud_y = WHEEL_CENTER_LOCAL_Y - (WHEEL_WIDTH / 2.0)
     right_shroud_y = WHEEL_CENTER_LOCAL_Y + (WHEEL_WIDTH / 2.0)
@@ -281,16 +281,16 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_gap_z("flume", "frame", max_gap=0.02, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("flume", "frame", min_overlap=0.18)
-    ctx.expect_aabb_overlap_xy("flume", "wheel", min_overlap=0.10)
-    ctx.expect_aabb_gap_z("flume", "wheel", max_gap=0.18, max_penetration=0.07)
+    ctx.expect_aabb_gap("flume", "frame", axis="z", max_gap=0.02, max_penetration=0.0)
+    ctx.expect_aabb_overlap("flume", "frame", axes="xy", min_overlap=0.18)
+    ctx.expect_aabb_overlap("flume", "wheel", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_gap("flume", "wheel", axis="z", max_gap=0.18, max_penetration=0.07)
 
     for angle in (0.0, math.pi / 4.0, math.pi / 2.0, math.pi, 1.5 * math.pi):
         with ctx.pose(**{WHEEL_JOINT_NAME: angle}):
-            ctx.expect_aabb_overlap_xy("wheel", "frame", min_overlap=0.22)
-            ctx.expect_aabb_overlap_xy("flume", "wheel", min_overlap=0.10)
-            ctx.expect_aabb_gap_z("flume", "wheel", max_gap=0.18, max_penetration=0.07)
+            ctx.expect_aabb_overlap("wheel", "frame", axes="xy", min_overlap=0.22)
+            ctx.expect_aabb_overlap("flume", "wheel", axes="xy", min_overlap=0.10)
+            ctx.expect_aabb_gap("flume", "wheel", axis="z", max_gap=0.18, max_penetration=0.07)
 
     return ctx.report()
 

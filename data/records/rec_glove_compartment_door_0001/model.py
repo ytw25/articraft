@@ -379,8 +379,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("glovebox_door", "dashboard_frame", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("glovebox_door", "compartment_bin", min_overlap=0.08)
+    ctx.expect_aabb_overlap("glovebox_door", "dashboard_frame", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("glovebox_door", "compartment_bin", axes="xy", min_overlap=0.08)
     ctx.expect_joint_motion_axis(
         "door_hinge",
         "glovebox_door",
@@ -397,18 +397,10 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(door_hinge=0.55):
-        ctx.expect_aabb_overlap_xy(
-            "glovebox_door",
-            "dashboard_frame",
-            min_overlap=0.06,
-        )
+        ctx.expect_aabb_overlap("glovebox_door", "dashboard_frame", axes="xy", min_overlap=0.06)
 
     with ctx.pose(door_hinge=1.20):
-        ctx.expect_aabb_overlap_xy(
-            "glovebox_door",
-            "dashboard_frame",
-            min_overlap=0.025,
-        )
+        ctx.expect_aabb_overlap("glovebox_door", "dashboard_frame", axes="xy", min_overlap=0.025)
 
     return ctx.report()
 

@@ -344,8 +344,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("side_panel", "chassis", min_overlap=0.002)
-    ctx.expect_aabb_overlap_xy("front_door", "chassis", min_overlap=0.002)
+    ctx.expect_aabb_overlap("side_panel", "chassis", axes="xy", min_overlap=0.002)
+    ctx.expect_aabb_overlap("front_door", "chassis", axes="xy", min_overlap=0.002)
 
     ctx.expect_joint_motion_axis(
         "chassis_to_side_panel",
@@ -363,14 +363,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(chassis_to_side_panel=1.35):
-        ctx.expect_xy_distance("side_panel", "chassis", max_dist=0.38)
+        ctx.expect_origin_distance("side_panel", "chassis", axes="xy", max_dist=0.38)
 
     with ctx.pose(chassis_to_front_door=1.15):
-        ctx.expect_xy_distance("front_door", "chassis", max_dist=0.35)
+        ctx.expect_origin_distance("front_door", "chassis", axes="xy", max_dist=0.35)
 
     with ctx.pose(chassis_to_side_panel=0.0, chassis_to_front_door=0.0):
-        ctx.expect_aabb_overlap_xy("side_panel", "chassis", min_overlap=0.002)
-        ctx.expect_aabb_overlap_xy("front_door", "chassis", min_overlap=0.002)
+        ctx.expect_aabb_overlap("side_panel", "chassis", axes="xy", min_overlap=0.002)
+        ctx.expect_aabb_overlap("front_door", "chassis", axes="xy", min_overlap=0.002)
 
     return ctx.report()
 

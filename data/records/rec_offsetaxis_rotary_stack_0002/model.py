@@ -164,23 +164,12 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base_frame")
     _export_visual(base, _build_base_frame_shape(), "base_frame.obj", "frame_dark")
-    base.collision(Box((0.123, MODULE_WIDTH, 0.134)), origin=Origin(xyz=(0.0, 0.0, -0.017)))
+
     for side_y in (-SIDE_PLATE_CENTER_Y, SIDE_PLATE_CENTER_Y):
-        base.collision(
-            Box((0.070, PLATE_THICKNESS, 0.014)),
-            origin=Origin(xyz=(0.010, side_y, -0.074)),
-        )
-        base.collision(
-            Box((0.028, PLATE_THICKNESS, 0.050)),
-            origin=Origin(xyz=(-0.018, side_y, -0.040)),
-        )
-        base.collision(
-            Box((0.022, PLATE_THICKNESS, 0.024)),
-            origin=Origin(xyz=(0.032, side_y, -0.026)),
-        )
-    base.collision(Box((0.030, INNER_GAP, 0.030)), origin=Origin(xyz=(0.000, 0.0, 0.000)))
-    base.collision(Box((0.022, INNER_GAP, 0.018)), origin=Origin(xyz=(-0.015, 0.0, -0.061)))
-    base.collision(Box((0.016, INNER_GAP, 0.014)), origin=Origin(xyz=(0.034, 0.0, -0.071)))
+        pass
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.110, MODULE_WIDTH, 0.110)),
         mass=1.45,
@@ -190,18 +179,11 @@ def build_object_model() -> ArticulatedObject:
     stage1 = model.part("stage1_carrier")
     _export_visual(stage1, _build_stage1_shape(), "stage1_carrier.obj", "module_gray")
     for side_y in (-SIDE_PLATE_CENTER_Y, SIDE_PLATE_CENTER_Y):
-        stage1.collision(
-            Box((0.070, PLATE_THICKNESS, 0.022)),
-            origin=Origin(xyz=(0.062, side_y, 0.012)),
-        )
-        stage1.collision(
-            Box((0.060, PLATE_THICKNESS, 0.016)),
-            origin=Origin(xyz=(0.066, side_y, -0.015)),
-        )
-    stage1.collision(Box((0.028, INNER_GAP, 0.028)), origin=Origin(xyz=(0.000, 0.0, 0.000)))
-    stage1.collision(Box((0.026, INNER_GAP, 0.026)), origin=Origin(xyz=(0.135, 0.0, 0.045)))
-    stage1.collision(Box((0.016, INNER_GAP, 0.016)), origin=Origin(xyz=(0.045, 0.0, -0.018)))
-    stage1.collision(Box((0.018, INNER_GAP, 0.016)), origin=Origin(xyz=(0.090, 0.0, 0.022)))
+        pass
+
+
+
+
     stage1.inertial = Inertial.from_geometry(
         Box((0.180, MODULE_WIDTH, 0.100)),
         mass=0.95,
@@ -211,18 +193,11 @@ def build_object_model() -> ArticulatedObject:
     stage2 = model.part("stage2_carrier")
     _export_visual(stage2, _build_stage2_shape(), "stage2_carrier.obj", "accent_blue")
     for side_y in (-SIDE_PLATE_CENTER_Y, SIDE_PLATE_CENTER_Y):
-        stage2.collision(
-            Box((0.058, PLATE_THICKNESS, 0.020)),
-            origin=Origin(xyz=(0.052, side_y, -0.012)),
-        )
-        stage2.collision(
-            Box((0.055, PLATE_THICKNESS, 0.015)),
-            origin=Origin(xyz=(0.050, side_y, 0.014)),
-        )
-    stage2.collision(Box((0.026, INNER_GAP, 0.026)), origin=Origin(xyz=(0.000, 0.0, 0.000)))
-    stage2.collision(Box((0.024, INNER_GAP, 0.024)), origin=Origin(xyz=(0.110, 0.0, -0.038)))
-    stage2.collision(Box((0.015, INNER_GAP, 0.015)), origin=Origin(xyz=(0.040, 0.0, 0.020)))
-    stage2.collision(Box((0.016, INNER_GAP, 0.015)), origin=Origin(xyz=(0.076, 0.0, -0.018)))
+        pass
+
+
+
+
     stage2.inertial = Inertial.from_geometry(
         Box((0.145, MODULE_WIDTH, 0.086)),
         mass=0.74,
@@ -231,18 +206,11 @@ def build_object_model() -> ArticulatedObject:
 
     stage3 = model.part("stage3_platform")
     _export_visual(stage3, _build_stage3_shape(), "stage3_platform.obj", "tool_light")
-    stage3.collision(Box((0.122, MODULE_WIDTH, 0.107)), origin=Origin(xyz=(0.046, 0.0, 0.018)))
+
     for side_y in (-SIDE_PLATE_CENTER_Y, SIDE_PLATE_CENTER_Y):
-        stage3.collision(
-            Box((0.050, PLATE_THICKNESS, 0.024)),
-            origin=Origin(xyz=(0.040, side_y, 0.010)),
-        )
-        stage3.collision(
-            Box((0.036, PLATE_THICKNESS, 0.014)),
-            origin=Origin(xyz=(0.030, side_y, -0.010)),
-        )
-    stage3.collision(Box((0.024, INNER_GAP, 0.024)), origin=Origin(xyz=(0.000, 0.0, 0.000)))
-    stage3.collision(Box((0.050, INNER_GAP, 0.018)), origin=Origin(xyz=(0.070, 0.0, 0.030)))
+        pass
+
+
     stage3.inertial = Inertial.from_geometry(
         Box((0.120, MODULE_WIDTH, 0.080)),
         mass=0.48,
@@ -300,7 +268,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "base_frame",
         "stage1_carrier",
@@ -332,18 +300,18 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("stage1_carrier", "base_frame", max_dist=0.12)
-    ctx.expect_xy_distance("stage2_carrier", "stage1_carrier", max_dist=0.18)
-    ctx.expect_xy_distance("stage3_platform", "stage2_carrier", max_dist=0.12)
-    ctx.expect_xy_distance("stage3_platform", "base_frame", max_dist=0.32)
+    ctx.expect_origin_distance("stage1_carrier", "base_frame", axes="xy", max_dist=0.12)
+    ctx.expect_origin_distance("stage2_carrier", "stage1_carrier", axes="xy", max_dist=0.18)
+    ctx.expect_origin_distance("stage3_platform", "stage2_carrier", axes="xy", max_dist=0.12)
+    ctx.expect_origin_distance("stage3_platform", "base_frame", axes="xy", max_dist=0.32)
 
-    ctx.expect_aabb_overlap_xy("stage1_carrier", "base_frame", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("stage2_carrier", "stage1_carrier", min_overlap=0.018)
-    ctx.expect_aabb_overlap_xy("stage3_platform", "stage2_carrier", min_overlap=0.015)
+    ctx.expect_aabb_overlap("stage1_carrier", "base_frame", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("stage2_carrier", "stage1_carrier", axes="xy", min_overlap=0.018)
+    ctx.expect_aabb_overlap("stage3_platform", "stage2_carrier", axes="xy", min_overlap=0.015)
 
-    ctx.expect_aabb_gap_z("stage1_carrier", "base_frame", max_gap=0.060, max_penetration=0.085)
-    ctx.expect_aabb_gap_z("stage2_carrier", "base_frame", max_gap=0.140, max_penetration=0.060)
-    ctx.expect_aabb_gap_z("stage3_platform", "base_frame", max_gap=0.100, max_penetration=0.080)
+    ctx.expect_aabb_gap("stage1_carrier", "base_frame", axis="z", max_gap=0.060, max_penetration=0.085)
+    ctx.expect_aabb_gap("stage2_carrier", "base_frame", axis="z", max_gap=0.140, max_penetration=0.060)
+    ctx.expect_aabb_gap("stage3_platform", "base_frame", axis="z", max_gap=0.100, max_penetration=0.080)
 
     ctx.expect_joint_motion_axis(
         "base_to_stage1",

@@ -371,13 +371,13 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_gap_z("mast_assembly", "foundation", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("mast_assembly", "foundation", min_overlap=0.300)
-    ctx.expect_xy_distance("mast_assembly", "foundation", max_dist=0.090)
+    ctx.expect_aabb_gap("mast_assembly", "foundation", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_overlap("mast_assembly", "foundation", axes="xy", min_overlap=0.300)
+    ctx.expect_origin_distance("mast_assembly", "foundation", axes="xy", max_dist=0.090)
 
-    ctx.expect_aabb_overlap_xy("lamp_head", "mast_assembly", min_overlap=0.140)
-    ctx.expect_aabb_overlap_xy("lamp_head", "foundation", min_overlap=0.180)
-    ctx.expect_xy_distance("lamp_head", "foundation", max_dist=0.220)
+    ctx.expect_aabb_overlap("lamp_head", "mast_assembly", axes="xy", min_overlap=0.140)
+    ctx.expect_aabb_overlap("lamp_head", "foundation", axes="xy", min_overlap=0.180)
+    ctx.expect_origin_distance("lamp_head", "foundation", axes="xy", max_dist=0.220)
     ctx.expect_joint_motion_axis(
         "lamp_tilt",
         "lamp_head",
@@ -387,14 +387,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(lamp_tilt=-0.35):
-        ctx.expect_aabb_overlap_xy("lamp_head", "mast_assembly", min_overlap=0.130)
-        ctx.expect_aabb_overlap_xy("lamp_head", "foundation", min_overlap=0.180)
-        ctx.expect_xy_distance("lamp_head", "foundation", max_dist=0.230)
+        ctx.expect_aabb_overlap("lamp_head", "mast_assembly", axes="xy", min_overlap=0.130)
+        ctx.expect_aabb_overlap("lamp_head", "foundation", axes="xy", min_overlap=0.180)
+        ctx.expect_origin_distance("lamp_head", "foundation", axes="xy", max_dist=0.230)
 
     with ctx.pose(lamp_tilt=1.00):
-        ctx.expect_aabb_overlap_xy("lamp_head", "mast_assembly", min_overlap=0.100)
-        ctx.expect_aabb_overlap_xy("lamp_head", "foundation", min_overlap=0.160)
-        ctx.expect_xy_distance("lamp_head", "foundation", max_dist=0.260)
+        ctx.expect_aabb_overlap("lamp_head", "mast_assembly", axes="xy", min_overlap=0.100)
+        ctx.expect_aabb_overlap("lamp_head", "foundation", axes="xy", min_overlap=0.160)
+        ctx.expect_origin_distance("lamp_head", "foundation", axes="xy", max_dist=0.260)
 
     return ctx.report()
 

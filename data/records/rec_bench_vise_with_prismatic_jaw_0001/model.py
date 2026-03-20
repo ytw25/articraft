@@ -367,9 +367,9 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("body", "base", min_overlap=0.050)
-    ctx.expect_aabb_overlap_xy("sliding_jaw", "body", min_overlap=0.030)
-    ctx.expect_aabb_overlap_xy("screw", "sliding_jaw", min_overlap=0.025)
+    ctx.expect_aabb_overlap("body", "base", axes="xy", min_overlap=0.050)
+    ctx.expect_aabb_overlap("sliding_jaw", "body", axes="xy", min_overlap=0.030)
+    ctx.expect_aabb_overlap("screw", "sliding_jaw", axes="xy", min_overlap=0.025)
     ctx.expect_joint_motion_axis(
         "jaw_slide",
         "sliding_jaw",
@@ -383,7 +383,7 @@ def run_tests() -> TestReport:
     with ctx.pose(jaw_slide=0.100):
         open_jaw = tuple(ctx.part_world_position("sliding_jaw"))
         open_screw = tuple(ctx.part_world_position("screw"))
-        ctx.expect_aabb_overlap_xy("screw", "body", min_overlap=0.015)
+        ctx.expect_aabb_overlap("screw", "body", axes="xy", min_overlap=0.015)
     jaw_dx = open_jaw[0] - closed_jaw[0]
     screw_dx = open_screw[0] - closed_screw[0]
     if jaw_dx < 0.095:
@@ -400,7 +400,7 @@ def run_tests() -> TestReport:
         raise AssertionError("Horizontal handle pose should stay relatively low in Z.")
     with ctx.pose(handle_spin=math.pi / 2.0):
         vertical_handle = ctx.part_world_aabb("screw", use="visual")
-        ctx.expect_aabb_overlap_xy("screw", "sliding_jaw", min_overlap=0.020)
+        ctx.expect_aabb_overlap("screw", "sliding_jaw", axes="xy", min_overlap=0.020)
     if _aabb_span(vertical_handle, "z") < 0.150:
         raise AssertionError("Quarter-turn handle pose should stand tall in Z.")
     if _aabb_span(vertical_handle, "y") > 0.090:

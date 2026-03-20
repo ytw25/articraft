@@ -51,11 +51,11 @@ def build_object_model() -> ArticulatedObject:
         .union(cq.Workplane("XY").box(0.100, 0.016, 0.080).translate((0.0, -0.018, 0.090)))
     )
     _add_mesh_visual(base, base_shape, "vertical_slide_base.obj", "frame_gray")
-    base.collision(Box((0.160, 0.130, 0.020)), origin=Origin(xyz=(0.0, 0.0, 0.010)))
-    base.collision(Box((0.070, 0.040, 0.520)), origin=Origin(xyz=(0.0, -0.005, 0.280)))
-    base.collision(Box((0.014, 0.018, 0.440)), origin=Origin(xyz=(RAIL_X, RAIL_Y, 0.280)))
-    base.collision(Box((0.014, 0.018, 0.440)), origin=Origin(xyz=(-RAIL_X, RAIL_Y, 0.280)))
-    base.collision(Box((0.110, 0.030, 0.030)), origin=Origin(xyz=(0.0, 0.006, 0.505)))
+
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.160, 0.130, 0.540)),
         mass=8.8,
@@ -79,9 +79,9 @@ def build_object_model() -> ArticulatedObject:
         .cut(cq.Workplane("XY").box(0.040, 0.032, 0.022).translate((0.0, 0.035, 0.145)))
     )
     _add_mesh_visual(carriage, carriage_shape, "vertical_slide_carriage.obj", "carriage_light")
-    carriage.collision(Box((0.125, 0.020, 0.100)), origin=Origin(xyz=(0.0, 0.035, 0.000)))
-    carriage.collision(Box((0.060, 0.012, 0.090)), origin=Origin(xyz=(0.0, 0.010, 0.000)))
-    carriage.collision(Box((0.046, 0.020, 0.085)), origin=Origin(xyz=(0.0, 0.035, 0.090)))
+
+
+
     carriage.qc_collision(Box((0.030, 0.030, 0.030)), origin=Origin(xyz=(0.0, 0.000, 0.000)))
     carriage.qc_collision(Box((0.030, 0.030, 0.030)), origin=Origin(xyz=(0.0, 0.035, 0.145)))
     carriage.inertial = Inertial.from_geometry(
@@ -102,9 +102,9 @@ def build_object_model() -> ArticulatedObject:
         .union(cq.Workplane("XY").circle(0.010).extrude(0.028).translate((0.0, 0.095, -0.203)))
     )
     _add_mesh_visual(wrist, wrist_shape, "vertical_slide_wrist.obj", "tool_dark")
-    wrist.collision(Box((0.034, 0.018, 0.028)), origin=Origin(xyz=(0.0, 0.000, 0.000)))
-    wrist.collision(Box((0.040, 0.028, 0.095)), origin=Origin(xyz=(0.0, 0.080, -0.050)))
-    wrist.collision(Box((0.055, 0.040, 0.115)), origin=Origin(xyz=(0.0, 0.095, -0.112)))
+
+
+
     wrist.qc_collision(Box((0.028, 0.028, 0.028)), origin=Origin(xyz=(0.0, 0.000, 0.000)))
     wrist.inertial = Inertial.from_geometry(
         Box((0.060, 0.050, 0.180)),
@@ -149,7 +149,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.003,
@@ -169,12 +169,12 @@ def run_tests() -> TestReport:
         direction="negative",
         min_delta=0.120,
     )
-    ctx.expect_above("carriage", "base", min_clearance=0.180)
-    ctx.expect_above("wrist", "base", min_clearance=0.300)
-    ctx.expect_xy_distance("carriage", "base", max_dist=0.030)
-    ctx.expect_xy_distance("wrist", "carriage", max_dist=0.060)
-    ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.020)
-    ctx.expect_xy_distance("wrist", "base", max_dist=0.120)
+    ctx.expect_origin_gap("carriage", "base", axis="z", min_gap=0.180)
+    ctx.expect_origin_gap("wrist", "base", axis="z", min_gap=0.300)
+    ctx.expect_origin_distance("carriage", "base", axes="xy", max_dist=0.030)
+    ctx.expect_origin_distance("wrist", "carriage", axes="xy", max_dist=0.060)
+    ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.020)
+    ctx.expect_origin_distance("wrist", "base", axes="xy", max_dist=0.120)
     return ctx.report()
 
 

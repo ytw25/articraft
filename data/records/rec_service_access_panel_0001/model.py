@@ -323,7 +323,7 @@ def run_tests() -> TestReport:
         overlap_tol=0.003,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_overlap_xy("panel", "housing", min_overlap=0.015)
+    ctx.expect_aabb_overlap("panel", "housing", axes="xy", min_overlap=0.015)
     ctx.expect_joint_motion_axis(
         "service_panel_hinge",
         "panel",

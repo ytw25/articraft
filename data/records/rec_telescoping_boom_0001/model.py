@@ -125,26 +125,10 @@ def _add_tube_wall_collisions(
 ) -> None:
     cavity_width = outer_width - 2.0 * wall
 
-    part.collision(
-        Box((length, wall, outer_height)),
-        origin=Origin(xyz=(length / 2.0, outer_width / 2.0 - wall / 2.0, outer_height / 2.0)),
-        name=f"{prefix}_left_wall",
-    )
-    part.collision(
-        Box((length, wall, outer_height)),
-        origin=Origin(xyz=(length / 2.0, -outer_width / 2.0 + wall / 2.0, outer_height / 2.0)),
-        name=f"{prefix}_right_wall",
-    )
-    part.collision(
-        Box((length, cavity_width, wall)),
-        origin=Origin(xyz=(length / 2.0, 0.0, wall / 2.0)),
-        name=f"{prefix}_bottom_wall",
-    )
-    part.collision(
-        Box((length, cavity_width, wall)),
-        origin=Origin(xyz=(length / 2.0, 0.0, outer_height - wall / 2.0)),
-        name=f"{prefix}_top_wall",
-    )
+
+
+
+
 
 
 def build_object_model() -> ArticulatedObject:
@@ -172,31 +156,11 @@ def build_object_model() -> ArticulatedObject:
 
     base_bracket = model.part("base_bracket")
     _add_mesh_visual(base_bracket, _base_bracket_shape(), "base_bracket.obj", "industrial_steel")
-    base_bracket.collision(
-        Box((0.46, 0.34, 0.03)),
-        origin=Origin(xyz=(0.0, 0.0, 0.015)),
-        name="base_plate",
-    )
-    base_bracket.collision(
-        Box((0.08, 0.18, 0.17)),
-        origin=Origin(xyz=(-0.18, 0.0, 0.115)),
-        name="rear_spine",
-    )
-    base_bracket.collision(
-        Box((0.24, 0.03, 0.18)),
-        origin=Origin(xyz=(-0.06, 0.11, 0.12)),
-        name="left_cheek",
-    )
-    base_bracket.collision(
-        Box((0.24, 0.03, 0.18)),
-        origin=Origin(xyz=(-0.06, -0.11, 0.12)),
-        name="right_cheek",
-    )
-    base_bracket.collision(
-        Box((0.26, 0.16, 0.02)),
-        origin=Origin(xyz=(-0.02, 0.0, 0.20)),
-        name="saddle",
-    )
+
+
+
+
+
     base_bracket.inertial = Inertial.from_geometry(
         Box((0.46, 0.34, 0.22)),
         mass=48.0,
@@ -285,17 +249,7 @@ def build_object_model() -> ArticulatedObject:
         outer_height=inner_height,
         wall=inner_wall,
     )
-    inner_stage.collision(
-        Box((0.10, inner_width + 0.010, inner_height - 0.004)),
-        origin=Origin(
-            xyz=(
-                inner_len + 0.10 / 2.0 - 0.006,
-                0.0,
-                inner_height / 2.0,
-            )
-        ),
-        name="tip_head",
-    )
+
     inner_stage.inertial = Inertial.from_geometry(
         Box((inner_len + 0.08, inner_width + 0.02, inner_height + 0.02)),
         mass=7.0,
@@ -346,22 +300,22 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.002,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_gap_z("outer_stage", "base_bracket", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("outer_stage", "base_bracket", min_overlap=0.08)
-    ctx.expect_above("outer_stage", "base_bracket", min_clearance=0.05)
-    ctx.expect_above("mid_stage", "base_bracket", min_clearance=0.05)
-    ctx.expect_above("inner_stage", "base_bracket", min_clearance=0.05)
-    ctx.expect_xy_distance("mid_stage", "outer_stage", max_dist=0.02)
-    ctx.expect_xy_distance("inner_stage", "mid_stage", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("mid_stage", "outer_stage", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("inner_stage", "mid_stage", min_overlap=0.05)
-    ctx.expect_aabb_overlap_xy("inner_stage", "outer_stage", min_overlap=0.05)
+    ctx.expect_aabb_gap("outer_stage", "base_bracket", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_aabb_overlap("outer_stage", "base_bracket", axes="xy", min_overlap=0.08)
+    ctx.expect_origin_gap("outer_stage", "base_bracket", axis="z", min_gap=0.05)
+    ctx.expect_origin_gap("mid_stage", "base_bracket", axis="z", min_gap=0.05)
+    ctx.expect_origin_gap("inner_stage", "base_bracket", axis="z", min_gap=0.05)
+    ctx.expect_origin_distance("mid_stage", "outer_stage", axes="xy", max_dist=0.02)
+    ctx.expect_origin_distance("inner_stage", "mid_stage", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("mid_stage", "outer_stage", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("inner_stage", "mid_stage", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_overlap("inner_stage", "outer_stage", axes="xy", min_overlap=0.05)
     ctx.expect_joint_motion_axis(
         "outer_to_mid",
         "mid_stage",

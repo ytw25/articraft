@@ -21,9 +21,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _origin(xyz, rpy=(0.0, 0.0, 0.0)) -> Origin:
     return Origin(xyz=xyz, rpy=rpy)
 

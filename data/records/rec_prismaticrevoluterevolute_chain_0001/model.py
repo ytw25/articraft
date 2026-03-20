@@ -120,30 +120,11 @@ def build_object_model() -> ArticulatedObject:
 
     gantry = model.part("gantry")
     _add_mesh_visual(gantry, _build_gantry_shape(), "gantry.obj", "frame_gray")
-    gantry.collision(
-        Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
-        origin=Origin(xyz=(0.0, RAIL_Y_OFFSET, RAIL_HEIGHT / 2.0)),
-    )
-    gantry.collision(
-        Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
-        origin=Origin(xyz=(0.0, -RAIL_Y_OFFSET, RAIL_HEIGHT / 2.0)),
-    )
-    gantry.collision(
-        Box((END_CAP_THICKNESS, 2.0 * RAIL_Y_OFFSET + RAIL_WIDTH, RAIL_HEIGHT)),
-        origin=Origin(
-            xyz=(RAIL_LENGTH / 2.0 - END_CAP_THICKNESS / 2.0, 0.0, RAIL_HEIGHT / 2.0),
-        ),
-    )
-    gantry.collision(
-        Box((END_CAP_THICKNESS, 2.0 * RAIL_Y_OFFSET + RAIL_WIDTH, RAIL_HEIGHT)),
-        origin=Origin(
-            xyz=(-RAIL_LENGTH / 2.0 + END_CAP_THICKNESS / 2.0, 0.0, RAIL_HEIGHT / 2.0),
-        ),
-    )
-    gantry.collision(
-        Box((GUIDE_BEAM_LENGTH, GUIDE_BEAM_WIDTH, GUIDE_BEAM_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, GUIDE_BEAM_Z)),
-    )
+
+
+
+
+
     gantry.inertial = Inertial.from_geometry(
         Box((RAIL_LENGTH, 2.0 * RAIL_Y_OFFSET + RAIL_WIDTH, RAIL_HEIGHT)),
         mass=14.0,
@@ -152,19 +133,10 @@ def build_object_model() -> ArticulatedObject:
 
     carriage = model.part("carriage")
     _add_mesh_visual(carriage, _build_carriage_shape(), "carriage.obj", "carriage_orange")
-    carriage.collision(Box((0.14, 0.31, 0.03)))
-    carriage.collision(
-        Box((0.09, 0.055, 0.028)),
-        origin=Origin(xyz=(0.0, RAIL_Y_OFFSET, -0.028)),
-    )
-    carriage.collision(
-        Box((0.09, 0.055, 0.028)),
-        origin=Origin(xyz=(0.0, -RAIL_Y_OFFSET, -0.028)),
-    )
-    carriage.collision(
-        Box((0.05, 0.075, 0.11)),
-        origin=Origin(xyz=(0.0, 0.0, 0.07)),
-    )
+
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.14, 0.31, 0.14)),
         mass=2.4,
@@ -173,15 +145,9 @@ def build_object_model() -> ArticulatedObject:
 
     upper_arm = model.part("upper_arm")
     _add_mesh_visual(upper_arm, _build_upper_arm_shape(), "upper_arm.obj", "arm_blue")
-    upper_arm.collision(Box((0.07, 0.05, 0.03)), origin=Origin(xyz=(0.0, 0.025, 0.0)))
-    upper_arm.collision(
-        Box((0.05, UPPER_ARM_LENGTH, 0.03)),
-        origin=Origin(xyz=(0.0, UPPER_ARM_LENGTH / 2.0, 0.0)),
-    )
-    upper_arm.collision(
-        Box((0.06, 0.05, 0.03)),
-        origin=Origin(xyz=(0.0, UPPER_ARM_LENGTH, 0.0)),
-    )
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((0.08, UPPER_ARM_LENGTH + 0.05, 0.04)),
         mass=1.7,
@@ -190,15 +156,9 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm")
     _add_mesh_visual(forearm, _build_forearm_shape(), "forearm.obj", "tool_black")
-    forearm.collision(Box((0.06, 0.04, 0.03)), origin=Origin(xyz=(0.0, 0.02, 0.0)))
-    forearm.collision(
-        Box((0.045, FOREARM_LENGTH, 0.028)),
-        origin=Origin(xyz=(0.0, FOREARM_LENGTH / 2.0, 0.0)),
-    )
-    forearm.collision(
-        Box((0.10, 0.065, 0.012)),
-        origin=Origin(xyz=(0.0, FOREARM_LENGTH + 0.04, 0.0)),
-    )
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((0.10, FOREARM_LENGTH + 0.08, 0.04)),
         mass=1.05,
@@ -256,7 +216,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "gantry",
         "carriage",
@@ -274,12 +234,12 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_gap_z("carriage", "gantry", max_gap=0.03, max_penetration=0.03)
-    ctx.expect_aabb_overlap_xy("carriage", "gantry", min_overlap=0.08)
-    ctx.expect_above("upper_arm", "gantry", min_clearance=0.10)
-    ctx.expect_above("forearm", "gantry", min_clearance=0.10)
-    ctx.expect_aabb_overlap_xy("upper_arm", "carriage", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.02)
+    ctx.expect_aabb_gap("carriage", "gantry", axis="z", max_gap=0.03, max_penetration=0.03)
+    ctx.expect_aabb_overlap("carriage", "gantry", axes="xy", min_overlap=0.08)
+    ctx.expect_origin_gap("upper_arm", "gantry", axis="z", min_gap=0.10)
+    ctx.expect_origin_gap("forearm", "gantry", axis="z", min_gap=0.10)
+    ctx.expect_aabb_overlap("upper_arm", "carriage", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.02)
     ctx.expect_joint_motion_axis(
         "gantry_slide",
         "carriage",
@@ -303,24 +263,24 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(gantry_slide=-SLIDE_LIMIT):
-        ctx.expect_aabb_gap_z("carriage", "gantry", max_gap=0.03, max_penetration=0.03)
-        ctx.expect_aabb_overlap_xy("carriage", "gantry", min_overlap=0.08)
+        ctx.expect_aabb_gap("carriage", "gantry", axis="z", max_gap=0.03, max_penetration=0.03)
+        ctx.expect_aabb_overlap("carriage", "gantry", axes="xy", min_overlap=0.08)
 
     with ctx.pose(gantry_slide=SLIDE_LIMIT):
-        ctx.expect_aabb_gap_z("carriage", "gantry", max_gap=0.03, max_penetration=0.03)
-        ctx.expect_aabb_overlap_xy("carriage", "gantry", min_overlap=0.08)
+        ctx.expect_aabb_gap("carriage", "gantry", axis="z", max_gap=0.03, max_penetration=0.03)
+        ctx.expect_aabb_overlap("carriage", "gantry", axes="xy", min_overlap=0.08)
 
     with ctx.pose(shoulder_yaw=1.0):
-        ctx.expect_above("forearm", "gantry", min_clearance=0.09)
-        ctx.expect_aabb_overlap_xy("upper_arm", "carriage", min_overlap=0.02)
+        ctx.expect_origin_gap("forearm", "gantry", axis="z", min_gap=0.09)
+        ctx.expect_aabb_overlap("upper_arm", "carriage", axes="xy", min_overlap=0.02)
 
     with ctx.pose(elbow_yaw=1.0):
-        ctx.expect_above("forearm", "gantry", min_clearance=0.09)
-        ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.02)
+        ctx.expect_origin_gap("forearm", "gantry", axis="z", min_gap=0.09)
+        ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.02)
 
     with ctx.pose(gantry_slide=SLIDE_LIMIT, shoulder_yaw=0.9, elbow_yaw=-1.0):
-        ctx.expect_above("forearm", "gantry", min_clearance=0.09)
-        ctx.expect_aabb_overlap_xy("carriage", "gantry", min_overlap=0.08)
+        ctx.expect_origin_gap("forearm", "gantry", axis="z", min_gap=0.09)
+        ctx.expect_aabb_overlap("carriage", "gantry", axes="xy", min_overlap=0.08)
 
     return ctx.report()
 

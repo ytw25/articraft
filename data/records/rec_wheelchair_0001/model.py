@@ -26,9 +26,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _make_material(name: str, rgba: tuple[float, float, float, float]) -> Material:
     try:
         return Material(name=name, rgba=rgba)
@@ -50,7 +48,7 @@ PLASTIC = _make_material("black_plastic", (0.14, 0.15, 0.16, 1.0))
 def _mesh_path(name: str) -> Path:
     if hasattr(ASSETS, "mesh_path"):
         return Path(ASSETS.mesh_path(name))
-    mesh_dir = HERE / "meshes"
+    mesh_dir = ASSETS.mesh_dir
     mesh_dir.mkdir(parents=True, exist_ok=True)
     return mesh_dir / name
 
@@ -533,8 +531,8 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("left_caster_fork", "left_caster_wheel", max_dist=0.050)
-    ctx.expect_xy_distance("right_caster_fork", "right_caster_wheel", max_dist=0.050)
+    ctx.expect_origin_distance("left_caster_fork", "left_caster_wheel", axes="xy", max_dist=0.050)
+    ctx.expect_origin_distance("right_caster_fork", "right_caster_wheel", axes="xy", max_dist=0.050)
     ctx.expect_joint_motion_axis(
         "left_footplate_hinge",
         "left_footplate",
@@ -637,8 +635,8 @@ def run_tests() -> TestReport:
     with ctx.pose(left_caster_swivel=1.10, right_caster_swivel=-1.10):
         left_swiveled = _aabb_center("left_caster_wheel")
         right_swiveled = _aabb_center("right_caster_wheel")
-        ctx.expect_xy_distance("left_caster_fork", "left_caster_wheel", max_dist=0.050)
-        ctx.expect_xy_distance("right_caster_fork", "right_caster_wheel", max_dist=0.050)
+        ctx.expect_origin_distance("left_caster_fork", "left_caster_wheel", axes="xy", max_dist=0.050)
+        ctx.expect_origin_distance("right_caster_fork", "right_caster_wheel", axes="xy", max_dist=0.050)
         _assert(
             left_swiveled[0] > left_caster_center[0] + 0.015,
             "Left caster wheel should trail and swing outward when steered",

@@ -250,7 +250,7 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("left_body", "right_body", min_overlap=0.014)
+    ctx.expect_aabb_overlap("left_body", "right_body", axes="xy", min_overlap=0.014)
     ctx.expect_joint_motion_axis(
         "center_hinge",
         "right_body",
@@ -260,13 +260,13 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(center_hinge=math.radians(8.0)):
-        ctx.expect_aabb_overlap_xy("left_body", "right_body", min_overlap=0.012)
+        ctx.expect_aabb_overlap("left_body", "right_body", axes="xy", min_overlap=0.012)
 
     with ctx.pose(center_hinge=HINGE_OPEN_LIMIT):
-        ctx.expect_aabb_overlap_xy("left_body", "right_body", min_overlap=0.010)
+        ctx.expect_aabb_overlap("left_body", "right_body", axes="xy", min_overlap=0.010)
 
     with ctx.pose(center_hinge=HINGE_CLOSE_LIMIT):
-        ctx.expect_aabb_overlap_xy("left_body", "right_body", min_overlap=0.016)
+        ctx.expect_aabb_overlap("left_body", "right_body", axes="xy", min_overlap=0.016)
 
     return ctx.report()
 

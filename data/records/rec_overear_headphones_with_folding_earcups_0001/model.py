@@ -334,10 +334,10 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("headband", "left_earcup", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("headband", "right_earcup", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("headband", "left_earcup", max_gap=0.004, max_penetration=0.014)
-    ctx.expect_aabb_gap_z("headband", "right_earcup", max_gap=0.004, max_penetration=0.014)
+    ctx.expect_aabb_overlap("headband", "left_earcup", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("headband", "right_earcup", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("headband", "left_earcup", axis="z", max_gap=0.004, max_penetration=0.014)
+    ctx.expect_aabb_gap("headband", "right_earcup", axis="z", max_gap=0.004, max_penetration=0.014)
     ctx.expect_joint_motion_axis(
         "left_cup_fold",
         "left_earcup",
@@ -368,14 +368,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(left_cup_fold=FOLD_ANGLE):
-        ctx.expect_aabb_overlap_xy("headband", "left_earcup", min_overlap=0.02)
+        ctx.expect_aabb_overlap("headband", "left_earcup", axes="xy", min_overlap=0.02)
 
     with ctx.pose(right_cup_fold=FOLD_ANGLE):
-        ctx.expect_aabb_overlap_xy("headband", "right_earcup", min_overlap=0.02)
+        ctx.expect_aabb_overlap("headband", "right_earcup", axes="xy", min_overlap=0.02)
 
     with ctx.pose(left_cup_fold=FOLD_ANGLE, right_cup_fold=FOLD_ANGLE):
-        ctx.expect_aabb_overlap_xy("headband", "left_earcup", min_overlap=0.02)
-        ctx.expect_aabb_overlap_xy("headband", "right_earcup", min_overlap=0.02)
+        ctx.expect_aabb_overlap("headband", "left_earcup", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_overlap("headband", "right_earcup", axes="xy", min_overlap=0.02)
 
     return ctx.report()
 

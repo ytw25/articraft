@@ -27,7 +27,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 
 BOTTLE_HEIGHT = 0.280
 LIQUID_FRAME_X = 0.030

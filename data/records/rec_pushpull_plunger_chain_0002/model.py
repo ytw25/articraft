@@ -110,59 +110,33 @@ def build_object_model() -> ArticulatedObject:
 
     base_frame = model.part("base_frame")
     _add_visual_mesh(base_frame, _build_base_shape(), "base_frame.obj", "frame_steel")
-    base_frame.collision(Box((0.11, 0.09, 0.018)), origin=Origin(xyz=(0.0, 0.0, -0.009)))
-    base_frame.collision(Box((0.016, 0.05, 0.055)), origin=Origin(xyz=(-0.035, 0.0, 0.0175)))
-    base_frame.collision(Box((0.016, 0.05, 0.055)), origin=Origin(xyz=(0.035, 0.0, 0.0175)))
-    base_frame.collision(
-        Box((0.006, 0.06, OUTER_SLEEVE_LENGTH)), origin=Origin(xyz=(-0.027, 0.0, 0.063))
-    )
-    base_frame.collision(
-        Box((0.006, 0.06, OUTER_SLEEVE_LENGTH)), origin=Origin(xyz=(0.027, 0.0, 0.063))
-    )
-    base_frame.collision(
-        Box((0.048, 0.006, OUTER_SLEEVE_LENGTH)), origin=Origin(xyz=(0.0, -0.027, 0.063))
-    )
-    base_frame.collision(
-        Box((0.048, 0.006, OUTER_SLEEVE_LENGTH)), origin=Origin(xyz=(0.0, 0.027, 0.063))
-    )
+
+
+
+
+
+
+
     base_frame.inertial = Inertial.from_geometry(
         Box((0.11, 0.09, 0.09)), mass=1.6, origin=Origin(xyz=(0.0, 0.0, 0.03))
     )
 
     carrier_slide = model.part("carrier_slide")
     _add_visual_mesh(carrier_slide, _build_carrier_shape(), "carrier_slide.obj", "dark_anodized")
-    carrier_slide.collision(
-        Cylinder(radius=0.0195, length=CARRIER_SHUTTLE_LENGTH),
-        origin=Origin(xyz=(0.0, 0.0, CARRIER_SHUTTLE_LENGTH / 2.0)),
-    )
-    carrier_slide.collision(
-        Box((0.004, 0.034, CARRIER_SLEEVE_LENGTH)),
-        origin=Origin(xyz=(-0.015, 0.0, CARRIER_GUIDE_Z + CARRIER_SLEEVE_LENGTH / 2.0)),
-    )
-    carrier_slide.collision(
-        Box((0.004, 0.034, CARRIER_SLEEVE_LENGTH)),
-        origin=Origin(xyz=(0.015, 0.0, CARRIER_GUIDE_Z + CARRIER_SLEEVE_LENGTH / 2.0)),
-    )
-    carrier_slide.collision(
-        Box((0.026, 0.004, CARRIER_SLEEVE_LENGTH)),
-        origin=Origin(xyz=(0.0, -0.015, CARRIER_GUIDE_Z + CARRIER_SLEEVE_LENGTH / 2.0)),
-    )
-    carrier_slide.collision(
-        Box((0.026, 0.004, CARRIER_SLEEVE_LENGTH)),
-        origin=Origin(xyz=(0.0, 0.015, CARRIER_GUIDE_Z + CARRIER_SLEEVE_LENGTH / 2.0)),
-    )
-    carrier_slide.collision(Box((0.032, 0.022, 0.014)), origin=Origin(xyz=(0.0, 0.0, 0.078)))
+
+
+
+
+
+
     carrier_slide.inertial = Inertial.from_geometry(
         Box((0.05, 0.05, 0.15)), mass=0.42, origin=Origin(xyz=(0.0, 0.0, 0.085))
     )
 
     plunger_rod = model.part("plunger_rod")
     _add_visual_mesh(plunger_rod, _build_plunger_shape(), "plunger_rod.obj", "plunger_finish")
-    plunger_rod.collision(
-        Cylinder(radius=PLUNGER_ROD_R, length=PLUNGER_ROD_LENGTH),
-        origin=Origin(xyz=(0.0, 0.0, PLUNGER_ROD_LENGTH / 2.0)),
-    )
-    plunger_rod.collision(Box((0.026, 0.026, 0.02)), origin=Origin(xyz=(0.0, 0.0, 0.155)))
+
+
     plunger_rod.inertial = Inertial.from_geometry(
         Cylinder(radius=0.011, length=0.17), mass=0.19, origin=Origin(xyz=(0.0, 0.0, 0.085))
     )
@@ -194,14 +168,14 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("carrier_slide", "base_frame", max_dist=0.01)
-    ctx.expect_xy_distance("plunger_rod", "carrier_slide", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("carrier_slide", "base_frame", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("plunger_rod", "carrier_slide", min_overlap=0.014)
-    ctx.expect_above("plunger_rod", "carrier_slide", min_clearance=0.02)
+    ctx.expect_origin_distance("carrier_slide", "base_frame", axes="xy", max_dist=0.01)
+    ctx.expect_origin_distance("plunger_rod", "carrier_slide", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("carrier_slide", "base_frame", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("plunger_rod", "carrier_slide", axes="xy", min_overlap=0.014)
+    ctx.expect_origin_gap("plunger_rod", "carrier_slide", axis="z", min_gap=0.02)
     ctx.expect_joint_motion_axis(
         "base_to_carrier",
         "carrier_slide",

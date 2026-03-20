@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -16,11 +17,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 try:
     import cadquery as cq
@@ -159,22 +159,10 @@ def _add_rectangular_tube_collisions(
     bottom_z: float,
 ):
     center_z = _tube_center_z(bottom_z, height)
-    part.collision(
-        Box((wall, outer_y, height)),
-        origin=_box_origin((-(outer_x * 0.5) + (wall * 0.5), 0.0, center_z)),
-    )
-    part.collision(
-        Box((wall, outer_y, height)),
-        origin=_box_origin(((outer_x * 0.5) - (wall * 0.5), 0.0, center_z)),
-    )
-    part.collision(
-        Box((outer_x - (2.0 * wall), wall, height)),
-        origin=_box_origin((0.0, -(outer_y * 0.5) + (wall * 0.5), center_z)),
-    )
-    part.collision(
-        Box((outer_x - (2.0 * wall), wall, height)),
-        origin=_box_origin((0.0, (outer_y * 0.5) - (wall * 0.5), center_z)),
-    )
+
+
+
+
 
 
 def build_object_model() -> ArticulatedObject:
@@ -268,14 +256,8 @@ def build_object_model() -> ArticulatedObject:
         height=BASE_HEIGHT,
         bottom_z=-BASE_HEIGHT,
     )
-    base.collision(
-        Box((0.062, 0.048, 0.055)),
-        origin=_box_origin((0.0, 0.0, -BASE_HEIGHT - 0.0275)),
-    )
-    base.collision(
-        Box((0.078, 0.060, 0.012)),
-        origin=_box_origin((0.0, 0.0, -BASE_HEIGHT - 0.061)),
-    )
+
+
 
     _add_rectangular_tube_collisions(
         middle,
@@ -286,26 +268,9 @@ def build_object_model() -> ArticulatedObject:
         bottom_z=-MIDDLE_EMBED,
     )
 
-    upper.collision(
-        Box((UPPER_OUTER_X, UPPER_OUTER_Y, UPPER_HEIGHT)),
-        origin=_box_origin((0.0, 0.0, -UPPER_EMBED + (0.5 * UPPER_HEIGHT))),
-    )
-    upper.collision(
-        Box(
-            (UPPER_OUTER_X - (2.0 * UPPER_WALL), UPPER_OUTER_Y - (2.0 * UPPER_WALL), TOP_CAP_HEIGHT)
-        ),
-        origin=_box_origin((0.0, 0.0, -UPPER_EMBED + UPPER_HEIGHT + (0.5 * TOP_CAP_HEIGHT))),
-    )
-    upper.collision(
-        Cylinder(radius=ANTENNA_TIP_RADIUS, length=ANTENNA_TIP_LENGTH),
-        origin=_box_origin(
-            (
-                0.0,
-                0.0,
-                -UPPER_EMBED + UPPER_HEIGHT + TOP_CAP_HEIGHT + (0.5 * ANTENNA_TIP_LENGTH),
-            )
-        ),
-    )
+
+
+
 
     base.inertial = Inertial.from_geometry(
         Box((0.078, 0.060, 0.407)),
@@ -360,19 +325,19 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("middle_section", "base_section", max_dist=0.002)
-    ctx.expect_xy_distance("upper_section", "middle_section", max_dist=0.002)
-    ctx.expect_aabb_overlap_xy("middle_section", "base_section", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("upper_section", "middle_section", min_overlap=0.012)
-    ctx.expect_xy_distance("upper_section", "base_section", max_dist=0.002)
-    ctx.expect_aabb_overlap_xy("upper_section", "base_section", min_overlap=0.012)
+    ctx.expect_origin_distance("middle_section", "base_section", axes="xy", max_dist=0.002)
+    ctx.expect_origin_distance("upper_section", "middle_section", axes="xy", max_dist=0.002)
+    ctx.expect_aabb_overlap("middle_section", "base_section", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("upper_section", "middle_section", axes="xy", min_overlap=0.012)
+    ctx.expect_origin_distance("upper_section", "base_section", axes="xy", max_dist=0.002)
+    ctx.expect_aabb_overlap("upper_section", "base_section", axes="xy", min_overlap=0.012)
     ctx.expect_joint_motion_axis(
         "base_to_middle",
         "middle_section",

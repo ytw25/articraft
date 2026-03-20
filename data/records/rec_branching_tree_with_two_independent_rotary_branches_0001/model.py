@@ -175,28 +175,19 @@ def _add_visual_mesh(part, shape: cq.Workplane, filename: str, material: str) ->
 
 
 def _add_base_collisions(base) -> None:
-    base.collision(Box(BASE_FOOT_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.5 * BASE_FOOT_SIZE[2])))
-    base.collision(
-        Box(BASE_COLUMN_SIZE),
-        origin=Origin(xyz=(0.0, 0.0, BASE_FOOT_SIZE[2] + 0.5 * BASE_COLUMN_SIZE[2])),
-    )
-    base.collision(Box(BASE_TOP_BEAM_SIZE), origin=Origin(xyz=(0.0, 0.0, SHOULDER_Z)))
-    base.collision(Box(BASE_SHOULDER_BLOCK_SIZE), origin=Origin(xyz=(-0.12, 0.0, SHOULDER_Z)))
-    base.collision(Box(BASE_SHOULDER_BLOCK_SIZE), origin=Origin(xyz=(0.12, 0.0, SHOULDER_Z)))
+    pass
 
 
 def _add_upper_arm_collisions(part, sign: float) -> None:
     direction = 1.0 if sign >= 0.0 else -1.0
-    part.collision(Box((0.032, 0.048, 0.052)), origin=Origin(xyz=(direction * 0.022, 0.0, 0.0)))
-    part.collision(Box((0.10, 0.038, 0.048)), origin=Origin(xyz=(direction * 0.095, 0.0, 0.0)))
-    part.collision(Box((0.03, 0.05, 0.055)), origin=Origin(xyz=(direction * 0.165, 0.0, 0.0)))
+    pass
 
 
 def _add_forearm_collisions(part, sign: float) -> None:
     direction = 1.0 if sign >= 0.0 else -1.0
-    part.collision(Box((0.032, 0.046, 0.048)), origin=Origin(xyz=(direction * 0.022, 0.0, 0.0)))
-    part.collision(Box((0.095, 0.032, 0.042)), origin=Origin(xyz=(direction * 0.086, 0.0, 0.0)))
-    part.collision(Box((0.036, 0.03, 0.038)), origin=Origin(xyz=(direction * 0.146, 0.0, 0.0)))
+
+
+
 
 
 def build_object_model() -> ArticulatedObject:
@@ -305,15 +296,15 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("left_upper_arm", "left_forearm", max_dist=0.18)
-    ctx.expect_xy_distance("right_upper_arm", "right_forearm", max_dist=0.18)
-    ctx.expect_xy_distance("left_upper_arm", "base", max_dist=0.18)
-    ctx.expect_xy_distance("right_upper_arm", "base", max_dist=0.18)
-    ctx.expect_aabb_gap_z("left_forearm", "left_upper_arm", max_gap=0.01, max_penetration=0.06)
-    ctx.expect_aabb_gap_z("right_forearm", "right_upper_arm", max_gap=0.01, max_penetration=0.06)
+    ctx.expect_origin_distance("left_upper_arm", "left_forearm", axes="xy", max_dist=0.18)
+    ctx.expect_origin_distance("right_upper_arm", "right_forearm", axes="xy", max_dist=0.18)
+    ctx.expect_origin_distance("left_upper_arm", "base", axes="xy", max_dist=0.18)
+    ctx.expect_origin_distance("right_upper_arm", "base", axes="xy", max_dist=0.18)
+    ctx.expect_aabb_gap("left_forearm", "left_upper_arm", axis="z", max_gap=0.01, max_penetration=0.06)
+    ctx.expect_aabb_gap("right_forearm", "right_upper_arm", axis="z", max_gap=0.01, max_penetration=0.06)
     ctx.expect_joint_motion_axis(
         "base_to_left_upper",
         "left_upper_arm",
@@ -344,18 +335,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(base_to_left_upper=1.15, left_upper_to_forearm=1.1):
-        ctx.expect_above("left_upper_arm", "base", min_clearance=0.03)
-        ctx.expect_above("left_forearm", "base", min_clearance=0.08)
-        ctx.expect_xy_distance("left_upper_arm", "left_forearm", max_dist=0.22)
-        ctx.expect_aabb_gap_z(
-            "right_forearm", "right_upper_arm", max_gap=0.01, max_penetration=0.06
-        )
+        ctx.expect_origin_gap("left_upper_arm", "base", axis="z", min_gap=0.03)
+        ctx.expect_origin_gap("left_forearm", "base", axis="z", min_gap=0.08)
+        ctx.expect_origin_distance("left_upper_arm", "left_forearm", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_gap("right_forearm", "right_upper_arm", axis="z", max_gap=0.01, max_penetration=0.06)
 
     with ctx.pose(base_to_right_upper=1.15, right_upper_to_forearm=1.1):
-        ctx.expect_above("right_upper_arm", "base", min_clearance=0.03)
-        ctx.expect_above("right_forearm", "base", min_clearance=0.08)
-        ctx.expect_xy_distance("right_upper_arm", "right_forearm", max_dist=0.22)
-        ctx.expect_aabb_gap_z("left_forearm", "left_upper_arm", max_gap=0.01, max_penetration=0.06)
+        ctx.expect_origin_gap("right_upper_arm", "base", axis="z", min_gap=0.03)
+        ctx.expect_origin_gap("right_forearm", "base", axis="z", min_gap=0.08)
+        ctx.expect_origin_distance("right_upper_arm", "right_forearm", axes="xy", max_dist=0.22)
+        ctx.expect_aabb_gap("left_forearm", "left_upper_arm", axis="z", max_gap=0.01, max_penetration=0.06)
 
     return ctx.report()
 

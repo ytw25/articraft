@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -17,11 +18,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 # In sdk_hybrid, author visual meshes with cadquery + mesh_from_cadquery.
 PI = math.pi
@@ -266,43 +266,22 @@ def build_object_model() -> ArticulatedObject:
         material="belt_black",
     )
 
-    housing.collision(Box(BASE_SIZE), origin=Origin(xyz=BASE_CENTER))
-    housing.collision(Box(MOTOR_FOOT_SIZE), origin=Origin(xyz=MOTOR_FOOT_CENTER))
-    housing.collision(
-        Cylinder(radius=MOTOR_BODY_RADIUS, length=MOTOR_BODY_LENGTH),
-        origin=Origin(xyz=MOTOR_BODY_CENTER, rpy=(0.0, PI / 2.0, 0.0)),
-    )
-    housing.collision(Box(PEDESTAL_SIZE), origin=Origin(xyz=PEDESTAL_CENTER))
-    housing.collision(
-        Cylinder(radius=BEARING_RADIUS, length=BEARING_LENGTH),
-        origin=Origin(xyz=SPINDLE_ORIGIN, rpy=(0.0, PI / 2.0, 0.0)),
-    )
+
+
+
+
+
     housing.inertial = Inertial.from_geometry(
         Box((0.34, 0.16, 0.18)),
         mass=18.0,
         origin=Origin(xyz=(0.0, 0.0, 0.09)),
     )
 
-    spindle.collision(
-        Cylinder(radius=SPINDLE_SHAFT_RADIUS, length=SPINDLE_SHAFT_LENGTH),
-        origin=Origin(xyz=(0.035, 0.0, 0.0), rpy=(0.0, PI / 2.0, 0.0)),
-    )
-    spindle.collision(
-        Cylinder(radius=DRIVEN_PULLEY_RADIUS, length=DRIVEN_PULLEY_LENGTH),
-        origin=Origin(xyz=DRIVEN_PULLEY_CENTER_LOCAL, rpy=(0.0, PI / 2.0, 0.0)),
-    )
-    spindle.collision(
-        Cylinder(radius=BUFF_WHEEL_RADIUS, length=BUFF_WHEEL_LENGTH),
-        origin=Origin(xyz=BUFF_WHEEL_CENTER_LOCAL, rpy=(0.0, PI / 2.0, 0.0)),
-    )
-    spindle.collision(
-        Cylinder(radius=BUFF_SEAM_RADIUS, length=BUFF_SEAM_LENGTH),
-        origin=Origin(xyz=BUFF_SEAM_CENTER_LOCAL, rpy=(0.0, PI / 2.0, 0.0)),
-    )
-    spindle.collision(
-        Cylinder(radius=0.005, length=0.012),
-        origin=Origin(xyz=(-0.045, 0.0, 0.032)),
-    )
+
+
+
+
+
     spindle.inertial = Inertial.from_geometry(
         Cylinder(radius=0.082, length=0.16),
         mass=1.9,
@@ -327,7 +306,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "motor_housing",
         "spindle",
@@ -341,9 +320,9 @@ def run_tests() -> TestReport:
         direction="negative",
         min_delta=0.01,
     )
-    ctx.expect_aabb_overlap_xy("spindle", "motor_housing", min_overlap=0.03)
-    ctx.expect_xy_distance("spindle", "motor_housing", max_dist=0.16)
-    ctx.expect_aabb_gap_z("spindle", "motor_housing", max_gap=0.03, max_penetration=0.12)
+    ctx.expect_aabb_overlap("spindle", "motor_housing", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("spindle", "motor_housing", axes="xy", max_dist=0.16)
+    ctx.expect_aabb_gap("spindle", "motor_housing", axis="z", max_gap=0.03, max_penetration=0.12)
     return ctx.report()
 
 

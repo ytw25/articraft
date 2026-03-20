@@ -235,14 +235,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(swing_hinge=0.0):
-        ctx.expect_xy_distance("swing_assembly", "frame", max_dist=0.03)
-        ctx.expect_aabb_overlap_xy("swing_assembly", "frame", min_overlap=0.18)
+        ctx.expect_origin_distance("swing_assembly", "frame", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_overlap("swing_assembly", "frame", axes="xy", min_overlap=0.18)
 
     with ctx.pose(swing_hinge=0.65):
-        ctx.expect_aabb_overlap_xy("swing_assembly", "frame", min_overlap=0.18)
+        ctx.expect_aabb_overlap("swing_assembly", "frame", axes="xy", min_overlap=0.18)
 
     with ctx.pose(swing_hinge=-0.65):
-        ctx.expect_aabb_overlap_xy("swing_assembly", "frame", min_overlap=0.18)
+        ctx.expect_aabb_overlap("swing_assembly", "frame", axes="xy", min_overlap=0.18)
 
     return ctx.report()
 

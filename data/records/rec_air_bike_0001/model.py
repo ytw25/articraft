@@ -582,14 +582,14 @@ def run_tests() -> TestReport:
 
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("fan_wheel", "frame", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("crank_assembly", "frame", min_overlap=0.06)
-    ctx.expect_aabb_overlap_xy("seat", "frame", min_overlap=0.03)
-    ctx.expect_xy_distance("seat", "frame", max_dist=0.16)
-    ctx.expect_xy_distance("seat", "crank_assembly", max_dist=0.15)
-    ctx.expect_xy_distance("fan_wheel", "crank_assembly", max_dist=0.30)
-    ctx.expect_xy_distance("left_handlebar", "fan_wheel", max_dist=0.24)
-    ctx.expect_xy_distance("right_handlebar", "fan_wheel", max_dist=0.24)
+    ctx.expect_aabb_overlap("fan_wheel", "frame", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("crank_assembly", "frame", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_overlap("seat", "frame", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("seat", "frame", axes="xy", max_dist=0.16)
+    ctx.expect_origin_distance("seat", "crank_assembly", axes="xy", max_dist=0.15)
+    ctx.expect_origin_distance("fan_wheel", "crank_assembly", axes="xy", max_dist=0.30)
+    ctx.expect_origin_distance("left_handlebar", "fan_wheel", axes="xy", max_dist=0.24)
+    ctx.expect_origin_distance("right_handlebar", "fan_wheel", axes="xy", max_dist=0.24)
     ctx.expect_joint_motion_axis(
         "left_handlebar_swing",
         "left_handlebar",

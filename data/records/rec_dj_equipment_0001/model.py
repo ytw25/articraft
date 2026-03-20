@@ -369,17 +369,17 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("channel_fader", "body", min_overlap=0.010)
-    ctx.expect_aabb_gap_z("channel_fader", "body", max_gap=0.002, max_penetration=0.006)
-    ctx.expect_xy_distance("channel_fader", "body", max_dist=0.035)
+    ctx.expect_aabb_overlap("channel_fader", "body", axes="xy", min_overlap=0.010)
+    ctx.expect_aabb_gap("channel_fader", "body", axis="z", max_gap=0.002, max_penetration=0.006)
+    ctx.expect_origin_distance("channel_fader", "body", axes="xy", max_dist=0.035)
 
-    ctx.expect_aabb_overlap_xy("crossfader", "body", min_overlap=0.014)
-    ctx.expect_aabb_gap_z("crossfader", "body", max_gap=0.002, max_penetration=0.006)
-    ctx.expect_xy_distance("crossfader", "body", max_dist=0.095)
+    ctx.expect_aabb_overlap("crossfader", "body", axes="xy", min_overlap=0.014)
+    ctx.expect_aabb_gap("crossfader", "body", axis="z", max_gap=0.002, max_penetration=0.006)
+    ctx.expect_origin_distance("crossfader", "body", axes="xy", max_dist=0.095)
 
-    ctx.expect_aabb_overlap_xy("browse_knob", "body", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("browse_knob", "body", max_gap=0.006, max_penetration=0.006)
-    ctx.expect_xy_distance("browse_knob", "body", max_dist=0.065)
+    ctx.expect_aabb_overlap("browse_knob", "body", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("browse_knob", "body", axis="z", max_gap=0.006, max_penetration=0.006)
+    ctx.expect_origin_distance("browse_knob", "body", axes="xy", max_dist=0.065)
 
     ctx.expect_joint_motion_axis(
         "channel_fader_slide",
@@ -397,43 +397,43 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(channel_fader_slide=-0.032):
-        ctx.expect_aabb_overlap_xy("channel_fader", "body", min_overlap=0.010)
-        ctx.expect_aabb_gap_z("channel_fader", "body", max_gap=0.002, max_penetration=0.006)
-        ctx.expect_xy_distance("channel_fader", "body", max_dist=0.055)
+        ctx.expect_aabb_overlap("channel_fader", "body", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_gap("channel_fader", "body", axis="z", max_gap=0.002, max_penetration=0.006)
+        ctx.expect_origin_distance("channel_fader", "body", axes="xy", max_dist=0.055)
 
     with ctx.pose(channel_fader_slide=0.032):
-        ctx.expect_aabb_overlap_xy("channel_fader", "body", min_overlap=0.010)
-        ctx.expect_aabb_gap_z("channel_fader", "body", max_gap=0.002, max_penetration=0.006)
-        ctx.expect_xy_distance("channel_fader", "body", max_dist=0.055)
+        ctx.expect_aabb_overlap("channel_fader", "body", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_gap("channel_fader", "body", axis="z", max_gap=0.002, max_penetration=0.006)
+        ctx.expect_origin_distance("channel_fader", "body", axes="xy", max_dist=0.055)
 
     with ctx.pose(crossfader_slide=-0.055):
-        ctx.expect_aabb_overlap_xy("crossfader", "body", min_overlap=0.014)
-        ctx.expect_aabb_gap_z("crossfader", "body", max_gap=0.002, max_penetration=0.006)
-        ctx.expect_xy_distance("crossfader", "body", max_dist=0.115)
+        ctx.expect_aabb_overlap("crossfader", "body", axes="xy", min_overlap=0.014)
+        ctx.expect_aabb_gap("crossfader", "body", axis="z", max_gap=0.002, max_penetration=0.006)
+        ctx.expect_origin_distance("crossfader", "body", axes="xy", max_dist=0.115)
 
     with ctx.pose(crossfader_slide=0.055):
-        ctx.expect_aabb_overlap_xy("crossfader", "body", min_overlap=0.014)
-        ctx.expect_aabb_gap_z("crossfader", "body", max_gap=0.002, max_penetration=0.006)
-        ctx.expect_xy_distance("crossfader", "body", max_dist=0.115)
+        ctx.expect_aabb_overlap("crossfader", "body", axes="xy", min_overlap=0.014)
+        ctx.expect_aabb_gap("crossfader", "body", axis="z", max_gap=0.002, max_penetration=0.006)
+        ctx.expect_origin_distance("crossfader", "body", axes="xy", max_dist=0.115)
 
     with ctx.pose(browse_knob_turn=-2.4):
-        ctx.expect_aabb_overlap_xy("browse_knob", "body", min_overlap=0.018)
-        ctx.expect_aabb_gap_z("browse_knob", "body", max_gap=0.006, max_penetration=0.006)
-        ctx.expect_xy_distance("browse_knob", "body", max_dist=0.070)
+        ctx.expect_aabb_overlap("browse_knob", "body", axes="xy", min_overlap=0.018)
+        ctx.expect_aabb_gap("browse_knob", "body", axis="z", max_gap=0.006, max_penetration=0.006)
+        ctx.expect_origin_distance("browse_knob", "body", axes="xy", max_dist=0.070)
 
     with ctx.pose(browse_knob_turn=2.4):
-        ctx.expect_aabb_overlap_xy("browse_knob", "body", min_overlap=0.018)
-        ctx.expect_aabb_gap_z("browse_knob", "body", max_gap=0.006, max_penetration=0.006)
-        ctx.expect_xy_distance("browse_knob", "body", max_dist=0.070)
+        ctx.expect_aabb_overlap("browse_knob", "body", axes="xy", min_overlap=0.018)
+        ctx.expect_aabb_gap("browse_knob", "body", axis="z", max_gap=0.006, max_penetration=0.006)
+        ctx.expect_origin_distance("browse_knob", "body", axes="xy", max_dist=0.070)
 
     with ctx.pose(
         channel_fader_slide=0.032,
         crossfader_slide=-0.055,
         browse_knob_turn=2.4,
     ):
-        ctx.expect_aabb_overlap_xy("channel_fader", "body", min_overlap=0.010)
-        ctx.expect_aabb_overlap_xy("crossfader", "body", min_overlap=0.014)
-        ctx.expect_aabb_overlap_xy("browse_knob", "body", min_overlap=0.018)
+        ctx.expect_aabb_overlap("channel_fader", "body", axes="xy", min_overlap=0.010)
+        ctx.expect_aabb_overlap("crossfader", "body", axes="xy", min_overlap=0.014)
+        ctx.expect_aabb_overlap("browse_knob", "body", axes="xy", min_overlap=0.018)
 
     return ctx.report()
 

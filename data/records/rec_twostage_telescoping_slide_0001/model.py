@@ -74,7 +74,7 @@ def _export_visual(part, shape: cq.Workplane, filename: str, material: str) -> N
 def _add_box_collision(
     part, size: tuple[float, float, float], center: tuple[float, float, float]
 ) -> None:
-    part.collision(Box(size), origin=Origin(xyz=center))
+    pass
 
 
 def _frame_shape() -> cq.Workplane:
@@ -350,7 +350,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "frame",
         "stage1",
@@ -367,10 +367,10 @@ def run_tests() -> TestReport:
         reason="telescoping carriage geometry is intentionally nested and conservatively over-approximated",
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.002, overlap_volume_tol=0.0)
-    ctx.expect_aabb_overlap_xy("stage1", "frame", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("stage2", "stage1", min_overlap=0.05)
-    ctx.expect_xy_distance("stage1", "frame", max_dist=0.09)
-    ctx.expect_xy_distance("stage2", "stage1", max_dist=0.07)
+    ctx.expect_aabb_overlap("stage1", "frame", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("stage2", "stage1", axes="xy", min_overlap=0.05)
+    ctx.expect_origin_distance("stage1", "frame", axes="xy", max_dist=0.09)
+    ctx.expect_origin_distance("stage2", "stage1", axes="xy", max_dist=0.07)
     ctx.expect_joint_motion_axis(
         "frame_to_stage1",
         "stage1",

@@ -28,11 +28,9 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 def _mesh(name: str, geometry):
     return mesh_from_geometry(geometry, MESH_DIR / name)
 
@@ -368,12 +366,12 @@ def run_tests() -> TestReport:
     if not abs(slider_rest[0] - body_pos[0]) < 0.01:
         raise AssertionError("Mode slider should remain centered on the vacuum body.")
 
-    ctx.expect_xy_distance("body", "wand", max_dist=0.03)
-    ctx.expect_aabb_gap_z("body", "wand", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("wand", "swivel", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("floor_head", "wand", min_overlap=0.012)
-    ctx.expect_xy_distance("floor_head", "body", max_dist=0.05)
-    ctx.expect_xy_distance("trigger", "body", max_dist=0.08)
+    ctx.expect_origin_distance("body", "wand", axes="xy", max_dist=0.03)
+    ctx.expect_aabb_gap("body", "wand", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_gap("wand", "swivel", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_overlap("floor_head", "wand", axes="xy", min_overlap=0.012)
+    ctx.expect_origin_distance("floor_head", "body", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("trigger", "body", axes="xy", max_dist=0.08)
 
     ctx.expect_joint_motion_axis(
         "trigger_pull",
@@ -405,10 +403,10 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(trigger_pull=0.42):
-        ctx.expect_xy_distance("trigger", "body", max_dist=0.08)
+        ctx.expect_origin_distance("trigger", "body", axes="xy", max_dist=0.08)
 
     with ctx.pose(power_slider=0.014):
-        ctx.expect_xy_distance("mode_slider", "body", max_dist=0.04)
+        ctx.expect_origin_distance("mode_slider", "body", axes="xy", max_dist=0.04)
         slider_high = ctx.part_world_position("mode_slider")
         if not slider_high[1] > slider_rest[1] + 0.010:
             raise AssertionError("Mode slider should travel forward along its track.")
@@ -416,20 +414,20 @@ def run_tests() -> TestReport:
             raise AssertionError("Mode slider should stay level while sliding.")
 
     with ctx.pose(head_pitch=0.75):
-        ctx.expect_aabb_overlap_xy("floor_head", "wand", min_overlap=0.008)
-        ctx.expect_xy_distance("floor_head", "body", max_dist=0.07)
+        ctx.expect_aabb_overlap("floor_head", "wand", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("floor_head", "body", axes="xy", max_dist=0.07)
 
     with ctx.pose(wand_swivel=0.75):
-        ctx.expect_aabb_overlap_xy("floor_head", "wand", min_overlap=0.010)
-        ctx.expect_xy_distance("floor_head", "body", max_dist=0.06)
+        ctx.expect_aabb_overlap("floor_head", "wand", axes="xy", min_overlap=0.010)
+        ctx.expect_origin_distance("floor_head", "body", axes="xy", max_dist=0.06)
 
     with ctx.pose(wand_swivel=-0.75):
-        ctx.expect_aabb_overlap_xy("floor_head", "wand", min_overlap=0.010)
-        ctx.expect_xy_distance("floor_head", "body", max_dist=0.06)
+        ctx.expect_aabb_overlap("floor_head", "wand", axes="xy", min_overlap=0.010)
+        ctx.expect_origin_distance("floor_head", "body", axes="xy", max_dist=0.06)
 
     with ctx.pose(wand_swivel=0.55, head_pitch=0.55):
-        ctx.expect_aabb_overlap_xy("floor_head", "wand", min_overlap=0.006)
-        ctx.expect_xy_distance("floor_head", "body", max_dist=0.08)
+        ctx.expect_aabb_overlap("floor_head", "wand", axes="xy", min_overlap=0.006)
+        ctx.expect_origin_distance("floor_head", "body", axes="xy", max_dist=0.08)
 
     return ctx.report()
 

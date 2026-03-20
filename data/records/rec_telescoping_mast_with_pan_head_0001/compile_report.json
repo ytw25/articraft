@@ -3,9 +3,14 @@
   "record_id": "rec_telescoping_mast_with_pan_head_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='pan_head' nearest_part='mast_stage' approx_gap=0.002m pose_index=0 pose=(mast_extension=0, pan_yaw=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

@@ -488,15 +488,15 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("lantern_shell", "tower", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("lantern_shell", "tower", min_overlap=1.6)
-    ctx.expect_aabb_gap_z("lantern_shell", "tower", max_gap=0.003, max_penetration=0.09)
+    ctx.expect_origin_distance("lantern_shell", "tower", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("lantern_shell", "tower", axes="xy", min_overlap=1.6)
+    ctx.expect_aabb_gap("lantern_shell", "tower", axis="z", max_gap=0.003, max_penetration=0.09)
 
     for angle in (0.0, math.pi * 0.25, math.pi * 0.5, math.pi, math.pi * 1.5):
         with ctx.pose(beacon_rotation=angle):
-            ctx.expect_xy_distance("beacon", "lantern_shell", max_dist=0.02)
-            ctx.expect_xy_distance("beacon", "tower", max_dist=0.02)
-            ctx.expect_aabb_overlap_xy("beacon", "lantern_shell", min_overlap=0.55)
+            ctx.expect_origin_distance("beacon", "lantern_shell", axes="xy", max_dist=0.02)
+            ctx.expect_origin_distance("beacon", "tower", axes="xy", max_dist=0.02)
+            ctx.expect_aabb_overlap("beacon", "lantern_shell", axes="xy", min_overlap=0.55)
 
     return ctx.report()
 

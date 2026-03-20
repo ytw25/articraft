@@ -323,9 +323,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("main_body", "connector_hose", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("wand", "floor_head", min_overlap=0.01)
-    ctx.expect_aabb_gap_z("wand", "floor_head", max_gap=0.06, max_penetration=0.11)
+    ctx.expect_aabb_overlap("main_body", "connector_hose", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_gap("wand", "floor_head", axis="z", max_gap=0.06, max_penetration=0.11)
     ctx.expect_joint_motion_axis(
         "hose_to_wand",
         "floor_head",
@@ -342,24 +342,24 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(hose_to_wand=-0.30):
-        ctx.expect_aabb_overlap_xy("wand", "floor_head", min_overlap=0.01)
-        ctx.expect_aabb_gap_z("wand", "floor_head", max_gap=0.07, max_penetration=0.11)
+        ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_gap("wand", "floor_head", axis="z", max_gap=0.07, max_penetration=0.11)
 
     with ctx.pose(hose_to_wand=0.35):
-        ctx.expect_aabb_overlap_xy("wand", "floor_head", min_overlap=0.01)
-        ctx.expect_aabb_gap_z("wand", "floor_head", max_gap=0.08, max_penetration=0.11)
+        ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_gap("wand", "floor_head", axis="z", max_gap=0.08, max_penetration=0.11)
 
     with ctx.pose(wand_to_floor_head=-0.25):
-        ctx.expect_aabb_overlap_xy("wand", "floor_head", min_overlap=0.01)
-        ctx.expect_aabb_gap_z("wand", "floor_head", max_gap=0.06, max_penetration=0.11)
+        ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_gap("wand", "floor_head", axis="z", max_gap=0.06, max_penetration=0.11)
 
     with ctx.pose(wand_to_floor_head=0.45):
-        ctx.expect_aabb_overlap_xy("wand", "floor_head", min_overlap=0.01)
-        ctx.expect_aabb_gap_z("wand", "floor_head", max_gap=0.08, max_penetration=0.11)
+        ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_gap("wand", "floor_head", axis="z", max_gap=0.08, max_penetration=0.11)
 
     with ctx.pose(hose_to_wand=0.25, wand_to_floor_head=0.35):
-        ctx.expect_aabb_overlap_xy("wand", "floor_head", min_overlap=0.01)
-        ctx.expect_aabb_gap_z("wand", "floor_head", max_gap=0.09, max_penetration=0.11)
+        ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_gap("wand", "floor_head", axis="z", max_gap=0.09, max_penetration=0.11)
 
     return ctx.report()
 

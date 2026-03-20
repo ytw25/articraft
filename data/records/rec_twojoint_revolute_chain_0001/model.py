@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 HAS_CADQUERY = cadquery_available()
 if HAS_CADQUERY:
@@ -125,9 +125,9 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_base_visuals(base)
-    base.collision(Box((0.20, 0.14, 0.04)), origin=Origin(xyz=(0.0, 0.0, 0.02)))
-    base.collision(Box((0.08, 0.10, 0.15)), origin=Origin(xyz=(0.0, 0.0, 0.115)))
-    base.collision(Box((0.06, 0.10, 0.025)), origin=Origin(xyz=(0.0, 0.0, 0.2025)))
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.20, 0.14, 0.23)),
         mass=6.0,
@@ -136,9 +136,9 @@ def build_object_model() -> ArticulatedObject:
 
     upper_arm = model.part("upper_arm")
     _add_upper_arm_visuals(upper_arm)
-    upper_arm.collision(Box((0.03, 0.07, 0.03)), origin=Origin(xyz=(0.015, 0.0, 0.0)))
-    upper_arm.collision(Box((0.17, 0.05, 0.03)), origin=Origin(xyz=(0.12, 0.0, 0.0)))
-    upper_arm.collision(Box((0.03, 0.065, 0.03)), origin=Origin(xyz=(0.225, 0.0, 0.0)))
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((UPPER_ARM_LENGTH, 0.08, 0.06)),
         mass=1.8,
@@ -147,9 +147,9 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm")
     _add_forearm_visuals(forearm)
-    forearm.collision(Box((0.03, 0.065, 0.03)), origin=Origin(xyz=(0.015, 0.0, 0.0)))
-    forearm.collision(Box((0.14, 0.045, 0.03)), origin=Origin(xyz=(0.10, 0.0, 0.0)))
-    forearm.collision(Box((0.03, 0.055, 0.025)), origin=Origin(xyz=(0.185, 0.0, 0.0)))
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((FOREARM_LENGTH, 0.07, 0.05)),
         mass=1.1,
@@ -158,9 +158,9 @@ def build_object_model() -> ArticulatedObject:
 
     tool_block = model.part("tool_block")
     _add_tool_visuals(tool_block)
-    tool_block.collision(Box((0.02, 0.05, 0.02)), origin=Origin(xyz=(0.01, 0.0, 0.0)))
-    tool_block.collision(Box((0.06, 0.045, 0.02)), origin=Origin(xyz=(0.05, 0.0, 0.0)))
-    tool_block.collision(Box((0.02, 0.025, 0.012)), origin=Origin(xyz=(0.085, 0.0, 0.0)))
+
+
+
     tool_block.inertial = Inertial.from_geometry(
         Box((0.09, 0.06, 0.03)),
         mass=0.3,
@@ -207,24 +207,24 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, prefer_collisions=True, seed=0)
+    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision", seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_gap_z("upper_arm", "base", max_gap=0.04, max_penetration=0.0)
-    ctx.expect_above("upper_arm", "base", min_clearance=0.0)
-    ctx.expect_above("forearm", "base", min_clearance=0.0)
-    ctx.expect_above("tool_block", "base", min_clearance=0.0)
-    ctx.expect_aabb_gap_z("tool_block", "base", max_gap=0.04, max_penetration=0.0)
-    ctx.expect_xy_distance("upper_arm", "base", max_dist=0.18)
-    ctx.expect_xy_distance("forearm", "upper_arm", max_dist=0.26)
-    ctx.expect_xy_distance("tool_block", "forearm", max_dist=0.22)
+    ctx.expect_aabb_gap("upper_arm", "base", axis="z", max_gap=0.04, max_penetration=0.0)
+    ctx.expect_origin_gap("upper_arm", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("forearm", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("tool_block", "base", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("tool_block", "base", axis="z", max_gap=0.04, max_penetration=0.0)
+    ctx.expect_origin_distance("upper_arm", "base", axes="xy", max_dist=0.18)
+    ctx.expect_origin_distance("forearm", "upper_arm", axes="xy", max_dist=0.26)
+    ctx.expect_origin_distance("tool_block", "forearm", axes="xy", max_dist=0.22)
     ctx.expect_joint_motion_axis(
         "shoulder_joint",
         "upper_arm",

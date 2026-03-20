@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 import math
 
@@ -180,18 +180,9 @@ def _add_sensor_visuals(part, *, body_material: str, lens_material: str) -> None
 
 def _add_link_collisions(part, length: float, *, z_offset: float = 0.0) -> None:
     beam_length = max(length - 0.042, 0.02)
-    part.collision(
-        Box((0.022, LINK_WIDTH_Y, LINK_HEIGHT_Z)),
-        origin=Origin(xyz=(0.016, 0.0, z_offset)),
-    )
-    part.collision(
-        Box((beam_length, 0.034, LINK_HEIGHT_Z)),
-        origin=Origin(xyz=(0.025 + (beam_length / 2.0), 0.0, z_offset)),
-    )
-    part.collision(
-        Box((0.018, LINK_WIDTH_Y, LINK_HEIGHT_Z)),
-        origin=Origin(xyz=(length - 0.009, 0.0, z_offset)),
-    )
+
+
+
 
 
 def build_object_model() -> ArticulatedObject:
@@ -206,7 +197,7 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_base_visuals(base, base_material="base_metal", accent_material="accent_dark")
-    base.collision(Box(BASE_SIZE))
+
     base.inertial = Inertial.from_geometry(Box(BASE_SIZE), mass=4.5)
 
     link1 = model.part("link1")
@@ -269,14 +260,8 @@ def build_object_model() -> ArticulatedObject:
 
     sensor_pod = model.part("sensor_pod")
     _add_sensor_visuals(sensor_pod, body_material="sensor_body", lens_material="sensor_lens")
-    sensor_pod.collision(
-        Box((0.02, 0.024, 0.018)),
-        origin=Origin(xyz=(0.014, 0.0, 0.028)),
-    )
-    sensor_pod.collision(
-        Box((0.052, 0.04, 0.03)),
-        origin=Origin(xyz=(0.036, 0.0, 0.052)),
-    )
+
+
     sensor_pod.inertial = Inertial.from_geometry(
         Box((0.07, 0.05, 0.06)),
         mass=0.18,
@@ -356,16 +341,16 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("link1", "base", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("link1", "base", max_gap=0.02, max_penetration=0.0)
-    ctx.expect_above("link2", "base", min_clearance=0.0)
-    ctx.expect_above("sensor_pod", "base", min_clearance=0.01)
-    ctx.expect_xy_distance("sensor_pod", "base", max_dist=0.72)
-    ctx.expect_aabb_gap_z("sensor_pod", "link4", max_gap=0.08, max_penetration=0.0)
-    ctx.expect_xy_distance("sensor_pod", "link4", max_dist=0.11)
+    ctx.expect_aabb_overlap("link1", "base", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("link1", "base", axis="z", max_gap=0.02, max_penetration=0.0)
+    ctx.expect_origin_gap("link2", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("sensor_pod", "base", axis="z", min_gap=0.01)
+    ctx.expect_origin_distance("sensor_pod", "base", axes="xy", max_dist=0.72)
+    ctx.expect_aabb_gap("sensor_pod", "link4", axis="z", max_gap=0.08, max_penetration=0.0)
+    ctx.expect_origin_distance("sensor_pod", "link4", axes="xy", max_dist=0.11)
 
     ctx.expect_joint_motion_axis(
         "base_to_link1",

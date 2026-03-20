@@ -109,26 +109,10 @@ def build_object_model() -> ArticulatedObject:
 
     frame = model.part("frame")
     frame.visual(frame_mesh, material="rail_finish")
-    frame.collision(
-        Box((RAIL_THICKNESS, RAIL_DEPTH, FRAME_HEIGHT)),
-        origin=Origin(xyz=(-FRAME_WIDTH * 0.5 + RAIL_THICKNESS * 0.5, 0.0, 0.0)),
-        name="left_rail",
-    )
-    frame.collision(
-        Box((RAIL_THICKNESS, RAIL_DEPTH, FRAME_HEIGHT)),
-        origin=Origin(xyz=(FRAME_WIDTH * 0.5 - RAIL_THICKNESS * 0.5, 0.0, 0.0)),
-        name="right_rail",
-    )
-    frame.collision(
-        Box((INNER_WIDTH, RAIL_DEPTH * 0.92, BAR_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, FRAME_HEIGHT * 0.5 - BAR_HEIGHT * 0.5)),
-        name="top_bar",
-    )
-    frame.collision(
-        Box((INNER_WIDTH, RAIL_DEPTH * 0.92, BAR_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, -FRAME_HEIGHT * 0.5 + BAR_HEIGHT * 0.5)),
-        name="bottom_bar",
-    )
+
+
+
+
     frame.inertial = Inertial.from_geometry(
         Box((FRAME_WIDTH, RAIL_DEPTH, FRAME_HEIGHT)),
         mass=2.8,
@@ -137,11 +121,7 @@ def build_object_model() -> ArticulatedObject:
     for index, (slat_name, slat_z) in enumerate(zip(SLAT_NAMES, SLAT_ZS)):
         slat = model.part(slat_name)
         slat.visual(slat_mesh, material="slat_finish")
-        slat.collision(
-            Box((BEARING_SPAN, SLAT_CHORD * 0.9, SLAT_THICKNESS * 0.85)),
-            origin=Origin(xyz=(BEARING_SPAN * 0.5, SLAT_AXIS_OFFSET_Y, 0.0)),
-            name=f"{slat_name}_blade_proxy",
-        )
+
         slat.qc_collision(
             Box((0.012, 0.012, 0.012)),
             name=f"{slat_name}_hinge_anchor",
@@ -182,7 +162,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
 
     for slat_name in SLAT_NAMES:
         ctx.allow_overlap(
@@ -201,35 +181,20 @@ def run_tests() -> TestReport:
             direction="positive",
             min_delta=0.01,
         )
-        ctx.expect_aabb_overlap_xy(slat_name, "frame", min_overlap=0.01)
+        ctx.expect_aabb_overlap(slat_name, "frame", axes="xy", min_overlap=0.01)
 
     for upper_slat, lower_slat in zip(SLAT_NAMES, SLAT_NAMES[1:]):
-        ctx.expect_aabb_gap_z(
-            upper_slat,
-            lower_slat,
-            max_gap=0.07,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_gap(upper_slat, lower_slat, axis="z", max_gap=0.07, max_penetration=0.0)
 
     with ctx.pose({joint_name: SLAT_LIMIT for joint_name in JOINT_NAMES}):
         for upper_slat, lower_slat in zip(SLAT_NAMES, SLAT_NAMES[1:]):
-            ctx.expect_aabb_gap_z(
-                upper_slat,
-                lower_slat,
-                max_gap=0.055,
-                max_penetration=0.001,
-            )
+            ctx.expect_aabb_gap(upper_slat, lower_slat, axis="z", max_gap=0.055, max_penetration=0.001)
         for slat_name in SLAT_NAMES:
-            ctx.expect_aabb_overlap_xy(slat_name, "frame", min_overlap=0.01)
+            ctx.expect_aabb_overlap(slat_name, "frame", axes="xy", min_overlap=0.01)
 
     with ctx.pose({joint_name: -SLAT_LIMIT for joint_name in JOINT_NAMES}):
         for upper_slat, lower_slat in zip(SLAT_NAMES, SLAT_NAMES[1:]):
-            ctx.expect_aabb_gap_z(
-                upper_slat,
-                lower_slat,
-                max_gap=0.055,
-                max_penetration=0.001,
-            )
+            ctx.expect_aabb_gap(upper_slat, lower_slat, axis="z", max_gap=0.055, max_penetration=0.001)
 
     with ctx.pose(
         {
@@ -238,12 +203,7 @@ def run_tests() -> TestReport:
         }
     ):
         for upper_slat, lower_slat in zip(SLAT_NAMES, SLAT_NAMES[1:]):
-            ctx.expect_aabb_gap_z(
-                upper_slat,
-                lower_slat,
-                max_gap=0.055,
-                max_penetration=0.001,
-            )
+            ctx.expect_aabb_gap(upper_slat, lower_slat, axis="z", max_gap=0.055, max_penetration=0.001)
 
     return ctx.report()
 

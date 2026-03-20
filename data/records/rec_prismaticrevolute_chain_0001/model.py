@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 BASE_L = 0.42
 BASE_W = 0.22
@@ -234,26 +234,12 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_base_shape(cq), MESH_DIR / "fixture_base.obj"),
         material="fixture_base",
     )
-    base.collision(Box((BASE_L, BASE_W, BASE_T)))
-    base.collision(
-        Box((RAIL_L, RAIL_W, RAIL_H)),
-        origin=Origin(xyz=(0.0, RAIL_Y, (BASE_T / 2.0) + (RAIL_H / 2.0))),
-    )
-    base.collision(
-        Box((RAIL_L, RAIL_W, RAIL_H)),
-        origin=Origin(xyz=(0.0, -RAIL_Y, (BASE_T / 2.0) + (RAIL_H / 2.0))),
-    )
-    base.collision(
-        Box((REAR_STOP_L, REAR_STOP_W, REAR_STOP_H)),
-        origin=Origin(xyz=(REAR_STOP_X, 0.0, (BASE_T / 2.0) + (REAR_STOP_H / 2.0))),
-    )
-    base.collision(
-        Box((FRONT_STOP_L, FRONT_STOP_W, FRONT_STOP_H)),
-        origin=Origin(xyz=(FRONT_STOP_X, 0.0, (BASE_T / 2.0) + (FRONT_STOP_H / 2.0))),
-    )
-    base.collision(
-        Box((0.05, 0.06, 0.012)), origin=Origin(xyz=(-0.12, 0.0, (BASE_T / 2.0) + 0.006))
-    )
+
+
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((BASE_L, BASE_W, 0.08)),
         mass=11.0,
@@ -265,26 +251,13 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_carriage_shape(cq), MESH_DIR / "carriage.obj"),
         material="fixture_carriage",
     )
-    carriage.collision(Box((SHOE_L, SHOE_W, SHOE_H)), origin=Origin(xyz=(0.0, 0.0, SHOE_H / 2.0)))
-    carriage.collision(
-        Box((SHOE_L, SHOE_W, SHOE_H)), origin=Origin(xyz=(0.0, -2.0 * RAIL_Y, SHOE_H / 2.0))
-    )
-    carriage.collision(
-        Box((BRIDGE_L, BRIDGE_W, BRIDGE_H)), origin=Origin(xyz=(0.0, -RAIL_Y, BRIDGE_Z))
-    )
-    carriage.collision(
-        Box((PEDESTAL_L, PEDESTAL_W, PEDESTAL_H)),
-        origin=Origin(xyz=(PEDESTAL_X, -RAIL_Y, PEDESTAL_Z)),
-    )
-    carriage.collision(Box((0.02, 0.05, 0.01)), origin=Origin(xyz=(-0.012, -RAIL_Y, 0.055)))
-    carriage.collision(
-        Box((EAR_L, EAR_W, EAR_H)),
-        origin=Origin(xyz=(EAR_X, -RAIL_Y + EAR_OFFSET_Y, EAR_Z)),
-    )
-    carriage.collision(
-        Box((EAR_L, EAR_W, EAR_H)),
-        origin=Origin(xyz=(EAR_X, -RAIL_Y - EAR_OFFSET_Y, EAR_Z)),
-    )
+
+
+
+
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.14, 0.17, 0.08)),
         mass=1.8,
@@ -296,9 +269,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_flap_shape(cq), MESH_DIR / "inspection_flap.obj"),
         material="fixture_flap",
     )
-    flap.collision(Box((FLAP_L, FLAP_W, FLAP_T)), origin=Origin(xyz=(FLAP_X, 0.0, FLAP_Z)))
-    flap.collision(Box((TAB_L, TAB_W, TAB_T)), origin=Origin(xyz=(TAB_X, 0.0, TAB_Z)))
-    flap.collision(Box((0.014, BARREL_COL_L, 0.014)))
+
+
+
     flap.inertial = Inertial.from_geometry(
         Box((0.12, 0.09, 0.03)),
         mass=0.35,
@@ -337,33 +310,33 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.09)
+    ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.09)
     ctx.expect_joint_motion_axis(
         "base_to_carriage", "carriage", world_axis="x", direction="positive", min_delta=0.03
     )
 
-    ctx.expect_aabb_overlap_xy("flap", "carriage", min_overlap=0.03)
-    ctx.expect_xy_distance("flap", "carriage", max_dist=0.085)
+    ctx.expect_aabb_overlap("flap", "carriage", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("flap", "carriage", axes="xy", max_dist=0.085)
     ctx.expect_joint_motion_axis(
         "carriage_to_flap", "flap", world_axis="z", direction="positive", min_delta=0.03
     )
 
     with ctx.pose(base_to_carriage=PRISMATIC_LOWER):
-        ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.08)
-        ctx.expect_aabb_overlap_xy("flap", "carriage", min_overlap=0.03)
+        ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_overlap("flap", "carriage", axes="xy", min_overlap=0.03)
 
     with ctx.pose(base_to_carriage=PRISMATIC_UPPER):
-        ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.08)
-        ctx.expect_aabb_overlap_xy("flap", "carriage", min_overlap=0.03)
+        ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_overlap("flap", "carriage", axes="xy", min_overlap=0.03)
 
     with ctx.pose(carriage_to_flap=FLAP_UPPER):
-        ctx.expect_above("flap", "carriage", min_clearance=0.03)
+        ctx.expect_origin_gap("flap", "carriage", axis="z", min_gap=0.03)
 
     with ctx.pose(base_to_carriage=PRISMATIC_UPPER, carriage_to_flap=FLAP_UPPER):
-        ctx.expect_above("flap", "base", min_clearance=0.04)
+        ctx.expect_origin_gap("flap", "base", axis="z", min_gap=0.04)
 
     return ctx.report()
 

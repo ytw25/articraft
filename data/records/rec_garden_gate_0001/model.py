@@ -334,12 +334,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("hinge_assembly", "threshold", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("hinge_assembly", "threshold", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("latch_post", "threshold", min_overlap=0.05)
-    ctx.expect_aabb_gap_z("latch_post", "threshold", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("gate_leaf", "threshold", min_overlap=0.02)
-    ctx.expect_aabb_gap_z("gate_leaf", "threshold", max_gap=0.07, max_penetration=0.0)
+    ctx.expect_aabb_overlap("hinge_assembly", "threshold", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("hinge_assembly", "threshold", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_overlap("latch_post", "threshold", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_gap("latch_post", "threshold", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_overlap("gate_leaf", "threshold", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_gap("gate_leaf", "threshold", axis="z", max_gap=0.07, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "gate_swing",
         "gate_leaf",
@@ -349,12 +349,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(gate_swing=0.75):
-        ctx.expect_aabb_gap_z("gate_leaf", "threshold", max_gap=0.07, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("gate_leaf", "threshold", min_overlap=0.02)
+        ctx.expect_aabb_gap("gate_leaf", "threshold", axis="z", max_gap=0.07, max_penetration=0.0)
+        ctx.expect_aabb_overlap("gate_leaf", "threshold", axes="xy", min_overlap=0.02)
 
     with ctx.pose(gate_swing=1.45):
-        ctx.expect_aabb_gap_z("gate_leaf", "threshold", max_gap=0.07, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("gate_leaf", "threshold", min_overlap=0.02)
+        ctx.expect_aabb_gap("gate_leaf", "threshold", axis="z", max_gap=0.07, max_penetration=0.0)
+        ctx.expect_aabb_overlap("gate_leaf", "threshold", axes="xy", min_overlap=0.02)
 
     return ctx.report()
 

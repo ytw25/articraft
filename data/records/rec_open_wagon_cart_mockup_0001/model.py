@@ -410,8 +410,8 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("body", "front_steer", min_overlap=0.06)
-    ctx.expect_aabb_overlap_xy("front_steer", "handle", min_overlap=0.02)
+    ctx.expect_aabb_overlap("body", "front_steer", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_overlap("front_steer", "handle", axes="xy", min_overlap=0.02)
     ctx.expect_joint_motion_axis(
         "front_steer_swivel",
         "front_left_wheel",

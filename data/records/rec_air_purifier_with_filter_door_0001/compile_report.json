@@ -3,14 +3,15 @@
   "record_id": "rec_air_purifier_with_filter_door_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (collision, non-blocking): isolated parts detected (not contacting any other part in the checked pose).\n- part='power_rocker' nearest_part='body_shell' approx_gap=0.0038m pose_index=0 pose=(body_to_control_pod=0, body_to_filter_door=0, body_to_front_intake=0, body_to_top_grille=0, control_pod_to_power_rocker=0, control_pod_to_selector_dial=0) backend=fcl\n- part='selector_dial' nearest_part='body_shell' approx_gap=0.0004125m pose_index=0 pose=(body_to_control_pod=0, body_to_filter_door=0, body_to_front_intake=0, body_to_top_grille=0, control_pod_to_power_rocker=0, control_pod_to_selector_dial=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
-  "metrics": {
-    "turn_count": 9,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 0.5647455
-  }
+  "metrics": {}
 }

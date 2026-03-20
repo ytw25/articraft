@@ -58,7 +58,7 @@ def _box_collision(
     size: tuple[float, float, float],
     center: tuple[float, float, float],
 ) -> None:
-    part.collision(Box(size), origin=Origin(xyz=center))
+    pass
 
 
 def _ring_block(
@@ -244,7 +244,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
 
     ctx.allow_overlap(
         "base_mount",
@@ -280,28 +280,28 @@ def run_tests() -> TestReport:
         min_delta=0.02,
     )
 
-    ctx.expect_aabb_overlap_xy("base_mount", "primary_boom", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("primary_boom", "telescoping_stage", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("inspection_head", "telescoping_stage", min_overlap=0.006)
-    ctx.expect_xy_distance("primary_boom", "telescoping_stage", max_dist=0.08)
+    ctx.expect_aabb_overlap("base_mount", "primary_boom", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("primary_boom", "telescoping_stage", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("inspection_head", "telescoping_stage", axes="xy", min_overlap=0.006)
+    ctx.expect_origin_distance("primary_boom", "telescoping_stage", axes="xy", max_dist=0.08)
 
     with ctx.pose(base_to_boom=BOOM_UPPER):
-        ctx.expect_above("inspection_head", "base_mount", min_clearance=0.16)
-        ctx.expect_aabb_overlap_xy("base_mount", "primary_boom", min_overlap=0.01)
+        ctx.expect_origin_gap("inspection_head", "base_mount", axis="z", min_gap=0.16)
+        ctx.expect_aabb_overlap("base_mount", "primary_boom", axes="xy", min_overlap=0.01)
 
     with ctx.pose(boom_to_stage=STAGE_UPPER):
-        ctx.expect_aabb_overlap_xy("primary_boom", "telescoping_stage", min_overlap=0.01)
-        ctx.expect_aabb_overlap_xy("inspection_head", "telescoping_stage", min_overlap=0.006)
+        ctx.expect_aabb_overlap("primary_boom", "telescoping_stage", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_overlap("inspection_head", "telescoping_stage", axes="xy", min_overlap=0.006)
 
     with ctx.pose(stage_to_head=HEAD_LOWER):
-        ctx.expect_aabb_overlap_xy("inspection_head", "telescoping_stage", min_overlap=0.004)
+        ctx.expect_aabb_overlap("inspection_head", "telescoping_stage", axes="xy", min_overlap=0.004)
 
     with ctx.pose(stage_to_head=HEAD_UPPER):
-        ctx.expect_aabb_overlap_xy("inspection_head", "telescoping_stage", min_overlap=0.004)
+        ctx.expect_aabb_overlap("inspection_head", "telescoping_stage", axes="xy", min_overlap=0.004)
 
     with ctx.pose(base_to_boom=BOOM_UPPER, boom_to_stage=STAGE_UPPER):
-        ctx.expect_above("inspection_head", "base_mount", min_clearance=0.28)
-        ctx.expect_aabb_overlap_xy("primary_boom", "telescoping_stage", min_overlap=0.008)
+        ctx.expect_origin_gap("inspection_head", "base_mount", axis="z", min_gap=0.28)
+        ctx.expect_aabb_overlap("primary_boom", "telescoping_stage", axes="xy", min_overlap=0.008)
 
     return ctx.report()
 

@@ -3,9 +3,14 @@
   "record_id": "rec_simplified_bascule_bridge_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (non-blocking): geometry overlap check reported overlaps.\nGeometry overlap check failed: part AABBs intersect at sampled articulation poses. worst_pair=('leaf_span'[57], 'pier_base'[0]) min_overlap_depth=0.2872m overlap_volume=0.02783m^3 pose_index=1 pose=(leaf_lift=1.15, leaf_to_tip_signal=0, pier_to_tower=0). elem_a=(name='leaf_span__visual_58' origin_xyz=(-0.34, 0.0, -0.21) origin_rpy=(0.0, 0.0, 0.0) geom=Box) elem_b=(name='pier_base__visual_1' origin_xyz=(-0.22, 0.0, 0.18) origin_rpy=(0.0, 0.0, 0.0) geom=Box). hint: try moving 'pier_base' by ~-0.2922m along world z (or adjust the responsible articulation origin/limits / collision origins). Note: this QC is conservative (bounding boxes); concave mesh collisions can yield false positives. Fix by adjusting articulation origins/limits and/or visual/collision origins so parts do not interpenetrate in the rest pose or across the articulated range.\nIf this overlap is acceptable (e.g., conservative false-positive), explicitly allow the specific pair in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)` and then run `ctx.warn_if_overlaps(...)` so the allowance is tracked; otherwise adjust geometry/joints."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

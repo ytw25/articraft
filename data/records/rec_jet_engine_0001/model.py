@@ -27,7 +27,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 IDENTITY = Origin(xyz=(0.0, 0.0, 0.0))
 
 FAN_JOINT_X = 0.505
@@ -558,7 +558,7 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, math.pi / 7.0, 2.0 * math.pi / 7.0, math.pi / 2.0):
         with ctx.pose(fan_spin=angle):
-            ctx.expect_aabb_overlap_xy("fan_rotor", "nacelle", min_overlap=0.20)
+            ctx.expect_aabb_overlap("fan_rotor", "nacelle", axes="xy", min_overlap=0.20)
             fan_mins, fan_maxs = _aabb_bounds(ctx.part_world_aabb("fan_rotor", use="collision"))
             fan_center_y = 0.5 * (fan_mins[1] + fan_maxs[1])
             fan_center_z = 0.5 * (fan_mins[2] + fan_maxs[2])

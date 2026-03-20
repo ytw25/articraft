@@ -215,9 +215,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("left_support", "rack_deck", max_dist=0.32)
-    ctx.expect_xy_distance("right_support", "rack_deck", max_dist=0.32)
-    ctx.expect_xy_distance("left_support", "right_support", max_dist=0.72)
+    ctx.expect_origin_distance("left_support", "rack_deck", axes="xy", max_dist=0.32)
+    ctx.expect_origin_distance("right_support", "rack_deck", axes="xy", max_dist=0.32)
+    ctx.expect_origin_distance("left_support", "right_support", axes="xy", max_dist=0.72)
 
     ctx.expect_joint_motion_axis(
         "left_support_fold",
@@ -249,16 +249,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(left_support_fold=-0.48, right_support_fold=-0.48):
-        ctx.expect_xy_distance("left_support", "rack_deck", max_dist=0.28)
-        ctx.expect_xy_distance("right_support", "rack_deck", max_dist=0.28)
-        ctx.expect_xy_distance("left_support", "right_support", max_dist=0.56)
-        ctx.expect_aabb_overlap_xy("left_support", "rack_deck", min_overlap=0.33)
-        ctx.expect_aabb_overlap_xy("right_support", "rack_deck", min_overlap=0.33)
+        ctx.expect_origin_distance("left_support", "rack_deck", axes="xy", max_dist=0.28)
+        ctx.expect_origin_distance("right_support", "rack_deck", axes="xy", max_dist=0.28)
+        ctx.expect_origin_distance("left_support", "right_support", axes="xy", max_dist=0.56)
+        ctx.expect_aabb_overlap("left_support", "rack_deck", axes="xy", min_overlap=0.33)
+        ctx.expect_aabb_overlap("right_support", "rack_deck", axes="xy", min_overlap=0.33)
 
     with ctx.pose(left_support_fold=0.0, right_support_fold=0.0):
-        ctx.expect_xy_distance("left_support", "right_support", max_dist=0.72)
-        ctx.expect_aabb_overlap_xy("left_support", "rack_deck", min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy("right_support", "rack_deck", min_overlap=0.015)
+        ctx.expect_origin_distance("left_support", "right_support", axes="xy", max_dist=0.72)
+        ctx.expect_aabb_overlap("left_support", "rack_deck", axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap("right_support", "rack_deck", axes="xy", min_overlap=0.015)
 
     return ctx.report()
 

@@ -464,10 +464,10 @@ def run_tests() -> TestReport:
         )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("seat", "base", max_dist=0.03)
-    ctx.expect_aabb_overlap_xy("column_upper", "base", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("seat", "column_upper", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("backrest", "seat", min_overlap=0.02)
+    ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
+    ctx.expect_aabb_overlap("column_upper", "base", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("seat", "column_upper", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("backrest", "seat", axes="xy", min_overlap=0.02)
     ctx.expect_joint_motion_axis(
         "height_adjust", "seat", world_axis="z", direction="positive", min_delta=0.05
     )
@@ -526,7 +526,7 @@ def run_tests() -> TestReport:
         assert upper_back_point(raised_back, 0.0)[2] > back_upper_rest[2] + 0.08, (
             "Backrest should rise with the seat assembly"
         )
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
 
     with ctx.pose(back_tilt=0.42):
         reclined_back_origin = ctx.part_world_position("backrest")
@@ -539,7 +539,7 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose(swivel=pi / 2.0):
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
         swivel_back = ctx.part_world_position("backrest")
         assert upper_back_point(swivel_back, 0.0)[2] > seat_top_z + 0.28, (
             "Swiveled backrest should stay mounted above the seat"
@@ -553,7 +553,7 @@ def run_tests() -> TestReport:
         assert abs(wheel_rot[2] - wheel_rest[2]) < 1e-6
 
     with ctx.pose(height_adjust=0.08, swivel=pi / 3.0, back_tilt=0.30):
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
         combo_back = ctx.part_world_position("backrest")
         assert upper_back_point(combo_back, 0.30)[2] > 0.82, (
             "Chair should maintain a tall ergonomic back profile in combined adjustment poses"

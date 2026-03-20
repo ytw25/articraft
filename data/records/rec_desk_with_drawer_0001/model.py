@@ -357,8 +357,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("tabletop", "desk_base", min_overlap=0.20)
-    ctx.expect_aabb_gap_z("tabletop", "desk_base", max_gap=0.0015, max_penetration=0.001)
+    ctx.expect_aabb_overlap("tabletop", "desk_base", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_gap("tabletop", "desk_base", axis="z", max_gap=0.0015, max_penetration=0.001)
     ctx.expect_joint_motion_axis(
         "drawer_slide",
         "drawer",
@@ -368,17 +368,17 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(drawer_slide=0.0):
-        ctx.expect_aabb_within_xy("drawer", "tabletop")
-        ctx.expect_aabb_overlap_xy("drawer", "desk_base", min_overlap=0.25)
-        ctx.expect_aabb_overlap_xy("drawer", "tabletop", min_overlap=0.25)
+        ctx.expect_aabb_within("drawer", "tabletop", axes="xy")
+        ctx.expect_aabb_overlap("drawer", "desk_base", axes="xy", min_overlap=0.25)
+        ctx.expect_aabb_overlap("drawer", "tabletop", axes="xy", min_overlap=0.25)
 
     with ctx.pose(drawer_slide=DRAWER_TRAVEL * 0.5):
-        ctx.expect_aabb_overlap_xy("drawer", "desk_base", min_overlap=0.18)
-        ctx.expect_aabb_overlap_xy("drawer", "tabletop", min_overlap=0.18)
+        ctx.expect_aabb_overlap("drawer", "desk_base", axes="xy", min_overlap=0.18)
+        ctx.expect_aabb_overlap("drawer", "tabletop", axes="xy", min_overlap=0.18)
 
     with ctx.pose(drawer_slide=DRAWER_TRAVEL):
-        ctx.expect_aabb_overlap_xy("drawer", "desk_base", min_overlap=0.08)
-        ctx.expect_aabb_overlap_xy("drawer", "tabletop", min_overlap=0.10)
+        ctx.expect_aabb_overlap("drawer", "desk_base", axes="xy", min_overlap=0.08)
+        ctx.expect_aabb_overlap("drawer", "tabletop", axes="xy", min_overlap=0.10)
 
     return ctx.report()
 

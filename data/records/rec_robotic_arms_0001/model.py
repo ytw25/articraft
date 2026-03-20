@@ -824,12 +824,12 @@ def run_tests() -> TestReport:
         ignore_adjacent=True,
     )
 
-    ctx.expect_aabb_overlap_xy("turret", "base", min_overlap=0.120)
-    ctx.expect_xy_distance("turret", "base", max_dist=0.020)
-    ctx.expect_aabb_overlap_xy("upper_arm", "turret", min_overlap=0.050)
-    ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("wrist_pitch", "forearm", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("wrist_roll", "wrist_pitch", min_overlap=0.012)
+    ctx.expect_aabb_overlap("turret", "base", axes="xy", min_overlap=0.120)
+    ctx.expect_origin_distance("turret", "base", axes="xy", max_dist=0.020)
+    ctx.expect_aabb_overlap("upper_arm", "turret", axes="xy", min_overlap=0.050)
+    ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("wrist_pitch", "forearm", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("wrist_roll", "wrist_pitch", axes="xy", min_overlap=0.012)
 
     ctx.expect_joint_motion_axis(
         "shoulder_joint",

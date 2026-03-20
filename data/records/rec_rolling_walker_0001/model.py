@@ -23,8 +23,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 TUBE_RADIUS = 0.011
 SIDE_OFFSET_Y = 0.245
 WHEEL_RADIUS = 0.065
@@ -351,8 +350,8 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("left_front_wheel", "main_frame", min_overlap=0.008)
-    ctx.expect_aabb_overlap_xy("right_front_wheel", "right_side", min_overlap=0.008)
+    ctx.expect_aabb_overlap("left_front_wheel", "main_frame", axes="xy", min_overlap=0.008)
+    ctx.expect_aabb_overlap("right_front_wheel", "right_side", axes="xy", min_overlap=0.008)
 
     left_wheel_open = ctx.part_world_position("left_front_wheel")
     right_wheel_open = ctx.part_world_position("right_front_wheel")

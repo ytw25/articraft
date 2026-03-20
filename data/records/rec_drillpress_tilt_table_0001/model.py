@@ -27,9 +27,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _build_tabletop_mesh():
     top_profile = rounded_rect_profile(0.34, 0.24, radius=0.018, corner_segments=10)
     top_geom = ExtrudeGeometry.centered(top_profile, height=0.022, cap=True, closed=True)

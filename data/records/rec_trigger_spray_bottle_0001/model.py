@@ -43,7 +43,7 @@ def _mesh_path(name: str) -> Path:
     try:
         return ASSETS.mesh_path(name)
     except AttributeError:
-        mesh_dir = HERE / "meshes"
+        mesh_dir = ASSETS.mesh_dir
         mesh_dir.mkdir(parents=True, exist_ok=True)
         return mesh_dir / name
 
@@ -391,9 +391,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("sprayer_head", "bottle", min_overlap=0.018)
-    ctx.expect_xy_distance("sprayer_head", "bottle", max_dist=0.040)
-    ctx.expect_aabb_gap_z("sprayer_head", "bottle", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_overlap("sprayer_head", "bottle", axes="xy", min_overlap=0.018)
+    ctx.expect_origin_distance("sprayer_head", "bottle", axes="xy", max_dist=0.040)
+    ctx.expect_aabb_gap("sprayer_head", "bottle", axis="z", max_gap=0.003, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "trigger_hinge",
@@ -404,28 +404,28 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(trigger_hinge=0.0):
-        ctx.expect_aabb_overlap_xy("trigger", "sprayer_head", min_overlap=0.004)
-        ctx.expect_xy_distance("trigger", "sprayer_head", max_dist=0.062)
-        ctx.expect_xy_distance("trigger", "bottle", max_dist=0.065)
+        ctx.expect_aabb_overlap("trigger", "sprayer_head", axes="xy", min_overlap=0.004)
+        ctx.expect_origin_distance("trigger", "sprayer_head", axes="xy", max_dist=0.062)
+        ctx.expect_origin_distance("trigger", "bottle", axes="xy", max_dist=0.065)
 
     with ctx.pose(trigger_hinge=0.58):
-        ctx.expect_aabb_overlap_xy("trigger", "sprayer_head", min_overlap=0.002)
-        ctx.expect_xy_distance("trigger", "sprayer_head", max_dist=0.062)
-        ctx.expect_xy_distance("trigger", "bottle", max_dist=0.065)
+        ctx.expect_aabb_overlap("trigger", "sprayer_head", axes="xy", min_overlap=0.002)
+        ctx.expect_origin_distance("trigger", "sprayer_head", axes="xy", max_dist=0.062)
+        ctx.expect_origin_distance("trigger", "bottle", axes="xy", max_dist=0.065)
 
     with ctx.pose(nozzle_selector=0.0):
-        ctx.expect_aabb_overlap_xy("nozzle_tip", "sprayer_head", min_overlap=0.002)
-        ctx.expect_xy_distance("nozzle_tip", "sprayer_head", max_dist=0.080)
-        ctx.expect_xy_distance("nozzle_tip", "bottle", max_dist=0.090)
+        ctx.expect_aabb_overlap("nozzle_tip", "sprayer_head", axes="xy", min_overlap=0.002)
+        ctx.expect_origin_distance("nozzle_tip", "sprayer_head", axes="xy", max_dist=0.080)
+        ctx.expect_origin_distance("nozzle_tip", "bottle", axes="xy", max_dist=0.090)
 
     with ctx.pose(nozzle_selector=1.35):
-        ctx.expect_aabb_overlap_xy("nozzle_tip", "sprayer_head", min_overlap=0.002)
-        ctx.expect_xy_distance("nozzle_tip", "sprayer_head", max_dist=0.080)
-        ctx.expect_xy_distance("nozzle_tip", "bottle", max_dist=0.090)
+        ctx.expect_aabb_overlap("nozzle_tip", "sprayer_head", axes="xy", min_overlap=0.002)
+        ctx.expect_origin_distance("nozzle_tip", "sprayer_head", axes="xy", max_dist=0.080)
+        ctx.expect_origin_distance("nozzle_tip", "bottle", axes="xy", max_dist=0.090)
 
     with ctx.pose(trigger_hinge=0.58, nozzle_selector=1.35):
-        ctx.expect_xy_distance("nozzle_tip", "trigger", max_dist=0.110)
-        ctx.expect_xy_distance("sprayer_head", "bottle", max_dist=0.040)
+        ctx.expect_origin_distance("nozzle_tip", "trigger", axes="xy", max_dist=0.110)
+        ctx.expect_origin_distance("sprayer_head", "bottle", axes="xy", max_dist=0.040)
 
     return ctx.report()
 

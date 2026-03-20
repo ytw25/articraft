@@ -292,16 +292,16 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("wheel", "frame", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("wheel", "frame", min_overlap=0.15)
-    ctx.expect_aabb_overlap_xy("wheel", "axle", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("axle", "frame", min_overlap=0.08)
+    ctx.expect_origin_distance("wheel", "frame", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("wheel", "frame", axes="xy", min_overlap=0.15)
+    ctx.expect_aabb_overlap("wheel", "axle", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("axle", "frame", axes="xy", min_overlap=0.08)
 
     for angle in (math.pi / 8.0, math.pi / 4.0, 3.0 * math.pi / 8.0, math.pi / 2.0):
         with ctx.pose(axle_to_wheel=angle):
-            ctx.expect_xy_distance("wheel", "frame", max_dist=0.02)
-            ctx.expect_aabb_overlap_xy("wheel", "frame", min_overlap=0.15)
-            ctx.expect_aabb_overlap_xy("wheel", "axle", min_overlap=0.08)
+            ctx.expect_origin_distance("wheel", "frame", axes="xy", max_dist=0.02)
+            ctx.expect_aabb_overlap("wheel", "frame", axes="xy", min_overlap=0.15)
+            ctx.expect_aabb_overlap("wheel", "axle", axes="xy", min_overlap=0.08)
 
     return ctx.report()
 

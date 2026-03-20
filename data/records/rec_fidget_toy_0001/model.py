@@ -226,8 +226,8 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, math.pi / 6.0, math.pi / 3.0, math.pi / 2.0, 2.05):
         with ctx.pose(hub_to_spinner=angle):
-            ctx.expect_xy_distance("spinner_frame", "hub", max_dist=0.001)
-            ctx.expect_aabb_overlap_xy("spinner_frame", "hub", min_overlap=0.020)
+            ctx.expect_origin_distance("spinner_frame", "hub", axes="xy", max_dist=0.001)
+            ctx.expect_aabb_overlap("spinner_frame", "hub", axes="xy", min_overlap=0.020)
 
     return ctx.report()
 

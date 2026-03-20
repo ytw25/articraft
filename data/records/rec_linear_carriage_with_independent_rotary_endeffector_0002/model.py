@@ -175,14 +175,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_rail_shape(), "rail_base.obj", assets=ASSETS),
         material="anodized_aluminum",
     )
-    rail_base.collision(
-        Box((BASE_LENGTH, BASE_WIDTH, BASE_PLATE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_THICKNESS / 2.0)),
-    )
-    rail_base.collision(
-        Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_THICKNESS + (RAIL_HEIGHT / 2.0))),
-    )
+
+
     rail_base.inertial = Inertial.from_geometry(
         Box((BASE_LENGTH, BASE_WIDTH, BASE_PLATE_THICKNESS + RAIL_HEIGHT)),
         mass=6.5,
@@ -196,20 +190,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_carriage_shape(), "carriage.obj", assets=ASSETS),
         material="dark_polymer",
     )
-    carriage.collision(
-        Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, CARRIAGE_TOP_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, CARRIAGE_TOP_THICKNESS / 2.0)),
-    )
-    carriage.collision(
-        Box((MOUNT_BLOCK_X, 0.018, MOUNT_BLOCK_Z)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                (CARRIAGE_WIDTH / 2.0) + 0.009,
-                MOUNT_BLOCK_Z / 2.0,
-            )
-        ),
-    )
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, MOUNT_BLOCK_Z)),
         mass=1.6,
@@ -271,23 +253,8 @@ def build_object_model() -> ArticulatedObject:
         ),
         material="dark_polymer",
     )
-    spindle.collision(
-        Cylinder(radius=SPINDLE_BODY_RADIUS, length=0.098),
-        origin=Origin(
-            xyz=(0.0, 0.051, 0.0),
-            rpy=(-pi / 2.0, 0.0, 0.0),
-        ),
-    )
-    spindle.collision(
-        Box((SPINDLE_SIDE_MODULE_X, SPINDLE_SIDE_MODULE_Y, SPINDLE_SIDE_MODULE_Z)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                SPINDLE_FLANGE_LENGTH + 0.022,
-                SPINDLE_FLANGE_RADIUS + 0.012,
-            ),
-        ),
-    )
+
+
     spindle.inertial = Inertial.from_geometry(
         Cylinder(radius=SPINDLE_BODY_RADIUS, length=0.11),
         mass=0.7,
@@ -330,11 +297,11 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, prefer_collisions=True, seed=0)
+    ctx = TestContext(object_model, geometry_source="collision", seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.001,
@@ -356,23 +323,13 @@ def run_tests() -> TestReport:
         min_delta=0.009,
     )
 
-    ctx.expect_xy_distance("carriage", "rail_base", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("carriage", "rail_base", min_overlap=0.05)
-    ctx.expect_aabb_gap_z(
-        "carriage",
-        "rail_base",
-        max_gap=0.01,
-        max_penetration=0.0,
-    )
-    ctx.expect_above("carriage", "rail_base", min_clearance=0.0)
+    ctx.expect_origin_distance("carriage", "rail_base", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("carriage", "rail_base", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_gap("carriage", "rail_base", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_gap("carriage", "rail_base", axis="z", min_gap=0.0)
 
-    ctx.expect_above("spindle", "rail_base", min_clearance=0.0)
-    ctx.expect_aabb_gap_z(
-        "spindle",
-        "rail_base",
-        max_gap=0.03,
-        max_penetration=0.0,
-    )
+    ctx.expect_origin_gap("spindle", "rail_base", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("spindle", "rail_base", axis="z", max_gap=0.03, max_penetration=0.0)
 
     return ctx.report()
 

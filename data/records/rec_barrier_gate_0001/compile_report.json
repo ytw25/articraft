@@ -3,9 +3,14 @@
   "record_id": "rec_barrier_gate_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='base_housing' nearest_part='gate_arm' approx_gap=0.004m pose_index=0 pose=(arm_hinge=0) backend=fcl\n- part='gate_arm' nearest_part='base_housing' approx_gap=0.004m pose_index=0 pose=(arm_hinge=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

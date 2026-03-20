@@ -60,7 +60,7 @@ def _add_mesh_part(
     collision_box = Box(collision_size)
 
     part.visual(mesh, material=material)
-    part.collision(collision_box, origin=collision_origin)
+
     part.inertial = Inertial.from_geometry(
         collision_box,
         mass=mass,
@@ -240,21 +240,21 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=160,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("arm_1", "base_mount", min_overlap=0.020)
-    ctx.expect_aabb_gap_z("arm_1", "base_mount", max_gap=0.004, max_penetration=0.0)
+    ctx.expect_aabb_overlap("arm_1", "base_mount", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_gap("arm_1", "base_mount", axis="z", max_gap=0.004, max_penetration=0.0)
 
-    ctx.expect_aabb_overlap_xy("arm_2", "arm_1", min_overlap=0.018)
-    ctx.expect_aabb_gap_z("arm_2", "arm_1", max_gap=0.004, max_penetration=0.0)
+    ctx.expect_aabb_overlap("arm_2", "arm_1", axes="xy", min_overlap=0.018)
+    ctx.expect_aabb_gap("arm_2", "arm_1", axis="z", max_gap=0.004, max_penetration=0.0)
 
-    ctx.expect_aabb_overlap_xy("service_plate", "arm_2", min_overlap=0.018)
-    ctx.expect_aabb_gap_z("service_plate", "arm_2", max_gap=0.004, max_penetration=0.0)
+    ctx.expect_aabb_overlap("service_plate", "arm_2", axes="xy", min_overlap=0.018)
+    ctx.expect_aabb_gap("service_plate", "arm_2", axis="z", max_gap=0.004, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "base_to_shoulder",
@@ -279,14 +279,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(base_to_shoulder=0.0, shoulder_to_elbow=2.65, elbow_to_service=0.0):
-        ctx.expect_aabb_overlap_xy("service_plate", "base_mount", min_overlap=0.006)
-        ctx.expect_aabb_gap_z("service_plate", "arm_2", max_gap=0.004, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("arm_2", "arm_1", max_gap=0.004, max_penetration=0.0)
+        ctx.expect_aabb_overlap("service_plate", "base_mount", axes="xy", min_overlap=0.006)
+        ctx.expect_aabb_gap("service_plate", "arm_2", axis="z", max_gap=0.004, max_penetration=0.0)
+        ctx.expect_aabb_gap("arm_2", "arm_1", axis="z", max_gap=0.004, max_penetration=0.0)
 
     with ctx.pose(base_to_shoulder=1.35, shoulder_to_elbow=0.0, elbow_to_service=-1.10):
-        ctx.expect_aabb_overlap_xy("arm_1", "base_mount", min_overlap=0.020)
-        ctx.expect_aabb_gap_z("arm_2", "arm_1", max_gap=0.004, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("service_plate", "arm_2", max_gap=0.004, max_penetration=0.0)
+        ctx.expect_aabb_overlap("arm_1", "base_mount", axes="xy", min_overlap=0.020)
+        ctx.expect_aabb_gap("arm_2", "arm_1", axis="z", max_gap=0.004, max_penetration=0.0)
+        ctx.expect_aabb_gap("service_plate", "arm_2", axis="z", max_gap=0.004, max_penetration=0.0)
 
     return ctx.report()
 

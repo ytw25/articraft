@@ -108,8 +108,8 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base_housing")
     _add_mesh_visual(base, _make_base_shape(), "base_housing.obj", "housing_dark")
-    base.collision(Box((0.108, 0.088, 0.044)), origin=Origin(xyz=(0.0, 0.0, 0.022)))
-    base.collision(Cylinder(radius=0.022, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.050)))
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.110, 0.090, 0.056)),
         mass=1.8,
@@ -118,8 +118,8 @@ def build_object_model() -> ArticulatedObject:
 
     shoulder = model.part("shoulder_module")
     _add_mesh_visual(shoulder, _make_shoulder_shape(), "shoulder_module.obj", "housing_dark")
-    shoulder.collision(Cylinder(radius=0.026, length=0.008), origin=Origin(xyz=(0.0, 0.0, 0.004)))
-    shoulder.collision(Box((0.060, 0.068, 0.044)), origin=Origin(xyz=(0.055, 0.0, 0.030)))
+
+
     shoulder.inertial = Inertial.from_geometry(
         Box((0.088, 0.070, 0.054)),
         mass=1.1,
@@ -129,9 +129,9 @@ def build_object_model() -> ArticulatedObject:
     elbow = model.part("elbow_module")
     _add_mesh_visual(elbow, _make_elbow_link_shape(), "elbow_link.obj", "machined_aluminum")
     _add_mesh_visual(elbow, _make_elbow_actuator_shape(), "elbow_actuator.obj", "housing_dark")
-    elbow.collision(Box((0.042, 0.028, 0.042)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    elbow.collision(Box((0.131, 0.031, 0.028)), origin=Origin(xyz=(0.0805, 0.0065, 0.0)))
-    elbow.collision(Box((0.052, 0.058, 0.042)), origin=Origin(xyz=(0.150, 0.024, 0.010)))
+
+
+
     elbow.inertial = Inertial.from_geometry(
         Box((0.178, 0.058, 0.044)),
         mass=0.85,
@@ -141,8 +141,8 @@ def build_object_model() -> ArticulatedObject:
     wrist = model.part("wrist_module")
     _add_mesh_visual(wrist, _make_wrist_housing_shape(), "wrist_housing.obj", "housing_dark")
     _add_mesh_visual(wrist, _make_wrist_fork_shape(), "wrist_fork.obj", "machined_aluminum")
-    wrist.collision(Box((0.042, 0.050, 0.038)), origin=Origin(xyz=(0.024, 0.0, 0.0)))
-    wrist.collision(Box((0.075, 0.030, 0.034)), origin=Origin(xyz=(0.073, 0.024, 0.0)))
+
+
     wrist.inertial = Inertial.from_geometry(
         Box((0.110, 0.052, 0.040)),
         mass=0.45,
@@ -185,7 +185,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -210,14 +210,14 @@ def run_tests() -> TestReport:
         min_delta=0.01,
     )
 
-    ctx.expect_xy_distance("shoulder_module", "base_housing", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("shoulder_module", "base_housing", min_overlap=0.05)
-    ctx.expect_aabb_gap_z("shoulder_module", "base_housing", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_distance("shoulder_module", "base_housing", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("shoulder_module", "base_housing", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_gap("shoulder_module", "base_housing", axis="z", max_gap=0.01, max_penetration=0.0)
 
-    ctx.expect_xy_distance("elbow_module", "base_housing", max_dist=0.18)
-    ctx.expect_aabb_gap_z("elbow_module", "base_housing", max_gap=0.04, max_penetration=0.0)
-    ctx.expect_xy_distance("wrist_module", "base_housing", max_dist=0.30)
-    ctx.expect_aabb_gap_z("wrist_module", "base_housing", max_gap=0.06, max_penetration=0.0)
+    ctx.expect_origin_distance("elbow_module", "base_housing", axes="xy", max_dist=0.18)
+    ctx.expect_aabb_gap("elbow_module", "base_housing", axis="z", max_gap=0.04, max_penetration=0.0)
+    ctx.expect_origin_distance("wrist_module", "base_housing", axes="xy", max_dist=0.30)
+    ctx.expect_aabb_gap("wrist_module", "base_housing", axis="z", max_gap=0.06, max_penetration=0.0)
 
     return ctx.report()
 

@@ -346,12 +346,12 @@ def run_tests() -> TestReport:
     for caster_name, _, _ in CASTER_LAYOUT:
         swivel_name = f"{caster_name}_swivel"
         wheel_name = f"{caster_name}_wheel"
-        ctx.expect_aabb_overlap_xy("deck", swivel_name, min_overlap=0.040)
-        ctx.expect_aabb_overlap_xy("deck", wheel_name, min_overlap=0.020)
-        ctx.expect_aabb_gap_z("deck", wheel_name, max_gap=0.055, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy(swivel_name, wheel_name, min_overlap=0.020)
+        ctx.expect_aabb_overlap("deck", swivel_name, axes="xy", min_overlap=0.040)
+        ctx.expect_aabb_overlap("deck", wheel_name, axes="xy", min_overlap=0.020)
+        ctx.expect_aabb_gap("deck", wheel_name, axis="z", max_gap=0.055, max_penetration=0.0)
+        ctx.expect_aabb_overlap(swivel_name, wheel_name, axes="xy", min_overlap=0.020)
 
-    ctx.expect_aabb_overlap_xy("handle", "deck", min_overlap=0.018)
+    ctx.expect_aabb_overlap("handle", "deck", axes="xy", min_overlap=0.018)
     ctx.expect_joint_motion_axis(
         "handle_hinge",
         "handle",
@@ -361,10 +361,10 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(handle_hinge=0.72):
-        ctx.expect_aabb_overlap_xy("handle", "deck", min_overlap=0.080)
+        ctx.expect_aabb_overlap("handle", "deck", axes="xy", min_overlap=0.080)
 
     with ctx.pose(handle_hinge=HANDLE_FOLD_UPPER):
-        ctx.expect_aabb_overlap_xy("handle", "deck", min_overlap=0.140)
+        ctx.expect_aabb_overlap("handle", "deck", axes="xy", min_overlap=0.140)
 
     with ctx.pose(
         front_left_caster_swivel=math.pi / 2.0,
@@ -372,10 +372,10 @@ def run_tests() -> TestReport:
         front_left_wheel_roll=1.1,
         rear_right_wheel_roll=-0.8,
     ):
-        ctx.expect_aabb_gap_z("deck", "front_left_wheel", max_gap=0.055, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("deck", "rear_right_wheel", max_gap=0.055, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("deck", "front_left_wheel", min_overlap=0.020)
-        ctx.expect_aabb_overlap_xy("deck", "rear_right_wheel", min_overlap=0.020)
+        ctx.expect_aabb_gap("deck", "front_left_wheel", axis="z", max_gap=0.055, max_penetration=0.0)
+        ctx.expect_aabb_gap("deck", "rear_right_wheel", axis="z", max_gap=0.055, max_penetration=0.0)
+        ctx.expect_aabb_overlap("deck", "front_left_wheel", axes="xy", min_overlap=0.020)
+        ctx.expect_aabb_overlap("deck", "rear_right_wheel", axes="xy", min_overlap=0.020)
 
     return ctx.report()
 

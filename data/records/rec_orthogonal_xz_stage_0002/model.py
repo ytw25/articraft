@@ -39,7 +39,7 @@ def _add_box(
     origin = _origin(xyz)
     part.visual(Box(size), origin=origin, material=material)
     if collision:
-        part.collision(Box(size), origin=origin)
+        pass
 
 
 def _add_cylinder(
@@ -55,7 +55,7 @@ def _add_cylinder(
     origin = _origin(xyz, rpy=rpy)
     part.visual(Cylinder(radius=radius, length=length), origin=origin, material=material)
     if collision:
-        part.collision(Cylinder(radius=radius, length=length), origin=origin)
+        pass
 
 
 def build_object_model() -> ArticulatedObject:
@@ -157,22 +157,22 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, prefer_collisions=True, seed=0)
+    ctx = TestContext(object_model, geometry_source="collision", seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("x_stage", "base", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("x_stage", "base", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("x_stage", "base", max_gap=0.004, max_penetration=0.001)
-    ctx.expect_above("x_stage", "base", min_clearance=0.0)
+    ctx.expect_origin_distance("x_stage", "base", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("x_stage", "base", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("x_stage", "base", axis="z", max_gap=0.004, max_penetration=0.001)
+    ctx.expect_origin_gap("x_stage", "base", axis="z", min_gap=0.0)
 
-    ctx.expect_xy_distance("z_stage", "x_stage", max_dist=0.05)
-    ctx.expect_aabb_overlap_xy("z_stage", "x_stage", min_overlap=0.05)
-    ctx.expect_aabb_overlap_xy("z_stage", "base", min_overlap=0.07)
-    ctx.expect_above("z_stage", "base", min_clearance=0.05)
+    ctx.expect_origin_distance("z_stage", "x_stage", axes="xy", max_dist=0.05)
+    ctx.expect_aabb_overlap("z_stage", "x_stage", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_overlap("z_stage", "base", axes="xy", min_overlap=0.07)
+    ctx.expect_origin_gap("z_stage", "base", axis="z", min_gap=0.05)
 
     ctx.expect_joint_motion_axis(
         "base_to_x",

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 RAIL_LENGTH = 0.42
 RAIL_WIDTH = 0.032
@@ -105,10 +105,7 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(xyz=(0.0, 0.0, -RAIL_HEIGHT / 2.0)),
             material="rail_steel",
         )
-    rail.collision(
-        Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, -RAIL_HEIGHT / 2.0)),
-    )
+
     rail.inertial = Inertial.from_geometry(
         Box((RAIL_LENGTH, RAIL_WIDTH, RAIL_HEIGHT)),
         mass=3.2,
@@ -146,10 +143,7 @@ def build_object_model() -> ArticulatedObject:
         ),
         material="wiper_black",
     )
-    carriage.collision(
-        Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, CARRIAGE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, CARRIAGE_HEIGHT / 2.0)),
-    )
+
     carriage.inertial = Inertial.from_geometry(
         Box((CARRIAGE_LENGTH, CARRIAGE_WIDTH, CARRIAGE_HEIGHT)),
         mass=1.0,
@@ -179,20 +173,15 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_above("carriage", "rail", min_clearance=0.0)
-    ctx.expect_aabb_gap_z(
-        "carriage",
-        "rail",
-        max_gap=0.002,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_overlap_xy("carriage", "rail", min_overlap=0.002)
+    ctx.expect_origin_gap("carriage", "rail", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("carriage", "rail", axis="z", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_aabb_overlap("carriage", "rail", axes="xy", min_overlap=0.002)
     ctx.expect_joint_motion_axis(
         "rail_to_carriage",
         "carriage",

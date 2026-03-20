@@ -522,11 +522,11 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_xy_distance("mount_head", "tripod_base", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("mount_head", "tripod_base", min_overlap=0.10)
-    ctx.expect_aabb_gap_z("mount_head", "tripod_base", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_origin_distance("mount_head", "tripod_base", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("mount_head", "tripod_base", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_gap("mount_head", "tripod_base", axis="z", max_gap=0.002, max_penetration=0.0)
 
-    ctx.expect_aabb_overlap_xy("optical_tube", "mount_head", min_overlap=0.05)
+    ctx.expect_aabb_overlap("optical_tube", "mount_head", axes="xy", min_overlap=0.05)
 
     ctx.expect_joint_motion_axis(
         "leg_a_extension",
@@ -557,12 +557,12 @@ def run_tests() -> TestReport:
     with ctx.pose(tube_elevation=-0.20):
         low_bounds = _aabb_bounds(ctx.part_world_aabb("optical_tube", use="visual"))
         low_pos = ctx.part_world_position("optical_tube")
-        ctx.expect_aabb_overlap_xy("optical_tube", "mount_head", min_overlap=0.05)
+        ctx.expect_aabb_overlap("optical_tube", "mount_head", axes="xy", min_overlap=0.05)
 
     with ctx.pose(tube_elevation=1.10):
         high_bounds = _aabb_bounds(ctx.part_world_aabb("optical_tube", use="visual"))
         high_pos = ctx.part_world_position("optical_tube")
-        ctx.expect_aabb_overlap_xy("optical_tube", "mount_head", min_overlap=0.02)
+        ctx.expect_aabb_overlap("optical_tube", "mount_head", axes="xy", min_overlap=0.02)
 
     low_mins, low_maxs = low_bounds
     high_mins, high_maxs = high_bounds
@@ -576,10 +576,10 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose(mount_azimuth=1.70, tube_elevation=0.65):
-        ctx.expect_xy_distance("mount_head", "tripod_base", max_dist=0.01)
-        ctx.expect_aabb_overlap_xy("mount_head", "tripod_base", min_overlap=0.10)
-        ctx.expect_aabb_gap_z("mount_head", "tripod_base", max_gap=0.002, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("optical_tube", "mount_head", min_overlap=0.02)
+        ctx.expect_origin_distance("mount_head", "tripod_base", axes="xy", max_dist=0.01)
+        ctx.expect_aabb_overlap("mount_head", "tripod_base", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_gap("mount_head", "tripod_base", axis="z", max_gap=0.002, max_penetration=0.0)
+        ctx.expect_aabb_overlap("optical_tube", "mount_head", axes="xy", min_overlap=0.02)
 
     rest_positions = {
         label: ctx.part_world_position(f"leg_extension_{label}") for label in LEG_LABELS

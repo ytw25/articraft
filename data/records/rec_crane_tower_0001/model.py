@@ -449,9 +449,9 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("upperworks", "tower", min_overlap=0.20)
-    ctx.expect_aabb_gap_z("upperworks", "tower", max_gap=0.004, max_penetration=0.0)
-    ctx.expect_xy_distance("upperworks", "tower", max_dist=0.95)
+    ctx.expect_aabb_overlap("upperworks", "tower", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_gap("upperworks", "tower", axis="z", max_gap=0.004, max_penetration=0.0)
+    ctx.expect_origin_distance("upperworks", "tower", axes="xy", max_dist=0.95)
     ctx.expect_joint_motion_axis(
         "trolley_slide",
         "trolley_hook",
@@ -461,16 +461,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(trolley_slide=0.0):
-        ctx.expect_aabb_overlap_xy("trolley_hook", "upperworks", min_overlap=0.08)
-        ctx.expect_xy_distance("trolley_hook", "tower", max_dist=0.70)
+        ctx.expect_aabb_overlap("trolley_hook", "upperworks", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("trolley_hook", "tower", axes="xy", max_dist=0.70)
 
     with ctx.pose(trolley_slide=1.92):
-        ctx.expect_aabb_overlap_xy("trolley_hook", "upperworks", min_overlap=0.08)
+        ctx.expect_aabb_overlap("trolley_hook", "upperworks", axes="xy", min_overlap=0.08)
 
     with ctx.pose(slew_rotation=math.pi * 0.5):
-        ctx.expect_aabb_overlap_xy("upperworks", "tower", min_overlap=0.20)
-        ctx.expect_aabb_gap_z("upperworks", "tower", max_gap=0.004, max_penetration=0.0)
-        ctx.expect_xy_distance("upperworks", "tower", max_dist=0.95)
+        ctx.expect_aabb_overlap("upperworks", "tower", axes="xy", min_overlap=0.20)
+        ctx.expect_aabb_gap("upperworks", "tower", axis="z", max_gap=0.004, max_penetration=0.0)
+        ctx.expect_origin_distance("upperworks", "tower", axes="xy", max_dist=0.95)
         ctx.expect_joint_motion_axis(
             "trolley_slide",
             "trolley_hook",
@@ -480,7 +480,7 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose({"slew_rotation": math.pi * 0.5, "trolley_slide": 1.92}):
-        ctx.expect_aabb_overlap_xy("trolley_hook", "upperworks", min_overlap=0.08)
+        ctx.expect_aabb_overlap("trolley_hook", "upperworks", axes="xy", min_overlap=0.08)
 
     return ctx.report()
 

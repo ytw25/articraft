@@ -259,11 +259,11 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("inner_arm", "wall_plate", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("outer_arm", "inner_arm", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("screen_bracket", "tilt_head", min_overlap=0.01)
-    ctx.expect_xy_distance("screen_bracket", "wall_plate", max_dist=0.42)
-    ctx.expect_aabb_gap_z("screen_bracket", "wall_plate", max_gap=0.06, max_penetration=0.34)
+    ctx.expect_aabb_overlap("inner_arm", "wall_plate", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("outer_arm", "inner_arm", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("screen_bracket", "tilt_head", axes="xy", min_overlap=0.01)
+    ctx.expect_origin_distance("screen_bracket", "wall_plate", axes="xy", max_dist=0.42)
+    ctx.expect_aabb_gap("screen_bracket", "wall_plate", axis="z", max_gap=0.06, max_penetration=0.34)
 
     ctx.expect_joint_motion_axis(
         "wall_swing",
@@ -295,20 +295,20 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(wall_swing=1.00, elbow_swing=1.20, head_swivel=0.35):
-        ctx.expect_xy_distance("screen_bracket", "wall_plate", max_dist=0.56)
-        ctx.expect_aabb_gap_z("screen_bracket", "wall_plate", max_gap=0.10, max_penetration=0.36)
+        ctx.expect_origin_distance("screen_bracket", "wall_plate", axes="xy", max_dist=0.56)
+        ctx.expect_aabb_gap("screen_bracket", "wall_plate", axis="z", max_gap=0.10, max_penetration=0.36)
 
     with ctx.pose(wall_swing=-1.00, elbow_swing=-1.10, head_swivel=-0.35):
-        ctx.expect_xy_distance("screen_bracket", "wall_plate", max_dist=0.56)
-        ctx.expect_aabb_gap_z("screen_bracket", "wall_plate", max_gap=0.10, max_penetration=0.36)
+        ctx.expect_origin_distance("screen_bracket", "wall_plate", axes="xy", max_dist=0.56)
+        ctx.expect_aabb_gap("screen_bracket", "wall_plate", axis="z", max_gap=0.10, max_penetration=0.36)
 
     with ctx.pose(screen_tilt=0.20):
-        ctx.expect_aabb_overlap_xy("screen_bracket", "tilt_head", min_overlap=0.008)
-        ctx.expect_xy_distance("screen_bracket", "tilt_head", max_dist=0.16)
+        ctx.expect_aabb_overlap("screen_bracket", "tilt_head", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("screen_bracket", "tilt_head", axes="xy", max_dist=0.16)
 
     with ctx.pose(screen_tilt=-0.30):
-        ctx.expect_aabb_overlap_xy("screen_bracket", "tilt_head", min_overlap=0.008)
-        ctx.expect_xy_distance("screen_bracket", "tilt_head", max_dist=0.16)
+        ctx.expect_aabb_overlap("screen_bracket", "tilt_head", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("screen_bracket", "tilt_head", axes="xy", max_dist=0.16)
 
     return ctx.report()
 

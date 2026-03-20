@@ -169,8 +169,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("shackle", "body", min_overlap=0.005)
-    ctx.expect_aabb_gap_z("shackle", "body", max_gap=0.0015, max_penetration=0.004)
+    ctx.expect_aabb_overlap("shackle", "body", axes="xy", min_overlap=0.005)
+    ctx.expect_aabb_gap("shackle", "body", axis="z", max_gap=0.0015, max_penetration=0.004)
     ctx.expect_joint_motion_axis(
         "shackle_hinge",
         "shackle",
@@ -180,12 +180,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(shackle_hinge=0.90):
-        ctx.expect_aabb_overlap_xy("shackle", "body", min_overlap=0.004)
-        ctx.expect_aabb_gap_z("shackle", "body", max_gap=0.002, max_penetration=0.004)
+        ctx.expect_aabb_overlap("shackle", "body", axes="xy", min_overlap=0.004)
+        ctx.expect_aabb_gap("shackle", "body", axis="z", max_gap=0.002, max_penetration=0.004)
 
     with ctx.pose(shackle_hinge=1.70):
-        ctx.expect_aabb_overlap_xy("shackle", "body", min_overlap=0.003)
-        ctx.expect_aabb_gap_z("shackle", "body", max_gap=0.002, max_penetration=0.004)
+        ctx.expect_aabb_overlap("shackle", "body", axes="xy", min_overlap=0.003)
+        ctx.expect_aabb_gap("shackle", "body", axis="z", max_gap=0.002, max_penetration=0.004)
 
     return ctx.report()
 

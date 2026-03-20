@@ -423,14 +423,14 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("control_panel", "body_shell", min_overlap=0.005)
-    ctx.expect_aabb_overlap_xy("cavity_liner", "body_shell", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("turntable", "cavity_liner", min_overlap=0.08)
-    ctx.expect_xy_distance("turntable", "body_shell", max_dist=0.06)
-    ctx.expect_xy_distance("door", "body_shell", max_dist=0.33)
-    ctx.expect_aabb_gap_z("upper_knob", "lower_knob", max_gap=0.08, max_penetration=0.0)
-    ctx.expect_xy_distance("upper_knob", "control_panel", max_dist=0.05)
-    ctx.expect_xy_distance("lower_knob", "control_panel", max_dist=0.05)
+    ctx.expect_aabb_overlap("control_panel", "body_shell", axes="xy", min_overlap=0.005)
+    ctx.expect_aabb_overlap("cavity_liner", "body_shell", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("turntable", "cavity_liner", axes="xy", min_overlap=0.08)
+    ctx.expect_origin_distance("turntable", "body_shell", axes="xy", max_dist=0.06)
+    ctx.expect_origin_distance("door", "body_shell", axes="xy", max_dist=0.33)
+    ctx.expect_aabb_gap("upper_knob", "lower_knob", axis="z", max_gap=0.08, max_penetration=0.0)
+    ctx.expect_origin_distance("upper_knob", "control_panel", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("lower_knob", "control_panel", axes="xy", max_dist=0.05)
     ctx.expect_joint_motion_axis(
         "door_hinge",
         "door",
@@ -447,21 +447,21 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(door_hinge=0.0):
-        ctx.expect_xy_distance("door", "body_shell", max_dist=0.33)
-        ctx.expect_xy_distance("turntable", "body_shell", max_dist=0.06)
+        ctx.expect_origin_distance("door", "body_shell", axes="xy", max_dist=0.33)
+        ctx.expect_origin_distance("turntable", "body_shell", axes="xy", max_dist=0.06)
 
     with ctx.pose(door_hinge=1.60):
-        ctx.expect_xy_distance("door", "body_shell", max_dist=0.46)
-        ctx.expect_xy_distance("turntable", "body_shell", max_dist=0.06)
+        ctx.expect_origin_distance("door", "body_shell", axes="xy", max_dist=0.46)
+        ctx.expect_origin_distance("turntable", "body_shell", axes="xy", max_dist=0.06)
 
     with ctx.pose(upper_knob_joint=-0.70, lower_knob_joint=0.0):
-        ctx.expect_xy_distance("upper_knob", "control_panel", max_dist=0.05)
-        ctx.expect_xy_distance("lower_knob", "control_panel", max_dist=0.05)
+        ctx.expect_origin_distance("upper_knob", "control_panel", axes="xy", max_dist=0.05)
+        ctx.expect_origin_distance("lower_knob", "control_panel", axes="xy", max_dist=0.05)
 
     with ctx.pose(upper_knob_joint=2.60, lower_knob_joint=5.50):
-        ctx.expect_xy_distance("upper_knob", "control_panel", max_dist=0.05)
-        ctx.expect_xy_distance("lower_knob", "control_panel", max_dist=0.05)
-        ctx.expect_aabb_gap_z("upper_knob", "lower_knob", max_gap=0.08, max_penetration=0.0)
+        ctx.expect_origin_distance("upper_knob", "control_panel", axes="xy", max_dist=0.05)
+        ctx.expect_origin_distance("lower_knob", "control_panel", axes="xy", max_dist=0.05)
+        ctx.expect_aabb_gap("upper_knob", "lower_knob", axis="z", max_gap=0.08, max_penetration=0.0)
 
     return ctx.report()
 

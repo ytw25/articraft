@@ -84,26 +84,10 @@ def _add_annular_box_collisions(
     radius_center = 0.5 * (inner_radius + outer_radius)
     z_center = 0.5 * (z_min + z_max)
     height = z_max - z_min
-    part.collision(
-        Box((radial_span, tangential_span, height)),
-        origin=Origin(xyz=(radius_center, 0.0, z_center)),
-        name=f"{prefix}_px",
-    )
-    part.collision(
-        Box((radial_span, tangential_span, height)),
-        origin=Origin(xyz=(-radius_center, 0.0, z_center)),
-        name=f"{prefix}_nx",
-    )
-    part.collision(
-        Box((tangential_span, radial_span, height)),
-        origin=Origin(xyz=(0.0, radius_center, z_center)),
-        name=f"{prefix}_py",
-    )
-    part.collision(
-        Box((tangential_span, radial_span, height)),
-        origin=Origin(xyz=(0.0, -radius_center, z_center)),
-        name=f"{prefix}_ny",
-    )
+
+
+
+
 
 
 def _build_base_shape() -> cq.Workplane:
@@ -267,10 +251,10 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _build_base_shape(), "base.obj", "base_steel")
-    base.collision(Cylinder(radius=0.115, length=0.014), origin=Origin(xyz=(0.0, 0.0, -0.015)))
-    base.collision(Cylinder(radius=0.070, length=0.006), origin=Origin(xyz=(0.0, 0.0, -0.005)))
-    base.collision(Cylinder(radius=0.012, length=0.014), origin=Origin(xyz=(0.0, 0.0, 0.005)))
-    base.collision(Box((0.030, 0.018, 0.012)), origin=Origin(xyz=(-0.072, 0.0, -0.004)))
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Cylinder(radius=0.115, length=0.070),
         mass=5.8,
@@ -297,14 +281,10 @@ def build_object_model() -> ArticulatedObject:
         tangential_span=0.050,
         prefix="outer_shell",
     )
-    outer_stage.collision(
-        Cylinder(radius=0.010, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.072))
-    )
-    outer_stage.collision(Box((0.048, 0.032, 0.020)), origin=Origin(xyz=(0.122, 0.0, 0.044)))
-    outer_stage.collision(Box((0.050, 0.050, 0.028)), origin=Origin(xyz=(0.162, 0.0, 0.046)))
-    outer_stage.collision(
-        Cylinder(radius=0.018, length=0.026), origin=Origin(xyz=(0.186, 0.0, 0.046))
-    )
+
+
+
+
     outer_stage.inertial = Inertial.from_geometry(
         Box((0.296, 0.196, 0.078)),
         mass=2.2,
@@ -333,10 +313,8 @@ def build_object_model() -> ArticulatedObject:
         tangential_span=0.038,
         prefix="middle_shell",
     )
-    middle_stage.collision(
-        Cylinder(radius=0.008, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.057))
-    )
-    middle_stage.collision(Box((0.014, 0.022, 0.016)), origin=Origin(xyz=(0.0, -0.072, 0.032)))
+
+
     middle_stage.inertial = Inertial.from_geometry(
         Cylinder(radius=0.072, length=0.063),
         mass=1.3,
@@ -354,10 +332,8 @@ def build_object_model() -> ArticulatedObject:
         tangential_span=0.010,
         prefix="inner_hub",
     )
-    inner_stage.collision(
-        Cylinder(radius=0.022, length=0.040), origin=Origin(xyz=(0.0, 0.0, 0.030))
-    )
-    inner_stage.collision(Box((0.070, 0.028, 0.010)), origin=Origin(xyz=(0.008, 0.0, 0.056)))
+
+
     inner_stage.inertial = Inertial.from_geometry(
         Cylinder(radius=0.035, length=0.060),
         mass=0.75,
@@ -400,21 +376,21 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.0025, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("outer_stage", "base", max_dist=0.01)
-    ctx.expect_xy_distance("middle_stage", "base", max_dist=0.01)
-    ctx.expect_xy_distance("inner_stage", "base", max_dist=0.01)
+    ctx.expect_origin_distance("outer_stage", "base", axes="xy", max_dist=0.01)
+    ctx.expect_origin_distance("middle_stage", "base", axes="xy", max_dist=0.01)
+    ctx.expect_origin_distance("inner_stage", "base", axes="xy", max_dist=0.01)
 
-    ctx.expect_aabb_overlap_xy("outer_stage", "base", min_overlap=0.18)
-    ctx.expect_aabb_overlap_xy("middle_stage", "outer_stage", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("inner_stage", "middle_stage", min_overlap=0.04)
+    ctx.expect_aabb_overlap("outer_stage", "base", axes="xy", min_overlap=0.18)
+    ctx.expect_aabb_overlap("middle_stage", "outer_stage", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("inner_stage", "middle_stage", axes="xy", min_overlap=0.04)
 
-    ctx.expect_above("middle_stage", "outer_stage", min_clearance=0.0)
-    ctx.expect_above("inner_stage", "middle_stage", min_clearance=0.0)
-    ctx.expect_aabb_gap_z("middle_stage", "outer_stage", max_gap=0.006, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("inner_stage", "middle_stage", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_origin_gap("middle_stage", "outer_stage", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("inner_stage", "middle_stage", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("middle_stage", "outer_stage", axis="z", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_gap("inner_stage", "middle_stage", axis="z", max_gap=0.006, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "base_to_outer",

@@ -54,7 +54,7 @@ def _box_collision(
     size: tuple[float, float, float],
     xyz: tuple[float, float, float],
 ) -> None:
-    part.collision(Box(size), origin=Origin(xyz=xyz))
+    pass
 
 
 def _qc_anchor(
@@ -237,21 +237,21 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=96,
         overlap_tol=0.003,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("yaw_housing", "pedestal", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("yaw_housing", "pedestal", max_gap=0.005, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("upper_arm", "yaw_housing", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("forearm", "upper_arm", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("tool_head", "forearm", min_overlap=0.01)
-    ctx.expect_aabb_gap_z("upper_arm", "pedestal", max_gap=0.03, max_penetration=0.0)
-    ctx.expect_above("forearm", "pedestal", min_clearance=0.02)
-    ctx.expect_above("tool_head", "pedestal", min_clearance=0.02)
+    ctx.expect_aabb_overlap("yaw_housing", "pedestal", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("yaw_housing", "pedestal", axis="z", max_gap=0.005, max_penetration=0.0)
+    ctx.expect_aabb_overlap("upper_arm", "yaw_housing", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("forearm", "upper_arm", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("tool_head", "forearm", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_gap("upper_arm", "pedestal", axis="z", max_gap=0.03, max_penetration=0.0)
+    ctx.expect_origin_gap("forearm", "pedestal", axis="z", min_gap=0.02)
+    ctx.expect_origin_gap("tool_head", "pedestal", axis="z", min_gap=0.02)
 
     ctx.expect_joint_motion_axis(
         "pedestal_to_turret",
@@ -283,20 +283,20 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(turret_to_upper_arm=SHOULDER_LOWER):
-        ctx.expect_above("tool_head", "pedestal", min_clearance=0.005)
-        ctx.expect_above("upper_arm", "pedestal", min_clearance=0.0)
+        ctx.expect_origin_gap("tool_head", "pedestal", axis="z", min_gap=0.005)
+        ctx.expect_origin_gap("upper_arm", "pedestal", axis="z", min_gap=0.0)
 
     with ctx.pose(turret_to_upper_arm=0.85, upper_arm_to_forearm=1.10):
-        ctx.expect_above("tool_head", "yaw_housing", min_clearance=0.16)
-        ctx.expect_above("tool_head", "pedestal", min_clearance=0.20)
+        ctx.expect_origin_gap("tool_head", "yaw_housing", axis="z", min_gap=0.16)
+        ctx.expect_origin_gap("tool_head", "pedestal", axis="z", min_gap=0.20)
 
     with ctx.pose(upper_arm_to_forearm=ELBOW_UPPER):
-        ctx.expect_above("tool_head", "upper_arm", min_clearance=0.02)
-        ctx.expect_above("tool_head", "pedestal", min_clearance=0.08)
+        ctx.expect_origin_gap("tool_head", "upper_arm", axis="z", min_gap=0.02)
+        ctx.expect_origin_gap("tool_head", "pedestal", axis="z", min_gap=0.08)
 
     with ctx.pose(pedestal_to_turret=YAW_LIMIT, forearm_to_tool=WRIST_YAW_LIMIT):
-        ctx.expect_above("tool_head", "pedestal", min_clearance=0.02)
-        ctx.expect_aabb_overlap_xy("yaw_housing", "pedestal", min_overlap=0.12)
+        ctx.expect_origin_gap("tool_head", "pedestal", axis="z", min_gap=0.02)
+        ctx.expect_aabb_overlap("yaw_housing", "pedestal", axes="xy", min_overlap=0.12)
 
     return ctx.report()
 

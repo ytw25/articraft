@@ -358,11 +358,11 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("rotor", "housing", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("rotor", "housing", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("control_pod", "housing", min_overlap=0.04)
-    ctx.expect_aabb_overlap_xy("knob", "control_pod", min_overlap=0.02)
-    ctx.expect_aabb_gap_z("knob", "control_pod", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_origin_distance("rotor", "housing", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("rotor", "housing", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("control_pod", "housing", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_overlap("knob", "control_pod", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_gap("knob", "control_pod", axis="z", max_gap=0.003, max_penetration=0.0)
 
     control_pos = ctx.part_world_position("control_pod")
     rotor_pos = ctx.part_world_position("rotor")
@@ -375,15 +375,15 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, math.pi / 2, math.pi, 3.0 * math.pi / 2):
         with ctx.pose(blade_spin=angle):
-            ctx.expect_xy_distance("rotor", "housing", max_dist=0.01)
-            ctx.expect_aabb_overlap_xy("rotor", "housing", min_overlap=0.02)
+            ctx.expect_origin_distance("rotor", "housing", axes="xy", max_dist=0.01)
+            ctx.expect_aabb_overlap("rotor", "housing", axes="xy", min_overlap=0.02)
             posed_rotor = ctx.part_world_position("rotor")
             assert math.dist(rotor_pos, posed_rotor) < 1e-9
 
     for angle in (0.0, 2.1, 4.2):
         with ctx.pose(speed_knob=angle):
-            ctx.expect_aabb_overlap_xy("knob", "control_pod", min_overlap=0.02)
-            ctx.expect_aabb_gap_z("knob", "control_pod", max_gap=0.003, max_penetration=0.0)
+            ctx.expect_aabb_overlap("knob", "control_pod", axes="xy", min_overlap=0.02)
+            ctx.expect_aabb_gap("knob", "control_pod", axis="z", max_gap=0.003, max_penetration=0.0)
             posed_knob = ctx.part_world_position("knob")
             assert math.dist(knob_pos, posed_knob) < 1e-9
 

@@ -266,12 +266,12 @@ def run_tests() -> TestReport:
         min_delta=1.2,
     )
     with ctx.pose(arm_hinge=0.0):
-        ctx.expect_aabb_overlap_xy("gate_arm", "base_housing", min_overlap=0.08)
+        ctx.expect_aabb_overlap("gate_arm", "base_housing", axes="xy", min_overlap=0.08)
     with ctx.pose(arm_hinge=0.70):
-        ctx.expect_aabb_overlap_xy("gate_arm", "base_housing", min_overlap=0.08)
+        ctx.expect_aabb_overlap("gate_arm", "base_housing", axes="xy", min_overlap=0.08)
     with ctx.pose(arm_hinge=1.35):
-        ctx.expect_aabb_overlap_xy("gate_arm", "base_housing", min_overlap=0.08)
-        ctx.expect_xy_distance("gate_arm", "base_housing", max_dist=0.40)
+        ctx.expect_aabb_overlap("gate_arm", "base_housing", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("gate_arm", "base_housing", axes="xy", max_dist=0.40)
     return ctx.report()
 
 

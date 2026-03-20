@@ -3,14 +3,15 @@
   "record_id": "rec_air_bike_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (non-blocking): geometry overlap check reported overlaps.\nGeometry overlap check failed: part AABBs intersect at sampled articulation poses. worst_pair=('left_handlebar'[1], 'left_pedal'[2]) min_overlap_depth=0.008949m overlap_volume=1.524e-05m^3 pose_index=29 pose=(crank_spin=1.571, fan_spin=3.142, left_handlebar_swing=0.44, left_pedal_spin=3.142, right_handlebar_swing=0.44, right_pedal_spin=3.142, seat_mount=0). elem_a=(name='left_handlebar__left_bar_1' origin_xyz=(0.111, -0.1275, -0.062) origin_rpy=(0.0, 0.9933875949533253, 2.0812846487116725) geom=Cylinder) elem_b=(name='left_pedal__left_pedal_body' origin_xyz=(0.058, 0.0, 0.0) origin_rpy=(0.0, 0.0, 0.0) geom=Box). hint: try moving 'left_pedal' by ~-0.01395m along world x (or adjust the responsible articulation origin/limits / collision origins). Note: this QC is conservative (bounding boxes); concave mesh collisions can yield false positives. Fix by adjusting articulation origins/limits and/or visual/collision origins so parts do not interpenetrate in the rest pose or across the articulated range.\nIf this overlap is acceptable (e.g., conservative false-positive), explicitly allow the specific pair in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)` and then run `ctx.warn_if_overlaps(...)` so the allowance is tracked; otherwise adjust geometry/joints."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
-  "metrics": {
-    "turn_count": 21,
-    "legacy_prompt_index": 1,
-    "total_cost_usd": 1.277665
-  }
+  "metrics": {}
 }

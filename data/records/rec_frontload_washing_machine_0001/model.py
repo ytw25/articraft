@@ -3,492 +3,336 @@ from __future__ import annotations
 # The harness only exposes the editable block to the model.
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
+
 # >>> USER_CODE_START
 import math
+from pathlib import Path
 
 from sdk import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
+    DomeGeometry,
+    ExtrudeGeometry,
     ExtrudeWithHolesGeometry,
     Inertial,
-    LatheGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
     TorusGeometry,
     mesh_from_geometry,
+    rounded_rect_profile,
+    tube_from_spline_points,
 )
+
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+
+WIDTH = 0.598
+DEPTH = 0.635
+HEIGHT = 0.848
+SIDE_T = 0.018
+TOP_T = 0.020
+FRONT_PANEL_T = 0.018
+DOOR_CENTER_Z = 0.425
 
 
-def _rect_profile(width: float, height: float) -> list[tuple[float, float]]:
-    half_w = width / 2.0
-    half_h = height / 2.0
-    return [
-        (-half_w, -half_h),
-        (half_w, -half_h),
-        (half_w, half_h),
-        (-half_w, half_h),
-    ]
-
-
-def _circle_profile(
-    radius: float,
-    segments: int = 48,
-    center: tuple[float, float] = (0.0, 0.0),
-) -> list[tuple[float, float]]:
+def _circle_profile(radius: float, *, segments: int = 64, center: tuple[float, float] = (0.0, 0.0)) -> list[tuple[float, float]]:
     cx, cy = center
     return [
         (
-            cx + radius * math.cos(2.0 * math.pi * i / segments),
-            cy + radius * math.sin(2.0 * math.pi * i / segments),
+            cx + radius * math.cos((2.0 * math.pi * i) / segments),
+            cy + radius * math.sin((2.0 * math.pi * i) / segments),
         )
         for i in range(segments)
     ]
 
 
-def build_object_model() -> ArticulatedObject:
-    mesh_dir = HERE / "meshes"
-    mesh_dir.mkdir(parents=True, exist_ok=True)
+def _save_mesh(name: str, geometry) -> object:
+    MESH_DIR.mkdir(parents=True, exist_ok=True)
+    return mesh_from_geometry(geometry, MESH_DIR / name)
 
-    model = ArticulatedObject(name="front_load_washing_machine", assets=ASSETS)
 
-    enamel_white = model.material("enamel_white", rgba=(0.94, 0.95, 0.96, 1.0))
-    satin_steel = model.material("satin_steel", rgba=(0.70, 0.72, 0.74, 1.0))
-    dark_plastic = model.material("dark_plastic", rgba=(0.12, 0.12, 0.13, 1.0))
-    knob_silver = model.material("knob_silver", rgba=(0.74, 0.75, 0.77, 1.0))
-    smoked_glass = model.material("smoked_glass", rgba=(0.62, 0.73, 0.81, 0.28))
-    black_glass = model.material("black_glass", rgba=(0.07, 0.08, 0.09, 0.92))
-    rubber_gray = model.material("rubber_gray", rgba=(0.24, 0.25, 0.27, 1.0))
+def _build_meshes() -> dict[str, object]:
+    lower_panel = ExtrudeWithHolesGeometry(
+        rounded_rect_profile(0.564, 0.676, radius=0.020, corner_segments=10),
+        [_circle_profile(0.176, segments=72, center=(0.0, 0.039))],
+        height=FRONT_PANEL_T,
+        cap=True,
+        center=True,
+        closed=True,
+    )
+    lower_panel.rotate_x(math.pi / 2.0)
 
-    depth = 0.67
-    width = 0.60
-    height = 0.85
-    shell_t = 0.022
-    back_t = 0.018
-    bottom_t = 0.022
-    front_panel_t = 0.018
-    fascia_t = 0.028
-    kick_h = 0.075
-    control_h = 0.145
-    front_opening_center_z = 0.42
-    opening_radius = 0.170
-    bezel_radius = 0.194
+    fascia = ExtrudeGeometry(
+        rounded_rect_profile(0.558, 0.098, radius=0.012, corner_segments=8),
+        height=0.006,
+        cap=True,
+        center=True,
+        closed=True,
+    )
+    fascia.rotate_x(math.pi / 2.0)
 
-    mid_panel_h = height - control_h - kick_h
-    panel_center_z = kick_h + mid_panel_h / 2.0
+    door_ring = TorusGeometry(radius=0.165, tube=0.035, radial_segments=28, tubular_segments=72)
+    door_ring.rotate_x(math.pi / 2.0)
 
-    front_panel_geom = ExtrudeWithHolesGeometry(
-        outer_profile=_rect_profile(width - 2.0 * shell_t, mid_panel_h),
-        hole_profiles=[
-            _circle_profile(
-                opening_radius,
-                segments=56,
-                center=(0.0, front_opening_center_z - panel_center_z),
-            )
+    gasket_ring = TorusGeometry(radius=0.150, tube=0.028, radial_segments=24, tubular_segments=64)
+    gasket_ring.rotate_x(math.pi / 2.0)
+
+    drum_lip = TorusGeometry(radius=0.145, tube=0.012, radial_segments=20, tubular_segments=64)
+    drum_lip.rotate_x(math.pi / 2.0)
+
+    door_glass = DomeGeometry(radius=(0.130, 0.130, 0.043), radial_segments=40, height_segments=18, closed=True)
+    door_glass.rotate_x(-math.pi / 2.0)
+
+    door_handle = tube_from_spline_points(
+        [
+            (0.326, 0.036, -0.056),
+            (0.356, 0.055, -0.038),
+            (0.364, 0.063, 0.000),
+            (0.356, 0.055, 0.038),
+            (0.326, 0.036, 0.056),
         ],
-        height=front_panel_t,
-        center=True,
-    )
-    front_panel_geom.rotate_z(math.pi / 2.0).rotate_y(math.pi / 2.0)
-    front_panel_mesh = mesh_from_geometry(
-        front_panel_geom,
-        mesh_dir / "washer_front_panel.obj",
+        radius=0.008,
+        samples_per_segment=18,
+        radial_segments=18,
+        cap_ends=True,
     )
 
-    cabinet_bezel_mesh = mesh_from_geometry(
-        TorusGeometry(
-            radius=bezel_radius,
-            tube=0.018,
-            radial_segments=22,
-            tubular_segments=52,
-        ),
-        mesh_dir / "washer_cabinet_bezel.obj",
-    )
-    door_frame_geom = ExtrudeWithHolesGeometry(
-        outer_profile=_circle_profile(0.214, segments=60, center=(0.0, -0.194)),
-        hole_profiles=[_circle_profile(0.148, segments=56, center=(0.0, -0.194))],
-        height=0.030,
-        center=True,
-    )
-    door_frame_geom.rotate_z(math.pi / 2.0).rotate_y(math.pi / 2.0)
-    door_frame_mesh = mesh_from_geometry(
-        door_frame_geom,
-        mesh_dir / "washer_door_frame.obj",
-    )
-    door_outer_ring_mesh = mesh_from_geometry(
-        TorusGeometry(
-            radius=0.190,
-            tube=0.022,
-            radial_segments=22,
-            tubular_segments=52,
-        ),
-        mesh_dir / "washer_door_outer_ring.obj",
-    )
-    door_inner_ring_mesh = mesh_from_geometry(
-        TorusGeometry(
-            radius=0.156,
-            tube=0.012,
-            radial_segments=20,
-            tubular_segments=48,
-        ),
-        mesh_dir / "washer_door_inner_ring.obj",
-    )
-    drum_boot_mesh = mesh_from_geometry(
-        TorusGeometry(
-            radius=0.165,
-            tube=0.024,
-            radial_segments=20,
-            tubular_segments=48,
-        ),
-        mesh_dir / "washer_drum_boot.obj",
-    )
-    knob_mesh = mesh_from_geometry(
-        LatheGeometry(
-            [
-                (0.0, 0.000),
-                (0.018, 0.000),
-                (0.026, 0.003),
-                (0.032, 0.010),
-                (0.034, 0.020),
-                (0.034, 0.028),
-                (0.028, 0.034),
-                (0.020, 0.038),
-                (0.0, 0.038),
-            ],
-            segments=56,
-        ),
-        mesh_dir / "washer_selector_knob.obj",
-    )
+    knob_grip = TorusGeometry(radius=0.033, tube=0.004, radial_segments=16, tubular_segments=40)
+    knob_grip.rotate_x(math.pi / 2.0)
+
+    return {
+        "lower_panel": _save_mesh("washer_lower_panel.obj", lower_panel),
+        "fascia": _save_mesh("washer_fascia.obj", fascia),
+        "door_ring": _save_mesh("washer_door_ring.obj", door_ring),
+        "gasket_ring": _save_mesh("washer_gasket_ring.obj", gasket_ring),
+        "drum_lip": _save_mesh("washer_drum_lip.obj", drum_lip),
+        "door_glass": _save_mesh("washer_door_glass.obj", door_glass),
+        "door_handle": _save_mesh("washer_door_handle.obj", door_handle),
+        "knob_grip": _save_mesh("washer_knob_grip.obj", knob_grip),
+    }
+
+
+def build_object_model() -> ArticulatedObject:
+    meshes = _build_meshes()
+    model = ArticulatedObject(name="front_load_washer", assets=ASSETS)
+
+    white_enamel = model.material("white_enamel", rgba=(0.95, 0.96, 0.97, 1.0))
+    graphite = model.material("graphite", rgba=(0.18, 0.19, 0.21, 1.0))
+    matte_black = model.material("matte_black", rgba=(0.08, 0.08, 0.09, 1.0))
+    rubber = model.material("rubber", rgba=(0.12, 0.12, 0.13, 1.0))
+    stainless = model.material("stainless", rgba=(0.70, 0.72, 0.74, 1.0))
+    silver_plastic = model.material("silver_plastic", rgba=(0.78, 0.80, 0.82, 1.0))
+    tinted_glass = model.material("tinted_glass", rgba=(0.58, 0.68, 0.76, 0.28))
+    screen_black = model.material("screen_black", rgba=(0.05, 0.06, 0.07, 0.94))
+    accent = model.material("accent", rgba=(0.96, 0.53, 0.20, 1.0))
 
     cabinet = model.part("cabinet")
     cabinet.visual(
-        Box((depth, shell_t, height)),
-        origin=Origin(xyz=(0.0, width / 2.0 - shell_t / 2.0, height / 2.0)),
-        material=enamel_white,
+        Box((WIDTH - 0.036, DEPTH - 0.040, 0.030)),
+        origin=Origin(xyz=(0.0, 0.0, 0.015)),
+        material=graphite,
     )
     cabinet.visual(
-        Box((depth, shell_t, height)),
-        origin=Origin(xyz=(0.0, -width / 2.0 + shell_t / 2.0, height / 2.0)),
-        material=enamel_white,
+        Box((SIDE_T, DEPTH, 0.798)),
+        origin=Origin(xyz=(-WIDTH / 2.0 + SIDE_T / 2.0, 0.0, 0.429)),
+        material=white_enamel,
     )
     cabinet.visual(
-        Box((depth, width - 2.0 * shell_t, shell_t)),
-        origin=Origin(xyz=(0.0, 0.0, height - shell_t / 2.0)),
-        material=enamel_white,
+        Box((SIDE_T, DEPTH, 0.798)),
+        origin=Origin(xyz=(WIDTH / 2.0 - SIDE_T / 2.0, 0.0, 0.429)),
+        material=white_enamel,
     )
     cabinet.visual(
-        Box((depth, width - 2.0 * shell_t, bottom_t)),
-        origin=Origin(xyz=(0.0, 0.0, bottom_t / 2.0)),
-        material=enamel_white,
+        Box((WIDTH - 0.036, SIDE_T, 0.798)),
+        origin=Origin(xyz=(0.0, -DEPTH / 2.0 + SIDE_T / 2.0, 0.429)),
+        material=white_enamel,
     )
     cabinet.visual(
-        Box((back_t, width - 2.0 * shell_t, height - 2.0 * shell_t)),
-        origin=Origin(xyz=(-depth / 2.0 + back_t / 2.0, 0.0, height / 2.0)),
-        material=enamel_white,
+        Box((WIDTH, DEPTH, TOP_T)),
+        origin=Origin(xyz=(0.0, 0.0, HEIGHT - TOP_T / 2.0)),
+        material=white_enamel,
     )
     cabinet.visual(
-        Box((fascia_t, width - 2.0 * shell_t, control_h)),
-        origin=Origin(
-            xyz=(depth / 2.0 - fascia_t / 2.0, 0.0, height - control_h / 2.0),
-        ),
-        material=enamel_white,
+        meshes["lower_panel"],
+        origin=Origin(xyz=(0.0, 0.309, 0.386)),
+        material=white_enamel,
     )
     cabinet.visual(
-        Box((fascia_t, width - 2.0 * shell_t, kick_h)),
-        origin=Origin(xyz=(depth / 2.0 - fascia_t / 2.0, 0.0, kick_h / 2.0)),
-        material=enamel_white,
+        Box((0.562, 0.052, 0.112)),
+        origin=Origin(xyz=(0.0, 0.291, 0.775)),
+        material=white_enamel,
     )
     cabinet.visual(
-        front_panel_mesh,
-        origin=Origin(xyz=(depth / 2.0 - front_panel_t / 2.0, 0.0, panel_center_z)),
-        material=enamel_white,
+        meshes["fascia"],
+        origin=Origin(xyz=(0.0, 0.319, 0.782)),
+        material=graphite,
     )
     cabinet.visual(
-        cabinet_bezel_mesh,
-        origin=Origin(
-            xyz=(depth / 2.0 - 0.006, 0.0, front_opening_center_z),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=satin_steel,
+        Box((0.175, 0.014, 0.078)),
+        origin=Origin(xyz=(-0.170, 0.283, 0.750)),
+        material=screen_black,
     )
     cabinet.visual(
-        Box((0.006, 0.165, 0.050)),
-        origin=Origin(xyz=(depth / 2.0 + 0.003, 0.025, 0.774)),
-        material=black_glass,
+        Box((0.164, 0.008, 0.050)),
+        origin=Origin(xyz=(0.198, 0.321, 0.787)),
+        material=screen_black,
     )
-    for button_y in (0.065, 0.025, -0.015):
+    for button_x in (-0.018, 0.020, 0.058, 0.096, 0.134):
         cabinet.visual(
-            Box((0.010, 0.026, 0.012)),
-            origin=Origin(xyz=(depth / 2.0 + 0.002, button_y, 0.735)),
-            material=dark_plastic,
+            Box((0.024, 0.006, 0.012)),
+            origin=Origin(xyz=(button_x, 0.321, 0.736)),
+            material=graphite,
         )
-    for foot_x in (-0.250, 0.250):
-        for foot_y in (-0.235, 0.235):
-            cabinet.visual(
-                Cylinder(radius=0.020, length=0.018),
-                origin=Origin(xyz=(foot_x, foot_y, 0.009)),
-                material=rubber_gray,
-            )
+    cabinet.visual(
+        Box((0.034, 0.006, 0.014)),
+        origin=Origin(xyz=(0.250, 0.321, 0.735)),
+        material=graphite,
+    )
+    cabinet.visual(
+        Box((0.012, 0.006, 0.012)),
+        origin=Origin(xyz=(0.278, 0.321, 0.735)),
+        material=accent,
+    )
+    cabinet.visual(
+        meshes["gasket_ring"],
+        origin=Origin(xyz=(0.0, 0.285, DOOR_CENTER_Z)),
+        material=rubber,
+    )
+    cabinet.visual(
+        Cylinder(radius=0.120, length=0.140),
+        origin=Origin(xyz=(0.0, 0.200, DOOR_CENTER_Z), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=matte_black,
+    )
+    cabinet.visual(
+        meshes["drum_lip"],
+        origin=Origin(xyz=(0.0, 0.220, DOOR_CENTER_Z)),
+        material=stainless,
+    )
     cabinet.inertial = Inertial.from_geometry(
-        Box((depth, width, height)),
-        mass=54.0,
-        origin=Origin(xyz=(0.0, 0.0, height / 2.0)),
-    )
-
-    drum = model.part("drum_assembly")
-    drum.visual(
-        drum_boot_mesh,
-        origin=Origin(
-            xyz=(-0.012, 0.0, 0.175),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=rubber_gray,
-    )
-    drum.visual(
-        Cylinder(radius=0.168, length=0.022),
-        origin=Origin(
-            xyz=(-0.035, 0.0, 0.175),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=satin_steel,
-    )
-    drum.visual(
-        Cylinder(radius=0.156, length=0.270),
-        origin=Origin(
-            xyz=(-0.160, 0.0, 0.175),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=satin_steel,
-    )
-    drum.visual(
-        Cylinder(radius=0.158, length=0.020),
-        origin=Origin(
-            xyz=(-0.305, 0.0, 0.175),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=dark_plastic,
-    )
-    for rib_angle in (-0.9, 0.2, 1.3):
-        drum.visual(
-            Box((0.190, 0.016, 0.034)),
-            origin=Origin(
-                xyz=(
-                    -0.150,
-                    0.110 * math.cos(rib_angle),
-                    0.175 + 0.110 * math.sin(rib_angle),
-                ),
-                rpy=(0.0, 0.0, rib_angle),
-            ),
-            material=dark_plastic,
-        )
-    drum.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.180, length=0.320),
-        mass=9.0,
-        origin=Origin(
-            xyz=(-0.160, 0.0, 0.175),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
+        Box((WIDTH, DEPTH, HEIGHT)),
+        mass=58.0,
+        origin=Origin(xyz=(0.0, 0.0, HEIGHT / 2.0)),
     )
 
     door = model.part("door")
     door.visual(
-        Box((0.014, 0.055, 0.240)),
-        origin=Origin(xyz=(0.007, -0.010, 0.0)),
-        material=dark_plastic,
+        Box((0.028, 0.020, 0.140)),
+        origin=Origin(xyz=(0.014, 0.010, 0.0)),
+        material=graphite,
     )
     door.visual(
-        door_frame_mesh,
-        origin=Origin(
-            xyz=(0.029, 0.0, 0.0),
-            rpy=(0.0, 0.0, 0.0),
-        ),
-        material=dark_plastic,
+        Box((0.105, 0.022, 0.060)),
+        origin=Origin(xyz=(0.0525, 0.010, 0.0)),
+        material=graphite,
     )
     door.visual(
-        door_outer_ring_mesh,
-        origin=Origin(
-            xyz=(0.049, -0.194, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=satin_steel,
+        Cylinder(radius=0.010, length=0.080),
+        origin=Origin(xyz=(0.0, 0.014, 0.0)),
+        material=graphite,
     )
     door.visual(
-        door_inner_ring_mesh,
-        origin=Origin(
-            xyz=(0.034, -0.194, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=dark_plastic,
+        meshes["door_ring"],
+        origin=Origin(xyz=(0.198, 0.038, 0.0)),
+        material=graphite,
     )
     door.visual(
-        Cylinder(radius=0.145, length=0.014),
-        origin=Origin(
-            xyz=(0.038, -0.194, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=smoked_glass,
+        meshes["door_glass"],
+        origin=Origin(xyz=(0.198, 0.018, 0.0)),
+        material=tinted_glass,
     )
     door.visual(
-        Box((0.034, 0.050, 0.128)),
-        origin=Origin(xyz=(0.050, -0.356, 0.0)),
-        material=dark_plastic,
-    )
-    door.visual(
-        Box((0.024, 0.030, 0.090)),
-        origin=Origin(xyz=(0.060, -0.334, 0.0)),
-        material=dark_plastic,
+        meshes["door_handle"],
+        origin=Origin(),
+        material=silver_plastic,
     )
     door.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.215, length=0.060),
-        mass=3.5,
-        origin=Origin(
-            xyz=(0.047, -0.194, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
+        Box((0.420, 0.080, 0.420)),
+        mass=4.5,
+        origin=Origin(xyz=(0.198, 0.038, 0.0)),
     )
 
     selector_knob = model.part("selector_knob")
     selector_knob.visual(
+        Cylinder(radius=0.040, length=0.024),
+        origin=Origin(xyz=(0.0, 0.012, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=silver_plastic,
+    )
+    selector_knob.visual(
         Cylinder(radius=0.030, length=0.012),
-        origin=Origin(
-            xyz=(0.006, 0.0, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=dark_plastic,
+        origin=Origin(xyz=(0.0, 0.030, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=graphite,
     )
     selector_knob.visual(
-        knob_mesh,
-        origin=Origin(
-            xyz=(0.012, 0.0, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=knob_silver,
+        meshes["knob_grip"],
+        origin=Origin(xyz=(0.0, 0.022, 0.0)),
+        material=silver_plastic,
     )
     selector_knob.visual(
-        Box((0.008, 0.004, 0.010)),
-        origin=Origin(xyz=(0.036, 0.0, 0.028)),
-        material=dark_plastic,
+        Box((0.006, 0.006, 0.014)),
+        origin=Origin(xyz=(0.0, 0.035, 0.030)),
+        material=accent,
     )
     selector_knob.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.036, length=0.040),
-        mass=0.25,
-        origin=Origin(
-            xyz=(0.018, 0.0, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
+        Box((0.090, 0.050, 0.090)),
+        mass=0.35,
+        origin=Origin(xyz=(0.0, 0.020, 0.0)),
     )
 
     detergent_drawer = model.part("detergent_drawer")
     detergent_drawer.visual(
-        Box((0.028, 0.198, 0.094)),
-        origin=Origin(xyz=(0.014, 0.0, 0.0)),
-        material=enamel_white,
+        Box((0.170, 0.110, 0.078)),
+        origin=Origin(xyz=(0.0, -0.055, 0.0)),
+        material=white_enamel,
     )
     detergent_drawer.visual(
-        Box((0.240, 0.182, 0.072)),
-        origin=Origin(xyz=(-0.118, 0.0, -0.004)),
-        material=enamel_white,
+        Box((0.176, 0.028, 0.086)),
+        origin=Origin(xyz=(0.0, 0.014, 0.0)),
+        material=white_enamel,
     )
     detergent_drawer.visual(
-        Box((0.012, 0.092, 0.012)),
-        origin=Origin(xyz=(0.030, 0.0, 0.006)),
-        material=dark_plastic,
+        Box((0.110, 0.010, 0.022)),
+        origin=Origin(xyz=(0.0, 0.024, 0.0)),
+        material=screen_black,
     )
     detergent_drawer.inertial = Inertial.from_geometry(
-        Box((0.250, 0.200, 0.100)),
-        mass=0.8,
-        origin=Origin(xyz=(-0.105, 0.0, 0.0)),
+        Box((0.176, 0.138, 0.086)),
+        mass=0.9,
+        origin=Origin(xyz=(0.0, -0.041, 0.0)),
     )
 
-    power_button = model.part("power_button")
-    power_button.visual(
-        Cylinder(radius=0.012, length=0.010),
-        origin=Origin(
-            xyz=(0.005, 0.0, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=dark_plastic,
-    )
-    power_button.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.012, length=0.010),
-        mass=0.04,
-        origin=Origin(
-            xyz=(0.005, 0.0, 0.0),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-    )
-
-    model.articulation(
-        "drum_mount",
-        ArticulationType.FIXED,
-        parent="cabinet",
-        child="drum_assembly",
-        origin=Origin(
-            xyz=(depth / 2.0 - 0.028, 0.0, front_opening_center_z - opening_radius),
-        ),
-    )
     model.articulation(
         "door_hinge",
         ArticulationType.REVOLUTE,
         parent="cabinet",
         child="door",
-        origin=Origin(xyz=(depth / 2.0 - 0.006, bezel_radius, front_opening_center_z)),
+        origin=Origin(xyz=(-0.198, 0.309, DOOR_CENTER_Z)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=18.0,
-            velocity=1.6,
-            lower=0.0,
-            upper=1.55,
-        ),
+        motion_limits=MotionLimits(effort=18.0, velocity=2.2, lower=0.0, upper=1.65),
     )
     model.articulation(
-        "selector_rotation",
-        ArticulationType.REVOLUTE,
+        "selector_turn",
+        ArticulationType.CONTINUOUS,
         parent="cabinet",
         child="selector_knob",
-        origin=Origin(xyz=(depth / 2.0, -0.102, 0.755)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=0.8,
-            velocity=3.0,
-            lower=-2.4,
-            upper=2.4,
-        ),
+        origin=Origin(xyz=(0.118, 0.317, 0.756)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=1.2, velocity=8.0),
     )
     model.articulation(
         "drawer_slide",
         ArticulationType.PRISMATIC,
         parent="cabinet",
         child="detergent_drawer",
-        origin=Origin(xyz=(depth / 2.0, 0.165, 0.758)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=35.0,
-            velocity=0.45,
-            lower=0.0,
-            upper=0.180,
-        ),
-    )
-    model.articulation(
-        "power_button_press",
-        ArticulationType.PRISMATIC,
-        parent="cabinet",
-        child="power_button",
-        origin=Origin(xyz=(depth / 2.0, -0.235, 0.756)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=5.0,
-            velocity=0.05,
-            lower=-0.004,
-            upper=0.0,
-        ),
+        origin=Origin(xyz=(-0.170, 0.290, 0.750)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=25.0, velocity=0.20, lower=0.0, upper=0.115),
     )
 
     return model
@@ -498,72 +342,46 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
+    ctx.check_articulation_origin_near_geometry(tol=0.015)
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(
         max_pose_samples=160,
-        overlap_tol=0.004,
+        overlap_tol=0.005,
         overlap_volume_tol=0.0,
         ignore_adjacent=True,
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_contact("drum_assembly", "cabinet")
-    ctx.expect_aabb_overlap("drum_assembly", "cabinet", axes="yz", min_overlap=0.32)
-    ctx.expect_aabb_gap("door", "drum_assembly", axis="x", max_gap=0.03, max_penetration=0.0)
-    ctx.expect_aabb_overlap("door", "cabinet", axes="yz", min_overlap=0.38)
-    ctx.expect_aabb_overlap("door", "drum_assembly", axes="yz", min_overlap=0.30)
-    ctx.expect_aabb_contact("selector_knob", "cabinet")
-    ctx.expect_aabb_overlap("selector_knob", "cabinet", axes="yz", min_overlap=0.06)
+    ctx.expect_aabb_overlap("door", "cabinet", axes="xz", min_overlap=0.18)
+    ctx.expect_aabb_gap("door", "cabinet", axis="y", max_gap=0.008, max_penetration=0.020)
+    ctx.expect_aabb_contact("door", "cabinet")
+    ctx.expect_aabb_overlap("selector_knob", "cabinet", axes="xz", min_overlap=0.03)
+    ctx.expect_aabb_gap("selector_knob", "cabinet", axis="y", max_gap=0.008, max_penetration=0.020)
+    ctx.expect_aabb_overlap("detergent_drawer", "cabinet", axes="xz", min_overlap=0.06)
     ctx.expect_aabb_contact("detergent_drawer", "cabinet")
-    ctx.expect_aabb_overlap("detergent_drawer", "cabinet", axes="yz", min_overlap=0.09)
-    ctx.expect_aabb_contact("power_button", "cabinet")
-    ctx.expect_aabb_overlap("power_button", "cabinet", axes="yz", min_overlap=0.02)
-    ctx.expect_joint_motion_axis(
-        "door_hinge",
-        "door",
-        world_axis="x",
-        direction="positive",
-        min_delta=0.05,
-    )
-    ctx.expect_joint_motion_axis(
-        "drawer_slide",
-        "detergent_drawer",
-        world_axis="x",
-        direction="positive",
-        min_delta=0.10,
-    )
-    ctx.expect_joint_motion_axis(
-        "power_button_press",
-        "power_button",
-        world_axis="x",
-        direction="positive",
-        min_delta=0.002,
-    )
+    ctx.expect_aabb_gap("selector_knob", "door", axis="z", max_gap=0.45, max_penetration=0.0)
+    ctx.expect_aabb_gap("detergent_drawer", "door", axis="z", max_gap=0.45, max_penetration=0.0)
+    ctx.expect_origin_distance("selector_knob", "detergent_drawer", axes="z", max_dist=0.020)
+    ctx.expect_joint_motion_axis("door_hinge", "door", world_axis="x", direction="negative", min_delta=0.10)
+    ctx.expect_joint_motion_axis("drawer_slide", "detergent_drawer", world_axis="y", direction="positive", min_delta=0.05)
 
-    with ctx.pose(selector_rotation=-2.2):
-        ctx.expect_aabb_contact("selector_knob", "cabinet")
-        ctx.expect_aabb_overlap("selector_knob", "cabinet", axes="yz", min_overlap=0.06)
-    with ctx.pose(selector_rotation=2.2):
-        ctx.expect_aabb_contact("selector_knob", "cabinet")
-        ctx.expect_aabb_overlap("selector_knob", "cabinet", axes="yz", min_overlap=0.06)
-    with ctx.pose(drawer_slide=0.180):
-        ctx.expect_aabb_contact("detergent_drawer", "cabinet")
-        ctx.expect_aabb_overlap(
-            "detergent_drawer",
-            "cabinet",
-            axes="yz",
-            min_overlap=0.09,
-        )
     with ctx.pose(door_hinge=1.45):
-        ctx.expect_aabb_overlap("door", "cabinet", axes="z", min_overlap=0.38)
-    with ctx.pose(power_button_press=-0.004):
-        ctx.expect_aabb_contact("power_button", "cabinet")
-        ctx.expect_aabb_overlap("power_button", "cabinet", axes="yz", min_overlap=0.02)
+        ctx.expect_aabb_overlap("door", "cabinet", axes="z", min_overlap=0.35)
+        ctx.expect_aabb_gap("door", "cabinet", axis="y", max_gap=0.40, max_penetration=0.030)
+
+    with ctx.pose(drawer_slide=0.10):
+        ctx.expect_aabb_overlap("detergent_drawer", "cabinet", axes="xz", min_overlap=0.06)
+        ctx.expect_aabb_contact("detergent_drawer", "cabinet")
+
+    with ctx.pose(selector_turn=math.pi / 2.0):
+        ctx.expect_aabb_overlap("selector_knob", "cabinet", axes="xz", min_overlap=0.03)
+        ctx.expect_aabb_gap("selector_knob", "cabinet", axis="y", max_gap=0.008, max_penetration=0.020)
+
+    with ctx.pose(selector_turn=math.pi):
+        ctx.expect_aabb_overlap("selector_knob", "cabinet", axes="xz", min_overlap=0.03)
+        ctx.expect_aabb_gap("selector_knob", "cabinet", axis="y", max_gap=0.008, max_penetration=0.020)
 
     return ctx.report()
-
-
 # >>> USER_CODE_END
 
 object_model = build_object_model()

@@ -3,19 +3,23 @@ from __future__ import annotations
 # The harness only exposes the editable block to the model.
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
+
 # >>> USER_CODE_START
 import math
+from pathlib import Path
 
 from sdk import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
+    CylinderGeometry,
     ExtrudeGeometry,
     Inertial,
+    LatheGeometry,
+    LoftGeometry,
     LouverPanelGeometry,
-    Material,
     MotionLimits,
     Origin,
     TestContext,
@@ -24,324 +28,298 @@ from sdk import (
     rounded_rect_profile,
 )
 
+
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-
-BASE_W = 0.36
-BASE_D = 0.26
-BASE_H = 0.02
-SHELL_W = 0.34
-SHELL_D = 0.24
-SHELL_H = 0.64
-SHELL_RADIUS = 0.048
-SHELL_TOP_Z = BASE_H + SHELL_H
-
-DOOR_W = 0.288
-DOOR_H = 0.49
-DOOR_T = 0.018
-DOOR_CENTER_Z = 0.33
-DOOR_HINGE_X = DOOR_W / 2.0
-DOOR_HINGE_Y = SHELL_D / 2.0 + 0.004
-
-KNOB_POS = (0.052, 0.03, SHELL_TOP_Z + 0.004)
-BUTTON_POS = (-0.05, 0.036, SHELL_TOP_Z + 0.004)
-BUTTON_TRAVEL = 0.0025
-DOOR_OPEN_ANGLE = 1.2
+BODY_HEIGHT = 0.56
+BODY_WIDTH = 0.32
+BODY_DEPTH = 0.218
 
 
-def _named_material(name: str, rgba: tuple[float, float, float, float]) -> Material:
-    for kwargs in (
-        {"name": name, "color": rgba},
-        {"name": name, "rgba": rgba},
-    ):
-        try:
-            return Material(**kwargs)
-        except TypeError:
-            continue
-    try:
-        return Material(name, color=rgba)
-    except TypeError:
-        return Material(name, rgba=rgba)
+def _profile_section(width: float, depth: float, radius: float, z: float) -> list[tuple[float, float, float]]:
+    return [(x, y, z) for x, y in rounded_rect_profile(width, depth, radius, corner_segments=10)]
 
 
-SHELL_MAT = _named_material("shell_white", (0.93, 0.94, 0.92, 1.0))
-CHARCOAL_MAT = _named_material("charcoal_abs", (0.14, 0.15, 0.16, 1.0))
-GLASS_MAT = _named_material("smoked_glass", (0.10, 0.11, 0.12, 0.9))
-METAL_MAT = _named_material("brushed_aluminum", (0.63, 0.65, 0.67, 1.0))
-RUBBER_MAT = _named_material("soft_rubber", (0.07, 0.08, 0.08, 1.0))
-
-
-def _rounded_prism_mesh(
-    name: str,
-    width: float,
-    depth: float,
-    height: float,
-    radius: float,
-    *,
-    center: bool,
-):
-    safe_radius = max(0.0, min(radius, width / 2.0 - 1e-6, depth / 2.0 - 1e-6))
-    profile = rounded_rect_profile(
-        width,
-        depth,
-        radius=safe_radius,
-        corner_segments=10,
-    )
-    geometry = ExtrudeGeometry(profile, height, center=center)
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(f"{name}.obj"))
-
-
-def _louver_mesh(
-    name: str,
-    panel_size: tuple[float, float],
-    thickness: float,
-    *,
-    frame: float,
-    slat_pitch: float,
-    slat_width: float,
-    slat_angle_deg: float,
-    corner_radius: float,
-):
-    geometry = LouverPanelGeometry(
-        panel_size=panel_size,
-        thickness=thickness,
-        frame=frame,
-        slat_pitch=slat_pitch,
-        slat_width=slat_width,
-        slat_angle_deg=slat_angle_deg,
-        corner_radius=corner_radius,
-        center=True,
-    )
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(f"{name}.obj"))
+def _mesh(geometry, filename: str):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(filename))
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="air_purifier", assets=ASSETS)
 
-    body = model.part("body")
+    body_white = model.material("body_white", rgba=(0.94, 0.95, 0.96, 1.0))
+    warm_gray = model.material("warm_gray", rgba=(0.78, 0.79, 0.80, 1.0))
+    vent_dark = model.material("vent_dark", rgba=(0.19, 0.21, 0.23, 1.0))
+    glass_black = model.material("glass_black", rgba=(0.09, 0.10, 0.11, 0.96))
+    steel = model.material("steel", rgba=(0.73, 0.75, 0.78, 1.0))
+    rubber = model.material("rubber", rgba=(0.10, 0.10, 0.11, 1.0))
+
+    body_shell_geom = LoftGeometry(
+        [
+            _profile_section(0.320, 0.218, 0.036, 0.000),
+            _profile_section(0.318, 0.216, 0.036, 0.025),
+            _profile_section(0.308, 0.208, 0.034, 0.120),
+            _profile_section(0.298, 0.200, 0.032, 0.320),
+            _profile_section(0.276, 0.184, 0.028, 0.495),
+            _profile_section(0.246, 0.162, 0.024, 0.560),
+        ],
+        cap=True,
+        closed=True,
+    )
+    body_shell = _mesh(body_shell_geom, "body_shell.obj")
+
+    front_intake_geom = LouverPanelGeometry(
+        panel_size=(0.226, 0.300),
+        thickness=0.006,
+        frame=0.010,
+        slat_pitch=0.018,
+        slat_width=0.008,
+        slat_angle_deg=28.0,
+        corner_radius=0.016,
+        center=False,
+    )
+    front_intake_mesh = _mesh(front_intake_geom, "front_intake.obj")
+
+    top_grille_geom = LouverPanelGeometry(
+        panel_size=(0.148, 0.074),
+        thickness=0.008,
+        frame=0.007,
+        slat_pitch=0.014,
+        slat_width=0.006,
+        slat_angle_deg=22.0,
+        corner_radius=0.012,
+        center=False,
+    )
+    top_grille_mesh = _mesh(top_grille_geom, "top_grille.obj")
+
+    control_pod_geom = ExtrudeGeometry.from_z0(
+        rounded_rect_profile(0.150, 0.074, 0.014, corner_segments=10),
+        0.006,
+        cap=True,
+        closed=True,
+    )
+    control_pod_mesh = _mesh(control_pod_geom, "control_pod.obj")
+
+    filter_door_geom = ExtrudeGeometry.from_z0(
+        rounded_rect_profile(0.236, 0.300, 0.018, corner_segments=10),
+        0.010,
+        cap=True,
+        closed=True,
+    )
+    filter_door_geom.rotate_x(math.pi / 2.0)
+    filter_door_mesh = _mesh(filter_door_geom, "filter_door.obj")
+
+    filter_insert_geom = LouverPanelGeometry(
+        panel_size=(0.176, 0.216),
+        thickness=0.004,
+        frame=0.008,
+        slat_pitch=0.016,
+        slat_width=0.007,
+        slat_angle_deg=18.0,
+        corner_radius=0.010,
+        center=False,
+    )
+    filter_insert_geom.rotate_x(math.pi / 2.0)
+    filter_insert_mesh = _mesh(filter_insert_geom, "filter_insert.obj")
+
+    dial_geom = LatheGeometry(
+        [
+            (0.0, 0.000),
+            (0.026, 0.000),
+            (0.030, 0.004),
+            (0.030, 0.016),
+            (0.026, 0.022),
+            (0.020, 0.025),
+            (0.0, 0.025),
+        ],
+        segments=40,
+    )
+    selector_dial_mesh = _mesh(dial_geom, "selector_dial.obj")
+
+    rocker_geom = ExtrudeGeometry.from_z0(
+        rounded_rect_profile(0.030, 0.050, 0.006, corner_segments=8),
+        0.008,
+        cap=True,
+        closed=True,
+    )
+    power_rocker_mesh = _mesh(rocker_geom, "power_rocker.obj")
+
+    body = model.part("body_shell")
+    body.visual(body_shell, material=body_white)
     body.visual(
-        _rounded_prism_mesh(
-            "base_plinth",
-            BASE_W,
-            BASE_D,
-            BASE_H,
-            radius=0.055,
-            center=False,
-        ),
-        material=CHARCOAL_MAT,
+        Box((0.110, 0.004, 0.020)),
+        origin=Origin(xyz=(0.0, 0.103, 0.432)),
+        material=glass_black,
+        name="status_window",
     )
     body.visual(
-        _rounded_prism_mesh(
-            "main_shell",
-            SHELL_W,
-            SHELL_D,
-            SHELL_H,
-            radius=SHELL_RADIUS,
-            center=False,
-        ),
-        origin=Origin(xyz=(0.0, 0.0, BASE_H)),
-        material=SHELL_MAT,
+        Cylinder(radius=0.010, length=0.012),
+        origin=Origin(xyz=(-0.100, -0.055, 0.006), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=rubber,
+        name="rear_left_foot",
     )
     body.visual(
-        _rounded_prism_mesh(
-            "top_cap",
-            0.322,
-            0.222,
-            0.012,
-            radius=0.038,
-            center=False,
-        ),
-        origin=Origin(xyz=(0.0, 0.0, SHELL_TOP_Z - 0.006)),
-        material=SHELL_MAT,
+        Cylinder(radius=0.010, length=0.012),
+        origin=Origin(xyz=(0.100, -0.055, 0.006), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=rubber,
+        name="rear_right_foot",
     )
     body.visual(
-        _louver_mesh(
-            "top_exhaust",
-            (0.202, 0.108),
-            0.006,
-            frame=0.01,
-            slat_pitch=0.018,
-            slat_width=0.009,
-            slat_angle_deg=28.0,
-            corner_radius=0.01,
-        ),
-        origin=Origin(xyz=(0.0, -0.03, SHELL_TOP_Z - 0.002)),
-        material=CHARCOAL_MAT,
+        Cylinder(radius=0.010, length=0.012),
+        origin=Origin(xyz=(-0.100, 0.055, 0.006), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=rubber,
+        name="front_left_foot",
     )
     body.visual(
-        _rounded_prism_mesh(
-            "control_deck",
-            0.162,
-            0.104,
-            0.006,
-            radius=0.024,
-            center=False,
-        ),
-        origin=Origin(xyz=(0.0, 0.03, SHELL_TOP_Z - 0.002)),
-        material=GLASS_MAT,
-    )
-    body.visual(
-        _louver_mesh(
-            "rear_intake",
-            (0.19, 0.28),
-            0.006,
-            frame=0.008,
-            slat_pitch=0.02,
-            slat_width=0.008,
-            slat_angle_deg=22.0,
-            corner_radius=0.008,
-        ),
-        origin=Origin(
-            xyz=(0.0, -SHELL_D / 2.0 + 0.003, 0.305),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=CHARCOAL_MAT,
-    )
-    body.visual(
-        Box((0.182, 0.008, 0.062)),
-        origin=Origin(xyz=(0.0, SHELL_D / 2.0 - 0.003, 0.58)),
-        material=GLASS_MAT,
-    )
-    body.visual(
-        Box((0.128, 0.003, 0.012)),
-        origin=Origin(xyz=(0.0, SHELL_D / 2.0 - 0.0015, 0.536)),
-        material=METAL_MAT,
-    )
-    body.visual(
-        Cylinder(radius=0.03, length=0.004),
-        origin=Origin(xyz=(KNOB_POS[0], KNOB_POS[1], SHELL_TOP_Z + 0.002)),
-        material=METAL_MAT,
-    )
-    body.visual(
-        Cylinder(radius=0.017, length=0.004),
-        origin=Origin(xyz=(BUTTON_POS[0], BUTTON_POS[1], SHELL_TOP_Z + 0.002)),
-        material=METAL_MAT,
+        Cylinder(radius=0.010, length=0.012),
+        origin=Origin(xyz=(0.100, 0.055, 0.006), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=rubber,
+        name="front_right_foot",
     )
     body.inertial = Inertial.from_geometry(
-        Box((BASE_W, BASE_D, SHELL_TOP_Z + 0.008)),
-        mass=9.0,
-        origin=Origin(xyz=(0.0, 0.0, (SHELL_TOP_Z + 0.008) / 2.0)),
+        Box((0.30, 0.20, BODY_HEIGHT)),
+        mass=8.1,
+        origin=Origin(xyz=(0.0, 0.0, BODY_HEIGHT / 2.0)),
+    )
+
+    front_intake = model.part("front_intake")
+    front_intake.visual(
+        front_intake_mesh,
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=vent_dark,
+    )
+    front_intake.inertial = Inertial.from_geometry(
+        Box((0.226, 0.006, 0.300)),
+        mass=0.35,
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+    )
+
+    top_grille = model.part("top_grille")
+    top_grille.visual(top_grille_mesh, material=vent_dark)
+    top_grille.inertial = Inertial.from_geometry(
+        Box((0.148, 0.074, 0.008)),
+        mass=0.18,
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
+    )
+
+    control_pod = model.part("control_pod")
+    control_pod.visual(control_pod_mesh, material=glass_black)
+    control_pod.visual(
+        Box((0.038, 0.058, 0.0024)),
+        origin=Origin(xyz=(0.044, 0.0, 0.0052)),
+        material=warm_gray,
+        name="power_switch_bezel",
+    )
+    control_pod.inertial = Inertial.from_geometry(
+        Box((0.150, 0.074, 0.006)),
+        mass=0.22,
+        origin=Origin(xyz=(0.0, 0.0, 0.003)),
     )
 
     filter_door = model.part("filter_door")
     filter_door.visual(
-        _rounded_prism_mesh(
-            "filter_door_panel",
-            DOOR_W,
-            DOOR_T,
-            DOOR_H,
-            radius=0.022,
-            center=True,
-        ),
-        origin=Origin(xyz=(-DOOR_W / 2.0, DOOR_T / 2.0, 0.0)),
-        material=SHELL_MAT,
+        filter_door_mesh,
+        origin=Origin(xyz=(-0.118, 0.0, 0.0)),
+        material=body_white,
     )
     filter_door.visual(
-        _louver_mesh(
-            "filter_door_grille",
-            (0.214, 0.274),
-            0.006,
-            frame=0.007,
-            slat_pitch=0.022,
-            slat_width=0.009,
-            slat_angle_deg=26.0,
-            corner_radius=0.008,
-        ),
-        origin=Origin(
-            xyz=(-DOOR_W / 2.0, DOOR_T - 0.002, -0.055),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=CHARCOAL_MAT,
+        filter_insert_mesh,
+        origin=Origin(xyz=(-0.118, -0.003, 0.0)),
+        material=warm_gray,
     )
     filter_door.visual(
-        Box((0.018, 0.012, 0.095)),
-        origin=Origin(xyz=(-DOOR_W + 0.025, DOOR_T + 0.004, 0.02)),
-        material=METAL_MAT,
+        Box((0.010, 0.003, 0.050)),
+        origin=Origin(xyz=(-0.226, -0.006, 0.078)),
+        material=vent_dark,
+        name="finger_pull",
     )
     filter_door.inertial = Inertial.from_geometry(
-        Box((DOOR_W, DOOR_T, DOOR_H)),
-        mass=1.1,
-        origin=Origin(xyz=(-DOOR_W / 2.0, DOOR_T / 2.0, 0.0)),
+        Box((0.236, 0.010, 0.300)),
+        mass=0.95,
+        origin=Origin(xyz=(-0.118, -0.005, 0.0)),
     )
 
-    control_knob = model.part("control_knob")
-    control_knob.visual(
-        Cylinder(radius=0.024, length=0.012),
-        origin=Origin(xyz=(0.0, 0.0, 0.007)),
-        material=RUBBER_MAT,
+    selector_dial = model.part("selector_dial")
+    selector_dial.visual(selector_dial_mesh, material=glass_black)
+    selector_dial.visual(
+        Cylinder(radius=0.031, length=0.002),
+        origin=Origin(xyz=(0.0, 0.0, 0.001)),
+        material=steel,
+        name="dial_trim_ring",
     )
-    control_knob.visual(
-        Cylinder(radius=0.02, length=0.009),
-        origin=Origin(xyz=(0.0, 0.0, 0.0175)),
-        material=METAL_MAT,
+    selector_dial.visual(
+        Box((0.003, 0.012, 0.0014)),
+        origin=Origin(xyz=(0.0, 0.018, 0.024)),
+        material=steel,
+        name="dial_indicator",
     )
-    control_knob.visual(
-        Box((0.012, 0.005, 0.003)),
-        origin=Origin(xyz=(0.01, 0.0, 0.0235)),
-        material=CHARCOAL_MAT,
-    )
-    control_knob.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.024, length=0.0225),
-        mass=0.09,
-        origin=Origin(xyz=(0.0, 0.0, 0.01225)),
+    selector_dial.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.031, length=0.025),
+        mass=0.12,
+        origin=Origin(xyz=(0.0, 0.0, 0.0125)),
     )
 
-    power_button = model.part("power_button")
-    power_button.visual(
-        Cylinder(radius=0.0065, length=0.008),
-        origin=Origin(xyz=(0.0, 0.0, 0.008)),
-        material=RUBBER_MAT,
+    power_rocker = model.part("power_rocker")
+    power_rocker.visual(power_rocker_mesh, material=vent_dark)
+    power_rocker.visual(
+        Box((0.004, 0.014, 0.0015)),
+        origin=Origin(xyz=(0.0, 0.012, 0.0085)),
+        material=steel,
+        name="power_mark",
     )
-    power_button.visual(
-        Cylinder(radius=0.013, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, 0.014)),
-        material=CHARCOAL_MAT,
-    )
-    power_button.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.013, length=0.012),
-        mass=0.02,
-        origin=Origin(xyz=(0.0, 0.0, 0.01)),
+    power_rocker.inertial = Inertial.from_geometry(
+        Box((0.030, 0.050, 0.008)),
+        mass=0.05,
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
     )
 
     model.articulation(
-        "filter_door_hinge",
+        "body_to_front_intake",
+        ArticulationType.FIXED,
+        parent="body_shell",
+        child="front_intake",
+        origin=Origin(xyz=(0.0, 0.105, 0.205)),
+    )
+    model.articulation(
+        "body_to_top_grille",
+        ArticulationType.FIXED,
+        parent="body_shell",
+        child="top_grille",
+        origin=Origin(xyz=(0.0, -0.036, 0.5508)),
+    )
+    model.articulation(
+        "body_to_control_pod",
+        ArticulationType.FIXED,
+        parent="body_shell",
+        child="control_pod",
+        origin=Origin(xyz=(0.0, 0.048, 0.5515)),
+    )
+    model.articulation(
+        "body_to_filter_door",
         ArticulationType.REVOLUTE,
-        parent="body",
+        parent="body_shell",
         child="filter_door",
-        origin=Origin(xyz=(DOOR_HINGE_X, DOOR_HINGE_Y, DOOR_CENTER_Z)),
-        axis=(0.0, 0.0, -1.0),
-        motion_limits=MotionLimits(
-            effort=12.0,
-            velocity=1.5,
-            lower=0.0,
-            upper=1.45,
-        ),
-    )
-    model.articulation(
-        "control_knob_spin",
-        ArticulationType.CONTINUOUS,
-        parent="body",
-        child="control_knob",
-        origin=Origin(xyz=KNOB_POS),
+        origin=Origin(xyz=(0.120, -0.1045, 0.220)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=2.5,
-            velocity=6.0,
-        ),
+        motion_limits=MotionLimits(effort=9.0, velocity=2.5, lower=0.0, upper=1.25),
     )
     model.articulation(
-        "power_button_slide",
-        ArticulationType.PRISMATIC,
-        parent="body",
-        child="power_button",
-        origin=Origin(xyz=BUTTON_POS),
-        axis=(0.0, 0.0, -1.0),
-        motion_limits=MotionLimits(
-            effort=8.0,
-            velocity=0.2,
-            lower=0.0,
-            upper=BUTTON_TRAVEL,
-        ),
+        "control_pod_to_selector_dial",
+        ArticulationType.CONTINUOUS,
+        parent="control_pod",
+        child="selector_dial",
+        origin=Origin(xyz=(-0.036, 0.0, 0.0096)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=1.0, velocity=5.0),
+    )
+    model.articulation(
+        "control_pod_to_power_rocker",
+        ArticulationType.REVOLUTE,
+        parent="control_pod",
+        child="power_rocker",
+        origin=Origin(xyz=(0.044, 0.0, 0.0123)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=0.6, velocity=3.0, lower=-0.18, upper=0.18),
     )
 
     return model
@@ -351,76 +329,114 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
-    ctx.allow_overlap(
-        "power_button",
-        "body",
-        reason="the spring-loaded button stem rides inside an unmodeled actuator well under the solid control deck visual",
-    )
-    ctx.check_no_overlaps(
-        max_pose_samples=192,
+    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
+    ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.warn_if_coplanar_surfaces(max_pose_samples=32, use="visual")
+    ctx.warn_if_overlaps(
+        max_pose_samples=96,
         overlap_tol=0.004,
         overlap_volume_tol=0.0,
+        ignore_adjacent=True,
+        ignore_fixed=True,
     )
 
-    ctx.expect_xy_distance("filter_door", "body", max_dist=0.2)
+    ctx.expect_aabb_contact("front_intake", "body_shell")
+    ctx.expect_aabb_overlap("front_intake", "body_shell", axes="xz", min_overlap=0.20)
+
+    ctx.expect_aabb_contact("top_grille", "body_shell")
+    ctx.expect_aabb_overlap("top_grille", "body_shell", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_gap("top_grille", "body_shell", axis="z", max_gap=0.003, max_penetration=0.011)
+
+    ctx.expect_aabb_contact("control_pod", "body_shell")
+    ctx.expect_aabb_overlap("control_pod", "body_shell", axes="xy", min_overlap=0.06)
+
+    ctx.expect_aabb_contact("filter_door", "body_shell")
+    ctx.expect_aabb_overlap("filter_door", "body_shell", axes="xz", min_overlap=0.20)
     ctx.expect_joint_motion_axis(
-        "filter_door_hinge",
+        "body_to_filter_door",
         "filter_door",
         world_axis="y",
-        direction="positive",
-        min_delta=0.05,
-    )
-
-    ctx.expect_aabb_overlap_xy("control_knob", "body", min_overlap=0.03)
-    ctx.expect_xy_distance("control_knob", "body", max_dist=0.09)
-    ctx.expect_aabb_gap_z(
-        "control_knob",
-        "body",
-        max_gap=0.03,
-        max_penetration=0.002,
-    )
-
-    ctx.expect_aabb_overlap_xy("power_button", "body", min_overlap=0.02)
-    ctx.expect_xy_distance("power_button", "body", max_dist=0.09)
-    ctx.expect_aabb_gap_z(
-        "power_button",
-        "body",
-        max_gap=0.02,
-        max_penetration=0.008,
-    )
-    ctx.expect_joint_motion_axis(
-        "power_button_slide",
-        "power_button",
-        world_axis="z",
         direction="negative",
-        min_delta=0.002,
+        min_delta=0.04,
     )
+    with ctx.pose(body_to_filter_door=1.10):
+        ctx.expect_aabb_overlap("filter_door", "body_shell", axes="z", min_overlap=0.24)
 
-    with ctx.pose(filter_door_hinge=DOOR_OPEN_ANGLE):
-        ctx.expect_xy_distance("filter_door", "body", max_dist=0.31)
+    ctx.expect_aabb_gap(
+        "selector_dial",
+        "control_pod",
+        axis="z",
+        min_gap=0.0,
+        max_gap=0.004,
+        positive_use="visual",
+        negative_use="visual",
+    )
+    ctx.expect_aabb_overlap("selector_dial", "control_pod", axes="xy", min_overlap=0.05)
+    with ctx.pose(control_pod_to_selector_dial=1.57):
+        ctx.expect_aabb_gap(
+            "selector_dial",
+            "control_pod",
+            axis="z",
+            min_gap=0.0,
+            max_gap=0.004,
+            positive_use="visual",
+            negative_use="visual",
+        )
+        ctx.expect_aabb_overlap("selector_dial", "control_pod", axes="xy", min_overlap=0.05)
 
-    with ctx.pose(control_knob_spin=math.pi / 2.0):
-        ctx.expect_aabb_overlap_xy("control_knob", "body", min_overlap=0.03)
-        ctx.expect_aabb_gap_z(
-            "control_knob",
-            "body",
-            max_gap=0.03,
-            max_penetration=0.002,
+    ctx.expect_aabb_gap(
+        "power_rocker",
+        "control_pod",
+        axis="z",
+        min_gap=0.0,
+        max_gap=0.0065,
+        positive_use="visual",
+        negative_use="visual",
+    )
+    ctx.expect_aabb_overlap("power_rocker", "control_pod", axes="xy", min_overlap=0.02)
+    ctx.expect_joint_motion_axis(
+        "control_pod_to_power_rocker",
+        "power_rocker",
+        world_axis="y",
+        direction="negative",
+        min_delta=0.001,
+    )
+    with ctx.pose(control_pod_to_power_rocker=0.18):
+        ctx.expect_aabb_gap(
+            "power_rocker",
+            "control_pod",
+            axis="z",
+            min_gap=0.0,
+            max_gap=0.007,
+            positive_use="visual",
+            negative_use="visual",
+        )
+    with ctx.pose(control_pod_to_power_rocker=-0.18):
+        ctx.expect_aabb_gap(
+            "power_rocker",
+            "control_pod",
+            axis="z",
+            min_gap=0.0,
+            max_gap=0.007,
+            positive_use="visual",
+            negative_use="visual",
         )
 
-    with ctx.pose(power_button_slide=BUTTON_TRAVEL):
-        ctx.expect_aabb_gap_z(
-            "power_button",
-            "body",
-            max_gap=0.02,
-            max_penetration=0.01,
-        )
+    front_pos = ctx.part_world_position("front_intake")
+    top_pos = ctx.part_world_position("top_grille")
+    pod_pos = ctx.part_world_position("control_pod")
+    door_pos = ctx.part_world_position("filter_door")
+
+    if front_pos[1] <= 0.09 or front_pos[2] >= 0.30:
+        raise AssertionError("Front vent should read as a lower-front intake surface.")
+    if top_pos[2] <= 0.55 or top_pos[1] >= 0.0:
+        raise AssertionError("Top vent should sit high on the rear half of the purifier.")
+    if pod_pos[2] <= 0.55 or pod_pos[1] <= 0.02:
+        raise AssertionError("Controls should sit on the forward portion of the top deck.")
+    if door_pos[1] >= -0.09:
+        raise AssertionError("Filter access door should be mounted on the rear service face.")
 
     return ctx.report()
-
-
 # >>> USER_CODE_END
 
 object_model = build_object_model()

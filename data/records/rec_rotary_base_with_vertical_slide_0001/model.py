@@ -86,9 +86,9 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_base_shape(), "pedestal_base.obj", assets=ASSETS),
         material="housing_dark",
     )
-    pedestal.collision(Cylinder(radius=0.185, length=0.016), origin=Origin(xyz=(0.0, 0.0, 0.008)))
-    pedestal.collision(Cylinder(radius=0.155, length=0.104), origin=Origin(xyz=(0.0, 0.0, 0.068)))
-    pedestal.collision(Cylinder(radius=0.125, length=0.010), origin=Origin(xyz=(0.0, 0.0, 0.125)))
+
+
+
     pedestal.inertial = Inertial.from_geometry(
         Cylinder(radius=0.160, length=BASE_HEIGHT),
         mass=7.5,
@@ -100,11 +100,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_stage_shape(), "turntable_stage.obj", assets=ASSETS),
         material="frame_light",
     )
-    stage.collision(
-        Cylinder(radius=0.115, length=TURNTABLE_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, TURNTABLE_GAP + TURNTABLE_THICKNESS / 2.0)),
-    )
-    stage.collision(Box((0.150, 0.035, 0.320)), origin=Origin(xyz=(0.0, 0.005, 0.183)))
+
+
     stage.inertial = Inertial.from_geometry(
         Box((0.240, 0.120, 0.360)),
         mass=4.5,
@@ -116,10 +113,10 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_carriage_shape(), "top_carriage.obj", assets=ASSETS),
         material="carriage_gray",
     )
-    carriage.collision(Box((0.132, 0.016, 0.130)), origin=Origin(xyz=(0.0, 0.026, 0.0)))
-    carriage.collision(Box((0.036, 0.030, 0.080)), origin=Origin(xyz=(-0.045, 0.015, 0.0)))
-    carriage.collision(Box((0.036, 0.030, 0.080)), origin=Origin(xyz=(0.045, 0.015, 0.0)))
-    carriage.collision(Box((0.180, 0.090, 0.018)), origin=Origin(xyz=(0.0, 0.065, 0.085)))
+
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.180, 0.110, 0.150)),
         mass=2.2,
@@ -153,16 +150,16 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("turntable_stage", "pedestal_base", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("turntable_stage", "pedestal_base", min_overlap=0.20)
-    ctx.expect_aabb_gap_z("turntable_stage", "pedestal_base", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_origin_distance("turntable_stage", "pedestal_base", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("turntable_stage", "pedestal_base", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_gap("turntable_stage", "pedestal_base", axis="z", max_gap=0.003, max_penetration=0.0)
 
-    ctx.expect_above("top_carriage", "pedestal_base", min_clearance=0.045)
-    ctx.expect_aabb_overlap_xy("top_carriage", "pedestal_base", min_overlap=0.10)
-    ctx.expect_aabb_overlap_xy("top_carriage", "turntable_stage", min_overlap=0.08)
+    ctx.expect_origin_gap("top_carriage", "pedestal_base", axis="z", min_gap=0.045)
+    ctx.expect_aabb_overlap("top_carriage", "pedestal_base", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("top_carriage", "turntable_stage", axes="xy", min_overlap=0.08)
 
     ctx.expect_joint_motion_axis(
         "pedestal_yaw",

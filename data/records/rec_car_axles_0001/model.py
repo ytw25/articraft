@@ -26,9 +26,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _material(name: str, rgba: tuple[float, float, float, float]) -> Material:
     try:
         return Material(name=name, rgba=rgba)
@@ -399,8 +397,8 @@ def run_tests() -> TestReport:
         "pinion flange should stay level with the carrier center",
     )
 
-    ctx.expect_xy_distance("pinion_flange", "axle_housing", max_dist=0.30)
-    ctx.expect_xy_distance("left_hub", "right_hub", max_dist=1.67)
+    ctx.expect_origin_distance("pinion_flange", "axle_housing", axes="xy", max_dist=0.30)
+    ctx.expect_origin_distance("left_hub", "right_hub", axes="xy", max_dist=1.67)
 
     reference_positions = {
         "axle_housing": housing_pos,
@@ -432,8 +430,8 @@ def run_tests() -> TestReport:
                 current_pinion[0] > housing_pos[0] + 0.28,
                 "pinion flange must remain forward of the carrier through spin poses",
             )
-            ctx.expect_xy_distance("pinion_flange", "axle_housing", max_dist=0.30)
-            ctx.expect_xy_distance("left_hub", "right_hub", max_dist=1.67)
+            ctx.expect_origin_distance("pinion_flange", "axle_housing", axes="xy", max_dist=0.30)
+            ctx.expect_origin_distance("left_hub", "right_hub", axes="xy", max_dist=1.67)
 
     return ctx.report()
 

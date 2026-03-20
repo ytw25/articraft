@@ -562,27 +562,27 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.005, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("dome", "base", max_dist=0.02)
-    ctx.expect_aabb_overlap_xy("dome", "base", min_overlap=1.20)
-    ctx.expect_aabb_gap_z("dome", "base", max_gap=0.02, max_penetration=0.01)
-    ctx.expect_aabb_overlap_xy("shutter", "dome", min_overlap=0.18)
+    ctx.expect_origin_distance("dome", "base", axes="xy", max_dist=0.02)
+    ctx.expect_aabb_overlap("dome", "base", axes="xy", min_overlap=1.20)
+    ctx.expect_aabb_gap("dome", "base", axis="z", max_gap=0.02, max_penetration=0.01)
+    ctx.expect_aabb_overlap("shutter", "dome", axes="xy", min_overlap=0.18)
     ctx.expect_joint_motion_axis(
         "dome_to_shutter", "shutter", world_axis="z", direction="positive", min_delta=0.06
     )
 
     with ctx.pose({"base_to_dome": math.pi / 2.0}):
-        ctx.expect_xy_distance("dome", "base", max_dist=0.02)
-        ctx.expect_aabb_overlap_xy("dome", "base", min_overlap=1.20)
-        ctx.expect_aabb_gap_z("dome", "base", max_gap=0.02, max_penetration=0.01)
+        ctx.expect_origin_distance("dome", "base", axes="xy", max_dist=0.02)
+        ctx.expect_aabb_overlap("dome", "base", axes="xy", min_overlap=1.20)
+        ctx.expect_aabb_gap("dome", "base", axis="z", max_gap=0.02, max_penetration=0.01)
 
     with ctx.pose({"dome_to_shutter": 1.05}):
-        ctx.expect_aabb_overlap_xy("shutter", "dome", min_overlap=0.10)
-        ctx.expect_aabb_overlap_xy("shutter", "base", min_overlap=0.18)
+        ctx.expect_aabb_overlap("shutter", "dome", axes="xy", min_overlap=0.10)
+        ctx.expect_aabb_overlap("shutter", "base", axes="xy", min_overlap=0.18)
 
     with ctx.pose({"base_to_dome": 2.10, "dome_to_shutter": 1.05}):
-        ctx.expect_xy_distance("dome", "base", max_dist=0.02)
-        ctx.expect_aabb_overlap_xy("dome", "base", min_overlap=1.20)
-        ctx.expect_aabb_overlap_xy("shutter", "dome", min_overlap=0.10)
+        ctx.expect_origin_distance("dome", "base", axes="xy", max_dist=0.02)
+        ctx.expect_aabb_overlap("dome", "base", axes="xy", min_overlap=1.20)
+        ctx.expect_aabb_overlap("shutter", "dome", axes="xy", min_overlap=0.10)
 
     return ctx.report()
 

@@ -147,33 +147,15 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_base_shape(), "pedestal_base.obj", assets=ASSETS),
         material="motor_black",
     )
-    base.collision(
-        Box((MOTOR_BASE_SIZE, MOTOR_BASE_SIZE, MOTOR_BASE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, MOTOR_BASE_HEIGHT / 2.0)),
-    )
-    base.collision(
-        Cylinder(radius=PEDESTAL_RADIUS, length=PEDESTAL_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, MOTOR_BASE_HEIGHT + (PEDESTAL_HEIGHT / 2.0))),
-    )
+
+
     housing_wall_thickness = HOUSING_OUTER_RADIUS - HOUSING_INNER_RADIUS
     housing_wall_center = HOUSING_INNER_RADIUS + (housing_wall_thickness / 2.0)
     housing_center_z = HOUSING_BASE_Z + (HOUSING_HEIGHT / 2.0)
-    base.collision(
-        Box((2.0 * HOUSING_OUTER_RADIUS, housing_wall_thickness, HOUSING_HEIGHT)),
-        origin=Origin(xyz=(0.0, housing_wall_center, housing_center_z)),
-    )
-    base.collision(
-        Box((2.0 * HOUSING_OUTER_RADIUS, housing_wall_thickness, HOUSING_HEIGHT)),
-        origin=Origin(xyz=(0.0, -housing_wall_center, housing_center_z)),
-    )
-    base.collision(
-        Box((housing_wall_thickness, 2.0 * HOUSING_INNER_RADIUS, HOUSING_HEIGHT)),
-        origin=Origin(xyz=(housing_wall_center, 0.0, housing_center_z)),
-    )
-    base.collision(
-        Box((housing_wall_thickness, 2.0 * HOUSING_INNER_RADIUS, HOUSING_HEIGHT)),
-        origin=Origin(xyz=(-housing_wall_center, 0.0, housing_center_z)),
-    )
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((MOTOR_BASE_SIZE, MOTOR_BASE_SIZE, HOUSING_BASE_Z + HOUSING_HEIGHT)),
         mass=2.4,
@@ -185,20 +167,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_rotor_shape(), "yaw_rotor.obj", assets=ASSETS),
         material="bearing_steel",
     )
-    rotor.collision(
-        Cylinder(
-            radius=ROTOR_SHAFT_RADIUS,
-            length=ROTOR_SHAFT_TOP_Z - ROTOR_SHAFT_BOTTOM_Z,
-        ),
-        origin=Origin(xyz=(0.0, 0.0, (ROTOR_SHAFT_TOP_Z + ROTOR_SHAFT_BOTTOM_Z) / 2.0)),
-    )
-    rotor.collision(
-        Cylinder(
-            radius=ROTOR_FLANGE_RADIUS,
-            length=ROTOR_FLANGE_TOP_Z - ROTOR_FLANGE_BOTTOM_Z,
-        ),
-        origin=Origin(xyz=(0.0, 0.0, (ROTOR_FLANGE_TOP_Z + ROTOR_FLANGE_BOTTOM_Z) / 2.0)),
-    )
+
+
     rotor.inertial = Inertial.from_geometry(
         Cylinder(radius=ROTOR_FLANGE_RADIUS, length=ROTOR_FLANGE_TOP_Z + 0.01),
         mass=0.35,
@@ -210,20 +180,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_top_plate_shape(), "top_plate.obj", assets=ASSETS),
         material="plate_aluminum",
     )
-    top_plate.collision(
-        Box((TOP_PLATE_SIZE, TOP_PLATE_SIZE, TOP_PLATE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, TOP_PLATE_THICKNESS / 2.0)),
-    )
-    top_plate.collision(
-        Box((TOP_PLATE_TAB_LENGTH, TOP_PLATE_TAB_WIDTH, TOP_PLATE_THICKNESS)),
-        origin=Origin(
-            xyz=(
-                (TOP_PLATE_SIZE / 2.0) + (TOP_PLATE_TAB_LENGTH / 2.0),
-                0.0,
-                TOP_PLATE_THICKNESS / 2.0,
-            )
-        ),
-    )
+
+
     top_plate.inertial = Inertial.from_geometry(
         Box(
             (
@@ -266,30 +224,20 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.003,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_xy_distance("yaw_rotor", "pedestal_base", max_dist=0.003)
-    ctx.expect_xy_distance("top_plate", "pedestal_base", max_dist=0.015)
-    ctx.expect_aabb_overlap_xy("yaw_rotor", "pedestal_base", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("top_plate", "pedestal_base", min_overlap=0.12)
-    ctx.expect_above("top_plate", "pedestal_base", min_clearance=0.0)
-    ctx.expect_aabb_gap_z(
-        "top_plate",
-        "pedestal_base",
-        max_gap=0.02,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_gap_z(
-        "top_plate",
-        "yaw_rotor",
-        max_gap=0.002,
-        max_penetration=0.0,
-    )
+    ctx.expect_origin_distance("yaw_rotor", "pedestal_base", axes="xy", max_dist=0.003)
+    ctx.expect_origin_distance("top_plate", "pedestal_base", axes="xy", max_dist=0.015)
+    ctx.expect_aabb_overlap("yaw_rotor", "pedestal_base", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("top_plate", "pedestal_base", axes="xy", min_overlap=0.12)
+    ctx.expect_origin_gap("top_plate", "pedestal_base", axis="z", min_gap=0.0)
+    ctx.expect_aabb_gap("top_plate", "pedestal_base", axis="z", max_gap=0.02, max_penetration=0.0)
+    ctx.expect_aabb_gap("top_plate", "yaw_rotor", axis="z", max_gap=0.002, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "pedestal_to_rotor",
         "top_plate",
@@ -299,23 +247,13 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(pedestal_to_rotor=1.2):
-        ctx.expect_xy_distance("top_plate", "pedestal_base", max_dist=0.015)
-        ctx.expect_aabb_overlap_xy("top_plate", "pedestal_base", min_overlap=0.12)
-        ctx.expect_aabb_gap_z(
-            "top_plate",
-            "pedestal_base",
-            max_gap=0.02,
-            max_penetration=0.0,
-        )
+        ctx.expect_origin_distance("top_plate", "pedestal_base", axes="xy", max_dist=0.015)
+        ctx.expect_aabb_overlap("top_plate", "pedestal_base", axes="xy", min_overlap=0.12)
+        ctx.expect_aabb_gap("top_plate", "pedestal_base", axis="z", max_gap=0.02, max_penetration=0.0)
 
     with ctx.pose(pedestal_to_rotor=-1.7):
-        ctx.expect_xy_distance("top_plate", "pedestal_base", max_dist=0.015)
-        ctx.expect_aabb_gap_z(
-            "top_plate",
-            "yaw_rotor",
-            max_gap=0.002,
-            max_penetration=0.0,
-        )
+        ctx.expect_origin_distance("top_plate", "pedestal_base", axes="xy", max_dist=0.015)
+        ctx.expect_aabb_gap("top_plate", "yaw_rotor", axis="z", max_gap=0.002, max_penetration=0.0)
 
     return ctx.report()
 

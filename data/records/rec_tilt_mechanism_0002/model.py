@@ -207,7 +207,7 @@ def build_object_model() -> ArticulatedObject:
     base_plate = model.part("base_plate")
     base_mesh = mesh_from_cadquery(_base_plate_shape(), "base_plate.obj", assets=ASSETS)
     base_plate.visual(base_mesh, material="powdercoat_dark")
-    base_plate.collision(Box((BASE_X, BASE_Y, BASE_Z)), origin=Origin(xyz=(0.0, 0.0, BASE_Z / 2.0)))
+
     base_plate.inertial = Inertial.from_geometry(
         Box((BASE_X, BASE_Y, BASE_Z)),
         mass=0.65,
@@ -217,22 +217,10 @@ def build_object_model() -> ArticulatedObject:
     support_yoke = model.part("support_yoke")
     yoke_mesh = mesh_from_cadquery(_support_yoke_shape(), "support_yoke.obj", assets=ASSETS)
     support_yoke.visual(yoke_mesh, material="powdercoat_dark")
-    support_yoke.collision(
-        Box((YOKE_TIE_X, YOKE_TIE_Y, YOKE_TIE_Z)),
-        origin=Origin(xyz=(0.0, 0.0, YOKE_TIE_Z / 2.0)),
-    )
-    support_yoke.collision(
-        Box((PLATE_T, PLATE_Y, PLATE_Z)),
-        origin=Origin(xyz=(-PLATE_CENTER_X, 0.0, PLATE_Z / 2.0)),
-    )
-    support_yoke.collision(
-        Box((PLATE_T, PLATE_Y, PLATE_Z)),
-        origin=Origin(xyz=(PLATE_CENTER_X, 0.0, PLATE_Z / 2.0)),
-    )
-    support_yoke.collision(
-        Box((PIVOT_ROD_LENGTH, 2.0 * PIVOT_ROD_RADIUS, 2.0 * PIVOT_ROD_RADIUS)),
-        origin=Origin(xyz=(0.0, 0.0, PIVOT_Z_LOCAL)),
-    )
+
+
+
+
     support_yoke.inertial = Inertial.from_geometry(
         Box((0.16, PLATE_Y, PLATE_Z)),
         mass=0.9,
@@ -242,30 +230,12 @@ def build_object_model() -> ArticulatedObject:
     payload_frame = model.part("payload_frame")
     payload_mesh = mesh_from_cadquery(_payload_frame_shape(), "payload_frame.obj", assets=ASSETS)
     payload_frame.visual(payload_mesh, material="anodized_aluminum")
-    payload_frame.collision(
-        Box((FRAME_T, FRAME_OUTER_Y, FRAME_RAIL)),
-        origin=Origin(xyz=(0.0, 0.0, FRAME_CENTER_Z + (FRAME_OUTER_Z - FRAME_RAIL) / 2.0)),
-    )
-    payload_frame.collision(
-        Box((FRAME_T, FRAME_OUTER_Y, FRAME_RAIL)),
-        origin=Origin(xyz=(0.0, 0.0, FRAME_CENTER_Z - (FRAME_OUTER_Z - FRAME_RAIL) / 2.0)),
-    )
-    payload_frame.collision(
-        Box((FRAME_T, FRAME_RAIL, FRAME_OPEN_Z)),
-        origin=Origin(xyz=(0.0, (FRAME_OUTER_Y - FRAME_RAIL) / 2.0, FRAME_CENTER_Z)),
-    )
-    payload_frame.collision(
-        Box((FRAME_T, FRAME_RAIL, FRAME_OPEN_Z)),
-        origin=Origin(xyz=(0.0, -(FRAME_OUTER_Y - FRAME_RAIL) / 2.0, FRAME_CENTER_Z)),
-    )
-    payload_frame.collision(
-        Box((FRAME_T, FRAME_CROSSBAR_Y, FRAME_CROSSBAR_Z)),
-        origin=Origin(xyz=(0.0, 0.0, FRAME_CROSSBAR_CENTER_Z)),
-    )
-    payload_frame.collision(
-        Box((FRAME_SLEEVE_LENGTH, 2.0 * FRAME_SLEEVE_R_OUTER, 2.0 * FRAME_SLEEVE_R_OUTER)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
+
+
+
+
+
+
     payload_frame.inertial = Inertial.from_geometry(
         Box((FRAME_T, FRAME_OUTER_Y, FRAME_OUTER_Z)),
         mass=0.42,
@@ -307,14 +277,14 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("support_yoke", "base_plate", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("payload_frame", "support_yoke", min_overlap=0.05)
-    ctx.expect_xy_distance("payload_frame", "support_yoke", max_dist=0.005)
-    ctx.expect_above("payload_frame", "base_plate", min_clearance=0.06)
-    ctx.expect_aabb_gap_z("payload_frame", "base_plate", max_gap=0.06, max_penetration=0.0)
+    ctx.expect_aabb_overlap("support_yoke", "base_plate", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("payload_frame", "support_yoke", axes="xy", min_overlap=0.05)
+    ctx.expect_origin_distance("payload_frame", "support_yoke", axes="xy", max_dist=0.005)
+    ctx.expect_origin_gap("payload_frame", "base_plate", axis="z", min_gap=0.06)
+    ctx.expect_aabb_gap("payload_frame", "base_plate", axis="z", max_gap=0.06, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "yoke_to_payload",
         "payload_frame",
@@ -324,14 +294,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(yoke_to_payload=LOWER_TILT):
-        ctx.expect_xy_distance("payload_frame", "support_yoke", max_dist=0.005)
-        ctx.expect_aabb_gap_z("payload_frame", "base_plate", max_gap=0.017, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("payload_frame", "support_yoke", min_overlap=0.05)
+        ctx.expect_origin_distance("payload_frame", "support_yoke", axes="xy", max_dist=0.005)
+        ctx.expect_aabb_gap("payload_frame", "base_plate", axis="z", max_gap=0.017, max_penetration=0.0)
+        ctx.expect_aabb_overlap("payload_frame", "support_yoke", axes="xy", min_overlap=0.05)
 
     with ctx.pose(yoke_to_payload=UPPER_TILT):
-        ctx.expect_xy_distance("payload_frame", "support_yoke", max_dist=0.005)
-        ctx.expect_aabb_gap_z("payload_frame", "base_plate", max_gap=0.017, max_penetration=0.0)
-        ctx.expect_aabb_overlap_xy("payload_frame", "support_yoke", min_overlap=0.05)
+        ctx.expect_origin_distance("payload_frame", "support_yoke", axes="xy", max_dist=0.005)
+        ctx.expect_aabb_gap("payload_frame", "base_plate", axis="z", max_gap=0.017, max_penetration=0.0)
+        ctx.expect_aabb_overlap("payload_frame", "support_yoke", axes="xy", min_overlap=0.05)
 
     revolute = object_model.get_articulation("yoke_to_payload")
     fixed_mount = object_model.get_articulation("base_to_yoke")

@@ -27,8 +27,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 SATIN_BLACK = Material("satin_black", (0.08, 0.08, 0.09, 1.0))
 BRUSHED_ALUMINUM = Material("brushed_aluminum", (0.73, 0.73, 0.75, 1.0))
 DARK_RUBBER = Material("dark_rubber", (0.12, 0.12, 0.12, 1.0))
@@ -226,10 +225,10 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("platter", "plinth", min_overlap=0.28)
-    ctx.expect_xy_distance("platter", "plinth", max_dist=0.06)
-    ctx.expect_aabb_gap_z("platter", "plinth", max_gap=0.003, max_penetration=0.0)
-    ctx.expect_aabb_overlap_xy("tonearm", "plinth", min_overlap=0.04)
+    ctx.expect_aabb_overlap("platter", "plinth", axes="xy", min_overlap=0.28)
+    ctx.expect_origin_distance("platter", "plinth", axes="xy", max_dist=0.06)
+    ctx.expect_aabb_gap("platter", "plinth", axis="z", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_overlap("tonearm", "plinth", axes="xy", min_overlap=0.04)
     ctx.expect_joint_motion_axis(
         "tonearm_pivot",
         "tonearm",
@@ -239,20 +238,20 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(tonearm_pivot=0.0):
-        ctx.expect_aabb_overlap_xy("tonearm", "plinth", min_overlap=0.05)
-        ctx.expect_xy_distance("tonearm", "platter", max_dist=0.22)
+        ctx.expect_aabb_overlap("tonearm", "plinth", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("tonearm", "platter", axes="xy", max_dist=0.22)
 
     with ctx.pose(tonearm_pivot=0.88):
-        ctx.expect_aabb_overlap_xy("tonearm", "platter", min_overlap=0.08)
-        ctx.expect_xy_distance("tonearm", "platter", max_dist=0.24)
+        ctx.expect_aabb_overlap("tonearm", "platter", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("tonearm", "platter", axes="xy", max_dist=0.24)
 
     with ctx.pose(platter_spin=pi / 2.0):
-        ctx.expect_aabb_overlap_xy("platter", "plinth", min_overlap=0.28)
-        ctx.expect_aabb_gap_z("platter", "plinth", max_gap=0.003, max_penetration=0.0)
+        ctx.expect_aabb_overlap("platter", "plinth", axes="xy", min_overlap=0.28)
+        ctx.expect_aabb_gap("platter", "plinth", axis="z", max_gap=0.003, max_penetration=0.0)
 
     with ctx.pose(platter_spin=pi, tonearm_pivot=0.45):
-        ctx.expect_aabb_overlap_xy("tonearm", "plinth", min_overlap=0.04)
-        ctx.expect_aabb_overlap_xy("platter", "plinth", min_overlap=0.28)
+        ctx.expect_aabb_overlap("tonearm", "plinth", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_overlap("platter", "plinth", axes="xy", min_overlap=0.28)
 
     return ctx.report()
 

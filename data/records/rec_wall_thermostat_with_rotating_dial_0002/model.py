@@ -197,38 +197,23 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_xy_distance("housing", "wall_plate", max_dist=0.001)
-    ctx.expect_aabb_overlap_xy("housing", "wall_plate", min_overlap=0.07)
-    ctx.expect_aabb_gap_z(
-        "housing",
-        "wall_plate",
-        max_gap=0.001,
-        max_penetration=0.0005,
-    )
+    ctx.expect_origin_distance("housing", "wall_plate", axes="xy", max_dist=0.001)
+    ctx.expect_aabb_overlap("housing", "wall_plate", axes="xy", min_overlap=0.07)
+    ctx.expect_aabb_gap("housing", "wall_plate", axis="z", max_gap=0.001, max_penetration=0.0005)
 
-    ctx.expect_xy_distance("dial", "housing", max_dist=0.002)
-    ctx.expect_aabb_overlap_xy("dial", "housing", min_overlap=0.07)
-    ctx.expect_xy_distance("dial", "wall_plate", max_dist=0.002)
-    ctx.expect_aabb_overlap_xy("dial", "wall_plate", min_overlap=0.08)
-    ctx.expect_aabb_gap_z(
-        "dial",
-        "wall_plate",
-        max_gap=0.02,
-        max_penetration=0.0,
-    )
+    ctx.expect_origin_distance("dial", "housing", axes="xy", max_dist=0.002)
+    ctx.expect_aabb_overlap("dial", "housing", axes="xy", min_overlap=0.07)
+    ctx.expect_origin_distance("dial", "wall_plate", axes="xy", max_dist=0.002)
+    ctx.expect_aabb_overlap("dial", "wall_plate", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_gap("dial", "wall_plate", axis="z", max_gap=0.02, max_penetration=0.0)
 
     for angle in (0.0, pi / 2.0, pi, 3.0 * pi / 2.0):
         with ctx.pose(dial_spin=angle):
-            ctx.expect_xy_distance("dial", "housing", max_dist=0.002)
-            ctx.expect_aabb_overlap_xy("dial", "housing", min_overlap=0.07)
-            ctx.expect_xy_distance("dial", "wall_plate", max_dist=0.002)
-            ctx.expect_aabb_overlap_xy("dial", "wall_plate", min_overlap=0.08)
-            ctx.expect_aabb_gap_z(
-                "dial",
-                "wall_plate",
-                max_gap=0.02,
-                max_penetration=0.0,
-            )
+            ctx.expect_origin_distance("dial", "housing", axes="xy", max_dist=0.002)
+            ctx.expect_aabb_overlap("dial", "housing", axes="xy", min_overlap=0.07)
+            ctx.expect_origin_distance("dial", "wall_plate", axes="xy", max_dist=0.002)
+            ctx.expect_aabb_overlap("dial", "wall_plate", axes="xy", min_overlap=0.08)
+            ctx.expect_aabb_gap("dial", "wall_plate", axis="z", max_gap=0.02, max_penetration=0.0)
 
     return ctx.report()
 

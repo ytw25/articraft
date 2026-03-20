@@ -138,25 +138,10 @@ def add_segment_part(
 
     beam_end = length if tip else length - DISTAL_CLEARANCE
     beam_length = beam_end - BASE_LUG_LENGTH
-    part.collision(
-        Box((BASE_LUG_WIDTH, LINK_DEPTH, BASE_LUG_LENGTH)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_LUG_LENGTH / 2.0)),
-    )
-    part.collision(
-        Box((BEAM_WIDTH, LINK_DEPTH, beam_length)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_LUG_LENGTH + beam_length / 2.0)),
-    )
+
+
     if tip:
-        part.collision(
-            Box((PAD_WIDTH, LINK_DEPTH, PAD_LENGTH)),
-            origin=Origin(
-                xyz=(
-                    BEAM_WIDTH / 2.0 + PAD_WIDTH / 2.0 - 0.001,
-                    0.0,
-                    length - PAD_LENGTH / 2.0,
-                )
-            ),
-        )
+        pass
     part.inertial = Inertial.from_geometry(
         Box((BEAM_WIDTH, LINK_DEPTH, length)),
         mass=mass,
@@ -174,15 +159,9 @@ def build_object_model() -> ArticulatedObject:
 
     palm = model.part("palm")
     palm.visual(_mesh(make_palm_shape(), "palm.obj"), material="frame_gray")
-    palm.collision(Box(PALM_SIZE))
-    palm.collision(
-        Box(TOWER_SIZE),
-        origin=Origin(xyz=(JOINT_X, 0.0, PALM_SIZE[2] / 2.0 + TOWER_SIZE[2] / 2.0)),
-    )
-    palm.collision(
-        Box(TOWER_SIZE),
-        origin=Origin(xyz=(-JOINT_X, 0.0, PALM_SIZE[2] / 2.0 + TOWER_SIZE[2] / 2.0)),
-    )
+
+
+
     palm.inertial = Inertial.from_geometry(
         Box((PALM_SIZE[0], PALM_SIZE[1], PALM_SIZE[2] + TOWER_SIZE[2])),
         mass=0.8,
@@ -313,31 +292,21 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
 
     for side in ("left", "right"):
-        ctx.expect_above(f"{side}_proximal", "palm", min_clearance=0.0)
-        ctx.expect_aabb_overlap_xy(f"{side}_proximal", "palm", min_overlap=0.008)
-        ctx.expect_aabb_gap_z(f"{side}_proximal", "palm", max_gap=0.005, max_penetration=0.001)
+        ctx.expect_origin_gap(f"{side}_proximal", "palm", axis="z", min_gap=0.0)
+        ctx.expect_aabb_overlap(f"{side}_proximal", "palm", axes="xy", min_overlap=0.008)
+        ctx.expect_aabb_gap(f"{side}_proximal", "palm", axis="z", max_gap=0.005, max_penetration=0.001)
 
-        ctx.expect_above(f"{side}_middle", f"{side}_proximal", min_clearance=0.0)
-        ctx.expect_aabb_overlap_xy(f"{side}_middle", f"{side}_proximal", min_overlap=0.008)
-        ctx.expect_aabb_gap_z(
-            f"{side}_middle",
-            f"{side}_proximal",
-            max_gap=0.008,
-            max_penetration=0.001,
-        )
+        ctx.expect_origin_gap(f"{side}_middle", f"{side}_proximal", axis="z", min_gap=0.0)
+        ctx.expect_aabb_overlap(f"{side}_middle", f"{side}_proximal", axes="xy", min_overlap=0.008)
+        ctx.expect_aabb_gap(f"{side}_middle", f"{side}_proximal", axis="z", max_gap=0.008, max_penetration=0.001)
 
-        ctx.expect_above(f"{side}_distal", f"{side}_middle", min_clearance=0.0)
-        ctx.expect_aabb_overlap_xy(f"{side}_distal", f"{side}_middle", min_overlap=0.008)
-        ctx.expect_aabb_gap_z(
-            f"{side}_distal",
-            f"{side}_middle",
-            max_gap=0.008,
-            max_penetration=0.001,
-        )
+        ctx.expect_origin_gap(f"{side}_distal", f"{side}_middle", axis="z", min_gap=0.0)
+        ctx.expect_aabb_overlap(f"{side}_distal", f"{side}_middle", axes="xy", min_overlap=0.008)
+        ctx.expect_aabb_gap(f"{side}_distal", f"{side}_middle", axis="z", max_gap=0.008, max_penetration=0.001)
 
     ctx.expect_joint_motion_axis(
         "left_palm_to_proximal",

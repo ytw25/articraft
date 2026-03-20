@@ -359,7 +359,7 @@ def run_tests() -> TestReport:
             f"{wheel_joint_name} should be a continuous rolling joint.",
         )
 
-    ctx.expect_aabb_overlap_xy("steering_assembly", "base_frame", min_overlap=0.01)
+    ctx.expect_aabb_overlap("steering_assembly", "base_frame", axes="xy", min_overlap=0.01)
     ctx.expect_joint_motion_axis(
         "steering_joint",
         "front_left_wheel",
@@ -374,8 +374,8 @@ def run_tests() -> TestReport:
         direction="positive",
         min_delta=0.12,
     )
-    ctx.expect_xy_distance("front_left_wheel", "front_right_wheel", max_dist=0.30)
-    ctx.expect_xy_distance("rear_left_wheel", "rear_right_wheel", max_dist=0.45)
+    ctx.expect_origin_distance("front_left_wheel", "front_right_wheel", axes="xy", max_dist=0.30)
+    ctx.expect_origin_distance("rear_left_wheel", "rear_right_wheel", axes="xy", max_dist=0.45)
 
     wheel_names = (
         "rear_left_wheel",

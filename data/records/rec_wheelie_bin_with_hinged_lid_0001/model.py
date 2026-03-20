@@ -348,7 +348,7 @@ def run_tests() -> TestReport:
         overlap_tol=0.005,
         overlap_volume_tol=0.0,
     )
-    ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.18)
+    ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.18)
     ctx.expect_joint_motion_axis(
         "lid_hinge",
         "lid",

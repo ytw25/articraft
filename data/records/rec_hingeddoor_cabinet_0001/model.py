@@ -23,9 +23,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _make_material(name: str, rgba: tuple[float, float, float, float]):
     for kwargs in (
         {"name": name, "rgba": rgba},
@@ -403,9 +401,9 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_within_xy("plinth", "cabinet_body")
-    ctx.expect_xy_distance("plinth", "cabinet_body", max_dist=0.03)
-    ctx.expect_aabb_gap_z("cabinet_body", "plinth", max_gap=0.003, max_penetration=0.0)
+    ctx.expect_aabb_within("plinth", "cabinet_body", axes="xy")
+    ctx.expect_origin_distance("plinth", "cabinet_body", axes="xy", max_dist=0.03)
+    ctx.expect_aabb_gap("cabinet_body", "plinth", axis="z", max_gap=0.003, max_penetration=0.0)
 
     body_min_x, body_min_y, _, body_max_x, body_max_y, body_max_z = _world_aabb_bounds(
         ctx, "cabinet_body"

@@ -23,7 +23,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 
 
 def _material(name: str, rgba: tuple[float, float, float, float]) -> Material:
@@ -295,12 +295,12 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("ceiling_canopy", "housing", min_overlap=0.12)
-    ctx.expect_xy_distance("ceiling_canopy", "housing", max_dist=0.01)
-    ctx.expect_aabb_gap_z("housing", "ceiling_canopy", max_gap=0.002, max_penetration=0.004)
+    ctx.expect_aabb_overlap("ceiling_canopy", "housing", axes="xy", min_overlap=0.12)
+    ctx.expect_origin_distance("ceiling_canopy", "housing", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_gap("housing", "ceiling_canopy", axis="z", max_gap=0.002, max_penetration=0.004)
 
-    ctx.expect_aabb_overlap_xy("access_panel", "housing", min_overlap=0.14)
-    ctx.expect_aabb_gap_z("access_panel", "housing", max_gap=0.004, max_penetration=0.010)
+    ctx.expect_aabb_overlap("access_panel", "housing", axes="xy", min_overlap=0.14)
+    ctx.expect_aabb_gap("access_panel", "housing", axis="z", max_gap=0.004, max_penetration=0.010)
     ctx.expect_joint_motion_axis(
         "service_hinge",
         "access_panel",
@@ -310,10 +310,10 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(service_hinge=0.85):
-        ctx.expect_aabb_overlap_xy("access_panel", "housing", min_overlap=0.08)
+        ctx.expect_aabb_overlap("access_panel", "housing", axes="xy", min_overlap=0.08)
 
     with ctx.pose(service_hinge=1.45):
-        ctx.expect_aabb_overlap_xy("access_panel", "housing", min_overlap=0.03)
+        ctx.expect_aabb_overlap("access_panel", "housing", axes="xy", min_overlap=0.03)
 
     return ctx.report()
 

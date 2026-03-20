@@ -443,8 +443,8 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("lid", "base", max_gap=0.012, max_penetration=0.02)
+    ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("lid", "base", axis="z", max_gap=0.012, max_penetration=0.02)
     ctx.expect_joint_motion_axis(
         "lid_hinge",
         "lid",
@@ -468,14 +468,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(lid_hinge=1.25):
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.035)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.035)
 
     with ctx.pose(left_latch_joint=1.05, right_latch_joint=1.05):
-        ctx.expect_aabb_gap_z("lid", "base", max_gap=0.012, max_penetration=0.02)
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.12)
+        ctx.expect_aabb_gap("lid", "base", axis="z", max_gap=0.012, max_penetration=0.02)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.12)
 
     with ctx.pose(lid_hinge=1.25, left_latch_joint=1.05, right_latch_joint=1.05):
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.03)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.03)
 
     return ctx.report()
 

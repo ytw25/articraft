@@ -397,7 +397,7 @@ def run_tests() -> TestReport:
     for spec in DRAWER_SPECS:
         name = spec["name"]
         joint = _drawer_joint_name(name)
-        ctx.expect_aabb_overlap_xy(name, "carcass", min_overlap=0.120)
+        ctx.expect_aabb_overlap(name, "carcass", axes="xy", min_overlap=0.120)
         ctx.expect_joint_motion_axis(
             joint,
             name,
@@ -406,33 +406,33 @@ def run_tests() -> TestReport:
             min_delta=0.040,
         )
 
-    ctx.expect_aabb_overlap_xy("drawer_top", "drawer_upper", min_overlap=0.120)
-    ctx.expect_aabb_overlap_xy("drawer_upper", "drawer_lower", min_overlap=0.120)
-    ctx.expect_aabb_overlap_xy("drawer_lower", "drawer_bottom", min_overlap=0.120)
+    ctx.expect_aabb_overlap("drawer_top", "drawer_upper", axes="xy", min_overlap=0.120)
+    ctx.expect_aabb_overlap("drawer_upper", "drawer_lower", axes="xy", min_overlap=0.120)
+    ctx.expect_aabb_overlap("drawer_lower", "drawer_bottom", axes="xy", min_overlap=0.120)
 
-    ctx.expect_aabb_gap_z("drawer_top", "drawer_upper", max_gap=0.012, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("drawer_upper", "drawer_lower", max_gap=0.012, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("drawer_lower", "drawer_bottom", max_gap=0.012, max_penetration=0.0)
+    ctx.expect_aabb_gap("drawer_top", "drawer_upper", axis="z", max_gap=0.012, max_penetration=0.0)
+    ctx.expect_aabb_gap("drawer_upper", "drawer_lower", axis="z", max_gap=0.012, max_penetration=0.0)
+    ctx.expect_aabb_gap("drawer_lower", "drawer_bottom", axis="z", max_gap=0.012, max_penetration=0.0)
 
     with ctx.pose(carcass_to_drawer_top=0.260):
-        ctx.expect_aabb_overlap_xy("drawer_top", "carcass", min_overlap=0.120)
-        ctx.expect_aabb_gap_z("drawer_top", "drawer_upper", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("drawer_top", "carcass", axes="xy", min_overlap=0.120)
+        ctx.expect_aabb_gap("drawer_top", "drawer_upper", axis="z", max_gap=0.012, max_penetration=0.0)
         assert ctx.part_world_position("drawer_top")[1] > closed_y["drawer_top"] + 0.240
         assert abs(ctx.part_world_position("drawer_bottom")[1] - closed_y["drawer_bottom"]) < 1e-4
 
     with ctx.pose(carcass_to_drawer_upper=0.270):
-        ctx.expect_aabb_overlap_xy("drawer_upper", "carcass", min_overlap=0.110)
-        ctx.expect_aabb_gap_z("drawer_upper", "drawer_lower", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("drawer_upper", "carcass", axes="xy", min_overlap=0.110)
+        ctx.expect_aabb_gap("drawer_upper", "drawer_lower", axis="z", max_gap=0.012, max_penetration=0.0)
         assert ctx.part_world_position("drawer_upper")[1] > closed_y["drawer_upper"] + 0.250
 
     with ctx.pose(carcass_to_drawer_lower=0.290):
-        ctx.expect_aabb_overlap_xy("drawer_lower", "carcass", min_overlap=0.090)
-        ctx.expect_aabb_gap_z("drawer_lower", "drawer_bottom", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("drawer_lower", "carcass", axes="xy", min_overlap=0.090)
+        ctx.expect_aabb_gap("drawer_lower", "drawer_bottom", axis="z", max_gap=0.012, max_penetration=0.0)
         assert ctx.part_world_position("drawer_lower")[1] > closed_y["drawer_lower"] + 0.270
 
     with ctx.pose(carcass_to_drawer_bottom=0.310):
-        ctx.expect_aabb_overlap_xy("drawer_bottom", "carcass", min_overlap=0.070)
-        ctx.expect_aabb_gap_z("drawer_lower", "drawer_bottom", max_gap=0.012, max_penetration=0.0)
+        ctx.expect_aabb_overlap("drawer_bottom", "carcass", axes="xy", min_overlap=0.070)
+        ctx.expect_aabb_gap("drawer_lower", "drawer_bottom", axis="z", max_gap=0.012, max_penetration=0.0)
         assert ctx.part_world_position("drawer_bottom")[1] > closed_y["drawer_bottom"] + 0.290
         assert abs(ctx.part_world_position("drawer_top")[1] - closed_y["drawer_top"]) < 1e-4
 

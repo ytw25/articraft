@@ -22,8 +22,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 BASE_FRAME = "base_frame"
 DECK = "deck"
 LIP = "lip"
@@ -225,28 +224,28 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(deck_hinge=0.0, lip_hinge=0.0):
-        ctx.expect_xy_distance(DECK, BASE_FRAME, max_dist=1.45)
-        ctx.expect_aabb_overlap_xy(LIP, DECK, min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy(DECK, BASE_FRAME, min_overlap=0.03)
+        ctx.expect_origin_distance(DECK, BASE_FRAME, axes="xy", max_dist=1.45)
+        ctx.expect_aabb_overlap(LIP, DECK, axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap(DECK, BASE_FRAME, axes="xy", min_overlap=0.03)
 
     with ctx.pose(deck_hinge=0.45, lip_hinge=0.0):
-        ctx.expect_xy_distance(DECK, BASE_FRAME, max_dist=1.35)
-        ctx.expect_aabb_overlap_xy(LIP, DECK, min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy(DECK, BASE_FRAME, min_overlap=0.05)
+        ctx.expect_origin_distance(DECK, BASE_FRAME, axes="xy", max_dist=1.35)
+        ctx.expect_aabb_overlap(LIP, DECK, axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap(DECK, BASE_FRAME, axes="xy", min_overlap=0.05)
 
     with ctx.pose(deck_hinge=0.0, lip_hinge=-0.85):
-        ctx.expect_aabb_overlap_xy(LIP, DECK, min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy(DECK, BASE_FRAME, min_overlap=0.03)
+        ctx.expect_aabb_overlap(LIP, DECK, axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap(DECK, BASE_FRAME, axes="xy", min_overlap=0.03)
 
     with ctx.pose(deck_hinge=0.0, lip_hinge=0.10):
-        ctx.expect_aabb_overlap_xy(LIP, DECK, min_overlap=0.015)
+        ctx.expect_aabb_overlap(LIP, DECK, axes="xy", min_overlap=0.015)
 
     with ctx.pose(deck_hinge=0.45, lip_hinge=-0.85):
-        ctx.expect_aabb_overlap_xy(LIP, DECK, min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy(DECK, BASE_FRAME, min_overlap=0.05)
+        ctx.expect_aabb_overlap(LIP, DECK, axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap(DECK, BASE_FRAME, axes="xy", min_overlap=0.05)
 
     with ctx.pose(deck_hinge=0.45, lip_hinge=0.10):
-        ctx.expect_aabb_overlap_xy(LIP, DECK, min_overlap=0.015)
+        ctx.expect_aabb_overlap(LIP, DECK, axes="xy", min_overlap=0.015)
 
     return ctx.report()
 

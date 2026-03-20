@@ -25,8 +25,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 FRAME_OUTER_W = 1.22
 FRAME_OUTER_H = 1.82
 FRAME_INNER_W = 0.96
@@ -422,7 +421,7 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("shutter", "frame", min_overlap=0.90)
+    ctx.expect_aabb_overlap("shutter", "frame", axes="xy", min_overlap=0.90)
     ctx.expect_joint_motion_axis(
         JOINT_NAME,
         "shutter",
@@ -458,7 +457,7 @@ def run_tests() -> TestReport:
             raise AssertionError("Shutter should swing outward by mid-travel.")
         if mid_center[0] >= closed_center[0] - 0.10:
             raise AssertionError("Shutter should pivot back toward the hinge side.")
-        ctx.expect_aabb_overlap_xy("shutter", "frame", min_overlap=0.18)
+        ctx.expect_aabb_overlap("shutter", "frame", axes="xy", min_overlap=0.18)
 
     with ctx.pose(**{JOINT_NAME: 1.45}):
         open_center = _aabb_center(ctx.part_world_aabb("shutter", use="collision"))

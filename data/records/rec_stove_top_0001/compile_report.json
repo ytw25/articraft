@@ -3,9 +3,14 @@
   "record_id": "rec_stove_top_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (collision, non-blocking materialization): isolated parts detected (not contacting any other part in the checked pose).\n- part='knob_front_left' nearest_part='body' approx_gap=0.003m pose_index=0 pose=(knob_center_joint=0, knob_front_left_joint=0, knob_front_right_joint=0, knob_rear_left_joint=0, knob_rear_right_joint=0, oven_door_hinge=0) backend=fcl\n- part='knob_front_right' nearest_part='body' approx_gap=0.003m pose_index=0 pose=(knob_center_joint=0, knob_front_left_joint=0, knob_front_right_joint=0, knob_rear_left_joint=0, knob_rear_right_joint=0, oven_door_hinge=0) backend=fcl\n- part='knob_rear_left' nearest_part='body' approx_gap=0.003m pose_index=0 pose=(knob_center_joint=0, knob_front_left_joint=0, knob_front_right_joint=0, knob_rear_left_joint=0, knob_rear_right_joint=0, oven_door_hinge=0) backend=fcl\n- part='knob_rear_right' nearest_part='body' approx_gap=0.003m pose_index=0 pose=(knob_center_joint=0, knob_front_left_joint=0, knob_front_right_joint=0, knob_rear_left_joint=0, knob_rear_right_joint=0, oven_door_hinge=0) backend=fcl\n- part='oven_door' nearest_part='body' approx_gap=0.0075m pose_index=0 pose=(knob_center_joint=0, knob_front_left_joint=0, knob_front_right_joint=0, knob_rear_left_joint=0, knob_rear_right_joint=0, oven_door_hinge=0) backend=fcl\nConservative collision envelopes still do not touch, so this is usually a real floating-part or bad-mount bug.\nAdjust geometry origins or articulation placement so each isolated part is attached."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

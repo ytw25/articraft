@@ -309,12 +309,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("mast_stage", "base", min_overlap=0.06)
-    ctx.expect_xy_distance("mast_stage", "base", max_dist=0.01)
-    ctx.expect_aabb_overlap_xy("pan_head", "mast_stage", min_overlap=0.04)
-    ctx.expect_xy_distance("pan_head", "mast_stage", max_dist=0.03)
-    ctx.expect_aabb_gap_z("pan_head", "mast_stage", max_gap=0.02, max_penetration=0.0)
-    ctx.expect_above("pan_head", "base", min_clearance=0.24)
+    ctx.expect_aabb_overlap("mast_stage", "base", axes="xy", min_overlap=0.06)
+    ctx.expect_origin_distance("mast_stage", "base", axes="xy", max_dist=0.01)
+    ctx.expect_aabb_overlap("pan_head", "mast_stage", axes="xy", min_overlap=0.04)
+    ctx.expect_origin_distance("pan_head", "mast_stage", axes="xy", max_dist=0.03)
+    ctx.expect_aabb_gap("pan_head", "mast_stage", axis="z", max_gap=0.02, max_penetration=0.0)
+    ctx.expect_origin_gap("pan_head", "base", axis="z", min_gap=0.24)
     ctx.expect_joint_motion_axis(
         "mast_extension",
         "mast_stage",
@@ -324,37 +324,22 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(mast_extension=0.28):
-        ctx.expect_aabb_overlap_xy("mast_stage", "base", min_overlap=0.06)
-        ctx.expect_xy_distance("mast_stage", "base", max_dist=0.01)
-        ctx.expect_aabb_overlap_xy("pan_head", "mast_stage", min_overlap=0.04)
-        ctx.expect_aabb_gap_z(
-            "pan_head",
-            "mast_stage",
-            max_gap=0.02,
-            max_penetration=0.0,
-        )
-        ctx.expect_above("pan_head", "base", min_clearance=0.50)
+        ctx.expect_aabb_overlap("mast_stage", "base", axes="xy", min_overlap=0.06)
+        ctx.expect_origin_distance("mast_stage", "base", axes="xy", max_dist=0.01)
+        ctx.expect_aabb_overlap("pan_head", "mast_stage", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_gap("pan_head", "mast_stage", axis="z", max_gap=0.02, max_penetration=0.0)
+        ctx.expect_origin_gap("pan_head", "base", axis="z", min_gap=0.50)
 
     with ctx.pose(pan_yaw=pi / 2.0):
-        ctx.expect_aabb_overlap_xy("pan_head", "mast_stage", min_overlap=0.04)
-        ctx.expect_xy_distance("pan_head", "mast_stage", max_dist=0.03)
-        ctx.expect_aabb_gap_z(
-            "pan_head",
-            "mast_stage",
-            max_gap=0.02,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_overlap("pan_head", "mast_stage", axes="xy", min_overlap=0.04)
+        ctx.expect_origin_distance("pan_head", "mast_stage", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_gap("pan_head", "mast_stage", axis="z", max_gap=0.02, max_penetration=0.0)
 
     with ctx.pose({"mast_extension": 0.28, "pan_yaw": -pi / 2.0}):
-        ctx.expect_aabb_overlap_xy("pan_head", "mast_stage", min_overlap=0.04)
-        ctx.expect_xy_distance("pan_head", "mast_stage", max_dist=0.03)
-        ctx.expect_aabb_gap_z(
-            "pan_head",
-            "mast_stage",
-            max_gap=0.02,
-            max_penetration=0.0,
-        )
-        ctx.expect_above("pan_head", "base", min_clearance=0.50)
+        ctx.expect_aabb_overlap("pan_head", "mast_stage", axes="xy", min_overlap=0.04)
+        ctx.expect_origin_distance("pan_head", "mast_stage", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_gap("pan_head", "mast_stage", axis="z", max_gap=0.02, max_penetration=0.0)
+        ctx.expect_origin_gap("pan_head", "base", axis="z", min_gap=0.50)
 
     return ctx.report()
 

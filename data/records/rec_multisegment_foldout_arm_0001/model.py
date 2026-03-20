@@ -82,22 +82,10 @@ def _build_link_part(
     _add_mesh_visual(part, _make_link_shape(length), f"{name}.obj", material)
 
     ear_offset_y = (FORK_GAP + EAR_THICKNESS) / 2.0
-    part.collision(
-        Box((LINK_BODY_X * 0.96, LINK_BODY_Y * 0.96, length - 0.04)),
-        origin=Origin(xyz=(0.0, 0.0, length / 2.0)),
-    )
-    part.collision(
-        Box((ROOT_LUG_X * 0.94, ROOT_LUG_Y * 0.94, ROOT_LUG_Z * 0.94)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
-    part.collision(
-        Box((FORK_EAR_X * 0.90, EAR_THICKNESS * 0.90, FORK_EAR_Z * 0.90)),
-        origin=Origin(xyz=(0.0, ear_offset_y, length)),
-    )
-    part.collision(
-        Box((FORK_EAR_X * 0.90, EAR_THICKNESS * 0.90, FORK_EAR_Z * 0.90)),
-        origin=Origin(xyz=(0.0, -ear_offset_y, length)),
-    )
+
+
+
+
     part.inertial = Inertial.from_geometry(
         Box((LINK_BODY_X * 1.05, LINK_BODY_Y, length)),
         mass=mass,
@@ -114,17 +102,11 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _make_base_shape(), "base.obj", "boom_dark")
-    base.collision(Box((0.140, 0.100, 0.016)), origin=Origin(xyz=(0.0, 0.0, -0.055)))
-    base.collision(Box((0.072, 0.060, 0.030)), origin=Origin(xyz=(0.0, 0.0, -0.036)))
-    base.collision(Box((0.050, 0.040, 0.074)), origin=Origin(xyz=(0.0, 0.0, -0.022)))
-    base.collision(
-        Box((0.036, EAR_THICKNESS * 0.90, 0.020)),
-        origin=Origin(xyz=(0.0, (FORK_GAP + EAR_THICKNESS) / 2.0, 0.0)),
-    )
-    base.collision(
-        Box((0.036, EAR_THICKNESS * 0.90, 0.020)),
-        origin=Origin(xyz=(0.0, -(FORK_GAP + EAR_THICKNESS) / 2.0, 0.0)),
-    )
+
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.140, 0.100, 0.090)),
         mass=6.0,
@@ -191,28 +173,28 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("boom_1", "base", max_dist=0.005)
-    ctx.expect_xy_distance("boom_2", "boom_1", max_dist=0.005)
-    ctx.expect_xy_distance("boom_3", "boom_2", max_dist=0.005)
-    ctx.expect_xy_distance("boom_4", "boom_3", max_dist=0.005)
+    ctx.expect_origin_distance("boom_1", "base", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("boom_2", "boom_1", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("boom_3", "boom_2", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("boom_4", "boom_3", axes="xy", max_dist=0.005)
 
-    ctx.expect_aabb_overlap_xy("boom_1", "base", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("boom_2", "boom_1", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("boom_3", "boom_2", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("boom_4", "boom_3", min_overlap=0.020)
+    ctx.expect_aabb_overlap("boom_1", "base", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("boom_2", "boom_1", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("boom_3", "boom_2", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("boom_4", "boom_3", axes="xy", min_overlap=0.020)
 
-    ctx.expect_aabb_gap_z("boom_1", "base", max_gap=0.010, max_penetration=0.025)
-    ctx.expect_aabb_gap_z("boom_2", "boom_1", max_gap=0.010, max_penetration=0.022)
-    ctx.expect_aabb_gap_z("boom_3", "boom_2", max_gap=0.010, max_penetration=0.022)
-    ctx.expect_aabb_gap_z("boom_4", "boom_3", max_gap=0.010, max_penetration=0.022)
+    ctx.expect_aabb_gap("boom_1", "base", axis="z", max_gap=0.010, max_penetration=0.025)
+    ctx.expect_aabb_gap("boom_2", "boom_1", axis="z", max_gap=0.010, max_penetration=0.022)
+    ctx.expect_aabb_gap("boom_3", "boom_2", axis="z", max_gap=0.010, max_penetration=0.022)
+    ctx.expect_aabb_gap("boom_4", "boom_3", axis="z", max_gap=0.010, max_penetration=0.022)
 
-    ctx.expect_above("boom_2", "base", min_clearance=0.240)
-    ctx.expect_above("boom_3", "boom_1", min_clearance=0.220)
-    ctx.expect_above("boom_4", "boom_2", min_clearance=0.180)
-    ctx.expect_above("boom_4", "base", min_clearance=0.740)
+    ctx.expect_origin_gap("boom_2", "base", axis="z", min_gap=0.240)
+    ctx.expect_origin_gap("boom_3", "boom_1", axis="z", min_gap=0.220)
+    ctx.expect_origin_gap("boom_4", "boom_2", axis="z", min_gap=0.180)
+    ctx.expect_origin_gap("boom_4", "base", axis="z", min_gap=0.740)
 
     ctx.expect_joint_motion_axis(
         "base_to_boom_1",

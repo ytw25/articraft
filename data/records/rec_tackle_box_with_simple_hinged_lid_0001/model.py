@@ -296,8 +296,8 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.005, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("lid", "body", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("lid", "body", axis="z", max_gap=0.01, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "lid_hinge",
         "lid",
@@ -307,12 +307,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(lid_hinge=0.85):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.07)
-        ctx.expect_aabb_gap_z("lid", "body", max_gap=0.12, max_penetration=0.0)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.07)
+        ctx.expect_aabb_gap("lid", "body", axis="z", max_gap=0.12, max_penetration=0.0)
 
     with ctx.pose(lid_hinge=1.35):
-        ctx.expect_aabb_overlap_xy("lid", "body", min_overlap=0.02)
-        ctx.expect_aabb_gap_z("lid", "body", max_gap=0.18, max_penetration=0.0)
+        ctx.expect_aabb_overlap("lid", "body", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_gap("lid", "body", axis="z", max_gap=0.18, max_penetration=0.0)
 
     return ctx.report()
 

@@ -24,8 +24,8 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
 
 
 def _build_deck_mesh():
@@ -254,9 +254,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.005, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("rear_wheel", "deck", min_overlap=0.04)
-    ctx.expect_aabb_overlap_xy("stem_base", "deck", min_overlap=0.02)
-    ctx.expect_xy_distance("front_wheel", "steering_assembly", max_dist=0.18)
+    ctx.expect_aabb_overlap("rear_wheel", "deck", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_overlap("stem_base", "deck", axes="xy", min_overlap=0.02)
+    ctx.expect_origin_distance("front_wheel", "steering_assembly", axes="xy", max_dist=0.18)
     ctx.expect_joint_motion_axis(
         "stem_fold",
         "steering_assembly",
@@ -297,8 +297,8 @@ def run_tests() -> TestReport:
             raise AssertionError(
                 "Positive steering should swing the front wheel to the rider's left."
             )
-        ctx.expect_aabb_overlap_xy("front_wheel", "steering_assembly", min_overlap=0.015)
-        ctx.expect_xy_distance("front_wheel", "steering_assembly", max_dist=0.20)
+        ctx.expect_aabb_overlap("front_wheel", "steering_assembly", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("front_wheel", "steering_assembly", axes="xy", max_dist=0.20)
 
     with ctx.pose(steering_head=-0.55):
         front_right = ctx.part_world_position("front_wheel")
@@ -306,8 +306,8 @@ def run_tests() -> TestReport:
             raise AssertionError(
                 "Negative steering should swing the front wheel to the rider's right."
             )
-        ctx.expect_aabb_overlap_xy("front_wheel", "steering_assembly", min_overlap=0.015)
-        ctx.expect_xy_distance("front_wheel", "steering_assembly", max_dist=0.20)
+        ctx.expect_aabb_overlap("front_wheel", "steering_assembly", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("front_wheel", "steering_assembly", axes="xy", max_dist=0.20)
 
     with ctx.pose(stem_fold=0.65):
         folded_stem = ctx.part_world_position("steering_assembly")
@@ -315,11 +315,11 @@ def run_tests() -> TestReport:
             raise AssertionError("The folded stem should shift back over the deck.")
         if folded_stem[2] >= stem_pos[2] - 0.03:
             raise AssertionError("The folded stem should also settle lower toward the deck.")
-        ctx.expect_aabb_overlap_xy("steering_assembly", "deck", min_overlap=0.06)
+        ctx.expect_aabb_overlap("steering_assembly", "deck", axes="xy", min_overlap=0.06)
 
     with ctx.pose(stem_fold=0.65, steering_head=0.35):
-        ctx.expect_aabb_overlap_xy("front_wheel", "steering_assembly", min_overlap=0.012)
-        ctx.expect_xy_distance("front_wheel", "steering_assembly", max_dist=0.24)
+        ctx.expect_aabb_overlap("front_wheel", "steering_assembly", axes="xy", min_overlap=0.012)
+        ctx.expect_origin_distance("front_wheel", "steering_assembly", axes="xy", max_dist=0.24)
 
     return ctx.report()
 

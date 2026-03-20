@@ -153,7 +153,7 @@ def _add_mesh_box_proxy_part(
     part = model.part(name)
     part.visual(mesh_from_cadquery(shape, mesh_name, assets=ASSETS), material=material)
     proxy_origin = Origin(xyz=box_center)
-    part.collision(Box(box_size), origin=proxy_origin)
+
     part.inertial = Inertial.from_geometry(Box(box_size), mass=mass, origin=proxy_origin)
     return part
 
@@ -266,7 +266,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
 
     ctx.allow_overlap(
         "outer_rail",
@@ -289,27 +289,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("outer_rail", "base_plate", min_overlap=0.010)
-    ctx.expect_aabb_gap_z(
-        "outer_rail",
-        "base_plate",
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_gap_z(
-        "middle_rail",
-        "base_plate",
-        max_gap=0.010,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_gap_z(
-        "inner_rail",
-        "base_plate",
-        max_gap=0.015,
-        max_penetration=0.0,
-    )
-    ctx.expect_aabb_overlap_xy("middle_rail", "outer_rail", min_overlap=0.006)
-    ctx.expect_aabb_overlap_xy("inner_rail", "middle_rail", min_overlap=0.004)
+    ctx.expect_aabb_overlap("outer_rail", "base_plate", axes="xy", min_overlap=0.010)
+    ctx.expect_aabb_gap("outer_rail", "base_plate", axis="z", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_aabb_gap("middle_rail", "base_plate", axis="z", max_gap=0.010, max_penetration=0.0)
+    ctx.expect_aabb_gap("inner_rail", "base_plate", axis="z", max_gap=0.015, max_penetration=0.0)
+    ctx.expect_aabb_overlap("middle_rail", "outer_rail", axes="xy", min_overlap=0.006)
+    ctx.expect_aabb_overlap("inner_rail", "middle_rail", axes="xy", min_overlap=0.004)
     ctx.expect_joint_motion_axis(
         "outer_to_middle",
         "middle_rail",
@@ -326,17 +311,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(outer_to_middle=OUTER_TRAVEL):
-        ctx.expect_aabb_overlap_xy("middle_rail", "outer_rail", min_overlap=0.006)
-        ctx.expect_aabb_overlap_xy("inner_rail", "middle_rail", min_overlap=0.004)
+        ctx.expect_aabb_overlap("middle_rail", "outer_rail", axes="xy", min_overlap=0.006)
+        ctx.expect_aabb_overlap("inner_rail", "middle_rail", axes="xy", min_overlap=0.004)
 
     with ctx.pose(outer_to_middle=OUTER_TRAVEL, middle_to_inner=INNER_TRAVEL):
-        ctx.expect_aabb_overlap_xy("inner_rail", "middle_rail", min_overlap=0.004)
-        ctx.expect_aabb_gap_z(
-            "inner_rail",
-            "base_plate",
-            max_gap=0.015,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_overlap("inner_rail", "middle_rail", axes="xy", min_overlap=0.004)
+        ctx.expect_aabb_gap("inner_rail", "base_plate", axis="z", max_gap=0.015, max_penetration=0.0)
 
     return ctx.report()
 

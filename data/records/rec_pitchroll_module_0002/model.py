@@ -155,9 +155,9 @@ def build_object_model() -> ArticulatedObject:
     mount_base = model.part("mount_base")
     base_shape = _make_base_shape()
     _attach_mesh_visual(mount_base, base_shape, "mount_base.obj")
-    mount_base.collision(Box((0.160, 0.120, 0.012)), origin=Origin(xyz=(0.0, 0.0, -0.066)))
-    mount_base.collision(Box((0.060, 0.010, 0.086)), origin=Origin(xyz=(0.0, 0.024, -0.017)))
-    mount_base.collision(Box((0.060, 0.010, 0.086)), origin=Origin(xyz=(0.0, -0.024, -0.017)))
+
+
+
     mount_base.inertial = Inertial.from_geometry(
         Box((0.160, 0.120, 0.090)),
         mass=1.10,
@@ -167,20 +167,20 @@ def build_object_model() -> ArticulatedObject:
     pitch_cradle = model.part("pitch_cradle")
     cradle_shape = _make_cradle_shape()
     _attach_mesh_visual(pitch_cradle, cradle_shape, "pitch_cradle.obj")
-    pitch_cradle.collision(Box((0.010, 0.032, 0.078)), origin=Origin(xyz=(0.024, 0.0, 0.0)))
-    pitch_cradle.collision(Box((0.010, 0.032, 0.078)), origin=Origin(xyz=(-0.024, 0.0, 0.0)))
-    pitch_cradle.collision(Box((0.046, 0.028, 0.008)), origin=Origin(xyz=(0.0, 0.0, 0.034)))
-    pitch_cradle.collision(Box((0.046, 0.028, 0.008)), origin=Origin(xyz=(0.0, 0.0, -0.034)))
-    pitch_cradle.collision(Box((0.064, 0.064, 0.018)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    pitch_cradle.collision(Box((0.010, 0.028, 0.010)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
+
+
+
+
+
+
     pitch_cradle.inertial = Inertial.from_geometry(Box((0.050, 0.040, 0.080)), mass=0.42)
 
     sensor_head = model.part("sensor_head")
     sensor_shape = _make_sensor_shape()
     _attach_mesh_visual(sensor_head, sensor_shape, "sensor_head.obj")
-    sensor_head.collision(Box((0.032, 0.022, 0.030)), origin=Origin(xyz=(0.018, 0.0, 0.006)))
-    sensor_head.collision(Box((0.020, 0.010, 0.010)), origin=Origin(xyz=(-0.010, 0.0, 0.0)))
-    sensor_head.collision(Box((0.032, 0.018, 0.020)), origin=Origin(xyz=(0.034, 0.0, 0.006)))
+
+
+
     sensor_head.inertial = Inertial.from_geometry(
         Box((0.056, 0.030, 0.036)),
         mass=0.34,
@@ -214,19 +214,19 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "mount_base",
         "sensor_head",
         reason="Conservative AABB false positive: the sensor rolls inside the open gap between side towers while remaining above the base plate.",
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.001, overlap_volume_tol=0.0)
-    ctx.expect_xy_distance("pitch_cradle", "mount_base", max_dist=0.005)
-    ctx.expect_xy_distance("sensor_head", "pitch_cradle", max_dist=0.025)
-    ctx.expect_xy_distance("sensor_head", "mount_base", max_dist=0.025)
-    ctx.expect_aabb_overlap_xy("pitch_cradle", "mount_base", min_overlap=0.020)
-    ctx.expect_aabb_overlap_xy("sensor_head", "pitch_cradle", min_overlap=0.015)
-    ctx.expect_aabb_overlap_xy("sensor_head", "mount_base", min_overlap=0.015)
+    ctx.expect_origin_distance("pitch_cradle", "mount_base", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("sensor_head", "pitch_cradle", axes="xy", max_dist=0.025)
+    ctx.expect_origin_distance("sensor_head", "mount_base", axes="xy", max_dist=0.025)
+    ctx.expect_aabb_overlap("pitch_cradle", "mount_base", axes="xy", min_overlap=0.020)
+    ctx.expect_aabb_overlap("sensor_head", "pitch_cradle", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("sensor_head", "mount_base", axes="xy", min_overlap=0.015)
     ctx.expect_joint_motion_axis(
         "base_to_pitch_cradle",
         "sensor_head",

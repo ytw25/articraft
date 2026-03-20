@@ -384,10 +384,10 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("upper_column", "stand_base", min_overlap=0.02)
-    ctx.expect_xy_distance("ring_head", "stand_base", max_dist=0.08)
-    ctx.expect_aabb_overlap_xy("ring_head", "upper_column", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("device_mount", "ring_head", min_overlap=0.01)
+    ctx.expect_aabb_overlap("upper_column", "stand_base", axes="xy", min_overlap=0.02)
+    ctx.expect_origin_distance("ring_head", "stand_base", axes="xy", max_dist=0.08)
+    ctx.expect_aabb_overlap("ring_head", "upper_column", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("device_mount", "ring_head", axes="xy", min_overlap=0.01)
     ctx.expect_joint_motion_axis(
         "stand_height",
         "upper_column",
@@ -404,23 +404,23 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(stand_height=0.20):
-        ctx.expect_aabb_overlap_xy("upper_column", "stand_base", min_overlap=0.02)
-        ctx.expect_xy_distance("ring_head", "stand_base", max_dist=0.08)
-        ctx.expect_aabb_overlap_xy("ring_head", "upper_column", min_overlap=0.03)
+        ctx.expect_aabb_overlap("upper_column", "stand_base", axes="xy", min_overlap=0.02)
+        ctx.expect_origin_distance("ring_head", "stand_base", axes="xy", max_dist=0.08)
+        ctx.expect_aabb_overlap("ring_head", "upper_column", axes="xy", min_overlap=0.03)
 
     with ctx.pose(ring_tilt=-0.55):
-        ctx.expect_xy_distance("ring_head", "upper_column", max_dist=0.16)
-        ctx.expect_aabb_overlap_xy("ring_head", "upper_column", min_overlap=0.02)
-        ctx.expect_aabb_overlap_xy("device_mount", "ring_head", min_overlap=0.01)
+        ctx.expect_origin_distance("ring_head", "upper_column", axes="xy", max_dist=0.16)
+        ctx.expect_aabb_overlap("ring_head", "upper_column", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_overlap("device_mount", "ring_head", axes="xy", min_overlap=0.01)
 
     with ctx.pose(ring_tilt=0.40):
-        ctx.expect_xy_distance("ring_head", "upper_column", max_dist=0.16)
-        ctx.expect_aabb_overlap_xy("ring_head", "upper_column", min_overlap=0.02)
-        ctx.expect_aabb_overlap_xy("device_mount", "ring_head", min_overlap=0.01)
+        ctx.expect_origin_distance("ring_head", "upper_column", axes="xy", max_dist=0.16)
+        ctx.expect_aabb_overlap("ring_head", "upper_column", axes="xy", min_overlap=0.02)
+        ctx.expect_aabb_overlap("device_mount", "ring_head", axes="xy", min_overlap=0.01)
 
     with ctx.pose(stand_height=0.20, ring_tilt=-0.55):
-        ctx.expect_xy_distance("ring_head", "stand_base", max_dist=0.18)
-        ctx.expect_aabb_overlap_xy("device_mount", "ring_head", min_overlap=0.01)
+        ctx.expect_origin_distance("ring_head", "stand_base", axes="xy", max_dist=0.18)
+        ctx.expect_aabb_overlap("device_mount", "ring_head", axes="xy", min_overlap=0.01)
 
     return ctx.report()
 

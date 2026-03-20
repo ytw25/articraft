@@ -28,9 +28,9 @@ from sdk import (
     mesh_from_geometry,
 )
 
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -326,41 +326,41 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.05)
-    ctx.expect_xy_distance("head", "base", max_dist=0.03)
-    ctx.expect_aabb_overlap_xy("rotor", "head", min_overlap=0.03)
-    ctx.expect_xy_distance("rotor", "head", max_dist=0.11)
-    ctx.expect_xy_distance("rotor", "base", max_dist=0.11)
+    ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.05)
+    ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.03)
+    ctx.expect_aabb_overlap("rotor", "head", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("rotor", "head", axes="xy", max_dist=0.11)
+    ctx.expect_origin_distance("rotor", "base", axes="xy", max_dist=0.11)
     ctx.expect_joint_motion_axis(
         "head_tilt", "head", world_axis="z", direction="positive", min_delta=0.02
     )
 
     with ctx.pose(head_tilt=0.60):
-        ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.05)
-        ctx.expect_xy_distance("head", "base", max_dist=0.08)
-        ctx.expect_aabb_overlap_xy("rotor", "head", min_overlap=0.03)
-        ctx.expect_xy_distance("rotor", "head", max_dist=0.11)
-        ctx.expect_xy_distance("rotor", "base", max_dist=0.14)
+        ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.08)
+        ctx.expect_aabb_overlap("rotor", "head", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("rotor", "head", axes="xy", max_dist=0.11)
+        ctx.expect_origin_distance("rotor", "base", axes="xy", max_dist=0.14)
 
     with ctx.pose(head_tilt=-0.45):
-        ctx.expect_aabb_overlap_xy("head", "base", min_overlap=0.05)
-        ctx.expect_xy_distance("head", "base", max_dist=0.08)
-        ctx.expect_aabb_overlap_xy("rotor", "head", min_overlap=0.03)
-        ctx.expect_xy_distance("rotor", "head", max_dist=0.11)
-        ctx.expect_xy_distance("rotor", "base", max_dist=0.10)
+        ctx.expect_aabb_overlap("head", "base", axes="xy", min_overlap=0.05)
+        ctx.expect_origin_distance("head", "base", axes="xy", max_dist=0.08)
+        ctx.expect_aabb_overlap("rotor", "head", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("rotor", "head", axes="xy", max_dist=0.11)
+        ctx.expect_origin_distance("rotor", "base", axes="xy", max_dist=0.10)
 
     with ctx.pose(fan_spin=1.25):
-        ctx.expect_aabb_overlap_xy("rotor", "head", min_overlap=0.03)
-        ctx.expect_xy_distance("rotor", "head", max_dist=0.11)
+        ctx.expect_aabb_overlap("rotor", "head", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("rotor", "head", axes="xy", max_dist=0.11)
 
     with ctx.pose(fan_spin=2.40):
-        ctx.expect_aabb_overlap_xy("rotor", "head", min_overlap=0.03)
-        ctx.expect_xy_distance("rotor", "head", max_dist=0.11)
+        ctx.expect_aabb_overlap("rotor", "head", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("rotor", "head", axes="xy", max_dist=0.11)
 
     with ctx.pose(head_tilt=0.32, fan_spin=1.90):
-        ctx.expect_aabb_overlap_xy("rotor", "head", min_overlap=0.03)
-        ctx.expect_xy_distance("rotor", "head", max_dist=0.11)
-        ctx.expect_xy_distance("rotor", "base", max_dist=0.13)
+        ctx.expect_aabb_overlap("rotor", "head", axes="xy", min_overlap=0.03)
+        ctx.expect_origin_distance("rotor", "head", axes="xy", max_dist=0.11)
+        ctx.expect_origin_distance("rotor", "base", axes="xy", max_dist=0.13)
 
     return ctx.report()
 

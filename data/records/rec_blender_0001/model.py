@@ -25,8 +25,8 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -331,32 +331,32 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("jar", "base", min_overlap=0.105)
-    ctx.expect_xy_distance("jar", "base", max_dist=0.012)
-    ctx.expect_aabb_gap_z("jar", "base", max_gap=0.003, max_penetration=1e-5)
+    ctx.expect_aabb_overlap("jar", "base", axes="xy", min_overlap=0.105)
+    ctx.expect_origin_distance("jar", "base", axes="xy", max_dist=0.012)
+    ctx.expect_aabb_gap("jar", "base", axis="z", max_gap=0.003, max_penetration=1e-5)
 
     with ctx.pose(jar_to_lid=0.0):
-        ctx.expect_aabb_overlap_xy("lid", "jar", min_overlap=0.110)
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.090)
-        ctx.expect_xy_distance("lid", "jar", max_dist=0.020)
-        ctx.expect_aabb_gap_z("lid", "jar", max_gap=0.004, max_penetration=0.0)
+        ctx.expect_aabb_overlap("lid", "jar", axes="xy", min_overlap=0.110)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.090)
+        ctx.expect_origin_distance("lid", "jar", axes="xy", max_dist=0.020)
+        ctx.expect_aabb_gap("lid", "jar", axis="z", max_gap=0.004, max_penetration=0.0)
 
     with ctx.pose(base_to_jar=-0.35):
-        ctx.expect_aabb_overlap_xy("jar", "base", min_overlap=0.100)
-        ctx.expect_xy_distance("jar", "base", max_dist=0.014)
-        ctx.expect_aabb_gap_z("jar", "base", max_gap=0.003, max_penetration=1e-5)
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.085)
+        ctx.expect_aabb_overlap("jar", "base", axes="xy", min_overlap=0.100)
+        ctx.expect_origin_distance("jar", "base", axes="xy", max_dist=0.014)
+        ctx.expect_aabb_gap("jar", "base", axis="z", max_gap=0.003, max_penetration=1e-5)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.085)
 
     with ctx.pose(base_to_jar=0.35):
-        ctx.expect_aabb_overlap_xy("jar", "base", min_overlap=0.100)
-        ctx.expect_xy_distance("jar", "base", max_dist=0.014)
-        ctx.expect_aabb_gap_z("jar", "base", max_gap=0.003, max_penetration=1e-5)
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.085)
+        ctx.expect_aabb_overlap("jar", "base", axes="xy", min_overlap=0.100)
+        ctx.expect_origin_distance("jar", "base", axes="xy", max_dist=0.014)
+        ctx.expect_aabb_gap("jar", "base", axis="z", max_gap=0.003, max_penetration=1e-5)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.085)
 
     with ctx.pose(base_to_jar=0.35, jar_to_lid=0.036):
-        ctx.expect_aabb_overlap_xy("lid", "jar", min_overlap=0.110)
-        ctx.expect_xy_distance("lid", "jar", max_dist=0.022)
-        ctx.expect_aabb_overlap_xy("lid", "base", min_overlap=0.085)
+        ctx.expect_aabb_overlap("lid", "jar", axes="xy", min_overlap=0.110)
+        ctx.expect_origin_distance("lid", "jar", axes="xy", max_dist=0.022)
+        ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.085)
 
     ctx.expect_joint_motion_axis(
         "jar_to_lid",

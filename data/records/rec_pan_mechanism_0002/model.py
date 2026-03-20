@@ -149,17 +149,15 @@ def build_object_model() -> ArticulatedObject:
         material="machined_steel",
     )
 
-    mount_frame.collision(Box((0.32, 0.22, 0.014)), origin=Origin(xyz=(0.0, 0.0, 0.007)))
-    mount_frame.collision(Box((0.26, 0.028, 0.018)), origin=Origin(xyz=(0.0, 0.074, 0.009)))
-    mount_frame.collision(Box((0.26, 0.028, 0.018)), origin=Origin(xyz=(0.0, -0.074, 0.009)))
-    mount_frame.collision(Box((0.014, 0.18, 0.078)), origin=Origin(xyz=(0.103, 0.0, 0.053)))
-    mount_frame.collision(Box((0.014, 0.18, 0.078)), origin=Origin(xyz=(-0.103, 0.0, 0.053)))
-    mount_frame.collision(Box((0.196, 0.012, 0.050)), origin=Origin(xyz=(0.0, 0.084, 0.057)))
-    mount_frame.collision(Box((0.196, 0.012, 0.050)), origin=Origin(xyz=(0.0, -0.084, 0.057)))
-    mount_frame.collision(Box((0.24, 0.18, 0.012)), origin=Origin(xyz=(0.0, 0.0, 0.094)))
-    mount_frame.collision(
-        Cylinder(radius=0.056, length=0.017), origin=Origin(xyz=(0.0, 0.0, 0.1145))
-    )
+
+
+
+
+
+
+
+
+
     mount_frame.inertial = Inertial.from_geometry(
         Box((0.32, 0.22, 0.123)),
         mass=16.0,
@@ -180,13 +178,11 @@ def build_object_model() -> ArticulatedObject:
         material="sensor_black",
     )
 
-    scanner_platform.collision(
-        Cylinder(radius=0.068, length=0.007), origin=Origin(xyz=(0.0, 0.0, 0.0045))
-    )
-    scanner_platform.collision(Box((0.24, 0.17, 0.012)), origin=Origin(xyz=(0.035, 0.0, 0.022)))
-    scanner_platform.collision(Box((0.082, 0.11, 0.020)), origin=Origin(xyz=(0.110, 0.0, 0.036)))
-    scanner_platform.collision(Box((0.090, 0.090, 0.042)), origin=Origin(xyz=(0.128, 0.0, 0.058)))
-    scanner_platform.collision(Box((0.042, 0.080, 0.024)), origin=Origin(xyz=(-0.028, 0.0, 0.042)))
+
+
+
+
+
     scanner_platform.inertial = Inertial.from_geometry(
         Box((0.30, 0.17, 0.10)),
         mass=8.5,
@@ -211,12 +207,12 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.001, overlap_volume_tol=0.0)
-    ctx.expect_above("scanner_platform", "mount_frame", min_clearance=0.0)
-    ctx.expect_xy_distance("scanner_platform", "mount_frame", max_dist=0.08)
-    ctx.expect_aabb_overlap_xy("scanner_platform", "mount_frame", min_overlap=0.06)
-    ctx.expect_aabb_gap_z("scanner_platform", "mount_frame", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_gap("scanner_platform", "mount_frame", axis="z", min_gap=0.0)
+    ctx.expect_origin_distance("scanner_platform", "mount_frame", axes="xy", max_dist=0.08)
+    ctx.expect_aabb_overlap("scanner_platform", "mount_frame", axes="xy", min_overlap=0.06)
+    ctx.expect_aabb_gap("scanner_platform", "mount_frame", axis="z", max_gap=0.01, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "frame_to_platform_pan",
         "scanner_platform",

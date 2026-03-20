@@ -22,9 +22,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
-
+HERE = ASSETS.asset_root
 def _make_material(name: str, rgba: tuple[float, float, float, float]) -> Material | None:
     for key in ("color", "rgba"):
         try:
@@ -433,23 +431,23 @@ def run_tests() -> TestReport:
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.0025, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("flap", "frame", min_overlap=0.010)
+    ctx.expect_aabb_overlap("flap", "frame", axes="xy", min_overlap=0.010)
     _check_flap_pose(ctx, "rest pose", x_behavior="centered", top_behavior="tucked")
 
     with ctx.pose(frame_to_flap=0.45):
-        ctx.expect_aabb_overlap_xy("flap", "frame", min_overlap=0.010)
+        ctx.expect_aabb_overlap("flap", "frame", axes="xy", min_overlap=0.010)
         _check_flap_pose(
             ctx, "mid swing rearward", x_behavior="negative", top_behavior="within_frame"
         )
 
     with ctx.pose(frame_to_flap=-0.45):
-        ctx.expect_aabb_overlap_xy("flap", "frame", min_overlap=0.010)
+        ctx.expect_aabb_overlap("flap", "frame", axes="xy", min_overlap=0.010)
         _check_flap_pose(
             ctx, "mid swing forward", x_behavior="positive", top_behavior="within_frame"
         )
 
     with ctx.pose(frame_to_flap=0.60):
-        ctx.expect_aabb_overlap_xy("flap", "frame", min_overlap=0.010)
+        ctx.expect_aabb_overlap("flap", "frame", axes="xy", min_overlap=0.010)
         _check_flap_pose(
             ctx,
             "near-limit rearward swing",
@@ -458,7 +456,7 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose(frame_to_flap=-0.60):
-        ctx.expect_aabb_overlap_xy("flap", "frame", min_overlap=0.010)
+        ctx.expect_aabb_overlap("flap", "frame", axes="xy", min_overlap=0.010)
         _check_flap_pose(
             ctx,
             "near-limit forward swing",

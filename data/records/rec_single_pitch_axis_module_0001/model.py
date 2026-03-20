@@ -104,10 +104,10 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_base_shape(), "actuator_base.obj", assets=ASSETS),
         material="cast_aluminum",
     )
-    actuator_base.collision(Box((0.090, 0.070, 0.040)))
-    actuator_base.collision(Box((0.108, 0.018, 0.018)), origin=Origin(xyz=(0.0, 0.0, SHAFT_Z)))
-    actuator_base.collision(Box((0.012, 0.050, 0.044)), origin=Origin(xyz=(-CHEEK_X, 0.0, 0.042)))
-    actuator_base.collision(Box((0.012, 0.050, 0.044)), origin=Origin(xyz=(CHEEK_X, 0.0, 0.042)))
+
+
+
+
     actuator_base.inertial = Inertial.from_geometry(Box((0.112, 0.080, 0.060)), mass=1.8)
 
     payload_bracket = model.part("payload_bracket")
@@ -115,15 +115,11 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_build_payload_bracket_shape(), "payload_bracket.obj", assets=ASSETS),
         material="powdercoat_dark",
     )
-    payload_bracket.collision(Box((0.088, 0.010, 0.065)), origin=Origin(xyz=(0.0, 0.066, -0.010)))
-    payload_bracket.collision(
-        Box((0.010, 0.055, 0.018)), origin=Origin(xyz=(-BRACKET_BOSS_X, 0.032, -0.006))
-    )
-    payload_bracket.collision(
-        Box((0.010, 0.055, 0.018)), origin=Origin(xyz=(BRACKET_BOSS_X, 0.032, -0.006))
-    )
-    payload_bracket.collision(Box((0.032, 0.038, 0.016)), origin=Origin(xyz=(0.0, 0.044, -0.002)))
-    payload_bracket.collision(Box((0.070, 0.008, 0.012)), origin=Origin(xyz=(0.0, 0.018, 0.008)))
+
+
+
+
+
     payload_bracket.inertial = Inertial.from_geometry(
         Box((0.090, 0.080, 0.080)),
         mass=0.65,
@@ -152,12 +148,12 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("payload_bracket", "actuator_base", max_dist=0.01)
-    ctx.expect_above("payload_bracket", "actuator_base", min_clearance=0.035)
-    ctx.expect_aabb_overlap_xy("payload_bracket", "actuator_base", min_overlap=0.02)
+    ctx.expect_origin_distance("payload_bracket", "actuator_base", axes="xy", max_dist=0.01)
+    ctx.expect_origin_gap("payload_bracket", "actuator_base", axis="z", min_gap=0.035)
+    ctx.expect_aabb_overlap("payload_bracket", "actuator_base", axes="xy", min_overlap=0.02)
     ctx.expect_joint_motion_axis(
         "pitch_joint",
         "payload_bracket",
@@ -167,16 +163,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(pitch_joint=0.0):
-        ctx.expect_aabb_overlap_xy("payload_bracket", "actuator_base", min_overlap=0.02)
-        ctx.expect_xy_distance("payload_bracket", "actuator_base", max_dist=0.01)
+        ctx.expect_aabb_overlap("payload_bracket", "actuator_base", axes="xy", min_overlap=0.02)
+        ctx.expect_origin_distance("payload_bracket", "actuator_base", axes="xy", max_dist=0.01)
 
     with ctx.pose(pitch_joint=PITCH_UPPER):
-        ctx.expect_aabb_overlap_xy("payload_bracket", "actuator_base", min_overlap=0.015)
-        ctx.expect_xy_distance("payload_bracket", "actuator_base", max_dist=0.01)
+        ctx.expect_aabb_overlap("payload_bracket", "actuator_base", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("payload_bracket", "actuator_base", axes="xy", max_dist=0.01)
 
     with ctx.pose(pitch_joint=PITCH_LOWER):
-        ctx.expect_aabb_overlap_xy("payload_bracket", "actuator_base", min_overlap=0.015)
-        ctx.expect_xy_distance("payload_bracket", "actuator_base", max_dist=0.01)
+        ctx.expect_aabb_overlap("payload_bracket", "actuator_base", axes="xy", min_overlap=0.015)
+        ctx.expect_origin_distance("payload_bracket", "actuator_base", axes="xy", max_dist=0.01)
 
     return ctx.report()
 

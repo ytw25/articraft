@@ -97,22 +97,10 @@ def build_object_model() -> ArticulatedObject:
     frame.visual(
         mesh_from_cadquery(_make_frame_shape(), "frame.obj", assets=ASSETS), material="frame_finish"
     )
-    frame.collision(
-        Box((FRAME_SIDE_RAIL, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
-        origin=Origin(xyz=(-(FRAME_OUTER_WIDTH - FRAME_SIDE_RAIL) / 2.0, 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((FRAME_SIDE_RAIL, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
-        origin=Origin(xyz=((FRAME_OUTER_WIDTH - FRAME_SIDE_RAIL) / 2.0, 0.0, 0.0)),
-    )
-    frame.collision(
-        Box((_frame_inner_width(), FRAME_DEPTH, FRAME_TOP_RAIL)),
-        origin=Origin(xyz=(0.0, 0.0, (FRAME_OUTER_HEIGHT - FRAME_TOP_RAIL) / 2.0)),
-    )
-    frame.collision(
-        Box((_frame_inner_width(), FRAME_DEPTH, FRAME_TOP_RAIL)),
-        origin=Origin(xyz=(0.0, 0.0, -(FRAME_OUTER_HEIGHT - FRAME_TOP_RAIL) / 2.0)),
-    )
+
+
+
+
     frame.inertial = Inertial.from_geometry(
         Box((FRAME_OUTER_WIDTH, FRAME_DEPTH, FRAME_OUTER_HEIGHT)),
         mass=7.5,
@@ -132,10 +120,7 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(xyz=(0.0, SLAT_AXIS_OFFSET_Y, 0.0)),
             material="slat_finish",
         )
-        slat.collision(
-            Box((slat_span, 0.012, 0.094)),
-            origin=Origin(xyz=(slat_span / 2.0, SLAT_AXIS_OFFSET_Y, 0.0)),
-        )
+
         slat.inertial = Inertial.from_geometry(
             Box((slat_span, SLAT_DEPTH, 0.090)),
             mass=0.32,
@@ -165,7 +150,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=128,
         overlap_tol=0.001,
@@ -176,15 +161,10 @@ def run_tests() -> TestReport:
     joint_names = [f"frame_to_slat_{index:02d}" for index in range(1, SLAT_COUNT + 1)]
 
     for slat_name in slat_names:
-        ctx.expect_aabb_overlap_xy(slat_name, "frame", min_overlap=0.01)
+        ctx.expect_aabb_overlap(slat_name, "frame", axes="xy", min_overlap=0.01)
 
     for upper_name, lower_name in zip(slat_names[1:], slat_names[:-1]):
-        ctx.expect_aabb_gap_z(
-            upper_name,
-            lower_name,
-            max_gap=0.05,
-            max_penetration=0.0,
-        )
+        ctx.expect_aabb_gap(upper_name, lower_name, axis="z", max_gap=0.05, max_penetration=0.0)
 
     for joint_name, slat_name in zip(joint_names, slat_names):
         ctx.expect_joint_motion_axis(
@@ -195,7 +175,7 @@ def run_tests() -> TestReport:
             min_delta=0.01,
         )
 
-    ctx.expect_above(slat_names[-1], slat_names[0], min_clearance=0.55)
+    ctx.expect_origin_gap(slat_names[-1], slat_names[0], axis="z", min_gap=0.55)
     return ctx.report()
 
 

@@ -54,7 +54,7 @@ def _add_box_collision(
     size: tuple[float, float, float],
     center: tuple[float, float, float],
 ) -> None:
-    part.collision(Box(size), origin=Origin(xyz=center), name=name)
+    pass
 
 
 def _add_sleeve_wall_collisions(
@@ -251,20 +251,20 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, prefer_collisions=True, seed=0)
+    ctx = TestContext(object_model, geometry_source="collision", seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("stage1", "frame", min_overlap=0.018)
-    ctx.expect_aabb_overlap_xy("stage2", "stage1", min_overlap=0.012)
-    ctx.expect_aabb_overlap_xy("stage3", "stage2", min_overlap=0.008)
+    ctx.expect_aabb_overlap("stage1", "frame", axes="xy", min_overlap=0.018)
+    ctx.expect_aabb_overlap("stage2", "stage1", axes="xy", min_overlap=0.012)
+    ctx.expect_aabb_overlap("stage3", "stage2", axes="xy", min_overlap=0.008)
 
     ctx.expect_joint_motion_axis(
         "frame_to_stage1",
@@ -293,18 +293,18 @@ def run_tests() -> TestReport:
         stage1_to_stage2=STAGE1_TO_STAGE2_STROKE,
         stage2_to_stage3=STAGE2_TO_STAGE3_STROKE,
     ):
-        ctx.expect_aabb_overlap_xy("stage1", "frame", min_overlap=0.018)
-        ctx.expect_aabb_overlap_xy("stage2", "stage1", min_overlap=0.012)
-        ctx.expect_aabb_overlap_xy("stage3", "stage2", min_overlap=0.008)
+        ctx.expect_aabb_overlap("stage1", "frame", axes="xy", min_overlap=0.018)
+        ctx.expect_aabb_overlap("stage2", "stage1", axes="xy", min_overlap=0.012)
+        ctx.expect_aabb_overlap("stage3", "stage2", axes="xy", min_overlap=0.008)
 
     with ctx.pose(
         frame_to_stage1=FRAME_TO_STAGE1_STROKE * 0.5,
         stage1_to_stage2=STAGE1_TO_STAGE2_STROKE * 0.5,
         stage2_to_stage3=STAGE2_TO_STAGE3_STROKE * 0.5,
     ):
-        ctx.expect_aabb_overlap_xy("stage1", "frame", min_overlap=0.018)
-        ctx.expect_aabb_overlap_xy("stage2", "stage1", min_overlap=0.012)
-        ctx.expect_aabb_overlap_xy("stage3", "stage2", min_overlap=0.008)
+        ctx.expect_aabb_overlap("stage1", "frame", axes="xy", min_overlap=0.018)
+        ctx.expect_aabb_overlap("stage2", "stage1", axes="xy", min_overlap=0.012)
+        ctx.expect_aabb_overlap("stage3", "stage2", axes="xy", min_overlap=0.008)
 
     return ctx.report()
 

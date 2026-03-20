@@ -248,31 +248,31 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("guide_rails", "body", max_dist=0.035)
+    ctx.expect_origin_distance("guide_rails", "body", axes="xy", max_dist=0.035)
     ctx.expect_joint_motion_axis(
         "left_slide", "left_jaw", world_axis="x", direction="negative", min_delta=0.01
     )
     ctx.expect_joint_motion_axis(
         "right_slide", "right_jaw", world_axis="x", direction="positive", min_delta=0.01
     )
-    ctx.expect_aabb_overlap_xy("left_jaw", "guide_rails", min_overlap=0.003)
-    ctx.expect_aabb_overlap_xy("right_jaw", "guide_rails", min_overlap=0.003)
-    ctx.expect_xy_distance("left_jaw", "guide_rails", max_dist=0.05)
-    ctx.expect_xy_distance("right_jaw", "guide_rails", max_dist=0.05)
-    ctx.expect_xy_distance("left_jaw", "right_jaw", max_dist=0.08)
+    ctx.expect_aabb_overlap("left_jaw", "guide_rails", axes="xy", min_overlap=0.003)
+    ctx.expect_aabb_overlap("right_jaw", "guide_rails", axes="xy", min_overlap=0.003)
+    ctx.expect_origin_distance("left_jaw", "guide_rails", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("right_jaw", "guide_rails", axes="xy", max_dist=0.05)
+    ctx.expect_origin_distance("left_jaw", "right_jaw", axes="xy", max_dist=0.08)
 
     with ctx.pose(left_slide=0.018, right_slide=0.018):
-        ctx.expect_aabb_overlap_xy("left_jaw", "guide_rails", min_overlap=0.003)
-        ctx.expect_aabb_overlap_xy("right_jaw", "guide_rails", min_overlap=0.003)
-        ctx.expect_xy_distance("left_jaw", "guide_rails", max_dist=0.07)
-        ctx.expect_xy_distance("right_jaw", "guide_rails", max_dist=0.07)
-        ctx.expect_xy_distance("left_jaw", "right_jaw", max_dist=0.12)
+        ctx.expect_aabb_overlap("left_jaw", "guide_rails", axes="xy", min_overlap=0.003)
+        ctx.expect_aabb_overlap("right_jaw", "guide_rails", axes="xy", min_overlap=0.003)
+        ctx.expect_origin_distance("left_jaw", "guide_rails", axes="xy", max_dist=0.07)
+        ctx.expect_origin_distance("right_jaw", "guide_rails", axes="xy", max_dist=0.07)
+        ctx.expect_origin_distance("left_jaw", "right_jaw", axes="xy", max_dist=0.12)
 
     with ctx.pose(left_slide=0.018, right_slide=0.0):
-        ctx.expect_aabb_overlap_xy("left_jaw", "guide_rails", min_overlap=0.003)
-        ctx.expect_aabb_overlap_xy("right_jaw", "guide_rails", min_overlap=0.003)
-        ctx.expect_xy_distance("left_jaw", "guide_rails", max_dist=0.07)
-        ctx.expect_xy_distance("right_jaw", "guide_rails", max_dist=0.05)
+        ctx.expect_aabb_overlap("left_jaw", "guide_rails", axes="xy", min_overlap=0.003)
+        ctx.expect_aabb_overlap("right_jaw", "guide_rails", axes="xy", min_overlap=0.003)
+        ctx.expect_origin_distance("left_jaw", "guide_rails", axes="xy", max_dist=0.07)
+        ctx.expect_origin_distance("right_jaw", "guide_rails", axes="xy", max_dist=0.05)
 
     return ctx.report()
 

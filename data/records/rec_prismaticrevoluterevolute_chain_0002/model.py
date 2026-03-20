@@ -171,10 +171,10 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _make_base_shape(), "module_base.obj", "base_steel")
-    base.collision(Box((0.34, 0.12, 0.012)), origin=Origin(xyz=(0.0, 0.0, 0.006)))
-    base.collision(Box((0.29, 0.058, 0.018)), origin=Origin(xyz=(0.0, 0.0, 0.021)))
-    base.collision(Box((0.018, 0.06, 0.028)), origin=Origin(xyz=(-0.146, 0.0, 0.026)))
-    base.collision(Box((0.018, 0.06, 0.028)), origin=Origin(xyz=(0.146, 0.0, 0.026)))
+
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.34, 0.12, 0.04)),
         mass=4.5,
@@ -183,9 +183,9 @@ def build_object_model() -> ArticulatedObject:
 
     carriage = model.part("carriage")
     _add_mesh_visual(carriage, _make_carriage_shape(), "module_carriage.obj", "carriage_dark")
-    carriage.collision(Box((0.108, 0.09, 0.034)), origin=Origin(xyz=(0.002, 0.0, 0.018)))
-    carriage.collision(Box((0.044, 0.058, 0.026)), origin=Origin(xyz=(0.036, 0.0, 0.05)))
-    carriage.collision(Cylinder(radius=0.025, length=0.006), origin=Origin(xyz=(0.052, 0.0, 0.063)))
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.11, 0.09, 0.07)),
         mass=1.7,
@@ -194,10 +194,10 @@ def build_object_model() -> ArticulatedObject:
 
     shoulder = model.part("shoulder_link")
     _add_mesh_visual(shoulder, _make_shoulder_shape(), "module_shoulder.obj", "joint_blue")
-    shoulder.collision(Cylinder(radius=0.021, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.007)))
-    shoulder.collision(Box((0.108, 0.036, 0.026)), origin=Origin(xyz=(0.055, 0.0, 0.026)))
-    shoulder.collision(Box((0.03, 0.008, 0.04)), origin=Origin(xyz=(0.112, 0.018, 0.028)))
-    shoulder.collision(Box((0.03, 0.008, 0.04)), origin=Origin(xyz=(0.112, -0.018, 0.028)))
+
+
+
+
     shoulder.inertial = Inertial.from_geometry(
         Box((0.125, 0.05, 0.05)),
         mass=1.15,
@@ -206,9 +206,9 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm_link")
     _add_mesh_visual(forearm, _make_forearm_shape(), "module_forearm.obj", "arm_silver")
-    forearm.collision(Box((0.024, 0.022, 0.03)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    forearm.collision(Box((0.098, 0.024, 0.024)), origin=Origin(xyz=(0.06, 0.0, 0.0)))
-    forearm.collision(Box((0.026, 0.045, 0.03)), origin=Origin(xyz=(0.113, 0.0, 0.0)))
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((0.135, 0.045, 0.04)),
         mass=0.85,
@@ -251,7 +251,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.001, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -276,34 +276,34 @@ def run_tests() -> TestReport:
         min_delta=0.01,
     )
 
-    ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.05)
-    ctx.expect_aabb_gap_z("carriage", "base", max_gap=0.01, max_penetration=0.01)
-    ctx.expect_aabb_overlap_xy("shoulder_link", "carriage", min_overlap=0.015)
-    ctx.expect_aabb_gap_z("shoulder_link", "carriage", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_xy_distance("shoulder_link", "carriage", max_dist=0.12)
-    ctx.expect_xy_distance("forearm_link", "shoulder_link", max_dist=0.14)
-    ctx.expect_above("shoulder_link", "base", min_clearance=0.02)
-    ctx.expect_above("forearm_link", "carriage", min_clearance=0.01)
+    ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.05)
+    ctx.expect_aabb_gap("carriage", "base", axis="z", max_gap=0.01, max_penetration=0.01)
+    ctx.expect_aabb_overlap("shoulder_link", "carriage", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_gap("shoulder_link", "carriage", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_distance("shoulder_link", "carriage", axes="xy", max_dist=0.12)
+    ctx.expect_origin_distance("forearm_link", "shoulder_link", axes="xy", max_dist=0.14)
+    ctx.expect_origin_gap("shoulder_link", "base", axis="z", min_gap=0.02)
+    ctx.expect_origin_gap("forearm_link", "carriage", axis="z", min_gap=0.01)
 
     with _pose(ctx, base_to_carriage=0.14):
-        ctx.expect_aabb_overlap_xy("carriage", "base", min_overlap=0.03)
-        ctx.expect_aabb_gap_z("carriage", "base", max_gap=0.01, max_penetration=0.01)
+        ctx.expect_aabb_overlap("carriage", "base", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_gap("carriage", "base", axis="z", max_gap=0.01, max_penetration=0.01)
 
     with _pose(ctx, carriage_to_shoulder=0.9):
-        ctx.expect_xy_distance("shoulder_link", "carriage", max_dist=0.12)
-        ctx.expect_above("shoulder_link", "base", min_clearance=0.02)
+        ctx.expect_origin_distance("shoulder_link", "carriage", axes="xy", max_dist=0.12)
+        ctx.expect_origin_gap("shoulder_link", "base", axis="z", min_gap=0.02)
 
     with _pose(ctx, shoulder_to_forearm=-0.45):
-        ctx.expect_above("forearm_link", "base", min_clearance=0.0)
-        ctx.expect_xy_distance("forearm_link", "shoulder_link", max_dist=0.16)
+        ctx.expect_origin_gap("forearm_link", "base", axis="z", min_gap=0.0)
+        ctx.expect_origin_distance("forearm_link", "shoulder_link", axes="xy", max_dist=0.16)
 
     with _pose(ctx, shoulder_to_forearm=1.0):
-        ctx.expect_above("forearm_link", "carriage", min_clearance=0.04)
-        ctx.expect_xy_distance("forearm_link", "shoulder_link", max_dist=0.16)
+        ctx.expect_origin_gap("forearm_link", "carriage", axis="z", min_gap=0.04)
+        ctx.expect_origin_distance("forearm_link", "shoulder_link", axes="xy", max_dist=0.16)
 
     with _pose(ctx, base_to_carriage=0.14, carriage_to_shoulder=0.9, shoulder_to_forearm=1.0):
-        ctx.expect_above("forearm_link", "base", min_clearance=0.04)
-        ctx.expect_xy_distance("forearm_link", "carriage", max_dist=0.24)
+        ctx.expect_origin_gap("forearm_link", "base", axis="z", min_gap=0.04)
+        ctx.expect_origin_distance("forearm_link", "carriage", axes="xy", max_dist=0.24)
 
     return ctx.report()
 

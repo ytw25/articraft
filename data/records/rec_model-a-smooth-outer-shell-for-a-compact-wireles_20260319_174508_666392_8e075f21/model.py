@@ -22,8 +22,8 @@ from sdk import (
 
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
 MOUSE_MESH_PATH = MESH_DIR / "mouse_body_shell.obj"
 
 MODEL_LENGTH = 0.118

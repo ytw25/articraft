@@ -310,9 +310,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("body", "support", min_overlap=0.08)
-    ctx.expect_xy_distance("body", "support", max_dist=0.09)
-    ctx.expect_aabb_gap_z("body", "support", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_aabb_overlap("body", "support", axes="xy", min_overlap=0.08)
+    ctx.expect_origin_distance("body", "support", axes="xy", max_dist=0.09)
+    ctx.expect_aabb_gap("body", "support", axis="z", max_gap=0.006, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "front_access_door",
         "door",

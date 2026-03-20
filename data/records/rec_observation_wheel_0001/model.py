@@ -297,20 +297,20 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("wheel", "support", min_overlap=0.65)
-    ctx.expect_xy_distance("wheel", "support", max_dist=0.05)
+    ctx.expect_aabb_overlap("wheel", "support", axes="xy", min_overlap=0.65)
+    ctx.expect_origin_distance("wheel", "support", axes="xy", max_dist=0.05)
 
     with ctx.pose(wheel_spin=math.pi / 4.0):
-        ctx.expect_aabb_overlap_xy("wheel", "support", min_overlap=0.65)
-        ctx.expect_xy_distance("wheel", "support", max_dist=0.05)
+        ctx.expect_aabb_overlap("wheel", "support", axes="xy", min_overlap=0.65)
+        ctx.expect_origin_distance("wheel", "support", axes="xy", max_dist=0.05)
 
     with ctx.pose(wheel_spin=math.pi / 2.0):
-        ctx.expect_aabb_overlap_xy("wheel", "support", min_overlap=0.65)
-        ctx.expect_xy_distance("wheel", "support", max_dist=0.05)
+        ctx.expect_aabb_overlap("wheel", "support", axes="xy", min_overlap=0.65)
+        ctx.expect_origin_distance("wheel", "support", axes="xy", max_dist=0.05)
 
     with ctx.pose(wheel_spin=math.pi):
-        ctx.expect_aabb_overlap_xy("wheel", "support", min_overlap=0.65)
-        ctx.expect_xy_distance("wheel", "support", max_dist=0.05)
+        ctx.expect_aabb_overlap("wheel", "support", axes="xy", min_overlap=0.65)
+        ctx.expect_origin_distance("wheel", "support", axes="xy", max_dist=0.05)
 
     return ctx.report()
 

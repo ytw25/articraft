@@ -28,8 +28,7 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-
+HERE = ASSETS.asset_root
 REAR_WHEEL_RADIUS = 0.085
 REAR_WHEEL_WIDTH = 0.024
 CASTER_WHEEL_RADIUS = 0.055
@@ -541,16 +540,16 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("backrest", "chassis", max_dist=0.17)
-    ctx.expect_aabb_overlap_xy("footrest_left", "chassis", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("footrest_right", "chassis", min_overlap=0.01)
-    ctx.expect_aabb_overlap_xy("caster_left_yoke", "chassis", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("caster_right_yoke", "chassis", min_overlap=0.02)
-    ctx.expect_aabb_overlap_xy("rear_wheel_left", "chassis", min_overlap=0.003)
-    ctx.expect_aabb_overlap_xy("rear_wheel_right", "chassis", min_overlap=0.003)
-    ctx.expect_xy_distance("rear_wheel_left", "rear_wheel_right", max_dist=0.55)
-    ctx.expect_xy_distance("caster_left_wheel", "caster_right_wheel", max_dist=0.50)
-    ctx.expect_xy_distance("footrest_left", "footrest_right", max_dist=0.24)
+    ctx.expect_origin_distance("backrest", "chassis", axes="xy", max_dist=0.17)
+    ctx.expect_aabb_overlap("footrest_left", "chassis", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("footrest_right", "chassis", axes="xy", min_overlap=0.01)
+    ctx.expect_aabb_overlap("caster_left_yoke", "chassis", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("caster_right_yoke", "chassis", axes="xy", min_overlap=0.02)
+    ctx.expect_aabb_overlap("rear_wheel_left", "chassis", axes="xy", min_overlap=0.003)
+    ctx.expect_aabb_overlap("rear_wheel_right", "chassis", axes="xy", min_overlap=0.003)
+    ctx.expect_origin_distance("rear_wheel_left", "rear_wheel_right", axes="xy", max_dist=0.55)
+    ctx.expect_origin_distance("caster_left_wheel", "caster_right_wheel", axes="xy", max_dist=0.50)
+    ctx.expect_origin_distance("footrest_left", "footrest_right", axes="xy", max_dist=0.24)
     ctx.expect_joint_motion_axis(
         "backrest_fold",
         "backrest",
@@ -574,16 +573,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(backrest_fold=1.0):
-        ctx.expect_xy_distance("backrest", "chassis", max_dist=0.26)
+        ctx.expect_origin_distance("backrest", "chassis", axes="xy", max_dist=0.26)
 
     with ctx.pose(caster_left_swivel=math.pi / 2.0, caster_right_swivel=-math.pi / 2.0):
-        ctx.expect_xy_distance("caster_left_wheel", "caster_left_yoke", max_dist=0.001)
-        ctx.expect_xy_distance("caster_right_wheel", "caster_right_yoke", max_dist=0.001)
-        ctx.expect_aabb_overlap_xy("caster_left_wheel", "caster_left_yoke", min_overlap=0.015)
-        ctx.expect_aabb_overlap_xy("caster_right_wheel", "caster_right_yoke", min_overlap=0.015)
+        ctx.expect_origin_distance("caster_left_wheel", "caster_left_yoke", axes="xy", max_dist=0.001)
+        ctx.expect_origin_distance("caster_right_wheel", "caster_right_yoke", axes="xy", max_dist=0.001)
+        ctx.expect_aabb_overlap("caster_left_wheel", "caster_left_yoke", axes="xy", min_overlap=0.015)
+        ctx.expect_aabb_overlap("caster_right_wheel", "caster_right_yoke", axes="xy", min_overlap=0.015)
 
     with ctx.pose(footrest_left_fold=1.2, footrest_right_fold=1.2):
-        ctx.expect_xy_distance("footrest_left", "footrest_right", max_dist=0.28)
+        ctx.expect_origin_distance("footrest_left", "footrest_right", axes="xy", max_dist=0.28)
 
     return ctx.report()
 

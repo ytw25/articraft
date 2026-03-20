@@ -21,7 +21,7 @@ from sdk import (
     TestReport,
 )
 
-HERE = Path(__file__).resolve().parent
+HERE = ASSETS.asset_root
 ASSETS = AssetContext.from_script(__file__)
 
 
@@ -453,8 +453,8 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("canvas_tray", "front_frame", min_overlap=0.055)
-    ctx.expect_xy_distance("canvas_tray", "front_frame", max_dist=0.14)
+    ctx.expect_aabb_overlap("canvas_tray", "front_frame", axes="xy", min_overlap=0.055)
+    ctx.expect_origin_distance("canvas_tray", "front_frame", axes="xy", max_dist=0.14)
     ctx.expect_joint_motion_axis(
         "tray_height", "canvas_tray", world_axis="z", direction="positive", min_delta=0.20
     )
@@ -474,7 +474,7 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(tray_height=0.760):
-        ctx.expect_aabb_overlap_xy("canvas_tray", "front_frame", min_overlap=0.055)
+        ctx.expect_aabb_overlap("canvas_tray", "front_frame", axes="xy", min_overlap=0.055)
         tray_high_pos = _to_xyz(ctx.part_world_position("canvas_tray"))
         assert tray_high_pos[2] - tray_low_pos[2] > 0.70, (
             "Tray should offer a substantial working height range."

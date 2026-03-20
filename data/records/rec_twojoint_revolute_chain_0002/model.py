@@ -4,6 +4,7 @@ import inspect
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -17,11 +18,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 if cadquery_available():
     import cadquery as cq
@@ -150,14 +150,8 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     base.visual(_mesh("lamp_base.obj", _build_base_shape()), material="powder_black")
-    base.collision(
-        Cylinder(radius=BASE_RADIUS, length=BASE_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, BASE_THICKNESS / 2.0)),
-    )
-    base.collision(
-        Cylinder(radius=0.017, length=COLUMN_HEIGHT),
-        origin=Origin(xyz=(0.0, 0.0, BASE_THICKNESS + COLUMN_HEIGHT / 2.0)),
-    )
+
+
     base.inertial = Inertial.from_geometry(
         Cylinder(radius=BASE_RADIUS, length=BASE_THICKNESS),
         mass=2.2,
@@ -166,18 +160,9 @@ def build_object_model() -> ArticulatedObject:
 
     lower_arm = model.part("lower_arm")
     lower_arm.visual(_mesh("lower_arm.obj", _build_lower_arm_shape()), material="warm_brass")
-    lower_arm.collision(
-        Box((0.240, 0.018, 0.018)),
-        origin=Origin(xyz=(0.130, 0.0, 0.0)),
-    )
-    lower_arm.collision(
-        Box((0.018, 0.018, 0.018)),
-        origin=Origin(xyz=(0.0285, 0.0, 0.0)),
-    )
-    lower_arm.collision(
-        Box((0.020, 0.020, 0.020)),
-        origin=Origin(xyz=(0.270, 0.0, 0.0)),
-    )
+
+
+
     lower_arm.inertial = Inertial.from_geometry(
         Box((0.260, 0.024, 0.024)),
         mass=0.42,
@@ -190,18 +175,9 @@ def build_object_model() -> ArticulatedObject:
         material="warm_brass",
     )
     upper_assembly.visual(_mesh("lamp_shade.obj", _build_shade_shape()), material="shade_cream")
-    upper_assembly.collision(
-        Box((0.182, 0.016, 0.016)),
-        origin=Origin(xyz=(0.102, 0.0, 0.0)),
-    )
-    upper_assembly.collision(
-        Box((0.020, 0.018, 0.018)),
-        origin=Origin(xyz=(0.010, 0.0, 0.0)),
-    )
-    upper_assembly.collision(
-        Box((0.092, 0.072, 0.050)),
-        origin=Origin(xyz=(0.248, 0.0, -0.025)),
-    )
+
+
+
     upper_assembly.inertial = Inertial.from_geometry(
         Box((0.305, 0.072, 0.060)),
         mass=0.48,
@@ -254,7 +230,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=192,
         overlap_tol=0.002,
@@ -276,14 +252,14 @@ def run_tests() -> TestReport:
         min_delta=0.03,
     )
 
-    ctx.expect_xy_distance("lower_arm", "base", max_dist=0.18)
-    ctx.expect_aabb_overlap_xy("lower_arm", "base", min_overlap=0.015)
-    ctx.expect_xy_distance("upper_assembly", "base", max_dist=0.48)
+    ctx.expect_origin_distance("lower_arm", "base", axes="xy", max_dist=0.18)
+    ctx.expect_aabb_overlap("lower_arm", "base", axes="xy", min_overlap=0.015)
+    ctx.expect_origin_distance("upper_assembly", "base", axes="xy", max_dist=0.48)
 
     with _pose(ctx, {"base_to_lower_arm": SHOULDER_LIMITS[1]}):
-        ctx.expect_above("lower_arm", "base", min_clearance=0.02)
-        ctx.expect_above("upper_assembly", "base", min_clearance=0.05)
-        ctx.expect_aabb_gap_z("upper_assembly", "base", max_gap=0.45, max_penetration=0.0)
+        ctx.expect_origin_gap("lower_arm", "base", axis="z", min_gap=0.02)
+        ctx.expect_origin_gap("upper_assembly", "base", axis="z", min_gap=0.05)
+        ctx.expect_aabb_gap("upper_assembly", "base", axis="z", max_gap=0.45, max_penetration=0.0)
 
     with _pose(
         ctx,
@@ -292,8 +268,8 @@ def run_tests() -> TestReport:
             "lower_arm_to_upper_assembly": ELBOW_LIMITS[0],
         },
     ):
-        ctx.expect_above("upper_assembly", "base", min_clearance=0.01)
-        ctx.expect_xy_distance("upper_assembly", "lower_arm", max_dist=0.34)
+        ctx.expect_origin_gap("upper_assembly", "base", axis="z", min_gap=0.01)
+        ctx.expect_origin_distance("upper_assembly", "lower_arm", axes="xy", max_dist=0.34)
 
     with _pose(
         ctx,
@@ -302,7 +278,7 @@ def run_tests() -> TestReport:
             "lower_arm_to_upper_assembly": ELBOW_LIMITS[1],
         },
     ):
-        ctx.expect_xy_distance("upper_assembly", "base", max_dist=0.55)
+        ctx.expect_origin_distance("upper_assembly", "base", axes="xy", max_dist=0.55)
 
     return ctx.report()
 

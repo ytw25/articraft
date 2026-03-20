@@ -196,10 +196,7 @@ def build_object_model() -> ArticulatedObject:
 
     base_plate = model.part("base_plate")
     _add_mesh_visual(base_plate, _build_base_plate_shape(), "base_plate.obj", material="frame_blue")
-    base_plate.collision(
-        Box((BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, BASE_THICKNESS / 2.0)),
-    )
+
     base_plate.inertial = Inertial.from_geometry(
         Box((BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS)),
         mass=5.5,
@@ -213,22 +210,10 @@ def build_object_model() -> ArticulatedObject:
         "support_frame.obj",
         material="frame_blue",
     )
-    support_frame.collision(
-        Box((SUPPORT_COLUMN_WIDTH, SUPPORT_DEPTH, SUPPORT_COLUMN_HEIGHT)),
-        origin=Origin(xyz=(-SUPPORT_X, 0.0, SUPPORT_COLUMN_HEIGHT / 2.0)),
-    )
-    support_frame.collision(
-        Box((SUPPORT_COLUMN_WIDTH, SUPPORT_DEPTH, SUPPORT_COLUMN_HEIGHT)),
-        origin=Origin(xyz=(SUPPORT_X, 0.0, SUPPORT_COLUMN_HEIGHT / 2.0)),
-    )
-    support_frame.collision(
-        Box((LOWER_CROSS_WIDTH, LOWER_CROSS_DEPTH, LOWER_CROSS_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, LOWER_CROSS_HEIGHT / 2.0)),
-    )
-    support_frame.collision(
-        Box((UPPER_TIE_WIDTH, UPPER_TIE_DEPTH, UPPER_TIE_HEIGHT)),
-        origin=Origin(xyz=(0.0, UPPER_TIE_Y, SUPPORT_FRAME_PIVOT_Z)),
-    )
+
+
+
+
     support_frame.inertial = Inertial.from_geometry(
         Box((0.40, 0.09, 0.16)),
         mass=4.0,
@@ -242,10 +227,7 @@ def build_object_model() -> ArticulatedObject:
         "support_shaft.obj",
         material="dark_steel",
     )
-    support_shaft.collision(
-        Cylinder(radius=SHAFT_RADIUS, length=SHAFT_LENGTH),
-        origin=Origin(rpy=(0.0, pi / 2.0, 0.0)),
-    )
+
     support_shaft.inertial = Inertial.from_geometry(
         Cylinder(radius=SHAFT_RADIUS, length=SHAFT_LENGTH),
         mass=0.9,
@@ -259,22 +241,10 @@ def build_object_model() -> ArticulatedObject:
         "cradle_yoke.obj",
         material="dark_steel",
     )
-    cradle_yoke.collision(
-        Cylinder(radius=0.018, length=CRADLE_TUBE_LENGTH),
-        origin=Origin(rpy=(0.0, pi / 2.0, 0.0)),
-    )
-    cradle_yoke.collision(
-        Box((0.014, 0.10, 0.075)),
-        origin=Origin(xyz=(-0.11, 0.0, -0.0375)),
-    )
-    cradle_yoke.collision(
-        Box((0.014, 0.10, 0.075)),
-        origin=Origin(xyz=(0.11, 0.0, -0.0375)),
-    )
-    cradle_yoke.collision(
-        Box((0.16, 0.03, 0.008)),
-        origin=Origin(xyz=(0.0, 0.0, -0.066)),
-    )
+
+
+
+
     cradle_yoke.inertial = Inertial.from_geometry(
         Box((0.28, 0.10, 0.09)),
         mass=1.6,
@@ -288,10 +258,7 @@ def build_object_model() -> ArticulatedObject:
         "equipment_plate.obj",
         material="plate_gray",
     )
-    equipment_plate.collision(
-        Box((PLATE_WIDTH, PLATE_DEPTH, PLATE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, -PLATE_THICKNESS / 2.0)),
-    )
+
     equipment_plate.inertial = Inertial.from_geometry(
         Box((PLATE_WIDTH, PLATE_DEPTH, PLATE_THICKNESS)),
         mass=1.8,
@@ -342,7 +309,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.allow_overlap(
         "support_shaft",
         "cradle_yoke",
@@ -360,15 +327,15 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    ctx.expect_above("support_frame", "base_plate", min_clearance=0.0)
-    ctx.expect_above("equipment_plate", "base_plate", min_clearance=0.04)
-    ctx.expect_above("support_shaft", "equipment_plate", min_clearance=0.05)
-    ctx.expect_xy_distance("equipment_plate", "base_plate", max_dist=0.02)
-    ctx.expect_xy_distance("support_shaft", "support_frame", max_dist=0.02)
-    ctx.expect_xy_distance("cradle_yoke", "support_shaft", max_dist=0.04)
-    ctx.expect_aabb_overlap_xy("equipment_plate", "base_plate", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("equipment_plate", "base_plate", max_gap=0.08, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("support_shaft", "equipment_plate", max_gap=0.08, max_penetration=0.0)
+    ctx.expect_origin_gap("support_frame", "base_plate", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("equipment_plate", "base_plate", axis="z", min_gap=0.04)
+    ctx.expect_origin_gap("support_shaft", "equipment_plate", axis="z", min_gap=0.05)
+    ctx.expect_origin_distance("equipment_plate", "base_plate", axes="xy", max_dist=0.02)
+    ctx.expect_origin_distance("support_shaft", "support_frame", axes="xy", max_dist=0.02)
+    ctx.expect_origin_distance("cradle_yoke", "support_shaft", axes="xy", max_dist=0.04)
+    ctx.expect_aabb_overlap("equipment_plate", "base_plate", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("equipment_plate", "base_plate", axis="z", max_gap=0.08, max_penetration=0.0)
+    ctx.expect_aabb_gap("support_shaft", "equipment_plate", axis="z", max_gap=0.08, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "shaft_to_cradle",
         "cradle_yoke",

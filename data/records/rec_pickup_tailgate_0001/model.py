@@ -387,9 +387,9 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("tailgate", "body_frame", min_overlap=0.04)
-    ctx.expect_aabb_overlap_xy("body_frame", "bed_floor", min_overlap=0.08)
-    ctx.expect_aabb_overlap_xy("tailgate", "bed_floor", min_overlap=0.05)
+    ctx.expect_aabb_overlap("tailgate", "body_frame", axes="xy", min_overlap=0.04)
+    ctx.expect_aabb_overlap("body_frame", "bed_floor", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_overlap("tailgate", "bed_floor", axes="xy", min_overlap=0.05)
     ctx.expect_joint_motion_axis(
         "tailgate_hinge",
         "tailgate",
@@ -399,12 +399,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(tailgate_hinge=pi / 4.0):
-        ctx.expect_aabb_overlap_xy("tailgate", "body_frame", min_overlap=0.04)
-        ctx.expect_aabb_overlap_xy("tailgate", "bed_floor", min_overlap=0.05)
+        ctx.expect_aabb_overlap("tailgate", "body_frame", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_overlap("tailgate", "bed_floor", axes="xy", min_overlap=0.05)
 
     with ctx.pose(tailgate_hinge=pi / 2.0):
-        ctx.expect_aabb_overlap_xy("tailgate", "body_frame", min_overlap=0.04)
-        ctx.expect_aabb_overlap_xy("tailgate", "bed_floor", min_overlap=0.05)
+        ctx.expect_aabb_overlap("tailgate", "body_frame", axes="xy", min_overlap=0.04)
+        ctx.expect_aabb_overlap("tailgate", "bed_floor", axes="xy", min_overlap=0.05)
 
     return ctx.report()
 

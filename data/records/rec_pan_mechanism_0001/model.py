@@ -57,9 +57,9 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _build_base_shape(), "turntable_base.obj", "powder_black")
-    base.collision(Cylinder(radius=0.110, length=0.006), origin=Origin(xyz=(0.0, 0.0, 0.003)))
-    base.collision(Cylinder(radius=0.095, length=0.016), origin=Origin(xyz=(0.0, 0.0, 0.014)))
-    base.collision(Cylinder(radius=0.033, length=0.008), origin=Origin(xyz=(0.0, 0.0, 0.026)))
+
+
+
     base.inertial = Inertial.from_geometry(
         Cylinder(radius=0.105, length=0.030),
         mass=1.35,
@@ -73,10 +73,7 @@ def build_object_model() -> ArticulatedObject:
         "turntable_plate.obj",
         "machined_aluminum",
     )
-    turntable.collision(
-        Cylinder(radius=0.090, length=0.008),
-        origin=Origin(xyz=(0.0, 0.0, 0.004)),
-    )
+
     turntable.inertial = Inertial.from_geometry(
         Cylinder(radius=0.090, length=0.011),
         mass=0.70,
@@ -85,9 +82,9 @@ def build_object_model() -> ArticulatedObject:
 
     pedestal = model.part("payload_pedestal")
     _add_mesh_visual(pedestal, _build_pedestal_shape(), "payload_pedestal.obj", "pedestal_gray")
-    pedestal.collision(Box((0.060, 0.050, 0.006)), origin=Origin(xyz=(0.0, 0.0, 0.003)))
-    pedestal.collision(Box((0.038, 0.030, 0.074)), origin=Origin(xyz=(0.0, 0.0, 0.043)))
-    pedestal.collision(Box((0.075, 0.055, 0.006)), origin=Origin(xyz=(0.0, 0.0, 0.083)))
+
+
+
     pedestal.inertial = Inertial.from_geometry(
         Box((0.075, 0.055, 0.089)),
         mass=0.58,
@@ -124,21 +121,21 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("turntable_plate", "base", max_dist=0.005)
-    ctx.expect_xy_distance("payload_pedestal", "turntable_plate", max_dist=0.04)
-    ctx.expect_xy_distance("payload_pedestal", "base", max_dist=0.04)
+    ctx.expect_origin_distance("turntable_plate", "base", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("payload_pedestal", "turntable_plate", axes="xy", max_dist=0.04)
+    ctx.expect_origin_distance("payload_pedestal", "base", axes="xy", max_dist=0.04)
 
-    ctx.expect_above("turntable_plate", "base", min_clearance=0.0)
-    ctx.expect_above("payload_pedestal", "turntable_plate", min_clearance=0.0)
+    ctx.expect_origin_gap("turntable_plate", "base", axis="z", min_gap=0.0)
+    ctx.expect_origin_gap("payload_pedestal", "turntable_plate", axis="z", min_gap=0.0)
 
-    ctx.expect_aabb_overlap_xy("turntable_plate", "base", min_overlap=0.18)
-    ctx.expect_aabb_overlap_xy("payload_pedestal", "turntable_plate", min_overlap=0.05)
+    ctx.expect_aabb_overlap("turntable_plate", "base", axes="xy", min_overlap=0.18)
+    ctx.expect_aabb_overlap("payload_pedestal", "turntable_plate", axes="xy", min_overlap=0.05)
 
-    ctx.expect_aabb_gap_z("turntable_plate", "base", max_gap=0.002, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("payload_pedestal", "turntable_plate", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_aabb_gap("turntable_plate", "base", axis="z", max_gap=0.002, max_penetration=0.0)
+    ctx.expect_aabb_gap("payload_pedestal", "turntable_plate", axis="z", max_gap=0.002, max_penetration=0.0)
 
     ctx.expect_joint_motion_axis(
         "base_to_turntable",

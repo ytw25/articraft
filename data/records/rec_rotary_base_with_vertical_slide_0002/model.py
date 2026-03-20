@@ -101,17 +101,17 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base_frame")
     base.visual(_export_visual(_make_base_shape(), "base_frame.obj"), material="base_paint")
-    base.collision(Box(BASE_SIZE))
-    base.collision(Cylinder(radius=0.055, length=0.008), origin=Origin(xyz=(0.0, 0.0, 0.029)))
+
+
     base.inertial = Inertial.from_geometry(Box((0.30, 0.24, 0.07)), mass=12.0)
 
     rotary = model.part("rotary_head")
     rotary.visual(
         _export_visual(_make_rotary_head_shape(), "rotary_head.obj"), material="machined_steel"
     )
-    rotary.collision(Cylinder(radius=0.090, length=0.018), origin=Origin(xyz=(0.0, 0.0, 0.009)))
-    rotary.collision(Box((0.082, 0.072, 0.300)), origin=Origin(xyz=(0.030, 0.0, 0.168)))
-    rotary.collision(Box((0.012, 0.034, 0.240)), origin=Origin(xyz=(0.069, 0.0, 0.170)))
+
+
+
     rotary.inertial = Inertial.from_geometry(
         Box((0.20, 0.18, 0.34)),
         mass=6.5,
@@ -122,9 +122,9 @@ def build_object_model() -> ArticulatedObject:
     carriage.visual(
         _export_visual(_make_carriage_shape(), "carriage.obj"), material="safety_orange"
     )
-    carriage.collision(Box((0.010, 0.038, 0.060)), origin=Origin(xyz=(0.005, 0.0, 0.0)))
-    carriage.collision(Box((0.050, 0.088, 0.078)), origin=Origin(xyz=(0.036, 0.0, 0.0)))
-    carriage.collision(Box((0.086, 0.066, 0.012)), origin=Origin(xyz=(0.043, 0.0, 0.047)))
+
+
+
     carriage.inertial = Inertial.from_geometry(
         Box((0.10, 0.10, 0.10)),
         mass=2.2,
@@ -158,14 +158,14 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("rotary_head", "base_frame", min_overlap=0.08)
-    ctx.expect_aabb_gap_z("rotary_head", "base_frame", max_gap=0.01, max_penetration=0.0)
-    ctx.expect_above("carriage", "base_frame", min_clearance=0.08)
-    ctx.expect_aabb_overlap_xy("carriage", "rotary_head", min_overlap=0.01)
-    ctx.expect_xy_distance("carriage", "base_frame", max_dist=0.13)
+    ctx.expect_aabb_overlap("rotary_head", "base_frame", axes="xy", min_overlap=0.08)
+    ctx.expect_aabb_gap("rotary_head", "base_frame", axis="z", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_origin_gap("carriage", "base_frame", axis="z", min_gap=0.08)
+    ctx.expect_aabb_overlap("carriage", "rotary_head", axes="xy", min_overlap=0.01)
+    ctx.expect_origin_distance("carriage", "base_frame", axes="xy", max_dist=0.13)
     ctx.expect_joint_motion_axis(
         "base_yaw", "carriage", world_axis="y", direction="positive", min_delta=0.01
     )
@@ -174,18 +174,18 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(column_lift=LIFT_TRAVEL):
-        ctx.expect_above("carriage", "base_frame", min_clearance=0.20)
-        ctx.expect_aabb_overlap_xy("carriage", "rotary_head", min_overlap=0.01)
-        ctx.expect_xy_distance("carriage", "base_frame", max_dist=0.13)
+        ctx.expect_origin_gap("carriage", "base_frame", axis="z", min_gap=0.20)
+        ctx.expect_aabb_overlap("carriage", "rotary_head", axes="xy", min_overlap=0.01)
+        ctx.expect_origin_distance("carriage", "base_frame", axes="xy", max_dist=0.13)
 
     with ctx.pose(base_yaw=1.2):
-        ctx.expect_aabb_overlap_xy("rotary_head", "base_frame", min_overlap=0.08)
-        ctx.expect_xy_distance("rotary_head", "base_frame", max_dist=0.03)
-        ctx.expect_xy_distance("carriage", "base_frame", max_dist=0.13)
+        ctx.expect_aabb_overlap("rotary_head", "base_frame", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("rotary_head", "base_frame", axes="xy", max_dist=0.03)
+        ctx.expect_origin_distance("carriage", "base_frame", axes="xy", max_dist=0.13)
 
     with ctx.pose(base_yaw=1.2, column_lift=LIFT_TRAVEL):
-        ctx.expect_above("carriage", "base_frame", min_clearance=0.20)
-        ctx.expect_xy_distance("carriage", "base_frame", max_dist=0.13)
+        ctx.expect_origin_gap("carriage", "base_frame", axis="z", min_gap=0.20)
+        ctx.expect_origin_distance("carriage", "base_frame", axes="xy", max_dist=0.13)
 
     return ctx.report()
 

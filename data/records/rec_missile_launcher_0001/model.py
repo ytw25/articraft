@@ -346,16 +346,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(launcher_elevation=-0.15):
-        ctx.expect_aabb_overlap_xy("launcher_frame", "support_base", min_overlap=0.10)
-        ctx.expect_xy_distance("launcher_frame", "support_base", max_dist=0.22)
+        ctx.expect_aabb_overlap("launcher_frame", "support_base", axes="xy", min_overlap=0.10)
+        ctx.expect_origin_distance("launcher_frame", "support_base", axes="xy", max_dist=0.22)
 
     with ctx.pose(launcher_elevation=0.25):
-        ctx.expect_aabb_overlap_xy("launcher_frame", "support_base", min_overlap=0.10)
-        ctx.expect_xy_distance("launcher_frame", "support_base", max_dist=0.20)
+        ctx.expect_aabb_overlap("launcher_frame", "support_base", axes="xy", min_overlap=0.10)
+        ctx.expect_origin_distance("launcher_frame", "support_base", axes="xy", max_dist=0.20)
 
     with ctx.pose(launcher_elevation=0.95):
-        ctx.expect_aabb_overlap_xy("launcher_frame", "support_base", min_overlap=0.04)
-        ctx.expect_xy_distance("launcher_frame", "support_base", max_dist=0.30)
+        ctx.expect_aabb_overlap("launcher_frame", "support_base", axes="xy", min_overlap=0.04)
+        ctx.expect_origin_distance("launcher_frame", "support_base", axes="xy", max_dist=0.30)
 
     return ctx.report()
 

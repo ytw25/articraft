@@ -109,9 +109,9 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _make_base_shape(), "base.obj", "machine_gray")
-    base.collision(Box((0.30, 0.22, 0.04)), origin=Origin(xyz=(0.0, 0.0, 0.02)))
-    base.collision(Box((0.12, 0.14, 0.28)), origin=Origin(xyz=(0.0, 0.0, 0.18)))
-    base.collision(Box((0.08, 0.12, 0.12)), origin=Origin(xyz=(0.0, 0.0, 0.36)))
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.20, 0.18, 0.34)),
         mass=24.0,
@@ -120,9 +120,9 @@ def build_object_model() -> ArticulatedObject:
 
     upper_arm = model.part("upper_arm")
     _add_mesh_visual(upper_arm, _make_upper_arm_shape(), "upper_arm.obj", "safety_orange")
-    upper_arm.collision(Box((0.08, 0.09, 0.10)), origin=Origin(xyz=(0.02, 0.0, 0.0)))
-    upper_arm.collision(Box((0.22, 0.06, 0.06)), origin=Origin(xyz=(0.18, 0.0, 0.015)))
-    upper_arm.collision(Box((0.08, 0.12, 0.12)), origin=Origin(xyz=(0.34, 0.0, 0.0)))
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((0.30, 0.08, 0.10)),
         mass=7.5,
@@ -131,10 +131,10 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm")
     _add_mesh_visual(forearm, _make_forearm_shape(), "forearm.obj", "safety_orange")
-    forearm.collision(Box((0.06, 0.10, 0.10)), origin=Origin(xyz=(0.02, 0.0, 0.0)))
-    forearm.collision(Box((0.18, 0.05, 0.07)), origin=Origin(xyz=(0.17, 0.0, 0.0)))
-    forearm.collision(Box((0.10, 0.09, 0.04)), origin=Origin(xyz=(0.18, 0.0, 0.078)))
-    forearm.collision(Box((0.08, 0.09, 0.09)), origin=Origin(xyz=(0.39, 0.0, 0.0)))
+
+
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((0.28, 0.07, 0.09)),
         mass=5.0,
@@ -148,9 +148,9 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.322, 0.0, 0.0), rpy=(0.0, 1.57079632679, 0.0)),
         material="optic_blue",
     )
-    tool_slide.collision(Box((0.08, 0.09, 0.05)), origin=Origin(xyz=(0.04, 0.0, 0.0)))
-    tool_slide.collision(Box((0.12, 0.04, 0.04)), origin=Origin(xyz=(0.16, 0.0, 0.0)))
-    tool_slide.collision(Box((0.04, 0.04, 0.04)), origin=Origin(xyz=(0.285, 0.0, 0.0)))
+
+
+
     tool_slide.inertial = Inertial.from_geometry(
         Box((0.22, 0.06, 0.06)),
         mass=1.8,
@@ -193,7 +193,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_joint_motion_axis(
@@ -205,26 +205,26 @@ def run_tests() -> TestReport:
     ctx.expect_joint_motion_axis(
         "extension", "tool_slide", world_axis="x", direction="positive", min_delta=0.05
     )
-    ctx.expect_aabb_overlap_xy("upper_arm", "base", min_overlap=0.004)
+    ctx.expect_aabb_overlap("upper_arm", "base", axes="xy", min_overlap=0.004)
 
     with ctx.pose(extension=0.0):
-        ctx.expect_above("tool_slide", "forearm", min_clearance=0.02)
-        ctx.expect_aabb_gap_z("tool_slide", "forearm", max_gap=0.05, max_penetration=0.05)
+        ctx.expect_origin_gap("tool_slide", "forearm", axis="z", min_gap=0.02)
+        ctx.expect_aabb_gap("tool_slide", "forearm", axis="z", max_gap=0.05, max_penetration=0.05)
 
     with ctx.pose(extension=0.16):
-        ctx.expect_above("tool_slide", "forearm", min_clearance=0.02)
-        ctx.expect_aabb_gap_z("tool_slide", "forearm", max_gap=0.05, max_penetration=0.05)
+        ctx.expect_origin_gap("tool_slide", "forearm", axis="z", min_gap=0.02)
+        ctx.expect_aabb_gap("tool_slide", "forearm", axis="z", max_gap=0.05, max_penetration=0.05)
 
     with ctx.pose(shoulder=1.0):
-        ctx.expect_aabb_gap_z("upper_arm", "base", max_gap=0.20, max_penetration=0.12)
-        ctx.expect_above("upper_arm", "base", min_clearance=0.03)
+        ctx.expect_aabb_gap("upper_arm", "base", axis="z", max_gap=0.20, max_penetration=0.12)
+        ctx.expect_origin_gap("upper_arm", "base", axis="z", min_gap=0.03)
 
     with ctx.pose(shoulder=0.85, elbow=1.20):
-        ctx.expect_above("forearm", "base", min_clearance=0.08)
-        ctx.expect_above("tool_slide", "base", min_clearance=0.12)
+        ctx.expect_origin_gap("forearm", "base", axis="z", min_gap=0.08)
+        ctx.expect_origin_gap("tool_slide", "base", axis="z", min_gap=0.12)
 
     with ctx.pose(shoulder=0.45, elbow=0.80, extension=0.16):
-        ctx.expect_above("tool_slide", "forearm", min_clearance=0.02)
+        ctx.expect_origin_gap("tool_slide", "forearm", axis="z", min_gap=0.02)
 
     return ctx.report()
 

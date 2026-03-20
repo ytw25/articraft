@@ -274,14 +274,9 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, pi / 4.0, pi / 2.0):
         with ctx.pose({"mount_to_rotor_spin": angle}):
-            ctx.expect_xy_distance("mount", "rotor", max_dist=0.01)
-            ctx.expect_aabb_overlap_xy("mount", "rotor", min_overlap=0.12)
-            ctx.expect_aabb_gap_z(
-                "mount",
-                "rotor",
-                max_gap=0.006,
-                max_penetration=0.0,
-            )
+            ctx.expect_origin_distance("mount", "rotor", axes="xy", max_dist=0.01)
+            ctx.expect_aabb_overlap("mount", "rotor", axes="xy", min_overlap=0.12)
+            ctx.expect_aabb_gap("mount", "rotor", axis="z", max_gap=0.006, max_penetration=0.0)
 
     return ctx.report()
 

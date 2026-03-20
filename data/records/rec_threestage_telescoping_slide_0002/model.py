@@ -137,26 +137,10 @@ def _add_tube_collisions(
     side_height = outer_height - 2.0 * wall
     cap_width = outer_width - 2.0 * wall
 
-    part.collision(
-        Box((collision_length, wall, side_height)),
-        origin=_origin((cx, cy + outer_width / 2.0 - wall / 2.0, cz)),
-        name=f"{name_prefix}_side_pos_y",
-    )
-    part.collision(
-        Box((collision_length, wall, side_height)),
-        origin=_origin((cx, cy - outer_width / 2.0 + wall / 2.0, cz)),
-        name=f"{name_prefix}_side_neg_y",
-    )
-    part.collision(
-        Box((collision_length, cap_width, wall)),
-        origin=_origin((cx, cy, cz + outer_height / 2.0 - wall / 2.0)),
-        name=f"{name_prefix}_top",
-    )
-    part.collision(
-        Box((collision_length, cap_width, wall)),
-        origin=_origin((cx, cy, cz - outer_height / 2.0 + wall / 2.0)),
-        name=f"{name_prefix}_bottom",
-    )
+
+
+
+
 
 
 def _pose_ctx(ctx: TestContext, positions: dict[str, float]):
@@ -234,11 +218,7 @@ def build_object_model() -> ArticulatedObject:
         OUTER_WALL,
         OUTER_BODY_ORIGIN,
     )
-    outer.collision(
-        Box(OUTER_BRACKET_SIZE),
-        origin=_origin(OUTER_BRACKET_ORIGIN),
-        name="outer_end_bracket_collision",
-    )
+
 
     _add_tube_collisions(
         middle,
@@ -259,11 +239,7 @@ def build_object_model() -> ArticulatedObject:
         INNER_WALL,
         INNER_BODY_ORIGIN,
     )
-    inner.collision(
-        Box(INNER_BRACKET_SIZE),
-        origin=_origin(INNER_BRACKET_ORIGIN),
-        name="inner_end_bracket_collision",
-    )
+
 
     outer.inertial = Inertial.from_geometry(
         Box((0.350, 0.050, 0.052)),
@@ -318,7 +294,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(
         max_pose_samples=96,
         overlap_tol=0.001,
@@ -341,13 +317,13 @@ def run_tests() -> TestReport:
     )
 
     with _pose_ctx(ctx, {"outer_to_middle": 0.0, "middle_to_inner": 0.0}):
-        ctx.expect_aabb_overlap_xy("outer_rail", "middle_rail", min_overlap=0.01)
-        ctx.expect_aabb_overlap_xy("middle_rail", "inner_rail", min_overlap=0.01)
-        ctx.expect_aabb_overlap_xy("outer_rail", "inner_rail", min_overlap=0.01)
+        ctx.expect_aabb_overlap("outer_rail", "middle_rail", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_overlap("middle_rail", "inner_rail", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_overlap("outer_rail", "inner_rail", axes="xy", min_overlap=0.01)
 
     with _pose_ctx(ctx, {"outer_to_middle": OUTER_TO_MIDDLE_MAX, "middle_to_inner": 0.0}):
-        ctx.expect_aabb_overlap_xy("outer_rail", "middle_rail", min_overlap=0.01)
-        ctx.expect_aabb_overlap_xy("middle_rail", "inner_rail", min_overlap=0.01)
+        ctx.expect_aabb_overlap("outer_rail", "middle_rail", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_overlap("middle_rail", "inner_rail", axes="xy", min_overlap=0.01)
 
     with _pose_ctx(
         ctx,
@@ -356,8 +332,8 @@ def run_tests() -> TestReport:
             "middle_to_inner": MIDDLE_TO_INNER_MAX,
         },
     ):
-        ctx.expect_aabb_overlap_xy("outer_rail", "middle_rail", min_overlap=0.01)
-        ctx.expect_aabb_overlap_xy("middle_rail", "inner_rail", min_overlap=0.01)
+        ctx.expect_aabb_overlap("outer_rail", "middle_rail", axes="xy", min_overlap=0.01)
+        ctx.expect_aabb_overlap("middle_rail", "inner_rail", axes="xy", min_overlap=0.01)
 
     return ctx.report()
 

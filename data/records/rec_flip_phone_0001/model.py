@@ -368,10 +368,10 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap_xy("hinge_spine", "lower_body", min_overlap=0.008)
-    ctx.expect_aabb_gap_z("hinge_spine", "lower_body", max_gap=0.0015, max_penetration=0.0015)
-    ctx.expect_aabb_overlap_xy("upper_display", "lower_body", min_overlap=0.03)
-    ctx.expect_aabb_gap_z("upper_display", "lower_body", max_gap=0.0010, max_penetration=0.0)
+    ctx.expect_aabb_overlap("hinge_spine", "lower_body", axes="xy", min_overlap=0.008)
+    ctx.expect_aabb_gap("hinge_spine", "lower_body", axis="z", max_gap=0.0015, max_penetration=0.0015)
+    ctx.expect_aabb_overlap("upper_display", "lower_body", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_gap("upper_display", "lower_body", axis="z", max_gap=0.0010, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "clamshell_hinge",
         "upper_display",
@@ -381,12 +381,12 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(clamshell_hinge=1.15):
-        ctx.expect_aabb_overlap_xy("upper_display", "hinge_spine", min_overlap=0.005)
-        ctx.expect_xy_distance("upper_display", "lower_body", max_dist=0.05)
+        ctx.expect_aabb_overlap("upper_display", "hinge_spine", axes="xy", min_overlap=0.005)
+        ctx.expect_origin_distance("upper_display", "lower_body", axes="xy", max_dist=0.05)
 
     with ctx.pose(clamshell_hinge=2.25):
-        ctx.expect_aabb_overlap_xy("upper_display", "hinge_spine", min_overlap=0.005)
-        ctx.expect_xy_distance("upper_display", "lower_body", max_dist=0.08)
+        ctx.expect_aabb_overlap("upper_display", "hinge_spine", axes="xy", min_overlap=0.005)
+        ctx.expect_origin_distance("upper_display", "lower_body", axes="xy", max_dist=0.08)
 
     return ctx.report()
 

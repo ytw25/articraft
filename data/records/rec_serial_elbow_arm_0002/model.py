@@ -186,8 +186,8 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_visual_mesh(base, _make_base_shape(), "compact_elbow_arm_base.obj", "base_gray")
-    base.collision(Box(BASE_SIZE), origin=Origin(xyz=(0.0, 0.0, BASE_SIZE[2] / 2.0)))
-    base.collision(Box((0.024, 0.050, 0.026)), origin=Origin(xyz=(0.0, 0.0, 0.058)))
+
+
     base.inertial = Inertial.from_geometry(
         Box(BASE_SIZE),
         mass=2.1,
@@ -197,11 +197,9 @@ def build_object_model() -> ArticulatedObject:
 
     upper_arm = model.part("upper_arm")
     _add_visual_mesh(upper_arm, _make_upper_arm_shape(), "compact_elbow_arm_upper.obj", "arm_blue")
-    upper_arm.collision(Box((0.036, 0.030, 0.046)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    upper_arm.collision(Box((0.128, 0.034, 0.040)), origin=Origin(xyz=(0.092, 0.0, 0.0)))
-    upper_arm.collision(
-        Box((0.030, 0.030, 0.048)), origin=Origin(xyz=(UPPER_ARM_LENGTH - 0.012, 0.0, 0.0))
-    )
+
+
+
     upper_arm.inertial = Inertial.from_geometry(
         Box((UPPER_ARM_LENGTH, 0.038, 0.044)),
         mass=0.68,
@@ -214,8 +212,8 @@ def build_object_model() -> ArticulatedObject:
 
     forearm = model.part("forearm")
     _add_visual_mesh(forearm, _make_forearm_shape(), "compact_elbow_arm_forearm.obj", "dark_metal")
-    forearm.collision(Box((0.032, 0.026, 0.042)), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    forearm.collision(Box((0.108, 0.030, 0.036)), origin=Origin(xyz=(0.077, 0.0, 0.0)))
+
+
     forearm.inertial = Inertial.from_geometry(
         Box((FOREARM_LENGTH, 0.034, 0.040)),
         mass=0.44,
@@ -228,8 +226,8 @@ def build_object_model() -> ArticulatedObject:
     _add_visual_mesh(
         tool_plate, _make_tool_plate_shape(), "compact_elbow_arm_tool_plate.obj", "tool_silver"
     )
-    tool_plate.collision(Box((0.015, 0.028, 0.036)), origin=Origin(xyz=(0.0075, 0.0, 0.0)))
-    tool_plate.collision(Box((0.006, 0.058, 0.074)), origin=Origin(xyz=(0.018, 0.0, 0.0)))
+
+
     tool_plate.inertial = Inertial.from_geometry(
         Box((0.021, 0.058, 0.074)),
         mass=0.12,
@@ -271,13 +269,13 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("upper_arm", "base", min_overlap=0.010)
-    ctx.expect_xy_distance("upper_arm", "base", max_dist=0.14)
-    ctx.expect_xy_distance("forearm", "upper_arm", max_dist=0.20)
-    ctx.expect_xy_distance("tool_plate", "forearm", max_dist=0.15)
+    ctx.expect_aabb_overlap("upper_arm", "base", axes="xy", min_overlap=0.010)
+    ctx.expect_origin_distance("upper_arm", "base", axes="xy", max_dist=0.14)
+    ctx.expect_origin_distance("forearm", "upper_arm", axes="xy", max_dist=0.20)
+    ctx.expect_origin_distance("tool_plate", "forearm", axes="xy", max_dist=0.15)
     ctx.expect_joint_motion_axis(
         "shoulder_joint",
         "tool_plate",
@@ -294,14 +292,14 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(shoulder_joint=0.95):
-        ctx.expect_aabb_gap_z("forearm", "base", max_gap=0.30, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("tool_plate", "base", max_gap=0.40, max_penetration=0.0)
+        ctx.expect_aabb_gap("forearm", "base", axis="z", max_gap=0.30, max_penetration=0.0)
+        ctx.expect_aabb_gap("tool_plate", "base", axis="z", max_gap=0.40, max_penetration=0.0)
 
     with ctx.pose(elbow_joint=1.40):
-        ctx.expect_aabb_gap_z("tool_plate", "upper_arm", max_gap=0.14, max_penetration=0.0)
+        ctx.expect_aabb_gap("tool_plate", "upper_arm", axis="z", max_gap=0.14, max_penetration=0.0)
 
     with ctx.pose(shoulder_joint=0.75, elbow_joint=1.30):
-        ctx.expect_above("tool_plate", "base", min_clearance=0.12)
+        ctx.expect_origin_gap("tool_plate", "base", axis="z", min_gap=0.12)
 
     return ctx.report()
 

@@ -309,15 +309,15 @@ def run_tests() -> TestReport:
     )
 
     def check_lens_stack() -> None:
-        ctx.expect_aabb_overlap_xy("zoom_ring", "base", min_overlap=0.085)
-        ctx.expect_aabb_overlap_xy("focus_ring", "zoom_ring", min_overlap=0.084)
-        ctx.expect_aabb_overlap_xy("focus_ring", "base", min_overlap=0.080)
-        ctx.expect_xy_distance("zoom_ring", "base", max_dist=0.002)
-        ctx.expect_xy_distance("focus_ring", "zoom_ring", max_dist=0.002)
-        ctx.expect_xy_distance("focus_ring", "base", max_dist=0.002)
-        ctx.expect_aabb_gap_z("zoom_ring", "base", max_gap=0.003, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("focus_ring", "zoom_ring", max_gap=0.003, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("focus_ring", "base", max_gap=0.045, max_penetration=0.0)
+        ctx.expect_aabb_overlap("zoom_ring", "base", axes="xy", min_overlap=0.085)
+        ctx.expect_aabb_overlap("focus_ring", "zoom_ring", axes="xy", min_overlap=0.084)
+        ctx.expect_aabb_overlap("focus_ring", "base", axes="xy", min_overlap=0.080)
+        ctx.expect_origin_distance("zoom_ring", "base", axes="xy", max_dist=0.002)
+        ctx.expect_origin_distance("focus_ring", "zoom_ring", axes="xy", max_dist=0.002)
+        ctx.expect_origin_distance("focus_ring", "base", axes="xy", max_dist=0.002)
+        ctx.expect_aabb_gap("zoom_ring", "base", axis="z", max_gap=0.003, max_penetration=0.0)
+        ctx.expect_aabb_gap("focus_ring", "zoom_ring", axis="z", max_gap=0.003, max_penetration=0.0)
+        ctx.expect_aabb_gap("focus_ring", "base", axis="z", max_gap=0.045, max_penetration=0.0)
 
     check_lens_stack()
 

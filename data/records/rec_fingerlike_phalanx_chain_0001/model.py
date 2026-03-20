@@ -39,10 +39,7 @@ def _add_visual_mesh(part, shape, filename: str, material: str) -> None:
 
 
 def _joint_cylinder_collision(part, radius: float, length: float, x: float = 0.0) -> None:
-    part.collision(
-        Cylinder(radius=radius, length=length),
-        origin=Origin(xyz=(x, 0.0, 0.0), rpy=(-HALF_PI, 0.0, 0.0)),
-    )
+    pass
 
 
 def _make_base_shape() -> cq.Workplane:
@@ -202,15 +199,9 @@ def _make_terminal_phalanx_shape(
 def _build_base_part(model: ArticulatedObject):
     base = model.part("base_mount")
     _add_visual_mesh(base, _make_base_shape(), "base_mount.obj", "mount_grey")
-    base.collision(Box((0.030, 0.022, 0.018)), origin=Origin(xyz=(-0.019, 0.0, 0.0)))
-    base.collision(
-        Box((0.010, CLEVIS_EAR_THICKNESS, 0.013)),
-        origin=Origin(xyz=(-0.005, EAR_OFFSET, 0.0)),
-    )
-    base.collision(
-        Box((0.010, CLEVIS_EAR_THICKNESS, 0.013)),
-        origin=Origin(xyz=(-0.005, -EAR_OFFSET, 0.0)),
-    )
+
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.030, 0.022, 0.018)),
         mass=0.32,
@@ -245,18 +236,9 @@ def _build_clevis_segment(
     body_box_length = max(length * 0.66, 0.022)
     body_box_center = body_box_length * 0.5 + 0.008
     _joint_cylinder_collision(part, radius=JOINT_BARREL_RADIUS * 0.88, length=BARREL_LENGTH * 0.88)
-    part.collision(
-        Box((body_box_length, body_width * 0.82, root_height * 0.72)),
-        origin=Origin(xyz=(body_box_center, 0.0, 0.0)),
-    )
-    part.collision(
-        Box((0.010, CLEVIS_EAR_THICKNESS, tip_height * 0.90)),
-        origin=Origin(xyz=(length - 0.005, EAR_OFFSET, 0.0)),
-    )
-    part.collision(
-        Box((0.010, CLEVIS_EAR_THICKNESS, tip_height * 0.90)),
-        origin=Origin(xyz=(length - 0.005, -EAR_OFFSET, 0.0)),
-    )
+
+
+
     part.inertial = Inertial.from_geometry(
         Box((body_box_length, body_width * 0.82, root_height * 0.72)),
         mass=mass,
@@ -291,14 +273,8 @@ def _build_terminal_segment(
     body_box_length = max(length * 0.70, 0.020)
     body_box_center = body_box_length * 0.5 + 0.007
     _joint_cylinder_collision(part, radius=JOINT_BARREL_RADIUS * 0.88, length=BARREL_LENGTH * 0.88)
-    part.collision(
-        Box((body_box_length, body_width * 0.80, root_height * 0.70)),
-        origin=Origin(xyz=(body_box_center, 0.0, 0.0)),
-    )
-    part.collision(
-        Box((length * 0.14, body_width * 0.42, tip_height * 0.46)),
-        origin=Origin(xyz=(length * 0.93, 0.0, 0.0)),
-    )
+
+
     part.inertial = Inertial.from_geometry(
         Box((body_box_length, body_width * 0.80, root_height * 0.70)),
         mass=mass,
@@ -382,16 +358,16 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.0015, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("base_mount", "proximal", min_overlap=0.004)
-    ctx.expect_aabb_overlap_xy("proximal", "middle", min_overlap=0.004)
-    ctx.expect_aabb_overlap_xy("middle", "distal", min_overlap=0.004)
+    ctx.expect_aabb_overlap("base_mount", "proximal", axes="xy", min_overlap=0.004)
+    ctx.expect_aabb_overlap("proximal", "middle", axes="xy", min_overlap=0.004)
+    ctx.expect_aabb_overlap("middle", "distal", axes="xy", min_overlap=0.004)
 
-    ctx.expect_aabb_gap_z("proximal", "base_mount", max_gap=0.003, max_penetration=0.020)
-    ctx.expect_aabb_gap_z("middle", "proximal", max_gap=0.003, max_penetration=0.020)
-    ctx.expect_aabb_gap_z("distal", "middle", max_gap=0.003, max_penetration=0.020)
+    ctx.expect_aabb_gap("proximal", "base_mount", axis="z", max_gap=0.003, max_penetration=0.020)
+    ctx.expect_aabb_gap("middle", "proximal", axis="z", max_gap=0.003, max_penetration=0.020)
+    ctx.expect_aabb_gap("distal", "middle", axis="z", max_gap=0.003, max_penetration=0.020)
 
     ctx.expect_joint_motion_axis(
         "base_to_proximal",

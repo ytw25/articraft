@@ -25,8 +25,8 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
 
 DECK_LENGTH = 0.80
 DECK_WIDTH = 0.205
@@ -428,17 +428,17 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("grip_tape", "deck", min_overlap=0.12)
-    ctx.expect_aabb_overlap_xy("front_baseplate", "deck", min_overlap=0.03)
-    ctx.expect_aabb_overlap_xy("rear_baseplate", "deck", min_overlap=0.03)
-    ctx.expect_xy_distance("front_left_wheel", "front_baseplate", max_dist=0.13)
-    ctx.expect_xy_distance("front_right_wheel", "front_baseplate", max_dist=0.13)
-    ctx.expect_xy_distance("rear_left_wheel", "rear_baseplate", max_dist=0.13)
-    ctx.expect_xy_distance("rear_right_wheel", "rear_baseplate", max_dist=0.13)
-    ctx.expect_aabb_gap_z("deck", "front_left_wheel", max_gap=0.05, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("deck", "front_right_wheel", max_gap=0.05, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("deck", "rear_left_wheel", max_gap=0.05, max_penetration=0.0)
-    ctx.expect_aabb_gap_z("deck", "rear_right_wheel", max_gap=0.05, max_penetration=0.0)
+    ctx.expect_aabb_overlap("grip_tape", "deck", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_overlap("front_baseplate", "deck", axes="xy", min_overlap=0.03)
+    ctx.expect_aabb_overlap("rear_baseplate", "deck", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("front_left_wheel", "front_baseplate", axes="xy", max_dist=0.13)
+    ctx.expect_origin_distance("front_right_wheel", "front_baseplate", axes="xy", max_dist=0.13)
+    ctx.expect_origin_distance("rear_left_wheel", "rear_baseplate", axes="xy", max_dist=0.13)
+    ctx.expect_origin_distance("rear_right_wheel", "rear_baseplate", axes="xy", max_dist=0.13)
+    ctx.expect_aabb_gap("deck", "front_left_wheel", axis="z", max_gap=0.05, max_penetration=0.0)
+    ctx.expect_aabb_gap("deck", "front_right_wheel", axis="z", max_gap=0.05, max_penetration=0.0)
+    ctx.expect_aabb_gap("deck", "rear_left_wheel", axis="z", max_gap=0.05, max_penetration=0.0)
+    ctx.expect_aabb_gap("deck", "rear_right_wheel", axis="z", max_gap=0.05, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "front_truck_steer",
         "front_left_wheel",
@@ -508,10 +508,10 @@ def run_tests() -> TestReport:
         assert front_right_turn[1] < front_right_rest[1] - 0.018
         assert rear_left_turn[1] > rear_left_rest[1] + 0.018
         assert rear_right_turn[1] < rear_right_rest[1] - 0.018
-        ctx.expect_xy_distance("front_left_wheel", "front_baseplate", max_dist=0.13)
-        ctx.expect_xy_distance("rear_right_wheel", "rear_baseplate", max_dist=0.13)
-        ctx.expect_aabb_gap_z("deck", "front_left_wheel", max_gap=0.06, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("deck", "rear_right_wheel", max_gap=0.06, max_penetration=0.0)
+        ctx.expect_origin_distance("front_left_wheel", "front_baseplate", axes="xy", max_dist=0.13)
+        ctx.expect_origin_distance("rear_right_wheel", "rear_baseplate", axes="xy", max_dist=0.13)
+        ctx.expect_aabb_gap("deck", "front_left_wheel", axis="z", max_gap=0.06, max_penetration=0.0)
+        ctx.expect_aabb_gap("deck", "rear_right_wheel", axis="z", max_gap=0.06, max_penetration=0.0)
 
     with ctx.pose(front_truck_steer=-0.30, rear_truck_steer=-0.30):
         front_left_turn = ctx.part_world_position("front_left_wheel")
@@ -522,8 +522,8 @@ def run_tests() -> TestReport:
         assert front_right_turn[1] > front_right_rest[1] + 0.018
         assert rear_left_turn[1] < rear_left_rest[1] - 0.018
         assert rear_right_turn[1] > rear_right_rest[1] + 0.018
-        ctx.expect_aabb_gap_z("deck", "front_right_wheel", max_gap=0.06, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("deck", "rear_left_wheel", max_gap=0.06, max_penetration=0.0)
+        ctx.expect_aabb_gap("deck", "front_right_wheel", axis="z", max_gap=0.06, max_penetration=0.0)
+        ctx.expect_aabb_gap("deck", "rear_left_wheel", axis="z", max_gap=0.06, max_penetration=0.0)
 
     return ctx.report()
 

@@ -323,12 +323,12 @@ def run_tests() -> TestReport:
         overlap_volume_tol=0.0,
     )
 
-    ctx.expect_aabb_overlap_xy("left_filter", "hood_body", min_overlap=0.09)
-    ctx.expect_aabb_overlap_xy("right_filter", "hood_body", min_overlap=0.09)
-    ctx.expect_aabb_gap_z("hood_body", "left_filter", max_gap=0.008, max_penetration=0.014)
-    ctx.expect_aabb_gap_z("hood_body", "right_filter", max_gap=0.008, max_penetration=0.014)
-    ctx.expect_xy_distance("left_filter", "right_filter", max_dist=0.34)
-    ctx.expect_aabb_overlap_xy("fan_switch", "hood_body", min_overlap=0.005)
+    ctx.expect_aabb_overlap("left_filter", "hood_body", axes="xy", min_overlap=0.09)
+    ctx.expect_aabb_overlap("right_filter", "hood_body", axes="xy", min_overlap=0.09)
+    ctx.expect_aabb_gap("hood_body", "left_filter", axis="z", max_gap=0.008, max_penetration=0.014)
+    ctx.expect_aabb_gap("hood_body", "right_filter", axis="z", max_gap=0.008, max_penetration=0.014)
+    ctx.expect_origin_distance("left_filter", "right_filter", axes="xy", max_dist=0.34)
+    ctx.expect_aabb_overlap("fan_switch", "hood_body", axes="xy", min_overlap=0.005)
 
     ctx.expect_joint_motion_axis(
         "left_filter_hinge",
@@ -353,21 +353,21 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(left_filter_hinge=-1.10):
-        ctx.expect_aabb_overlap_xy("left_filter", "hood_body", min_overlap=0.03)
-        ctx.expect_aabb_gap_z("hood_body", "left_filter", max_gap=0.24, max_penetration=0.014)
+        ctx.expect_aabb_overlap("left_filter", "hood_body", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_gap("hood_body", "left_filter", axis="z", max_gap=0.24, max_penetration=0.014)
 
     with ctx.pose(right_filter_hinge=-1.10):
-        ctx.expect_aabb_overlap_xy("right_filter", "hood_body", min_overlap=0.03)
-        ctx.expect_aabb_gap_z("hood_body", "right_filter", max_gap=0.24, max_penetration=0.014)
+        ctx.expect_aabb_overlap("right_filter", "hood_body", axes="xy", min_overlap=0.03)
+        ctx.expect_aabb_gap("hood_body", "right_filter", axis="z", max_gap=0.24, max_penetration=0.014)
 
     with ctx.pose(left_filter_hinge=-1.10, right_filter_hinge=-1.10):
-        ctx.expect_xy_distance("left_filter", "right_filter", max_dist=0.36)
+        ctx.expect_origin_distance("left_filter", "right_filter", axes="xy", max_dist=0.36)
 
     with ctx.pose(fan_switch_hinge=0.30):
-        ctx.expect_aabb_overlap_xy("fan_switch", "hood_body", min_overlap=0.004)
+        ctx.expect_aabb_overlap("fan_switch", "hood_body", axes="xy", min_overlap=0.004)
 
     with ctx.pose(fan_switch_hinge=-0.30):
-        ctx.expect_aabb_overlap_xy("fan_switch", "hood_body", min_overlap=0.004)
+        ctx.expect_aabb_overlap("fan_switch", "hood_body", axes="xy", min_overlap=0.004)
 
     return ctx.report()
 

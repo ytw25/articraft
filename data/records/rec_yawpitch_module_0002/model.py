@@ -117,8 +117,8 @@ def build_object_model() -> ArticulatedObject:
 
     base = model.part("base")
     _add_mesh_visual(base, _build_base_shape(), "turret_base.obj", "base_paint")
-    base.collision(Box((0.18, 0.18, 0.016)), origin=Origin(xyz=(0.0, 0.0, 0.008)))
-    base.collision(Cylinder(radius=0.052, length=0.032), origin=Origin(xyz=(0.0, 0.0, 0.032)))
+
+
     base.inertial = Inertial.from_geometry(
         Box((0.18, 0.18, 0.060)),
         mass=2.4,
@@ -127,12 +127,12 @@ def build_object_model() -> ArticulatedObject:
 
     yaw_stage = model.part("yaw_stage")
     _add_mesh_visual(yaw_stage, _build_yaw_stage_shape(), "turret_yaw_stage.obj", "structure")
-    yaw_stage.collision(Cylinder(radius=0.030, length=0.014), origin=Origin(xyz=(0.0, 0.0, 0.007)))
-    yaw_stage.collision(Box((0.14, 0.14, 0.012)), origin=Origin(xyz=(0.0, 0.0, 0.016)))
-    yaw_stage.collision(Box((0.045, 0.010, 0.085)), origin=Origin(xyz=(-0.001, -0.060, 0.0635)))
-    yaw_stage.collision(Box((0.045, 0.010, 0.085)), origin=Origin(xyz=(-0.001, 0.060, 0.0635)))
-    yaw_stage.collision(Box((0.014, 0.100, 0.052)), origin=Origin(xyz=(-0.030, 0.0, 0.052)))
-    yaw_stage.collision(Box((0.012, 0.082, 0.012)), origin=Origin(xyz=(-0.028, 0.0, 0.094)))
+
+
+
+
+
+
     yaw_stage.inertial = Inertial.from_geometry(
         Box((0.14, 0.14, 0.110)),
         mass=1.5,
@@ -170,13 +170,10 @@ def build_object_model() -> ArticulatedObject:
     pitch_yoke.visual(
         Box((0.012, 0.034, 0.018)), origin=Origin(xyz=(0.078, 0.052, 0.0)), material="structure"
     )
-    pitch_yoke.collision(
-        Cylinder(radius=0.008, length=0.104),
-        origin=Origin(xyz=(0.0, 0.052, 0.0), rpy=(1.57079632679, 0.0, 0.0)),
-    )
-    pitch_yoke.collision(Box((0.080, 0.070, 0.050)), origin=Origin(xyz=(0.038, 0.052, 0.0)))
-    pitch_yoke.collision(Box((0.012, 0.078, 0.048)), origin=Origin(xyz=(-0.008, 0.052, 0.0)))
-    pitch_yoke.collision(Box((0.056, 0.074, 0.010)), origin=Origin(xyz=(0.020, 0.052, 0.030)))
+
+
+
+
     pitch_yoke.inertial = Inertial.from_geometry(
         Box((0.095, 0.110, 0.060)),
         mass=0.95,
@@ -210,20 +207,20 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("yaw_stage", "base", min_overlap=0.09)
-    ctx.expect_aabb_gap_z("yaw_stage", "base", max_gap=0.01, max_penetration=0.0)
+    ctx.expect_aabb_overlap("yaw_stage", "base", axes="xy", min_overlap=0.09)
+    ctx.expect_aabb_gap("yaw_stage", "base", axis="z", max_gap=0.01, max_penetration=0.0)
     ctx.expect_joint_motion_axis(
         "base_to_yaw", "pitch_yoke", world_axis="y", direction="positive", min_delta=0.02
     )
     ctx.expect_joint_motion_axis(
         "yaw_to_pitch", "pitch_yoke", world_axis="z", direction="positive", min_delta=0.03
     )
-    ctx.expect_xy_distance("pitch_yoke", "yaw_stage", max_dist=0.055)
-    ctx.expect_above("pitch_yoke", "base", min_clearance=0.03)
-    ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_stage", min_overlap=0.04)
+    ctx.expect_origin_distance("pitch_yoke", "yaw_stage", axes="xy", max_dist=0.055)
+    ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.03)
+    ctx.expect_aabb_overlap("pitch_yoke", "yaw_stage", axes="xy", min_overlap=0.04)
 
     def posed(**angles):
         try:
@@ -232,24 +229,24 @@ def run_tests() -> TestReport:
             return ctx.pose(angles)
 
     with posed(base_to_yaw=-2.4):
-        ctx.expect_aabb_overlap_xy("yaw_stage", "base", min_overlap=0.08)
-        ctx.expect_above("pitch_yoke", "base", min_clearance=0.03)
+        ctx.expect_aabb_overlap("yaw_stage", "base", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.03)
 
     with posed(base_to_yaw=2.4):
-        ctx.expect_aabb_overlap_xy("yaw_stage", "base", min_overlap=0.08)
-        ctx.expect_xy_distance("pitch_yoke", "yaw_stage", max_dist=0.055)
+        ctx.expect_aabb_overlap("yaw_stage", "base", axes="xy", min_overlap=0.08)
+        ctx.expect_origin_distance("pitch_yoke", "yaw_stage", axes="xy", max_dist=0.055)
 
     with posed(yaw_to_pitch=-0.75):
-        ctx.expect_above("pitch_yoke", "base", min_clearance=0.015)
-        ctx.expect_aabb_overlap_xy("pitch_yoke", "yaw_stage", min_overlap=0.03)
+        ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.015)
+        ctx.expect_aabb_overlap("pitch_yoke", "yaw_stage", axes="xy", min_overlap=0.03)
 
     with posed(yaw_to_pitch=1.05):
-        ctx.expect_above("pitch_yoke", "base", min_clearance=0.05)
-        ctx.expect_xy_distance("pitch_yoke", "yaw_stage", max_dist=0.06)
+        ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.05)
+        ctx.expect_origin_distance("pitch_yoke", "yaw_stage", axes="xy", max_dist=0.06)
 
     with posed(base_to_yaw=1.2, yaw_to_pitch=1.05):
-        ctx.expect_above("pitch_yoke", "base", min_clearance=0.05)
-        ctx.expect_aabb_overlap_xy("yaw_stage", "base", min_overlap=0.08)
+        ctx.expect_origin_gap("pitch_yoke", "base", axis="z", min_gap=0.05)
+        ctx.expect_aabb_overlap("yaw_stage", "base", axes="xy", min_overlap=0.08)
 
     return ctx.report()
 

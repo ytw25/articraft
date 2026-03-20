@@ -337,34 +337,34 @@ def run_tests() -> TestReport:
         direction="positive",
         min_delta=0.04,
     )
-    ctx.expect_aabb_overlap_xy("footrest", "base", min_overlap=0.10)
-    ctx.expect_xy_distance("lift", "base", max_dist=0.001)
+    ctx.expect_aabb_overlap("footrest", "base", axes="xy", min_overlap=0.10)
+    ctx.expect_origin_distance("lift", "base", axes="xy", max_dist=0.001)
 
     with ctx.pose(base_to_lift=0.0, lift_to_seat_swivel=0.0):
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
-        ctx.expect_aabb_overlap_xy("seat", "base", min_overlap=0.25)
-        ctx.expect_aabb_overlap_xy("seat", "footrest", min_overlap=0.20)
-        ctx.expect_aabb_gap_z("seat", "lift", max_gap=0.003, max_penetration=0.001)
-        ctx.expect_aabb_gap_z("seat", "base", max_gap=0.07, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("seat", "footrest", max_gap=0.45, max_penetration=0.0)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_overlap("seat", "base", axes="xy", min_overlap=0.25)
+        ctx.expect_aabb_overlap("seat", "footrest", axes="xy", min_overlap=0.20)
+        ctx.expect_aabb_gap("seat", "lift", axis="z", max_gap=0.003, max_penetration=0.001)
+        ctx.expect_aabb_gap("seat", "base", axis="z", max_gap=0.07, max_penetration=0.0)
+        ctx.expect_aabb_gap("seat", "footrest", axis="z", max_gap=0.45, max_penetration=0.0)
 
     with ctx.pose(base_to_lift=0.0, lift_to_seat_swivel=0.5 * pi):
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
-        ctx.expect_aabb_overlap_xy("seat", "base", min_overlap=0.25)
-        ctx.expect_aabb_gap_z("seat", "lift", max_gap=0.003, max_penetration=0.001)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_overlap("seat", "base", axes="xy", min_overlap=0.25)
+        ctx.expect_aabb_gap("seat", "lift", axis="z", max_gap=0.003, max_penetration=0.001)
 
     with ctx.pose(base_to_lift=0.100, lift_to_seat_swivel=pi):
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
-        ctx.expect_aabb_overlap_xy("seat", "base", min_overlap=0.25)
-        ctx.expect_aabb_overlap_xy("seat", "footrest", min_overlap=0.20)
-        ctx.expect_aabb_gap_z("seat", "lift", max_gap=0.003, max_penetration=0.001)
-        ctx.expect_aabb_gap_z("seat", "base", max_gap=0.17, max_penetration=0.0)
-        ctx.expect_aabb_gap_z("seat", "footrest", max_gap=0.55, max_penetration=0.0)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_overlap("seat", "base", axes="xy", min_overlap=0.25)
+        ctx.expect_aabb_overlap("seat", "footrest", axes="xy", min_overlap=0.20)
+        ctx.expect_aabb_gap("seat", "lift", axis="z", max_gap=0.003, max_penetration=0.001)
+        ctx.expect_aabb_gap("seat", "base", axis="z", max_gap=0.17, max_penetration=0.0)
+        ctx.expect_aabb_gap("seat", "footrest", axis="z", max_gap=0.55, max_penetration=0.0)
 
     with ctx.pose(base_to_lift=0.100, lift_to_seat_swivel=1.5 * pi):
-        ctx.expect_xy_distance("seat", "base", max_dist=0.03)
-        ctx.expect_aabb_overlap_xy("seat", "base", min_overlap=0.25)
-        ctx.expect_aabb_gap_z("seat", "lift", max_gap=0.003, max_penetration=0.001)
+        ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
+        ctx.expect_aabb_overlap("seat", "base", axes="xy", min_overlap=0.25)
+        ctx.expect_aabb_gap("seat", "lift", axis="z", max_gap=0.003, max_penetration=0.001)
 
     return ctx.report()
 

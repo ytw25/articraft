@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -15,11 +16,10 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
-HERE = Path(__file__).resolve().parent
-MESH_DIR = HERE / "meshes"
-MESH_DIR.mkdir(exist_ok=True)
-
-
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+MESH_DIR = ASSETS.mesh_dir
+MESH_DIR.mkdir(parents=True, exist_ok=True)
 # >>> USER_CODE_START
 try:
     import cadquery as cq
@@ -138,11 +138,8 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(xyz=(0.0, 0.0, SHOULDER_Z / 2.0)),
             material="base_gray",
         )
-    base.collision(Box(BASE_PLATE_SIZE), origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_SIZE[2] / 2.0)))
-    base.collision(
-        Box(BASE_COLUMN_SIZE),
-        origin=Origin(xyz=(0.0, 0.0, BASE_PLATE_SIZE[2] + (BASE_COLUMN_SIZE[2] / 2.0))),
-    )
+
+
     base.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, SHOULDER_Z - 0.004)))
     base.inertial = Inertial.from_geometry(
         Box((0.18, 0.16, SHOULDER_Z)),
@@ -166,13 +163,9 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(xyz=(UPPER_ARM_LENGTH / 2.0, 0.0, 0.0)),
             material="arm_silver",
         )
-    upper_arm.collision(Box(LINK_HUB_COLLISION_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    upper_arm.collision(
-        Box(UPPER_ARM_BEAM_SIZE), origin=Origin(xyz=(UPPER_ARM_LENGTH / 2.0, 0.0, 0.0))
-    )
-    upper_arm.collision(
-        Box(LINK_HUB_COLLISION_SIZE), origin=Origin(xyz=(UPPER_ARM_LENGTH, 0.0, 0.0))
-    )
+
+
+
     upper_arm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
     upper_arm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(UPPER_ARM_LENGTH, 0.0, 0.0)))
     upper_arm.inertial = Inertial.from_geometry(
@@ -197,9 +190,9 @@ def build_object_model() -> ArticulatedObject:
             origin=Origin(xyz=(FOREARM_LENGTH / 2.0, 0.0, 0.0)),
             material="arm_silver",
         )
-    forearm.collision(Box(LINK_HUB_COLLISION_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    forearm.collision(Box(FOREARM_BEAM_SIZE), origin=Origin(xyz=(FOREARM_LENGTH / 2.0, 0.0, 0.0)))
-    forearm.collision(Box(LINK_HUB_COLLISION_SIZE), origin=Origin(xyz=(FOREARM_LENGTH, 0.0, 0.0)))
+
+
+
     forearm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
     forearm.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(FOREARM_LENGTH, 0.0, 0.0)))
     forearm.inertial = Inertial.from_geometry(
@@ -227,11 +220,9 @@ def build_object_model() -> ArticulatedObject:
     wrist_pad.visual(
         Box(PAD_SIZE), origin=Origin(xyz=(PAD_CENTER_X, 0.0, 0.0)), material="pad_black"
     )
-    wrist_pad.collision(Box(WRIST_HUB_COLLISION_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
-    wrist_pad.collision(
-        Box(WRIST_BEAM_SIZE), origin=Origin(xyz=(WRIST_BODY_LENGTH / 2.0, 0.0, 0.0))
-    )
-    wrist_pad.collision(Box(PAD_SIZE), origin=Origin(xyz=(PAD_CENTER_X, 0.0, 0.0)))
+
+
+
     wrist_pad.qc_collision(Box(JOINT_BOX_SIZE), origin=Origin(xyz=(0.0, 0.0, 0.0)))
     wrist_pad.inertial = Inertial.from_geometry(
         Box((PAD_CENTER_X + (PAD_SIZE[0] / 2.0), 0.06, 0.05)),
@@ -282,13 +273,13 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.0025, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("base", "upper_arm", min_overlap=0.03)
-    ctx.expect_xy_distance("base", "upper_arm", max_dist=0.16)
-    ctx.expect_xy_distance("upper_arm", "forearm", max_dist=0.28)
-    ctx.expect_xy_distance("forearm", "wrist_pad", max_dist=0.24)
+    ctx.expect_aabb_overlap("base", "upper_arm", axes="xy", min_overlap=0.03)
+    ctx.expect_origin_distance("base", "upper_arm", axes="xy", max_dist=0.16)
+    ctx.expect_origin_distance("upper_arm", "forearm", axes="xy", max_dist=0.28)
+    ctx.expect_origin_distance("forearm", "wrist_pad", axes="xy", max_dist=0.24)
 
     ctx.expect_joint_motion_axis(
         "shoulder", "upper_arm", world_axis="z", direction="positive", min_delta=0.01
@@ -301,14 +292,14 @@ def run_tests() -> TestReport:
     )
 
     with _pose(ctx, shoulder=0.55, elbow=0.95, wrist=-0.2):
-        ctx.expect_above("forearm", "base", min_clearance=0.02)
-        ctx.expect_xy_distance("wrist_pad", "base", max_dist=0.48)
+        ctx.expect_origin_gap("forearm", "base", axis="z", min_gap=0.02)
+        ctx.expect_origin_distance("wrist_pad", "base", axes="xy", max_dist=0.48)
 
     with _pose(ctx, shoulder=0.82, elbow=1.28, wrist=0.32):
-        ctx.expect_above("forearm", "base", min_clearance=0.02)
-        ctx.expect_above("wrist_pad", "base", min_clearance=0.05)
-        ctx.expect_xy_distance("wrist_pad", "base", max_dist=0.35)
-        ctx.expect_aabb_gap_z("wrist_pad", "base", max_gap=0.5, max_penetration=0.0)
+        ctx.expect_origin_gap("forearm", "base", axis="z", min_gap=0.02)
+        ctx.expect_origin_gap("wrist_pad", "base", axis="z", min_gap=0.05)
+        ctx.expect_origin_distance("wrist_pad", "base", axes="xy", max_dist=0.35)
+        ctx.expect_aabb_gap("wrist_pad", "base", axis="z", max_gap=0.5, max_penetration=0.0)
 
     return ctx.report()
 

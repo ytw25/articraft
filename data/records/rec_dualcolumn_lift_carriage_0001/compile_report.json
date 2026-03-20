@@ -3,9 +3,14 @@
   "record_id": "rec_dualcolumn_lift_carriage_0001",
   "status": "success",
   "urdf_path": "model.urdf",
-  "warnings": [],
+  "warnings": [
+    {
+      "code": "warning",
+      "message": "URDF compile warning (non-blocking): geometry overlap check reported overlaps.\nGeometry overlap check failed: part AABBs intersect at sampled articulation poses. worst_pair=('carriage'[10], 'right_column'[0]) min_overlap_depth=0.04m overlap_volume=8.8e-05m^3 pose_index=0 pose=(base_to_left_column=0, base_to_right_column=0, base_to_service_mast=0, carriage_slide=0, left_column_to_top_tie=0). elem_a=(name='carriage__visual_11' origin_xyz=(0.115, 0.0, 0.0425) origin_rpy=(0.0, 0.0, 0.0) geom=Box) elem_b=(name='right_column__visual_1' origin_xyz=(0.0, 0.0, 0.31) origin_rpy=(0.0, 0.0, 0.0) geom=Cylinder). hint: try moving 'right_column' by ~0.045m along world y (or adjust the responsible articulation origin/limits / collision origins). Note: this QC is conservative (bounding boxes); concave mesh collisions can yield false positives. Fix by adjusting articulation origins/limits and/or visual/collision origins so parts do not interpenetrate in the rest pose or across the articulated range.\nIf this overlap is acceptable (e.g., conservative false-positive), explicitly allow the specific pair in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)` and then run `ctx.warn_if_overlaps(...)` so the allowance is tracked; otherwise adjust geometry/joints."
+    }
+  ],
   "checks_run": [
-    "legacy_import"
+    "compile_urdf"
   ],
   "overlap_allowances": [],
   "metrics": {

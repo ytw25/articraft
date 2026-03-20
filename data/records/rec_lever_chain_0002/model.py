@@ -140,40 +140,25 @@ def _add_link_part(
     link.visual(
         mesh_from_cadquery(link_shape, f"{name}.obj", assets=ASSETS), material="lever_steel"
     )
-    link.collision(
-        Box((0.024, WEB_THICKNESS * 0.92, WEB_HEIGHT * 0.96)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-    )
+
 
     if has_distal_fork:
         main_start = BOSS_RADIUS + JOINT_CLEARANCE
         main_end = length - DISTAL_FORK_LENGTH + 0.01
         main_length = main_end - main_start
-        link.collision(
-            Box((main_length, WEB_THICKNESS * 0.92, WEB_HEIGHT * 0.96)),
-            origin=Origin(xyz=((main_start + main_end) / 2.0, 0.0, 0.0)),
-        )
+
 
         cheek_start = length - DISTAL_FORK_LENGTH + 0.01
         cheek_end = length - 0.004
         cheek_length = cheek_end - cheek_start
         for cheek_y in (FORK_CHEEK_OFFSET, -FORK_CHEEK_OFFSET):
-            link.collision(
-                Box((cheek_length, CHEEK_THICKNESS * 0.95, WEB_HEIGHT * 0.94)),
-                origin=Origin(xyz=((cheek_start + cheek_end) / 2.0, cheek_y, 0.0)),
-            )
+            pass
     else:
         body_start = BOSS_RADIUS + JOINT_CLEARANCE
         body_end = length - 0.004
         body_length = body_end - body_start
-        link.collision(
-            Box((body_length, WEB_THICKNESS * 0.92, WEB_HEIGHT * 0.96)),
-            origin=Origin(xyz=((body_start + body_end) / 2.0, 0.0, 0.0)),
-        )
-        link.collision(
-            Box((0.024, WEB_THICKNESS * 0.92, WEB_HEIGHT * 0.96)),
-            origin=Origin(xyz=(length, 0.0, 0.0)),
-        )
+
+
 
     link.inertial = Inertial.from_geometry(
         Box((max(length - 0.02, 0.04), 0.016, 0.03)),
@@ -193,12 +178,12 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_base_frame_shape(), "base_frame.obj", assets=ASSETS),
         material="frame_paint",
     )
-    base_frame.collision(Box(BASE_PLATE_SIZE), origin=Origin(xyz=(0.0, 0.0, -0.06)))
-    base_frame.collision(Box(BASE_PEDESTAL_SIZE), origin=Origin(xyz=(-0.028, 0.0, -0.04)))
-    base_frame.collision(Box(UPRIGHT_SIZE), origin=Origin(xyz=(0.0, UPRIGHT_OFFSET_Y, -0.015)))
-    base_frame.collision(Box(UPRIGHT_SIZE), origin=Origin(xyz=(0.0, -UPRIGHT_OFFSET_Y, -0.015)))
-    base_frame.collision(Box(BODY_BRACE_SIZE), origin=Origin(xyz=BODY_BRACE_ORIGIN))
-    base_frame.collision(Box(PIVOT_BRIDGE_SIZE), origin=Origin(xyz=PIVOT_BRIDGE_ORIGIN))
+
+
+
+
+
+
     base_frame.inertial = Inertial.from_geometry(
         Box((0.16, 0.08, 0.10)),
         mass=2.8,
@@ -259,19 +244,19 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.002, overlap_volume_tol=0.0)
 
-    ctx.expect_xy_distance("link1", "base_frame", max_dist=0.12)
-    ctx.expect_xy_distance("link2", "link1", max_dist=0.19)
-    ctx.expect_xy_distance("link3", "link2", max_dist=0.17)
-    ctx.expect_xy_distance("link4", "link3", max_dist=0.15)
-    ctx.expect_xy_distance("link4", "base_frame", max_dist=0.60)
+    ctx.expect_origin_distance("link1", "base_frame", axes="xy", max_dist=0.12)
+    ctx.expect_origin_distance("link2", "link1", axes="xy", max_dist=0.19)
+    ctx.expect_origin_distance("link3", "link2", axes="xy", max_dist=0.17)
+    ctx.expect_origin_distance("link4", "link3", axes="xy", max_dist=0.15)
+    ctx.expect_origin_distance("link4", "base_frame", axes="xy", max_dist=0.60)
 
-    ctx.expect_aabb_gap_z("link1", "base_frame", max_gap=0.03, max_penetration=0.05)
-    ctx.expect_aabb_gap_z("link2", "link1", max_gap=0.01, max_penetration=0.02)
-    ctx.expect_aabb_gap_z("link3", "link2", max_gap=0.01, max_penetration=0.02)
-    ctx.expect_aabb_gap_z("link4", "link3", max_gap=0.01, max_penetration=0.02)
+    ctx.expect_aabb_gap("link1", "base_frame", axis="z", max_gap=0.03, max_penetration=0.05)
+    ctx.expect_aabb_gap("link2", "link1", axis="z", max_gap=0.01, max_penetration=0.02)
+    ctx.expect_aabb_gap("link3", "link2", axis="z", max_gap=0.01, max_penetration=0.02)
+    ctx.expect_aabb_gap("link4", "link3", axis="z", max_gap=0.01, max_penetration=0.02)
 
     ctx.expect_joint_motion_axis(
         "base_to_link1",

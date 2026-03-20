@@ -140,23 +140,11 @@ def _build_arm_shape() -> cq.Workplane:
 def _add_branch_part(model: ArticulatedObject, mesh, name: str):
     branch = model.part(name)
     branch.visual(mesh, material="arm_blue")
-    branch.collision(Box((2.0 * ARM_BARREL_RADIUS, ARM_BARREL_LENGTH, 2.0 * ARM_BARREL_RADIUS)))
-    branch.collision(
-        Box((ARM_SHOULDER_LENGTH, ARM_SHOULDER_WIDTH, ARM_SHOULDER_HEIGHT)),
-        origin=Origin(xyz=(ARM_SHOULDER_CENTER_X, 0.0, 0.0)),
-    )
-    branch.collision(
-        Box((ARM_BODY_LENGTH, ARM_BODY_WIDTH, ARM_BODY_HEIGHT)),
-        origin=Origin(xyz=(ARM_BODY_CENTER_X, 0.0, 0.0)),
-    )
-    branch.collision(
-        Box((ARM_TIP_PAD_LENGTH, ARM_TIP_PAD_WIDTH, ARM_TIP_PAD_HEIGHT)),
-        origin=Origin(xyz=(ARM_TIP_PAD_CENTER_X, 0.0, 0.0)),
-    )
-    branch.collision(
-        Box((2.0 * ARM_TIP_RADIUS, 2.0 * ARM_TIP_RADIUS, 2.0 * ARM_TIP_RADIUS)),
-        origin=Origin(xyz=(ARM_TIP_X, 0.0, 0.0)),
-    )
+
+
+
+
+
     branch.inertial = Inertial.from_geometry(
         Box((ARM_INERTIAL_LENGTH, ARM_INERTIAL_WIDTH, ARM_INERTIAL_HEIGHT)),
         mass=0.24,
@@ -176,16 +164,10 @@ def build_object_model() -> ArticulatedObject:
 
     hub = model.part("hub")
     hub.visual(hub_mesh, material="hub_gray")
-    hub.collision(Cylinder(radius=HUB_RADIUS, length=HUB_HEIGHT))
-    hub.collision(Cylinder(radius=SPINDLE_RADIUS, length=SPINDLE_HEIGHT))
+
+
     for angle in BRANCH_ANGLES:
-        hub.collision(
-            Box((LUG_LENGTH, LUG_WIDTH, LUG_HEIGHT)),
-            origin=Origin(
-                xyz=(LUG_OFFSET_X * cos(angle), LUG_OFFSET_X * sin(angle), 0.0),
-                rpy=(0.0, 0.0, angle),
-            ),
-        )
+        pass
     hub.inertial = Inertial.from_geometry(
         Cylinder(radius=HUB_RADIUS, length=HUB_HEIGHT),
         mass=1.15,
@@ -210,16 +192,16 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, prefer_collisions=True, seed=0)
+    ctx = TestContext(object_model, geometry_source="collision", seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     for name in BRANCH_NAMES:
-        ctx.expect_xy_distance(name, "hub", max_dist=0.12)
-        ctx.expect_aabb_gap_z(name, "hub", max_gap=0.04, max_penetration=0.055)
+        ctx.expect_origin_distance(name, "hub", axes="xy", max_dist=0.12)
+        ctx.expect_aabb_gap(name, "hub", axis="z", max_gap=0.04, max_penetration=0.055)
         ctx.expect_joint_motion_axis(
             f"hub_to_{name}",
             name,

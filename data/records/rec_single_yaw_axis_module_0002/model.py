@@ -116,14 +116,12 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_support_frame_shape(), "support_frame.obj", assets=ASSETS),
         material="frame_charcoal",
     )
-    support_frame.collision(Box((0.22, 0.16, 0.012)), origin=Origin(xyz=(0.0, 0.0, 0.006)))
-    support_frame.collision(Box((0.112, 0.014, 0.018)), origin=Origin(xyz=(0.0, 0.046, 0.021)))
-    support_frame.collision(Box((0.112, 0.014, 0.018)), origin=Origin(xyz=(0.0, -0.046, 0.021)))
-    support_frame.collision(Box((0.018, 0.070, 0.016)), origin=Origin(xyz=(0.052, 0.0, 0.020)))
-    support_frame.collision(Box((0.018, 0.070, 0.016)), origin=Origin(xyz=(-0.052, 0.0, 0.020)))
-    support_frame.collision(
-        Cylinder(radius=0.020, length=0.022), origin=Origin(xyz=(0.0, 0.0, 0.023))
-    )
+
+
+
+
+
+
     support_frame.inertial = Inertial.from_geometry(
         Box((0.22, 0.16, 0.05)),
         mass=3.6,
@@ -135,8 +133,8 @@ def build_object_model() -> ArticulatedObject:
         mesh_from_cadquery(_make_turntable_shape(), "turntable.obj", assets=ASSETS),
         material="turntable_steel",
     )
-    turntable.collision(Cylinder(radius=0.071, length=0.012), origin=Origin(xyz=(0.0, 0.0, 0.008)))
-    turntable.collision(Box((0.026, 0.016, 0.010)), origin=Origin(xyz=(0.082, 0.0, 0.007)))
+
+
     turntable.inertial = Inertial.from_geometry(
         Cylinder(radius=0.071, length=0.020),
         mass=1.2,
@@ -152,7 +150,7 @@ def build_object_model() -> ArticulatedObject:
         ),
         material="pointer_red",
     )
-    index_pointer.collision(Box((0.028, 0.008, 0.006)))
+
     index_pointer.inertial = Inertial.from_geometry(Box((0.028, 0.008, 0.006)), mass=0.05)
 
     model.articulation(
@@ -180,7 +178,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_joint_origin_near_physical_geometry(tol=0.02)
+    ctx.check_articulation_origin_near_geometry(tol=0.02)
     ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.002, overlap_volume_tol=0.0)
     ctx.expect_joint_motion_axis(
         "support_to_turntable",
@@ -189,12 +187,12 @@ def run_tests() -> TestReport:
         direction="positive",
         min_delta=0.05,
     )
-    ctx.expect_xy_distance("turntable", "support_frame", max_dist=0.001)
-    ctx.expect_aabb_overlap_xy("turntable", "support_frame", min_overlap=0.12)
-    ctx.expect_aabb_gap_z("turntable", "support_frame", max_gap=0.006, max_penetration=0.0)
-    ctx.expect_above("index_pointer", "turntable", min_clearance=0.0)
-    ctx.expect_aabb_overlap_xy("index_pointer", "turntable", min_overlap=0.004)
-    ctx.expect_aabb_gap_z("index_pointer", "turntable", max_gap=0.001, max_penetration=0.0)
+    ctx.expect_origin_distance("turntable", "support_frame", axes="xy", max_dist=0.001)
+    ctx.expect_aabb_overlap("turntable", "support_frame", axes="xy", min_overlap=0.12)
+    ctx.expect_aabb_gap("turntable", "support_frame", axis="z", max_gap=0.006, max_penetration=0.0)
+    ctx.expect_origin_gap("index_pointer", "turntable", axis="z", min_gap=0.0)
+    ctx.expect_aabb_overlap("index_pointer", "turntable", axes="xy", min_overlap=0.004)
+    ctx.expect_aabb_gap("index_pointer", "turntable", axis="z", max_gap=0.001, max_penetration=0.0)
     return ctx.report()
 
 

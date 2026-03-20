@@ -250,13 +250,8 @@ def run_tests() -> TestReport:
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_within_xy("status_window", "body")
-    ctx.expect_aabb_gap_z(
-        "status_window",
-        "body",
-        max_gap=0.001,
-        max_penetration=0.0007,
-    )
+    ctx.expect_aabb_within("status_window", "body", axes="xy")
+    ctx.expect_aabb_gap("status_window", "body", axis="z", max_gap=0.001, max_penetration=0.0007)
 
     ctx.expect_joint_motion_axis(
         "body_to_cover",
@@ -267,16 +262,16 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(body_to_cover=0.0):
-        ctx.expect_aabb_overlap_xy("cover", "body", min_overlap=0.014)
-        ctx.expect_xy_distance("cover", "body", max_dist=0.016)
+        ctx.expect_aabb_overlap("cover", "body", axes="xy", min_overlap=0.014)
+        ctx.expect_origin_distance("cover", "body", axes="xy", max_dist=0.016)
 
     with ctx.pose(body_to_cover=pi / 2.0):
-        ctx.expect_aabb_overlap_xy("cover", "body", min_overlap=0.008)
-        ctx.expect_xy_distance("cover", "body", max_dist=0.030)
+        ctx.expect_aabb_overlap("cover", "body", axes="xy", min_overlap=0.008)
+        ctx.expect_origin_distance("cover", "body", axes="xy", max_dist=0.030)
 
     with ctx.pose(body_to_cover=pi):
-        ctx.expect_aabb_overlap_xy("cover", "body", min_overlap=0.003)
-        ctx.expect_xy_distance("cover", "body", max_dist=0.038)
+        ctx.expect_aabb_overlap("cover", "body", axes="xy", min_overlap=0.003)
+        ctx.expect_origin_distance("cover", "body", axes="xy", max_dist=0.038)
 
     return ctx.report()
 

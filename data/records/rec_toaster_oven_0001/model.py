@@ -25,7 +25,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = Path(getattr(ASSETS, "asset_root", Path(__file__).resolve().parent))
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 MESH_DIR.mkdir(parents=True, exist_ok=True)
 
 BODY_WIDTH = 0.44
@@ -413,24 +413,24 @@ def run_tests() -> TestReport:
     )
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
-    ctx.expect_aabb_overlap_xy("body", "liner", min_overlap=0.20)
-    ctx.expect_aabb_overlap_xy("door", "body", min_overlap=0.003)
+    ctx.expect_aabb_overlap("body", "liner", axes="xy", min_overlap=0.20)
+    ctx.expect_aabb_overlap("door", "body", axes="xy", min_overlap=0.003)
     ctx.expect_joint_motion_axis(
         "door_hinge", "door", world_axis="z", direction="negative", min_delta=0.055
     )
-    ctx.expect_xy_distance("door", "body", max_dist=0.21)
-    ctx.expect_xy_distance("function_knob", "body", max_dist=0.235)
-    ctx.expect_xy_distance("temperature_knob", "body", max_dist=0.235)
-    ctx.expect_xy_distance("timer_knob", "body", max_dist=0.24)
+    ctx.expect_origin_distance("door", "body", axes="xy", max_dist=0.21)
+    ctx.expect_origin_distance("function_knob", "body", axes="xy", max_dist=0.235)
+    ctx.expect_origin_distance("temperature_knob", "body", axes="xy", max_dist=0.235)
+    ctx.expect_origin_distance("timer_knob", "body", axes="xy", max_dist=0.24)
 
     with ctx.pose(door_hinge=DOOR_OPEN_ANGLE):
-        ctx.expect_xy_distance("door", "body", max_dist=0.21)
-        ctx.expect_aabb_overlap_xy("body", "liner", min_overlap=0.20)
+        ctx.expect_origin_distance("door", "body", axes="xy", max_dist=0.21)
+        ctx.expect_aabb_overlap("body", "liner", axes="xy", min_overlap=0.20)
 
     with ctx.pose(function_selector=1.8, temperature_selector=-1.6, timer_selector=2.3):
-        ctx.expect_xy_distance("function_knob", "body", max_dist=0.235)
-        ctx.expect_xy_distance("temperature_knob", "body", max_dist=0.235)
-        ctx.expect_xy_distance("timer_knob", "body", max_dist=0.24)
+        ctx.expect_origin_distance("function_knob", "body", axes="xy", max_dist=0.235)
+        ctx.expect_origin_distance("temperature_knob", "body", axes="xy", max_dist=0.235)
+        ctx.expect_origin_distance("timer_knob", "body", axes="xy", max_dist=0.24)
 
     with ctx.pose(
         door_hinge=DOOR_OPEN_ANGLE,
@@ -438,8 +438,8 @@ def run_tests() -> TestReport:
         temperature_selector=-1.6,
         timer_selector=2.3,
     ):
-        ctx.expect_xy_distance("door", "body", max_dist=0.21)
-        ctx.expect_aabb_overlap_xy("body", "liner", min_overlap=0.20)
+        ctx.expect_origin_distance("door", "body", axes="xy", max_dist=0.21)
+        ctx.expect_aabb_overlap("body", "liner", axes="xy", min_overlap=0.20)
 
     return ctx.report()
 

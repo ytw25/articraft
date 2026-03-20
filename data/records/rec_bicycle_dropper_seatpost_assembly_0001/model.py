@@ -24,7 +24,7 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
-MESH_DIR = HERE / "meshes"
+MESH_DIR = ASSETS.mesh_dir
 
 
 def _mirror_x(points: list[tuple[float, float, float]]) -> list[tuple[float, float, float]]:
