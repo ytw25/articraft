@@ -5,12 +5,11 @@
   "urdf_path": "model.urdf",
   "warnings": [],
   "checks_run": [
-    "compile_urdf"
+    "compile_visual"
   ],
   "overlap_allowances": [],
   "metrics": {
-    "turn_count": 9,
-    "tool_call_count": 8,
-    "compile_attempt_count": 5
+    "compile_level": "visual",
+    "validation_level": "none"
   }
 }
