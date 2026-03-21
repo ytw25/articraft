@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "record_id": "rec_rotary_table_with_tilting_trunnion_0001",
+  "record_id": "rec_a-realistic-detailed-model-of-an-articulated-glo_20260320_235017_379193_b1490588",
   "generation": {
     "provider": "openai",
     "model_id": "gpt-5.4",
@@ -10,12 +10,12 @@
     "max_turns": 30
   },
   "prompting": {
-    "system_prompt_file": "designer_system_prompt_openai_hybrid.txt",
-    "system_prompt_sha256": "e1990e197a72ee72f17cf8eb02348894ec87cc74fd2bdd33f709ea197188b519",
-    "sdk_docs_mode": "legacy_import"
+    "system_prompt_file": "designer_system_prompt_openai.txt",
+    "system_prompt_sha256": "1de959ea84a637bfe4e3e06e85b156eb7d8305d6ccd2742be62c94ab4c703682",
+    "sdk_docs_mode": "full"
   },
   "sdk": {
-    "sdk_package": "sdk_hybrid",
+    "sdk_package": "sdk",
     "sdk_version": "workspace",
     "sdk_fingerprint": null
   },
@@ -26,9 +26,9 @@
     "uv_lock_sha256": "9f8228afadf15cc7fefa67a1e9b99a49933847bad7bc99d9fb2aaf633ebfbc92"
   },
   "run_summary": {
-    "turn_count": 14,
-    "tool_call_count": 12,
-    "compile_attempt_count": 9,
+    "turn_count": 11,
+    "tool_call_count": 9,
+    "compile_attempt_count": 7,
     "final_status": "success"
   }
 }

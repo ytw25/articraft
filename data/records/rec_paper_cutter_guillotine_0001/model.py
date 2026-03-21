@@ -3,236 +3,228 @@ from __future__ import annotations
 # The harness only exposes the editable block to the model.
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
+
 # >>> USER_CODE_START
 import math
 
 from sdk import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
     ExtrudeGeometry,
     Inertial,
     MotionLimits,
     Origin,
+    Sphere,
     TestContext,
     TestReport,
     mesh_from_geometry,
     rounded_rect_profile,
 )
 
+
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
 
-BASE_WIDTH = 0.46
-BASE_DEPTH = 0.32
-LOWER_DECK_THICKNESS = 0.014
-TOP_PLATE_THICKNESS = 0.004
-BASE_TOP_Z = LOWER_DECK_THICKNESS + TOP_PLATE_THICKNESS
+BASE_WIDTH = 0.42
+BASE_DEPTH = 0.31
+FOOT_HEIGHT = 0.003
+BASE_THICKNESS = 0.018
+BASE_TOP_Z = FOOT_HEIGHT + BASE_THICKNESS
+SURFACE_THICKNESS = 0.0006
+MARKING_THICKNESS = 0.0003
+FIXED_BLADE_THICKNESS = 0.0012
+ARM_YAW = -0.67
+ARM_LENGTH = 0.445
+HINGE_POS = (-0.172, 0.112, 0.028)
+FENCE_Y = 0.147
 
-CUT_START = (-0.165, 0.094)
-CUT_END = (0.152, -0.123)
-CUT_DX = CUT_END[0] - CUT_START[0]
-CUT_DY = CUT_END[1] - CUT_START[1]
-CUT_LENGTH = math.hypot(CUT_DX, CUT_DY)
-CUT_YAW = math.atan2(CUT_DY, CUT_DX)
-CUT_MID = ((CUT_START[0] + CUT_END[0]) / 2.0, (CUT_START[1] + CUT_END[1]) / 2.0)
 
-ARM_REACH = CUT_LENGTH + 0.065
-ARM_OPEN_LIMIT = 1.18
+def _build_base_panel_mesh():
+    profile = rounded_rect_profile(
+        BASE_WIDTH,
+        BASE_DEPTH,
+        radius=0.018,
+        corner_segments=10,
+    )
+    geom = ExtrudeGeometry.from_z0(profile, BASE_THICKNESS).translate(0.0, 0.0, FOOT_HEIGHT)
+    return mesh_from_geometry(geom, ASSETS.mesh_dir / "paper_cutter_base_panel.obj")
+
+
+def _build_arm_beam_mesh():
+    profile = [
+        (0.000, -0.022),
+        (0.040, -0.024),
+        (0.155, -0.019),
+        (0.285, -0.016),
+        (0.360, -0.014),
+        (0.390, -0.024),
+        (0.432, -0.024),
+        (0.447, 0.000),
+        (0.432, 0.024),
+        (0.390, 0.024),
+        (0.360, 0.014),
+        (0.285, 0.016),
+        (0.155, 0.019),
+        (0.040, 0.024),
+        (0.000, 0.022),
+    ]
+    geom = ExtrudeGeometry.centered(profile, 0.012).translate(0.0, 0.0, 0.0025)
+    return mesh_from_geometry(geom, ASSETS.mesh_dir / "paper_cutter_arm_beam.obj")
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="paper_cutter_guillotine", assets=ASSETS)
 
-    body_graphite = model.material("body_graphite", rgba=(0.19, 0.20, 0.22, 1.0))
-    work_surface = model.material("work_surface", rgba=(0.82, 0.83, 0.82, 1.0))
-    brushed_aluminum = model.material("brushed_aluminum", rgba=(0.72, 0.74, 0.77, 1.0))
-    blade_steel = model.material("blade_steel", rgba=(0.86, 0.87, 0.89, 1.0))
-    arm_finish = model.material("arm_finish", rgba=(0.34, 0.37, 0.40, 1.0))
-    print_blue = model.material("print_blue", rgba=(0.42, 0.54, 0.74, 1.0))
-    rubber_black = model.material("rubber_black", rgba=(0.08, 0.08, 0.09, 1.0))
-    clear_guard = model.material("clear_guard", rgba=(0.82, 0.90, 0.96, 0.35))
-    amber_cursor = model.material("amber_cursor", rgba=(0.90, 0.66, 0.18, 0.65))
-
-    deck_profile = rounded_rect_profile(
-        BASE_WIDTH,
-        BASE_DEPTH,
-        radius=0.020,
-        corner_segments=10,
-    )
-    deck_mesh = mesh_from_geometry(
-        ExtrudeGeometry.centered(deck_profile, LOWER_DECK_THICKNESS),
-        ASSETS.mesh_path("base_deck.obj"),
-    )
+    laminate = model.material("laminate_board", rgba=(0.24, 0.25, 0.28, 1.0))
+    cutting_mat = model.material("cutting_mat", rgba=(0.15, 0.18, 0.20, 1.0))
+    measurement = model.material("measurement_marking", rgba=(0.86, 0.87, 0.88, 1.0))
+    anodized = model.material("anodized_aluminum", rgba=(0.67, 0.69, 0.72, 1.0))
+    steel = model.material("brushed_steel", rgba=(0.74, 0.76, 0.79, 1.0))
+    black_plastic = model.material("black_plastic", rgba=(0.09, 0.09, 0.10, 1.0))
+    rubber = model.material("rubber", rgba=(0.05, 0.05, 0.05, 1.0))
+    clear_guard = model.material("clear_guard", rgba=(0.78, 0.88, 0.94, 0.30))
+    accent_red = model.material("accent_red", rgba=(0.76, 0.11, 0.11, 1.0))
 
     base = model.part("base")
+    base.visual(_build_base_panel_mesh(), material=laminate, name="base_panel")
     base.visual(
-        deck_mesh,
-        origin=Origin(xyz=(0.0, 0.0, LOWER_DECK_THICKNESS / 2.0)),
-        material=body_graphite,
+        Box((0.376, 0.262, SURFACE_THICKNESS)),
+        origin=Origin(xyz=(0.010, -0.004, BASE_TOP_Z + SURFACE_THICKNESS / 2.0)),
+        material=cutting_mat,
+        name="cutting_mat_surface",
     )
     base.visual(
-        Box((0.438, 0.298, TOP_PLATE_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, LOWER_DECK_THICKNESS + TOP_PLATE_THICKNESS / 2.0)),
-        material=work_surface,
+        Box((0.372, 0.018, MARKING_THICKNESS)),
+        origin=Origin(xyz=(0.008, 0.121, BASE_TOP_Z + MARKING_THICKNESS / 2.0)),
+        material=measurement,
+        name="top_ruler_strip",
     )
     base.visual(
-        Box((0.332, 0.018, 0.002)),
-        origin=Origin(xyz=(-0.005, -0.131, BASE_TOP_Z + 0.001)),
-        material=brushed_aluminum,
+        Box((0.018, 0.234, MARKING_THICKNESS)),
+        origin=Origin(xyz=(-0.160, 0.002, BASE_TOP_Z + MARKING_THICKNESS / 2.0)),
+        material=measurement,
+        name="side_ruler_strip",
     )
     base.visual(
-        Box((0.018, 0.246, 0.002)),
-        origin=Origin(xyz=(0.187, -0.006, BASE_TOP_Z + 0.001)),
-        material=brushed_aluminum,
-    )
-    base.visual(
-        Box((CUT_LENGTH * 0.98, 0.012, 0.003)),
+        Box((0.318, 0.012, FIXED_BLADE_THICKNESS)),
         origin=Origin(
-            xyz=(CUT_MID[0], CUT_MID[1], BASE_TOP_Z + 0.0015),
-            rpy=(0.0, 0.0, CUT_YAW),
+            xyz=(-0.020, -0.011, BASE_TOP_Z + FIXED_BLADE_THICKNESS / 2.0),
+            rpy=(0.0, 0.0, ARM_YAW),
         ),
-        material=blade_steel,
+        material=steel,
+        name="cutting_edge_bar",
     )
     base.visual(
-        Box((0.078, 0.058, 0.008)),
+        Box((0.318, 0.0022, MARKING_THICKNESS)),
         origin=Origin(
-            xyz=(CUT_START[0] + 0.012, CUT_START[1] - 0.020, BASE_TOP_Z + 0.004),
-            rpy=(0.0, 0.0, CUT_YAW),
+            xyz=(-0.020, -0.011, BASE_TOP_Z + MARKING_THICKNESS / 2.0),
+            rpy=(0.0, 0.0, ARM_YAW),
         ),
-        material=body_graphite,
+        material=accent_red,
+        name="cut_line_indicator",
     )
     base.visual(
-        Box((CUT_LENGTH * 0.96, 0.0012, 0.0004)),
-        origin=Origin(
-            xyz=(CUT_MID[0], CUT_MID[1], BASE_TOP_Z + 0.0002),
-            rpy=(0.0, 0.0, CUT_YAW),
-        ),
-        material=amber_cursor,
+        Box((0.026, 0.036, 0.020)),
+        origin=Origin(xyz=(-0.172, 0.119, BASE_TOP_Z + 0.010)),
+        material=steel,
+        name="hinge_mount_block",
     )
-
-    for x_line in (-0.105, -0.035, 0.035, 0.105):
-        base.visual(
-            Box((0.0008, 0.215, 0.0004)),
-            origin=Origin(xyz=(x_line, -0.010, BASE_TOP_Z + 0.0002)),
-            material=print_blue,
-        )
-
-    for y_line in (-0.085, -0.040, 0.005, 0.050):
-        base.visual(
-            Box((0.250, 0.0008, 0.0004)),
-            origin=Origin(xyz=(0.030, y_line, BASE_TOP_Z + 0.0002)),
-            material=print_blue,
-        )
-
-    for foot_x, foot_y in (
-        (-0.170, -0.112),
-        (0.170, -0.112),
-        (-0.170, 0.112),
-        (0.170, 0.112),
-    ):
-        base.visual(
-            Box((0.048, 0.040, 0.003)),
-            origin=Origin(xyz=(foot_x, foot_y, -0.0015)),
-            material=rubber_black,
-        )
-
+    for sx in (-0.158, 0.158):
+        for sy in (-0.108, 0.108):
+            base.visual(
+                Box((0.024, 0.024, FOOT_HEIGHT)),
+                origin=Origin(xyz=(sx, sy, FOOT_HEIGHT / 2.0)),
+                material=rubber,
+                name=f"foot_{'r' if sx > 0 else 'l'}_{'f' if sy < 0 else 'b'}",
+            )
     base.inertial = Inertial.from_geometry(
-        Box((BASE_WIDTH, BASE_DEPTH, BASE_TOP_Z + 0.003)),
-        mass=4.2,
-        origin=Origin(xyz=(0.0, 0.0, (BASE_TOP_Z + 0.003) / 2.0)),
+        Box((BASE_WIDTH, BASE_DEPTH, BASE_THICKNESS + FOOT_HEIGHT)),
+        mass=3.6,
+        origin=Origin(xyz=(0.0, 0.0, (BASE_THICKNESS + FOOT_HEIGHT) / 2.0)),
     )
 
-    fence = model.part("guide_fence")
-    fence.visual(
-        Box((0.392, 0.028, 0.004)),
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
-        material=brushed_aluminum,
+    guide_fence = model.part("guide_fence")
+    guide_fence.visual(
+        Box((0.340, 0.016, 0.020)),
+        origin=Origin(xyz=(0.0, 0.0, 0.010)),
+        material=anodized,
+        name="rear_fence_bar",
     )
-    fence.visual(
-        Box((0.392, 0.006, 0.022)),
-        origin=Origin(xyz=(0.0, 0.011, 0.015)),
-        material=brushed_aluminum,
+    guide_fence.visual(
+        Box((0.340, 0.005, 0.028)),
+        origin=Origin(xyz=(0.0, 0.005, 0.014)),
+        material=steel,
+        name="rear_fence_lip",
     )
-    fence.visual(
-        Box((0.034, 0.028, 0.024)),
-        origin=Origin(xyz=(-0.138, 0.0, 0.012)),
-        material=arm_finish,
+    guide_fence.visual(
+        Box((0.016, 0.052, 0.020)),
+        origin=Origin(xyz=(0.154, -0.023, 0.010)),
+        material=anodized,
+        name="squaring_stop",
     )
-    fence.visual(
-        Box((0.024, 0.028, 0.008)),
-        origin=Origin(xyz=(-0.100, 0.0, 0.008)),
-        material=amber_cursor,
+    guide_fence.visual(
+        Cylinder(radius=0.009, length=0.022),
+        origin=Origin(xyz=(0.120, 0.003, 0.016), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=black_plastic,
+        name="fence_adjustment_knob",
     )
-    fence.visual(
-        Cylinder(radius=0.007, length=0.014),
-        origin=Origin(xyz=(-0.138, 0.0, 0.031)),
-        material=rubber_black,
-    )
-    fence.inertial = Inertial.from_geometry(
-        Box((0.392, 0.028, 0.026)),
-        mass=0.65,
-        origin=Origin(xyz=(0.0, 0.0, 0.013)),
+    guide_fence.inertial = Inertial.from_geometry(
+        Box((0.340, 0.060, 0.028)),
+        mass=0.35,
+        origin=Origin(xyz=(0.0, -0.010, 0.014)),
     )
 
-    arm = model.part("arm")
-    arm.visual(
-        Box((0.072, 0.056, 0.026)),
-        origin=Origin(xyz=(0.036, -0.028, 0.013)),
-        material=arm_finish,
+    cutting_arm = model.part("cutting_arm")
+    cutting_arm.visual(_build_arm_beam_mesh(), material=anodized, name="arm_beam")
+    cutting_arm.visual(
+        Cylinder(radius=0.015, length=0.038),
+        origin=Origin(xyz=(0.018, 0.0, 0.012), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=steel,
+        name="hinge_hub",
     )
-    arm.visual(
-        Box((ARM_REACH - 0.072, 0.040, 0.016)),
-        origin=Origin(xyz=(0.072 + (ARM_REACH - 0.072) / 2.0, -0.020, 0.008)),
-        material=arm_finish,
+    cutting_arm.visual(
+        Box((0.308, 0.008, 0.003)),
+        origin=Origin(xyz=(0.205, -0.011, -0.0045)),
+        material=steel,
+        name="blade_backing_strip",
     )
-    arm.visual(
-        Box((ARM_REACH - 0.100, 0.022, 0.006)),
-        origin=Origin(xyz=(0.094 + (ARM_REACH - 0.100) / 2.0, -0.019, 0.019)),
-        material=body_graphite,
-    )
-    arm.visual(
-        Box((CUT_LENGTH * 0.92, 0.004, 0.006)),
-        origin=Origin(xyz=(0.030 + (CUT_LENGTH * 0.92) / 2.0, -0.002, 0.003)),
-        material=blade_steel,
-    )
-    arm.visual(
-        Box((ARM_REACH - 0.125, 0.003, 0.032)),
-        origin=Origin(xyz=(0.115 + (ARM_REACH - 0.125) / 2.0, -0.0415, 0.016)),
+    cutting_arm.visual(
+        Box((0.230, 0.003, 0.032)),
+        origin=Origin(xyz=(0.190, 0.014, 0.010)),
         material=clear_guard,
+        name="finger_guard",
     )
-    arm.visual(
-        Box((0.055, 0.022, 0.030)),
-        origin=Origin(xyz=(ARM_REACH - 0.050, -0.019, 0.015)),
-        material=arm_finish,
+    cutting_arm.visual(
+        Box((0.008, 0.008, 0.020)),
+        origin=Origin(xyz=(0.105, 0.010, 0.004)),
+        material=steel,
+        name="guard_post_rear",
     )
-    arm.visual(
-        Box((0.020, 0.036, 0.018)),
-        origin=Origin(xyz=(ARM_REACH - 0.010, -0.018, 0.009)),
-        material=blade_steel,
+    cutting_arm.visual(
+        Box((0.008, 0.008, 0.020)),
+        origin=Origin(xyz=(0.255, 0.010, 0.004)),
+        material=steel,
+        name="guard_post_front",
     )
-    arm.visual(
-        Cylinder(radius=0.016, length=0.030),
-        origin=Origin(
-            xyz=(0.018, -0.010, 0.016),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=blade_steel,
+    cutting_arm.visual(
+        Cylinder(radius=0.014, length=0.085),
+        origin=Origin(xyz=(0.392, 0.0, 0.012), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=black_plastic,
+        name="handle_grip",
     )
-    arm.visual(
-        Cylinder(radius=0.012, length=0.090),
-        origin=Origin(
-            xyz=(ARM_REACH - 0.030, -0.050, 0.028),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=rubber_black,
+    cutting_arm.visual(
+        Sphere(radius=0.014),
+        origin=Origin(xyz=(0.434, 0.0, 0.012)),
+        material=black_plastic,
+        name="handle_end_cap",
     )
-    arm.inertial = Inertial.from_geometry(
-        Box((ARM_REACH, 0.090, 0.040)),
-        mass=1.3,
-        origin=Origin(xyz=(ARM_REACH / 2.0, -0.028, 0.020)),
+    cutting_arm.inertial = Inertial.from_geometry(
+        Box((ARM_LENGTH, 0.052, 0.040)),
+        mass=0.85,
+        origin=Origin(xyz=(0.222, 0.0, 0.012)),
     )
 
     model.articulation(
@@ -240,23 +232,20 @@ def build_object_model() -> ArticulatedObject:
         ArticulationType.FIXED,
         parent="base",
         child="guide_fence",
-        origin=Origin(xyz=(0.0, 0.138, BASE_TOP_Z)),
+        origin=Origin(xyz=(0.0, FENCE_Y, BASE_TOP_Z + 0.001)),
     )
     model.articulation(
-        "base_to_arm",
+        "base_to_cutting_arm",
         ArticulationType.REVOLUTE,
         parent="base",
-        child="arm",
-        origin=Origin(
-            xyz=(CUT_START[0], CUT_START[1], BASE_TOP_Z + 0.003),
-            rpy=(0.0, 0.0, CUT_YAW),
-        ),
-        axis=(-1.0, 0.0, 0.0),
+        child="cutting_arm",
+        origin=Origin(xyz=HINGE_POS, rpy=(0.0, 0.0, ARM_YAW)),
+        axis=(0.0, -1.0, 0.0),
         motion_limits=MotionLimits(
             effort=18.0,
-            velocity=2.5,
+            velocity=2.6,
             lower=0.0,
-            upper=ARM_OPEN_LIMIT,
+            upper=1.32,
         ),
     )
 
@@ -267,10 +256,11 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
-    ctx.check_no_overlaps(
-        max_pose_samples=160,
+    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
+    ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.warn_if_coplanar_surfaces(use="visual")
+    ctx.warn_if_overlaps(
+        max_pose_samples=128,
         overlap_tol=0.004,
         overlap_volume_tol=0.0,
         ignore_adjacent=True,
@@ -278,31 +268,24 @@ def run_tests() -> TestReport:
     )
 
     ctx.expect_aabb_contact("guide_fence", "base")
-    ctx.expect_aabb_overlap("guide_fence", "base", axes="xy", min_overlap=0.015)
+    ctx.expect_aabb_overlap("guide_fence", "base", axes="x", min_overlap=0.300)
+    ctx.expect_aabb_overlap("guide_fence", "base", axes="y", min_overlap=0.018)
 
-    with ctx.pose(base_to_arm=0.0):
-        ctx.expect_aabb_contact("arm", "base")
-        ctx.expect_aabb_overlap("arm", "base", axes="xy", min_overlap=0.060)
-
+    ctx.expect_aabb_contact("cutting_arm", "base")
+    ctx.expect_aabb_overlap("cutting_arm", "base", axes="xy", min_overlap=0.130)
     ctx.expect_joint_motion_axis(
-        "base_to_arm",
-        "arm",
+        "base_to_cutting_arm",
+        "cutting_arm",
         world_axis="z",
         direction="positive",
-        min_delta=0.020,
+        min_delta=0.050,
     )
 
-    with ctx.pose(base_to_arm=0.70):
-        ctx.expect_aabb_overlap("arm", "base", axes="xy", min_overlap=0.040)
-        ctx.expect_aabb_overlap("arm", "guide_fence", axes="x", min_overlap=0.080)
-
-    with ctx.pose(base_to_arm=ARM_OPEN_LIMIT):
-        ctx.expect_aabb_overlap("arm", "base", axes="xy", min_overlap=0.025)
-        ctx.expect_aabb_overlap("arm", "guide_fence", axes="x", min_overlap=0.060)
+    with ctx.pose(base_to_cutting_arm=1.15):
+        ctx.expect_aabb_overlap("cutting_arm", "base", axes="x", min_overlap=0.020)
+        ctx.expect_aabb_overlap("cutting_arm", "base", axes="y", min_overlap=0.020)
 
     return ctx.report()
-
-
 # >>> USER_CODE_END
 
 object_model = build_object_model()

@@ -4,15 +4,14 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports. If the model needs mesh assets, create an
 # `AssetContext` inside the editable section.
+
 # >>> USER_CODE_START
 import math
 
-import cadquery as cq
-
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -23,178 +22,241 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
+import cadquery as cq
+
+
 ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
 
-PIVOT_Z = 0.305
-SUPPORT_CENTER_X = 0.165
-SUPPORT_WIDTH = 0.07
-SUPPORT_INNER_X = SUPPORT_CENTER_X - SUPPORT_WIDTH / 2.0
 
-TRUNNION_SPAN = 2.0 * SUPPORT_INNER_X
-TRUNNION_CENTER_X = TRUNNION_SPAN / 2.0
+BASE_X = 0.44
+BASE_Y = 0.30
+BASE_Z = 0.06
+PIVOT_Z = 0.19
+TABLE_JOINT_Z = 0.080
+TABLE_RADIUS = 0.105
+TABLE_THICKNESS = 0.032
 
-TABLE_RADIUS = 0.100
-TABLE_THICKNESS = 0.028
+
+def _bolt_circle_points(radius: float, count: int) -> list[tuple[float, float]]:
+    return [
+        (
+            radius * math.cos((2.0 * math.pi * i) / count),
+            radius * math.sin((2.0 * math.pi * i) / count),
+        )
+        for i in range(count)
+    ]
+
+
+def _build_base_shape() -> cq.Workplane:
+    plinth = (
+        cq.Workplane("XY")
+        .box(BASE_X, BASE_Y, BASE_Z)
+        .edges("|Z")
+        .fillet(0.012)
+        .translate((0.0, 0.0, BASE_Z / 2.0))
+    )
+
+    left_bearing_block = (
+        cq.Workplane("XY")
+        .box(0.08, 0.13, 0.18)
+        .edges("|Z")
+        .fillet(0.008)
+        .translate((-0.15, 0.0, 0.150))
+    )
+    right_bearing_block = (
+        cq.Workplane("XY")
+        .box(0.08, 0.13, 0.18)
+        .edges("|Z")
+        .fillet(0.008)
+        .translate((0.15, 0.0, 0.150))
+    )
+
+    left_gusset = (
+        cq.Workplane("XY")
+        .box(0.11, 0.16, 0.07)
+        .edges("|Z")
+        .fillet(0.010)
+        .translate((-0.13, 0.0, 0.095))
+    )
+    right_gusset = (
+        cq.Workplane("XY")
+        .box(0.11, 0.16, 0.07)
+        .edges("|Z")
+        .fillet(0.010)
+        .translate((0.13, 0.0, 0.095))
+    )
+
+    front_rib = (
+        cq.Workplane("XY")
+        .box(0.14, 0.06, 0.025)
+        .edges("|Z")
+        .fillet(0.006)
+        .translate((0.0, 0.085, 0.0425))
+    )
+    rear_rib = (
+        cq.Workplane("XY")
+        .box(0.18, 0.08, 0.030)
+        .edges("|Z")
+        .fillet(0.006)
+        .translate((0.0, -0.085, 0.045))
+    )
+
+    return (
+        plinth.union(left_bearing_block)
+        .union(right_bearing_block)
+        .union(left_gusset)
+        .union(right_gusset)
+        .union(front_rib)
+        .union(rear_rib)
+    )
+
+
+def _build_trunnion_shape() -> cq.Workplane:
+    side_web = (
+        cq.Workplane("XZ")
+        .moveTo(-0.155, -0.018)
+        .lineTo(-0.155, 0.018)
+        .lineTo(-0.11, 0.038)
+        .lineTo(-0.055, 0.060)
+        .lineTo(0.055, 0.060)
+        .lineTo(0.11, 0.038)
+        .lineTo(0.155, 0.018)
+        .lineTo(0.155, -0.018)
+        .lineTo(0.09, -0.006)
+        .lineTo(-0.09, -0.006)
+        .close()
+        .extrude(0.10)
+        .translate((0.0, -0.05, 0.0))
+    )
+
+    hub_shaft = (
+        cq.Workplane("YZ")
+        .circle(0.028)
+        .extrude(0.40)
+        .translate((-0.20, 0.0, 0.0))
+    )
+
+    lower_spindle_body = (
+        cq.Workplane("XY")
+        .circle(0.055)
+        .extrude(0.024)
+        .translate((0.0, 0.0, -0.004))
+    )
+
+    rotary_housing = (
+        cq.Workplane("XY")
+        .circle(0.080)
+        .extrude(0.066)
+        .translate((0.0, 0.0, 0.006))
+    )
+
+    mounting_flange = (
+        cq.Workplane("XY")
+        .circle(0.094)
+        .circle(0.062)
+        .extrude(0.010)
+        .translate((0.0, 0.0, 0.060))
+    )
+
+    trunnion = (
+        side_web.union(hub_shaft)
+        .union(lower_spindle_body)
+        .union(rotary_housing)
+        .union(mounting_flange)
+    )
+
+    spindle_pocket = (
+        cq.Workplane("XY")
+        .circle(0.044)
+        .extrude(0.014)
+        .translate((0.0, 0.0, 0.058))
+    )
+    center_bore = (
+        cq.Workplane("XY")
+        .circle(0.022)
+        .extrude(0.080)
+        .translate((0.0, 0.0, -0.004))
+    )
+
+    return trunnion.cut(spindle_pocket).cut(center_bore)
 
 
 def _build_turntable_shape() -> cq.Workplane:
-    ring_depth = 0.004
-    slot_depth = 0.0045
-    bolt_pocket_depth = 0.003
+    bolt_points = _bolt_circle_points(0.070, 8)
 
-    body = (
+    platter = cq.Workplane("XY").circle(TABLE_RADIUS).extrude(TABLE_THICKNESS)
+    platter = platter.faces(">Z").workplane().circle(0.088).cutBlind(-0.003)
+    platter = platter.faces(">Z").workplane().circle(0.020).cutBlind(-0.010)
+    platter = platter.faces(">Z").workplane().pushPoints(bolt_points).hole(0.008)
+    platter = platter.faces(">Z").workplane().slot2D(0.140, 0.014).cutBlind(-0.008)
+    platter = (
+        platter.faces(">Z")
+        .workplane()
+        .transformed(rotate=(0.0, 0.0, 90.0))
+        .slot2D(0.140, 0.014)
+        .cutBlind(-0.008)
+    )
+
+    spindle = (
         cq.Workplane("XY")
-        .circle(TABLE_RADIUS * 0.94)
-        .workplane(offset=0.002)
-        .circle(TABLE_RADIUS)
-        .workplane(offset=TABLE_THICKNESS - 0.004)
-        .circle(TABLE_RADIUS)
-        .workplane(offset=0.002)
-        .circle(TABLE_RADIUS * 0.94)
-        .loft(combine=True)
+        .circle(0.042)
+        .extrude(0.014)
+        .translate((0.0, 0.0, -0.014))
     )
 
-    recess = (
-        cq.Workplane("XY", origin=(0.0, 0.0, TABLE_THICKNESS - ring_depth))
-        .circle(TABLE_RADIUS * 0.80)
-        .circle(0.026)
-        .extrude(ring_depth)
-    )
-    body = body.cut(recess)
-
-    center_bore = cq.Workplane("XY").circle(0.016).extrude(TABLE_THICKNESS)
-    body = body.cut(center_bore)
-
-    for angle_deg in range(0, 360, 60):
-        slot = (
-            cq.Workplane("XY", origin=(0.0, 0.0, TABLE_THICKNESS - slot_depth))
-            .transformed(rotate=(0.0, 0.0, angle_deg))
-            .moveTo(0.054, 0.0)
-            .slot2D(0.050, 0.012)
-            .extrude(slot_depth)
-        )
-        body = body.cut(slot)
-
-    for angle_deg in range(0, 360, 30):
-        pocket = (
-            cq.Workplane("XY", origin=(0.0, 0.0, TABLE_THICKNESS - bolt_pocket_depth))
-            .transformed(rotate=(0.0, 0.0, angle_deg))
-            .moveTo(0.080, 0.0)
-            .circle(0.0042)
-            .extrude(bolt_pocket_depth)
-        )
-        body = body.cut(pocket)
-
-    return body
-
-
-def _x_axis_origin(xyz: tuple[float, float, float]) -> Origin:
-    return Origin(xyz=xyz, rpy=(0.0, math.pi / 2.0, 0.0))
+    return platter.union(spindle)
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="rotary_trunnion_table", assets=ASSETS)
 
-    model.material("cast_iron", rgba=(0.31, 0.33, 0.35, 1.0))
-    model.material("machine_gray", rgba=(0.55, 0.58, 0.61, 1.0))
-    model.material("machined_steel", rgba=(0.78, 0.80, 0.83, 1.0))
-    model.material("dark_oxide", rgba=(0.18, 0.19, 0.21, 1.0))
+    cast_gray = model.material("cast_gray", rgba=(0.33, 0.35, 0.37, 1.0))
+    machined_gray = model.material("machined_gray", rgba=(0.66, 0.68, 0.70, 1.0))
+    faceplate_steel = model.material("faceplate_steel", rgba=(0.47, 0.49, 0.52, 1.0))
+    black_oxide = model.material("black_oxide", rgba=(0.14, 0.15, 0.16, 1.0))
 
     base = model.part("base")
     base.visual(
-        Box((0.44, 0.30, 0.06)),
-        origin=Origin(xyz=(0.0, 0.0, 0.03)),
-        material="cast_iron",
-    )
-    base.visual(
-        Box((0.24, 0.18, 0.10)),
-        origin=Origin(xyz=(0.0, 0.0, 0.11)),
-        material="cast_iron",
-    )
-    base.visual(
-        Box((0.30, 0.16, 0.05)),
-        origin=Origin(xyz=(0.0, -0.03, 0.165)),
-        material="machine_gray",
-    )
-    for x_sign in (-1.0, 1.0):
-        x_pos = x_sign * SUPPORT_CENTER_X
-        base.visual(
-            Box((SUPPORT_WIDTH, 0.14, 0.19)),
-            origin=Origin(xyz=(x_pos, 0.0, 0.215)),
-            material="cast_iron",
-        )
-        base.visual(
-            Cylinder(radius=0.035, length=0.020),
-            origin=_x_axis_origin((x_sign * 0.210, 0.0, PIVOT_Z)),
-            material="machined_steel",
-        )
-    base.visual(
-        Box((0.34, 0.06, 0.06)),
-        origin=Origin(xyz=(0.0, -0.075, 0.18)),
-        material="machine_gray",
+        mesh_from_cadquery(_build_base_shape(), "base.obj", assets=ASSETS),
+        material=cast_gray,
     )
     base.inertial = Inertial.from_geometry(
-        Box((0.44, 0.30, 0.30)),
-        mass=38.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.15)),
+        Box((BASE_X, BASE_Y, 0.21)),
+        mass=28.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.105)),
     )
 
     trunnion = model.part("trunnion")
     trunnion.visual(
-        Cylinder(radius=0.078, length=0.070),
-        origin=Origin(xyz=(TRUNNION_CENTER_X, 0.0, -0.038)),
-        material="machine_gray",
+        mesh_from_cadquery(_build_trunnion_shape(), "trunnion.obj", assets=ASSETS),
+        material=machined_gray,
     )
     trunnion.visual(
-        Cylinder(radius=0.055, length=0.006),
-        origin=Origin(xyz=(TRUNNION_CENTER_X, 0.0, -0.003)),
-        material="machined_steel",
+        Cylinder(radius=0.036, length=0.010),
+        origin=Origin(xyz=(-0.205, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=black_oxide,
     )
     trunnion.visual(
-        Box((0.070, 0.080, 0.090)),
-        origin=Origin(xyz=(0.050, -0.040, -0.055)),
-        material="machine_gray",
-    )
-    trunnion.visual(
-        Box((0.070, 0.080, 0.090)),
-        origin=Origin(xyz=(0.210, -0.040, -0.055)),
-        material="machine_gray",
-    )
-    trunnion.visual(
-        Box((0.180, 0.035, 0.100)),
-        origin=Origin(xyz=(TRUNNION_CENTER_X, -0.075, -0.050)),
-        material="machine_gray",
-    )
-    trunnion.visual(
-        Box((0.110, 0.090, 0.040)),
-        origin=Origin(xyz=(TRUNNION_CENTER_X, -0.035, -0.100)),
-        material="dark_oxide",
-    )
-    trunnion.visual(
-        Cylinder(radius=0.030, length=0.030),
-        origin=_x_axis_origin((0.015, 0.0, 0.0)),
-        material="machined_steel",
-    )
-    trunnion.visual(
-        Cylinder(radius=0.030, length=0.030),
-        origin=_x_axis_origin((TRUNNION_SPAN - 0.015, 0.0, 0.0)),
-        material="machined_steel",
+        Cylinder(radius=0.036, length=0.010),
+        origin=Origin(xyz=(0.205, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=black_oxide,
     )
     trunnion.inertial = Inertial.from_geometry(
-        Box((0.26, 0.12, 0.14)),
-        mass=14.0,
-        origin=Origin(xyz=(TRUNNION_CENTER_X, -0.035, -0.050)),
+        Box((0.42, 0.12, 0.11)),
+        mass=16.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.03)),
     )
 
     turntable = model.part("turntable")
     turntable.visual(
         mesh_from_cadquery(_build_turntable_shape(), "turntable.obj", assets=ASSETS),
-        material="machined_steel",
+        material=faceplate_steel,
     )
     turntable.inertial = Inertial.from_geometry(
-        Cylinder(radius=TABLE_RADIUS, length=TABLE_THICKNESS),
-        mass=9.5,
-        origin=Origin(xyz=(0.0, 0.0, TABLE_THICKNESS / 2.0)),
+        Cylinder(radius=TABLE_RADIUS, length=TABLE_THICKNESS + 0.014),
+        mass=9.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.009)),
     )
 
     model.articulation(
@@ -202,90 +264,109 @@ def build_object_model() -> ArticulatedObject:
         ArticulationType.REVOLUTE,
         parent="base",
         child="trunnion",
-        origin=Origin(xyz=(-SUPPORT_INNER_X, 0.0, PIVOT_Z)),
+        origin=Origin(xyz=(0.0, 0.0, PIVOT_Z)),
         axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(
+            effort=80.0,
+            velocity=1.0,
             lower=-0.35,
-            upper=1.35,
-            effort=120.0,
-            velocity=0.9,
+            upper=math.pi / 2.0,
         ),
     )
+
     model.articulation(
         "table_spin",
         ArticulationType.CONTINUOUS,
         parent="trunnion",
         child="turntable",
-        origin=Origin(xyz=(TRUNNION_CENTER_X, 0.0, 0.0)),
+        origin=Origin(xyz=(0.0, 0.0, TABLE_JOINT_Z)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=60.0,
-            velocity=3.0,
-        ),
+        motion_limits=MotionLimits(effort=45.0, velocity=2.5),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
-    ctx.allow_overlap(
-        "trunnion",
-        "base",
-        reason="pivot hubs sit tightly inside the side supports and generated collision is conservative",
-    )
-    ctx.allow_overlap(
-        "turntable",
-        "trunnion",
-        reason="the rotary faceplate is intentionally seated on the trunnion nose with negligible clearance",
-    )
-    ctx.check_no_overlaps(
+    ctx.warn_if_articulation_origin_near_geometry(tol=0.100)
+    ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.warn_if_coplanar_surfaces(use="visual")
+    ctx.warn_if_overlaps(
         max_pose_samples=96,
-        overlap_tol=0.003,
+        overlap_tol=0.004,
         overlap_volume_tol=0.0,
         ignore_adjacent=True,
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_contact("trunnion", "base")
-    ctx.expect_aabb_contact("turntable", "trunnion")
-    ctx.expect_aabb_overlap("turntable", "base", axes="xy", min_overlap=0.18)
-    ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.005)
+    ctx.expect_aabb_contact("base", "trunnion")
+    ctx.expect_aabb_contact("trunnion", "turntable")
+    ctx.expect_aabb_overlap("base", "trunnion", axes="xy", min_overlap=0.10)
+    ctx.expect_aabb_overlap("base", "turntable", axes="xy", min_overlap=0.16)
+    ctx.expect_origin_distance("turntable", "trunnion", axes="xy", max_dist=0.005)
+    ctx.expect_origin_distance("turntable", "base", axes="x", max_dist=0.010)
+    ctx.expect_origin_distance("turntable", "base", axes="y", max_dist=0.005)
     ctx.expect_joint_motion_axis(
         "trunnion_tilt",
-        "trunnion",
+        "turntable",
         world_axis="y",
-        direction="positive",
-        min_delta=0.03,
+        direction="negative",
+        min_delta=0.050,
+    )
+    ctx.expect_aabb_gap(
+        "turntable",
+        "trunnion",
+        axis="z",
+        max_gap=0.003,
+        max_penetration=0.020,
     )
 
-    with ctx.pose(table_spin=math.pi / 2.0):
-        ctx.expect_aabb_contact("turntable", "trunnion")
-        ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.005)
-        ctx.expect_aabb_overlap("turntable", "base", axes="xy", min_overlap=0.18)
+    for spin in (0.0, math.pi / 2.0, math.pi):
+        with ctx.pose(table_spin=spin):
+            ctx.expect_origin_distance("turntable", "trunnion", axes="xy", max_dist=0.005)
+            ctx.expect_origin_distance("turntable", "base", axes="x", max_dist=0.010)
+            ctx.expect_origin_distance("turntable", "base", axes="y", max_dist=0.005)
+            ctx.expect_aabb_overlap("turntable", "trunnion", axes="xy", min_overlap=0.12)
+            ctx.expect_aabb_gap(
+                "turntable",
+                "trunnion",
+                axis="z",
+                max_gap=0.003,
+                max_penetration=0.020,
+            )
 
-    with ctx.pose(trunnion_tilt=-0.30):
-        ctx.expect_aabb_contact("trunnion", "base")
-        ctx.expect_aabb_contact("turntable", "trunnion")
-        ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.005)
+    for tilt in (-0.25, 1.40):
+        with ctx.pose(trunnion_tilt=tilt):
+            ctx.expect_aabb_contact("base", "trunnion")
+            ctx.expect_origin_distance("turntable", "base", axes="x", max_dist=0.010)
+            ctx.expect_aabb_overlap("base", "turntable", axes="xy", min_overlap=0.020)
+        with ctx.pose(trunnion_tilt=tilt, table_spin=math.pi / 2.0):
+            ctx.expect_aabb_contact("base", "trunnion")
+            ctx.expect_origin_distance("turntable", "base", axes="x", max_dist=0.010)
+            ctx.expect_aabb_overlap("base", "turntable", axes="xy", min_overlap=0.020)
 
-    with ctx.pose(trunnion_tilt=1.20):
-        ctx.expect_aabb_contact("trunnion", "base")
-        ctx.expect_aabb_contact("turntable", "trunnion")
-        ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.005)
-
-    with ctx.pose({"trunnion_tilt": 1.20, "table_spin": math.pi}):
-        ctx.expect_aabb_contact("trunnion", "base")
-        ctx.expect_aabb_contact("turntable", "trunnion")
-        ctx.expect_origin_distance("turntable", "base", axes="xy", max_dist=0.005)
+    with ctx.pose(trunnion_tilt=-0.25):
+        ctx.expect_origin_distance("turntable", "base", axes="y", min_dist=0.015, max_dist=0.030)
+    with ctx.pose(trunnion_tilt=-0.25, table_spin=math.pi / 2.0):
+        ctx.expect_origin_distance("turntable", "base", axes="y", min_dist=0.015, max_dist=0.030)
+    with ctx.pose(trunnion_tilt=1.40):
+        ctx.expect_origin_distance("turntable", "base", axes="y", min_dist=0.070, max_dist=0.085)
+    with ctx.pose(trunnion_tilt=1.40, table_spin=math.pi / 2.0):
+        ctx.expect_origin_distance("turntable", "base", axes="y", min_dist=0.070, max_dist=0.085)
+    with ctx.pose(trunnion_tilt=math.pi / 2.0):
+        ctx.expect_origin_distance("turntable", "base", axes="x", max_dist=0.010)
+        ctx.expect_origin_distance("turntable", "base", axes="y", min_dist=0.080, max_dist=0.095)
+        ctx.expect_aabb_overlap("base", "turntable", axes="xy", min_overlap=0.015)
+    with ctx.pose(trunnion_tilt=math.pi / 2.0, table_spin=math.pi / 2.0):
+        ctx.expect_origin_distance("turntable", "base", axes="x", max_dist=0.010)
+        ctx.expect_origin_distance("turntable", "base", axes="y", min_dist=0.080, max_dist=0.095)
+        ctx.expect_aabb_overlap("base", "turntable", axes="xy", min_overlap=0.015)
 
     return ctx.report()
-
-
 # >>> USER_CODE_END
 
 object_model = build_object_model()
