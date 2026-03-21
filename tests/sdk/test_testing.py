@@ -55,6 +55,70 @@ def _build_overlapping_parts_model() -> ArticulatedObject:
     return model
 
 
+def _build_articulation_overlap_model(*, joint_type: ArticulationType) -> ArticulatedObject:
+    model = ArticulatedObject(name=f"articulation_overlap_{joint_type.value.lower()}")
+
+    base = model.part("base")
+    base.visual(Box((0.24, 0.24, 0.24)), origin=Origin(xyz=(0.0, 0.0, 0.12)))
+
+    child = model.part("child")
+    child.visual(Box((0.2, 0.2, 0.2)), origin=Origin(xyz=(0.0, 0.0, 0.1)))
+
+    articulation_kwargs = {}
+    if joint_type == ArticulationType.REVOLUTE:
+        articulation_kwargs = {
+            "axis": (0.0, 1.0, 0.0),
+            "motion_limits": MotionLimits(effort=1.0, velocity=1.0, lower=-0.4, upper=0.4),
+        }
+    elif joint_type == ArticulationType.PRISMATIC:
+        articulation_kwargs = {
+            "axis": (1.0, 0.0, 0.0),
+            "motion_limits": MotionLimits(effort=1.0, velocity=1.0, lower=-0.02, upper=0.02),
+        }
+    elif joint_type == ArticulationType.CONTINUOUS:
+        articulation_kwargs = {
+            "axis": (0.0, 1.0, 0.0),
+            "motion_limits": MotionLimits(effort=1.0, velocity=1.0),
+        }
+
+    model.articulation(
+        "base_to_child",
+        joint_type,
+        parent=base,
+        child=child,
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+        **articulation_kwargs,
+    )
+    return model
+
+
+def _build_non_articulation_overlap_only_model() -> ArticulatedObject:
+    model = ArticulatedObject(name="non_articulation_overlap_only")
+
+    base = model.part("base")
+    base.visual(Box((0.2, 0.2, 0.2)), origin=Origin(xyz=(0.0, 0.0, 0.1)))
+
+    arm = model.part("arm")
+    arm.visual(Box((0.12, 0.12, 0.12)), origin=Origin(xyz=(0.22, 0.0, 0.06)))
+
+    rogue_a = model.part("rogue_a")
+    rogue_a.visual(Box((0.18, 0.18, 0.18)), origin=Origin(xyz=(0.8, 0.0, 0.09)))
+
+    rogue_b = model.part("rogue_b")
+    rogue_b.visual(Box((0.18, 0.18, 0.18)), origin=Origin(xyz=(0.8, 0.0, 0.09)))
+
+    model.articulation(
+        "base_to_arm",
+        ArticulationType.REVOLUTE,
+        parent=base,
+        child=arm,
+        origin=Origin(xyz=(0.22, 0.0, 0.0)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=1.0, velocity=1.0, lower=-0.2, upper=0.2),
+    )
+    return model
+
+
 def _build_coplanar_surface_model() -> ArticulatedObject:
     model = ArticulatedObject(name="coplanar_surfaces")
 
@@ -150,6 +214,97 @@ def test_warn_if_overlaps_records_warning_only() -> None:
         "warn_if_overlaps(samples=8,ignore_adjacent=False,ignore_fixed=True)" in report.warnings[0]
     )
     assert "Overlaps detected" in report.warnings[0]
+
+
+def test_check_articulation_overlaps_fails_for_revolute_pair() -> None:
+    ctx = SDKTestContext(
+        _build_articulation_overlap_model(joint_type=ArticulationType.REVOLUTE),
+        geometry_source="collision",
+    )
+
+    assert not ctx.check_articulation_overlaps(max_pose_samples=8)
+
+    report = ctx.report()
+    assert not report.passed
+    assert report.checks == ("check_articulation_overlaps(samples=8)",)
+    assert len(report.failures) == 1
+    assert report.failures[0].name == "check_articulation_overlaps(samples=8)"
+    assert "pair=('base','child')" in report.failures[0].details
+
+
+def test_check_articulation_overlaps_fails_for_prismatic_pair() -> None:
+    ctx = SDKTestContext(
+        _build_articulation_overlap_model(joint_type=ArticulationType.PRISMATIC),
+        geometry_source="collision",
+    )
+
+    assert not ctx.check_articulation_overlaps(max_pose_samples=8)
+
+    report = ctx.report()
+    assert not report.passed
+    assert len(report.failures) == 1
+    assert report.failures[0].name == "check_articulation_overlaps(samples=8)"
+    assert "pair=('base','child')" in report.failures[0].details
+
+
+def test_check_articulation_overlaps_fails_for_continuous_pair() -> None:
+    ctx = SDKTestContext(
+        _build_articulation_overlap_model(joint_type=ArticulationType.CONTINUOUS),
+        geometry_source="collision",
+    )
+
+    assert not ctx.check_articulation_overlaps(max_pose_samples=8)
+
+    report = ctx.report()
+    assert not report.passed
+    assert len(report.failures) == 1
+    assert report.failures[0].name == "check_articulation_overlaps(samples=8)"
+    assert "pair=('base','child')" in report.failures[0].details
+
+
+def test_check_articulation_overlaps_ignores_fixed_pairs() -> None:
+    ctx = SDKTestContext(
+        _build_articulation_overlap_model(joint_type=ArticulationType.FIXED),
+        geometry_source="collision",
+    )
+
+    assert ctx.check_articulation_overlaps(max_pose_samples=8)
+
+    report = ctx.report()
+    assert report.passed
+    assert report.failures == ()
+    assert report.checks == ("check_articulation_overlaps(samples=8)",)
+
+
+def test_check_articulation_overlaps_ignores_non_articulation_pairs() -> None:
+    ctx = SDKTestContext(_build_non_articulation_overlap_only_model(), geometry_source="collision")
+
+    assert ctx.check_articulation_overlaps(max_pose_samples=8)
+
+    report = ctx.report()
+    assert report.passed
+    assert report.failures == ()
+    assert report.checks == ("check_articulation_overlaps(samples=8)",)
+
+
+def test_allow_overlap_suppresses_reported_articulation_pair() -> None:
+    ctx = SDKTestContext(
+        _build_articulation_overlap_model(joint_type=ArticulationType.REVOLUTE),
+        geometry_source="collision",
+    )
+    ctx.allow_overlap("base", "child", reason="bearing sleeve nests around the hinge pin")
+
+    assert ctx.check_articulation_overlaps(max_pose_samples=8)
+
+    report = ctx.report()
+    assert report.passed
+    assert report.failures == ()
+    assert report.checks == ("check_articulation_overlaps(samples=8)",)
+    assert report.allowances == (
+        "allow_overlap('base', 'child'): bearing sleeve nests around the hinge pin",
+    )
+    assert len(report.warnings) == 1
+    assert "Overlaps detected but allowed by justification" in report.warnings[0]
 
 
 def test_warn_if_coplanar_surfaces_records_warning_only() -> None:

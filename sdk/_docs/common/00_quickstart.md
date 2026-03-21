@@ -24,8 +24,9 @@ Do not emit URDF XML yourself. The harness compiles `object_model`, generates co
    - `ctx.check_mesh_files_exist()`
    - `ctx.warn_if_articulation_origin_near_geometry(tol=0.015)`
    - `ctx.warn_if_part_geometry_connected(use="visual")`
+   - `ctx.check_articulation_overlaps(...)` when the model has non-fixed articulations
    - `ctx.warn_if_coplanar_surfaces(use="visual", ignore_adjacent=True, ignore_fixed=True)` when it is useful
-   - `ctx.warn_if_overlaps(..., ignore_adjacent=True, ignore_fixed=True)`
+   - `ctx.warn_if_overlaps(..., ignore_adjacent=True, ignore_fixed=True)` as a broad warning-tier backstop
 
 Joint authoring rules:
 
@@ -118,6 +119,11 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
     ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.check_articulation_overlaps(
+        max_pose_samples=128,
+        overlap_tol=0.005,
+        overlap_volume_tol=0.0,
+    )
     ctx.warn_if_coplanar_surfaces(use="visual", ignore_adjacent=True, ignore_fixed=True)
     ctx.warn_if_overlaps(
         max_pose_samples=128,
@@ -187,11 +193,12 @@ Important:
 - Prefer relation-aware defaults such as `ignore_adjacent=True` and `ignore_fixed=True`, and use `allow_coplanar_surfaces(...)` narrowly for intentional flush mounts that still get reported.
 - A tolerance that is sensible for a compact hinge may be meaningless for a vehicle-sized or aircraft-sized assembly.
 - Only relax articulation-origin tolerance when the geometry genuinely needs it, and keep it tight.
+- Use `ctx.check_articulation_overlaps(...)` as the failure-tier QC gate for `REVOLUTE`, `PRISMATIC`, and `CONTINUOUS` parent/child pairs when you need to prove non-fixed joint clearance.
 - Use prompt-specific `expect_*` assertions as the real regression tests for visible structure, proportions, and mechanism behavior.
 - Make attachment checks primary: use near-zero `expect_aabb_gap(...)`, footprint overlap, `expect_aabb_contact(...)` where appropriate, and pose-specific mounting checks to prove that parts look attached.
 - Slight intended interpenetration can be acceptable when it makes a mounted or nested assembly look seated instead of floating.
-- Use `ctx.allow_overlap(...)` narrowly for legitimate nested mechanisms or conservative false-positives, and still call `ctx.warn_if_overlaps(...)` so the allowance is tracked.
-- Use `ctx.warn_if_overlaps(..., ignore_adjacent=True, ignore_fixed=True)` as a conservative warning-tier backstop, not as proof that attachment quality is good.
+- Use `ctx.allow_overlap(...)` narrowly for legitimate nested mechanisms such as bearing sleeves, hinge barrels, or enclosed hubs, and still call `ctx.warn_if_overlaps(...)` so the allowance is tracked.
+- Use `ctx.warn_if_overlaps(..., ignore_adjacent=True, ignore_fixed=True)` as a conservative warning-tier backstop for non-joint overlap issues, not as proof that attachment quality is good.
 - Overlap QC is also heuristic: generated collisions, AABB reasoning, and convex decomposition can be noisy for thin wires, thin blades, concave shells, and other awkward shapes.
 - The harness also runs automatic isolated-part checks at compile time.
 - `visual` isolated-part findings stay warning-tier because they are based on broad visible-envelope contact.

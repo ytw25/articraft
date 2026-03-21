@@ -42,7 +42,9 @@
   - Slight intended interpenetration can be acceptable when it makes a mounted or nested assembly look seated instead of floating.
   - Prefer flush or nearly flush attachment when parts are meant to look mounted, and avoid visible air gaps unless the real object clearly has clearance.
   - Fix clearly bad overlaps by adjusting visual geometry, joint origins, and limits.
-  - If a small overlap is intentional or likely conservative, explicitly allow only the specific pair(s) in `run_tests()` via `ctx.allow_overlap(...)` and still run `ctx.warn_if_overlaps(...)` so the allowance is tracked.
+  - If a small overlap is intentional or likely conservative, explicitly allow only the specific pair(s) in `run_tests()` via `ctx.allow_overlap(...)`.
+  - On models with non-fixed joints, use `ctx.check_articulation_overlaps(...)` as the primary failure-tier clearance gate for articulated parent/child pairs.
+  - Still run `ctx.warn_if_overlaps(...)` so broader non-joint overlap findings and allowances are tracked.
 </qc_and_overlap_handling>
 
 <run_tests_requirements>
@@ -54,8 +56,9 @@
 - `warn_if_articulation_origin_near_geometry(...)` is not scale-aware; its tolerance is a fixed metric distance in meters.
 - A tolerance that is sensible for a compact object may be meaningless for a vehicle-sized or aircraft-sized assembly.
 - Use `ctx.warn_if_part_geometry_connected(use="visual")` as the default disconnected-geometry sensor.
+- On models with `REVOLUTE`, `PRISMATIC`, or `CONTINUOUS` articulations, use `ctx.check_articulation_overlaps(max_pose_samples=...)` as the default joint-clearance check.
 - Use `ctx.warn_if_coplanar_surfaces(use="visual", ignore_adjacent=True, ignore_fixed=True)` only when it is likely to add value for the current object.
-- Use `ctx.warn_if_overlaps(max_pose_samples=..., ignore_adjacent=True, ignore_fixed=True)` as the default overlap sensor.
+- Use `ctx.warn_if_overlaps(max_pose_samples=..., ignore_adjacent=True, ignore_fixed=True)` as the broad warning-tier overlap sensor.
 - `warn_if_coplanar_surfaces(...)` is a deliberately noisy visual heuristic based on element AABB faces; flush mounts, bezels, grilles, and panel seams can trigger it even when the model is acceptable.
 - Prefer relation-aware defaults for coplanar checks. Adjacent/fixed panel mounts are usually low-confidence hints, not proof that geometry is wrong.
 - Use `ctx.allow_coplanar_surfaces("a", "b", reason="...")` narrowly for intentional flush mounts or panel seams that the heuristic still reports.
@@ -74,6 +77,7 @@
 - Primitive geometry constructors (`Box`, `Cylinder`, `Sphere`) only take shape parameters. Put transforms on `visual(..., origin=...)` or `Inertial.from_geometry(..., origin=...)`.
 - Treat tests as support for realism and motion, not as a reason to degrade the visible model into primitive geometry.
 - Treat `warn_if_articulation_origin_near_geometry(...)` and `warn_if_part_geometry_connected(...)` as deliberately dumb static sensors.
+- Treat `check_articulation_overlaps(...)` differently: it is a targeted failure-tier clearance check for non-fixed articulated parent/child pairs.
 - Treat `warn_if_coplanar_surfaces(...)` the same way: it is a deliberately noisy flush-surface sensor, not semantic proof.
 - A coplanar warning alone is not a reason to add visible air gaps or distort a legitimate mounted panel.
 - Treat `warn_if_overlaps(...)` the same way: it is a deliberately broad collision/QC sensor, not semantic proof.
@@ -99,6 +103,7 @@
     - This especially applies to axle supports, brackets, hinge plates, legs, and body-mounted frames.
 - Allow overlaps only when justified:
   - Use `ctx.allow_overlap("a", "b", reason="...")` narrowly for legitimate nested mechanisms or conservative false-positives.
+  - On articulated models, use `ctx.check_articulation_overlaps(...)` unless the overlap is genuinely intentional and justified.
   - Do not introduce visible air gaps just to satisfy conservative overlap QC.
   - Still call `ctx.warn_if_overlaps(...)` so the allowance is validated and tracked.
 - Add selective separation checks only for pairs that truly must remain clear across motion.
@@ -110,8 +115,9 @@
 
 <recommended_test_structure>
 1) Sanity: `check_model_valid`, `check_mesh_files_exist`
-2) Broad warning sensors: include `warn_if_overlaps`, and include `warn_if_coplanar_surfaces` / `warn_if_articulation_origin_near_geometry` / `warn_if_part_geometry_connected` when they are useful
-3) Geometry warning backstop: `warn_if_overlaps(max_pose_samples=..., ignore_adjacent=True, ignore_fixed=True)`
-4) Intent: multiple prompt-specific `expect_*` semantic regression checks, with attachment checks as primary evidence of realism
-5) Pose coverage: for each important joint, include checks at lower/upper limits using `with ctx.pose({"joint_name": value}): ...` or `with ctx.pose(joint_name=value): ...`
+2) Joint clearance: on models with non-fixed articulations, include `check_articulation_overlaps(max_pose_samples=...)`
+3) Broad warning sensors: include `warn_if_overlaps`, and include `warn_if_coplanar_surfaces` / `warn_if_articulation_origin_near_geometry` / `warn_if_part_geometry_connected` when they are useful
+4) Geometry warning backstop: `warn_if_overlaps(max_pose_samples=..., ignore_adjacent=True, ignore_fixed=True)`
+5) Intent: multiple prompt-specific `expect_*` semantic regression checks, with attachment checks as primary evidence of realism
+6) Pose coverage: for each important joint, include checks at lower/upper limits using `with ctx.pose({"joint_name": value}): ...` or `with ctx.pose(joint_name=value): ...`
 </recommended_test_structure>

@@ -38,6 +38,7 @@ find_geometry_overlaps(
 
 Use `geometry_source="collision"` for physical overlap checks. Use `"visual"` when you explicitly want visible-envelope overlap checks.
 Treat this as a safety backstop, not as the primary proof that parts look attached.
+For author-facing non-fixed joint clearance checks, prefer `TestContext.check_articulation_overlaps(...)` over calling this lower-level helper directly.
 
 ## `find_unsupported_parts(...)`
 

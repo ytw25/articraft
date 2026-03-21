@@ -32,6 +32,7 @@ ctx.check_model_valid()
 ctx.check_mesh_files_exist()
 ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
 ctx.warn_if_part_geometry_connected(use="visual")
+ctx.check_articulation_overlaps(max_pose_samples=128)
 ctx.warn_if_coplanar_surfaces(use="visual", ignore_adjacent=True, ignore_fixed=True)
 ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 ```
@@ -46,6 +47,7 @@ What they catch:
 - `warn_if_articulation_origin_near_geometry`: a deliberately dumb static heuristic that checks whether the articulation origin is near real geometry in both parent and child frames; default `tol=0.015`. The harness truncates this tolerance to 3 decimals and caps it at `0.15`.
 - `warn_if_part_geometry_connected`: a deliberately dumb static heuristic that checks whether a single part appears to contain disconnected visual geometry islands.
 - `warn_if_coplanar_surfaces`: a deliberately noisy visual heuristic that looks for nearly coplanar element AABB faces with strong in-plane overlap. Flush mounts, bezels, grilles, and panel seams can trigger it even when the model is acceptable.
+- `check_articulation_overlaps`: a failure-tier overlap gate for non-fixed articulation-linked parent/child pairs. It is the recommended way to prove that `REVOLUTE`, `PRISMATIC`, and `CONTINUOUS` joints do not interpenetrate.
 - `warn_if_overlaps`: a deliberately broad overlap sensor over generated collision geometry. It relies on generated collisions, AABB reasoning, and convex decomposition, so it can be noisy for thin wires, thin blades, concave shells, and other awkward geometry.
 
 These broad checks are warning-tier sensors, not semantic proof. The agent still needs to reason about the object and add prompt-specific `expect_*` assertions as actual regression tests for silhouette, structure, proportions, and mechanism behavior.
@@ -53,6 +55,7 @@ These broad checks are warning-tier sensors, not semantic proof. The agent still
 Recommended default:
 
 - Include `warn_if_overlaps(...)` on every generated model as a broad warning-tier sensor, even when you do not want overlap findings to fail the run.
+- Include `check_articulation_overlaps(...)` on articulated models with non-fixed joints when joint clearance is a real requirement.
 - Use `warn_if_coplanar_surfaces(...)` when flush-surface duplication is genuinely a useful sensor for the object, and prefer `ignore_adjacent=True, ignore_fixed=True` unless you have a specific reason not to.
 
 Important:
@@ -71,11 +74,29 @@ The harness also runs automatic isolated-part checks at compile time:
 ## Overlap allowances
 
 ```python
-ctx.allow_overlap("door", "body", reason="hinge adjacency")
+ctx.allow_overlap("door", "body", reason="hinge barrel nests around the pin")
 ctx.allow_coplanar_surfaces("door", "body", reason="flush mounted panel")
 ```
 
-Use allowances narrowly. Slight intended interpenetration can be acceptable when it makes a mounted or nested assembly look attached instead of floating. Still call `ctx.warn_if_overlaps(...)` so the allowance is tracked.
+Use allowances narrowly. Slight intended interpenetration can be acceptable when it makes a mounted or nested assembly look attached instead of floating. For articulated mechanisms, use `ctx.allow_overlap(...)` only for specific justified cases such as bearing sleeves, hinge barrels, or enclosed hubs. Still call `ctx.warn_if_overlaps(...)` so the allowance is tracked.
+
+## Articulation-overlap QC
+
+```python
+ctx.check_articulation_overlaps(
+    max_pose_samples=128,
+    overlap_tol=0.001,
+    overlap_volume_tol=0.0,
+)
+```
+
+Use this as the failure-tier QC gate for non-fixed articulation-linked pairs.
+
+- It checks only parent/child pairs connected by `REVOLUTE`, `PRISMATIC`, or `CONTINUOUS` articulations.
+- It does not check `FIXED` or `FLOATING` pairs in v1.
+- It uses the `TestContext` geometry source, so `geometry_source="collision"` is the recommended mode.
+- It respects `ctx.allow_overlap(...)`, which is the intended escape hatch for legitimate nested mechanisms.
+- It complements rather than replaces broad `warn_if_overlaps(...)` sensing.
 
 ## Pose-aware queries
 
@@ -113,7 +134,7 @@ Use these to encode the intended layout and motion:
 - `ctx.expect_aabb_contact(...)`
 - `ctx.expect_joint_motion_axis(...)`
 
-Treat these intent checks as primary. They should carry the burden of proving that mounted parts look attached and that moving parts stay believable across key poses.
+Treat these intent checks as primary. They should carry the burden of proving that mounted parts look attached and that moving parts stay believable across key poses, while `check_articulation_overlaps(...)` enforces non-fixed joint clearance and `warn_if_overlaps(...)` remains the global backstop.
 
 Preferred signatures:
 
@@ -149,6 +170,7 @@ ctx.check_model_valid()
 ctx.check_mesh_files_exist()
 ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
 ctx.warn_if_part_geometry_connected(use="visual")
+ctx.check_articulation_overlaps(max_pose_samples=128)
 ctx.warn_if_coplanar_surfaces(use="visual", ignore_adjacent=True, ignore_fixed=True)
 ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.05)

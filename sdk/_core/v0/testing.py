@@ -4,7 +4,7 @@ import math
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Sequence, Set, Tuple, Union
 
 from .assets import resolve_asset_root
 from .errors import ValidationError
@@ -1050,6 +1050,26 @@ class TestContext:
             warn_only=False,
         )
 
+    def check_articulation_overlaps(
+        self,
+        *,
+        max_pose_samples: int = 128,
+        overlap_tol: Optional[float] = None,
+        overlap_volume_tol: Optional[float] = None,
+        name: Optional[str] = None,
+    ) -> bool:
+        return self._check_overlaps_impl(
+            max_pose_samples=max_pose_samples,
+            overlap_tol=overlap_tol,
+            overlap_volume_tol=overlap_volume_tol,
+            ignore_adjacent=False,
+            ignore_fixed=False,
+            check_name=name,
+            warn_only=False,
+            pair_scope=self._articulation_overlap_pair_scope(),
+            default_prefix="check_articulation_overlaps",
+        )
+
     def warn_if_overlaps(
         self,
         *,
@@ -1070,6 +1090,46 @@ class TestContext:
             warn_only=True,
         )
 
+    def _relation_ignored_pairs(
+        self,
+        *,
+        ignore_adjacent: bool,
+        ignore_fixed: bool,
+    ) -> List[Tuple[str, str]]:
+        ignored_pairs: List[Tuple[str, str]] = []
+        if ignore_adjacent or ignore_fixed:
+            joints = getattr(self.model, "articulations", None)
+            if isinstance(joints, list):
+                for joint in joints:
+                    parent = getattr(joint, "parent", None)
+                    child = getattr(joint, "child", None)
+                    if not isinstance(parent, str) or not isinstance(child, str):
+                        continue
+                    joint_type = getattr(joint, "articulation_type", None)
+                    if ignore_adjacent or (ignore_fixed and joint_type == ArticulationType.FIXED):
+                        ignored_pairs.append((parent, child))
+        return ignored_pairs
+
+    def _articulation_overlap_pair_scope(self) -> Set[Tuple[str, str]]:
+        scoped_pairs: Set[Tuple[str, str]] = set()
+        joints = getattr(self.model, "articulations", None)
+        if not isinstance(joints, list):
+            return scoped_pairs
+        for joint in joints:
+            parent = getattr(joint, "parent", None)
+            child = getattr(joint, "child", None)
+            if not isinstance(parent, str) or not isinstance(child, str):
+                continue
+            joint_type = getattr(joint, "articulation_type", None)
+            if joint_type not in {
+                ArticulationType.REVOLUTE,
+                ArticulationType.PRISMATIC,
+                ArticulationType.CONTINUOUS,
+            }:
+                continue
+            scoped_pairs.add(_pair_key(parent, child))
+        return scoped_pairs
+
     def _check_overlaps_impl(
         self,
         *,
@@ -1080,27 +1140,26 @@ class TestContext:
         ignore_fixed: bool,
         check_name: Optional[str],
         warn_only: bool,
+        pair_scope: Optional[Set[Tuple[str, str]]] = None,
+        default_prefix: Optional[str] = None,
     ) -> bool:
-        prefix = "warn_if_overlaps" if warn_only else "check_no_overlaps"
-        resolved_name = check_name or (
-            f"{prefix}("
-            f"samples={int(max_pose_samples)},"
-            f"ignore_adjacent={bool(ignore_adjacent)},"
-            f"ignore_fixed={bool(ignore_fixed)})"
-        )
+        prefix = default_prefix or ("warn_if_overlaps" if warn_only else "check_no_overlaps")
+        if check_name is not None:
+            resolved_name = check_name
+        elif pair_scope is not None:
+            resolved_name = f"{prefix}(samples={int(max_pose_samples)})"
+        else:
+            resolved_name = (
+                f"{prefix}("
+                f"samples={int(max_pose_samples)},"
+                f"ignore_adjacent={bool(ignore_adjacent)},"
+                f"ignore_fixed={bool(ignore_fixed)})"
+            )
         record = self._record_warning_check if warn_only else self._record
-        allowed_pairs: List[Tuple[str, str]] = []
-        if ignore_adjacent or ignore_fixed:
-            joints = getattr(self.model, "articulations", None)
-            if isinstance(joints, list):
-                for j in joints:
-                    parent = getattr(j, "parent", None)
-                    child = getattr(j, "child", None)
-                    if not isinstance(parent, str) or not isinstance(child, str):
-                        continue
-                    jt = getattr(j, "articulation_type", None)
-                    if ignore_adjacent or (ignore_fixed and jt == ArticulationType.FIXED):
-                        allowed_pairs.append((parent, child))
+        allowed_pairs = self._relation_ignored_pairs(
+            ignore_adjacent=ignore_adjacent,
+            ignore_fixed=ignore_fixed,
+        )
 
         overlaps = find_geometry_overlaps(
             self.model,
@@ -1119,8 +1178,16 @@ class TestContext:
             seed=int(self.seed),
         )
 
+        relevant_overlaps = overlaps
+        if pair_scope is not None:
+            relevant_overlaps = [
+                overlap
+                for overlap in overlaps
+                if _pair_key(overlap.link_a, overlap.link_b) in pair_scope
+            ]
+
         remaining: List[str] = []
-        for o in overlaps:
+        for o in relevant_overlaps:
             key = (o.link_a, o.link_b) if o.link_a <= o.link_b else (o.link_b, o.link_a)
             allowed = False
             # Element-scoped allowances, if any.
@@ -1147,8 +1214,10 @@ class TestContext:
             more = "" if len(remaining) <= 8 else f"\n... ({len(remaining) - 8} more)"
             return record(resolved_name, False, f"Overlaps detected:\n{preview}{more}")
 
-        if overlaps and (self._allow_pairs or self._allow_elems):
-            self.warn(f"Overlaps detected but allowed by justification: {len(overlaps)} overlaps.")
+        if relevant_overlaps and (self._allow_pairs or self._allow_elems):
+            self.warn(
+                f"Overlaps detected but allowed by justification: {len(relevant_overlaps)} overlaps."
+            )
         return record(resolved_name, True)
 
     def warn_if_coplanar_surfaces(

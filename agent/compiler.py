@@ -704,8 +704,9 @@ def _validate_geometry_overlaps(
             "URDF compile warning (non-blocking): geometry overlap check reported overlaps.\n"
             f"{exc}\n"
             "If this overlap is acceptable (e.g., conservative false-positive), explicitly allow the specific pair "
-            "in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)` and then run "
-            "`ctx.warn_if_overlaps(...)` so the allowance is tracked; otherwise adjust geometry/joints."
+            "in `run_tests()` via `ctx.allow_overlap(link_a, link_b, reason=...)`. On models with non-fixed joints, "
+            "use `ctx.check_articulation_overlaps(...)` as the articulated parent/child clearance gate, and still run "
+            "`ctx.warn_if_overlaps(...)` so broader overlap findings and allowances are tracked; otherwise adjust geometry/joints."
         )
     return None
 
