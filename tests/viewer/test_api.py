@@ -600,6 +600,100 @@ def test_viewer_api_end_to_end(tmp_path: Path) -> None:
     assert missing.status_code == 404
 
 
+def test_search_rebuilds_stale_index_when_new_workbench_record_is_added(tmp_path: Path) -> None:
+    repo_root = tmp_path
+    repo = StorageRepo(repo_root)
+    repo.ensure_layout()
+
+    record_store = RecordStore(repo)
+    collections = CollectionStore(repo)
+
+    record_store.write_record(
+        Record(
+            schema_version=1,
+            record_id="rec_bottle_001",
+            created_at="2026-03-21T15:40:00Z",
+            updated_at="2026-03-21T15:40:00Z",
+            rating=None,
+            kind="generated_model",
+            prompt_kind="single_prompt",
+            category_slug=None,
+            source=SourceRef(run_id="run_001"),
+            sdk_package="sdk",
+            provider="openai",
+            model_id="gpt-5.4",
+            display=DisplayMetadata(
+                title="Swing-top bottle",
+                prompt_preview="A realistic swing-top bottle.",
+            ),
+            artifacts=RecordArtifacts(
+                prompt_txt="prompt.txt",
+                prompt_series_json=None,
+                model_py="model.py",
+                provenance_json="provenance.json",
+                cost_json=None,
+            ),
+            collections=["workbench"],
+        )
+    )
+    (repo.layout.record_dir("rec_bottle_001") / "prompt.txt").write_text(
+        "A realistic swing top bottle with a wire mechanism.",
+        encoding="utf-8",
+    )
+    collections.append_workbench_entry(
+        record_id="rec_bottle_001",
+        added_at="2026-03-21T15:40:00Z",
+    )
+
+    client = TestClient(create_app(repo_root=repo_root))
+
+    initial_search = client.get("/api/records/search?q=bottle&source=workbench").json()
+    assert [item["record_id"] for item in initial_search] == ["rec_bottle_001"]
+
+    record_store.write_record(
+        Record(
+            schema_version=1,
+            record_id="rec_bottle_002",
+            created_at="2026-03-21T16:50:41Z",
+            updated_at="2026-03-21T16:50:41Z",
+            rating=None,
+            kind="generated_model",
+            prompt_kind="single_prompt",
+            category_slug=None,
+            source=SourceRef(run_id="run_002"),
+            sdk_package="sdk",
+            provider="openai",
+            model_id="gpt-5.4",
+            display=DisplayMetadata(
+                title="OCC bottle",
+                prompt_preview="A classic occ bottle with articulated cap.",
+            ),
+            artifacts=RecordArtifacts(
+                prompt_txt="prompt.txt",
+                prompt_series_json=None,
+                model_py="model.py",
+                provenance_json="provenance.json",
+                cost_json=None,
+            ),
+            collections=["workbench"],
+        )
+    )
+    (repo.layout.record_dir("rec_bottle_002") / "prompt.txt").write_text(
+        "A classic occ bottle with articulated cap.",
+        encoding="utf-8",
+    )
+    collections.append_workbench_entry(
+        record_id="rec_bottle_002",
+        added_at="2026-03-21T16:50:41Z",
+    )
+
+    updated_search = client.get("/api/records/search?q=bottle&source=workbench").json()
+    assert [item["record_id"] for item in updated_search] == [
+        "rec_bottle_002",
+        "rec_bottle_001",
+    ]
+
+
 def test_viewer_api_promote_uses_category_slug_not_display_title(tmp_path: Path) -> None:
     repo = StorageRepo(tmp_path)
     repo.ensure_layout()

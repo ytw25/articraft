@@ -86,6 +86,62 @@ class SearchIndex:
     _cached_path_mtime_ns: int | None = field(default=None, init=False, repr=False)
     _cached_documents: list[dict[str, Any]] | None = field(default=None, init=False, repr=False)
 
+    def _path_mtime_ns(self, path: Path) -> int | None:
+        try:
+            return path.stat().st_mtime_ns
+        except OSError:
+            return None
+
+    def _max_mtime_ns(self, current: int | None, candidate: int | None) -> int | None:
+        if candidate is None:
+            return current
+        if current is None or candidate > current:
+            return candidate
+        return current
+
+    def _source_mtime_ns(self) -> int | None:
+        latest_mtime_ns = self._max_mtime_ns(
+            None,
+            self._path_mtime_ns(self.repo.layout.records_root),
+        )
+        latest_mtime_ns = self._max_mtime_ns(
+            latest_mtime_ns,
+            self._path_mtime_ns(self.repo.layout.categories_root),
+        )
+        latest_mtime_ns = self._max_mtime_ns(
+            latest_mtime_ns,
+            self._path_mtime_ns(self.repo.layout.local_workbench_path()),
+        )
+
+        for category_path in self.repo.layout.categories_root.glob("*/category.json"):
+            latest_mtime_ns = self._max_mtime_ns(
+                latest_mtime_ns,
+                self._path_mtime_ns(category_path),
+            )
+
+        if self.repo.layout.records_root.exists():
+            for record_dir in self.repo.layout.records_root.iterdir():
+                if not record_dir.is_dir():
+                    continue
+                latest_mtime_ns = self._max_mtime_ns(
+                    latest_mtime_ns,
+                    self._path_mtime_ns(record_dir),
+                )
+                latest_mtime_ns = self._max_mtime_ns(
+                    latest_mtime_ns,
+                    self._path_mtime_ns(record_dir / "record.json"),
+                )
+                latest_mtime_ns = self._max_mtime_ns(
+                    latest_mtime_ns,
+                    self._path_mtime_ns(record_dir / "prompt.txt"),
+                )
+                latest_mtime_ns = self._max_mtime_ns(
+                    latest_mtime_ns,
+                    self._path_mtime_ns(record_dir / "dataset_entry.json"),
+                )
+
+        return latest_mtime_ns
+
     def _load_workbench_entries(self) -> dict[str, dict[str, str]]:
         raw = self.repo.read_json(self.repo.layout.local_workbench_path(), default={}) or {}
         entries: dict[str, dict[str, str]] = {}
@@ -279,6 +335,13 @@ class SearchIndex:
             current_mtime_ns = path.stat().st_mtime_ns
         except OSError:
             current_mtime_ns = None
+        source_mtime_ns = self._source_mtime_ns()
+        if (
+            current_mtime_ns is not None
+            and source_mtime_ns is not None
+            and source_mtime_ns > current_mtime_ns
+        ):
+            return self.rebuild()
         if (
             current_mtime_ns is not None
             and self._cached_path_mtime_ns == current_mtime_ns
