@@ -692,6 +692,21 @@ export function InspectPanel({
                 <span className="prop-label">Category</span>
                 <span className="prop-value">{record.category_slug || "--"}</span>
               </div>
+              <div className="prop-row">
+                <span className="prop-label">Updated</span>
+                <span className="prop-value font-mono text-[10px]">
+                  {record.updated_at
+                    ? new Date(record.updated_at).toLocaleString(undefined, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })
+                    : "--"}
+                </span>
+              </div>
             </div>
           </div>
         </section>

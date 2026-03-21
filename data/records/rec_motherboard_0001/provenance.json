@@ -6,29 +6,29 @@
     "model_id": "gpt-5.4",
     "thinking_level": "high",
     "openai_transport": "http",
-    "openai_reasoning_summary": null,
+    "openai_reasoning_summary": "auto",
     "max_turns": 30
   },
   "prompting": {
-    "system_prompt_file": "designer_system_prompt.txt",
-    "system_prompt_sha256": "cc9d8da632cede1f727af42b25255cc3a239ae31b5708cf6afa4fca39daa4a07",
+    "system_prompt_file": "designer_system_prompt_openai_hybrid.txt",
+    "system_prompt_sha256": "e1990e197a72ee72f17cf8eb02348894ec87cc74fd2bdd33f709ea197188b519",
     "sdk_docs_mode": "legacy_import"
   },
   "sdk": {
     "sdk_package": "sdk_hybrid",
-    "sdk_version": "legacy_final_10k",
+    "sdk_version": "workspace",
     "sdk_fingerprint": null
   },
   "environment": {
-    "python_version": "unknown",
-    "platform": "unknown",
-    "git_commit": null,
-    "uv_lock_sha256": null
+    "python_version": "3.12.10",
+    "platform": "darwin-arm64",
+    "git_commit": "4de45ff892dd5ddef9b4e92384d8dd461926acca",
+    "uv_lock_sha256": "9f8228afadf15cc7fefa67a1e9b99a49933847bad7bc99d9fb2aaf633ebfbc92"
   },
   "run_summary": {
-    "turn_count": 18,
-    "tool_call_count": null,
-    "compile_attempt_count": null,
+    "turn_count": 10,
+    "tool_call_count": 8,
+    "compile_attempt_count": 7,
     "final_status": "success"
   }
 }

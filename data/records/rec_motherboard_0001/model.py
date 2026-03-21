@@ -4,13 +4,16 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports. If the model needs mesh assets, create an
 # `AssetContext` inside the editable section.
+
 # >>> USER_CODE_START
+import math
+
 import cadquery as cq
 
 from sdk_hybrid import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -21,568 +24,466 @@ from sdk_hybrid import (
     mesh_from_cadquery,
 )
 
+
 ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
 
-BOARD_X = 0.305
-BOARD_Y = 0.244
-BOARD_T = 0.002
+BOARD_L = 0.305
+BOARD_W = 0.244
+PCB_T = 0.0018
 
-CPU_CENTER = (-0.032, 0.040)
-DIMM_BANK_CENTER = (0.046, 0.020)
-DIMM_SLOT_LENGTH = 0.133
-DIMM_SLOT_WIDTH = 0.0065
-DIMM_SLOT_HEIGHT = 0.009
-DIMM_SLOT_PITCH = 0.0115
-DIMM_SLOT_OFFSETS = (
-    -1.5 * DIMM_SLOT_PITCH,
-    -0.5 * DIMM_SLOT_PITCH,
-    0.5 * DIMM_SLOT_PITCH,
-    1.5 * DIMM_SLOT_PITCH,
-)
+CPU_SOCKET_ORIGIN = (-0.030, 0.045, PCB_T)
+MEMORY_BANK_ORIGIN = (0.096, 0.044, PCB_T)
+REAR_IO_ORIGIN = (-0.138, 0.066, PCB_T)
+EXPANSION_ORIGIN = (-0.010, -0.058, PCB_T)
+VRM_ORIGIN = (-0.060, 0.094, PCB_T)
+CONNECTOR_ORIGIN = (0.129, 0.022, PCB_T)
+
+CPU_ARM_LOCAL_ORIGIN = (0.030, -0.020, 0.004)
+PCIE_LATCH_LOCAL_ORIGIN = (0.042, 0.016, 0.004)
+
+
+def _cq_box(size: tuple[float, float, float], center: tuple[float, float, float]) -> cq.Workplane:
+    return cq.Workplane("XY").box(*size).translate(center)
+
+
+def _cq_cylinder(radius: float, height: float, base: tuple[float, float, float]) -> cq.Workplane:
+    return cq.Workplane("XY").circle(radius).extrude(height).translate(base)
+
+
+def _ring_plate(outer: float, inner: float, thickness: float, z_center: float) -> cq.Workplane:
+    ring = _cq_box((outer, outer, thickness), (0.0, 0.0, z_center))
+    cut = _cq_box((inner, inner, thickness + 0.004), (0.0, 0.0, z_center))
+    return ring.cut(cut)
+
+
+def _finned_block(
+    size: tuple[float, float, float],
+    center: tuple[float, float, float],
+    *,
+    fin_axis: str,
+    fin_count: int,
+) -> cq.Workplane:
+    sx, sy, sz = size
+    cx, cy, cz = center
+    block = _cq_box(size, center)
+    groove_height = sz * 0.72
+    groove_center_z = cz + (sz / 2.0) - (groove_height / 2.0)
+    if fin_axis == "x":
+        pitch = sx / (fin_count + 1)
+        groove_width = pitch * 0.48
+        for idx in range(fin_count):
+            x = cx - (sx / 2.0) + pitch * (idx + 1)
+            groove = _cq_box((groove_width, sy + 0.002, groove_height), (x, cy, groove_center_z))
+            block = block.cut(groove)
+    else:
+        pitch = sy / (fin_count + 1)
+        groove_width = pitch * 0.48
+        for idx in range(fin_count):
+            y = cy - (sy / 2.0) + pitch * (idx + 1)
+            groove = _cq_box((sx + 0.002, groove_width, groove_height), (cx, y, groove_center_z))
+            block = block.cut(groove)
+    return block
 
 
 def _board_shape() -> cq.Workplane:
-    board = cq.Workplane("XY").box(BOARD_X, BOARD_Y, BOARD_T).translate((0.0, 0.0, BOARD_T / 2.0))
-    mounting_holes = [
-        (-0.141, 0.108),
-        (-0.141, 0.000),
-        (-0.141, -0.103),
-        (-0.020, 0.108),
-        (-0.020, -0.103),
-        (0.101, 0.108),
-        (0.101, 0.000),
-        (0.141, -0.103),
-    ]
-    board = (
-        board.faces(">Z")
-        .workplane(centerOption="CenterOfMass")
-        .pushPoints(mounting_holes)
-        .hole(0.0036)
+    board = _cq_box((BOARD_L, BOARD_W, PCB_T), (0.0, 0.0, PCB_T / 2.0))
+    corner_cut = (
+        _cq_box(
+            (0.028, 0.028, 0.010),
+            (BOARD_L / 2.0 - 0.010, -BOARD_W / 2.0 + 0.010, PCB_T / 2.0),
+        ).rotate((0.0, 0.0, 0.0), (0.0, 0.0, 1.0), 45.0)
     )
-    return board.edges("|Z").fillet(0.0007)
+    board = board.cut(corner_cut)
+    for x, y in [
+        (-0.139, 0.104),
+        (-0.139, -0.103),
+        (-0.015, 0.104),
+        (0.108, 0.104),
+        (0.136, 0.010),
+        (0.136, -0.104),
+        (-0.016, -0.104),
+        (-0.073, -0.014),
+        (0.055, -0.014),
+    ]:
+        board = board.cut(_cq_cylinder(0.0019, 0.012, (x, y, -0.004)))
+    return board
 
 
-def _grooved_heatsink(
-    length: float, width: float, height: float, groove_count: int, groove_width: float
-) -> cq.Workplane:
-    heatsink = cq.Workplane("XY").box(length, width, height).translate((0.0, 0.0, height / 2.0))
-    for index in range(groove_count):
-        x = -length / 2.0 + (index + 0.5) * (length / groove_count)
-        cutter = (
-            cq.Workplane("XY")
-            .box(groove_width, width * 1.04, height * 0.72)
-            .translate((x, 0.0, height * 0.64))
-        )
-        heatsink = heatsink.cut(cutter)
-    crown = (
-        cq.Workplane("XY")
-        .box(length * 0.52, width * 0.82, height * 0.18)
-        .translate((0.0, 0.0, height * 0.91))
+def _cpu_socket_body_shape() -> cq.Workplane:
+    body = _cq_box((0.068, 0.068, 0.0042), (0.0, 0.0, 0.0018))
+    body = body.cut(_cq_box((0.048, 0.048, 0.0030), (0.0, 0.0, 0.0027)))
+    body = body.cut(_cq_box((0.020, 0.008, 0.0022), (0.020, -0.026, 0.0014)))
+    return body
+
+
+def _cpu_socket_frame_shape() -> cq.Workplane:
+    frame = _ring_plate(0.061, 0.048, 0.0013, 0.0049)
+    frame = frame.union(_cq_cylinder(0.0017, 0.008, (CPU_ARM_LOCAL_ORIGIN[0], CPU_ARM_LOCAL_ORIGIN[1], 0.0)))
+    frame = frame.union(_cq_box((0.0042, 0.010, 0.0040), (-0.031, 0.022, 0.0020)))
+    frame = frame.union(_cq_box((0.010, 0.0040, 0.0012), (0.010, 0.030, 0.0054)))
+    return frame
+
+
+def _rear_io_housing_shape() -> cq.Workplane:
+    housing = _cq_box((0.030, 0.098, 0.034), (0.0, 0.0, 0.017))
+    bevel_cut = _cq_box((0.040, 0.120, 0.020), (0.012, 0.0, 0.031)).rotate(
+        (0.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        18.0,
     )
-    return heatsink.union(crown)
+    housing = housing.cut(bevel_cut)
+    housing = housing.union(_cq_box((0.024, 0.088, 0.006), (0.002, 0.0, 0.031)))
+    housing = housing.union(_cq_box((0.006, 0.098, 0.018), (0.011, 0.0, 0.009)))
+    return housing
 
 
-def _io_shroud_shape() -> cq.Workplane:
-    body = cq.Workplane("XY").box(0.030, 0.094, 0.034).translate((0.0, 0.0, 0.017))
-    cavity = cq.Workplane("XY").box(0.021, 0.074, 0.020).translate((0.005, 0.0, 0.013))
-    visor = (
-        cq.Workplane("XY")
-        .box(0.018, 0.098, 0.008)
-        .translate((0.006, 0.0, 0.028))
-        .rotate((0.0, 0.0, 0.0), (0.0, 1.0, 0.0), 16.0)
+def _chipset_sink_shape() -> cq.Workplane:
+    sink = _finned_block((0.046, 0.036, 0.012), (0.054, 0.022, 0.006), fin_axis="x", fin_count=6)
+    sink = sink.union(_cq_box((0.012, 0.020, 0.004), (0.054, 0.022, 0.010)))
+    return sink
+
+
+def _vrm_sink_shape() -> cq.Workplane:
+    top = _finned_block((0.060, 0.018, 0.016), (0.006, 0.013, 0.008), fin_axis="x", fin_count=5)
+    side = _finned_block((0.018, 0.040, 0.015), (-0.024, -0.004, 0.0075), fin_axis="y", fin_count=4)
+    bridge = _cq_box((0.012, 0.014, 0.005), (-0.010, 0.003, 0.0025))
+    return top.union(side).union(bridge)
+
+
+def _cpu_retention_arm_shape() -> cq.Workplane:
+    path = cq.Workplane("XY").polyline(
+        [
+            (0.0015, 0.000),
+            (0.0045, 0.004),
+            (0.0050, 0.042),
+            (0.000, 0.048),
+            (-0.006, 0.042),
+        ]
     )
-    return body.cut(cavity).union(visor)
+    tube = cq.Workplane("YZ").circle(0.00115).sweep(path, transition="round")
+    sleeve = cq.Workplane("XY").circle(0.0022).extrude(0.004).translate((0.0, 0.0, -0.002))
+    latch_foot = _cq_box((0.0040, 0.0028, 0.0016), (-0.006, 0.042, 0.0008))
+    cam = _cq_box((0.0055, 0.0018, 0.0012), (0.005, 0.008, 0.0006))
+    return sleeve.union(tube).union(latch_foot).union(cam)
 
 
-def _chipset_shroud_shape() -> cq.Workplane:
-    base = cq.Workplane("XY").box(0.062, 0.058, 0.015).translate((0.0, 0.0, 0.0075))
-    top = (
-        cq.Workplane("XY")
-        .box(0.040, 0.050, 0.010)
-        .translate((0.007, 0.0, 0.018))
-        .rotate((0.0, 0.0, 0.0), (0.0, 1.0, 0.0), 18.0)
-    )
-    shroud = base.union(top)
-    for index in range(5):
-        y = -0.020 + 0.010 * index
-        cutter = cq.Workplane("XY").box(0.070, 0.0035, 0.008).translate((0.0, y, 0.016))
-        shroud = shroud.cut(cutter)
-    return shroud
+def _add_box_visual(
+    part,
+    size: tuple[float, float, float],
+    xyz: tuple[float, float, float],
+    material,
+    *,
+    rpy: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    name: str | None = None,
+) -> None:
+    part.visual(Box(size), origin=Origin(xyz=xyz, rpy=rpy), material=material, name=name)
 
 
-def _socket_frame_shape() -> cq.Workplane:
-    frame = cq.Workplane("XY").box(0.064, 0.064, 0.0011).translate((0.0, 0.0, 0.00055))
-    window = cq.Workplane("XY").box(0.043, 0.043, 0.0015).translate((0.0, 0.0, 0.00055))
-    latch_bridge = cq.Workplane("XY").box(0.008, 0.020, 0.0011).translate((0.030, 0.0, 0.00055))
-    hook_pad = cq.Workplane("XY").box(0.006, 0.012, 0.0011).translate((-0.030, 0.0, 0.00055))
-    return frame.cut(window).union(latch_bridge).union(hook_pad)
-
-
-def _cpu_arm_shape() -> cq.Workplane:
-    path = (
-        cq.Workplane("XZ")
-        .moveTo(0.0, 0.0006)
-        .lineTo(0.014, 0.0006)
-        .threePointArc((0.017, 0.0012), (0.0195, 0.006))
-        .lineTo(0.0195, 0.014)
-        .threePointArc((0.020, 0.0165), (0.023, 0.0185))
-    )
-    return cq.Workplane("YZ").circle(0.0011).sweep(path, transition="round")
-
-
-def _dimm_latch_shape() -> cq.Workplane:
-    profile = (
-        cq.Workplane("YZ")
-        .moveTo(0.0, 0.0)
-        .lineTo(0.0048, 0.0)
-        .lineTo(0.0064, 0.003)
-        .lineTo(0.0052, 0.016)
-        .lineTo(0.0020, 0.019)
-        .lineTo(-0.0015, 0.017)
-        .lineTo(-0.0010, 0.004)
-        .close()
-        .extrude(0.010)
-        .translate((-0.005, 0.0, 0.0))
-    )
-    catch = cq.Workplane("XY").box(0.010, 0.0025, 0.0035).translate((0.0, 0.005, 0.0042))
-    finger = cq.Workplane("XY").box(0.010, 0.0035, 0.0045).translate((0.0, 0.0015, 0.014))
-    return profile.union(catch).union(finger)
+def _add_cylinder_visual(
+    part,
+    radius: float,
+    length: float,
+    xyz: tuple[float, float, float],
+    material,
+    *,
+    rpy: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    name: str | None = None,
+) -> None:
+    part.visual(Cylinder(radius=radius, length=length), origin=Origin(xyz=xyz, rpy=rpy), material=material, name=name)
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="enthusiast_motherboard", assets=ASSETS)
 
-    model.material("pcb", rgba=(0.07, 0.16, 0.10, 1.0))
-    model.material("silkscreen", rgba=(0.83, 0.86, 0.88, 1.0))
-    model.material("slot_black", rgba=(0.12, 0.12, 0.13, 1.0))
-    model.material("socket_black", rgba=(0.11, 0.11, 0.12, 1.0))
-    model.material("charcoal", rgba=(0.18, 0.19, 0.21, 1.0))
-    model.material("steel", rgba=(0.69, 0.71, 0.74, 1.0))
-    model.material("heatsink_dark", rgba=(0.23, 0.25, 0.28, 1.0))
-    model.material("anodized_gray", rgba=(0.36, 0.38, 0.42, 1.0))
-    model.material("accent_blue", rgba=(0.20, 0.42, 0.74, 1.0))
-    model.material("gold", rgba=(0.78, 0.65, 0.24, 1.0))
-    model.material("port_black", rgba=(0.05, 0.05, 0.06, 1.0))
+    solder_mask = model.material("solder_mask", rgba=(0.06, 0.11, 0.08, 1.0))
+    matte_black = model.material("matte_black", rgba=(0.11, 0.11, 0.12, 1.0))
+    graphite = model.material("graphite", rgba=(0.20, 0.21, 0.23, 1.0))
+    slot_gray = model.material("slot_gray", rgba=(0.70, 0.72, 0.75, 1.0))
+    gunmetal = model.material("gunmetal", rgba=(0.34, 0.36, 0.39, 1.0))
+    steel = model.material("steel", rgba=(0.66, 0.68, 0.71, 1.0))
+    gold = model.material("gold_contacts", rgba=(0.82, 0.70, 0.26, 1.0))
+    port_metal = model.material("port_metal", rgba=(0.78, 0.80, 0.82, 1.0))
 
-    motherboard_base = model.part("motherboard_base")
-    motherboard_base.visual(
-        mesh_from_cadquery(_board_shape(), "motherboard_pcb.obj", assets=ASSETS),
-        material="pcb",
-    )
-    motherboard_base.visual(
-        mesh_from_cadquery(_io_shroud_shape(), "rear_io_shroud.obj", assets=ASSETS),
-        origin=Origin(xyz=(-0.136, 0.083, BOARD_T)),
-        material="anodized_gray",
-    )
-    motherboard_base.visual(
-        mesh_from_cadquery(
-            _grooved_heatsink(0.086, 0.026, 0.028, 7, 0.0045), "vrm_sink_top.obj", assets=ASSETS
-        ),
-        origin=Origin(xyz=(-0.040, 0.096, BOARD_T)),
-        material="heatsink_dark",
-    )
-    motherboard_base.visual(
-        mesh_from_cadquery(
-            _grooved_heatsink(0.075, 0.028, 0.028, 6, 0.0040), "vrm_sink_left.obj", assets=ASSETS
-        ),
-        origin=Origin(xyz=(-0.084, 0.046, BOARD_T), rpy=(0.0, 0.0, 1.5708)),
-        material="heatsink_dark",
-    )
-    motherboard_base.visual(
-        mesh_from_cadquery(_chipset_shroud_shape(), "chipset_shroud.obj", assets=ASSETS),
-        origin=Origin(xyz=(0.070, -0.057, BOARD_T)),
-        material="anodized_gray",
+    pcb = model.part("pcb")
+    pcb.visual(mesh_from_cadquery(_board_shape(), "motherboard_pcb.obj", assets=ASSETS), material=solder_mask)
+    pcb.inertial = Inertial.from_geometry(
+        Box((BOARD_L, BOARD_W, PCB_T)),
+        mass=0.35,
+        origin=Origin(xyz=(0.0, 0.0, PCB_T / 2.0)),
     )
 
-    motherboard_base.visual(
-        Box((0.088, 0.018, 0.008)),
-        origin=Origin(xyz=(0.028, -0.009, BOARD_T + 0.004)),
-        material="anodized_gray",
+    cpu_socket = model.part("cpu_socket")
+    cpu_socket.visual(
+        mesh_from_cadquery(_cpu_socket_body_shape(), "cpu_socket_body.obj", assets=ASSETS),
+        material=graphite,
     )
-    motherboard_base.visual(
-        Box((0.136, 0.008, 0.012)),
-        origin=Origin(xyz=(0.022, -0.056, BOARD_T + 0.006)),
-        material="slot_black",
+    cpu_socket.visual(
+        mesh_from_cadquery(_cpu_socket_frame_shape(), "cpu_socket_frame.obj", assets=ASSETS),
+        material=steel,
     )
-    motherboard_base.visual(
-        Box((0.032, 0.008, 0.012)),
-        origin=Origin(xyz=(-0.055, -0.031, BOARD_T + 0.006)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.032, 0.008, 0.012)),
-        origin=Origin(xyz=(-0.055, -0.082, BOARD_T + 0.006)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.114, 0.008, 0.012)),
-        origin=Origin(xyz=(0.010, -0.097, BOARD_T + 0.006)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.118, 0.0016, 0.0011)),
-        origin=Origin(xyz=(0.020, -0.056, BOARD_T + 0.00055)),
-        material="gold",
-    )
-    motherboard_base.visual(
-        Box((0.024, 0.0016, 0.0011)),
-        origin=Origin(xyz=(-0.055, -0.031, BOARD_T + 0.00055)),
-        material="gold",
-    )
-    motherboard_base.visual(
-        Box((0.024, 0.0016, 0.0011)),
-        origin=Origin(xyz=(-0.055, -0.082, BOARD_T + 0.00055)),
-        material="gold",
-    )
-    motherboard_base.visual(
-        Box((0.096, 0.0016, 0.0011)),
-        origin=Origin(xyz=(0.006, -0.097, BOARD_T + 0.00055)),
-        material="gold",
-    )
-    motherboard_base.visual(
-        Box((0.010, 0.012, 0.015)),
-        origin=Origin(xyz=(0.093, -0.056, BOARD_T + 0.0075)),
-        material="charcoal",
-    )
-    motherboard_base.visual(
-        Box((0.012, 0.053, 0.022)),
-        origin=Origin(xyz=(0.140, 0.051, BOARD_T + 0.011)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.024, 0.012, 0.018)),
-        origin=Origin(xyz=(0.095, 0.111, BOARD_T + 0.009)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.020, 0.012, 0.013)),
-        origin=Origin(xyz=(0.128, -0.079, BOARD_T + 0.0065)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.020, 0.012, 0.013)),
-        origin=Origin(xyz=(0.128, -0.065, BOARD_T + 0.0065)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.020, 0.008, 0.010)),
-        origin=Origin(xyz=(0.123, -0.111, BOARD_T + 0.005)),
-        material="slot_black",
-    )
-    motherboard_base.visual(
-        Box((0.020, 0.008, 0.010)),
-        origin=Origin(xyz=(0.090, -0.111, BOARD_T + 0.005)),
-        material="slot_black",
-    )
-
-    for offset in (-0.045, -0.027, -0.009, 0.009, 0.027, 0.045):
-        motherboard_base.visual(
-            Box((0.009, 0.010, 0.008)),
-            origin=Origin(xyz=(CPU_CENTER[0] + offset, 0.082, BOARD_T + 0.004)),
-            material="charcoal",
-        )
-    for offset in (-0.026, -0.013, 0.0, 0.013, 0.026):
-        motherboard_base.visual(
-            Box((0.010, 0.009, 0.008)),
-            origin=Origin(xyz=(-0.063, CPU_CENTER[1] + offset, BOARD_T + 0.004)),
-            material="charcoal",
-        )
-
-    for cap_x, cap_y in [
-        (-0.103, 0.097),
-        (-0.090, 0.097),
-        (-0.077, 0.097),
-        (-0.103, 0.081),
-    ]:
-        motherboard_base.visual(
-            Cylinder(radius=0.0034, length=0.011),
-            origin=Origin(xyz=(cap_x, cap_y, BOARD_T + 0.0055)),
-            material="slot_black",
-        )
-    for cap_x, cap_y, cap_r in [
-        (-0.118, -0.080, 0.0040),
-        (-0.107, -0.087, 0.0036),
-        (-0.096, -0.094, 0.0034),
-        (-0.086, -0.101, 0.0032),
-        (-0.075, -0.108, 0.0030),
-    ]:
-        motherboard_base.visual(
-            Cylinder(radius=cap_r, length=0.010),
-            origin=Origin(xyz=(cap_x, cap_y, BOARD_T + 0.005)),
-            material="slot_black",
-        )
-
-    motherboard_base.visual(
-        Box((0.014, 0.060, 0.001)),
-        origin=Origin(xyz=(-0.109, -0.086, BOARD_T + 0.0005)),
-        material="silkscreen",
-    )
-    motherboard_base.visual(
-        Box((0.030, 0.004, 0.001)),
-        origin=Origin(xyz=(0.077, -0.042, BOARD_T + 0.0155)),
-        material="accent_blue",
-    )
-    motherboard_base.visual(
-        Box((0.050, 0.0032, 0.0008)),
-        origin=Origin(xyz=(0.028, -0.009, BOARD_T + 0.0084)),
-        material="accent_blue",
-    )
-    motherboard_base.visual(
-        Box((0.018, 0.074, 0.0010)),
-        origin=Origin(xyz=(-0.125, 0.083, BOARD_T + 0.0345)),
-        material="accent_blue",
-    )
-
-    for x_pos, y_pos, z_pos, size_x, size_y, size_z, material in [
-        (-0.146, 0.104, BOARD_T + 0.009, 0.010, 0.014, 0.007, "steel"),
-        (-0.146, 0.088, BOARD_T + 0.009, 0.010, 0.014, 0.007, "steel"),
-        (-0.146, 0.069, BOARD_T + 0.011, 0.011, 0.016, 0.011, "steel"),
-        (-0.146, 0.049, BOARD_T + 0.009, 0.009, 0.026, 0.007, "port_black"),
-    ]:
-        motherboard_base.visual(
-            Box((size_x, size_y, size_z)),
-            origin=Origin(xyz=(x_pos, y_pos, z_pos)),
-            material=material,
-        )
-
-    motherboard_base.inertial = Inertial.from_geometry(
-        Box((BOARD_X, BOARD_Y, 0.040)),
-        mass=1.55,
-        origin=Origin(xyz=(0.0, 0.0, 0.020)),
-    )
-
-    cpu_socket_frame = model.part("cpu_socket_frame")
-    cpu_socket_frame.visual(
-        Box((0.057, 0.057, 0.0060)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0030)),
-        material="socket_black",
-    )
-    cpu_socket_frame.visual(
-        Box((0.038, 0.038, 0.0008)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0063)),
-        material="charcoal",
-    )
-    cpu_socket_frame.visual(
-        mesh_from_cadquery(_socket_frame_shape(), "cpu_socket_load_plate.obj", assets=ASSETS),
-        origin=Origin(xyz=(0.0, 0.0, 0.0057)),
-        material="steel",
-    )
-    cpu_socket_frame.inertial = Inertial.from_geometry(
-        Box((0.064, 0.064, 0.008)),
-        mass=0.12,
+    _add_box_visual(cpu_socket, (0.040, 0.040, 0.0006), (0.0, 0.0, 0.0007), gold)
+    cpu_socket.inertial = Inertial.from_geometry(
+        Box((0.070, 0.070, 0.008)),
+        mass=0.08,
         origin=Origin(xyz=(0.0, 0.0, 0.004)),
     )
 
-    dimm_bank = model.part("dimm_bank")
-    for slot_index, slot_offset in enumerate(DIMM_SLOT_OFFSETS):
-        dimm_bank.visual(
-            Box((DIMM_SLOT_WIDTH, DIMM_SLOT_LENGTH, DIMM_SLOT_HEIGHT)),
-            origin=Origin(xyz=(slot_offset, 0.0, DIMM_SLOT_HEIGHT / 2.0)),
-            material="slot_black",
-        )
-        dimm_bank.visual(
-            Box((0.003, DIMM_SLOT_LENGTH * 0.95, 0.0012)),
-            origin=Origin(xyz=(slot_offset, 0.0, 0.0006)),
-            material="gold",
-        )
-        dimm_bank.visual(
-            Box((0.009, 0.004, 0.015)),
-            origin=Origin(xyz=(slot_offset, -DIMM_SLOT_LENGTH / 2.0 + 0.002, 0.0075)),
-            material="charcoal",
-        )
-        if slot_index != 0:
-            dimm_bank.visual(
-                Box((0.009, 0.004, 0.015)),
-                origin=Origin(xyz=(slot_offset, DIMM_SLOT_LENGTH / 2.0 - 0.002, 0.0075)),
-                material="charcoal",
-            )
-        else:
-            dimm_bank.visual(
-                Box((0.006, 0.002, 0.010)),
-                origin=Origin(xyz=(slot_offset, DIMM_SLOT_LENGTH / 2.0 - 0.004, 0.005)),
-                material="charcoal",
-            )
-    dimm_bank.visual(
-        Box((0.058, 0.006, 0.003)),
-        origin=Origin(xyz=(0.0, -0.074, 0.0015)),
-        material="accent_blue",
+    memory_slots = model.part("memory_slots")
+    _add_box_visual(memory_slots, (0.056, 0.140, 0.0008), (0.0, 0.0, -0.0002), matte_black)
+    slot_xs = (-0.019, -0.006, 0.007, 0.020)
+    for x in (slot_xs[0], slot_xs[2]):
+        _add_box_visual(memory_slots, (0.0068, 0.132, 0.0080), (x, 0.0, 0.0036), matte_black)
+    for x in (slot_xs[1], slot_xs[3]):
+        _add_box_visual(memory_slots, (0.0068, 0.132, 0.0080), (x, 0.0, 0.0036), slot_gray)
+    for x in slot_xs:
+        _add_box_visual(memory_slots, (0.0022, 0.112, 0.0008), (x, 0.0, 0.0005), gold)
+    memory_slots.inertial = Inertial.from_geometry(
+        Box((0.056, 0.140, 0.010)),
+        mass=0.06,
+        origin=Origin(xyz=(0.0, 0.0, 0.005)),
     )
-    dimm_bank.inertial = Inertial.from_geometry(
-        Box((0.055, 0.150, 0.017)),
+
+    rear_io = model.part("rear_io")
+    _add_box_visual(rear_io, (0.034, 0.105, 0.0008), (0.0, 0.0, -0.0002), matte_black)
+    rear_io.visual(
+        mesh_from_cadquery(_rear_io_housing_shape(), "rear_io_shroud.obj", assets=ASSETS),
+        material=gunmetal,
+    )
+    _add_box_visual(rear_io, (0.018, 0.013, 0.012), (-0.016, 0.042, 0.011), port_metal)
+    _add_box_visual(rear_io, (0.018, 0.013, 0.012), (-0.016, 0.022, 0.011), port_metal)
+    _add_box_visual(rear_io, (0.021, 0.015, 0.014), (-0.015, -0.004, 0.013), port_metal)
+    _add_box_visual(rear_io, (0.018, 0.026, 0.006), (-0.016, -0.035, 0.013), port_metal)
+    for idx in range(5):
+        _add_cylinder_visual(
+            rear_io,
+            0.0032,
+            0.010,
+            (-0.016, -0.043 + idx * 0.009, 0.009),
+            port_metal,
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        )
+    rear_io.inertial = Inertial.from_geometry(
+        Box((0.034, 0.105, 0.036)),
+        mass=0.12,
+        origin=Origin(xyz=(0.0, 0.0, 0.018)),
+    )
+
+    expansion_zone = model.part("expansion_zone")
+    _add_box_visual(expansion_zone, (0.184, 0.072, 0.0008), (0.0, 0.0, -0.0002), matte_black)
+    _add_box_visual(expansion_zone, (0.108, 0.010, 0.010), (-0.015, 0.016, 0.0048), matte_black)
+    _add_box_visual(expansion_zone, (0.106, 0.010, 0.010), (-0.015, -0.018, 0.0048), matte_black)
+    _add_box_visual(expansion_zone, (0.038, 0.008, 0.008), (-0.062, 0.034, 0.0042), matte_black)
+    _add_box_visual(expansion_zone, (0.036, 0.008, 0.008), (-0.062, -0.001, 0.0042), matte_black)
+    _add_box_visual(expansion_zone, (0.108, 0.003, 0.004), (-0.015, 0.016, 0.0094), steel)
+    _add_box_visual(expansion_zone, (0.106, 0.003, 0.004), (-0.015, -0.018, 0.0094), steel)
+    expansion_zone.visual(
+        mesh_from_cadquery(_chipset_sink_shape(), "chipset_sink.obj", assets=ASSETS),
+        material=gunmetal,
+    )
+    _add_box_visual(expansion_zone, (0.064, 0.017, 0.005), (0.054, -0.017, 0.0026), graphite)
+    _add_box_visual(
+        expansion_zone,
+        (0.012, 0.006, 0.005),
+        (PCIE_LATCH_LOCAL_ORIGIN[0], PCIE_LATCH_LOCAL_ORIGIN[1], 0.0025),
+        matte_black,
+    )
+    expansion_zone.inertial = Inertial.from_geometry(
+        Box((0.184, 0.072, 0.016)),
         mass=0.10,
-        origin=Origin(xyz=(0.0, 0.0, 0.0085)),
+        origin=Origin(xyz=(0.0, 0.0, 0.008)),
+    )
+
+    vrm_cooling = model.part("vrm_cooling")
+    _add_box_visual(vrm_cooling, (0.070, 0.052, 0.0008), (0.0, 0.0, -0.0002), matte_black)
+    vrm_cooling.visual(
+        mesh_from_cadquery(_vrm_sink_shape(), "vrm_heatsinks.obj", assets=ASSETS),
+        material=gunmetal,
+    )
+    for x, y in [(-0.010, -0.004), (0.004, -0.004), (0.018, -0.004), (-0.010, 0.008)]:
+        _add_box_visual(vrm_cooling, (0.010, 0.010, 0.007), (x, y, 0.0035), graphite)
+    for x, y in [(-0.031, 0.012), (-0.031, 0.000), (-0.031, -0.012), (0.024, 0.010)]:
+        _add_cylinder_visual(vrm_cooling, 0.0030, 0.010, (x, y, 0.005), matte_black)
+    vrm_cooling.inertial = Inertial.from_geometry(
+        Box((0.070, 0.052, 0.018)),
+        mass=0.09,
+        origin=Origin(xyz=(0.0, 0.0, 0.009)),
+    )
+
+    connectors = model.part("connectors")
+    _add_box_visual(connectors, (0.022, 0.150, 0.0008), (0.0, 0.0, -0.0002), matte_black)
+    _add_box_visual(connectors, (0.014, 0.056, 0.015), (0.0, 0.025, 0.0075), slot_gray)
+    _add_box_visual(connectors, (0.014, 0.024, 0.011), (0.0, 0.082, 0.0055), slot_gray)
+    _add_box_visual(connectors, (0.008, 0.020, 0.004), (0.0, 0.060, 0.002), matte_black)
+    _add_box_visual(connectors, (0.012, 0.012, 0.006), (0.0, 0.108, 0.003), matte_black)
+    _add_box_visual(connectors, (0.006, 0.018, 0.004), (0.0, 0.099, 0.002), matte_black)
+    for y in (-0.055, -0.040, -0.025):
+        _add_box_visual(connectors, (0.018, 0.012, 0.010), (-0.002, y, 0.005), matte_black)
+    _add_box_visual(connectors, (0.008, 0.044, 0.004), (-0.002, -0.040, 0.002), matte_black)
+    _add_box_visual(connectors, (0.006, 0.130, 0.0016), (-0.003, 0.012, 0.0008), matte_black)
+    connectors.inertial = Inertial.from_geometry(
+        Box((0.022, 0.150, 0.016)),
+        mass=0.04,
+        origin=Origin(xyz=(0.0, 0.0, 0.008)),
     )
 
     cpu_retention_arm = model.part("cpu_retention_arm")
     cpu_retention_arm.visual(
-        Cylinder(radius=0.0011, length=0.013),
-        origin=Origin(xyz=(0.008, 0.0, 0.0013), rpy=(0.0, 1.5708, 0.0)),
-        material="steel",
-    )
-    cpu_retention_arm.visual(
-        Cylinder(radius=0.0011, length=0.010),
-        origin=Origin(xyz=(0.0145, 0.0, 0.0070)),
-        material="steel",
-    )
-    cpu_retention_arm.visual(
-        Box((0.0038, 0.0028, 0.0028)),
-        origin=Origin(xyz=(0.0145, 0.0, 0.0121)),
-        material="steel",
-    )
-    cpu_retention_arm.visual(
-        Box((0.0052, 0.0030, 0.0012)),
-        origin=Origin(xyz=(0.0185, 0.0, 0.0152)),
-        material="steel",
-    )
-    cpu_retention_arm.visual(
-        Box((0.0035, 0.0035, 0.0048)),
-        origin=Origin(xyz=(0.0195, 0.0, 0.0128)),
-        material="steel",
-    )
-    cpu_retention_arm.visual(
-        Box((0.0055, 0.0040, 0.0020)),
-        origin=Origin(xyz=(0.0015, 0.0, 0.0016)),
-        material="steel",
-    )
-    cpu_retention_arm.visual(
-        Cylinder(radius=0.0016, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, 0.003)),
-        material="steel",
+        mesh_from_cadquery(_cpu_retention_arm_shape(), "cpu_retention_arm.obj", assets=ASSETS),
+        material=steel,
     )
     cpu_retention_arm.inertial = Inertial.from_geometry(
-        Box((0.030, 0.008, 0.022)),
-        mass=0.014,
-        origin=Origin(xyz=(0.015, 0.0, 0.011)),
+        Box((0.018, 0.055, 0.006)),
+        mass=0.01,
+        origin=Origin(xyz=(0.003, 0.027, 0.0)),
     )
 
-    dimm_slot_latch = model.part("dimm_slot_latch")
-    dimm_slot_latch.visual(
-        mesh_from_cadquery(_dimm_latch_shape(), "dimm_slot_latch.obj", assets=ASSETS),
-        material="charcoal",
+    pcie_latch = model.part("pcie_latch")
+    _add_cylinder_visual(
+        pcie_latch,
+        0.0015,
+        0.012,
+        (0.0, 0.0, 0.0),
+        matte_black,
+        rpy=(0.0, math.pi / 2.0, 0.0),
     )
-    dimm_slot_latch.inertial = Inertial.from_geometry(
-        Box((0.010, 0.010, 0.020)),
-        mass=0.006,
-        origin=Origin(xyz=(0.0, 0.004, 0.010)),
+    _add_box_visual(pcie_latch, (0.012, 0.005, 0.012), (0.0, -0.0012, 0.0060), matte_black)
+    _add_box_visual(pcie_latch, (0.012, 0.0038, 0.0030), (0.0, -0.0025, 0.0110), slot_gray)
+    pcie_latch.inertial = Inertial.from_geometry(
+        Box((0.012, 0.008, 0.013)),
+        mass=0.003,
+        origin=Origin(xyz=(0.0, -0.001, 0.006)),
     )
 
     model.articulation(
-        "base_to_cpu_socket",
+        "pcb_to_cpu_socket",
         ArticulationType.FIXED,
-        parent=motherboard_base,
-        child=cpu_socket_frame,
-        origin=Origin(xyz=(CPU_CENTER[0], CPU_CENTER[1], BOARD_T)),
+        parent="pcb",
+        child="cpu_socket",
+        origin=Origin(xyz=CPU_SOCKET_ORIGIN),
     )
     model.articulation(
-        "base_to_dimm_bank",
+        "pcb_to_memory_slots",
         ArticulationType.FIXED,
-        parent=motherboard_base,
-        child=dimm_bank,
-        origin=Origin(xyz=(DIMM_BANK_CENTER[0], DIMM_BANK_CENTER[1], BOARD_T)),
+        parent="pcb",
+        child="memory_slots",
+        origin=Origin(xyz=MEMORY_BANK_ORIGIN),
     )
     model.articulation(
-        "cpu_retention_arm_joint",
-        ArticulationType.REVOLUTE,
-        parent=cpu_socket_frame,
-        child=cpu_retention_arm,
-        origin=Origin(xyz=(0.031, 0.0, 0.0073)),
-        axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(lower=0.0, upper=1.35, effort=1.5, velocity=2.0),
+        "pcb_to_rear_io",
+        ArticulationType.FIXED,
+        parent="pcb",
+        child="rear_io",
+        origin=Origin(xyz=REAR_IO_ORIGIN),
     )
     model.articulation(
-        "dimm_latch_joint",
+        "pcb_to_expansion_zone",
+        ArticulationType.FIXED,
+        parent="pcb",
+        child="expansion_zone",
+        origin=Origin(xyz=EXPANSION_ORIGIN),
+    )
+    model.articulation(
+        "pcb_to_vrm_cooling",
+        ArticulationType.FIXED,
+        parent="pcb",
+        child="vrm_cooling",
+        origin=Origin(xyz=VRM_ORIGIN),
+    )
+    model.articulation(
+        "pcb_to_connectors",
+        ArticulationType.FIXED,
+        parent="pcb",
+        child="connectors",
+        origin=Origin(xyz=CONNECTOR_ORIGIN),
+    )
+    model.articulation(
+        "cpu_arm_joint",
         ArticulationType.REVOLUTE,
-        parent=dimm_bank,
-        child=dimm_slot_latch,
-        origin=Origin(xyz=(DIMM_SLOT_OFFSETS[0], DIMM_SLOT_LENGTH / 2.0 + 0.001, 0.0055)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(lower=0.0, upper=1.05, effort=0.5, velocity=3.0),
+        parent="cpu_socket",
+        child="cpu_retention_arm",
+        origin=Origin(xyz=CPU_ARM_LOCAL_ORIGIN),
+        axis=(0.0, 0.0, -1.0),
+        motion_limits=MotionLimits(effort=0.12, velocity=3.0, lower=0.0, upper=1.20),
+    )
+    model.articulation(
+        "pcie_latch_joint",
+        ArticulationType.REVOLUTE,
+        parent="expansion_zone",
+        child="pcie_latch",
+        origin=Origin(xyz=PCIE_LATCH_LOCAL_ORIGIN),
+        axis=(-1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=0.05, velocity=3.5, lower=0.0, upper=0.85),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
-    ctx.allow_overlap(
-        "dimm_slot_latch",
-        "motherboard_base",
-        reason="DIMM latch sweeps close to the upper VRM heatsink; generated hulls are conservative around the grooved shroud geometry.",
-    )
-    ctx.check_no_overlaps(
+    ctx.allow_overlap("cpu_retention_arm", "cpu_socket", reason="sleeved lever wraps a retention peg")
+    ctx.allow_overlap("pcie_latch", "expansion_zone", reason="hinge barrel nests into the slot-end pivot boss")
+    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
+    ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.warn_if_coplanar_surfaces(use="visual")
+    ctx.warn_if_overlaps(
         max_pose_samples=96,
-        overlap_tol=0.003,
+        overlap_tol=0.004,
         overlap_volume_tol=0.0,
         ignore_adjacent=True,
         ignore_fixed=True,
     )
 
-    ctx.expect_aabb_overlap("cpu_socket_frame", "motherboard_base", axes="xy", min_overlap=0.05)
-    ctx.expect_aabb_contact("cpu_socket_frame", "motherboard_base")
-    ctx.expect_aabb_overlap("dimm_bank", "motherboard_base", axes="xy", min_overlap=0.05)
-    ctx.expect_aabb_contact("dimm_bank", "motherboard_base")
+    for part_name, min_overlap in [
+        ("cpu_socket", 0.030),
+        ("memory_slots", 0.020),
+        ("rear_io", 0.020),
+        ("expansion_zone", 0.040),
+        ("vrm_cooling", 0.028),
+        ("connectors", 0.018),
+    ]:
+        ctx.expect_aabb_overlap(part_name, "pcb", axes="xy", min_overlap=min_overlap)
+        ctx.expect_aabb_gap(part_name, "pcb", axis="z", max_gap=0.0015, max_penetration=0.0030)
 
-    ctx.expect_origin_distance("cpu_retention_arm", "cpu_socket_frame", axes="y", max_dist=0.0015)
-    ctx.expect_aabb_gap(
-        "cpu_retention_arm",
-        "cpu_socket_frame",
-        axis="z",
-        max_gap=0.006,
-        max_penetration=0.002,
-    )
-    ctx.expect_aabb_overlap("dimm_slot_latch", "dimm_bank", axes="xz", min_overlap=0.004)
-    ctx.expect_aabb_gap(
-        "dimm_slot_latch",
-        "dimm_bank",
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.002,
-    )
+    ctx.expect_aabb_overlap("memory_slots", "cpu_socket", axes="y", min_overlap=0.055)
+    ctx.expect_aabb_overlap("rear_io", "cpu_socket", axes="y", min_overlap=0.040)
+    ctx.expect_aabb_overlap("expansion_zone", "cpu_socket", axes="x", min_overlap=0.050)
+    ctx.expect_aabb_overlap("vrm_cooling", "cpu_socket", axes="x", min_overlap=0.040)
+    ctx.expect_aabb_overlap("vrm_cooling", "cpu_socket", axes="y", min_overlap=0.010)
+    ctx.expect_aabb_overlap("memory_slots", "connectors", axes="y", min_overlap=0.045)
 
     ctx.expect_joint_motion_axis(
-        "cpu_retention_arm_joint",
+        "cpu_arm_joint",
         "cpu_retention_arm",
-        world_axis="z",
+        world_axis="x",
         direction="positive",
-        min_delta=0.003,
+        min_delta=0.008,
     )
     ctx.expect_joint_motion_axis(
-        "dimm_latch_joint",
-        "dimm_slot_latch",
-        world_axis="z",
-        direction="negative",
+        "pcie_latch_joint",
+        "pcie_latch",
+        world_axis="y",
+        direction="positive",
         min_delta=0.002,
     )
 
-    with ctx.pose(cpu_retention_arm_joint=1.25):
-        ctx.expect_origin_distance(
-            "cpu_retention_arm", "cpu_socket_frame", axes="y", max_dist=0.0015
-        )
-        ctx.expect_aabb_gap(
-            "cpu_retention_arm",
-            "cpu_socket_frame",
-            axis="z",
-            max_gap=0.020,
-            max_penetration=0.0015,
-        )
+    with ctx.pose(cpu_arm_joint=0.0):
+        ctx.expect_aabb_overlap("cpu_retention_arm", "cpu_socket", axes="y", min_overlap=0.040)
+        ctx.expect_aabb_overlap("cpu_retention_arm", "cpu_socket", axes="x", min_overlap=0.008)
 
-    with ctx.pose(dimm_latch_joint=0.95):
-        ctx.expect_aabb_overlap("dimm_slot_latch", "dimm_bank", axes="xz", min_overlap=0.004)
-        ctx.expect_origin_distance("dimm_slot_latch", "dimm_bank", axes="z", max_dist=0.02)
+    with ctx.pose(cpu_arm_joint=1.15):
+        ctx.expect_aabb_overlap("cpu_retention_arm", "pcb", axes="xy", min_overlap=0.003)
+        ctx.expect_aabb_overlap("cpu_retention_arm", "cpu_socket", axes="x", min_overlap=0.004)
 
-    with ctx.pose(cpu_retention_arm_joint=1.25, dimm_latch_joint=0.95):
-        ctx.expect_origin_distance(
-            "cpu_retention_arm", "cpu_socket_frame", axes="y", max_dist=0.0015
-        )
-        ctx.expect_aabb_overlap("dimm_slot_latch", "dimm_bank", axes="xz", min_overlap=0.004)
+    with ctx.pose(pcie_latch_joint=0.0):
+        ctx.expect_aabb_overlap("pcie_latch", "expansion_zone", axes="x", min_overlap=0.008)
+
+    with ctx.pose(pcie_latch_joint=0.75):
+        ctx.expect_aabb_overlap("pcie_latch", "expansion_zone", axes="x", min_overlap=0.008)
 
     return ctx.report()
-
-
 # >>> USER_CODE_END
 
 object_model = build_object_model()

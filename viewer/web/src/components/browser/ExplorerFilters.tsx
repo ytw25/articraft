@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 
 import type { CostFilter, RatingFilter, RecordSummary, TimeFilter } from "@/lib/types";
 import { useViewer, useViewerDispatch } from "@/lib/viewer-context";
@@ -95,7 +95,9 @@ function CategoryMultiSelect({
   onChange: (nextValues: string[]) => void;
 }): JSX.Element {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
   const hasActiveFilter = selectedValues.length > 0;
 
   useEffect(() => {
@@ -126,8 +128,22 @@ function CategoryMultiSelect({
     };
   }, [open]);
 
+  useEffect(() => {
+    if (open) {
+      requestAnimationFrame(() => searchRef.current?.focus());
+    } else {
+      setSearch("");
+    }
+  }, [open]);
+
   const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
   const triggerLabel = categoryTriggerLabel(options, selectedValues);
+
+  const filteredOptions = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return options;
+    return options.filter((o) => o.label.toLowerCase().includes(query) || o.value.toLowerCase().includes(query));
+  }, [options, search]);
 
   const toggleValue = (value: string) => {
     if (selectedSet.has(value)) {
@@ -176,8 +192,27 @@ function CategoryMultiSelect({
             ) : null}
           </div>
 
+          {options.length > 6 ? (
+            <div className="relative px-1.5 pb-1">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 size-3 -translate-y-1/2 text-[var(--text-tertiary)]" />
+              <input
+                ref={searchRef}
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search categories…"
+                className="w-full rounded-md border border-[var(--border-default)] bg-[var(--surface-1)] py-1 pl-7 pr-2 text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none transition-colors focus:border-[var(--accent)]"
+              />
+            </div>
+          ) : null}
+
           <div role="listbox" aria-multiselectable="true" className="max-h-64 overflow-y-auto">
-            {options.map((option) => {
+            {filteredOptions.length === 0 ? (
+              <div className="px-2.5 py-3 text-center text-[11px] text-[var(--text-tertiary)]">
+                No categories match
+              </div>
+            ) : null}
+            {filteredOptions.map((option) => {
               const selected = selectedSet.has(option.value);
               return (
                 <button
