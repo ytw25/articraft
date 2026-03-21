@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -22,6 +23,54 @@ from storage.runs import RunStore
 from storage.trajectories import compress_trajectory_file
 from viewer.api.app import create_app
 from viewer.api.store import ViewerStore
+
+
+def test_viewer_store_staging_listing_avoids_recursive_tree_scan(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+
+    RunStore(repo).write_run(
+        RunRecord(
+            schema_version=1,
+            run_id="run_live_001",
+            run_mode="workbench_single",
+            collection="workbench",
+            created_at="2026-03-18T08:00:00Z",
+            updated_at="2026-03-18T08:00:00Z",
+            provider="openai",
+            model_id="gpt-5.4",
+            sdk_package="sdk",
+            status="running",
+            prompt_count=1,
+        )
+    )
+
+    live_stage_dir = repo.layout.run_staging_dir("run_live_001") / "rec_stage_001"
+    live_stage_dir.mkdir(parents=True, exist_ok=True)
+    (live_stage_dir / "prompt.txt").write_text("prototype chair", encoding="utf-8")
+    (live_stage_dir / "model.py").write_text("# staged model\n", encoding="utf-8")
+    (live_stage_dir / "assets" / "meshes").mkdir(parents=True, exist_ok=True)
+    (live_stage_dir / "assets" / "meshes" / "preview.obj").write_text("o tri\n", encoding="utf-8")
+    (live_stage_dir / "traces").mkdir(parents=True, exist_ok=True)
+    (live_stage_dir / "traces" / "trajectory.jsonl").write_text(
+        '{"type":"message"}\n', encoding="utf-8"
+    )
+
+    newer_mtime = 1_710_750_000
+    os.utime(live_stage_dir / "model.py", (newer_mtime, newer_mtime))
+
+    def fail_rglob(self: Path, pattern: str):  # pragma: no cover - assertion helper
+        raise AssertionError(f"unexpected recursive scan of {self} with {pattern}")
+
+    monkeypatch.setattr(Path, "rglob", fail_rglob)
+
+    entries = ViewerStore(tmp_path, ensure_search_index=False).list_staging_entries()
+
+    assert len(entries) == 1
+    assert entries[0].record_id == "rec_stage_001"
+    assert entries[0].updated_at is not None
 
 
 def test_viewer_store_delete_record_removes_empty_ad_hoc_category(tmp_path: Path) -> None:

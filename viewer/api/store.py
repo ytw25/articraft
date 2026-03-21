@@ -506,25 +506,48 @@ class ViewerStore:
             return None
 
     def _latest_staging_timestamp(self, staging_dir: Path, fallback: str | None) -> str | None:
+        # Keep staging polling cheap by checking a small set of known files instead of
+        # recursively scanning every artifact on each request.
+        candidates = (
+            staging_dir,
+            staging_dir / "prompt.txt",
+            staging_dir / "model.py",
+            staging_dir / "model.urdf",
+            staging_dir / "cost.json",
+            staging_dir / "assets",
+            staging_dir / "assets" / "meshes",
+            staging_dir / "assets" / "glb",
+            staging_dir / "assets" / "viewer",
+            staging_dir / "traces",
+            staging_dir / "traces" / "conversation.jsonl",
+            staging_dir / "traces" / "trajectory.jsonl",
+            staging_dir / "traces" / "trajectory.jsonl.zst",
+        )
         latest_mtime: float | None = None
-        try:
-            for candidate in staging_dir.rglob("*"):
-                try:
-                    stat = candidate.stat()
-                except OSError:
-                    continue
-                if latest_mtime is None or stat.st_mtime > latest_mtime:
-                    latest_mtime = stat.st_mtime
-        except OSError:
-            return fallback
+        for candidate in candidates:
+            try:
+                stat = candidate.stat()
+            except OSError:
+                continue
+            if latest_mtime is None or stat.st_mtime > latest_mtime:
+                latest_mtime = stat.st_mtime
         if latest_mtime is None:
             return fallback
         return _mtime_to_utc(latest_mtime)
 
-    def _record_summary(self, record_id: str) -> RecordSummaryResponse | None:
+    def _record_summary(
+        self,
+        record_id: str,
+        summary_cache: dict[str, RecordSummaryResponse | None] | None = None,
+    ) -> RecordSummaryResponse | None:
+        if summary_cache is not None and record_id in summary_cache:
+            return summary_cache[record_id]
+
         record_path = self.repo.layout.record_metadata_path(record_id)
         record = self.repo.read_json(record_path)
         if record is None:
+            if summary_cache is not None:
+                summary_cache[record_id] = None
             return None
 
         display = record.get("display") or {}
@@ -554,7 +577,7 @@ class ViewerStore:
                 if isinstance(costs_usd, dict):
                     total_cost_usd = _coerce_float(costs_usd.get("total"))
 
-        return RecordSummaryResponse(
+        summary = RecordSummaryResponse(
             record_id=record_id,
             title=str(display.get("title") or record_id),
             prompt_preview=str(display.get("prompt_preview") or ""),
@@ -574,9 +597,16 @@ class ViewerStore:
             has_provenance=provenance_path.exists(),
             has_cost=(record_dir / str(cost_name)).exists() if cost_name else False,
         )
+        if summary_cache is not None:
+            summary_cache[record_id] = summary
+        return summary
 
-    def _record_detail(self, record_id: str) -> RecordDetailResponse | None:
-        summary = self._record_summary(record_id)
+    def _record_detail(
+        self,
+        record_id: str,
+        summary_cache: dict[str, RecordSummaryResponse | None] | None = None,
+    ) -> RecordDetailResponse | None:
+        summary = self._record_summary(record_id, summary_cache=summary_cache)
         if summary is None:
             return None
 
@@ -600,7 +630,10 @@ class ViewerStore:
             cost=cost,
         )
 
-    def list_workbench_entries(self) -> list[WorkbenchEntryResponse]:
+    def list_workbench_entries(
+        self,
+        summary_cache: dict[str, RecordSummaryResponse | None] | None = None,
+    ) -> list[WorkbenchEntryResponse]:
         workbench = self.collections.load_workbench() or {"entries": []}
         entries: list[WorkbenchEntryResponse] = []
         for item in workbench.get("entries", []):
@@ -614,12 +647,15 @@ class ViewerStore:
                     label=item.get("label"),
                     tags=[str(tag) for tag in item.get("tags", [])],
                     archived=bool(item.get("archived", False)),
-                    record=self._record_summary(record_id),
+                    record=self._record_summary(record_id, summary_cache=summary_cache),
                 )
             )
         return sorted(entries, key=lambda entry: _parse_sort_key(entry.added_at), reverse=True)
 
-    def list_dataset_entries(self) -> list[DatasetEntryResponse]:
+    def list_dataset_entries(
+        self,
+        summary_cache: dict[str, RecordSummaryResponse | None] | None = None,
+    ) -> list[DatasetEntryResponse]:
         entries: list[DatasetEntryResponse] = []
         for item in self.datasets.list_entries():
             record_id = str(item.get("record_id", ""))
@@ -634,7 +670,7 @@ class ViewerStore:
                     dataset_id=dataset_id,
                     category_slug=category_slug,
                     promoted_at=promoted_at,
-                    record=self._record_summary(record_id),
+                    record=self._record_summary(record_id, summary_cache=summary_cache),
                 )
             )
         return entries
@@ -708,7 +744,10 @@ class ViewerStore:
             record=self._record_summary(record_id),
         )
 
-    def list_staging_entries(self) -> list[StagingEntryResponse]:
+    def list_staging_entries(
+        self,
+        summary_cache: dict[str, RecordSummaryResponse | None] | None = None,
+    ) -> list[StagingEntryResponse]:
         runs_root = self.repo.layout.runs_root
         if not runs_root.exists():
             return []
@@ -744,7 +783,7 @@ class ViewerStore:
                     continue
 
                 result = result_by_record_id.get(record_id, {})
-                persisted_record = self._record_summary(record_id)
+                persisted_record = self._record_summary(record_id, summary_cache=summary_cache)
                 prompt_path = staging_dir / "prompt.txt"
                 model_script_path = staging_dir / "model.py"
                 checkpoint_urdf_path = staging_dir / "model.urdf"
@@ -894,9 +933,10 @@ class ViewerStore:
                 )
             )
 
+        summary_cache: dict[str, RecordSummaryResponse | None] = {}
         records: list[RecordDetailResponse] = []
         for record_id in record_ids:
-            detail = self._record_detail(record_id)
+            detail = self._record_detail(record_id, summary_cache=summary_cache)
             if detail is not None:
                 records.append(detail)
 
@@ -908,12 +948,13 @@ class ViewerStore:
         )
 
     def bootstrap(self) -> ViewerBootstrapResponse:
+        summary_cache: dict[str, RecordSummaryResponse | None] = {}
         return ViewerBootstrapResponse(
             repo_root=self.repo_root.as_posix(),
             generated_at=_utc_now(),
-            workbench_entries=self.list_workbench_entries(),
-            dataset_entries=self.list_dataset_entries(),
-            staging_entries=self.list_staging_entries(),
+            workbench_entries=self.list_workbench_entries(summary_cache=summary_cache),
+            dataset_entries=self.list_dataset_entries(summary_cache=summary_cache),
+            staging_entries=self.list_staging_entries(summary_cache=summary_cache),
             runs=self.list_runs(),
         )
 
@@ -1000,8 +1041,9 @@ class ViewerStore:
             if now - cached_at < self._STATS_TTL:
                 return cached
 
-        workbench_entries = self.list_workbench_entries()
-        dataset_entries = self.list_dataset_entries()
+        summary_cache: dict[str, RecordSummaryResponse | None] = {}
+        workbench_entries = self.list_workbench_entries(summary_cache=summary_cache)
+        dataset_entries = self.list_dataset_entries(summary_cache=summary_cache)
         runs = self.list_runs()
 
         seen_ids: set[str] = set()
