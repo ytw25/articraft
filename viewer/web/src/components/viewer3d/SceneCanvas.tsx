@@ -7,10 +7,8 @@ import { createEdgeLines } from './materials';
 import { createEnvironmentMap } from './lighting';
 import { attachJointOverlay, disposeOverlayObjects } from './joint-overlay';
 import type { RenderOptions } from '@/components/inspector/RenderOptionsPanel';
-import { updateUrlSearchParams } from '@/lib/url';
 import type { UrdfSpec } from './urdf-parser';
 
-const CAMERA_QUERY_PARAM = 'cam';
 const ROBOT_GROUP_NAME = '__articraft_robot__';
 const CLICK_MOVE_THRESHOLD_PX = 5;
 const SEGMENTATION_PALETTE = [
@@ -269,12 +267,6 @@ export function SceneCanvas({
       missingArtifacts: isMissingArtifactsError(error),
     });
   }, [error, loading, onLoadStateChange]);
-
-  useEffect(() => {
-    updateUrlSearchParams((params) => {
-      params.delete(CAMERA_QUERY_PARAM);
-    });
-  }, []);
 
   useEffect(() => {
     setSelectedPartName(null);

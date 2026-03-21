@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { fetchBootstrap, fetchStagingEntries } from "@/lib/api";
+import { useRoute } from "@/lib/useRoute";
 import type {
   BrowserTab,
   CostFilter,
@@ -89,7 +90,8 @@ function parseEnumParam<const T extends readonly string[]>(
   allowedValues: T,
   fallback: T[number],
 ): T[number] {
-  return value && allowedValues.includes(value) ? value : fallback;
+  const normalizedValue = value?.trim() ?? "";
+  return allowedValues.includes(normalizedValue as T[number]) ? (normalizedValue as T[number]) : fallback;
 }
 
 function parseCostBoundParam(value: string | null): number | null {
@@ -119,13 +121,19 @@ function normalizeCostFilter(costFilter: CostFilter): CostFilter {
 }
 
 function parseStagingParam(value: string | null): ViewerSelection | null {
-  if (!value) return null;
-  const parts = value.split(":");
+  const normalizedValue = value?.trim() ?? "";
+  if (!normalizedValue) return null;
+  const parts = normalizedValue.split(":");
   if (parts.length < 2) return null;
-  const runId = parts[0];
-  const recordId = parts.slice(1).join(":");
+  const runId = parts[0]?.trim() ?? "";
+  const recordId = parts.slice(1).join(":").trim();
   if (!runId || !recordId) return null;
   return { kind: "staging", runId, recordId };
+}
+
+function normalizeOptionalQueryParam(value: string | null): string | null {
+  const normalizedValue = value?.trim() ?? "";
+  return normalizedValue ? normalizedValue : null;
 }
 
 function readViewerUrlState(): ViewerUrlState {
@@ -135,13 +143,14 @@ function readViewerUrlState(): ViewerUrlState {
 
   try {
     const params = new URLSearchParams(window.location.search);
-    const rawRecordId = params.get(URL_QUERY_PARAMS.record);
-    const rawStaging = params.get(URL_QUERY_PARAMS.staging);
+    const rawRecordId = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.record));
+    const rawStaging = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.staging));
 
     let selection: ViewerSelection | null = null;
     if (rawStaging) {
       selection = parseStagingParam(rawStaging);
-    } else if (rawRecordId && rawRecordId.trim()) {
+    }
+    if (!selection && rawRecordId) {
       selection = { kind: "record", recordId: rawRecordId };
     }
 
@@ -169,7 +178,7 @@ function readViewerUrlState(): ViewerUrlState {
       TIME_FILTERS,
       defaultViewerUrlState.timeFilter,
     );
-    const modelFilter = params.get(URL_QUERY_PARAMS.model);
+    const modelFilter = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.model));
     const categoryFilters = Array.from(
       new Set(
         params
@@ -187,7 +196,7 @@ function readViewerUrlState(): ViewerUrlState {
       RATING_FILTERS,
       defaultViewerUrlState.ratingFilter,
     );
-    const selectedRunId = params.get(URL_QUERY_PARAMS.run);
+    const selectedRunId = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.run));
 
     return {
       selection,
@@ -197,11 +206,11 @@ function readViewerUrlState(): ViewerUrlState {
       browserTab: parsedBrowserTab,
       sourceFilter,
       timeFilter,
-      modelFilter: modelFilter && modelFilter.trim() ? modelFilter : null,
+      modelFilter,
       categoryFilters,
       costFilter,
       ratingFilter,
-      selectedRunId: selectedRunId && selectedRunId.trim() ? selectedRunId : null,
+      selectedRunId,
     };
   } catch {
     return defaultViewerUrlState;
@@ -247,42 +256,44 @@ function syncViewerStateToUrl(state: ViewerUrlState): void {
     url.searchParams.delete(URL_QUERY_PARAMS.source);
   }
 
-  if (state.timeFilter !== defaultViewerUrlState.timeFilter) {
+  if (state.browserTab !== "staging" && state.timeFilter !== defaultViewerUrlState.timeFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.time, state.timeFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.time);
   }
 
-  if (state.modelFilter) {
+  if (state.browserTab !== "staging" && state.modelFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.model, state.modelFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.model);
   }
 
   url.searchParams.delete(URL_QUERY_PARAMS.category);
-  for (const categoryFilter of [...state.categoryFilters].sort((left, right) => left.localeCompare(right))) {
-    url.searchParams.append(URL_QUERY_PARAMS.category, categoryFilter);
+  if (state.browserTab !== "staging" && state.sourceFilter === "dataset") {
+    for (const categoryFilter of [...state.categoryFilters].sort((left, right) => left.localeCompare(right))) {
+      url.searchParams.append(URL_QUERY_PARAMS.category, categoryFilter);
+    }
   }
 
-  if (state.costFilter.min != null) {
+  if (state.browserTab !== "staging" && state.costFilter.min != null) {
     url.searchParams.set(URL_QUERY_PARAMS.costMin, String(state.costFilter.min));
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.costMin);
   }
 
-  if (state.costFilter.max != null) {
+  if (state.browserTab !== "staging" && state.costFilter.max != null) {
     url.searchParams.set(URL_QUERY_PARAMS.costMax, String(state.costFilter.max));
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.costMax);
   }
 
-  if (state.ratingFilter !== defaultViewerUrlState.ratingFilter) {
+  if (state.browserTab !== "staging" && state.ratingFilter !== defaultViewerUrlState.ratingFilter) {
     url.searchParams.set(URL_QUERY_PARAMS.rating, state.ratingFilter);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.rating);
   }
 
-  if (state.selectedRunId) {
+  if (state.browserTab !== "staging" && state.selectedRunId) {
     url.searchParams.set(URL_QUERY_PARAMS.run, state.selectedRunId);
   } else {
     url.searchParams.delete(URL_QUERY_PARAMS.run);
@@ -619,6 +630,7 @@ function useStagingPolling(state: ViewerState, dispatch: Dispatch<ViewerAction>)
 
 export function ViewerProvider({ children }: { children: ReactNode }): JSX.Element {
   const [state, dispatch] = useReducer(viewerReducer, initialState);
+  const route = useRoute();
 
   useEffect(() => {
     let cancelled = false;
@@ -647,6 +659,10 @@ export function ViewerProvider({ children }: { children: ReactNode }): JSX.Eleme
   useStagingPolling(state, dispatch);
 
   useEffect(() => {
+    if (route.page !== "viewer") {
+      return;
+    }
+
     syncViewerStateToUrl({
       selection: state.selection,
       selectedRecordId: state.selectedRecordId,
@@ -674,6 +690,7 @@ export function ViewerProvider({ children }: { children: ReactNode }): JSX.Eleme
     state.selection,
     state.sourceFilter,
     state.timeFilter,
+    route.page,
   ]);
 
   useEffect(() => {
