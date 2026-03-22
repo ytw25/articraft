@@ -298,7 +298,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -328,9 +328,9 @@ def run_tests() -> TestReport:
         min_delta=0.05,
     )
 
-    body_bounds = _aabb_bounds(ctx.part_world_aabb("body", use="visual"))
-    support_bounds = _aabb_bounds(ctx.part_world_aabb("support", use="visual"))
-    door_closed_bounds = _aabb_bounds(ctx.part_world_aabb("door", use="visual"))
+    body_bounds = _aabb_bounds(ctx.part_world_aabb("body"))
+    support_bounds = _aabb_bounds(ctx.part_world_aabb("support"))
+    door_closed_bounds = _aabb_bounds(ctx.part_world_aabb("door"))
 
     body_width = body_bounds[1] - body_bounds[0]
     body_length = body_bounds[3] - body_bounds[2]
@@ -353,7 +353,7 @@ def run_tests() -> TestReport:
     )
 
     with ctx.pose(front_access_door=0.75):
-        door_mid_bounds = _aabb_bounds(ctx.part_world_aabb("door", use="visual"))
+        door_mid_bounds = _aabb_bounds(ctx.part_world_aabb("door"))
         assert door_mid_bounds[5] < door_closed_bounds[5] - 0.03, (
             "Partially open door should drop from the closed position."
         )
@@ -362,7 +362,7 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose(front_access_door=1.45):
-        door_open_bounds = _aabb_bounds(ctx.part_world_aabb("door", use="visual"))
+        door_open_bounds = _aabb_bounds(ctx.part_world_aabb("door"))
         assert door_open_bounds[5] < door_mid_bounds[5] - 0.02, (
             "Fully open door should swing farther downward than the mid pose."
         )

@@ -441,7 +441,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, geometry_source="collision")
+    ctx = TestContext(object_model)
     ctx.allow_overlap(
         "base",
         "stage1",

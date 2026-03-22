@@ -395,7 +395,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     for index in range(1, SLAT_COUNT + 1):
         ctx.allow_overlap(
             "shutter_leaf",

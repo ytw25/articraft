@@ -173,7 +173,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
 
     def _vec3(value):
         if isinstance(value, (tuple, list)) and len(value) == 3:

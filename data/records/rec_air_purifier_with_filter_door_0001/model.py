@@ -326,12 +326,12 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
     ctx.warn_if_part_geometry_disconnected(use="visual")
-    ctx.warn_if_coplanar_surfaces(max_pose_samples=32, use="visual")
+    ctx.warn_if_coplanar_surfaces(max_pose_samples=32)
     ctx.warn_if_overlaps(
         max_pose_samples=96,
         overlap_tol=0.004,
@@ -368,8 +368,6 @@ def run_tests() -> TestReport:
         axis="z",
         min_gap=0.0,
         max_gap=0.004,
-        positive_use="visual",
-        negative_use="visual",
     )
     ctx.expect_aabb_overlap("selector_dial", "control_pod", axes="xy", min_overlap=0.05)
     with ctx.pose(control_pod_to_selector_dial=1.57):
@@ -379,8 +377,6 @@ def run_tests() -> TestReport:
             axis="z",
             min_gap=0.0,
             max_gap=0.004,
-            positive_use="visual",
-            negative_use="visual",
         )
         ctx.expect_aabb_overlap("selector_dial", "control_pod", axes="xy", min_overlap=0.05)
 
@@ -390,8 +386,6 @@ def run_tests() -> TestReport:
         axis="z",
         min_gap=0.0,
         max_gap=0.0065,
-        positive_use="visual",
-        negative_use="visual",
     )
     ctx.expect_aabb_overlap("power_rocker", "control_pod", axes="xy", min_overlap=0.02)
     ctx.expect_joint_motion_axis(
@@ -408,8 +402,6 @@ def run_tests() -> TestReport:
             axis="z",
             min_gap=0.0,
             max_gap=0.007,
-            positive_use="visual",
-            negative_use="visual",
         )
     with ctx.pose(control_pod_to_power_rocker=-0.18):
         ctx.expect_aabb_gap(
@@ -418,8 +410,6 @@ def run_tests() -> TestReport:
             axis="z",
             min_gap=0.0,
             max_gap=0.007,
-            positive_use="visual",
-            negative_use="visual",
         )
 
     front_pos = ctx.part_world_position("front_intake")

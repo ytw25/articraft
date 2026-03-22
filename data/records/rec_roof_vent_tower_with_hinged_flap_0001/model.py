@@ -292,7 +292,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -316,14 +316,14 @@ def run_tests() -> TestReport:
         min_delta=0.05,
     )
 
-    body_aabb = ctx.part_world_aabb("tower_body", use="visual")
+    body_aabb = ctx.part_world_aabb("tower_body")
     body_mins, body_maxs = _aabb_bounds(body_aabb)
     outlet_face_y = 0.160 + 0.08 * 0.5
     gasket_outer_y = 0.204 + 0.008 * 0.5
     hood_front_y = 0.232 + 0.014 * 0.5
 
     with ctx.pose(outlet_flap_hinge=0.0):
-        flap_closed = ctx.part_world_aabb("outlet_flap", use="visual")
+        flap_closed = ctx.part_world_aabb("outlet_flap")
         closed_mins, closed_maxs = _aabb_bounds(flap_closed)
         closed_center = _aabb_center(flap_closed)
 
@@ -339,7 +339,7 @@ def run_tests() -> TestReport:
         )
 
     with ctx.pose(outlet_flap_hinge=0.48):
-        flap_mid = ctx.part_world_aabb("outlet_flap", use="visual")
+        flap_mid = ctx.part_world_aabb("outlet_flap")
         mid_center = _aabb_center(flap_mid)
 
         assert mid_center[1] > closed_center[1] + 0.025, (
@@ -348,7 +348,7 @@ def run_tests() -> TestReport:
         assert mid_center[2] > closed_center[2] + 0.015, "Top-hinged flap should lift as it opens."
 
     with ctx.pose(outlet_flap_hinge=0.90):
-        flap_open = ctx.part_world_aabb("outlet_flap", use="visual")
+        flap_open = ctx.part_world_aabb("outlet_flap")
         open_mins, open_maxs = _aabb_bounds(flap_open)
         open_center = _aabb_center(flap_open)
 

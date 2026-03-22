@@ -444,7 +444,7 @@ def _assert(condition: bool, message: str) -> None:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)

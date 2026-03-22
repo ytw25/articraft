@@ -369,8 +369,8 @@ def _require(condition: bool, message: str) -> None:
 
 
 def _check_flap_pose(ctx: TestContext, label: str, x_behavior: str, top_behavior: str) -> None:
-    frame_bounds = _aabb_bounds(ctx.part_world_aabb("frame", use="visual"))
-    flap_bounds = _aabb_bounds(ctx.part_world_aabb("flap", use="visual"))
+    frame_bounds = _aabb_bounds(ctx.part_world_aabb("frame"))
+    flap_bounds = _aabb_bounds(ctx.part_world_aabb("flap"))
     frame_min_x, frame_max_x, frame_min_y, frame_max_y, frame_min_z, frame_max_z = frame_bounds
     flap_min_x, flap_max_x, flap_min_y, flap_max_y, flap_min_z, flap_max_z = flap_bounds
 
@@ -424,7 +424,7 @@ def _check_flap_pose(ctx: TestContext, label: str, x_behavior: str, top_behavior
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)

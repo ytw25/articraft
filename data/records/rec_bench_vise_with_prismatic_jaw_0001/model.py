@@ -345,7 +345,7 @@ def run_tests() -> TestReport:
             return float(aabb[1][idx]) - float(aabb[0][idx])
         raise AssertionError(f"Unsupported AABB object: {aabb!r}")
 
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -393,13 +393,13 @@ def run_tests() -> TestReport:
     if abs(screw_dx - jaw_dx) > 1e-4:
         raise AssertionError("Lead screw head should translate with the movable jaw.")
 
-    flat_handle = ctx.part_world_aabb("screw", use="visual")
+    flat_handle = ctx.part_world_aabb("screw")
     if _aabb_span(flat_handle, "y") < 0.150:
         raise AssertionError("Handle should read as a broad crossbar in the default pose.")
     if _aabb_span(flat_handle, "z") > 0.090:
         raise AssertionError("Horizontal handle pose should stay relatively low in Z.")
     with ctx.pose(handle_spin=math.pi / 2.0):
-        vertical_handle = ctx.part_world_aabb("screw", use="visual")
+        vertical_handle = ctx.part_world_aabb("screw")
         ctx.expect_aabb_overlap("screw", "sliding_jaw", axes="xy", min_overlap=0.020)
     if _aabb_span(vertical_handle, "z") < 0.150:
         raise AssertionError("Quarter-turn handle pose should stand tall in Z.")

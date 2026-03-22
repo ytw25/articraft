@@ -301,7 +301,6 @@ def run_tests() -> TestReport:
     ctx = TestContext(
         object_model,
         asset_root=HERE,
-        geometry_source="collision",
     )
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()

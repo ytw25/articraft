@@ -509,7 +509,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -555,12 +555,12 @@ def run_tests() -> TestReport:
         raise AssertionError("optical tube should be side-mounted clear of the tripod centerline")
 
     with ctx.pose(tube_elevation=-0.20):
-        low_bounds = _aabb_bounds(ctx.part_world_aabb("optical_tube", use="visual"))
+        low_bounds = _aabb_bounds(ctx.part_world_aabb("optical_tube"))
         low_pos = ctx.part_world_position("optical_tube")
         ctx.expect_aabb_overlap("optical_tube", "mount_head", axes="xy", min_overlap=0.05)
 
     with ctx.pose(tube_elevation=1.10):
-        high_bounds = _aabb_bounds(ctx.part_world_aabb("optical_tube", use="visual"))
+        high_bounds = _aabb_bounds(ctx.part_world_aabb("optical_tube"))
         high_pos = ctx.part_world_position("optical_tube")
         ctx.expect_aabb_overlap("optical_tube", "mount_head", axes="xy", min_overlap=0.02)
 

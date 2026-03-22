@@ -256,14 +256,14 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
     ctx.check_part_geometry_connected(use="visual")
     ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.003, overlap_volume_tol=0.0)
 
-    airframe_bounds = _aabb_bounds(ctx.part_world_aabb("airframe", use="visual"))
+    airframe_bounds = _aabb_bounds(ctx.part_world_aabb("airframe"))
     airframe_length = airframe_bounds[1] - airframe_bounds[0]
     airframe_span = airframe_bounds[3] - airframe_bounds[2]
     airframe_height = airframe_bounds[5] - airframe_bounds[4]
@@ -277,7 +277,7 @@ def run_tests() -> TestReport:
     if airframe_span < airframe_length * 0.95:
         raise AssertionError("Wings should read clearly in the collectible airplane silhouette.")
 
-    rest_prop_bounds = _aabb_bounds(ctx.part_world_aabb("propeller", use="visual"))
+    rest_prop_bounds = _aabb_bounds(ctx.part_world_aabb("propeller"))
     propeller_gap = rest_prop_bounds[0] - airframe_bounds[1]
     propeller_span_y = rest_prop_bounds[3] - rest_prop_bounds[2]
     propeller_span_z = rest_prop_bounds[5] - rest_prop_bounds[4]
@@ -291,8 +291,8 @@ def run_tests() -> TestReport:
 
     for angle in (0.0, 1.1, 2.2):
         with ctx.pose(propeller_spin=angle):
-            posed_airframe_bounds = _aabb_bounds(ctx.part_world_aabb("airframe", use="visual"))
-            posed_prop_bounds = _aabb_bounds(ctx.part_world_aabb("propeller", use="visual"))
+            posed_airframe_bounds = _aabb_bounds(ctx.part_world_aabb("airframe"))
+            posed_prop_bounds = _aabb_bounds(ctx.part_world_aabb("propeller"))
             posed_gap = posed_prop_bounds[0] - posed_airframe_bounds[1]
             _assert_between(f"propeller nose gap at {angle:.1f} rad", posed_gap, 0.002, 0.020)
 

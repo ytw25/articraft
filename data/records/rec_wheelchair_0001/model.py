@@ -484,7 +484,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -553,7 +553,7 @@ def run_tests() -> TestReport:
             raise AssertionError(message)
 
     def _aabb_center(part_name: str):
-        aabb = ctx.part_world_aabb(part_name, use="visual")
+        aabb = ctx.part_world_aabb(part_name)
         if hasattr(aabb, "center"):
             center = aabb.center() if callable(aabb.center) else aabb.center
             return tuple(center)

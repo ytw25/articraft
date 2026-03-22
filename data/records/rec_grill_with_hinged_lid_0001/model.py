@@ -365,7 +365,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -389,7 +389,7 @@ def run_tests() -> TestReport:
             self.max_x, self.max_y, self.max_z = max_corner
 
     def part_aabb(name: str):
-        raw = ctx.part_world_aabb(name, use="visual")
+        raw = ctx.part_world_aabb(name)
         if hasattr(raw, "max_x"):
             return raw
         if len(raw) == 2 and len(raw[0]) == 3 and len(raw[1]) == 3:

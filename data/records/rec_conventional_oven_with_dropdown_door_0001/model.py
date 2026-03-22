@@ -309,7 +309,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -340,7 +340,7 @@ def run_tests() -> TestReport:
         return None
 
     def bounds(part_name: str) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-        aabb = ctx.part_world_aabb(part_name, use="visual")
+        aabb = ctx.part_world_aabb(part_name)
 
         for lo_name, hi_name in (
             ("min", "max"),

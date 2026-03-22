@@ -449,7 +449,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -458,8 +458,8 @@ def run_tests() -> TestReport:
 
     body_pos = _extract_xyz(ctx.part_world_position("body"))
     sail_pos = _extract_xyz(ctx.part_world_position("sails"))
-    body_aabb = _extract_aabb_bounds(ctx.part_world_aabb("body", use="visual"))
-    sail_aabb = _extract_aabb_bounds(ctx.part_world_aabb("sails", use="visual"))
+    body_aabb = _extract_aabb_bounds(ctx.part_world_aabb("body"))
+    sail_aabb = _extract_aabb_bounds(ctx.part_world_aabb("sails"))
 
     body_width = body_aabb[1] - body_aabb[0]
     body_depth = body_aabb[3] - body_aabb[2]
@@ -497,7 +497,7 @@ def run_tests() -> TestReport:
 
     with ctx.pose(sail_spin=math.pi / 4.0):
         ctx.check_no_overlaps(max_pose_samples=1, overlap_tol=0.003, overlap_volume_tol=0.0)
-        diag_aabb = _extract_aabb_bounds(ctx.part_world_aabb("sails", use="visual"))
+        diag_aabb = _extract_aabb_bounds(ctx.part_world_aabb("sails"))
         diag_width = diag_aabb[1] - diag_aabb[0]
         diag_height = diag_aabb[5] - diag_aabb[4]
         if diag_aabb[2] < body_aabb[3] - 0.08:
@@ -520,7 +520,7 @@ def run_tests() -> TestReport:
 
     with ctx.pose(sail_spin=math.pi / 2.0):
         ctx.check_no_overlaps(max_pose_samples=1, overlap_tol=0.003, overlap_volume_tol=0.0)
-        quarter_aabb = _extract_aabb_bounds(ctx.part_world_aabb("sails", use="visual"))
+        quarter_aabb = _extract_aabb_bounds(ctx.part_world_aabb("sails"))
         if (quarter_aabb[1] - quarter_aabb[0]) <= 3.10:
             raise AssertionError("Quarter-turn pose should preserve the full horizontal sail span.")
         if (quarter_aabb[5] - quarter_aabb[4]) <= 3.10:

@@ -308,7 +308,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE, geometry_source="collision")
+    ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.check_articulation_origin_near_geometry(tol=0.01)
@@ -362,11 +362,11 @@ def run_tests() -> TestReport:
         raise AssertionError(f"Unsupported AABB structure for {part_name!r}: {aabb!r}")
 
     def _aabb_center(part_name: str) -> tuple[float, float, float]:
-        mins, maxs = _aabb_bounds(part_name, use="visual")
+        mins, maxs = _aabb_bounds(part_name)
         return tuple((lo + hi) * 0.5 for lo, hi in zip(mins, maxs))
 
-    housing_mins, housing_maxs = _aabb_bounds("housing", use="visual")
-    panel_mins, panel_maxs = _aabb_bounds("panel", use="visual")
+    housing_mins, housing_maxs = _aabb_bounds("housing")
+    panel_mins, panel_maxs = _aabb_bounds("panel")
     closed_center = _aabb_center("panel")
 
     housing_size_y = housing_maxs[1] - housing_mins[1]
