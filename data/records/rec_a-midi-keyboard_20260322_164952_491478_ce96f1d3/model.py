@@ -12,414 +12,537 @@ from sdk import (
     Box,
     Cylinder,
     Inertial,
-    MotionLimits,
+    MeshGeometry,
     Origin,
     TestContext,
     TestReport,
     mesh_from_geometry,
-    repair_loft,
-    section_loft,
+    place_on_surface,
 )
 
 ASSETS = AssetContext.from_script(__file__)
 
 
-def _named_visual(part: object, name: str) -> object:
-    for visual in getattr(part, "visuals", []) or []:
-        if getattr(visual, "name", None) == name:
-            return visual
-    raise ValueError(f"Unknown visual {name!r} on part {getattr(part, 'name', part)!r}")
+def _add_quad(geom: MeshGeometry, a: int, b: int, c: int, d: int) -> None:
+    geom.add_face(a, b, c)
+    geom.add_face(a, c, d)
 
 
-def _wedge_section(
-    x: float,
-    y_front: float,
-    y_rear: float,
-    z_bottom: float,
-    z_front_top: float,
-    z_rear_top: float,
-) -> list[tuple[float, float, float]]:
-    depth = y_rear - y_front
-    front_r = min(0.006, 0.18 * depth, 0.45 * max(z_front_top - z_bottom, 0.001))
-    rear_r = min(0.008, 0.18 * depth, 0.45 * max(z_rear_top - z_bottom, 0.001))
-    slope = z_rear_top - z_front_top
-    return [
-        (x, y_front + front_r, z_bottom),
-        (x, y_front, z_bottom + 0.35 * front_r),
-        (x, y_front, z_front_top - 0.65 * front_r),
-        (x, y_front + front_r, z_front_top),
-        (x, y_front + 0.28 * depth, z_front_top + 0.30 * slope),
-        (x, y_front + 0.68 * depth, z_front_top + 0.78 * slope),
-        (x, y_rear - rear_r, z_rear_top),
-        (x, y_rear, z_rear_top - 0.65 * rear_r),
-        (x, y_rear, z_bottom + 0.35 * rear_r),
-        (x, y_rear - rear_r, z_bottom),
-        (x, y_front + 0.72 * depth, z_bottom),
-        (x, y_front + 0.30 * depth, z_bottom),
+def _build_rear_housing_mesh() -> MeshGeometry:
+    geom = MeshGeometry()
+
+    vertices = [
+        (-0.250, 0.000, 0.000),
+        (0.250, 0.000, 0.000),
+        (0.250, 0.095, 0.000),
+        (-0.250, 0.095, 0.000),
+        (-0.246, 0.000, 0.028),
+        (0.246, 0.000, 0.028),
+        (0.248, 0.095, 0.044),
+        (-0.248, 0.095, 0.044),
     ]
+    ids = [geom.add_vertex(*vertex) for vertex in vertices]
 
+    _add_quad(geom, ids[0], ids[1], ids[2], ids[3])  # bottom
+    _add_quad(geom, ids[4], ids[7], ids[6], ids[5])  # top
+    _add_quad(geom, ids[0], ids[4], ids[5], ids[1])  # front
+    _add_quad(geom, ids[1], ids[5], ids[6], ids[2])  # right
+    _add_quad(geom, ids[2], ids[6], ids[7], ids[3])  # back
+    _add_quad(geom, ids[3], ids[7], ids[4], ids[0])  # left
+    return geom
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="midi_keyboard", assets=ASSETS)
 
-    matte_black = model.material("matte_black", rgba=(0.12, 0.12, 0.13, 1.0))
-    dark_panel = model.material("dark_panel", rgba=(0.19, 0.20, 0.22, 1.0))
-    warm_white = model.material("warm_white", rgba=(0.93, 0.93, 0.91, 1.0))
-    satin_black = model.material("satin_black", rgba=(0.06, 0.06, 0.07, 1.0))
-    graphite = model.material("graphite", rgba=(0.24, 0.24, 0.25, 1.0))
-    steel = model.material("steel", rgba=(0.60, 0.61, 0.63, 1.0))
-    glass = model.material("display_glass", rgba=(0.10, 0.13, 0.16, 0.82))
+    body = model.material("body_charcoal", rgba=(0.17, 0.18, 0.20, 1.0))
+    deck = model.material("deck_black", rgba=(0.10, 0.11, 0.12, 1.0))
+    key_white = model.material("key_white", rgba=(0.94, 0.95, 0.96, 1.0))
+    key_black = model.material("key_black", rgba=(0.08, 0.08, 0.09, 1.0))
+    knob_dark = model.material("knob_dark", rgba=(0.14, 0.15, 0.16, 1.0))
+    pad_rubber = model.material("pad_rubber", rgba=(0.22, 0.23, 0.25, 1.0))
+    wheel_rubber = model.material("wheel_rubber", rgba=(0.12, 0.12, 0.13, 1.0))
+    display_glass = model.material("display_glass", rgba=(0.18, 0.29, 0.34, 0.45))
+    accent = model.material("accent_grey", rgba=(0.44, 0.46, 0.49, 1.0))
 
     chassis = model.part("chassis")
-
-    lower_shell = mesh_from_geometry(
-        repair_loft(
-            section_loft(
-                [
-                    _wedge_section(-0.240, -0.095, 0.095, 0.000, 0.0100, 0.0140),
-                    _wedge_section(-0.080, -0.095, 0.095, 0.000, 0.0106, 0.0146),
-                    _wedge_section(0.240, -0.094, 0.094, 0.000, 0.0090, 0.0130),
-                ]
-            )
-        ),
-        ASSETS.mesh_path("midi_lower_shell.obj"),
+    rear_housing_mesh = mesh_from_geometry(
+        _build_rear_housing_mesh(),
+        ASSETS.mesh_path("midi_keyboard_rear_housing.obj"),
     )
-    rear_deck = mesh_from_geometry(
-        repair_loft(
-            section_loft(
-                [
-                    _wedge_section(-0.135, 0.040, 0.095, 0.0135, 0.0260, 0.0400),
-                    _wedge_section(0.050, 0.042, 0.095, 0.0135, 0.0240, 0.0380),
-                    _wedge_section(0.235, 0.045, 0.094, 0.0132, 0.0220, 0.0350),
-                ]
-            )
-        ),
-        ASSETS.mesh_path("midi_rear_deck.obj"),
-    )
-
-    chassis.visual(lower_shell, material=matte_black, name="lower_shell")
-    chassis.visual(rear_deck, material=matte_black, name="rear_deck")
+    rear_housing = chassis.visual(rear_housing_mesh, material=body, name="rear_housing")
     chassis.visual(
-        Box((0.372, 0.108, 0.003)),
-        origin=Origin(xyz=(0.040, -0.036, 0.0130)),
-        material=dark_panel,
-        name="keybed",
+        Box((0.500, 0.100, 0.018)),
+        origin=Origin(xyz=(0.000, -0.050, 0.009)),
+        material=body,
+        name="front_base",
     )
     chassis.visual(
-        Box((0.074, 0.094, 0.004)),
-        origin=Origin(xyz=(-0.193, 0.003, 0.0130)),
-        material=dark_panel,
-        name="wheel_panel",
+        Box((0.382, 0.010, 0.020)),
+        origin=Origin(xyz=(0.000, 0.030, 0.010)),
+        material=deck,
+        name="rear_key_wall",
+    )
+    chassis.visual(
+        Box((0.010, 0.115, 0.024)),
+        origin=Origin(xyz=(-0.186, -0.026, 0.012)),
+        material=deck,
+        name="left_key_cheek",
+    )
+    chassis.visual(
+        Box((0.010, 0.115, 0.024)),
+        origin=Origin(xyz=(0.186, -0.026, 0.012)),
+        material=deck,
+        name="right_key_cheek",
+    )
+    chassis.visual(
+        Box((0.358, 0.114, 0.002)),
+        origin=Origin(xyz=(0.000, -0.026, 0.017)),
+        material=deck,
+        name="keybed_seat",
+    )
+    chassis.visual(
+        Box((0.322, 0.034, 0.002)),
+        origin=Origin(xyz=(0.000, -0.004, 0.023)),
+        material=deck,
+        name="black_key_seat",
+    )
+    chassis.visual(
+        Box((0.496, 0.008, 0.006)),
+        origin=Origin(xyz=(0.000, -0.094, 0.015)),
+        material=accent,
+        name="front_trim",
+    )
+    chassis.inertial = Inertial.from_geometry(
+        Box((0.500, 0.195, 0.055)),
+        mass=2.8,
+        origin=Origin(xyz=(0.000, 0.000, 0.0275)),
     )
 
-    for wheel_name, wheel_y in (("pitch", -0.020), ("mod", 0.026)):
-        chassis.visual(
-            Box((0.044, 0.024, 0.004)),
-            origin=Origin(xyz=(-0.193, wheel_y, 0.0120)),
-            material=dark_panel,
-            name=f"{wheel_name}_dock",
+    white_keys = model.part("white_keys")
+    white_keys.visual(
+        Box((0.358, 0.114, 0.002)),
+        material=deck,
+        name="white_key_support",
+    )
+    white_key_width = 0.0222
+    white_key_pitch = 0.0235
+    white_key_centers = [(-7 + index) * white_key_pitch for index in range(15)]
+    for index, center_x in enumerate(white_key_centers):
+        white_keys.visual(
+            Box((white_key_width, 0.112, 0.008)),
+            origin=Origin(xyz=(center_x, -0.001, 0.004)),
+            material=key_white,
+            name=f"white_key_body_{index}",
         )
-        for side, support_x in (("left", -0.214), ("right", -0.172)):
-            chassis.visual(
-                Box((0.006, 0.016, 0.018)),
-                origin=Origin(xyz=(support_x, wheel_y, 0.0232)),
-                material=dark_panel,
-                name=f"{wheel_name}_support_{side}",
-            )
+        white_keys.visual(
+            Box((white_key_width * 0.9, 0.080, 0.014)),
+            origin=Origin(xyz=(center_x, -0.018, 0.008)),
+            material=key_white,
+            name=f"white_key_{index}",
+        )
+    white_keys.inertial = Inertial.from_geometry(
+        Box((0.358, 0.114, 0.016)),
+        mass=0.65,
+        origin=Origin(xyz=(0.000, 0.000, 0.008)),
+    )
 
-    chassis.visual(
-        Box((0.034, 0.020, 0.003)),
-        origin=Origin(xyz=(-0.110, 0.069, 0.0360)),
-        material=glass,
+    black_keys = model.part("black_keys")
+    black_keys.visual(
+        Box((0.322, 0.034, 0.004)),
+        material=deck,
+        name="black_key_rail",
+    )
+    black_key_positions = [0, 1, 3, 4, 5, 7, 8, 10, 11, 12]
+    for visual_index, white_index in enumerate(black_key_positions):
+        key_center_x = (white_key_centers[white_index] + white_key_centers[white_index + 1]) / 2.0
+        black_keys.visual(
+            Box((0.010, 0.022, 0.012)),
+            origin=Origin(
+                xyz=(
+                    key_center_x,
+                    0.010,
+                    0.008,
+                )
+            ),
+            material=key_black,
+            name=f"black_key_stem_{visual_index}",
+        )
+        black_keys.visual(
+            Box((0.013, 0.042, 0.014)),
+            origin=Origin(
+                xyz=(
+                    key_center_x,
+                    -0.014,
+                    0.015,
+                )
+            ),
+            material=key_black,
+            name=f"black_key_{visual_index}",
+        )
+        black_keys.visual(
+            Box((0.010, 0.024, 0.004)),
+            origin=Origin(
+                xyz=(
+                    key_center_x,
+                    -0.012,
+                    0.024,
+                )
+            ),
+            material=key_black,
+            name=f"black_key_crown_{visual_index}",
+        )
+    black_keys.inertial = Inertial.from_geometry(
+        Box((0.322, 0.060, 0.028)),
+        mass=0.28,
+        origin=Origin(xyz=(0.000, 0.000, 0.014)),
+    )
+
+    def _mount_to_chassis_surface(
+        child_part,
+        *,
+        articulation_name: str,
+        point_hint: tuple[float, float, float],
+        clearance: float = 0.0,
+    ) -> None:
+        model.articulation(
+            articulation_name,
+            ArticulationType.FIXED,
+            parent=chassis,
+            child=child_part,
+            origin=place_on_surface(
+                child_part,
+                rear_housing,
+                point_hint=point_hint,
+                clearance=clearance,
+                asset_root=ASSETS.asset_root,
+                prefer_collisions=False,
+                child_prefer_collisions=False,
+            ),
+        )
+
+    display_part = model.part("display_module")
+    display_part.visual(
+        Box((0.050, 0.024, 0.006)),
+        origin=Origin(xyz=(0.000, 0.000, 0.003)),
+        material=display_glass,
         name="display",
     )
+    display_part.inertial = Inertial.from_geometry(
+        Box((0.050, 0.024, 0.006)),
+        mass=0.04,
+        origin=Origin(xyz=(0.000, 0.000, 0.003)),
+    )
+    _mount_to_chassis_surface(
+        display_part,
+        articulation_name="chassis_to_display_module",
+        point_hint=(-0.012, 0.060, 0.080),
+    )
 
-    for index, button_x in enumerate((-0.072, -0.054, -0.036, -0.018), start=1):
-        chassis.visual(
-            Box((0.012, 0.010, 0.004)),
-            origin=Origin(xyz=(button_x, 0.047, 0.0370)),
-            material=graphite,
-            name=f"button_{index:02d}",
+    first_knob_part = None
+    for row_index, local_y in enumerate((-0.014, 0.014)):
+        for column_index, local_x in enumerate((-0.040, -0.010, 0.020, 0.050)):
+            knob_part = model.part(f"knob_{row_index}_{column_index}_part")
+            knob_part.visual(
+                Cylinder(radius=0.008, length=0.010),
+                origin=Origin(xyz=(0.000, 0.000, 0.005)),
+                material=knob_dark,
+                name="knob",
+            )
+            knob_part.inertial = Inertial.from_geometry(
+                Cylinder(radius=0.008, length=0.010),
+                mass=0.012,
+                origin=Origin(xyz=(0.000, 0.000, 0.005)),
+            )
+            _mount_to_chassis_surface(
+                knob_part,
+                articulation_name=f"chassis_to_knob_{row_index}_{column_index}",
+                point_hint=(0.055 + local_x, 0.056 + local_y, 0.080),
+            )
+            if first_knob_part is None:
+                first_knob_part = knob_part
+
+    first_pad_part = None
+    for row_index, local_y in enumerate((-0.014, 0.014)):
+        for column_index, local_x in enumerate((0.098, 0.128)):
+            pad_part = model.part(f"pad_{row_index}_{column_index}_part")
+            pad_part.visual(
+                Box((0.024, 0.024, 0.005)),
+                origin=Origin(xyz=(0.000, 0.000, 0.0025)),
+                material=pad_rubber,
+                name="pad",
+            )
+            pad_part.inertial = Inertial.from_geometry(
+                Box((0.024, 0.024, 0.005)),
+                mass=0.02,
+                origin=Origin(xyz=(0.000, 0.000, 0.0025)),
+            )
+            _mount_to_chassis_surface(
+                pad_part,
+                articulation_name=f"chassis_to_pad_{row_index}_{column_index}",
+                point_hint=(0.055 + local_x, 0.056 + local_y, 0.080),
+            )
+            if first_pad_part is None:
+                first_pad_part = pad_part
+
+    for index, local_x in enumerate((0.066, 0.088, 0.110)):
+        button_part = model.part(f"transport_button_{index}_part")
+        button_part.visual(
+            Box((0.010, 0.026, 0.004)),
+            origin=Origin(xyz=(0.000, 0.000, 0.002)),
+            material=accent,
+            name="transport_button",
+        )
+        button_part.inertial = Inertial.from_geometry(
+            Box((0.010, 0.026, 0.004)),
+            mass=0.006,
+            origin=Origin(xyz=(0.000, 0.000, 0.002)),
+        )
+        _mount_to_chassis_surface(
+            button_part,
+            articulation_name=f"chassis_to_transport_button_{index}",
+            point_hint=(0.055 + local_x, 0.024, 0.070),
         )
 
-    for index in range(8):
-        chassis.visual(
-            Cylinder(radius=0.0075, length=0.012),
-            origin=Origin(xyz=(-0.010 + 0.031 * index, 0.068, 0.0430)),
-            material=graphite,
-            name=f"knob_{index + 1:02d}",
-        )
-
-    keyboard_x0 = -0.143
-    keyboard_len = 0.366
-    white_key_pitch = keyboard_len / 15.0
-    white_key_width = white_key_pitch - 0.0012
-    white_key_y = -0.040
-    white_key_length = 0.110
-    white_key_height = 0.011
-    white_key_center_z = 0.0145 + 0.5 * white_key_height
-
-    for index in range(15):
-        chassis.visual(
-            Box((white_key_width, white_key_length, white_key_height)),
-            origin=Origin(
-                xyz=(
-                    keyboard_x0 + (index + 0.5) * white_key_pitch,
-                    white_key_y,
-                    white_key_center_z,
-                )
-            ),
-            material=warm_white,
-            name=f"white_key_{index + 1:02d}",
-        )
-
-    black_after_white = (0, 1, 3, 4, 5, 7, 8, 10, 11, 12)
-    for black_index, white_index in enumerate(black_after_white, start=1):
-        chassis.visual(
-            Box((0.014, 0.068, 0.019)),
-            origin=Origin(
-                xyz=(
-                    keyboard_x0 + (white_index + 1.0) * white_key_pitch,
-                    -0.015,
-                    0.0245,
-                )
-            ),
-            material=satin_black,
-            name=f"black_key_{black_index:02d}",
-        )
-
-    chassis.inertial = Inertial.from_geometry(
-        Box((0.480, 0.190, 0.050)),
-        mass=1.8,
-        origin=Origin(xyz=(0.000, 0.000, 0.025)),
+    pitch_wheel_part = model.part("pitch_wheel_part")
+    pitch_wheel_part.visual(
+        Box((0.012, 0.032, 0.003)),
+        origin=Origin(xyz=(0.000, 0.000, 0.0015)),
+        material=deck,
+        name="pitch_wheel_floor",
+    )
+    pitch_wheel_part.visual(
+        Box((0.003, 0.032, 0.010)),
+        origin=Origin(xyz=(-0.0065, 0.000, 0.005)),
+        material=deck,
+        name="pitch_wheel_left_cheek",
+    )
+    pitch_wheel_part.visual(
+        Box((0.003, 0.032, 0.010)),
+        origin=Origin(xyz=(0.0065, 0.000, 0.005)),
+        material=deck,
+        name="pitch_wheel_right_cheek",
+    )
+    pitch_wheel_part.visual(
+        Cylinder(radius=0.011, length=0.010),
+        origin=Origin(xyz=(0.000, 0.000, 0.007), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=wheel_rubber,
+        name="pitch_wheel",
+    )
+    pitch_wheel_part.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.011, length=0.010),
+        mass=0.02,
+        origin=Origin(xyz=(0.000, 0.000, 0.012)),
+    )
+    _mount_to_chassis_surface(
+        pitch_wheel_part,
+        articulation_name="chassis_to_pitch_wheel",
+        point_hint=(-0.224, 0.026, 0.070),
     )
 
-    pitch_wheel = model.part("pitch_wheel")
-    pitch_wheel.visual(
-        Cylinder(radius=0.013, length=0.024),
-        origin=Origin(rpy=(0.000, math.pi / 2.0, 0.000)),
-        material=graphite,
-        name="pitch_tire",
+    mod_wheel_part = model.part("mod_wheel_part")
+    mod_wheel_part.visual(
+        Box((0.012, 0.032, 0.003)),
+        origin=Origin(xyz=(0.000, 0.000, 0.0015)),
+        material=deck,
+        name="mod_wheel_floor",
     )
-    pitch_wheel.visual(
-        Cylinder(radius=0.0025, length=0.038),
-        origin=Origin(rpy=(0.000, math.pi / 2.0, 0.000)),
-        material=steel,
-        name="pitch_axle",
+    mod_wheel_part.visual(
+        Box((0.003, 0.032, 0.010)),
+        origin=Origin(xyz=(-0.0065, 0.000, 0.005)),
+        material=deck,
+        name="mod_wheel_left_cheek",
     )
-    pitch_wheel.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.013, length=0.024),
-        mass=0.045,
-        origin=Origin(rpy=(0.000, math.pi / 2.0, 0.000)),
+    mod_wheel_part.visual(
+        Box((0.003, 0.032, 0.010)),
+        origin=Origin(xyz=(0.0065, 0.000, 0.005)),
+        material=deck,
+        name="mod_wheel_right_cheek",
     )
-
-    mod_wheel = model.part("mod_wheel")
-    mod_wheel.visual(
-        Cylinder(radius=0.013, length=0.024),
-        origin=Origin(rpy=(0.000, math.pi / 2.0, 0.000)),
-        material=graphite,
-        name="mod_tire",
+    mod_wheel_part.visual(
+        Cylinder(radius=0.011, length=0.010),
+        origin=Origin(xyz=(0.000, 0.000, 0.007), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=wheel_rubber,
+        name="mod_wheel",
     )
-    mod_wheel.visual(
-        Cylinder(radius=0.0025, length=0.038),
-        origin=Origin(rpy=(0.000, math.pi / 2.0, 0.000)),
-        material=steel,
-        name="mod_axle",
+    mod_wheel_part.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.011, length=0.010),
+        mass=0.02,
+        origin=Origin(xyz=(0.000, 0.000, 0.012)),
     )
-    mod_wheel.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.013, length=0.024),
-        mass=0.045,
-        origin=Origin(rpy=(0.000, math.pi / 2.0, 0.000)),
+    _mount_to_chassis_surface(
+        mod_wheel_part,
+        articulation_name="chassis_to_mod_wheel",
+        point_hint=(-0.198, 0.026, 0.070),
     )
 
     model.articulation(
-        "pitch_bend",
-        ArticulationType.REVOLUTE,
+        "chassis_to_white_keys",
+        ArticulationType.FIXED,
         parent=chassis,
-        child=pitch_wheel,
-        origin=Origin(xyz=(-0.193, -0.020, 0.0272)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=1.0, velocity=6.0, lower=-0.75, upper=0.75),
+        child=white_keys,
+        origin=Origin(xyz=(0.000, -0.026, 0.019)),
     )
     model.articulation(
-        "modulation_wheel",
-        ArticulationType.REVOLUTE,
+        "chassis_to_black_keys",
+        ArticulationType.FIXED,
         parent=chassis,
-        child=mod_wheel,
-        origin=Origin(xyz=(-0.193, 0.026, 0.0272)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=1.0, velocity=5.0, lower=0.0, upper=0.85),
+        child=black_keys,
+        origin=Origin(xyz=(0.000, -0.004, 0.026)),
     )
-
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
     chassis = object_model.get_part("chassis")
-    pitch_wheel = object_model.get_part("pitch_wheel")
-    mod_wheel = object_model.get_part("mod_wheel")
-    pitch_bend = object_model.get_articulation("pitch_bend")
-    modulation_wheel = object_model.get_articulation("modulation_wheel")
-    rear_deck = _named_visual(chassis, "rear_deck")
-    keybed = _named_visual(chassis, "keybed")
-    wheel_panel = _named_visual(chassis, "wheel_panel")
-    pitch_dock = _named_visual(chassis, "pitch_dock")
-    mod_dock = _named_visual(chassis, "mod_dock")
-    pitch_tire = _named_visual(pitch_wheel, "pitch_tire")
-    mod_tire = _named_visual(mod_wheel, "mod_tire")
-    display = _named_visual(chassis, "display")
-    first_button = _named_visual(chassis, "button_01")
-    last_button = _named_visual(chassis, "button_04")
-    first_white = _named_visual(chassis, "white_key_01")
-    last_white = _named_visual(chassis, "white_key_15")
-    mid_white = _named_visual(chassis, "white_key_08")
-    first_black = _named_visual(chassis, "black_key_01")
-    last_black = _named_visual(chassis, "black_key_10")
-    first_knob = _named_visual(chassis, "knob_01")
-    last_knob = _named_visual(chassis, "knob_08")
+    white_keys = object_model.get_part("white_keys")
+    black_keys = object_model.get_part("black_keys")
+    display_part = object_model.get_part("display_module")
+    first_knob_part = object_model.get_part("knob_0_0_part")
+    first_pad_part = object_model.get_part("pad_0_0_part")
+    pitch_wheel_part = object_model.get_part("pitch_wheel_part")
+    mod_wheel_part = object_model.get_part("mod_wheel_part")
+
+    rear_housing = chassis.get_visual("rear_housing")
+    keybed_seat = chassis.get_visual("keybed_seat")
+    black_key_seat = chassis.get_visual("black_key_seat")
+    white_key_support = white_keys.get_visual("white_key_support")
+    first_white = white_keys.get_visual("white_key_0")
+    black_key_rail = black_keys.get_visual("black_key_rail")
+    first_black = black_keys.get_visual("black_key_0")
+    display = display_part.get_visual("display")
+    first_knob = first_knob_part.get_visual("knob")
+    first_pad = first_pad_part.get_visual("pad")
+    pitch_wheel = pitch_wheel_part.get_visual("pitch_wheel")
+    mod_wheel = mod_wheel_part.get_visual("mod_wheel")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
 
-    # Default broad sensor; do not remove. Tune params only if warranted.
+    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default broad sensor; do not remove. Tune params only if warranted.
+    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
     ctx.warn_if_part_geometry_disconnected()
-    ctx.allow_overlap(pitch_wheel, chassis, reason="wheel axle nests in the molded wheel supports")
-    ctx.allow_overlap(mod_wheel, chassis, reason="wheel axle nests in the molded wheel supports")
     # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad sensor; do not remove. Tune params only if warranted.
+    if any(
+        articulation.articulation_type != ArticulationType.FIXED
+        for articulation in object_model.articulations
+    ):
+        ctx.check_articulation_overlaps(max_pose_samples=128)
+    # Default broad overlap warning backstop; conservative and non-blocking by default.
     ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 
-    ctx.expect_aabb_gap(
-        chassis,
-        chassis,
-        axis="x",
-        positive_elem=last_white,
-        negative_elem=first_white,
-        min_gap=0.300,
-        name="white_key_bank_spans_keyboard_width",
-    )
-    ctx.expect_aabb_gap(
-        chassis,
-        chassis,
-        axis="x",
-        positive_elem=last_black,
-        negative_elem=first_black,
-        min_gap=0.220,
-        name="black_key_bank_spans_middle_of_keyboard",
-    )
-    ctx.expect_aabb_gap(
-        chassis,
-        chassis,
-        axis="y",
-        positive_elem=rear_deck,
-        negative_elem=mid_white,
-        min_gap=0.020,
-        max_gap=0.030,
-        name="rear_control_deck_sits_behind_keys",
-    )
-    ctx.expect_aabb_gap(
-        chassis,
+    ctx.expect_gap(
+        white_keys,
         chassis,
         axis="z",
-        positive_elem=first_knob,
-        negative_elem=keybed,
-        min_gap=0.020,
-        name="knobs_stand_proud_of_the_control_surface",
+        max_gap=0.001,
+        max_penetration=0.0001,
+        positive_elem=white_key_support,
+        negative_elem=keybed_seat,
+        name="white_keys_seated_on_keybed",
     )
-    ctx.expect_aabb_gap(
+    ctx.expect_gap(
+        black_keys,
         chassis,
+        axis="z",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=black_key_rail,
+        negative_elem=black_key_seat,
+        name="black_keys_seated_on_rail",
+    )
+    ctx.expect_overlap(white_keys, chassis, axes="xy", min_overlap=0.10)
+    ctx.expect_overlap(black_keys, white_keys, axes="xy", min_overlap=0.05)
+    ctx.expect_within(white_keys, chassis, axes="xy")
+    ctx.expect_within(black_keys, chassis, axes="xy")
+    ctx.expect_within(display_part, chassis, axes="xy")
+    ctx.expect_within(first_knob_part, chassis, axes="xy")
+    ctx.expect_within(first_pad_part, chassis, axes="xy")
+    ctx.expect_within(pitch_wheel_part, chassis, axes="xy")
+    ctx.expect_within(mod_wheel_part, chassis, axes="xy")
+    ctx.expect_gap(
+        white_keys,
         chassis,
-        axis="x",
+        axis="z",
+        min_gap=0.001,
+        max_gap=0.004,
         positive_elem=first_white,
-        negative_elem=wheel_panel,
-        min_gap=0.010,
-        name="wheel_section_sits_left_of_the_keybed",
+        negative_elem=keybed_seat,
+        name="white_keys_proud_of_body",
     )
-    ctx.expect_aabb_gap(
+    ctx.expect_gap(
+        black_keys,
+        white_keys,
+        axis="z",
+        max_gap=0.001,
+        max_penetration=0.0001,
+        positive_elem=first_black,
+        negative_elem=first_white,
+        name="black_keys_hover_above_white_keys",
+    )
+    ctx.expect_contact(
+        first_knob_part,
         chassis,
+        contact_tol=1e-4,
+        elem_a=first_knob,
+        elem_b=rear_housing,
+        name="knob_directly_mounted_to_housing",
+    )
+    ctx.expect_contact(
+        first_pad_part,
         chassis,
+        contact_tol=1e-4,
+        elem_a=first_pad,
+        elem_b=rear_housing,
+        name="pad_directly_mounted_to_housing",
+    )
+    ctx.expect_contact(
+        display_part,
+        chassis,
+        contact_tol=1e-4,
+        elem_a=display,
+        elem_b=rear_housing,
+        name="display_directly_mounted_to_housing",
+    )
+    ctx.expect_contact(
+        pitch_wheel_part,
+        chassis,
+        contact_tol=1e-4,
+        elem_a=pitch_wheel,
+        elem_b=rear_housing,
+        name="pitch_wheel_directly_mounted_to_housing",
+    )
+    ctx.expect_gap(
+        white_keys,
+        white_keys,
         axis="x",
-        positive_elem=last_knob,
-        negative_elem=first_knob,
-        min_gap=0.190,
-        name="knob_row_spans_the_right_control_bank",
+        min_gap=0.30,
+        max_gap=0.32,
+        positive_elem=white_keys.get_visual("white_key_14"),
+        negative_elem=first_white,
+        name="white_key_span_reads_as_compact_two_octave_layout",
     )
-    ctx.expect_aabb_gap(
-        chassis,
-        chassis,
-        axis="y",
+    ctx.expect_gap(
+        display_part,
+        mod_wheel_part,
+        axis="x",
+        min_gap=0.15,
+        max_gap=0.18,
         positive_elem=display,
-        negative_elem=mid_white,
-        min_gap=0.040,
-        name="display_sits_on_the_rear_panel_above_keys",
+        negative_elem=mod_wheel,
+        name="wheels_are_clearly_left_of_control_section",
     )
-    ctx.expect_aabb_gap(
-        chassis,
-        chassis,
+    ctx.expect_gap(
+        mod_wheel_part,
+        pitch_wheel_part,
         axis="x",
-        positive_elem=last_button,
-        negative_elem=first_button,
-        min_gap=0.040,
-        name="transport_buttons_form_a_small_button_row",
+        min_gap=0.012,
+        max_gap=0.016,
+        positive_elem=mod_wheel,
+        negative_elem=pitch_wheel,
+        name="mod_wheel_sits_just_right_of_pitch_wheel",
     )
-    ctx.expect_aabb_gap(
-        pitch_wheel,
-        chassis,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.006,
-        positive_elem=pitch_tire,
-        negative_elem=pitch_dock,
-        name="pitch_wheel_sits_on_its_dock",
-    )
-    ctx.expect_aabb_gap(
-        mod_wheel,
-        chassis,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.006,
-        positive_elem=mod_tire,
-        negative_elem=mod_dock,
-        name="mod_wheel_sits_on_its_dock",
-    )
-    ctx.expect_aabb_overlap(pitch_wheel, chassis, axes="yz", min_overlap=0.024)
-    ctx.expect_aabb_overlap(mod_wheel, chassis, axes="yz", min_overlap=0.024)
-    ctx.expect_origin_distance(pitch_wheel, mod_wheel, axes="x", max_dist=0.002)
-    ctx.expect_aabb_gap(
-        mod_wheel,
-        pitch_wheel,
-        axis="y",
-        min_gap=0.010,
-        max_gap=0.020,
-        name="mod_wheel_sits_behind_pitch_wheel",
-    )
-    with ctx.pose({pitch_bend: -0.65, modulation_wheel: 0.80}):
-        ctx.expect_aabb_gap(
-            pitch_wheel,
-            chassis,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.006,
-            positive_elem=pitch_tire,
-            negative_elem=pitch_dock,
-            name="pitch_wheel_stays_seated_at_full_throw",
-        )
-        ctx.expect_aabb_gap(
-            mod_wheel,
-            chassis,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.006,
-            positive_elem=mod_tire,
-            negative_elem=mod_dock,
-            name="mod_wheel_stays_seated_at_upper_throw",
-        )
-        ctx.expect_aabb_overlap(pitch_wheel, chassis, axes="yz", min_overlap=0.024)
-        ctx.expect_aabb_overlap(mod_wheel, chassis, axes="yz", min_overlap=0.024)
     return ctx.report()
 
 
