@@ -27,6 +27,7 @@ Do not emit URDF XML yourself. The harness compiles `object_model`, derives coll
    - `ctx.check_articulation_overlaps(...)` when the model has non-fixed articulations
    - `ctx.warn_if_overlaps(..., ignore_adjacent=True, ignore_fixed=True)` as a broad warning-tier backstop
    Keep that block unless parameter tuning is justified, add `warn_if_coplanar_surfaces(...)` only when it is useful, and extend `run_tests()` with prompt-specific `expect_*` checks.
+6. In `run_tests()`, resolve the exact `Part`, `Articulation`, and named `Visual` objects you need from `object_model` once at the top, then pass those objects into `ctx.*`. Use names only at the lookup boundary, not as the main test-call style. For named visual features, prefer `part.get_visual("feature_name")`.
 
 Joint authoring rules:
 
@@ -85,7 +86,7 @@ def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="example", assets=ASSETS)
 
     base = model.part("base")
-    base.visual(Box((0.20, 0.20, 0.05)), origin=Origin(xyz=(0.0, 0.0, 0.025)))
+    base.visual(Box((0.20, 0.20, 0.05)), origin=Origin(xyz=(0.0, 0.0, 0.025)), name="base_shell")
     base.inertial = Inertial.from_geometry(
         Box((0.20, 0.20, 0.05)),
         mass=1.0,
@@ -93,7 +94,7 @@ def build_object_model() -> ArticulatedObject:
     )
 
     lid = model.part("lid")
-    lid.visual(Box((0.18, 0.18, 0.02)), origin=Origin(xyz=(0.0, 0.0, 0.01)))
+    lid.visual(Box((0.18, 0.18, 0.02)), origin=Origin(xyz=(0.0, 0.0, 0.01)), name="lid_shell")
     lid.inertial = Inertial.from_geometry(
         Box((0.18, 0.18, 0.02)),
         mass=0.3,
@@ -103,8 +104,8 @@ def build_object_model() -> ArticulatedObject:
     model.articulation(
         "base_to_lid",
         ArticulationType.REVOLUTE,
-        parent="base",
-        child="lid",
+        parent=base,
+        child=lid,
         origin=Origin(xyz=(0.0, 0.0, 0.05)),
         axis=(0.0, 1.0, 0.0),
         motion_limits=MotionLimits(effort=5.0, velocity=3.0, lower=0.0, upper=1.2),
@@ -115,6 +116,10 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
+    base = object_model.get_part("base")
+    lid = object_model.get_part("lid")
+    lid_hinge = object_model.get_articulation("base_to_lid")
+
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
@@ -132,18 +137,11 @@ def run_tests() -> TestReport:
         ignore_adjacent=True,
         ignore_fixed=True,
     )
-    ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.05)
-    ctx.expect_origin_distance("lid", "base", axes="xy", max_dist=0.02)
-    ctx.expect_aabb_gap("lid", "base", axis="z", max_gap=0.001, max_penetration=0.0)
-    ctx.expect_aabb_gap(
-        "lid",
-        "base",
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem="hinge_leaf",
-        negative_elem="frame_leaf",
-    )
+    ctx.expect_aabb_overlap(lid, base, axes="xy", min_overlap=0.05)
+    ctx.expect_origin_distance(lid, base, axes="xy", max_dist=0.02)
+    ctx.expect_aabb_gap(lid, base, axis="z", max_gap=0.001, max_penetration=0.0)
+    with ctx.pose({lid_hinge: 1.0}):
+        ctx.expect_aabb_overlap(lid, base, axes="xy", min_overlap=0.02)
     return ctx.report()
 
 
@@ -205,7 +203,7 @@ Important:
 - Use `ctx.check_articulation_overlaps(...)` as the failure-tier QC gate for `REVOLUTE`, `PRISMATIC`, and `CONTINUOUS` parent/child pairs when you need to prove non-fixed joint clearance.
 - Use prompt-specific `expect_*` assertions as the real regression tests for visible structure, proportions, and mechanism behavior.
 - Make attachment checks primary: use near-zero `expect_aabb_gap(...)`, footprint overlap, `expect_aabb_contact(...)` where appropriate, and pose-specific mounting checks to prove that parts look attached.
-- When whole-link AABBs are too coarse for a small mount or hinge seat, scope `expect_aabb_gap(...)` to named local features with `positive_elem=` and `negative_elem=`. Those names come directly from `part.visual(..., name=...)`.
+- When whole-link AABBs are too coarse for a small mount or hinge seat, resolve named local features from the part with `part.get_visual(...)` and pass those `Visual` objects into `positive_elem=` and `negative_elem=`.
 - Slight intended interpenetration can be acceptable when it makes a mounted or nested assembly look seated instead of floating.
 - Use `ctx.allow_overlap(...)` narrowly for legitimate nested mechanisms such as bearing sleeves, hinge barrels, or enclosed hubs, and still call `ctx.warn_if_overlaps(...)` so the allowance is tracked.
 - Use `ctx.warn_if_overlaps(..., ignore_adjacent=True, ignore_fixed=True)` as a conservative warning-tier backstop for non-joint overlap issues, not as proof that attachment quality is good.

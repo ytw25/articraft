@@ -398,6 +398,7 @@ def test_workbench_init_record_command(
         in model_text
     )
     assert "Default broad sensor; do not remove. Tune params only if warranted." in model_text
+    assert 'hinge_leaf = lid.get_visual("hinge_leaf")' in model_text
 
     materialization_dir = repo_root / "data" / "cache" / "record_materialization" / record_dir.name
     assert not (materialization_dir / "compile_report.json").exists()

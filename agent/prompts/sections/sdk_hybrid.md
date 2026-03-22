@@ -70,6 +70,7 @@
 - Extend the scaffolded broad-check block with narrow allowances and prompt-specific `expect_*` assertions instead of recreating it from scratch.
 - Thoroughly test intended geometry, layout, and kinematic behavior with meaningful checks.
 - Add prompt-specific semantic regression checks with `expect_*` assertions for the important visible and mechanical claims.
+- Retain the `Part`, `Articulation`, and named `Visual` objects you create, and pass those exact objects into test helpers instead of re-looking them up by string name.
 </run_tests_requirements>
 
 <testing_principles>
@@ -79,6 +80,7 @@
 - Test both rest pose and key mechanism poses.
 - For `ArticulationType.CONTINUOUS`, use explicit sampled angles such as `0`, `pi / 2`, and `pi` instead of lower/upper limit poses.
 - Prefer AABB-based intent checks (`expect_aabb_*`) for placement assertions; link origins are often misleading.
+- Prefer object-first tests: pass the exact `Part`, `Articulation`, and named `Visual` objects into `expect_*`, allowance helpers, and `ctx.pose({joint: value})`; keep string names only as silent back-compat.
 - Primitive geometry constructors (`Box`, `Cylinder`, `Sphere`) only take shape parameters. Put transforms on `visual(..., origin=...)` or `Inertial.from_geometry(..., origin=...)`.
 - Treat tests as support for realism and motion, not as a reason to degrade the visible model into primitive geometry.
 - Treat `warn_if_articulation_origin_near_geometry(...)` and `warn_if_part_geometry_disconnected(...)` as deliberately dumb static sensors.

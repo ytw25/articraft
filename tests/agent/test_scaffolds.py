@@ -24,6 +24,7 @@ def test_base_scaffold_matches_harness_fallback() -> None:
         in scaffold_text
     )
     assert "Default broad sensor; do not remove. Tune params only if warranted." in scaffold_text
+    assert 'hinge_leaf = lid.get_visual("hinge_leaf")' in scaffold_text
 
 
 def test_hybrid_scaffold_matches_harness_fallback() -> None:
@@ -46,3 +47,4 @@ def test_hybrid_scaffold_matches_harness_fallback() -> None:
         in scaffold_text
     )
     assert "Default broad sensor; do not remove. Tune params only if warranted." in scaffold_text
+    assert 'hinge_leaf = lid.get_visual("hinge_leaf")' in scaffold_text

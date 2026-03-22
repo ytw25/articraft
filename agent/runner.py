@@ -122,6 +122,13 @@ def run_tests() -> TestReport:
     ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 
     # Add narrow allowances here when conservative QC reports acceptable cases.
+    # Resolve exact Part / Articulation / named Visual objects once here, then
+    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
+    # Prefer this object-first pattern over global REFS bags or raw string test calls.
+    # Example:
+    # lid = object_model.get_part("lid")
+    # lid_hinge = object_model.get_articulation("lid_hinge")
+    # hinge_leaf = lid.get_visual("hinge_leaf")
     # Add prompt-specific expect_* semantic checks below; they are the main regressions.
     return ctx.report()
 
@@ -375,7 +382,9 @@ def _thinking_level_from_run_parameters(
             if isinstance(thinking_levels, list) and len(thinking_levels) == 1:
                 return _optional_string(thinking_levels[0])
 
-    allocations = storage_repo.read_json(storage_repo.layout.run_allocations_path(normalized_run_id))
+    allocations = storage_repo.read_json(
+        storage_repo.layout.run_allocations_path(normalized_run_id)
+    )
     rows = allocations.get("rows") if isinstance(allocations, dict) else None
     if not isinstance(rows, list):
         return None
@@ -1605,7 +1614,9 @@ async def rerun_record_in_place(
         logger.error("Invalid provenance.json for record %s", record_id)
         return 1
 
-    source = existing_record.get("source") if isinstance(existing_record.get("source"), dict) else {}
+    source = (
+        existing_record.get("source") if isinstance(existing_record.get("source"), dict) else {}
+    )
     source_run_id = source.get("run_id") if isinstance(source, dict) else None
 
     provider = _first_string(generation.get("provider"), existing_record.get("provider"))

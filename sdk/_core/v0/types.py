@@ -242,8 +242,17 @@ class Part:
         self.visuals.append(visual)
         return visual
 
+    def get_visual(self, name: str) -> Visual:
+        key = str(name).strip()
+        if not key:
+            raise ValidationError("visual name is required")
+        for visual in self.visuals:
+            if visual.name == key:
+                return visual
+        raise ValidationError(f"Unknown visual on part {self.name!r}: {name!r}")
 
-@dataclass
+
+@dataclass(eq=False)
 class Articulation:
     name: str
     articulation_type: Union[ArticulationType, str]

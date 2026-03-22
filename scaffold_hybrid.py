@@ -29,6 +29,13 @@ def run_tests() -> TestReport:
     ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 
     # Add narrow allowances here when conservative QC reports acceptable cases.
+    # Resolve exact Part / Articulation / named Visual objects once here, then
+    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
+    # Prefer this object-first pattern over global REFS bags or raw string test calls.
+    # Example:
+    # lid = object_model.get_part("lid")
+    # lid_hinge = object_model.get_articulation("lid_hinge")
+    # hinge_leaf = lid.get_visual("hinge_leaf")
     # Add prompt-specific expect_* semantic checks below; they are the main regressions.
     return ctx.report()
 

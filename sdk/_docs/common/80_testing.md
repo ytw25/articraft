@@ -22,6 +22,16 @@ ctx = TestContext(
 
 If the model was constructed with `ArticulatedObject(..., assets=AssetContext.from_script(__file__))`, `TestContext(object_model, ...)` can infer the mesh root automatically. If not, pass `asset_root=HERE` explicitly whenever the model uses mesh files.
 
+## Resolve once, assert many
+
+Prefer object-first tests:
+
+- At the top of `run_tests()`, resolve each needed `Part` with `object_model.get_part(...)`.
+- Resolve each needed `Articulation` with `object_model.get_articulation(...)`.
+- Resolve named local features from those parts with `part.get_visual(...)`, then pass the resulting `Visual` objects into `positive_elem=` / `negative_elem=`.
+- After that, pass only objects into `ctx.expect_*`, `ctx.allow_*`, and `ctx.pose({joint: value})`.
+- Use string names only at the lookup boundary. Avoid global `REFS` bags or string-driven test calls as the main pattern.
+
 ## Default broad sensors and backstops
 
 The scaffolded `run_tests()` starts from these broad sensors and backstops:
@@ -73,8 +83,11 @@ The harness also runs automatic isolated-part checks at compile time:
 ## Overlap allowances
 
 ```python
-ctx.allow_overlap("door", "body", reason="hinge barrel nests around the pin")
-ctx.allow_coplanar_surfaces("door", "body", reason="flush mounted panel")
+door = object_model.get_part("door")
+body = object_model.get_part("body")
+
+ctx.allow_overlap(door, body, reason="hinge barrel nests around the pin")
+ctx.allow_coplanar_surfaces(door, body, reason="flush mounted panel")
 ```
 
 Use allowances narrowly. Slight intended interpenetration can be acceptable when it makes a mounted or nested assembly look attached instead of floating. For articulated mechanisms, use `ctx.allow_overlap(...)` only for specific justified cases such as bearing sleeves, hinge barrels, or enclosed hubs. Still call `ctx.warn_if_overlaps(...)` so the allowance is tracked.
@@ -99,23 +112,28 @@ Use this as the failure-tier QC gate for non-fixed articulation-linked pairs.
 ## Pose-aware queries
 
 ```python
-ctx.part_world_position("lid")
-ctx.part_world_aabb("lid")
+lid = object_model.get_part("lid")
+lid_hinge = object_model.get_articulation("lid_hinge")
+
+ctx.part_world_position(lid)
+ctx.part_world_aabb(lid)
 ```
 
 Use temporary mechanism poses with the context manager:
 
 ```python
-with ctx.pose({"lid_hinge": 0.5}):
-    ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.05)
+base = object_model.get_part("base")
+
+with ctx.pose({lid_hinge: 0.5}):
+    ctx.expect_aabb_overlap(lid, base, axes="xy", min_overlap=0.05)
 
 with ctx.pose(lid_hinge=1.0):
-    ctx.expect_origin_distance("lid", "base", axes="xy", max_dist=0.02)
+    ctx.expect_origin_distance(lid, base, axes="xy", max_dist=0.02)
 ```
 
 `ctx.pose(...)` takes either:
 
-- a mapping of joint name to position, for example `{"hinge": 0.5}`
+- a mapping of articulation object or joint name to position, for example `{hinge: 0.5}`
 - keyword arguments, for example `hinge=0.5`
 
 Do not pass positional `(joint_name, value)` arguments.
@@ -137,33 +155,43 @@ Treat these intent checks as primary. They should carry the burden of proving th
 Preferred signatures:
 
 ```python
-ctx.expect_aabb_gap("upper", "lower", axis="z", max_gap=0.001, max_penetration=0.0)
-ctx.expect_aabb_contact("bracket", "frame")
-ctx.expect_joint_motion_axis("hinge", "lid", world_axis="z", direction="positive", min_delta=0.01)
+upper = object_model.get_part("upper")
+lower = object_model.get_part("lower")
+hinge = object_model.get_articulation("hinge")
+lid = object_model.get_part("lid")
+bracket = object_model.get_part("bracket")
+frame = object_model.get_part("frame")
+
+ctx.expect_aabb_gap(upper, lower, axis="z", max_gap=0.001, max_penetration=0.0)
+ctx.expect_aabb_contact(bracket, frame)
+ctx.expect_joint_motion_axis(hinge, lid, world_axis="z", direction="positive", min_delta=0.01)
 ```
 
-`expect_aabb_gap(...)` is directional: it measures the signed gap from the positive-side link's minimum face to the negative-side link's maximum face along the chosen axis. When whole-link AABBs are too coarse, you can scope the check to named geometry on each side. The element names come directly from `part.visual(..., name=...)`:
+`expect_aabb_gap(...)` is directional: it measures the signed gap from the positive-side link's minimum face to the negative-side link's maximum face along the chosen axis. When whole-link AABBs are too coarse, resolve the named `Visual` objects from the part with `part.get_visual(...)` and pass those objects directly:
 
 ```python
+mount_block = base.get_visual("mount_block")
+hub = arm.get_visual("hub")
+
 ctx.expect_aabb_gap(
-    "arm",
-    "base",
+    arm,
+    base,
     axis="z",
     max_gap=0.001,
     max_penetration=0.0,
-    positive_elem="hub",
-    negative_elem="mount_block",
+    positive_elem=hub,
+    negative_elem=mount_block,
 )
 ```
 
 Argument guide:
 
-- `positive_link`, `negative_link`: the two bodies being compared, ordered by the positive-axis convention
+- `positive_link`, `negative_link`: the two bodies being compared, ordered by the positive-axis convention; prefer passing `Part` objects
 - `axis`: the positive world axis to measure along; use `"x"`, `"y"`, or `"z"`
 - `min_gap`: lower bound on the signed gap; use this when you want to allow or require a specific amount of separation
 - `max_gap`: upper bound on the signed gap; use this for "must stay visually seated" style checks
 - `max_penetration`: shorthand for how much overlap is allowed when `min_gap` is omitted
-- `positive_elem`, `negative_elem`: optional named local features to test instead of the whole-link envelope
+- `positive_elem`, `negative_elem`: optional named local features to test instead of the whole-link envelope; prefer passing the exact `Visual` objects
 - `name`: override the recorded check name when the default is too generic
 
 Practical defaults:
@@ -194,6 +222,13 @@ For pairs that truly must not intersect across motion, add selective separation 
 ## Example
 
 ```python
+lid = object_model.get_part("lid")
+base = object_model.get_part("base")
+lid_hinge = object_model.get_articulation("lid_hinge")
+frame = object_model.get_part("frame")
+hinge_leaf = lid.get_visual("hinge_leaf")
+frame_leaf = frame.get_visual("frame_leaf")
+
 ctx.check_model_valid()
 ctx.check_mesh_files_exist()
 ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
@@ -201,20 +236,20 @@ ctx.warn_if_part_geometry_disconnected()
 ctx.check_articulation_overlaps(max_pose_samples=128)
 ctx.warn_if_coplanar_surfaces(ignore_adjacent=True, ignore_fixed=True)
 ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.05)
-ctx.expect_origin_distance("lid", "base", axes="xy", max_dist=0.02)
-ctx.expect_aabb_gap("lid", "base", axis="z", max_gap=0.001, max_penetration=0.0)
+ctx.expect_aabb_overlap(lid, base, axes="xy", min_overlap=0.05)
+ctx.expect_origin_distance(lid, base, axes="xy", max_dist=0.02)
+ctx.expect_aabb_gap(lid, base, axis="z", max_gap=0.001, max_penetration=0.0)
 ctx.expect_aabb_gap(
-    "lid",
-    "base",
+    lid,
+    base,
     axis="z",
     max_gap=0.001,
     max_penetration=0.0,
-    positive_elem="hinge_leaf",
-    negative_elem="frame_leaf",
+    positive_elem=hinge_leaf,
+    negative_elem=frame_leaf,
 )
-ctx.expect_aabb_contact("hinge_leaf", "frame")
-ctx.expect_joint_motion_axis("lid_hinge", "lid", world_axis="z", direction="positive", min_delta=0.01)
-with ctx.pose({"lid_hinge": 1.0}):
-    ctx.expect_aabb_overlap("lid", "base", axes="xy", min_overlap=0.02)
+ctx.expect_aabb_contact(lid, frame)
+ctx.expect_joint_motion_axis(lid_hinge, lid, world_axis="z", direction="positive", min_delta=0.01)
+with ctx.pose({lid_hinge: 1.0}):
+    ctx.expect_aabb_overlap(lid, base, axes="xy", min_overlap=0.02)
 ```

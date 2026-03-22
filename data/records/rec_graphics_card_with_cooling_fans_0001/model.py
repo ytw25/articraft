@@ -4,7 +4,7 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-from pathlib import Path
+
 from sdk import (
     ArticulatedObject,
     ArticulationType,
@@ -12,227 +12,416 @@ from sdk import (
     Box,
     BoxGeometry,
     Cylinder,
-    CylinderGeometry,
     ExtrudeWithHolesGeometry,
     Inertial,
-    Material,
-    Mesh,
-    MeshGeometry,
+    LatheGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
     mesh_from_geometry,
     rounded_rect_profile,
-    superellipse_profile,
 )
 
 ASSETS = AssetContext.from_script(__file__)
-MESH_DIR = ASSETS.mesh_dir
+
+
+def _circle_profile(
+    radius: float,
+    *,
+    cx: float = 0.0,
+    cy: float = 0.0,
+    segments: int = 32,
+) -> list[tuple[float, float]]:
+    return [
+        (
+            cx + radius * math.cos(2.0 * math.pi * i / segments),
+            cy + radius * math.sin(2.0 * math.pi * i / segments),
+        )
+        for i in range(segments)
+    ]
+
+
+def _translate_profile(
+    profile: list[tuple[float, float]],
+    *,
+    dx: float = 0.0,
+    dy: float = 0.0,
+) -> list[tuple[float, float]]:
+    return [(x + dx, y + dy) for x, y in profile]
+
+
+def _build_shroud_face_mesh():
+    outer_profile = [
+        (-0.144, -0.054),
+        (0.114, -0.054),
+        (0.131, -0.049),
+        (0.142, -0.039),
+        (0.145, -0.024),
+        (0.145, 0.024),
+        (0.142, 0.039),
+        (0.131, 0.049),
+        (0.114, 0.054),
+        (-0.137, 0.054),
+        (-0.144, 0.046),
+    ]
+    holes = [
+        _circle_profile(0.039, cx=-0.091, cy=0.0, segments=28),
+        _circle_profile(0.039, cx=0.0, cy=0.0, segments=28),
+        _circle_profile(0.039, cx=0.091, cy=0.0, segments=28),
+    ]
+    face_geom = ExtrudeWithHolesGeometry(
+        outer_profile,
+        holes,
+        height=0.006,
+        cap=True,
+        center=True,
+        closed=True,
+    )
+    return mesh_from_geometry(face_geom, ASSETS.mesh_dir / "graphics_card_shroud_face.obj")
+
+
+def _build_fan_rotor_mesh(name: str):
+    rim_geom = LatheGeometry(
+        [
+            (0.0325, -0.0022),
+            (0.0360, -0.0022),
+            (0.0360, 0.0022),
+            (0.0325, 0.0022),
+        ],
+        segments=56,
+    )
+    blade_geom = BoxGeometry((0.024, 0.008, 0.0024))
+    blade_geom.translate(0.021, 0.0, 0.0)
+    blade_geom.rotate_z(math.radians(24.0))
+    for idx in range(9):
+        rim_geom.merge(blade_geom.clone().rotate_z(idx * (2.0 * math.pi / 9.0)))
+    return mesh_from_geometry(rim_geom, ASSETS.mesh_dir / name)
+
+
+def _build_bracket_mesh():
+    outer_profile = [
+        (0.022, -0.059),
+        (0.022, 0.048),
+        (0.018, 0.056),
+        (0.008, 0.064),
+        (-0.008, 0.064),
+        (-0.018, 0.056),
+        (-0.022, 0.048),
+        (-0.022, -0.059),
+    ]
+    port_profile = rounded_rect_profile(0.013, 0.023, radius=0.0018, corner_segments=4)
+    holes = [
+        _translate_profile(port_profile, dx=0.0, dy=-0.021),
+        _translate_profile(port_profile, dx=0.0, dy=0.010),
+        _circle_profile(0.0045, cx=0.0, cy=0.056, segments=20),
+    ]
+    bracket_geom = ExtrudeWithHolesGeometry(
+        outer_profile,
+        holes,
+        height=0.002,
+        cap=True,
+        center=True,
+        closed=True,
+    )
+    return mesh_from_geometry(bracket_geom, ASSETS.mesh_dir / "graphics_card_bracket.obj")
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="graphics_card", assets=ASSETS)
 
-    # Materials
-    pcb_mat = model.material("pcb_black", color=(0.05, 0.05, 0.05, 1.0))
-    metal_mat = model.material("brushed_metal", color=(0.6, 0.6, 0.65, 1.0))
-    shroud_mat = model.material("shroud_matte", color=(0.12, 0.12, 0.14, 1.0))
-    fan_mat = model.material("fan_blade", color=(0.2, 0.2, 0.2, 0.9))
-    accent_mat = model.material("accent_silver", color=(0.8, 0.8, 0.8, 1.0))
+    polymer_black = model.material("polymer_black", rgba=(0.08, 0.09, 0.10, 1.0))
+    satin_black = model.material("satin_black", rgba=(0.14, 0.15, 0.17, 1.0))
+    dark_aluminum = model.material("dark_aluminum", rgba=(0.34, 0.36, 0.39, 1.0))
+    fin_aluminum = model.material("fin_aluminum", rgba=(0.56, 0.58, 0.60, 1.0))
+    bracket_steel = model.material("bracket_steel", rgba=(0.67, 0.69, 0.72, 1.0))
+    pcb_green = model.material("pcb_green", rgba=(0.06, 0.18, 0.10, 1.0))
+    contact_gold = model.material("contact_gold", rgba=(0.83, 0.68, 0.28, 1.0))
 
-    # Dimensions
-    L = 0.30  # Total length
-    H = 0.13  # Total height
-    W = 0.05  # Total width (thickness)
-    PCB_L = 0.28
-    PCB_H = 0.11
-    PCB_W = 0.002
+    shroud_face_mesh = _build_shroud_face_mesh()
+    fan_rotor_mesh = _build_fan_rotor_mesh("graphics_card_fan_rotor.obj")
+    bracket_mesh = _build_bracket_mesh()
 
-    # 1. PCB
-    pcb = model.part("pcb")
-    pcb.visual(
-        Box((PCB_L, PCB_W, PCB_H)),
-        origin=Origin(xyz=(0, 0, 0)),
-        material=pcb_mat,
-        name="pcb_board",
+    body = model.part("gpu_body")
+    front_plate = body.visual(
+        shroud_face_mesh,
+        origin=Origin(xyz=(0.0, 0.0, 0.019)),
+        material=polymer_black,
+        name="front_plate",
     )
-    # PCIe Connector
-    pcb.visual(
-        Box((0.06, 0.003, 0.01)),
-        origin=Origin(xyz=(-0.08, 0, -0.06)),
-        material=accent_mat,
-        name="pcie_connector",
+    body.visual(
+        Box((0.275, 0.010, 0.044)),
+        origin=Origin(xyz=(0.000, 0.051, -0.001)),
+        material=satin_black,
+        name="top_rail",
     )
-    # Backplate
-    pcb.visual(
-        Box((PCB_L, 0.002, PCB_H)),
-        origin=Origin(xyz=(0, -0.002, 0)),
-        material=shroud_mat,
+    body.visual(
+        Box((0.275, 0.010, 0.044)),
+        origin=Origin(xyz=(0.000, -0.051, -0.001)),
+        material=satin_black,
+        name="bottom_rail",
+    )
+    rear_spine = body.visual(
+        Box((0.008, 0.108, 0.044)),
+        origin=Origin(xyz=(-0.139, 0.0, -0.001)),
+        material=satin_black,
+        name="rear_spine",
+    )
+    body.visual(
+        Box((0.018, 0.098, 0.044)),
+        origin=Origin(xyz=(0.136, 0.0, -0.001)),
+        material=satin_black,
+        name="nose_cap",
+    )
+    heatsink = body.visual(
+        Box((0.278, 0.104, 0.018)),
+        origin=Origin(xyz=(0.000, 0.0, -0.008)),
+        material=fin_aluminum,
+        name="heatsink_core",
+    )
+    body.visual(
+        Box((0.286, 0.108, 0.002)),
+        origin=Origin(xyz=(0.000, 0.0, -0.022)),
+        material=dark_aluminum,
         name="backplate",
     )
-    # Add some "electronic components" to the back of the PCB
-    for i in range(5):
-        for j in range(3):
-            pcb.visual(
-                Box((0.01, 0.002, 0.01)),
-                origin=Origin(xyz=(-0.1 + i * 0.04, -0.003, -0.03 + j * 0.03)),
-                material=shroud_mat,
-            )
-    pcb.inertial = Inertial.from_geometry(Box((PCB_L, PCB_W, PCB_H)), mass=0.5)
-
-    # 2. Bracket (PCIe)
-    # Joint origin at the edge of the PCB
-    # Bracket plate is at -0.15 in world, joint is at -0.14.
-    # So child-local translate is -0.01.
-    bracket_geom = BoxGeometry((0.002, 0.02, 0.16)).translate(-0.01, 0.01, 0.015)
-    bracket_tab = BoxGeometry((0.02, 0.02, 0.002)).translate(0, 0.01, 0.095)
-    bracket_geom.merge(bracket_tab)
-    bracket_mesh = mesh_from_geometry(
-        bracket_geom, str(MESH_DIR / "pcie_bracket.obj")
+    body.visual(
+        Box((0.282, 0.098, 0.004)),
+        origin=Origin(xyz=(0.000, 0.0, -0.019)),
+        material=pcb_green,
+        name="pcb",
+    )
+    body.visual(
+        Box((0.088, 0.010, 0.002)),
+        origin=Origin(xyz=(-0.010, -0.049, -0.019)),
+        material=contact_gold,
+        name="pcie_fingers",
+    )
+    body.visual(
+        Box((0.024, 0.012, 0.012)),
+        origin=Origin(xyz=(0.055, 0.056, -0.004)),
+        material=satin_black,
+        name="power_connector",
+    )
+    body.visual(
+        Box((0.060, 0.008, 0.004)),
+        origin=Origin(xyz=(0.030, 0.053, 0.007)),
+        material=dark_aluminum,
+        name="top_badge_bar",
+    )
+    body.inertial = Inertial.from_geometry(
+        Box((0.290, 0.118, 0.046)),
+        mass=1.25,
+        origin=Origin(xyz=(0.0, 0.0, -0.001)),
     )
 
-    bracket = model.part("bracket")
-    bracket.visual(bracket_mesh, material=metal_mat)
-    bracket.inertial = Inertial.from_geometry(Box((0.02, 0.02, 0.16)), mass=0.1)
+    bracket = model.part("io_bracket")
+    bracket_plate = bracket.visual(
+        bracket_mesh,
+        origin=Origin(xyz=(-0.001, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=bracket_steel,
+        name="bracket_plate",
+    )
+    bracket.visual(
+        Box((0.008, 0.016, 0.006)),
+        origin=Origin(xyz=(-0.004, 0.056, 0.0)),
+        material=bracket_steel,
+        name="mount_tab",
+    )
+    bracket.inertial = Inertial.from_geometry(
+        Box((0.008, 0.125, 0.050)),
+        mass=0.10,
+        origin=Origin(xyz=(-0.002, 0.0, 0.0)),
+    )
 
     model.articulation(
-        "pcb_to_bracket",
+        "body_to_bracket",
         ArticulationType.FIXED,
-        parent="pcb",
-        child="bracket",
-        origin=Origin(xyz=(-0.14, 0, 0)),
+        parent=body,
+        child=bracket,
+        origin=Origin(xyz=(-0.143, 0.0, 0.0)),
     )
 
-    # 3. Shroud and Heatsink
-    shroud = model.part("shroud")
-
-    # Create shroud front with fan holes
-    fan_positions = [-0.09, 0.0, 0.09]
-    outer_rect = rounded_rect_profile(L, H, radius=0.01)
-    fan_holes = []
-    for x_pos in fan_positions:
-        # Hole radius 0.045
-        hole = superellipse_profile(0.09, 0.09, segments=32)
-        hole = [(px + x_pos, py) for px, py in hole]
-        fan_holes.append(hole)
-
-    shroud_front_geom = ExtrudeWithHolesGeometry(outer_rect, fan_holes, height=0.01)
-    # Extruded along Z, centered. Rotate to face +Y and translate to front.
-    shroud_front_geom.rotate_x(math.pi / 2).translate(0, 0.04, 0)
-
-    # Shroud side walls
-    shroud_sides = BoxGeometry((L, 0.035, 0.01)).translate(0, 0.0175, 0.06)
-    shroud_sides.merge(BoxGeometry((L, 0.035, 0.01)).translate(0, 0.0175, -0.06))
-    shroud_sides.merge(BoxGeometry((0.01, 0.035, H)).translate(0.145, 0.0175, 0))
-    shroud_sides.merge(BoxGeometry((0.01, 0.035, H)).translate(-0.145, 0.0175, 0))
-
-    shroud_front_geom.merge(shroud_sides)
-    shroud_mesh = mesh_from_geometry(shroud_front_geom, str(MESH_DIR / "shroud_v3.obj"))
-    shroud.visual(shroud_mesh, material=shroud_mat)
-
-    # Heatsink fins (visible through the shroud)
-    for i in range(30):
-        shroud.visual(
-            Box((0.001, 0.03, 0.10)),
-            origin=Origin(xyz=(-0.12 + i * 0.008, 0.015, 0)),
-            material=metal_mat,
+    fan_centers = (-0.091, 0.0, 0.091)
+    fan_parts = []
+    fan_rotor_visuals = []
+    fan_hub_visuals = []
+    fan_joints = []
+    for idx, x_pos in enumerate(fan_centers, start=1):
+        fan = model.part(f"fan_{idx}")
+        rotor = fan.visual(
+            fan_rotor_mesh,
+            origin=Origin(),
+            material=satin_black,
+            name=f"fan_{idx}_rotor",
         )
-
-    shroud.inertial = Inertial.from_geometry(Box((L, 0.04, H)), mass=0.8)
-    model.articulation(
-        "pcb_to_shroud",
-        ArticulationType.FIXED,
-        parent="pcb",
-        child="shroud",
-        origin=Origin(xyz=(0, 0, 0)),
-    )
-
-    # 4. Fans
-    for i, x_pos in enumerate(fan_positions):
-        fan_name = f"fan_{i}"
-        fan_part = model.part(fan_name)
-
-        # Fan geometry: Hub + Blades
-        hub_r = 0.015
-        hub_h = 0.008
-        hub_geom = CylinderGeometry(radius=hub_r, height=hub_h).rotate_x(math.pi / 2)
-
-        # Blades (radius ~0.043, fits in 0.045 hole)
-        blade_count = 9
-        for b in range(blade_count):
-            angle = 2 * math.pi * b / blade_count
-            blade = BoxGeometry((0.03, 0.002, 0.025)).translate(0.028, 0, 0)
-            blade.rotate_x(0.5)
-            blade.rotate_y(angle)
-            hub_geom.merge(blade)
-
-        fan_mesh = mesh_from_geometry(hub_geom, str(MESH_DIR / f"fan_v3_{i}.obj"))
-        fan_part.visual(fan_mesh, material=fan_mat)
-        fan_part.inertial = Inertial.from_geometry(
-            Cylinder(radius=0.045, length=0.01), mass=0.05
+        hub = fan.visual(
+            Cylinder(radius=0.0105, length=0.006),
+            origin=Origin(),
+            material=dark_aluminum,
+            name=f"fan_{idx}_hub",
         )
-
-        model.articulation(
-            f"shroud_to_{fan_name}",
+        fan.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.036, length=0.008),
+            mass=0.05,
+            origin=Origin(),
+        )
+        joint = model.articulation(
+            f"body_to_fan_{idx}",
             ArticulationType.CONTINUOUS,
-            parent="shroud",
-            child=fan_part,
-            # Place at y=0.055 (well outside the shroud front face max y=0.045)
-            origin=Origin(xyz=(x_pos, 0.055, 0)),
-            axis=(0, 1, 0),
-            motion_limits=MotionLimits(effort=1.0, velocity=20.0),
+            parent=body,
+            child=fan,
+            origin=Origin(xyz=(x_pos, 0.0, 0.010)),
+            axis=(0.0, 0.0, 1.0),
+            motion_limits=MotionLimits(effort=0.4, velocity=45.0),
         )
+        fan_parts.append(fan)
+        fan_rotor_visuals.append(rotor)
+        fan_hub_visuals.append(hub)
+        fan_joints.append(joint)
 
+    model.meta["test_refs"] = {
+        "body": body,
+        "bracket": bracket,
+        "bracket_plate": bracket_plate,
+        "front_plate": front_plate,
+        "rear_spine": rear_spine,
+        "heatsink": heatsink,
+        "fans": fan_parts,
+        "fan_rotors": fan_rotor_visuals,
+        "fan_hubs": fan_hub_visuals,
+        "fan_joints": fan_joints,
+    }
     return model
 
 
 def run_tests() -> TestReport:
+    refs = object_model.meta["test_refs"]
+    body = refs["body"]
+    bracket = refs["bracket"]
+    bracket_plate = refs["bracket_plate"]
+    front_plate = refs["front_plate"]
+    rear_spine = refs["rear_spine"]
+    heatsink = refs["heatsink"]
+    fans = refs["fans"]
+    fan_rotors = refs["fan_rotors"]
+    fan_joints = refs["fan_joints"]
+
     ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
 
-    # The fans are nested in the shroud cutouts (conceptually)
-    # and the heatsink fins are very close.
+    # Default broad sensor; do not remove. Tune params only if warranted.
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
     # Default broad sensor; do not remove. Tune params only if warranted.
     ctx.warn_if_part_geometry_disconnected()
     # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=32)
+    ctx.check_articulation_overlaps(max_pose_samples=128)
     # Default broad sensor; do not remove. Tune params only if warranted.
-    ctx.warn_if_overlaps(max_pose_samples=32, ignore_adjacent=True, ignore_fixed=True)
+    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 
-    # Semantic checks
-    # 1. Bracket is at the negative X end of the PCB
-    ctx.expect_aabb_overlap("bracket", "pcb", axes="yz")
-    # Allow some overlap for the bracket mounting
-    ctx.expect_aabb_gap("pcb", "bracket", axis="x", max_gap=0.02, max_penetration=0.02)
-
-    # 2. Shroud is offset from PCB along Y (thickness)
-    ctx.expect_aabb_gap("shroud", "pcb", axis="y", max_gap=0.01, max_penetration=0.01)
-
-    # 3. Fans are on the front face of the shroud
-    for i in range(3):
-        # Center alignment check
-        ctx.expect_aabb_overlap(f"fan_{i}", "shroud", axes="xz")
-        # Depth check
-        ctx.expect_aabb_gap(f"fan_{i}", "shroud", axis="y", max_gap=0.02, max_penetration=0.01)
-
-    # 4. PCIe connector is at the bottom
+    # Add narrow allowances here when conservative QC reports acceptable cases.
+    # Add prompt-specific expect_* semantic checks below; they are the main regressions.
+    ctx.expect_aabb_contact(body, bracket)
     ctx.expect_aabb_gap(
-        "pcb",
-        "pcb",
-        axis="z",
-        positive_elem="pcb_board",
-        negative_elem="pcie_connector",
-        max_gap=0.01,
-        max_penetration=0.01,
+        body,
+        bracket,
+        axis="x",
+        max_gap=0.001,
+        max_penetration=0.0002,
+        positive_elem=rear_spine,
+        negative_elem=bracket_plate,
+        name="bracket seats flush to card body",
     )
+    ctx.expect_aabb_overlap(body, bracket, axes="yz", min_overlap=0.035)
+    ctx.expect_aabb_gap(
+        fans[1],
+        fans[0],
+        axis="x",
+        min_gap=0.012,
+        max_gap=0.028,
+        positive_elem=fan_rotors[1],
+        negative_elem=fan_rotors[0],
+        name="left and center cooling fans are clearly separated",
+    )
+    ctx.expect_aabb_gap(
+        fans[2],
+        fans[1],
+        axis="x",
+        min_gap=0.012,
+        max_gap=0.028,
+        positive_elem=fan_rotors[2],
+        negative_elem=fan_rotors[1],
+        name="center and right cooling fans are clearly separated",
+    )
+    ctx.expect_aabb_overlap(fans[0], fans[1], axes="y", min_overlap=0.068)
+    ctx.expect_aabb_overlap(fans[1], fans[2], axes="y", min_overlap=0.068)
+    ctx.expect_origin_distance(fans[0], fans[1], axes="z", max_dist=0.001)
+    ctx.expect_origin_distance(fans[1], fans[2], axes="z", max_dist=0.001)
 
+    for fan, rotor in zip(fans, fan_rotors):
+        ctx.expect_aabb_overlap(body, fan, axes="xy", min_overlap=0.070)
+        ctx.expect_aabb_gap(
+            body,
+            fan,
+            axis="z",
+            max_gap=0.007,
+            max_penetration=0.0,
+            positive_elem=front_plate,
+            negative_elem=rotor,
+            name=f"{fan.name} sits just behind shroud opening",
+        )
+        ctx.expect_aabb_gap(
+            fan,
+            body,
+            axis="z",
+            min_gap=0.004,
+            positive_elem=rotor,
+            negative_elem=heatsink,
+            name=f"{fan.name} clears heatsink core",
+        )
+
+    with ctx.pose(
+        {
+            fan_joints[0]: math.pi / 7.0,
+            fan_joints[1]: math.pi / 5.0,
+            fan_joints[2]: math.pi / 3.0,
+        }
+    ):
+        for fan, rotor in zip(fans, fan_rotors):
+            ctx.expect_aabb_overlap(body, fan, axes="xy", min_overlap=0.068)
+            ctx.expect_aabb_gap(
+                body,
+                fan,
+                axis="z",
+                max_gap=0.008,
+                max_penetration=0.0,
+                positive_elem=front_plate,
+                negative_elem=rotor,
+                name=f"{fan.name} remains seated behind opening in spun pose",
+            )
+
+    with ctx.pose(
+        {
+            fan_joints[0]: 1.9,
+            fan_joints[1]: 2.6,
+            fan_joints[2]: 0.9,
+        }
+    ):
+        for fan, rotor in zip(fans, fan_rotors):
+            ctx.expect_aabb_gap(
+                body,
+                fan,
+                axis="z",
+                max_gap=0.008,
+                max_penetration=0.0,
+                positive_elem=front_plate,
+                negative_elem=rotor,
+                name=f"{fan.name} stays behind front plate at alternate spin phase",
+            )
     return ctx.report()
 
 
-object_model = build_object_model()
 # >>> USER_CODE_END
 
 object_model = build_object_model()
