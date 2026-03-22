@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_threejoint_prismatic_chain_0003",
+  "created_at": "2026-03-21T23:57:23Z",
+  "updated_at": "2026-03-22T00:08:28Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "threejoint_prismatic_chain",
+  "source": {
+    "run_id": "run_20260321_235723_099522_smoke-gpt54-hybrid",
+    "prompt_batch_id": null,
+    "batch_spec_id": "smoke_gpt54_hybrid",
+    "row_id": "prismatic_smoke",
+    "prompt_index": 2
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Prismatic Smoke",
+    "prompt_preview": "A three-stage telescoping antenna mast with a sturdy fixed base, three nested rectangular sliding sections extending along one axis, compact guide collars be..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "7c546effebf164161a3a0aee47a10ce0adb159c75c772b8cac6d54641e67bd18",
+    "model_py_sha256": "d945779edb7d7dc45ca2bc96ffc0689f06e7d7eea6edfb85aae825f5fcf06f27"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
