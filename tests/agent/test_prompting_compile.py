@@ -1,7 +1,44 @@
 from __future__ import annotations
 
+import re
+
 from agent.prompts.compile import compile_prompt_variant, find_stale_prompts
 from agent.prompts.spec import iter_prompt_variants
+
+REQUIRED_TAGS = (
+    "<role>",
+    "<tool_contract>",
+    "<modeling_charter>",
+    "<verification_contract>",
+    "<repair_strategy>",
+)
+DISALLOWED_FRAGMENTS = (
+    "expect_aabb_",
+    "expect_joint_motion_axis(",
+    "Prefer **AABB-based intent checks**",
+)
+
+
+def _opening_tag_count(text: str) -> int:
+    return len(re.findall(r"^<(?!(?:/|compile_signals>))[a-z_]+>$", text, flags=re.MULTILINE))
+
+
+def _assert_shared_contract(text: str, *, budget: int) -> None:
+    for tag in REQUIRED_TAGS:
+        assert tag in text
+    assert _opening_tag_count(text) == 5
+    assert "<compile_signals>" in text
+    assert 'Do not optimize for "passing" in the abstract' in text
+    assert "Use the injected SDK docs for exact helper signatures" in text
+    assert "The model is not done until every applicable visual coverage category is proved" in text
+    assert "hero features are present" in text
+    assert "connected/seated" in text
+    assert "important parts are in the right place" in text
+    assert "each new visible form or mechanism has a matching assertion" in text
+    assert "Broad `warn_if_*` checks are sensors, not proof." in text
+    for fragment in DISALLOWED_FRAGMENTS:
+        assert fragment not in text
+    assert len(text.splitlines()) <= budget
 
 
 def test_prompt_outputs_are_current() -> None:
@@ -12,91 +49,43 @@ def test_prompt_outputs_are_current() -> None:
         variant.output.name: compile_prompt_variant(variant) for variant in iter_prompt_variants()
     }
 
-    assert "apply_patch" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "write_code" not in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "<tool_contract>" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "<feedback_strategy>" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "<failure_diagnosis>" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "<compile_signals>" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "<modeling_priority>" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "wrong geometric representation" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert "prompt-named visible features" in compiled_by_name["designer_system_prompt_openai.txt"]
+    openai_text = compiled_by_name["designer_system_prompt_openai.txt"]
+    _assert_shared_contract(openai_text, budget=120)
+    assert "Use ONLY `read_file` and `apply_patch`" in openai_text
+    assert "write_code" not in openai_text
+    assert "find_examples" not in openai_text
+    assert "Author visuals only; do not author collision geometry in `sdk`." in openai_text
+
+    openai_hybrid_text = compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
+    _assert_shared_contract(openai_hybrid_text, budget=135)
+    assert "Use ONLY `read_file`, `apply_patch`, and `find_examples`" in openai_hybrid_text
     assert (
-        "warn_if_articulation_origin_near_geometry"
-        in compiled_by_name["designer_system_prompt_openai.txt"]
+        "find_examples` is lexical search over curated hybrid/CadQuery examples"
+        in openai_hybrid_text
     )
+    assert "Import from `sdk_hybrid`, not `sdk`" in openai_hybrid_text
     assert (
-        "warn_if_part_geometry_disconnected"
-        in compiled_by_name["designer_system_prompt_openai.txt"]
+        "`section_loft(...)`, `repair_loft(...)`, and `partition_shell(...)` are unavailable"
+        in openai_hybrid_text
     )
+
+    gemini_text = compiled_by_name["designer_system_prompt_gemini.txt"]
+    _assert_shared_contract(gemini_text, budget=120)
+    assert "Use ONLY `read_code` and `edit_code`" in gemini_text
+    assert 'old_string=""' in gemini_text
+    assert "write_code" not in gemini_text
+    assert "find_examples" not in gemini_text
+    assert "Author visuals only; do not author collision geometry in `sdk`." in gemini_text
+
+    gemini_hybrid_text = compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
+    _assert_shared_contract(gemini_hybrid_text, budget=135)
+    assert "Use ONLY `read_code`, `edit_code`, and `find_examples`" in gemini_hybrid_text
     assert (
-        "The scaffold already seeds the default broad checks in `run_tests()`."
-        in compiled_by_name["designer_system_prompt_openai.txt"]
+        "find_examples` is lexical search over curated hybrid/CadQuery examples"
+        in gemini_hybrid_text
     )
+    assert "Import from `sdk_hybrid`, not `sdk`" in gemini_hybrid_text
     assert (
-        "deliberately dumb static sensors" in compiled_by_name["designer_system_prompt_openai.txt"]
+        "`section_loft(...)`, `repair_loft(...)`, and `partition_shell(...)` are unavailable"
+        in gemini_hybrid_text
     )
-    assert "semantic regression" in compiled_by_name["designer_system_prompt_openai.txt"]
-    assert (
-        "silhouette-critical visible forms" in compiled_by_name["designer_system_prompt_openai.txt"]
-    )
-    assert (
-        "Plain primitives are acceptable for hidden structure"
-        in compiled_by_name["designer_system_prompt_openai.txt"]
-    )
-    assert (
-        "If the real object should be hollow, thin-walled, or cavity-bearing"
-        in compiled_by_name["designer_system_prompt_openai.txt"]
-    )
-    assert (
-        "Do not omit important internal structures"
-        in compiled_by_name["designer_system_prompt_openai.txt"]
-    )
-    assert "sdk_hybrid" in compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
-    assert "full base SDK" not in compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
-    assert "section_loft(...)" in compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
-    assert "find_examples" in compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
-    assert "lexical, not semantic" in compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
-    assert "edit_code" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert "read_code" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert "write_code" not in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert "<feedback_strategy>" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert "<compile_signals>" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert "wrong geometric representation" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert "prompt-named visible features" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert (
-        "warn_if_articulation_origin_near_geometry"
-        in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert (
-        "warn_if_part_geometry_disconnected"
-        in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert (
-        "The scaffold already seeds the default broad checks in `run_tests()`."
-        in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert (
-        "deliberately dumb static sensors" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert "semantic regression" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    assert (
-        "silhouette-critical visible forms" in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert (
-        "Plain primitives are acceptable for hidden structure"
-        in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert (
-        "If the real object should be hollow, thin-walled, or cavity-bearing"
-        in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert (
-        "Do not omit important internal structures"
-        in compiled_by_name["designer_system_prompt_gemini.txt"]
-    )
-    assert "sdk_hybrid" in compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
-    assert "full base SDK" not in compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
-    assert "section_loft(...)" in compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
-    assert "find_examples" in compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
-    assert "lexical, not semantic" in compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]

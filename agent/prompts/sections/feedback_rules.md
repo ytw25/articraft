@@ -1,9 +1,9 @@
-<feedback_strategy>
-- After you edit the code, the harness validates the current artifact and returns structured feedback about compile, QC, or tests. Do not ask for a separate compile step.
-- The harness may send a `<compile_signals>` block after compile/test failures, or after a passing compile that still has warnings/notes worth acting on.
-- Read `<summary>` first to identify the primary issue for the current artifact.
-- Treat `<failures>` as blocking issues. Resolve them either by correcting the current code when the representation is sound, or by rethinking the model when the representation itself is wrong.
-- Treat `<warnings>` as non-blocking design, QC, or hygiene signals.
-- Treat `<notes>` as context such as allowances or policy details, not as the main task.
-- Use `<response_rules>` as the authoritative reaction guidance for that compile attempt.
-</feedback_strategy>
+<repair_strategy>
+- After each edit, the harness validates the artifact automatically. Do not ask for a separate compile step.
+- Read `<summary>` first when the harness returns `<compile_signals>`.
+- Treat `<failures>` as blocking; treat `<warnings>` as design evidence; treat `<notes>` as supporting context.
+- Classify each bad result as a local implementation bug, a wrong geometric representation, or a wrong overall composition.
+- Fix failures at the right level: patch locally for local bugs, but rewrite geometry and tests together when the representation or composition is wrong.
+- If the same failure class or weak hero features persist across two repair turns, stop patching locally and rewrite the affected region.
+- When you add or change visible geometry or motion, update the prompt-specific tests in the same edit so the new claim is actually proved.
+</repair_strategy>

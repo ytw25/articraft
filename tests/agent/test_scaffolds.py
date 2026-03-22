@@ -23,8 +23,18 @@ def test_base_scaffold_matches_harness_fallback() -> None:
         "ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)"
         in scaffold_text
     )
-    assert "Default broad sensor; do not remove. Tune params only if warranted." in scaffold_text
+    assert "Default exact visual sensor for joint mounting" in scaffold_text
+    assert "hero features are present and legible" in scaffold_text
+    assert "mounted parts are connected/seated, not floating" in scaffold_text
+    assert "important parts are in the right place" in scaffold_text
+    assert "each new visible form or mechanism has a matching assertion" in scaffold_text
+    assert "Prefer this object-first pattern" in scaffold_text
     assert 'hinge_leaf = lid.get_visual("hinge_leaf")' in scaffold_text
+    assert (
+        'ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)' in scaffold_text
+    )
+    assert "ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)" in scaffold_text
+    assert "expect_aabb_" not in scaffold_text
 
 
 def test_hybrid_scaffold_matches_harness_fallback() -> None:
@@ -46,5 +56,15 @@ def test_hybrid_scaffold_matches_harness_fallback() -> None:
         "ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)"
         in scaffold_text
     )
-    assert "Default broad sensor; do not remove. Tune params only if warranted." in scaffold_text
+    assert "Default exact visual sensor for joint mounting" in scaffold_text
+    assert "hero features are present and legible" in scaffold_text
+    assert "mounted parts are connected/seated, not floating" in scaffold_text
+    assert "important parts are in the right place" in scaffold_text
+    assert "each new visible form or mechanism has a matching assertion" in scaffold_text
+    assert "Prefer this object-first pattern" in scaffold_text
     assert 'hinge_leaf = lid.get_visual("hinge_leaf")' in scaffold_text
+    assert (
+        'ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)' in scaffold_text
+    )
+    assert "ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)" in scaffold_text
+    assert "expect_aabb_" not in scaffold_text

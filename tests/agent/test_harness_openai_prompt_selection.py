@@ -73,19 +73,20 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
     docs_message = payload["input"][0]["content"][0]["text"]
 
     assert "<tool_contract>" in instructions
-    assert "<feedback_strategy>" in instructions
-    assert "<failure_diagnosis>" in instructions
-    assert "<modeling_priority>" in instructions
+    assert "<modeling_charter>" in instructions
+    assert "<verification_contract>" in instructions
+    assert "<repair_strategy>" in instructions
     assert "Use ONLY `read_file` and `apply_patch`" in instructions
     assert "FREEFORM tool" in instructions
     assert "write_code" not in instructions
     assert "Do NOT provide `file_path`" in instructions
     assert "<compile_signals>" in instructions
-    assert "wrong geometric representation" in instructions
-    assert "prompt-named visible features" in instructions
-    assert "silhouette-critical visible forms" in instructions
-    assert "If the real object should be hollow, thin-walled, or cavity-bearing" in instructions
-    assert "Do not omit important internal structures" in instructions
+    assert "Use the injected SDK docs for exact helper signatures" in instructions
+    assert (
+        "The model is not done until every applicable visual coverage category is proved"
+        in instructions
+    )
+    assert "important parts are in the right place" in instructions
     assert payload["prompt_cache_key"].startswith("ac1:")
     assert len(payload["prompt_cache_key"]) <= 64
     assert payload["prompt_cache_retention"] == "24h"
@@ -113,7 +114,7 @@ def test_openai_hybrid_payload_preview_includes_find_examples_tool() -> None:
     tool_names = {tool["name"] for tool in payload["tools"]}
     assert "find_examples" in tool_names
     assert "Use ONLY `read_file`, `apply_patch`, and `find_examples`" in payload["instructions"]
-    assert "Use `find_examples` early" in payload["instructions"]
+    assert "lexical search over curated hybrid/CadQuery examples" in payload["instructions"]
 
 
 def test_openai_prompt_cache_key_is_stable_across_user_prompt_changes() -> None:
@@ -242,18 +243,17 @@ def test_gemini_prompt_resolution_and_payload_preview() -> None:
     )
     gemini_instructions = gemini_payload["config"]["system_instruction"]
     assert "<tool_contract>" in gemini_instructions
-    assert "<feedback_strategy>" in gemini_instructions
+    assert "<verification_contract>" in gemini_instructions
     assert "<compile_signals>" in gemini_instructions
     assert "Use ONLY `read_code` and `edit_code`" in gemini_instructions
     assert 'old_string=""' in gemini_instructions
     assert "write_code" not in gemini_instructions
-    assert "wrong geometric representation" in gemini_instructions
-    assert "prompt-named visible features" in gemini_instructions
-    assert "silhouette-critical visible forms" in gemini_instructions
+    assert "Use the injected SDK docs for exact helper signatures" in gemini_instructions
     assert (
-        "If the real object should be hollow, thin-walled, or cavity-bearing" in gemini_instructions
+        "The model is not done until every applicable visual coverage category is proved"
+        in gemini_instructions
     )
-    assert "Do not omit important internal structures" in gemini_instructions
+    assert "important parts are in the right place" in gemini_instructions
 
 
 def test_gemini_hybrid_payload_preview_includes_find_examples_tool() -> None:
@@ -273,4 +273,7 @@ def test_gemini_hybrid_payload_preview_includes_find_examples_tool() -> None:
         "Use ONLY `read_code`, `edit_code`, and `find_examples`"
         in payload["config"]["system_instruction"]
     )
-    assert "Use `find_examples` early" in payload["config"]["system_instruction"]
+    assert (
+        "lexical search over curated hybrid/CadQuery examples"
+        in payload["config"]["system_instruction"]
+    )
