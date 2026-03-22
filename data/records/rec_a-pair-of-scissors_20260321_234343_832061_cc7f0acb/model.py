@@ -186,7 +186,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.warn_if_part_geometry_disconnected(use="visual")
     
     # Allow overlap at the pivot where they are stacked
     ctx.allow_overlap("upper_part", "lower_part", reason="Stacked blades share pivot origin")

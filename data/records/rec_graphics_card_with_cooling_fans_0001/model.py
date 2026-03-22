@@ -393,7 +393,7 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
     ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_connected(use="visual")
+    ctx.warn_if_part_geometry_disconnected(use="visual")
     ctx.warn_if_coplanar_surfaces(use="visual")
     for fan_name in ("fan_left", "fan_center", "fan_right"):
         ctx.allow_overlap("card_body", fan_name, reason="fan hub seats on the bearing post")
