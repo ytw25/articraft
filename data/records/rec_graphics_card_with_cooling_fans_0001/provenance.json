@@ -2,33 +2,33 @@
   "schema_version": 2,
   "record_id": "rec_graphics_card_with_cooling_fans_0001",
   "generation": {
-    "provider": "openai",
-    "model_id": "gpt-5.4",
+    "provider": "gemini",
+    "model_id": "gemini-3-flash-preview",
     "thinking_level": "high",
-    "openai_transport": "http",
-    "openai_reasoning_summary": "auto",
+    "openai_transport": null,
+    "openai_reasoning_summary": null,
     "max_turns": 30
   },
   "prompting": {
-    "system_prompt_file": "designer_system_prompt_openai_hybrid.txt",
-    "system_prompt_sha256": "ad2df06565671c0bbca222f47932081660e7699bcd28abf4abd3f280549cfbbb",
+    "system_prompt_file": "designer_system_prompt_gemini.txt",
+    "system_prompt_sha256": "eb866e2c1ae6732875bf59dbe93d925748dd04fbe51f1cdabd0fc161db1b1eaa",
     "sdk_docs_mode": "legacy_import"
   },
   "sdk": {
-    "sdk_package": "sdk_hybrid",
+    "sdk_package": "sdk",
     "sdk_version": "workspace",
     "sdk_fingerprint": null
   },
   "environment": {
     "python_version": "3.12.10",
     "platform": "darwin-arm64",
-    "git_commit": "4de45ff892dd5ddef9b4e92384d8dd461926acca",
-    "uv_lock_sha256": "9f8228afadf15cc7fefa67a1e9b99a49933847bad7bc99d9fb2aaf633ebfbc92"
+    "git_commit": "38add5b69ae2cfb87d918f9d04957979cfe39a7a",
+    "uv_lock_sha256": "bf02521d96b8d31b38ce67f1c79f5ba24739ab013fe05db8ab67b5a760c0728e"
   },
   "run_summary": {
-    "turn_count": 5,
-    "tool_call_count": 4,
-    "compile_attempt_count": 3,
+    "turn_count": 14,
+    "tool_call_count": 13,
+    "compile_attempt_count": 6,
     "final_status": "success"
   }
 }
