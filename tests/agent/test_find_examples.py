@@ -99,6 +99,71 @@ def test_find_examples_tool_returns_expected_shape() -> None:
     assert "content" in output[0]
 
 
+def test_search_example_documents_returns_base_sdk_jet_engine_example() -> None:
+    matches = search_example_documents("jet engine nacelle turbofan", sdk_package="sdk", limit=3)
+
+    assert matches
+    assert matches[0].title == "Jet Engine with Smooth Nacelle and Dense Front Fan"
+
+
+def test_search_example_documents_returns_base_sdk_atv_example() -> None:
+    matches = search_example_documents(
+        "atv quad bike steering suspension", sdk_package="sdk", limit=3
+    )
+
+    assert matches
+    assert matches[0].title == "ATV Quad Bike with Front Steering and Suspension"
+
+
+def test_search_example_documents_returns_base_sdk_tower_crane_example() -> None:
+    matches = search_example_documents(
+        "tower crane trolley lattice mast", sdk_package="sdk", limit=3
+    )
+
+    assert matches
+    assert matches[0].title == "Tower Crane with Lattice Mast and Traveling Trolley"
+
+
+def test_search_example_documents_returns_base_sdk_radio_telescope_example() -> None:
+    matches = search_example_documents(
+        "radio telescope dish azimuth elevation mount",
+        sdk_package="sdk",
+        limit=3,
+    )
+
+    assert matches
+    assert matches[0].title == "Radio Telescope on Azimuth-Elevation Mount"
+
+
+def test_search_example_documents_returns_base_sdk_midi_keyboard_example() -> None:
+    matches = search_example_documents(
+        "midi keyboard white keys knobs pads pitch wheel",
+        sdk_package="sdk",
+        limit=3,
+    )
+
+    assert matches
+    assert matches[0].title == "MIDI Keyboard with Articulated Keys, Knobs, and Pads"
+
+
+def test_find_examples_tool_supports_base_sdk_examples() -> None:
+    async def _run() -> list[dict[str, object]]:
+        tool = FindExamplesTool(sdk_package="sdk")
+        invocation = await tool.build({"query": "jet engine nacelle", "limit": 3})
+        result = await invocation.execute()
+        assert result.error is None
+        assert isinstance(result.output, list)
+        return result.output
+
+    output = asyncio.run(_run())
+
+    assert output
+    assert output[0]["title"] == "Jet Engine with Smooth Nacelle and Dense Front Fan"
+    assert (
+        output[0]["path"] == "sdk/_examples/base/jet_engine_with_smooth_nacelle_dense_front_fan.md"
+    )
+
+
 def test_first_turn_no_tool_response_no_longer_injects_nudge(tmp_path: Path) -> None:
     class _FakeLLM:
         async def generate_with_tools(

@@ -9,8 +9,16 @@ def test_provider_tool_registry_schemas() -> None:
     hybrid_openai_registry = build_tool_registry("openai", sdk_package="sdk_hybrid")
     hybrid_gemini_registry = build_tool_registry("gemini", sdk_package="sdk_hybrid")
 
-    assert set(openai_registry.get_all_tool_names()) == {"read_file", "apply_patch"}
-    assert set(gemini_registry.get_all_tool_names()) == {"read_code", "edit_code"}
+    assert set(openai_registry.get_all_tool_names()) == {
+        "read_file",
+        "apply_patch",
+        "find_examples",
+    }
+    assert set(gemini_registry.get_all_tool_names()) == {
+        "read_code",
+        "edit_code",
+        "find_examples",
+    }
     assert set(hybrid_openai_registry.get_all_tool_names()) == {
         "read_file",
         "apply_patch",
@@ -23,13 +31,12 @@ def test_provider_tool_registry_schemas() -> None:
     }
 
     openai_schemas = openai_registry.get_tool_schemas()
-    hybrid_openai_schemas = hybrid_openai_registry.get_tool_schemas()
     apply_patch_schema = next(s for s in openai_schemas if s.get("name") == "apply_patch")
     read_file_schema = next(
         s for s in openai_schemas if s.get("function", {}).get("name") == "read_file"
     )
     find_examples_schema = next(
-        s for s in hybrid_openai_schemas if s.get("function", {}).get("name") == "find_examples"
+        s for s in openai_schemas if s.get("function", {}).get("name") == "find_examples"
     )
     assert apply_patch_schema.get("type") == "custom"
     read_file_props = read_file_schema["function"]["parameters"]["properties"]

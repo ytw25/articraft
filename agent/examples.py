@@ -397,7 +397,11 @@ def load_example_documents(sdk_package: str) -> tuple[ExampleDocument, ...]:
 def load_example_search_index(sdk_package: str) -> ExampleSearchIndex:
     documents = tuple(_index_document(doc) for doc in load_example_documents(sdk_package))
     retriever = bm25s.BM25()
-    retriever.index([list(document.weighted_tokens) for document in documents], show_progress=False)
+    if documents:
+        retriever.index(
+            [list(document.weighted_tokens) for document in documents],
+            show_progress=False,
+        )
     return ExampleSearchIndex(documents=documents, retriever=retriever)
 
 

@@ -44,8 +44,7 @@ def build_tool_registry(provider: str, *, sdk_package: str = "sdk") -> ToolRegis
         tools: list[BaseDeclarativeTool] = [ReadFileTool(), ApplyPatchFreeformTool()]
     else:
         tools = [ReadCodeTool(), EditCodeTool()]
-    if package == "sdk_hybrid":
-        tools.append(FindExamplesTool(sdk_package=package))
+    tools.append(FindExamplesTool(sdk_package=package))
     return ToolRegistry(tools)
 
 
