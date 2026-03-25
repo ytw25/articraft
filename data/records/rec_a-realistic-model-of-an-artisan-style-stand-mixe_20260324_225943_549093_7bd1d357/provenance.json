@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_a-realistic-model-of-an-artisan-style-stand-mixe_20260324_225943_549093_7bd1d357",
+  "generation": {
+    "provider": "openai",
+    "model_id": "gpt-5.4",
+    "thinking_level": "high",
+    "openai_transport": "http",
+    "openai_reasoning_summary": "auto",
+    "max_turns": 50
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt_openai.txt",
+    "system_prompt_sha256": "5d5f52b10b604c347255ce9030dd80e6fb0a70e9bd07477ea56eba37b87166ea",
+    "sdk_docs_mode": "full"
+  },
+  "sdk": {
+    "sdk_package": "sdk",
+    "sdk_version": "workspace",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "darwin-arm64",
+    "git_commit": "96a94673d88cefc16e336fd829d13eaf181ce19e",
+    "uv_lock_sha256": "609c6cb5ce8a26122aaeab4bd2bdcc6e45bacfa426781165809f517f6b02bb83"
+  },
+  "run_summary": {
+    "turn_count": 13,
+    "tool_call_count": 12,
+    "compile_attempt_count": 4,
+    "final_status": "success"
+  }
+}
