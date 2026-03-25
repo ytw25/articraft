@@ -45,6 +45,9 @@ class FindExamplesInvocation(BaseToolInvocation[FindExamplesParams, list[dict[st
                     "tags": list(doc.tags),
                     "path": doc.path.relative_to(Path(__file__).resolve().parents[2]).as_posix(),
                     "content": doc.content,
+                    "match_quality": doc.match_quality,
+                    "matched_tokens": list(doc.matched_tokens),
+                    "matched_fields": list(doc.matched_fields),
                 }
                 for doc in matches
             ]
@@ -63,6 +66,8 @@ class FindExamplesTool(BaseDeclarativeTool):
                 "identifiers. It works best with short concrete queries such as object names, "
                 "feature names, geometry operations, CadQuery API names, or exact example "
                 "titles.\n\n"
+                "When strong matches do not exist, the tool may return `[weakly relevant]` "
+                "results as inspiration-only hints. Treat those cautiously.\n\n"
                 "This does not search SDK docs, tests, test helper APIs, or arbitrary "
                 "repository code. It is not a general API search tool.\n\n"
                 "If relevance is weak, the search may return fewer than limit results."

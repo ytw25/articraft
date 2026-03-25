@@ -69,6 +69,7 @@ def test_provider_tool_registry_schemas() -> None:
     assert (
         "not a general api search tool" in find_examples_schema["function"]["description"].lower()
     )
+    assert "weakly relevant" in find_examples_schema["function"]["description"].lower()
     assert "available example titles" not in find_examples_schema["function"]["description"].lower()
     assert "short lexical query" in (
         find_examples_schema["function"]["parameters"]["properties"]["query"]["description"].lower()

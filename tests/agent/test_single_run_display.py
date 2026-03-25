@@ -77,3 +77,24 @@ def test_add_tool_call_shows_all_find_examples_titles() -> None:
     assert "- Parametric Pin Header" in output
     assert "- RJ45 Surface-mount Jack" in output
     assert "result: [{" not in output
+
+
+def test_add_tool_call_marks_weakly_relevant_find_example_titles() -> None:
+    display, buffer = _make_display()
+
+    display.add_tool_call(
+        tool_name="find_examples",
+        args={"query": "support bracket", "limit": 2},
+        success=True,
+        duration=0.02,
+        result=[
+            {
+                "title": "PiTray Clip",
+                "path": "sdk/_examples/hybrid/pitray_clip.md",
+                "match_quality": "weakly_relevant",
+            }
+        ],
+    )
+
+    output = buffer.getvalue()
+    assert "- PiTray Clip [weakly relevant]" in output

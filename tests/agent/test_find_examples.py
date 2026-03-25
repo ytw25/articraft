@@ -27,6 +27,7 @@ def test_search_example_documents_prefers_structured_matches() -> None:
 
     assert matches
     assert matches[0].title == "Rounding Corners with Fillet"
+    assert matches[0].match_quality == "strong"
 
 
 def test_search_example_documents_returns_full_content() -> None:
@@ -73,6 +74,7 @@ def test_search_example_documents_keeps_specific_body_api_queries() -> None:
     assert matches
     assert matches[0].title == "Making Counter-bored and Counter-sunk Holes"
     assert "A Parametric Bearing Pillow Block" in [doc.title for doc in matches]
+    assert all(doc.match_quality == "strong" for doc in matches)
 
 
 def test_hybrid_example_corpus_titles_are_unique() -> None:
@@ -98,6 +100,9 @@ def test_find_examples_tool_returns_expected_shape() -> None:
     assert output[0]["title"] == "Making Lofts"
     assert output[0]["path"] == "sdk/_examples/hybrid/making_lofts.md"
     assert "content" in output[0]
+    assert output[0]["match_quality"] == "strong"
+    assert output[0]["matched_tokens"]
+    assert output[0]["matched_fields"]
 
 
 def test_search_example_documents_returns_base_sdk_jet_engine_example() -> None:
@@ -105,6 +110,7 @@ def test_search_example_documents_returns_base_sdk_jet_engine_example() -> None:
 
     assert matches
     assert matches[0].title == "Jet Engine with Smooth Nacelle and Dense Front Fan"
+    assert matches[0].match_quality == "strong"
 
 
 def test_search_example_documents_returns_base_sdk_atv_example() -> None:
@@ -177,6 +183,46 @@ def test_find_examples_tool_supports_base_sdk_examples() -> None:
     assert (
         output[0]["path"] == "sdk/_examples/base/jet_engine_with_smooth_nacelle_dense_front_fan.md"
     )
+    assert output[0]["match_quality"] == "strong"
+    assert output[0]["matched_tokens"]
+    assert output[0]["matched_fields"]
+
+
+def test_search_example_documents_can_return_weakly_relevant_hybrid_matches() -> None:
+    matches = search_example_documents("support bracket", sdk_package="sdk_hybrid", limit=5)
+
+    assert matches
+    assert [doc.title for doc in matches] == ["PiTray Clip"]
+    assert all(doc.match_quality == "weakly_relevant" for doc in matches)
+    assert len(matches) <= 2
+
+
+def test_search_example_documents_sparse_hybrid_query_never_returns_strong_matches() -> None:
+    matches = search_example_documents(
+        "cadquery bracket shaft bearing housing",
+        sdk_package="sdk_hybrid",
+        limit=5,
+    )
+
+    assert len(matches) <= 2
+    assert all(doc.match_quality == "weakly_relevant" for doc in matches)
+
+
+def test_search_example_documents_can_return_weakly_relevant_base_matches() -> None:
+    matches = search_example_documents("support paddle", sdk_package="sdk", limit=5)
+
+    assert matches
+    assert [doc.title for doc in matches] == ["Radio Telescope on Azimuth-Elevation Mount"]
+    assert all(doc.match_quality == "weakly_relevant" for doc in matches)
+    assert len(matches) <= 2
+
+
+def test_search_example_documents_excludes_weak_matches_when_strong_matches_exist() -> None:
+    matches = search_example_documents("loft wheel", sdk_package="sdk_hybrid", limit=5)
+
+    assert matches
+    assert [doc.title for doc in matches] == ["Mecanum Wheel"]
+    assert all(doc.match_quality == "strong" for doc in matches)
 
 
 def test_find_examples_repeated_results_replace_full_content_with_blurb() -> None:

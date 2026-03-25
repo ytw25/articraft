@@ -14,7 +14,7 @@ PHASE 1 — PLAN
 - Read the bound scaffold with the provider's read tool.
 - Read the injected SDK docs for helper signatures and constraints.
 - Think through the full part tree: list every part, how each connects to its parent, what articulates, what the dominant silhouette is, and what realistic proportions should be.
-- Use `find_examples` for unfamiliar modeling or testing patterns. Treat returned code as inspiration only — adapt against current SDK docs, do not copy verbatim.
+- Use `find_examples` for unfamiliar modeling or testing patterns. Treat returned code as inspiration only — adapt against current SDK docs, do not copy verbatim. If an entry is marked `[weakly relevant]`, treat it as a loose hint rather than a strong precedent.
 
 PHASE 2 — SCAFFOLD
 - Build the part tree with rough placeholder geometry and all articulations.
@@ -52,7 +52,7 @@ REPAIR RULES
 - `read_code` returns the editable section as plain text.
 - `edit_code` performs surgical text replacement in the editable section.
 - `probe_model` runs short read-only Python snippets for geometry inspection. See SDK docs for the helper catalog and signatures.
-- `find_examples` does lexical search over curated base SDK examples. Results may be stale — adapt against current SDK docs.
+- `find_examples` does lexical search over curated base SDK examples. Results may be stale — adapt against current SDK docs. Entries marked `[weakly relevant]` are inspiration-only and should not be over-trusted.
 - The harness binds one file automatically. Do not provide `file_path`.
 - After any `edit_code` failure, call `read_code` and copy exact current text for `old_string` before retrying.
 - The scaffold has existing editable code; do not assume `old_string=""` for a blank start.

@@ -94,6 +94,7 @@ def test_prompt_outputs_are_current() -> None:
     assert "write_code" not in openai_text
     assert "FREEFORM tool" in openai_text
     assert "lexical search over curated base SDK examples" in openai_text
+    assert "[weakly relevant]" in openai_text
     assert "Author visual geometry only; do not author collision geometry in `sdk`." in openai_text
 
     openai_hybrid_text = compiled_by_name["designer_system_prompt_openai_hybrid.txt"]
@@ -104,6 +105,7 @@ def test_prompt_outputs_are_current() -> None:
     )
     assert "FREEFORM tool" in openai_hybrid_text
     assert "lexical search over curated hybrid/CadQuery examples" in openai_hybrid_text
+    assert "[weakly relevant]" in openai_hybrid_text
     assert "Import from `sdk_hybrid`, not `sdk`" in openai_hybrid_text
     assert (
         "`section_loft(...)`, `repair_loft(...)`, and `partition_shell(...)` are unavailable"
@@ -116,6 +118,7 @@ def test_prompt_outputs_are_current() -> None:
     assert 'old_string=""' in gemini_text
     assert "write_code" not in gemini_text
     assert "lexical search over curated base SDK examples" in gemini_text
+    assert "[weakly relevant]" in gemini_text
     assert "Author visual geometry only; do not author collision geometry in `sdk`." in gemini_text
 
     gemini_hybrid_text = compiled_by_name["designer_system_prompt_gemini_hybrid.txt"]
@@ -125,6 +128,7 @@ def test_prompt_outputs_are_current() -> None:
         in gemini_hybrid_text
     )
     assert "lexical search over curated hybrid/CadQuery examples" in gemini_hybrid_text
+    assert "[weakly relevant]" in gemini_hybrid_text
     assert "Import from `sdk_hybrid`, not `sdk`" in gemini_hybrid_text
     assert (
         "`section_loft(...)`, `repair_loft(...)`, and `partition_shell(...)` are unavailable"

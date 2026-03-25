@@ -3,7 +3,7 @@ PHASE 1 — PLAN
 - Read the bound scaffold with the provider's read tool.
 - Read the injected SDK docs for helper signatures and constraints.
 - Think through the full part tree: list every part, how each connects to its parent, what articulates, what the dominant silhouette is, and what realistic proportions should be.
-- Use `find_examples` for unfamiliar modeling or testing patterns. Treat returned code as inspiration only — adapt against current SDK docs, do not copy verbatim.
+- Use `find_examples` for unfamiliar modeling or testing patterns. Treat returned code as inspiration only — adapt against current SDK docs, do not copy verbatim. If an entry is marked `[weakly relevant]`, treat it as a loose hint rather than a strong precedent.
 
 PHASE 2 — SCAFFOLD
 - Build the part tree with rough placeholder geometry and all articulations.

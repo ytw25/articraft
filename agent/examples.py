@@ -105,6 +105,62 @@ class ExampleSearchIndex:
     retriever: bm25s.BM25
 
 
+@dataclass(slots=True, frozen=True)
+class ExampleSearchMatch:
+    doc: ExampleDocument
+    match_quality: str
+    matched_tokens: tuple[str, ...]
+    matched_fields: tuple[str, ...]
+    score: float
+    structured_match_count: int
+    total_match_count: int
+    coverage: float
+    has_non_prose_phrase_hit: bool
+    has_code_only_signal: bool
+
+    @property
+    def path(self) -> Path:
+        return self.doc.path
+
+    @property
+    def title(self) -> str:
+        return self.doc.title
+
+    @property
+    def description(self) -> str:
+        return self.doc.description
+
+    @property
+    def tags(self) -> tuple[str, ...]:
+        return self.doc.tags
+
+    @property
+    def body(self) -> str:
+        return self.doc.body
+
+    @property
+    def content(self) -> str:
+        return self.doc.content
+
+
+@dataclass(slots=True, frozen=True)
+class _CandidateMatch:
+    doc: ExampleDocument
+    score: float
+    bm25_score: float
+    matched_tokens: tuple[str, ...]
+    matched_fields: tuple[str, ...]
+    structured_match_count: int
+    total_match_count: int
+    coverage: float
+    has_non_prose_phrase_hit: bool
+    has_metadata_phrase_hit: bool
+    has_code_only_signal: bool
+    has_structured_signal: bool
+    has_slug_or_title_prefix: bool
+    prose_matches: tuple[str, ...]
+
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -405,12 +461,236 @@ def load_example_search_index(sdk_package: str) -> ExampleSearchIndex:
     return ExampleSearchIndex(documents=documents, retriever=retriever)
 
 
+def _collect_candidate_match(
+    indexed_doc: IndexedExampleDocument,
+    *,
+    bm25_score: float,
+    query_tokens: list[str],
+    query_alias_tokens: list[str],
+    phrase_query: str,
+) -> _CandidateMatch | None:
+    metadata_field_names = {"slug", "title", "description", "tags"}
+    fields = {
+        "slug": indexed_doc.slug,
+        "title": indexed_doc.title,
+        "description": indexed_doc.description,
+        "tags": indexed_doc.tags,
+        "code": indexed_doc.code,
+        "prose": indexed_doc.prose,
+    }
+
+    score = bm25_score
+    matched_tokens: set[str] = set()
+    matched_fields: set[str] = set()
+    structured_matches: set[str] = set()
+    structured_fields: set[str] = set()
+    code_matches: set[str] = set()
+    prose_matches: set[str] = set()
+    phrase_fields: set[str] = set()
+    slug_or_title_prefix = False
+
+    for token in query_tokens:
+        for field_name, field in fields.items():
+            if token in field.token_set:
+                score += _FIELD_BONUSES[field_name]
+                matched_tokens.add(token)
+                matched_fields.add(field_name)
+                if field_name == "prose":
+                    prose_matches.add(token)
+                elif field_name == "code":
+                    code_matches.add(token)
+                else:
+                    if field_name in metadata_field_names:
+                        structured_matches.add(token)
+                        structured_fields.add(field_name)
+                continue
+
+            if _field_has_prefix(field, token):
+                score += _FIELD_PREFIX_BONUSES[field_name]
+                matched_tokens.add(token)
+                matched_fields.add(field_name)
+                if field_name in {"slug", "title"}:
+                    slug_or_title_prefix = True
+                if field_name == "prose":
+                    prose_matches.add(token)
+                elif field_name == "code":
+                    code_matches.add(token)
+                else:
+                    if field_name in metadata_field_names:
+                        structured_matches.add(token)
+                        structured_fields.add(field_name)
+
+    for token in query_alias_tokens:
+        for field_name in ("slug", "title", "tags", "description"):
+            field = fields[field_name]
+            if token in field.token_set:
+                score += _FIELD_BONUSES[field_name] * 0.3
+            elif _field_has_prefix(field, token):
+                score += _FIELD_PREFIX_BONUSES[field_name] * 0.3
+
+    if len(query_tokens) >= 2:
+        for field_name, field in fields.items():
+            if phrase_query in field.phrase_text:
+                score += _FIELD_PHRASE_BONUSES[field_name]
+                phrase_fields.add(field_name)
+                matched_fields.add(field_name)
+
+    if not matched_tokens and not phrase_fields:
+        return None
+
+    coverage = len(matched_tokens) / len(query_tokens)
+    score += coverage * coverage * 3.0
+    if len(structured_matches) >= 2:
+        score += 2.0
+    elif structured_matches:
+        score += 1.0
+
+    metadata_phrase_fields = phrase_fields & metadata_field_names
+    has_structured_signal = bool(structured_matches or metadata_phrase_fields)
+    has_code_only_signal = bool(code_matches) and not has_structured_signal
+
+    return _CandidateMatch(
+        doc=indexed_doc.doc,
+        score=score,
+        bm25_score=bm25_score,
+        matched_tokens=tuple(sorted(matched_tokens)),
+        matched_fields=tuple(sorted(matched_fields)),
+        structured_match_count=len(structured_matches),
+        total_match_count=len(matched_tokens),
+        coverage=coverage,
+        has_non_prose_phrase_hit=bool(phrase_fields - {"prose"}),
+        has_metadata_phrase_hit=bool(metadata_phrase_fields),
+        has_code_only_signal=has_code_only_signal,
+        has_structured_signal=has_structured_signal,
+        has_slug_or_title_prefix=slug_or_title_prefix,
+        prose_matches=tuple(sorted(prose_matches)),
+    )
+
+
+def _make_search_match(candidate: _CandidateMatch, *, match_quality: str) -> ExampleSearchMatch:
+    return ExampleSearchMatch(
+        doc=candidate.doc,
+        match_quality=match_quality,
+        matched_tokens=candidate.matched_tokens,
+        matched_fields=candidate.matched_fields,
+        score=candidate.score,
+        structured_match_count=candidate.structured_match_count,
+        total_match_count=candidate.total_match_count,
+        coverage=candidate.coverage,
+        has_non_prose_phrase_hit=candidate.has_non_prose_phrase_hit,
+        has_code_only_signal=candidate.has_code_only_signal,
+    )
+
+
+def _single_token_matches(
+    candidates: list[_CandidateMatch],
+    *,
+    token: str,
+    limit: int,
+) -> list[ExampleSearchMatch]:
+    ranked: list[_CandidateMatch] = []
+    for candidate in candidates:
+        if candidate.has_code_only_signal:
+            if len(token) < 5 or candidate.bm25_score < 0.5:
+                continue
+        elif not candidate.has_structured_signal:
+            if not (
+                token in candidate.prose_matches and len(token) >= 6 and candidate.score >= 2.0
+            ):
+                continue
+        ranked.append(candidate)
+
+    ranked.sort(key=lambda item: (-item.score, item.doc.title, item.doc.path.as_posix()))
+    if not ranked:
+        return []
+
+    best_score = ranked[0].score
+    retained = [item for item in ranked if item.score >= max(1.0, best_score * 0.5)]
+    return [_make_search_match(item, match_quality="strong") for item in retained[:limit]]
+
+
+def _is_strong_multi_token_match(candidate: _CandidateMatch) -> bool:
+    if candidate.has_code_only_signal:
+        return False
+    if candidate.has_metadata_phrase_hit:
+        return True
+    if candidate.structured_match_count >= 2:
+        return True
+    return candidate.total_match_count >= 3 and candidate.structured_match_count >= 1
+
+
+def _is_weak_multi_token_match(candidate: _CandidateMatch, *, query_len: int) -> bool:
+    if not (candidate.structured_match_count >= 1 or candidate.has_slug_or_title_prefix):
+        return False
+    if query_len >= 3 and candidate.total_match_count < 2:
+        return False
+    return not candidate.has_code_only_signal
+
+
+def _strong_multi_token_matches(
+    candidates: list[_CandidateMatch],
+    *,
+    limit: int,
+) -> list[ExampleSearchMatch]:
+    ranked = [candidate for candidate in candidates if _is_strong_multi_token_match(candidate)]
+    ranked.sort(
+        key=lambda item: (
+            -item.coverage,
+            -item.structured_match_count,
+            -int(item.has_non_prose_phrase_hit),
+            -item.score,
+            item.doc.title,
+            item.doc.path.as_posix(),
+        )
+    )
+    if not ranked:
+        return []
+
+    best_score = max(item.score for item in ranked)
+    retained = [item for item in ranked if item.score >= max(1.0, best_score * 0.5)]
+    return [_make_search_match(item, match_quality="strong") for item in retained[:limit]]
+
+
+def _weak_multi_token_matches(
+    candidates: list[_CandidateMatch],
+    *,
+    query_len: int,
+    limit: int,
+) -> list[ExampleSearchMatch]:
+    ranked = [
+        candidate
+        for candidate in candidates
+        if not _is_strong_multi_token_match(candidate)
+        and _is_weak_multi_token_match(candidate, query_len=query_len)
+    ]
+    ranked.sort(
+        key=lambda item: (
+            -item.structured_match_count,
+            -item.coverage,
+            -int(item.has_slug_or_title_prefix),
+            -item.score,
+            item.doc.title,
+            item.doc.path.as_posix(),
+        )
+    )
+    if not ranked:
+        return []
+
+    best_score = ranked[0].score
+    retained = [item for item in ranked if item.score >= max(1.0, best_score * 0.7)]
+    capped_limit = min(limit, 2)
+    return [
+        _make_search_match(item, match_quality="weakly_relevant")
+        for item in retained[:capped_limit]
+    ]
+
+
 def search_example_documents(
     query: str,
     *,
     sdk_package: str,
     limit: int = 3,
-) -> list[ExampleDocument]:
+) -> list[ExampleSearchMatch]:
     query_tokens = _dedupe_preserving_order(_meaningful_tokens(query))
     if not query_tokens:
         return []
@@ -429,105 +709,31 @@ def search_example_documents(
         show_progress=False,
     )
 
-    ranked: list[tuple[float, ExampleDocument]] = []
     phrase_query = " ".join(query_tokens)
+    candidates: list[_CandidateMatch] = []
     for raw_doc_index, raw_score in zip(retrieval.documents[0], retrieval.scores[0], strict=True):
         bm25_score = float(raw_score)
         if bm25_score <= 0:
             continue
 
         indexed_doc = index.documents[int(raw_doc_index)]
-        fields = {
-            "slug": indexed_doc.slug,
-            "title": indexed_doc.title,
-            "description": indexed_doc.description,
-            "tags": indexed_doc.tags,
-            "code": indexed_doc.code,
-            "prose": indexed_doc.prose,
-        }
-
-        score = bm25_score
-        matched_tokens: set[str] = set()
-        structured_matches: set[str] = set()
-        structured_fields: set[str] = set()
-        prose_matches: set[str] = set()
-        phrase_fields: set[str] = set()
-
-        for token in query_tokens:
-            for field_name, field in fields.items():
-                if token in field.token_set:
-                    score += _FIELD_BONUSES[field_name]
-                    matched_tokens.add(token)
-                    if field_name == "prose":
-                        prose_matches.add(token)
-                    else:
-                        structured_matches.add(token)
-                        structured_fields.add(field_name)
-                    continue
-
-                if _field_has_prefix(field, token):
-                    score += _FIELD_PREFIX_BONUSES[field_name]
-                    matched_tokens.add(token)
-                    if field_name == "prose":
-                        prose_matches.add(token)
-                    else:
-                        structured_matches.add(token)
-                        structured_fields.add(field_name)
-
-        for token in query_alias_tokens:
-            for field_name in ("slug", "title", "tags", "description"):
-                field = fields[field_name]
-                if token in field.token_set:
-                    score += _FIELD_BONUSES[field_name] * 0.3
-                elif _field_has_prefix(field, token):
-                    score += _FIELD_PREFIX_BONUSES[field_name] * 0.3
-
-        if len(query_tokens) >= 2:
-            for field_name, field in fields.items():
-                if phrase_query in field.phrase_text:
-                    score += _FIELD_PHRASE_BONUSES[field_name]
-                    phrase_fields.add(field_name)
-
-        if not matched_tokens and not phrase_fields:
-            continue
-
-        if len(query_tokens) >= 3 and len(matched_tokens) < 2 and not phrase_fields:
-            continue
-
-        coverage = len(matched_tokens) / len(query_tokens)
-        score += coverage * coverage * 3.0
-        if len(structured_matches) >= 2:
-            score += 2.0
-        elif structured_matches:
-            score += 1.0
-
-        has_structured_signal = bool(structured_matches or (phrase_fields - {"prose"}))
-        has_non_code_structured_signal = bool(structured_fields - {"code"}) or bool(
-            phrase_fields - {"code", "prose"}
+        candidate = _collect_candidate_match(
+            indexed_doc,
+            bm25_score=bm25_score,
+            query_tokens=query_tokens,
+            query_alias_tokens=query_alias_tokens,
+            phrase_query=phrase_query,
         )
+        if candidate is not None:
+            candidates.append(candidate)
 
-        if not has_non_code_structured_signal and structured_fields == {"code"}:
-            if len(query_tokens) == 1:
-                token = query_tokens[0]
-                if len(token) < 5 or bm25_score < 0.5:
-                    continue
-            elif len(structured_matches) < 2:
-                continue
-
-        if not has_structured_signal:
-            if len(query_tokens) == 1:
-                token = query_tokens[0]
-                if not (token in prose_matches and len(token) >= 6 and score >= 2.0):
-                    continue
-            elif len(prose_matches) < 2 and "prose" not in phrase_fields:
-                continue
-
-        ranked.append((score, indexed_doc.doc))
-
-    ranked.sort(key=lambda item: (-item[0], item[1].title, item[1].path.as_posix()))
-    if not ranked:
+    if not candidates:
         return []
 
-    best_score = ranked[0][0]
-    retained = [doc for score, doc in ranked if score >= max(1.0, best_score * 0.5)]
-    return retained[:limit]
+    if len(query_tokens) == 1:
+        return _single_token_matches(candidates, token=query_tokens[0], limit=limit)
+
+    strong_matches = _strong_multi_token_matches(candidates, limit=limit)
+    if strong_matches:
+        return strong_matches
+    return _weak_multi_token_matches(candidates, query_len=len(query_tokens), limit=limit)

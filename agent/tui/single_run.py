@@ -77,7 +77,10 @@ class SingleRunDisplay:
                 continue
             title = item.get("title")
             if isinstance(title, str) and title.strip():
-                titles.append(title.strip())
+                label = title.strip()
+                if item.get("match_quality") == "weakly_relevant":
+                    label = f"{label} [weakly relevant]"
+                titles.append(label)
         return titles
 
     def _supports_live_timer(self) -> bool:
