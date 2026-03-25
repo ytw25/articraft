@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_yawpitch_module_0005",
+  "created_at": "2026-03-25T18:37:12Z",
+  "updated_at": "2026-03-25T18:55:10Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "yawpitch_module",
+  "source": {
+    "run_id": "run_20260325_170410_328290_20260325-sdk-hybrid-mechanical-1x-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_mechanical_1x_gpt54_high",
+    "row_id": "yawpitch_module_mechanical_fresh_01",
+    "prompt_index": 55
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Yaw-pitch module Mechanical Fresh 1",
+    "prompt_preview": "Design a realistic, highly detailed yaw-pitch module as a standalone mechanical study assembly for the sdk_hybrid pipeline, with a two-axis orientation gimba..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "9771fbce2362c8c28adec430d6909d4cf63066dec5eaec20ee82105edbe41265",
+    "model_py_sha256": "a06e2fc637173e34505994a125b27e7daa3ee9d61544f51dced55e0608f6f9f9"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_single_revolute_hinge_0003",
+  "created_at": "2026-03-25T18:37:12Z",
+  "updated_at": "2026-03-25T22:27:19Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "single_revolute_hinge",
+  "source": {
+    "run_id": "run_20260325_170410_328290_20260325-sdk-hybrid-mechanical-1x-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_mechanical_1x_gpt54_high",
+    "row_id": "single_revolute_hinge_mechanical_fresh_01",
+    "prompt_index": 40
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Single revolute hinge Mechanical Fresh 1",
+    "prompt_preview": "Design a realistic, highly detailed single revolute hinge as a standalone mechanical study assembly for the sdk_hybrid pipeline, with one clear rotary axis j..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "db8c5dfcf1f3da2c5ae19b11bdc1e47e37b933e90a30bcee1f06be8756c62f83",
+    "model_py_sha256": "c0c4fd3221034a508abbfba6c6ee7e60ae10cf0f244f278e43d8d5d9b5f25c24"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

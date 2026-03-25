@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_serial_elbow_arm_0003",
+  "created_at": "2026-03-25T18:37:12Z",
+  "updated_at": "2026-03-25T22:27:19Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "serial_elbow_arm",
+  "source": {
+    "run_id": "run_20260325_170410_328290_20260325-sdk-hybrid-mechanical-1x-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_mechanical_1x_gpt54_high",
+    "row_id": "serial_elbow_arm_mechanical_fresh_01",
+    "prompt_index": 35
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Serial elbow arm Mechanical Fresh 1",
+    "prompt_preview": "Design a realistic, highly detailed serial elbow arm as a standalone mechanical study assembly for the sdk_hybrid pipeline, with a compact elbowed arm assemb..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "d1e06b2a143d035d0dc0945a9fa380a5fb120b0191f2d4b4f764de5ce8f58614",
+    "model_py_sha256": "f6232e97ca49c675a66645562c92c3eb020174ef8dc320278d22cfa0af6d4c98"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

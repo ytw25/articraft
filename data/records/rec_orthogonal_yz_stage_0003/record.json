@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_orthogonal_yz_stage_0003",
+  "created_at": "2026-03-25T18:37:12Z",
+  "updated_at": "2026-03-25T22:27:19Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "orthogonal_yz_stage",
+  "source": {
+    "run_id": "run_20260325_170410_328290_20260325-sdk-hybrid-mechanical-1x-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_mechanical_1x_gpt54_high",
+    "row_id": "orthogonal_yz_stage_mechanical_fresh_01",
+    "prompt_index": 22
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Orthogonal YZ stage Mechanical Fresh 1",
+    "prompt_preview": "Design a realistic, highly detailed orthogonal YZ stage as a standalone mechanical study assembly for the sdk_hybrid pipeline, with a horizontal Y slide comb..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "ca6c1a4617da7df09638c0078813c27b09f6586ac0b4f1e858c7d634fedc46f3",
+    "model_py_sha256": "691d04a2540fd0b8d35094d6ae49d88048cfd8f2f2226608fef10dd6e56887d4"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
