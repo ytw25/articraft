@@ -13,7 +13,7 @@ from typing import Any, Callable, Optional
 from rich.console import Console
 
 from agent.compiler import (
-    compile_urdf_report,
+    compile_urdf_report_maybe_timeout,
     persist_compile_success_artifacts,
 )
 from agent.cost import CostTracker, pricing_for_provider_model
@@ -36,6 +36,7 @@ from agent.prompts import (
 )
 from agent.providers.gemini import GeminiLLM
 from agent.providers.openai import OpenAILLM
+from agent.runtime_limits import BatchRuntimeLimits, local_work_slot
 from agent.tools import (
     build_first_turn_messages as _build_first_turn_messages,
 )
@@ -186,11 +187,13 @@ class ArticraftAgent:
         sdk_docs_mode: str = "full",
         openai_reasoning_summary: Optional[str] = "auto",
         post_success_design_audit: bool = True,
+        runtime_limits: BatchRuntimeLimits | None = None,
     ):
         self.file_path = file_path
         self.max_turns = max_turns
         self.sdk_package = _normalize_sdk_package(sdk_package)
         self.sdk_docs_mode = _normalize_sdk_docs_mode(sdk_docs_mode)
+        self.runtime_limits = runtime_limits
         self._seen_compile_signal_sigs: set[str] = set()
         self._seen_tool_error_sigs: set[str] = set()
         self._seen_find_example_paths: set[str] = set()
@@ -236,7 +239,11 @@ class ArticraftAgent:
         if pricing:
             self.cost_tracker = CostTracker(model_id=actual_model_id, pricing=pricing)
 
-        self.tool_registry = build_tool_registry(provider_norm, sdk_package=self.sdk_package)
+        self.tool_registry = build_tool_registry(
+            provider_norm,
+            sdk_package=self.sdk_package,
+            runtime_limits=self.runtime_limits,
+        )
         self.on_turn_start = on_turn_start
 
         if display_enabled is None:
@@ -385,12 +392,13 @@ class ArticraftAgent:
         return True
 
     async def _compile_urdf_report_async(self) -> CompileReport:
-        return await asyncio.to_thread(
-            compile_urdf_report,
-            Path(self.file_path),
-            sdk_package=self.sdk_package,
-            rewrite_visual_glb=False,
-        )
+        async with local_work_slot(self.runtime_limits):
+            return await asyncio.to_thread(
+                compile_urdf_report_maybe_timeout,
+                Path(self.file_path),
+                sdk_package=self.sdk_package,
+                rewrite_visual_glb=False,
+            )
 
     async def _persist_compile_success_checkpoint_async(self, urdf_xml: str) -> None:
         try:

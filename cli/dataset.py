@@ -558,22 +558,29 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run_batch.add_argument("spec", help="CSV spec path, typically under data/batch_specs/.")
     run_batch.add_argument(
+        "--row-concurrency",
         "--concurrency",
+        dest="row_concurrency",
         default="auto",
         help=(
-            "Maximum number of batch rows to run concurrently: "
+            "Maximum number of live batch rows / agent runs to keep active at once: "
             "auto (CPU-bounded), max (all candidate rows), or a positive integer."
+        ),
+    )
+    run_batch.add_argument(
+        "--subprocess-concurrency",
+        "--local-work-concurrency",
+        dest="subprocess_concurrency",
+        default="auto",
+        help=(
+            "Maximum number of compile/QC and probe_model subprocess-heavy operations to run "
+            "at once across the batch: auto, max, or a positive integer."
         ),
     )
     run_batch.add_argument(
         "--system-prompt-path",
         default="designer_system_prompt.txt",
         help="System prompt file to use for all rows in the batch.",
-    )
-    run_batch.add_argument(
-        "--sdk-docs-mode",
-        default="full",
-        help="SDK docs injection mode for all rows in the batch.",
     )
     run_batch.add_argument(
         "--qc-blurb",
@@ -596,6 +603,15 @@ def _build_parser() -> argparse.ArgumentParser:
         default="failed_or_pending",
         choices=("failed_or_pending", "failed_only", "all"),
         help="In resume mode, choose which row statuses should run again.",
+    )
+    run_batch.add_argument(
+        "--allow-resume-spec-mismatch",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "Allow resuming when current row specs differ from prior run specs. "
+            "Use only for explicit, controlled recovery flows."
+        ),
     )
     run_batch.add_argument(
         "--pause-file",
@@ -834,13 +850,14 @@ def main(argv: list[str] | None = None) -> int:
             config = build_batch_config(
                 repo_root=args.repo_root,
                 spec_arg=args.spec,
-                concurrency=args.concurrency,
+                concurrency=args.row_concurrency,
+                local_work_concurrency=args.subprocess_concurrency,
                 system_prompt_path=args.system_prompt_path,
-                sdk_docs_mode=args.sdk_docs_mode,
                 qc_blurb_path=args.qc_blurb,
                 post_success_design_audit=args.design_audit,
                 resume=args.resume,
                 resume_policy=args.resume_policy,
+                allow_resume_spec_mismatch=args.allow_resume_spec_mismatch,
                 keep_awake=bool(args.keep_awake),
                 pause_file=args.pause_file,
                 pause_poll_seconds=args.pause_poll_seconds,

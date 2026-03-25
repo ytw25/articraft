@@ -101,11 +101,6 @@ def _build_parser() -> argparse.ArgumentParser:
         help="SDK package metadata to attach to the draft record.",
     )
     init_record.add_argument(
-        "--sdk-docs-mode",
-        default="full",
-        help="SDK docs mode metadata to attach to the draft provenance.",
-    )
-    init_record.add_argument(
         "--design-audit",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -208,7 +203,6 @@ def main(argv: list[str] | None = None) -> int:
                 max_turns=args.max_turns,
                 system_prompt_path=args.system_prompt_path,
                 sdk_package=args.sdk_package,
-                sdk_docs_mode=args.sdk_docs_mode,
                 openai_reasoning_summary=args.openai_reasoning_summary,
                 post_success_design_audit=args.design_audit,
                 label=args.label,

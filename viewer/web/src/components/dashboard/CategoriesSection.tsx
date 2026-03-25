@@ -1,5 +1,5 @@
-import { useState, useMemo, type JSX } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Search } from "lucide-react";
+import { useCallback, useState, useMemo, type JSX } from "react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, Search } from "lucide-react";
 
 import { formatCost } from "@/lib/dashboard-stats";
 import { formatCategoryLabel } from "@/lib/utils";
@@ -79,6 +79,27 @@ export function CategoriesSection({ categoryStats }: CategoriesSectionProps): JS
     [categoryStats, sortDirection, sortKey],
   );
 
+  const exportCsv = useCallback(
+    (rows: [string, CategoriesSectionProps["categoryStats"][string]][]) => {
+      const header = "Category,SDK,Count,Avg Stars,Avg Cost USD";
+      const lines = rows.map(([slug, s]) => {
+        const cat = formatCategoryLabel(slug).replaceAll('"', '""');
+        const sdk = formatSdkPackage(s.sdk_package);
+        const rating = s.average_rating != null ? s.average_rating.toFixed(1) : "";
+        const cost = s.average_cost_usd != null ? s.average_cost_usd.toFixed(4) : "";
+        return `"${cat}",${sdk},${s.count},${rating},${cost}`;
+      });
+      const blob = new Blob([header + "\n" + lines.join("\n") + "\n"], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "categories.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    [],
+  );
+
   if (allSorted.length === 0) return null;
 
   const needle = filter.trim().toLowerCase();
@@ -111,11 +132,21 @@ export function CategoriesSection({ categoryStats }: CategoriesSectionProps): JS
         <h2 className="text-[10px] font-medium uppercase tracking-[0.06em] text-[var(--text-tertiary)]">
           Categories
         </h2>
-        <span className="text-[10px] tabular-nums text-[var(--text-quaternary)]">
-          {filtered.length === allSorted.length
-            ? `${allSorted.length}`
-            : `${filtered.length} / ${allSorted.length}`}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] tabular-nums text-[var(--text-quaternary)]">
+            {filtered.length === allSorted.length
+              ? `${allSorted.length}`
+              : `${filtered.length} / ${allSorted.length}`}
+          </span>
+          <button
+            type="button"
+            onClick={() => exportCsv(filtered)}
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-[var(--text-quaternary)] transition-colors hover:bg-[var(--surface-1)] hover:text-[var(--text-secondary)]"
+          >
+            <Download className="size-3" />
+            <span>Export</span>
+          </button>
+        </div>
       </div>
       <div className="rounded-md border border-[var(--border-default)] bg-[var(--surface-0)]">
         {allSorted.length > 12 ? (

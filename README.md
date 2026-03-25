@@ -136,23 +136,35 @@ Notes:
 Run a batch directly:
 
 ```bash
-uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto
 ```
 Use `--design-audit` or `--no-design-audit` to override the default for the full batch.
+Resume flags are available for recovery flows:
+
+```bash
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --resume --resume-policy failed_or_pending
+# --resume-policy choices: failed_only | failed_or_pending | all
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --resume --allow-resume-spec-mismatch
+# --allow-resume-spec-mismatch is risky: only use when you intentionally need to force a
+# spec-incompatible resume.
+```
 
 Resume the latest run for that spec:
 
 ```bash
-uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8 --resume
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto --resume
 ```
 
 Or use the `just` shortcut:
 
 ```bash
-just concurrency=8 dataset-batch data/batch_specs/<batch-id>.csv
+just row_concurrency=8 subprocess_concurrency=auto dataset-batch data/batch_specs/<batch-id>.csv
+just row_concurrency=8 subprocess_concurrency=auto resume=true dataset-batch data/batch_specs/<batch-id>.csv
+just row_concurrency=8 subprocess_concurrency=auto resume=true resume_policy=failed_or_pending dataset-batch data/batch_specs/<batch-id>.csv
+just row_concurrency=8 subprocess_concurrency=auto resume=true allow_resume_spec_mismatch=true dataset-batch data/batch_specs/<batch-id>.csv
 ```
 
-Batch rows run concurrently up to the requested limit, successful outputs are promoted into canonical dataset storage under `data/records/`, and resumable batch state is stored under `data/cache/runs/<run_id>/`.
+Batch rows run concurrently up to the requested row limit, successful outputs are promoted into canonical dataset storage under `data/records/`, and resumable batch state is stored under `data/cache/runs/<run_id>/`.
 
 ## 7. Reference
 
@@ -209,6 +221,6 @@ just model=gpt-5.4 thinking=high image=reference.png wb "Create a tower crane wi
 Run a batch directly with `uv`:
 
 ```bash
-uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8
-uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8 --resume
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto --resume
 ```

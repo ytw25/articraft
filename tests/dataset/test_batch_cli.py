@@ -847,6 +847,87 @@ def test_run_batch_resume_reconciles_durable_success_without_rerunning(
     assert repaired_rows[0]["record_dir"] == "data/records/rec_hinge_0001"
 
 
+def test_run_batch_resume_reruns_interrupted_running_rows(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(runner, "ArticraftAgent", FlakyBatchAgent)
+
+    spec_path = tmp_path / "source_specs" / "resume_running.csv"
+    _write_csv(
+        spec_path,
+        [
+            {
+                "row_id": "retry_row",
+                "category_slug": "hinge",
+                "category_title": "Hinge",
+                "prompt": "retry hinge once",
+                "provider": "openai",
+                "model_id": "gpt-5.4",
+                "thinking_level": "high",
+                "max_turns": "12",
+                "sdk_package": "sdk",
+            },
+        ],
+    )
+
+    first_exit_code = dataset_main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "run-batch",
+            str(spec_path),
+            "--concurrency",
+            "1",
+        ]
+    )
+    assert first_exit_code == 1
+
+    repo = StorageRepo(tmp_path)
+    run_id = next(path.name for path in repo.layout.runs_root.iterdir() if path.is_dir())
+    row_state_path = repo.layout.run_row_state_path(run_id, "retry_row")
+    row_state = repo.read_json(row_state_path)
+    assert isinstance(row_state, dict)
+    row_state["latest_status"] = "running"
+    row_state["latest_error_message"] = None
+    repo.write_json(row_state_path, row_state)
+
+    results_path = repo.layout.run_results_path(run_id)
+    result_rows = [
+        json.loads(line) for line in results_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(result_rows) == 1
+    result_rows[0]["status"] = "running"
+    result_rows[0]["record_dir"] = None
+    results_path.write_text(
+        "".join(json.dumps(row) + "\n" for row in result_rows),
+        encoding="utf-8",
+    )
+
+    second_exit_code = dataset_main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "run-batch",
+            str(spec_path),
+            "--concurrency",
+            "1",
+            "--resume",
+        ]
+    )
+    assert second_exit_code == 0
+
+    repaired_state = repo.read_json(row_state_path)
+    assert repaired_state["latest_status"] == "success"
+    assert repaired_state["attempt_count"] == 2
+
+    repaired_rows = [
+        json.loads(line) for line in results_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(repaired_rows) == 1
+    assert repaired_rows[0]["status"] == "success"
+
+
 def test_run_batch_display_stops_after_finalization(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

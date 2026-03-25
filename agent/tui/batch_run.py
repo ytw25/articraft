@@ -148,7 +148,7 @@ class BatchRunDisplay:
         line.append("batch ", style="bold cyan")
         line.append(self.experiment_name, style="bold white on blue")
         line.append(f"  model={self.model_id}", style="dim")
-        line.append(f"  concurrency={self.concurrency}", style="dim")
+        line.append(f"  row_concurrency={self.concurrency}", style="dim")
         line.append(f"  {self.total_runs} runs", style="dim")
         self.console.print(line)
         self.console.print()
@@ -187,6 +187,16 @@ class BatchRunDisplay:
             "finalize",
             message,
             label_style="bold cyan",
+            message_style="dim",
+        )
+
+    def print_runtime_setting(self, label: str, message: str) -> None:
+        if not self.enabled:
+            return
+        self._print_event(
+            label,
+            message,
+            label_style="bold white",
             message_style="dim",
         )
 

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from agent.prompts import normalize_sdk_package
+from agent.runtime_limits import BatchRuntimeLimits
 from agent.tools.apply_patch import ApplyPatchFreeformTool, ApplyPatchTool
 from agent.tools.base import (
     BaseDeclarativeTool,
@@ -38,17 +39,26 @@ SUPPORTED_IMAGE_MIME_TYPES_BY_PROVIDER: dict[str, set[str]] = {
 }
 
 
-def build_tool_registry(provider: str, *, sdk_package: str = "sdk") -> ToolRegistry:
+def build_tool_registry(
+    provider: str,
+    *,
+    sdk_package: str = "sdk",
+    runtime_limits: BatchRuntimeLimits | None = None,
+) -> ToolRegistry:
     provider_norm = (provider or "openai").strip().lower()
     package = normalize_sdk_package(sdk_package)
     if provider_norm == "openai":
         tools: list[BaseDeclarativeTool] = [
             ReadFileTool(),
             ApplyPatchFreeformTool(),
-            ProbeModelTool(sdk_package=package),
+            ProbeModelTool(sdk_package=package, runtime_limits=runtime_limits),
         ]
     else:
-        tools = [ReadCodeTool(), EditCodeTool(), ProbeModelTool(sdk_package=package)]
+        tools = [
+            ReadCodeTool(),
+            EditCodeTool(),
+            ProbeModelTool(sdk_package=package, runtime_limits=runtime_limits),
+        ]
     tools.append(FindExamplesTool(sdk_package=package))
     return ToolRegistry(tools)
 

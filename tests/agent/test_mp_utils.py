@@ -5,11 +5,11 @@ import pytest
 from agent import mp_utils
 
 
-def test_resolve_mp_start_method_prefers_forkserver(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_resolve_mp_start_method_prefers_spawn(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("ARTICRAFT_MP_START_METHOD", raising=False)
     monkeypatch.setattr(mp_utils.mp, "get_all_start_methods", lambda: ["spawn", "forkserver"])
 
-    assert mp_utils.resolve_mp_start_method() == "forkserver"
+    assert mp_utils.resolve_mp_start_method() == "spawn"
 
 
 def test_configured_mp_start_method_override_returns_trimmed_value(

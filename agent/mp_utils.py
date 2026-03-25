@@ -5,7 +5,7 @@ import os
 from typing import Sequence
 
 _MP_START_METHOD_ENV = "ARTICRAFT_MP_START_METHOD"
-_DEFAULT_START_METHODS = ("forkserver", "spawn")
+_DEFAULT_START_METHODS = ("spawn", "forkserver")
 
 
 def mp_start_method_env_var() -> str:
@@ -39,8 +39,8 @@ def resolve_mp_start_method(*, prefer_fork: bool = False) -> str:
     if prefer_fork and "fork" in available:
         return "fork"
 
-    # Prefer forkserver over spawn on Unix because it avoids repeated interpreter
-    # bootstrap while still avoiding the hazards of plain fork in a live process.
+    # Prefer spawn for long-lived threaded runners so heavy compile state is
+    # isolated in short-lived workers, matching the historical batch behavior.
     for start_method in _DEFAULT_START_METHODS:
         if start_method in available:
             return start_method

@@ -7,7 +7,6 @@ import multiprocessing as mp
 import os
 import queue
 import re
-import resource
 import subprocess
 import time
 from collections import deque
@@ -32,6 +31,12 @@ from agent.mp_utils import (
     get_mp_context,
     mp_start_method_env_var,
     resolve_mp_start_method,
+)
+from agent.open_file_limits import (
+    OpenFileWorkerCap,
+)
+from agent.open_file_limits import (
+    open_file_worker_cap as _shared_open_file_worker_cap,
 )
 from storage.materialize import (
     infer_materialization_status,
@@ -93,15 +98,6 @@ class WorkerState:
     task_queue: Any
     assigned: CompileCandidate | None = None
     started_at: float | None = None
-
-
-@dataclass(slots=True, frozen=True)
-class OpenFileWorkerCap:
-    worker_cap: int
-    soft_limit: int
-    open_files: int
-    reserve_files: int
-    per_worker_budget: int
 
 
 def _normalize_compile_target(target: str) -> str:
@@ -485,41 +481,8 @@ def _memory_budget_bytes() -> int | None:
     return _available_memory_bytes()
 
 
-def _open_file_soft_limit() -> int | None:
-    if not hasattr(resource, "RLIMIT_NOFILE"):
-        return None
-    try:
-        soft_limit, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
-    except Exception:
-        return None
-    if not isinstance(soft_limit, int) or soft_limit <= 0:
-        return None
-    return soft_limit
-
-
-def _current_open_file_count() -> int | None:
-    for fd_root in ("/dev/fd", "/proc/self/fd"):
-        try:
-            return len(os.listdir(fd_root))
-        except OSError:
-            continue
-    return None
-
-
 def _open_file_worker_cap() -> OpenFileWorkerCap | None:
-    soft_limit = _open_file_soft_limit()
-    open_files = _current_open_file_count()
-    if soft_limit is None or open_files is None:
-        return None
-    usable = soft_limit - open_files - _OPEN_FILE_WORKER_RESERVE
-    if usable <= 0:
-        worker_cap = 1
-    else:
-        worker_cap = max(1, usable // _OPEN_FILE_WORKER_FD_BUDGET)
-    return OpenFileWorkerCap(
-        worker_cap=worker_cap,
-        soft_limit=soft_limit,
-        open_files=open_files,
+    return _shared_open_file_worker_cap(
         reserve_files=_OPEN_FILE_WORKER_RESERVE,
         per_worker_budget=_OPEN_FILE_WORKER_FD_BUDGET,
     )

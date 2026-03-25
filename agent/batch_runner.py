@@ -18,6 +18,7 @@ from typing import Any, Callable, Iterator
 
 from rich.console import Console
 
+from agent.open_file_limits import open_file_worker_cap
 from agent.runner import (
     _build_prompt_with_qc,
     _build_single_run_context,
@@ -25,6 +26,7 @@ from agent.runner import (
     _relative_to_repo,
     _timestamp_token,
 )
+from agent.runtime_limits import BatchRuntimeLimits
 from agent.tools import build_initial_user_content
 from agent.tui.batch_run import BatchRunDisplay
 from storage.batch_specs import BatchSpecStore
@@ -135,6 +137,59 @@ def _logical_cpu_count() -> int:
     return max(int(os.cpu_count() or 1), 1)
 
 
+def _preferred_local_work_cpu_count() -> int:
+    if sys.platform == "darwin":
+        try:
+            result = subprocess.run(
+                ["sysctl", "-n", "hw.perflevel0.physicalcpu"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            value = int(result.stdout.strip())
+            if value > 0:
+                return value
+        except (OSError, ValueError, subprocess.SubprocessError):
+            pass
+    return _logical_cpu_count()
+
+
+_LOCAL_WORK_OPEN_FILE_RESERVE = 64
+_LOCAL_WORK_ROW_FILE_RESERVE = 1
+_LOCAL_WORK_OPEN_FILE_FD_BUDGET = 8
+
+
+def _auto_local_work_limit_from_fds(*, row_concurrency: int) -> int | None:
+    cap = open_file_worker_cap(
+        reserve_files=(
+            _LOCAL_WORK_OPEN_FILE_RESERVE + (max(row_concurrency, 0) * _LOCAL_WORK_ROW_FILE_RESERVE)
+        ),
+        per_worker_budget=_LOCAL_WORK_OPEN_FILE_FD_BUDGET,
+    )
+    if cap is None:
+        return None
+    return cap.worker_cap
+
+
+def _local_work_runtime_message(config: BatchRunConfig) -> str:
+    reserve_files = _LOCAL_WORK_OPEN_FILE_RESERVE + (
+        max(config.concurrency, 0) * _LOCAL_WORK_ROW_FILE_RESERVE
+    )
+    cap = open_file_worker_cap(
+        reserve_files=reserve_files,
+        per_worker_budget=_LOCAL_WORK_OPEN_FILE_FD_BUDGET,
+    )
+    message = f"subprocess_concurrency={config.local_work_concurrency}"
+    cpu_basis = _preferred_local_work_cpu_count()
+    if cap is None:
+        return f"{message}  cpu_cap={cpu_basis}  fd_cap=unknown"
+    return (
+        f"{message}  cpu_cap={cpu_basis}  fd_cap={cap.worker_cap}  "
+        f"soft_limit={cap.soft_limit}  open_now={cap.open_files}  "
+        f"reserve={cap.reserve_files}  per_slot={cap.per_worker_budget}"
+    )
+
+
 def _resolve_batch_concurrency(raw_value: str | int, *, candidate_count: int) -> int:
     if candidate_count <= 0:
         return 1
@@ -155,6 +210,33 @@ def _resolve_batch_concurrency(raw_value: str | int, *, candidate_count: int) ->
     if requested <= 0:
         raise ValueError("Concurrency must be a positive integer, or one of: auto, max.")
     return min(candidate_count, requested)
+
+
+def _resolve_local_work_concurrency(raw_value: str | int, *, row_concurrency: int) -> int:
+    if row_concurrency <= 0:
+        return 1
+
+    normalized = str(raw_value).strip().lower()
+    if normalized == "auto":
+        default = max(1, _preferred_local_work_cpu_count())
+        fd_limited = _auto_local_work_limit_from_fds(row_concurrency=row_concurrency)
+        if fd_limited is not None:
+            default = min(default, fd_limited)
+        return max(1, min(row_concurrency, default))
+    if normalized == "max":
+        return max(1, row_concurrency)
+
+    try:
+        requested = int(normalized)
+    except ValueError as exc:
+        raise ValueError(
+            "Unsupported local-work concurrency value "
+            f"{raw_value!r}. Expected auto, max, or a positive integer."
+        ) from exc
+
+    if requested <= 0:
+        raise ValueError("Local-work concurrency must be a positive integer, or one of: auto, max.")
+    return min(row_concurrency, requested)
 
 
 def _build_batch_run_id(batch_id: str) -> str:
@@ -360,6 +442,7 @@ class BatchRunConfig:
     rows: list[BatchRowSpec]
     allocations: dict[str, BatchRowAllocation]
     concurrency: int
+    local_work_concurrency: int
     system_prompt_path: str
     sdk_docs_mode: str
     resume: bool
@@ -544,6 +627,8 @@ def _resolve_spec_path(repo: StorageRepo, spec_arg: str) -> tuple[Path, str]:
 def _settings_summary(
     rows: list[BatchRowSpec],
     *,
+    concurrency: int,
+    local_work_concurrency: int,
     system_prompt_path: str,
     sdk_docs_mode: str,
     qc_blurb_path: str | None,
@@ -559,6 +644,8 @@ def _settings_summary(
         "max_turns": sorted({row.max_turns for row in rows}),
         "sdk_packages": sorted(sdk_packages),
         "post_success_design_audit": _summary_value(post_success_design_audit_values),
+        "row_concurrency": concurrency,
+        "subprocess_concurrency": local_work_concurrency,
         "system_prompt_path": system_prompt_path,
         "sdk_docs_mode": sdk_docs_mode,
         "qc_blurb_path": qc_blurb_path,
@@ -570,7 +657,7 @@ def _resume_policy_should_run(status: str, policy: str) -> bool:
         return True
     if policy == "failed_only":
         return status == "failed"
-    return status in {"failed", "pending"}
+    return status in {"failed", "pending", "running"}
 
 
 def _find_latest_batch_run(repo: StorageRepo, batch_spec_id: str) -> str | None:
@@ -665,6 +752,7 @@ def _validate_resume_allocations(
     *,
     run_id: str,
     rows: list[BatchRowSpec],
+    allow_spec_mismatch: bool,
 ) -> dict[str, BatchRowAllocation]:
     payload = repo.read_json(repo.layout.run_allocations_path(run_id))
     if not isinstance(payload, dict):
@@ -684,19 +772,20 @@ def _validate_resume_allocations(
         existing = existing_by_row_id.get(row.row_id)
         if existing is None:
             raise ValueError(f"Resume run {run_id} is missing allocation for row_id={row.row_id}")
-        for key in (
-            "category_slug",
-            "prompt",
-            "provider",
-            "model_id",
-            "thinking_level",
-            "sdk_package",
-            "post_success_design_audit",
-        ):
-            if str(existing.get(key) or "") != str(getattr(row, key) or ""):
-                raise ValueError(f"Resume spec mismatch for row_id={row.row_id} field={key}")
-        if int(existing.get("max_turns") or 0) != row.max_turns:
-            raise ValueError(f"Resume spec mismatch for row_id={row.row_id} field=max_turns")
+        if not allow_spec_mismatch:
+            for key in (
+                "category_slug",
+                "prompt",
+                "provider",
+                "model_id",
+                "thinking_level",
+                "sdk_package",
+                "post_success_design_audit",
+            ):
+                if str(existing.get(key) or "") != str(getattr(row, key) or ""):
+                    raise ValueError(f"Resume spec mismatch for row_id={row.row_id} field={key}")
+            if int(existing.get("max_turns") or 0) != row.max_turns:
+                raise ValueError(f"Resume spec mismatch for row_id={row.row_id} field=max_turns")
         allocations[row.row_id] = BatchRowAllocation(
             row_id=row.row_id,
             category_slug=str(existing.get("category_slug") or row.category_slug),
@@ -721,6 +810,8 @@ async def _write_run_metadata(
     category_slugs = sorted({row.category_slug for row in config.rows})
     settings_summary = _settings_summary(
         config.rows,
+        concurrency=config.concurrency,
+        local_work_concurrency=config.local_work_concurrency,
         system_prompt_path=config.system_prompt_path,
         sdk_docs_mode=config.sdk_docs_mode,
         qc_blurb_path=None,
@@ -864,6 +955,7 @@ async def _run_batch_row(
     allocation: BatchRowAllocation,
     commit_lock: asyncio.Lock,
     display: BatchRunDisplay,
+    runtime_limits: BatchRuntimeLimits,
 ) -> BatchRowOutcome:
     prompt_with_qc = _build_prompt_with_qc(row.prompt, config.qc_blurb_text)
     user_content = build_initial_user_content(prompt_with_qc)
@@ -939,6 +1031,7 @@ async def _run_batch_row(
         batch_spec_id=config.batch_spec_id,
         row_id=row.row_id,
         prompt_index=allocation.prompt_index,
+        runtime_limits=runtime_limits,
     )
     return BatchRowOutcome(
         row_id=row.row_id,
@@ -1015,6 +1108,9 @@ async def run_dataset_batch(config: BatchRunConfig) -> dict[str, Any]:
     run_store = RunStore(repo)
     search = SearchIndex(repo)
     commit_lock = asyncio.Lock()
+    runtime_limits = BatchRuntimeLimits(
+        local_work_semaphore=asyncio.Semaphore(config.local_work_concurrency)
+    )
 
     display = BatchRunDisplay(
         console=CONSOLE,
@@ -1039,6 +1135,8 @@ async def run_dataset_batch(config: BatchRunConfig) -> dict[str, Any]:
     pause_controller.start_keyboard_listener()
     watcher_task = asyncio.create_task(pause_controller.watch())
     display.start()
+    if hasattr(display, "print_runtime_setting"):
+        display.print_runtime_setting("limits", _local_work_runtime_message(config))
 
     async with commit_lock:
         await _write_run_metadata(run_store, config=config, status="running")
@@ -1215,6 +1313,7 @@ async def run_dataset_batch(config: BatchRunConfig) -> dict[str, Any]:
                 allocation=allocation,
                 commit_lock=commit_lock,
                 display=display,
+                runtime_limits=runtime_limits,
             )
             await _commit_outcome(row, outcome)
             work_queue.task_done()
@@ -1269,12 +1368,14 @@ def build_batch_config(
     repo_root: Path,
     spec_arg: str,
     concurrency: str | int,
+    local_work_concurrency: str | int = "auto",
     system_prompt_path: str,
-    sdk_docs_mode: str,
+    sdk_docs_mode: str = "full",
     qc_blurb_path: str | None,
     post_success_design_audit: bool = True,
     resume: bool,
     resume_policy: str,
+    allow_resume_spec_mismatch: bool = False,
     keep_awake: bool,
     pause_file: str | None,
     pause_poll_seconds: float,
@@ -1289,6 +1390,10 @@ def build_batch_config(
         default_post_success_design_audit=post_success_design_audit,
     )
     resolved_concurrency = _resolve_batch_concurrency(concurrency, candidate_count=len(rows))
+    resolved_local_work_concurrency = _resolve_local_work_concurrency(
+        local_work_concurrency,
+        row_concurrency=resolved_concurrency,
+    )
     if resume_policy not in RESUME_POLICIES:
         raise ValueError(f"Unsupported resume policy: {resume_policy}")
 
@@ -1297,7 +1402,12 @@ def build_batch_config(
         if latest_run_id is None:
             raise ValueError(f"No prior batch run found for batch_spec_id={batch_spec_id}")
         run_id = latest_run_id
-        allocations = _validate_resume_allocations(repo, run_id=run_id, rows=rows)
+        allocations = _validate_resume_allocations(
+            repo,
+            run_id=run_id,
+            rows=rows,
+            allow_spec_mismatch=allow_resume_spec_mismatch,
+        )
     else:
         run_id = _build_batch_run_id(batch_spec_id)
         allocations = _build_allocations(rows, repo=repo)
@@ -1324,6 +1434,7 @@ def build_batch_config(
         rows=rows,
         allocations=allocations,
         concurrency=resolved_concurrency,
+        local_work_concurrency=resolved_local_work_concurrency,
         system_prompt_path=system_prompt_path,
         sdk_docs_mode=sdk_docs_mode,
         qc_blurb_text=qc_blurb_text,

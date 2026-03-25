@@ -13,7 +13,13 @@ api_host := host
 api_port := port
 viewer_target := "/"
 concurrency := "auto"
+row_concurrency := ""
+subprocess_concurrency := ""
+local_work_concurrency := ""
 design_audit := ""
+resume := ""
+resume_policy := ""
+allow_resume_spec_mismatch := ""
 limit := ""
 name := ""
 
@@ -246,18 +252,48 @@ dataset-batch spec_path="":
     #!/usr/bin/env bash
     set -euo pipefail
     spec_path={{ quote(spec_path) }}
-    concurrency_value={{ quote(concurrency) }}
+    row_concurrency_value={{ quote(row_concurrency) }}
+    legacy_concurrency_value={{ quote(concurrency) }}
     design_audit_value={{ quote(design_audit) }}
+    subprocess_concurrency_value={{ quote(subprocess_concurrency) }}
+    legacy_local_work_value={{ quote(local_work_concurrency) }}
+    resume_value={{ quote(resume) }}
+    resume_policy_value={{ quote(resume_policy) }}
+    allow_resume_spec_mismatch_value={{ quote(allow_resume_spec_mismatch) }}
     if [ -z "$spec_path" ]; then
-      echo "Usage: just concurrency=<n> dataset-batch path/to/batch.csv" >&2
+      echo "Usage: just row_concurrency=<n> dataset-batch path/to/batch.csv" >&2
       exit 1
     fi
-    if [ "$design_audit_value" = "false" ]; then
-      exec uv run articraft-dataset --repo-root . run-batch "$spec_path" --concurrency "$concurrency_value" --no-design-audit
-    elif [ "$design_audit_value" = "true" ]; then
-      exec uv run articraft-dataset --repo-root . run-batch "$spec_path" --concurrency "$concurrency_value" --design-audit
+    if [ -z "$row_concurrency_value" ]; then
+      row_concurrency_value="$legacy_concurrency_value"
     fi
-    exec uv run articraft-dataset --repo-root . run-batch "$spec_path" --concurrency "$concurrency_value"
+    if [ -z "$row_concurrency_value" ]; then
+      row_concurrency_value="auto"
+    fi
+    if [ -z "$subprocess_concurrency_value" ]; then
+      subprocess_concurrency_value="$legacy_local_work_value"
+    fi
+    extra_args=(--row-concurrency "$row_concurrency_value")
+    if [ -n "$subprocess_concurrency_value" ]; then
+      extra_args+=(--subprocess-concurrency "$subprocess_concurrency_value")
+    fi
+    if [ "$resume_value" = "true" ]; then
+      extra_args+=(--resume)
+      if [ -n "$resume_policy_value" ]; then
+        extra_args+=(--resume-policy "$resume_policy_value")
+      fi
+    fi
+    if [ "$allow_resume_spec_mismatch_value" = "true" ]; then
+      extra_args+=(--allow-resume-spec-mismatch)
+    elif [ "$allow_resume_spec_mismatch_value" = "false" ]; then
+      extra_args+=(--no-allow-resume-spec-mismatch)
+    fi
+    if [ "$design_audit_value" = "false" ]; then
+      exec uv run articraft-dataset --repo-root . run-batch "$spec_path" "${extra_args[@]}" --no-design-audit
+    elif [ "$design_audit_value" = "true" ]; then
+      exec uv run articraft-dataset --repo-root . run-batch "$spec_path" "${extra_args[@]}" --design-audit
+    fi
+    exec uv run articraft-dataset --repo-root . run-batch "$spec_path" "${extra_args[@]}"
 
 batch-spec-new:
     #!/usr/bin/env bash

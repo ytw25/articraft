@@ -8,6 +8,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from agent.prompts import normalize_sdk_package
+from agent.runtime_limits import BatchRuntimeLimits, local_work_slot
 from agent.tools.base import BaseDeclarativeTool, BaseToolInvocation, ToolResult, make_tool_schema
 from agent.tools.probe_model.description import PROBE_MODEL_DESCRIPTION
 
@@ -20,9 +21,16 @@ class ProbeModelParams(BaseModel):
 
 
 class ProbeModelInvocation(BaseToolInvocation[ProbeModelParams, dict[str, object]]):
-    def __init__(self, params: ProbeModelParams, *, sdk_package: str) -> None:
+    def __init__(
+        self,
+        params: ProbeModelParams,
+        *,
+        sdk_package: str,
+        runtime_limits: BatchRuntimeLimits | None = None,
+    ) -> None:
         super().__init__(params)
         self.sdk_package = normalize_sdk_package(sdk_package)
+        self.runtime_limits = runtime_limits
 
     def get_description(self) -> str:
         preview = self.params.code[:50].replace("\n", "\\n")
@@ -46,34 +54,35 @@ class ProbeModelInvocation(BaseToolInvocation[ProbeModelParams, dict[str, object
         }
         repo_root = Path(__file__).resolve().parents[3]
         started = asyncio.get_running_loop().time()
-        process = await asyncio.create_subprocess_exec(
-            sys.executable,
-            "-m",
-            "agent.tools.probe_model.runner",
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=str(repo_root),
-        )
-        try:
-            stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                process.communicate(json.dumps(request).encode("utf-8")),
-                timeout=self.params.timeout_ms / 1000.0,
+        async with local_work_slot(self.runtime_limits):
+            process = await asyncio.create_subprocess_exec(
+                sys.executable,
+                "-m",
+                "agent.tools.probe_model.runner",
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=str(repo_root),
             )
-        except asyncio.TimeoutError:
-            process.kill()
-            await process.communicate()
-            elapsed_ms = (asyncio.get_running_loop().time() - started) * 1000.0
-            return ToolResult(
-                output={
-                    "ok": False,
-                    "error": {
-                        "type": "timeout",
-                        "message": f"probe_model timed out after {self.params.timeout_ms} ms",
+            try:
+                stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                    process.communicate(json.dumps(request).encode("utf-8")),
+                    timeout=self.params.timeout_ms / 1000.0,
+                )
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.communicate()
+                elapsed_ms = (asyncio.get_running_loop().time() - started) * 1000.0
+                return ToolResult(
+                    output={
+                        "ok": False,
+                        "error": {
+                            "type": "timeout",
+                            "message": f"probe_model timed out after {self.params.timeout_ms} ms",
+                        },
+                        "elapsed_ms": float(elapsed_ms),
                     },
-                    "elapsed_ms": float(elapsed_ms),
-                }
-            )
+                )
 
         stdout_text = stdout_bytes.decode("utf-8", errors="replace").strip()
         stderr_text = stderr_bytes.decode("utf-8", errors="replace").strip()
@@ -143,8 +152,14 @@ class ProbeModelInvocation(BaseToolInvocation[ProbeModelParams, dict[str, object
 
 
 class ProbeModelTool(BaseDeclarativeTool):
-    def __init__(self, *, sdk_package: str) -> None:
+    def __init__(
+        self,
+        *,
+        sdk_package: str,
+        runtime_limits: BatchRuntimeLimits | None = None,
+    ) -> None:
         self.sdk_package = normalize_sdk_package(sdk_package)
+        self.runtime_limits = runtime_limits
         schema = make_tool_schema(
             name="probe_model",
             description=PROBE_MODEL_DESCRIPTION,
@@ -173,4 +188,8 @@ class ProbeModelTool(BaseDeclarativeTool):
 
     async def build(self, params: dict) -> ProbeModelInvocation:
         validated = ProbeModelParams(**params)
-        return ProbeModelInvocation(validated, sdk_package=self.sdk_package)
+        return ProbeModelInvocation(
+            validated,
+            sdk_package=self.sdk_package,
+            runtime_limits=self.runtime_limits,
+        )

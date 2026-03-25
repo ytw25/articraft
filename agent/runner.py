@@ -24,17 +24,15 @@ from agent.compiler import (
     compile_urdf as _compile_urdf,
 )
 from agent.compiler import (
-    compile_urdf_report,
-    rewrite_visual_meshes_to_glb,
+    compile_urdf_report_maybe_timeout as _compile_urdf_report_maybe_timeout,
 )
 from agent.compiler import (
-    compile_urdf_report_maybe_timeout as _compile_urdf_report_maybe_timeout,
+    rewrite_visual_meshes_to_glb,
 )
 from agent.defaults import DEFAULT_MAX_TURNS
 from agent.harness import ArticraftAgent, build_openai_prompt_cache_settings
 from agent.models import CompileReport as AgentCompileReport
 from agent.prompts import (
-    SUPPORTED_SDK_DOCS_MODES,
     load_sdk_docs_reference,
     load_system_prompt_text,
     normalize_sdk_package,
@@ -42,6 +40,7 @@ from agent.prompts import (
 )
 from agent.providers.gemini import GeminiLLM, gemini_client_config_from_env
 from agent.providers.openai import OpenAILLM, openai_api_key_from_env
+from agent.runtime_limits import BatchRuntimeLimits, local_work_slot
 from agent.tools import (
     build_first_turn_messages as _build_first_turn_messages,
 )
@@ -91,6 +90,7 @@ from storage.trajectories import (
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+SDK_DOCS_MODE_FULL = "full"
 
 MAX_SINGLE_RUN_SLUG_LEN = 120
 _DRAFT_MODEL_TEMPLATE = """from __future__ import annotations
@@ -1181,6 +1181,7 @@ async def _execute_single_run(
     batch_spec_id: str | None = None,
     row_id: str | None = None,
     prompt_index: int | None = None,
+    runtime_limits: BatchRuntimeLimits | None = None,
 ) -> RunExecutionOutcome:
     resolved_context = context or await asyncio.to_thread(
         _build_single_run_context,
@@ -1325,6 +1326,7 @@ async def _execute_single_run(
             sdk_docs_mode=sdk_docs_mode,
             openai_reasoning_summary=openai_reasoning_summary,
             post_success_design_audit=post_success_design_audit,
+            runtime_limits=runtime_limits,
         ) as agent:
             logger.info("Using system prompt: %s", agent.loaded_system_prompt_path)
             loaded_system_prompt_path = Path(agent.loaded_system_prompt_path)
@@ -1365,11 +1367,12 @@ async def _execute_single_run(
         compile_warnings = list(result.compile_warnings)
     else:
         try:
-            report = await asyncio.to_thread(
-                compile_urdf_report,
-                resolved_context.script_path,
-                sdk_package=sdk_package,
-            )
+            async with local_work_slot(runtime_limits):
+                report = await asyncio.to_thread(
+                    compile_urdf_report_maybe_timeout,
+                    resolved_context.script_path,
+                    sdk_package=sdk_package,
+                )
             for warning in report.warnings:
                 logger.warning("%s", warning)
             urdf_xml = report.urdf_xml
@@ -1942,15 +1945,6 @@ def main(argv: list[str] | None = None) -> int:
         help="JSON indent for --dump-provider-payload (default: 2).",
     )
     parser.add_argument(
-        "--sdk-docs-mode",
-        default="full",
-        choices=sorted(SUPPORTED_SDK_DOCS_MODES),
-        help=(
-            "SDK docs injection mode for turn 1. `core` keeps only a compact subset "
-            "to reduce prompt size; `none` disables injected SDK docs entirely."
-        ),
-    )
-    parser.add_argument(
         "--sdk-package",
         default="sdk",
         help="SDK package to use for prompt selection, scaffolding, and compilation.",
@@ -2015,7 +2009,7 @@ def main(argv: list[str] | None = None) -> int:
             thinking_level=args.thinking,
             system_prompt_path=args.system_prompt,
             sdk_package=sdk_package,
-            sdk_docs_mode=args.sdk_docs_mode,
+            sdk_docs_mode=SDK_DOCS_MODE_FULL,
             openai_reasoning_summary=openai_reasoning_summary,
         )
         text = json.dumps(payload, indent=args.dump_provider_payload_indent, ensure_ascii=False)
@@ -2059,7 +2053,7 @@ def main(argv: list[str] | None = None) -> int:
             max_turns=args.max_turns,
             system_prompt_path=args.system_prompt,
             sdk_package=sdk_package,
-            sdk_docs_mode=args.sdk_docs_mode,
+            sdk_docs_mode=SDK_DOCS_MODE_FULL,
             openai_reasoning_summary=openai_reasoning_summary,
             post_success_design_audit=args.design_audit,
             label=args.label,
