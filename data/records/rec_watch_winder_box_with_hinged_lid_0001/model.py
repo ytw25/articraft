@@ -376,11 +376,11 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(
+    ctx.fail_if_articulation_origin_far_from_geometry(
         tol=0.02,
         reason="The watch cushion is intentionally displayed above a plush presentation pedestal, so the body-side drive mount sits slightly below the visible rotation axis.",
     )
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "body",
         "lid",
@@ -391,7 +391,7 @@ def run_tests() -> TestReport:
         "winder_rotor",
         reason="The body-side drive cup intentionally nests tightly around the rotating watch cushion hub; generated convex hulls overestimate this coaxial interface and report tiny false-positive overlap volumes.",
     )
-    ctx.check_no_overlaps(
+    ctx.fail_if_parts_overlap_in_sampled_poses(
         max_pose_samples=160,
         overlap_tol=0.004,
         overlap_volume_tol=0.0,

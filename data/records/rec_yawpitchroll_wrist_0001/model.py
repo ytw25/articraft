@@ -264,8 +264,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
 
     ctx.allow_overlap(
         "base", "yaw_ring", reason="compact yaw bearing collar is intentionally nested."
@@ -296,7 +296,7 @@ def run_tests() -> TestReport:
         "yaw_ring",
         reason="the locator key swings through the open center of the yaw ring, which the overlap QC treats as a solid AABB.",
     )
-    ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_origin_distance("yaw_ring", "base", axes="xy", max_dist=0.006)
     ctx.expect_aabb_overlap("yaw_ring", "base", axes="xy", min_overlap=0.039)

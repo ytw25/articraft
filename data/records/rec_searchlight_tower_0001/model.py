@@ -447,8 +447,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "tower_base",
         "turret",
@@ -459,7 +459,7 @@ def run_tests() -> TestReport:
         "lamp_head",
         reason="trunnion clevis and lamp bosses are intentionally modeled with tight industrial clearance",
     )
-    ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_origin_distance("turret", "tower_base", axes="xy", max_dist=0.08)
     ctx.expect_aabb_overlap("turret", "tower_base", axes="xy", min_overlap=0.20)

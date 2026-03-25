@@ -385,11 +385,11 @@ def run_tests() -> TestReport:
 
     # The tilt-head hinge is mostly buried inside the cast shell, so use a slightly
     # looser origin-distance sensor than the compact default.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.035)
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.035)
     # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
     # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(
+    ctx.fail_if_articulation_overlaps(
         max_pose_samples=128,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,

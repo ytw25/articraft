@@ -242,14 +242,14 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
     ctx.allow_overlap(
         "base_mount",
         "pitch_yoke",
         reason="Conservative AABB false-positive at full yaw where the slim pitch bracket swings past the compact base flange.",
     )
-    ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.001, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=160, overlap_tol=0.001, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_overlap("pitch_yoke", "yaw_housing", axes="xy", min_overlap=0.012)
     ctx.expect_aabb_overlap("roll_head", "pitch_yoke", axes="xy", min_overlap=0.010)

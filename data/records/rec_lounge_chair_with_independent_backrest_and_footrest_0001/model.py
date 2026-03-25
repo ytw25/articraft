@@ -273,8 +273,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "backrest",
         "base",
@@ -285,7 +285,7 @@ def run_tests() -> TestReport:
         "footrest",
         reason="the raised ottoman panel folds tightly beneath the front apron, so collision hulls around the upholstered pad and hinge rails are intentionally conservative near the nesting seam",
     )
-    ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=160, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_overlap("backrest", "base", axes="xy", min_overlap=0.05)
     ctx.expect_origin_distance("backrest", "base", axes="xy", max_dist=0.42)

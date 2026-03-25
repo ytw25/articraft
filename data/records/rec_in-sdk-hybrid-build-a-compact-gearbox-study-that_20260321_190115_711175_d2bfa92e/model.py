@@ -420,8 +420,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected(use="visual")
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
+    ctx.warn_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.warn_if_overlaps(
         max_pose_samples=32,
         overlap_tol=0.003,

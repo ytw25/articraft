@@ -226,14 +226,14 @@ def run_tests() -> TestReport:
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "cabinet",
         "door",
         reason="Closed cabinet door intentionally seats against the front return and hinge knuckles; generated collision hulls conservatively report this tight industrial fit as overlap.",
     )
-    ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
     ctx.expect_joint_motion_axis(
         "door_hinge", "door", world_axis="x", direction="positive", min_delta=0.18
     )

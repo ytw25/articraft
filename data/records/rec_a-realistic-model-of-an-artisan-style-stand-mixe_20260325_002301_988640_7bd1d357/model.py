@@ -293,7 +293,7 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
 
     # Default exact visual connectivity gate for floating/disconnected subassemblies inside one part.
-    ctx.check_part_geometry_connected()
+    ctx.fail_if_part_contains_disconnected_geometry_islands()
 
     # Encode the actual visual/mechanical claims with prompt-specific exact checks.
     # If you add a warning-tier heuristic and it fires, investigate it with

@@ -444,8 +444,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "column_upper",
         "seat",
@@ -462,7 +462,7 @@ def run_tests() -> TestReport:
             f"caster_{idx}",
             reason="tight caster fork clearances can appear overlapping in conservative collision QC",
         )
-    ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.004, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=128, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_origin_distance("seat", "base", axes="xy", max_dist=0.03)
     ctx.expect_aabb_overlap("column_upper", "base", axes="xy", min_overlap=0.08)

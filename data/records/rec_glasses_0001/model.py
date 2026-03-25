@@ -347,8 +347,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "frame_front",
         "left_temple",
@@ -364,7 +364,7 @@ def run_tests() -> TestReport:
         "right_temple",
         reason="Folded temple arms stack tightly and convex collision hulls are conservative around the ear hooks.",
     )
-    ctx.check_no_overlaps(
+    ctx.fail_if_parts_overlap_in_sampled_poses(
         max_pose_samples=192,
         overlap_tol=0.0015,
         overlap_volume_tol=0.0,

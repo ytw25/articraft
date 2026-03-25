@@ -285,17 +285,17 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(
+    ctx.fail_if_articulation_origin_far_from_geometry(
         tol=0.02,
         reason="The wheel turns around a visible fixed axle and bearing pack, so the closest support geometry sits at the engineered hub clearance.",
     )
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "support",
         "wheel",
         reason="The rotating hub sleeves the fixed axle, and convex collision generation is conservative around the coaxial bearing interface.",
     )
-    ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.004, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=96, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_overlap("wheel", "support", axes="xy", min_overlap=0.65)
     ctx.expect_origin_distance("wheel", "support", axes="xy", max_dist=0.05)

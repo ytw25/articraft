@@ -284,9 +284,9 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
-    ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.002, overlap_volume_tol=0.0)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=192, overlap_tol=0.002, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_overlap("outer_slide_stage", "rack_base", axes="xy", min_overlap=0.30)
     ctx.expect_aabb_overlap("inner_slide_stage", "outer_slide_stage", axes="xy", min_overlap=0.25)

@@ -267,8 +267,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
     ctx.allow_overlap(
         "base_frame",
         "stage1_carrier",
@@ -294,7 +294,7 @@ def run_tests() -> TestReport:
         "stage3_platform",
         reason="folded offset-axis poses create conservative AABB overlap between nonadjacent carrier envelopes",
     )
-    ctx.check_no_overlaps(
+    ctx.fail_if_parts_overlap_in_sampled_poses(
         max_pose_samples=160,
         overlap_tol=0.003,
         overlap_volume_tol=0.0,

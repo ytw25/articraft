@@ -430,8 +430,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected(use="visual")
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
+    ctx.warn_if_part_contains_disconnected_geometry_islands(use="visual")
 
     ctx.allow_overlap(
         "pcb_substrate",

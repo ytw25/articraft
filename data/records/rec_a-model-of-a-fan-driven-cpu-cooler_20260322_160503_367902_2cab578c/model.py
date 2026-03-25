@@ -168,9 +168,9 @@ def run_tests() -> TestReport:
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
 
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(max_pose_samples=64)
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
 
     # Allow overlap between base and fins due to heat pipes embedding
     ctx.allow_overlap("base", "fin_stack", reason="heat pipes embedded in base plate")

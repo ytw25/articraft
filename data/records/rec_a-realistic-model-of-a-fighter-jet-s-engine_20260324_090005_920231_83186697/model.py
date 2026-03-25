@@ -225,11 +225,11 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
 
     # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.080)
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.080)
     # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
     # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(
+    ctx.fail_if_articulation_overlaps(
         max_pose_samples=128,
         overlap_tol=0.003,
         overlap_volume_tol=0.0,

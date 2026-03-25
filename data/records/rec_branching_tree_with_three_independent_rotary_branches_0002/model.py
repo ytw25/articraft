@@ -195,9 +195,9 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, seed=0)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
-    ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     for name in BRANCH_NAMES:
         ctx.expect_origin_distance(name, "hub", axes="xy", max_dist=0.12)

@@ -418,7 +418,7 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
 
     # Default exact visual connectivity gate for floating/disconnected subassemblies inside one part.
-    ctx.check_part_geometry_connected()
+    ctx.fail_if_part_contains_disconnected_geometry_islands()
 
     # Encode the actual visual/mechanical claims with prompt-specific exact checks.
     # If you add a warning-tier heuristic and it fires, investigate it with
@@ -446,7 +446,7 @@ def run_tests() -> TestReport:
     # If the object has a mounted subassembly, prefer exact `expect_contact(...)`,
     # `expect_gap(...)`, `expect_overlap(...)`, and `expect_within(...)` checks on
     # named local features over broad warning-tier heuristics.
-    ctx.check_part_geometry_connected()
+    ctx.fail_if_part_contains_disconnected_geometry_islands()
 
     ctx.expect_within(fan, nacelle, axes="xy", inner_elem=fan_blades, outer_elem=nacelle_shell)
     ctx.expect_within(fan, nacelle, axes="xy", inner_elem=spinner, outer_elem=nacelle_shell)

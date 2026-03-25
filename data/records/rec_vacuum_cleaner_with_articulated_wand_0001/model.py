@@ -312,8 +312,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "main_body", "connector_hose", reason="hose cuff plugs into the intake collar"
     )
@@ -321,7 +321,7 @@ def run_tests() -> TestReport:
     ctx.allow_overlap(
         "wand", "floor_head", reason="swivel neck shares conservative collision volume at the pivot"
     )
-    ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_overlap("main_body", "connector_hose", axes="xy", min_overlap=0.02)
     ctx.expect_aabb_overlap("wand", "floor_head", axes="xy", min_overlap=0.01)

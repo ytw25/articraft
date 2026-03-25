@@ -688,7 +688,7 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
 
     # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
     # Default broad overlap warning backstop; conservative and non-blocking by default.
     ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 

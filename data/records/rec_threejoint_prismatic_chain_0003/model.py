@@ -459,9 +459,9 @@ def run_tests() -> TestReport:
     )
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.03)
-    ctx.warn_if_part_geometry_disconnected(use="visual")
-    ctx.check_articulation_overlaps(
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.03)
+    ctx.warn_if_part_contains_disconnected_geometry_islands(use="visual")
+    ctx.fail_if_articulation_overlaps(
         max_pose_samples=96,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,

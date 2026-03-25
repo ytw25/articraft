@@ -425,8 +425,8 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
     ctx.allow_overlap("cpu_retention_arm", "cpu_socket", reason="sleeved lever wraps a retention peg")
     ctx.allow_overlap("pcie_latch", "expansion_zone", reason="hinge barrel nests into the slot-end pivot boss")
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected(use="visual")
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
+    ctx.warn_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.warn_if_coplanar_surfaces(use="visual")
     ctx.warn_if_overlaps(
         max_pose_samples=96,

@@ -387,8 +387,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
     ctx.allow_overlap(
         "shoulder_link",
         "tool_head",
@@ -404,7 +404,7 @@ def run_tests() -> TestReport:
         "wrist_link",
         reason="stowed wrist link passes close to the base housing; conservative AABB overlap is acceptable",
     )
-    ctx.check_no_overlaps(
+    ctx.fail_if_parts_overlap_in_sampled_poses(
         max_pose_samples=128,
         overlap_tol=0.004,
         overlap_volume_tol=0.0,

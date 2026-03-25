@@ -368,14 +368,14 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "cart_body",
         "lid",
         reason="The grill hood is visually modeled as a solid shell over the cookbox, so generated collision hulls conservatively overlap through the enclosed cooking volume.",
     )
-    ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=192, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_overlap("lid", "cart_body", axes="xy", min_overlap=0.24)
 
@@ -479,7 +479,7 @@ def run_tests() -> TestReport:
     with ctx.pose(
         lid_hinge=1.20, knob_1_joint=4.0, knob_2_joint=3.1, knob_3_joint=2.2, knob_4_joint=1.0
     ):
-        ctx.check_no_overlaps(max_pose_samples=1, overlap_tol=0.004, overlap_volume_tol=0.0)
+        ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=1, overlap_tol=0.004, overlap_volume_tol=0.0)
 
     return ctx.report()
 

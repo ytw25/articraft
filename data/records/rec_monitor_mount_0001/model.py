@@ -248,8 +248,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
 
     ctx.allow_overlap(
         "lower_arm", "upper_arm", reason="elbow clevis captures the upper arm pivot sleeve"
@@ -261,7 +261,7 @@ def run_tests() -> TestReport:
         "head", "vesa_plate", reason="screen tilt trunnion sits between the head yoke ears"
     )
 
-    ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=160, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_aabb_gap("lower_arm", "desk_clamp", axis="z", max_gap=0.01, max_penetration=0.008)
     ctx.expect_aabb_overlap("lower_arm", "desk_clamp", axes="xy", min_overlap=0.02)

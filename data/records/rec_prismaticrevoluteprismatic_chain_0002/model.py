@@ -301,14 +301,14 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
     ctx.allow_overlap(
         "elbow_stage",
         "extension_inner",
         reason="the telescoping inner stage is intentionally nested inside the elbow sleeve",
     )
-    ctx.check_no_overlaps(max_pose_samples=96, overlap_tol=0.003, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=96, overlap_tol=0.003, overlap_volume_tol=0.0)
     ctx.expect_origin_distance("carriage", "base_frame", axes="xy", max_dist=0.02)
     ctx.expect_aabb_overlap("carriage", "base_frame", axes="xy", min_overlap=0.10)
     ctx.expect_origin_gap("elbow_stage", "base_frame", axis="z", min_gap=0.015)

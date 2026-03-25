@@ -234,8 +234,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.01)
-    ctx.check_part_geometry_connected(use="visual")
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.01)
+    ctx.fail_if_part_contains_disconnected_geometry_islands(use="visual")
     ctx.allow_overlap(
         "guide_rails",
         "left_jaw",
@@ -246,7 +246,7 @@ def run_tests() -> TestReport:
         "right_jaw",
         reason="generated convex hulls can conservatively bridge the open rear guide grooves",
     )
-    ctx.check_no_overlaps(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=128, overlap_tol=0.003, overlap_volume_tol=0.0)
 
     ctx.expect_origin_distance("guide_rails", "body", axes="xy", max_dist=0.035)
     ctx.expect_joint_motion_axis(

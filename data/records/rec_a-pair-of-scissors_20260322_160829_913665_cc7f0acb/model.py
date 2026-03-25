@@ -167,14 +167,14 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
 
     # Broad sensors
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
 
     # Allowances: Scissor blades cross/touch at the pivot and along the edge.
     ctx.allow_overlap("upper_blade", "lower_blade", reason="blades must touch to cut")
 
     # Joint clearance check
-    ctx.check_articulation_overlaps(max_pose_samples=64)
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
     # Global overlap check
     ctx.warn_if_overlaps(max_pose_samples=64, ignore_adjacent=True, ignore_fixed=True)
 

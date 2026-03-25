@@ -213,14 +213,14 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
     ctx.allow_overlap(
         "mount_base",
         "sensor_head",
         reason="Conservative AABB false positive: the sensor rolls inside the open gap between side towers while remaining above the base plate.",
     )
-    ctx.check_no_overlaps(max_pose_samples=192, overlap_tol=0.001, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=192, overlap_tol=0.001, overlap_volume_tol=0.0)
     ctx.expect_origin_distance("pitch_cradle", "mount_base", axes="xy", max_dist=0.005)
     ctx.expect_origin_distance("sensor_head", "pitch_cradle", axes="xy", max_dist=0.025)
     ctx.expect_origin_distance("sensor_head", "mount_base", axes="xy", max_dist=0.025)

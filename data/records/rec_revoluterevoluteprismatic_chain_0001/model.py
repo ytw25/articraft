@@ -205,8 +205,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
     ctx.allow_overlap(
         "bench_base",
         "upper_arm",
@@ -217,7 +217,7 @@ def run_tests() -> TestReport:
         "forearm",
         reason="shared elbow sleeve and hub at the revolute axle",
     )
-    ctx.check_no_overlaps(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=160, overlap_tol=0.002, overlap_volume_tol=0.0)
     ctx.expect_origin_gap("upper_arm", "bench_base", axis="z", min_gap=0.10)
     ctx.expect_origin_gap("forearm", "bench_base", axis="z", min_gap=0.10)
     ctx.expect_origin_gap("tool_slide", "bench_base", axis="z", min_gap=0.10)

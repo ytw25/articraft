@@ -816,8 +816,8 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_articulation_origin_near_geometry(tol=0.012)
-    ctx.check_no_overlaps(
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.012)
+    ctx.fail_if_parts_overlap_in_sampled_poses(
         max_pose_samples=96,
         overlap_tol=0.003,
         overlap_volume_tol=0.0,

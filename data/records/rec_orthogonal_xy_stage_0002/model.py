@@ -371,14 +371,14 @@ def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.check_joint_origin_near_geometry(tol=0.02)
-    ctx.check_articulation_origin_near_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
+    ctx.fail_if_articulation_origin_far_from_geometry(tol=0.02)
 
     mesh_dir = Path(MESH_DIR)
     for mesh_name in TOPOLOGY_QC_MESHES:
         _assert_closed_obj_mesh(mesh_dir / mesh_name)
 
-    ctx.check_no_overlaps(
+    ctx.fail_if_parts_overlap_in_sampled_poses(
         max_pose_samples=128,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,

@@ -140,9 +140,9 @@ def run_tests() -> TestReport:
     ctx.check_mesh_files_exist()
 
     # Default broad sensor; do not remove. Tune params only if warranted.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
+    ctx.warn_if_articulation_origin_far_from_geometry(tol=0.015)
     # Default broad sensor; do not remove. Tune params only if warranted.
-    ctx.warn_if_part_geometry_disconnected()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
 
     # Allow overlaps for the hubs which are nested by design
     ctx.allow_overlap("base", "lower_arm", reason="shoulder hub overlaps mounting block top")
@@ -150,7 +150,7 @@ def run_tests() -> TestReport:
     ctx.allow_overlap("upper_arm", "microphone", reason="wrist hubs overlap")
 
     # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
+    ctx.fail_if_articulation_overlaps(max_pose_samples=128)
     # Default broad sensor; do not remove. Tune params only if warranted.
     ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 
