@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_dock_loading_ramp_0002",
+  "created_at": "2026-03-26T14:16:51Z",
+  "updated_at": "2026-03-26T17:30:12Z",
+  "rating": 3,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "dock_loading_ramp",
+  "source": {
+    "run_id": "run_20260326_102121_239999_new-prompts-part1-20260325",
+    "prompt_batch_id": null,
+    "batch_spec_id": "new_prompts_part1_20260325",
+    "row_id": "dock_loading_ramp_new_1",
+    "prompt_index": 79
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Dock loading ramp New 1",
+    "prompt_preview": "An adjustable-height dock leveler with a rectangular steel deck plate hinged at the rear edge to a pit frame, two hydraulic-cylinder-style actuator housings..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "62a1c27d4052c81e5d506892cd2b1843fd601842a564042c675a0be7b7fee9cc",
+    "model_py_sha256": "6208d8d8c78f812d2d9d59e0897032e8e642d037fdcf9e3886610d056d92c840"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
