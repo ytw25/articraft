@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_radial_arm_with_sliding_carriage_0003",
+  "created_at": "2026-03-25T23:15:42Z",
+  "updated_at": "2026-03-25T23:18:46Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "radial_arm_with_sliding_carriage",
+  "source": {
+    "run_id": "run_20260325_231541_877152_20260325-sdk-hybrid-fill-to-4-gpt54-medium",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_fill_to_4_gpt54_medium",
+    "row_id": "radial_arm_with_sliding_carriage_to4_medium_03",
+    "prompt_index": 38
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Radial arm with sliding carriage Medium 3",
+    "prompt_preview": "A radial arm with sliding carriage. A base column supports a horizontal arm that sweeps in plan, and a small carriage rides along the arm. The arm rotates ab..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "bcccf54ac81f8693f221dae6562e5481b2ce3c87a146b917554e3ae5cf2665b7",
+    "model_py_sha256": "c9c28849b38edf91d5b019e0d9db79f348f8341f564508dec3b41e0f9970607a"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

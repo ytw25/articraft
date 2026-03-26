@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_dualcolumn_lift_carriage_0004",
+  "created_at": "2026-03-25T23:15:42Z",
+  "updated_at": "2026-03-25T23:23:31Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "dualcolumn_lift_carriage",
+  "source": {
+    "run_id": "run_20260325_231541_877152_20260325-sdk-hybrid-fill-to-4-gpt54-medium",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_fill_to_4_gpt54_medium",
+    "row_id": "dualcolumn_lift_carriage_to4_medium_04",
+    "prompt_index": 7
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Dual-column lift carriage Medium 4",
+    "prompt_preview": "A compact dual-column lift carriage with twin round posts and a wide tooling plate. The columns are anchored to a heavy base and bridged at the top, while th..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "d54a3a5e4eceaa254557614a28fa08d7fac111f50de0433218cfcacd5e0ea822",
+    "model_py_sha256": "0b96ca087efc786e1ec36572ad49f98ae3dc82fdb284d0cfa037e4e8e7339cfe"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

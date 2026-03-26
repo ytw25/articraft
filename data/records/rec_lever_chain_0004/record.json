@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_lever_chain_0004",
+  "created_at": "2026-03-25T23:15:42Z",
+  "updated_at": "2026-03-25T23:26:52Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "lever_chain",
+  "source": {
+    "run_id": "run_20260325_231541_877152_20260325-sdk-hybrid-fill-to-4-gpt54-medium",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_sdk_hybrid_fill_to_4_gpt54_medium",
+    "row_id": "lever_chain_to4_medium_04",
+    "prompt_index": 18
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Lever chain Medium 4",
+    "prompt_preview": "A lever chain. A base lug supports three rigid lever bars in series with offset pin joints and a small end tab. All three joints are revolute about parallel..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "8121077bbd0a6cdf3d391bff98c4dd441d103b1bb31b1b003aafd44728c62503",
+    "model_py_sha256": "e127542d3062537595a40227afdb3eaf5cda8853cf328f601663b3f889d72208"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
