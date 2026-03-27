@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_air_purifier_with_filter_door_0006",
+  "created_at": "2026-03-25T13:54:24Z",
+  "updated_at": "2026-03-25T14:33:50Z",
+  "rating": 4,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "air_purifier_with_filter_door",
+  "source": {
+    "run_id": "run_20260325_135424_959434_prompt-test",
+    "prompt_batch_id": null,
+    "batch_spec_id": "prompt_test",
+    "row_id": "row_0005",
+    "prompt_index": 5
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Air purifier with filter door 5",
+    "prompt_preview": "A mid-size rectangular air purifier with a wide, low-profile body, a full-width rear intake grille, and a hinged bottom panel for filter access."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "7627c62ad787440eee36c330a893bdf136ca75806dc0f0d66661a9ceaef4dd5c",
+    "model_py_sha256": "ead55461f5c8ed0d19ef65e75820225d1f0bbbde36ca6698ff106b20b87fa302"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
