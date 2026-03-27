@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_dock_loading_ramp_0003",
+  "created_at": "2026-03-26T14:16:58Z",
+  "updated_at": "2026-03-26T17:13:33Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "dock_loading_ramp",
+  "source": {
+    "run_id": "run_20260326_102121_239999_new-prompts-part1-20260325",
+    "prompt_batch_id": null,
+    "batch_spec_id": "new_prompts_part1_20260325",
+    "row_id": "dock_loading_ramp_new_2",
+    "prompt_index": 80
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Dock loading ramp New 2",
+    "prompt_preview": "An edge-of-dock leveler bolting to the dock-face wall above floor level, with a flat deck plate hanging from a top hinge on a wall-mount frame and a folding..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "0b9f66bf805aa93cead4311a2d9fbbca6ea236d1ab4e088653d7c571f3c83533",
+    "model_py_sha256": "32ca29c38fc47c361a7d76a3cda84ce6c150b3f4c188c7a5f44e07fae51a5a6d"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
