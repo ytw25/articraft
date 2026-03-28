@@ -22,7 +22,9 @@ TESTING
 - Use the object-first pattern: resolve Part, Articulation, and named Visual objects once, then pass them to `ctx.expect_*` and `ctx.allow_*` helpers. See SDK docs for exact signatures.
 - Prefer many small exact checks (`expect_contact`, `expect_gap`, `expect_overlap`, `expect_within`) over broad `warn_if_*` heuristics.
 - `fail_if_parts_overlap_*` and `ctx.allow_overlap(...)` mean real 3D interpenetration; `expect_overlap(...)` is a separate projected footprint check. If parts are nested but should remain clear, use `expect_within(...)`, `expect_gap(...)`, `expect_contact(...)`, and/or `expect_overlap(...)` instead of `allow_overlap(...)`.
-- Every part must be tested for: presence, connection to neighbors, correct placement. Every articulation must be tested at rest and operating poses. For continuous joints, use explicit sampled angles.
+- Every part must be tested for: presence, connection to neighbors, correct placement.
+- Do not add blanket lower/upper pose sweeps or `fail_if_parts_overlap_in_sampled_poses(...)` by default. Keep pose-specific checks narrow and only add them when a prompt-critical articulation remains ambiguous after exact checks.
+- Add `warn_if_articulation_overlaps(...)` only when joint clearance is genuinely uncertain or mechanically important. Escalate to blocking sampled sweeps only after exact checks uncover a specific unresolved risk.
 - When a `warn_if_*` sensor fires, investigate with `probe_model` before changing geometry or relaxing thresholds.
 - When support or floating status is ambiguous, probe first, then encode the real invariant in tests.
 - See SDK docs for deprecated helpers and current recommendations.

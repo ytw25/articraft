@@ -73,23 +73,9 @@ ctx.fail_if_parts_overlap_in_current_pose()
 Then add prompt-specific exact assertions such as `expect_gap(...)`,
 `expect_overlap(...)`, `expect_contact(...)`, and `expect_within(...)`.
 
-For bounded `REVOLUTE` and `PRISMATIC` joints, also add explicit lower/upper
-pose checks for both no overlap and no floating:
-
-```python
-hinge = object_model.get_articulation("lid_hinge")
-limits = hinge.motion_limits
-if limits is not None and limits.lower is not None and limits.upper is not None:
-    with ctx.pose({hinge: limits.lower}):
-        ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_lower_no_overlap")
-        ctx.fail_if_isolated_parts(name="lid_hinge_lower_no_floating")
-    with ctx.pose({hinge: limits.upper}):
-        ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_upper_no_overlap")
-        ctx.fail_if_isolated_parts(name="lid_hinge_upper_no_floating")
-```
-
-This pattern is not applicable to `CONTINUOUS` joints because they do not expose
-finite `lower` / `upper` limits.
+Keep pose-specific checks lean. Do not add blanket lower/upper pose sweeps or
+sampled-pose overlap checks by default. Add pose-specific assertions only when a
+prompt-critical articulation remains ambiguous after exact rest-pose checks.
 
 `ctx.fail_if_isolated_parts()` and `find_unsupported_parts()` use
 grounded-component semantics: they group parts by actual physical contact and
@@ -98,7 +84,8 @@ detached groups such as `lid + top_vent`, not only singleton orphan parts.
 
 ## Parameter Conventions
 
-These rules apply across the API unless a method says otherwise.
+These rules apply across most of the API. Method signatures below are
+authoritative when a helper differs.
 
 - `link_*`, `part`, `positive_link`, `negative_link`, `inner_link`, and
   `outer_link` accept either a `Part` object or a part name string. The API uses
@@ -264,12 +251,13 @@ Fails when distinct parts overlap in the current pose.
 
 This is the recommended default overlap gate.
 
-### `fail_if_parts_overlap_in_sampled_poses(*, max_pose_samples=128, overlap_tol=None, overlap_volume_tol=None, ignore_adjacent=False, ignore_fixed=True) -> bool`
+### `fail_if_parts_overlap_in_sampled_poses(*, max_pose_samples=128, overlap_tol=None, overlap_volume_tol=None, ignore_adjacent=False, ignore_fixed=True, name=None) -> bool`
 
 Fails on sampled-pose overlaps across the full model.
 
 - `ignore_adjacent`: ignore directly articulated parent/child pairs.
 - `ignore_fixed`: ignore `FIXED` articulation pairs.
+- `name`: optional override for the recorded check name.
 
 Use when a broader pose sweep is required than the rest-pose default.
 
@@ -358,29 +346,3 @@ axes.
 
 - `margin`: allowed slack outside the outer bounds.
 - `inner_elem`, `outer_elem`: optional named element scope.
-
-## Minimal Example
-
-```python
-from sdk import TestContext
-
-
-def run_tests(object_model):
-    ctx = TestContext(object_model, seed=0)
-
-    base = object_model.get_part("base")
-    lid = object_model.get_part("lid")
-    hinge = object_model.get_articulation("lid_hinge")
-
-    ctx.check_model_valid()
-    ctx.check_mesh_assets_ready()
-    ctx.fail_if_isolated_parts()
-    ctx.warn_if_part_contains_disconnected_geometry_islands()
-    ctx.fail_if_parts_overlap_in_current_pose()
-
-    with ctx.pose({hinge: 0.0}):
-        ctx.expect_gap(lid, base, axis="z", max_gap=0.001, max_penetration=0.0)
-        ctx.expect_overlap(lid, base, axes="xy", min_overlap=0.05)
-
-    return ctx.report()
-```

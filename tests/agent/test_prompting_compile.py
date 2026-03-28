@@ -48,7 +48,6 @@ def _assert_shared_contract(text: str, *, budget: int) -> None:
 
     # Probe helpers
     assert "find_floating_parts(...)" in text
-    assert "sample_poses(...)" in text
     assert "`summary(...)`, `dims(...)`, `projection(...)`" in text
 
     # Object-first pattern
@@ -62,6 +61,9 @@ def _assert_shared_contract(text: str, *, budget: int) -> None:
     assert "expect_within" in text
     assert "keep the scaffolded baseline check stack" in text
     assert "warn_if_*" in text
+    assert "Do not add blanket lower/upper pose sweeps" in text
+    assert "fail_if_parts_overlap_in_sampled_poses(...)" in text
+    assert "warn_if_articulation_overlaps(...)" in text
     assert "real 3D interpenetration" in text
     assert "projected footprint check" in text
 

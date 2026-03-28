@@ -3,7 +3,7 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-from sdk_hybrid import ArticulatedObject, TestContext, TestReport
+from sdk import ArticulatedObject, TestContext, TestReport
 
 
 def build_object_model() -> ArticulatedObject:
@@ -29,12 +29,6 @@ def run_tests() -> TestReport:
     # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
     # `expect_within(...)` checks instead.
     ctx.fail_if_parts_overlap_in_current_pose()
-
-    # Keep pose-specific checks lean.
-    # Do not add blanket lower/upper pose sweeps or
-    # `fail_if_parts_overlap_in_sampled_poses(...)` by default.
-    # Add `ctx.warn_if_articulation_overlaps(...)` only when joint clearance is
-    # genuinely uncertain or mechanically important.
 
     return ctx.report()
 

@@ -30,12 +30,6 @@ def run_tests() -> TestReport:
     # `expect_within(...)` checks instead.
     ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Keep pose-specific checks lean.
-    # Do not add blanket lower/upper pose sweeps or
-    # `fail_if_parts_overlap_in_sampled_poses(...)` by default.
-    # Add `ctx.warn_if_articulation_overlaps(...)` only when joint clearance is
-    # genuinely uncertain or mechanically important.
-
     return ctx.report()
 
 

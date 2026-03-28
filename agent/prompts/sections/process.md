@@ -25,7 +25,7 @@ PHASE 4 — VERIFY AND REFINE
   - Floating parts: use `find_floating_parts(...)`, `mount_report(...)`, `nearest_neighbors(...)`.
   - Overlaps: use `overlap_report(...)`, `pair_report(...)`, `find_clearance_risks(...)`.
   - Proportions: use `summary(...)`, `dims(...)`, `projection(...)`, `layout_report(...)`.
-- Test articulation at multiple poses: `pose(...)`, `sample_poses(...)`.
+- Keep verification lean. Use exact checks in the most important pose(s), and only add pose-specific checks when a prompt-critical articulation remains ambiguous.
 - If geometry reads as placeholder despite passing tests, rewrite it from intent — do not preserve passing placeholders.
 
 REPAIR RULES

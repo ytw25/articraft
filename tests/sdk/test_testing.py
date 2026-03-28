@@ -575,18 +575,14 @@ def test_fail_if_parts_overlap_in_sampled_poses_records_failure() -> None:
         max_pose_samples=8,
         overlap_tol=0.001,
         overlap_volume_tol=0.0,
+        name="sampled_clearance",
     )
 
     report = ctx.report()
     assert not report.passed
-    assert report.checks == (
-        "fail_if_parts_overlap_in_sampled_poses(samples=8,ignore_adjacent=False,ignore_fixed=True)",
-    )
+    assert report.checks == ("sampled_clearance",)
     assert len(report.failures) == 1
-    assert (
-        report.failures[0].name
-        == "fail_if_parts_overlap_in_sampled_poses(samples=8,ignore_adjacent=False,ignore_fixed=True)"
-    )
+    assert report.failures[0].name == "sampled_clearance"
     assert "Overlaps detected" in report.failures[0].details
     assert "relation=unrelated" in report.failures[0].details
 
