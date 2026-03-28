@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_toy_model_planes_0003",
+  "created_at": "2026-03-28T03:21:17Z",
+  "updated_at": "2026-03-28T16:07:08Z",
+  "rating": 4,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "toy_model_planes",
+  "source": {
+    "run_id": "run_20260325_223731_504956_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "toy_model_planes_backfill_2",
+    "prompt_index": 54
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Toy model planes Backfill 2",
+    "prompt_preview": "A realistic, highly detailed Toy Model Planes in a refined premium variant, with a compact fuselage, wing-tail assembly, and small propeller or display-stand..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "5d5457236731c7dfb8f9c065df9338b1c1e45e786b8b57e7d7620ae0c7724337",
+    "model_py_sha256": "437c8ecaefa6d6541effd314b4d3ad5294f03dc1c3ea5c8ba976d0cc48b9474a"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

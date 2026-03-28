@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_task-generate-a-high-precision-3d-cad-model-of-a_20260322_165337_642444_f9307d50",
+  "created_at": "2026-03-22T16:53:37Z",
+  "updated_at": "2026-03-22T17:09:59Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": null,
+  "source": {
+    "run_id": "run_20260322_165337_642444_f9307d50",
+    "prompt_batch_id": null,
+    "batch_spec_id": null,
+    "row_id": null,
+    "prompt_index": null
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Task: Generate a high-precision 3D CAD model of a standard Deep Groove Ball Bearing assembly.",
+    "prompt_preview": "Task: Generate a high-precision 3D CAD model of a standard Deep Groove Ball Bearing assembly. Structural Components & Geometry: Outer Ring: A hollow cylinder..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "71fc142f76d5cfebff6d71b5296f27cc281320688f37224448dbca3927c3e8a9",
+    "model_py_sha256": "da9b44a05e6e6de74e35f7955071eb93ca2a74f5cfccc6b79ddec1dc73ecd017"
+  },
+  "collections": [
+    "workbench"
+  ]
+}

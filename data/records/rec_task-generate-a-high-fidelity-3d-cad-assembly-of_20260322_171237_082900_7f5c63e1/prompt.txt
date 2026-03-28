@@ -1,0 +1,21 @@
+ Task: Generate a high-fidelity 3D CAD assembly of a Universal Joint (Cardan Joint) designed for drivetrain torque transmission.
+
+Structural Components & Geometry:
+
+Driving and Driven Yokes: Two U-shaped forging structures with precision-bored eyelets. Each yoke features a splined shaft interface for torque input/output. The yokes are oriented at a 90-degree phase shift relative to each other.
+
+Central Spider (Cross): A cruciform component with four cylindrical trunnions machined to high tolerances. The axes of the two pairs of trunnions must be perfectly perpendicular and intersect at a single central point.
+
+Bearing Cups: Four cylindrical bearing assemblies (incorporating needle rollers) press-fitted into the yoke eyelets to encapsulate the spider trunnions, secured by circlips or snap rings.
+
+Mechanical Constraints & Kinematics:
+
+Revolute Joints: Define four revolute pairs between the spider trunnions and the bearing cups.
+
+Angular Deflection: The assembly must support an operating angle (articulation) between the input and output shafts ranging from 0 to 45 degrees.
+
+Rotational Transmission: Constrain the mechanism such that rotation of the driving yoke is transmitted to the driven yoke through the spider, maintaining the intersection of axes at the geometric center.
+
+Phasing: Ensure the cross-axes remain coplanar during full 360-degree rotation of the input shaft.
+
+Technical Specifications: Apply structural fillets to all stress-concentration areas of the yokes. The model must represent a zero-interference assembly throughout the entire range of angular motion. 
