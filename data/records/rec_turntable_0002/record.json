@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_turntable_0002",
+  "created_at": "2026-03-28T03:37:50Z",
+  "updated_at": "2026-03-28T16:03:16Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "turntable",
+  "source": {
+    "run_id": "run_20260325_223731_504956_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "turntable_backfill_1",
+    "prompt_index": 63
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Turntable Backfill 1",
+    "prompt_preview": "A realistic, highly detailed Turntable in a rugged utility variant, with a base plinth, rotating platter on a central spindle, and a pivoting tonearm assembl..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "9fce85b45f2fcef311f79da3047f1210e1ce54c38eea580c96f764d54289b11a",
+    "model_py_sha256": "d35019e26a8df69f12dbbf6a986dca6b0aae7a7e7e8510fcf44b8e772496f880"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
