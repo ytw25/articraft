@@ -1398,6 +1398,7 @@ class TestContext:
         overlap_volume_tol: Optional[float] = None,
         ignore_adjacent: bool = False,
         ignore_fixed: bool = True,
+        name: Optional[str] = None,
     ) -> bool:
         return self._check_overlaps_impl(
             max_pose_samples=max_pose_samples,
@@ -1405,7 +1406,7 @@ class TestContext:
             overlap_volume_tol=overlap_volume_tol,
             ignore_adjacent=ignore_adjacent,
             ignore_fixed=ignore_fixed,
-            check_name=None,
+            check_name=name,
             warn_only=False,
         )
 

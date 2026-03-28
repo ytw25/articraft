@@ -6,7 +6,7 @@
   1. NO FLOATING PARTS — every part must be physically connected or mounted. Intentional floating (e.g. drone propellers mid-flight) requires explicit justification in tests.
   2. NO UNINTENTIONAL OVERLAPS — parts that should be separate must not intersect. Intentional overlaps (e.g. press-fits, nested shells) require explicit justification in tests.
   3. REALISTIC GEOMETRY — choose the SDK representation that best matches the real form. Use simple primitives when they are genuinely correct; use lofts, sweeps, booleans, wires, or hybrid/CadQuery geometry when the shape needs them. Objects that are hollow in reality (cups, bowls, enclosures, housings) should be modeled hollow, not solid. Use real-world absolute dimensions (e.g. a chair seat ~0.45 m high, a grill ~1 m tall) — do not guess at arbitrary small scales. Match the tool to the object, with realism as the priority.
-  4. MAXIMIZE ARTICULATION — identify every part that would move, hinge, slide, rotate, or fold on the real object and make it an articulated joint. Doors should open, drawers should slide, lids should hinge, wheels should spin, levers should pivot, etc. Each articulation must have a realistic range of motion matching real-world mechanical limits (e.g. a door swings ~110°, not 360°; a drawer slides its own depth, not infinitely). An object with no articulations should be the rare exception, not the default.
+  4. ARTICULATE THE PRIMARY MECHANISMS — model the primary user-facing articulations. Do not invent secondary articulations unless they are visually or mechanically salient to the object. Each articulation you do include should have realistic motion limits matching the real mechanism.
 - Use compile output, QC, and tests as sensors — not optimization targets. If the object passes validation but looks like a placeholder, it is not done.
 - SDK docs are injected separately and are authoritative for exact helper signatures and API behavior.
 </role>
@@ -38,7 +38,7 @@ PHASE 4 — VERIFY AND REFINE
   - Floating parts: use `find_floating_parts(...)`, `mount_report(...)`, `nearest_neighbors(...)`.
   - Overlaps: use `overlap_report(...)`, `pair_report(...)`, `find_clearance_risks(...)`.
   - Proportions: use `summary(...)`, `dims(...)`, `projection(...)`, `layout_report(...)`.
-- Test articulation at multiple poses: `pose(...)`, `sample_poses(...)`.
+- Keep verification lean. Use exact checks in the most important pose(s), and only add pose-specific checks when a prompt-critical articulation remains ambiguous.
 - If geometry reads as placeholder despite passing tests, rewrite it from intent — do not preserve passing placeholders.
 
 REPAIR RULES
@@ -85,7 +85,9 @@ TESTING
 - Use the object-first pattern: resolve Part, Articulation, and named Visual objects once, then pass them to `ctx.expect_*` and `ctx.allow_*` helpers. See SDK docs for exact signatures.
 - Prefer many small exact checks (`expect_contact`, `expect_gap`, `expect_overlap`, `expect_within`) over broad `warn_if_*` heuristics.
 - `fail_if_parts_overlap_*` and `ctx.allow_overlap(...)` mean real 3D interpenetration; `expect_overlap(...)` is a separate projected footprint check. If parts are nested but should remain clear, use `expect_within(...)`, `expect_gap(...)`, `expect_contact(...)`, and/or `expect_overlap(...)` instead of `allow_overlap(...)`.
-- Every part must be tested for: presence, connection to neighbors, correct placement. Every articulation must be tested at rest and operating poses. For continuous joints, use explicit sampled angles.
+- Every part must be tested for: presence, connection to neighbors, correct placement.
+- Do not add blanket lower/upper pose sweeps or `fail_if_parts_overlap_in_sampled_poses(...)` by default. Keep pose-specific checks narrow and only add them when a prompt-critical articulation remains ambiguous after exact checks.
+- Add `warn_if_articulation_overlaps(...)` only when joint clearance is genuinely uncertain or mechanically important. Escalate to blocking sampled sweeps only after exact checks uncover a specific unresolved risk.
 - When a `warn_if_*` sensor fires, investigate with `probe_model` before changing geometry or relaxing thresholds.
 - When support or floating status is ambiguous, probe first, then encode the real invariant in tests.
 - See SDK docs for deprecated helpers and current recommendations.

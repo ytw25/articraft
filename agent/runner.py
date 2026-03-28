@@ -135,7 +135,6 @@ def run_tests() -> TestReport:
     # - hero features are present and legible
     # - mounted parts are connected/seated, not floating
     # - important parts are in the right place
-    # - key poses stay believable
     # - each new visible form or mechanism has a matching assertion
     # Resolve exact Part / Articulation / named Visual objects once here, then
     # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
@@ -148,20 +147,17 @@ def run_tests() -> TestReport:
     # lid_hinge = object_model.get_articulation("lid_hinge")
     # hinge_leaf = lid.get_visual("hinge_leaf")
     # body_leaf = body.get_visual("body_leaf")
-    # hinge_limits = lid_hinge.motion_limits
     # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
     # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
     # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # if hinge_limits is not None and hinge_limits.lower is not None and hinge_limits.upper is not None:
-    #     with ctx.pose({lid_hinge: hinge_limits.lower}):
-    #         ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_lower_no_overlap")
-    #         ctx.fail_if_isolated_parts(name="lid_hinge_lower_no_floating")
-    #     with ctx.pose({lid_hinge: hinge_limits.upper}):
-    #         ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_upper_no_overlap")
-    #         ctx.fail_if_isolated_parts(name="lid_hinge_upper_no_floating")
+    # Keep pose-specific checks lean.
+    # Do not add blanket lower/upper pose sweeps or
+    # `ctx.fail_if_parts_overlap_in_sampled_poses(...)` by default.
     # If the object has a mounted subassembly, prefer exact `expect_contact(...)`,
     # `expect_gap(...)`, `expect_overlap(...)`, and `expect_within(...)` checks on
     # named local features over the broad rest-pose overlap backstop.
+    # Add `ctx.warn_if_articulation_overlaps(...)` only when joint clearance is
+    # genuinely uncertain or mechanically important.
     # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
     return ctx.report()
 
