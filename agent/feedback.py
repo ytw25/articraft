@@ -190,12 +190,11 @@ OVERLAP_WARNING_SPEC = SignalSpec(
     group="qc",
 )
 DISCONNECTED_GEOMETRY_SPEC = SignalSpec(
-    severity="failure",
+    severity="warning",
     kind="disconnected_geometry",
-    code="TEST_DISCONNECTED_GEOMETRY",
+    code="WARN_DISCONNECTED_GEOMETRY",
     source="tests",
     group="qc",
-    blocking=True,
 )
 ARTICULATION_ORIGIN_SPEC = SignalSpec(
     severity="warning",

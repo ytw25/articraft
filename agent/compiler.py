@@ -50,10 +50,6 @@ _GEOMETRY_QC_MARKERS = (
 _HYBRID_BASE_SDK_IMPORT_RE = re.compile(
     r"^\s*(?:from\s+sdk\s+import\b|import\s+sdk\b)", re.MULTILINE
 )
-_BLOCKING_TEST_WARNING_MARKERS = (
-    "disconnected geometry islands detected",
-    "floating geometry",
-)
 
 
 def _validate_hybrid_script_imports(script_path: Path) -> None:
@@ -952,23 +948,6 @@ def _run_required_tests(
             lines.append(f"- {name}: {details}")
         if len(list(failures)) > 10:
             lines.append(f"... ({len(list(failures)) - 10} more)")
-        exc = ValueError("\n".join(lines))
-        setattr(exc, "test_report", report)
-        raise exc
-
-    warnings = tuple(str(item) for item in getattr(report, "warnings", ()) or ())
-    blocking_warnings = [
-        warning
-        for warning in warnings
-        if any(marker in warning.lower() for marker in _BLOCKING_TEST_WARNING_MARKERS)
-    ]
-    if blocking_warnings:
-        lines = ["URDF tests failed:"]
-        for warning in blocking_warnings[:10]:
-            summary = warning.splitlines()[0]
-            lines.append(f"- blocking_test_warning: {summary}")
-        if len(blocking_warnings) > 10:
-            lines.append(f"... ({len(blocking_warnings) - 10} more)")
         exc = ValueError("\n".join(lines))
         setattr(exc, "test_report", report)
         raise exc

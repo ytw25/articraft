@@ -117,8 +117,9 @@ def test_compile_signal_bundle_parses_common_broad_qc_warning_families() -> None
     disconnected_signal = next(
         signal for signal in bundle.signals if signal.kind == "disconnected_geometry"
     )
-    assert disconnected_signal.severity == "failure"
-    assert disconnected_signal.blocking is True
+    assert disconnected_signal.severity == "warning"
+    assert disconnected_signal.code == "WARN_DISCONNECTED_GEOMETRY"
+    assert disconnected_signal.blocking is False
     assert (
         disconnected_signal.summary
         == "Exact visual connectivity check found disconnected geometry within a part."
@@ -158,6 +159,7 @@ def test_compile_signal_bundle_accepts_part_geometry_warning_name() -> None:
     disconnected_signal = next(
         signal for signal in bundle.signals if signal.kind == "disconnected_geometry"
     )
+    assert disconnected_signal.severity == "warning"
     assert (
         disconnected_signal.summary
         == "Exact visual connectivity check found disconnected geometry within a part."

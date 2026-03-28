@@ -302,7 +302,7 @@ def test_compile_urdf_report_preserves_run_test_warnings_on_success(tmp_path: Pa
     assert report.signal_bundle.status == "success"
 
 
-def test_compile_urdf_report_promotes_floating_geometry_warnings_to_failures(
+def test_compile_urdf_report_preserves_disconnected_geometry_warnings_on_success(
     tmp_path: Path,
 ) -> None:
     script_path = tmp_path / "model.py"
@@ -333,11 +333,17 @@ def test_compile_urdf_report_promotes_floating_geometry_warnings_to_failures(
         encoding="utf-8",
     )
 
-    with pytest.raises(RuntimeError, match="blocking_test_warning"):
-        compile_urdf_report(script_path, run_checks=True, target="full")
+    report = compile_urdf_report(script_path, run_checks=True, target="full")
+
+    assert "<robot" in report.urdf_xml
+    assert report.signal_bundle.status == "success"
+    assert report.warnings == [
+        "warn_if_part_contains_disconnected_geometry_islands(tol=1e-06): "
+        "Disconnected geometry islands detected:\npart='controls' connected=1/19"
+    ]
 
 
-def test_compile_urdf_report_keeps_disconnected_geometry_blocking_with_isolated_part_allowance(
+def test_compile_urdf_report_keeps_disconnected_geometry_as_warning_with_isolated_part_allowance(
     tmp_path: Path,
 ) -> None:
     script_path = tmp_path / "model.py"
@@ -347,8 +353,14 @@ def test_compile_urdf_report_keeps_disconnected_geometry_blocking_with_isolated_
         disconnected_base=True,
     )
 
-    with pytest.raises(RuntimeError, match="blocking_test_warning"):
-        compile_urdf_report(script_path, run_checks=True, target="full")
+    report = compile_urdf_report(script_path, run_checks=True, target="full")
+
+    assert "<robot" in report.urdf_xml
+    assert report.signal_bundle.status == "success"
+    assert any(
+        warning.startswith("warn_if_part_contains_disconnected_geometry_islands(tol=1e-06):")
+        for warning in report.warnings
+    )
 
 
 def test_compile_urdf_report_does_not_ignore_non_geometry_failures(tmp_path: Path) -> None:
