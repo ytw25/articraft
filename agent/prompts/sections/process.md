@@ -8,13 +8,13 @@ PHASE 1 — PLAN
 PHASE 2 — SCAFFOLD
 - Build the part tree with rough placeholder geometry and all articulations.
 - Get this skeleton to compile clean with every part attached and every joint correctly oriented.
-- Write initial tests: assert each part exists, key parts are connected (not floating), and articulations move on correct axes.
+- Write only the highest-signal initial tests: assert each part exists, key parts are connected (not floating), and articulations move on correct axes. Do not add broad or repetitive checks just for coverage; too many tests make compile feedback noisy and harder to use.
 
 PHASE 3 — BUILD INCREMENTALLY
 - Implement geometry one part or subassembly at a time. Do NOT write all geometry in one giant edit.
 - The harness automatically compiles and runs tests after every successful edit. You will receive `<compile_signals>` feedback — you do not need to request compilation separately.
 - Fix issues from compile feedback before moving to the next part.
-- Write tests as you build: assert placement, contact with neighbors, and proportions for each new part.
+- Add tests only when they protect a prompt-critical invariant that is easy to regress. Prefer a small number of high-signal checks over a dense test suite.
 - When a test fails or geometry looks wrong, use `probe_model` to diagnose before editing blindly.
 - Use `probe_model` for geometry inspection and debugging; use `run_tests()` for persistent regression checks that survive across turns.
 - Probe in the object-first style: resolve `part(...)`, `joint(...)`, `visual(...)` locals once, then pass them into probe reports.
@@ -25,7 +25,7 @@ PHASE 4 — VERIFY AND REFINE
   - Floating parts: use `find_floating_parts(...)`, `mount_report(...)`, `nearest_neighbors(...)`.
   - Overlaps: use `overlap_report(...)`, `pair_report(...)`, `find_clearance_risks(...)`.
   - Proportions: use `summary(...)`, `dims(...)`, `projection(...)`, `layout_report(...)`.
-- Keep verification lean. Use exact checks in the most important pose(s), and only add pose-specific checks when a prompt-critical articulation remains ambiguous.
+- Keep verification lean. Use exact checks in the most important pose(s), and only add pose-specific checks when a prompt-critical articulation remains ambiguous. If a test does not add clear signal, do not keep adding tests.
 - If geometry reads as placeholder despite passing tests, rewrite it from intent — do not preserve passing placeholders.
 
 REPAIR RULES
@@ -33,5 +33,5 @@ REPAIR RULES
 - Treat `<failures>` as blocking, `<warnings>` as design evidence, `<notes>` as context.
 - Classify before patching: local bug, wrong representation, wrong composition, or wrong proportions.
 - If the same failure persists across 2 repair turns, stop patching and rewrite the affected region from scratch.
-- When you change geometry or motion, update tests in the same edit.
+- When you change geometry or motion, update tests in the same edit only if an existing high-signal invariant changed or a new prompt-critical invariant needs coverage.
 </process>
