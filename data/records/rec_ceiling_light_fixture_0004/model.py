@@ -9,18 +9,18 @@ from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,
+    Box,
     Cylinder,
-    CylinderGeometry,
     Inertial,
     LatheGeometry,
     MotionLimits,
     Origin,
-    Sphere,
     TestContext,
     TestReport,
-    boolean_difference,
+    TorusGeometry,
     mesh_from_geometry,
 )
+
 
 ASSETS = AssetContext.from_script(__file__)
 
@@ -29,307 +29,285 @@ def _save_mesh(name: str, geometry):
     return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
 
 
-def _ring_band(
-    *,
-    outer_radius: float,
-    inner_radius: float,
-    height: float,
-    z_center: float,
-    radial_segments: int = 72,
-):
-    outer = CylinderGeometry(radius=outer_radius, height=height, radial_segments=radial_segments)
-    inner = CylinderGeometry(
-        radius=inner_radius,
-        height=height + 0.004,
-        radial_segments=radial_segments,
-    )
-    return boolean_difference(outer, inner).translate(0.0, 0.0, z_center)
-
-
-def _build_glass_bowl_mesh():
-    return LatheGeometry(
+def _build_dome_shade_mesh():
+    shell = LatheGeometry.from_shell_profiles(
         [
-            (0.046, -0.071),
-            (0.070, -0.079),
-            (0.105, -0.106),
-            (0.132, -0.145),
-            (0.145, -0.192),
-            (0.140, -0.240),
-            (0.112, -0.284),
-            (0.066, -0.318),
-            (0.018, -0.334),
-            (0.000, -0.334),
-            (0.000, -0.323),
-            (0.061, -0.310),
-            (0.104, -0.278),
-            (0.131, -0.236),
-            (0.136, -0.192),
-            (0.124, -0.148),
-            (0.098, -0.110),
-            (0.052, -0.078),
-            (0.028, -0.071),
+            (0.024, -0.018),
+            (0.052, -0.036),
+            (0.090, -0.072),
+            (0.126, -0.112),
+            (0.152, -0.148),
+            (0.160, -0.170),
         ],
-        segments=88,
+        [
+            (0.018, -0.022),
+            (0.046, -0.040),
+            (0.084, -0.075),
+            (0.119, -0.113),
+            (0.145, -0.147),
+            (0.152, -0.166),
+        ],
+        segments=80,
+        start_cap="flat",
+        end_cap="flat",
     )
+    shell.merge(
+        TorusGeometry(
+            radius=0.153,
+            tube=0.004,
+            radial_segments=18,
+            tubular_segments=72,
+        ).translate(0.0, 0.0, -0.167)
+    )
+    return shell
+
+
+def _build_canopy_shell_mesh():
+    shell = LatheGeometry.from_shell_profiles(
+        [
+            (0.010, 0.012),
+            (0.026, 0.014),
+            (0.044, 0.019),
+            (0.058, 0.027),
+            (0.061, 0.034),
+        ],
+        [
+            (0.006, 0.015),
+            (0.022, 0.017),
+            (0.040, 0.021),
+            (0.026, 0.028),
+            (0.006, 0.032),
+        ],
+        segments=72,
+        start_cap="flat",
+        end_cap="flat",
+    )
+    shell.merge(
+        TorusGeometry(
+            radius=0.059,
+            tube=0.0025,
+            radial_segments=14,
+            tubular_segments=64,
+        ).translate(0.0, 0.0, 0.031)
+    )
+    return shell
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="semi_flush_globe_fixture", assets=ASSETS)
+    model = ArticulatedObject(name="pendant_ceiling_light", assets=ASSETS)
 
-    canopy_metal = model.material("canopy_metal", rgba=(0.82, 0.82, 0.80, 1.0))
-    collar_metal = model.material("collar_metal", rgba=(0.74, 0.74, 0.72, 1.0))
-    glass_white = model.material("glass_white", rgba=(0.96, 0.97, 0.98, 0.32))
+    brass = model.material("brass", rgba=(0.66, 0.58, 0.40, 1.0))
+    fabric_black = model.material("fabric_black", rgba=(0.10, 0.10, 0.11, 1.0))
+    enamel_cream = model.material("enamel_cream", rgba=(0.90, 0.88, 0.83, 1.0))
+    socket_black = model.material("socket_black", rgba=(0.14, 0.14, 0.15, 1.0))
 
-    mount = model.part("mount")
-    mount.visual(
-        Cylinder(radius=0.108, length=0.008),
-        origin=Origin(xyz=(0.0, 0.0, -0.004)),
-        material=canopy_metal,
-        name="canopy_plate",
+    canopy = model.part("canopy")
+    canopy.visual(
+        _save_mesh("canopy_shell.obj", _build_canopy_shell_mesh()),
+        material=brass,
+        name="canopy_shell",
     )
-    mount.visual(
-        Cylinder(radius=0.042, length=0.012),
+    canopy.visual(
+        Box((0.009, 0.024, 0.030)),
+        origin=Origin(xyz=(-0.019, 0.0, 0.0)),
+        material=brass,
+        name="clevis_left",
+    )
+    canopy.visual(
+        Box((0.009, 0.024, 0.030)),
+        origin=Origin(xyz=(0.019, 0.0, 0.0)),
+        material=brass,
+        name="clevis_right",
+    )
+    canopy.visual(
+        Cylinder(radius=0.012, length=0.014),
+        origin=Origin(xyz=(0.0, 0.0, 0.033)),
+        material=brass,
+        name="ceiling_nipple",
+    )
+    canopy.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.062, length=0.064),
+        mass=0.7,
+        origin=Origin(xyz=(0.0, 0.0, 0.017)),
+    )
+
+    hanger = model.part("hanger")
+    hanger.visual(
+        Cylinder(radius=0.0065, length=0.029),
+        origin=Origin(rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=brass,
+        name="trunnion_barrel",
+    )
+    hanger.visual(
+        Cylinder(radius=0.010, length=0.022),
         origin=Origin(xyz=(0.0, 0.0, -0.014)),
-        material=canopy_metal,
-        name="canopy_hub",
+        material=brass,
+        name="swivel_stem",
     )
-    mount.visual(
-        Cylinder(radius=0.024, length=0.020),
-        origin=Origin(xyz=(0.0, 0.0, -0.030)),
-        material=canopy_metal,
-        name="neck_stub",
+    hanger.visual(
+        Cylinder(radius=0.0065, length=0.018),
+        origin=Origin(xyz=(0.0, 0.0, -0.034)),
+        material=brass,
+        name="cord_grip",
     )
-    mount.visual(
-        Cylinder(radius=0.024, length=0.043),
-        origin=Origin(xyz=(0.0, 0.0, -0.0415)),
-        material=canopy_metal,
-        name="neck_tube",
+    hanger.visual(
+        Cylinder(radius=0.0045, length=0.652),
+        origin=Origin(xyz=(0.0, 0.0, -0.369)),
+        material=fabric_black,
+        name="fabric_cord",
     )
-    mount.visual(
-        Cylinder(radius=0.036, length=0.008),
-        origin=Origin(xyz=(0.0, 0.0, -0.067)),
-        material=canopy_metal,
-        name="holder_shoulder",
-    )
-    mount.visual(
-        Cylinder(radius=0.024, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.074)),
-        material=canopy_metal,
-        name="thread_peak_upper",
-    )
-    mount.visual(
-        Cylinder(radius=0.0225, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.080)),
-        material=canopy_metal,
-        name="thread_valley_upper",
-    )
-    mount.visual(
-        Cylinder(radius=0.024, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.086)),
-        material=canopy_metal,
-        name="thread_peak_mid",
-    )
-    mount.visual(
-        Cylinder(radius=0.0225, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.092)),
-        material=canopy_metal,
-        name="thread_valley_lower",
-    )
-    mount.visual(
-        Cylinder(radius=0.024, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.098)),
-        material=canopy_metal,
-        name="thread_peak_lower",
-    )
-    mount.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.108, length=0.102),
-        mass=1.2,
-        origin=Origin(xyz=(0.0, 0.0, -0.051)),
+    hanger.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.014, length=0.700),
+        mass=0.35,
+        origin=Origin(xyz=(0.0, 0.0, -0.350)),
     )
 
-    bowl = model.part("bowl")
-    bowl.visual(
-        _save_mesh("glass_bowl.obj", _build_glass_bowl_mesh()),
-        origin=Origin(xyz=(0.0, 0.0, 0.079)),
-        material=glass_white,
-        name="glass_bowl",
+    shade = model.part("shade")
+    shade.visual(
+        Cylinder(radius=0.022, length=0.028),
+        origin=Origin(xyz=(0.0, 0.0, -0.014)),
+        material=brass,
+        name="shade_collar",
     )
-    bowl.visual(
-        _save_mesh(
-            "glass_bowl_rim.obj",
-            _ring_band(
-                outer_radius=0.046,
-                inner_radius=0.028,
-                height=0.010,
-                z_center=0.010,
-            ),
-        ),
-        material=glass_white,
-        name="bowl_rim",
+    shade.visual(
+        Cylinder(radius=0.018, length=0.048),
+        origin=Origin(xyz=(0.0, 0.0, -0.038)),
+        material=socket_black,
+        name="socket_body",
     )
-    bowl.inertial = Inertial.from_geometry(
-        Sphere(radius=0.146),
-        mass=0.95,
-        origin=Origin(xyz=(0.0, 0.0, -0.118)),
+    shade.visual(
+        _save_mesh("dome_shade_shell.obj", _build_dome_shade_mesh()),
+        material=enamel_cream,
+        name="dome_shade",
     )
-
-    collar = model.part("collar")
-    collar.visual(
-        _save_mesh(
-            "threaded_collar.obj",
-            _ring_band(
-                outer_radius=0.041,
-                inner_radius=0.026,
-                height=0.022,
-                z_center=-0.006,
-            ),
-        ),
-        material=collar_metal,
-        name="threaded_collar",
-    )
-    collar.visual(
-        _save_mesh(
-            "retaining_lip.obj",
-            _ring_band(
-                outer_radius=0.046,
-                inner_radius=0.028,
-                height=0.010,
-                z_center=0.000,
-            ),
-        ),
-        material=collar_metal,
-        name="retaining_lip",
-    )
-    collar.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.046, length=0.030),
-        mass=0.22,
-        origin=Origin(xyz=(0.0, 0.0, -0.004)),
+    shade.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.160, length=0.180),
+        mass=1.1,
+        origin=Origin(xyz=(0.0, 0.0, -0.090)),
     )
 
     model.articulation(
-        "neck_to_collar",
-        ArticulationType.CONTINUOUS,
-        parent=mount,
-        child=collar,
-        origin=Origin(xyz=(0.0, 0.0, -0.086)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=1.5, velocity=5.0),
-    )
-    model.articulation(
-        "collar_to_bowl",
-        ArticulationType.FIXED,
-        parent=collar,
-        child=bowl,
+        "canopy_swivel",
+        ArticulationType.REVOLUTE,
+        parent=canopy,
+        child=hanger,
         origin=Origin(),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=10.0,
+            velocity=1.2,
+            lower=-0.75,
+            upper=0.75,
+        ),
+    )
+    model.articulation(
+        "hanger_to_shade",
+        ArticulationType.FIXED,
+        parent=hanger,
+        child=shade,
+        origin=Origin(xyz=(0.0, 0.0, -0.695)),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    mount = object_model.get_part("mount")
-    bowl = object_model.get_part("bowl")
-    collar = object_model.get_part("collar")
-    collar_spin = object_model.get_articulation("neck_to_collar")
-    canopy_plate = mount.get_visual("canopy_plate")
-    holder_shoulder = mount.get_visual("holder_shoulder")
-    thread_peak_mid = mount.get_visual("thread_peak_mid")
-    glass_bowl = bowl.get_visual("glass_bowl")
-    bowl_rim = bowl.get_visual("bowl_rim")
-    threaded_collar = collar.get_visual("threaded_collar")
-    retaining_lip = collar.get_visual("retaining_lip")
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    canopy = object_model.get_part("canopy")
+    hanger = object_model.get_part("hanger")
+    shade = object_model.get_part("shade")
+    canopy_swivel = object_model.get_articulation("canopy_swivel")
+    clevis_left = canopy.get_visual("clevis_left")
+    clevis_right = canopy.get_visual("clevis_right")
+    trunnion_barrel = hanger.get_visual("trunnion_barrel")
+    fabric_cord = hanger.get_visual("fabric_cord")
+    shade_collar = shade.get_visual("shade_collar")
+    dome_shade = shade.get_visual("dome_shade")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.03)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.001,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=32)
 
-    ctx.expect_origin_distance(bowl, mount, axes="xy", max_dist=0.002)
-    ctx.expect_origin_distance(collar, mount, axes="xy", max_dist=0.002)
-    ctx.expect_overlap(bowl, mount, axes="xy", min_overlap=0.08)
-    ctx.expect_gap(
-        mount,
-        bowl,
-        axis="z",
-        min_gap=0.058,
-        positive_elem=canopy_plate,
-        negative_elem=glass_bowl,
-        name="canopy_plate_sits_well_above_the_main_globe_volume",
-    )
-    ctx.expect_gap(
-        mount,
-        bowl,
-        axis="z",
-        min_gap=0.060,
-        positive_elem=canopy_plate,
-        negative_elem=bowl_rim,
-        name="short_neck_visibly_separates_canopy_from_globe_rim",
-    )
-    ctx.expect_contact(
-        mount,
-        bowl,
-        elem_a=holder_shoulder,
-        elem_b=bowl_rim,
-        name="glass_rim_seats_under_the_neck_shoulder",
-    )
-    ctx.expect_within(
-        mount,
-        collar,
-        axes="xy",
-        inner_elem=thread_peak_mid,
-        outer_elem=threaded_collar,
-        name="collar_ring_screws_onto_the_threaded_neck",
-    )
-    ctx.expect_overlap(
-        collar,
-        bowl,
-        axes="xy",
-        min_overlap=0.075,
-        elem_a=retaining_lip,
-        elem_b=bowl_rim,
-        name="retaining_lip_spans_the_globe_opening",
-    )
-    ctx.expect_contact(
-        collar,
-        bowl,
-        elem_a=retaining_lip,
-        elem_b=bowl_rim,
-        name="retaining_lip_supports_the_glass_bowl_from_below",
-    )
-    ctx.expect_gap(
-        mount,
-        collar,
-        axis="z",
-        min_gap=0.007,
-        max_gap=0.010,
-        positive_elem=holder_shoulder,
-        negative_elem=retaining_lip,
-        name="collar_gap_matches_the_captured_glass_rim_thickness",
-    )
-    with ctx.pose({collar_spin: math.pi / 2.0}):
-        ctx.expect_within(
-            mount,
-            collar,
-            axes="xy",
-            inner_elem=thread_peak_mid,
-            outer_elem=threaded_collar,
-            name="collar_remains_engaged_with_the_neck_thread_when_rotated",
+    ctx.expect_contact(canopy, hanger, elem_a=clevis_left, elem_b=trunnion_barrel)
+    ctx.expect_contact(canopy, hanger, elem_a=clevis_right, elem_b=trunnion_barrel)
+    ctx.expect_contact(hanger, shade, elem_a=fabric_cord, elem_b=shade_collar)
+    ctx.expect_origin_distance(hanger, canopy, axes="xy", max_dist=0.002)
+    ctx.expect_origin_distance(shade, canopy, axes="xy", max_dist=0.002)
+    ctx.expect_within(hanger, shade, axes="xy", inner_elem=fabric_cord, outer_elem=dome_shade)
+    ctx.expect_overlap(shade, canopy, axes="xy", min_overlap=0.120)
+    ctx.expect_gap(canopy, shade, axis="z", min_gap=0.500)
+
+    canopy_aabb = ctx.part_world_aabb(canopy)
+    shade_aabb = ctx.part_world_aabb(shade)
+    rest_pos = ctx.part_world_position(shade)
+    if canopy_aabb is not None:
+        canopy_diam_x = canopy_aabb[1][0] - canopy_aabb[0][0]
+        canopy_diam_y = canopy_aabb[1][1] - canopy_aabb[0][1]
+        ctx.check(
+            "canopy_realistic_diameter",
+            0.11 <= canopy_diam_x <= 0.14 and 0.11 <= canopy_diam_y <= 0.14,
+            f"canopy spans {canopy_diam_x:.3f} x {canopy_diam_y:.3f} m",
         )
-        ctx.expect_contact(
-            collar,
-            bowl,
-            elem_a=retaining_lip,
-            elem_b=bowl_rim,
-            name="globe_remains_retained_by_the_rotated_collar",
+    else:
+        ctx.fail("canopy_has_aabb", "Canopy world bounds were unavailable.")
+
+    if shade_aabb is not None:
+        shade_span_x = shade_aabb[1][0] - shade_aabb[0][0]
+        shade_span_z = shade_aabb[1][2] - shade_aabb[0][2]
+        ctx.check(
+            "shade_reads_as_large_dome",
+            0.29 <= shade_span_x <= 0.34 and 0.16 <= shade_span_z <= 0.20,
+            f"shade spans {shade_span_x:.3f} x {shade_span_z:.3f} m",
         )
-        ctx.expect_origin_distance(bowl, mount, axes="xy", max_dist=0.002)
+    else:
+        ctx.fail("shade_has_aabb", "Shade world bounds were unavailable.")
+
+    limits = canopy_swivel.motion_limits
+    assert limits is not None
+
+    with ctx.pose({canopy_swivel: limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="canopy_swivel_lower_no_overlap")
+        ctx.fail_if_isolated_parts(name="canopy_swivel_lower_no_floating")
+        ctx.expect_contact(canopy, hanger, elem_a=clevis_left, elem_b=trunnion_barrel)
+        ctx.expect_contact(canopy, hanger, elem_a=clevis_right, elem_b=trunnion_barrel)
+        ctx.expect_contact(hanger, shade, elem_a=fabric_cord, elem_b=shade_collar)
+        ctx.expect_gap(canopy, shade, axis="z", min_gap=0.330)
+
+    with ctx.pose({canopy_swivel: limits.upper}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="canopy_swivel_upper_no_overlap")
+        ctx.fail_if_isolated_parts(name="canopy_swivel_upper_no_floating")
+        ctx.expect_contact(canopy, hanger, elem_a=clevis_left, elem_b=trunnion_barrel)
+        ctx.expect_contact(canopy, hanger, elem_a=clevis_right, elem_b=trunnion_barrel)
+        ctx.expect_contact(hanger, shade, elem_a=fabric_cord, elem_b=shade_collar)
+        ctx.expect_gap(canopy, shade, axis="z", min_gap=0.330)
+
+    if rest_pos is not None:
+        with ctx.pose({canopy_swivel: 0.55}):
+            plus_pos = ctx.part_world_position(shade)
+        with ctx.pose({canopy_swivel: -0.55}):
+            minus_pos = ctx.part_world_position(shade)
+        if plus_pos is not None and minus_pos is not None:
+            ctx.check(
+                "shade_swings_side_to_side",
+                plus_pos[1] > 0.30 and minus_pos[1] < -0.30,
+                f"shade y positions were {plus_pos[1]:.3f} and {minus_pos[1]:.3f} m",
+            )
+            ctx.check(
+                "shade_lifts_when_swiveled",
+                plus_pos[2] > rest_pos[2] + 0.08 and minus_pos[2] > rest_pos[2] + 0.08,
+                (
+                    f"rest z={rest_pos[2]:.3f}, "
+                    f"plus z={plus_pos[2]:.3f}, minus z={minus_pos[2]:.3f}"
+                ),
+            )
+        else:
+            ctx.fail("shade_pose_positions_available", "Could not read shade positions in swivel poses.")
+    else:
+        ctx.fail("shade_rest_position_available", "Could not read shade position at rest.")
+
     return ctx.report()
 
 

@@ -11,8 +11,10 @@
   },
   "prompting": {
     "system_prompt_file": "designer_system_prompt_openai.txt",
-    "system_prompt_sha256": "3bb527a25b6c5319a231063bba49f9593e42cc9a9806b74a843b4a26b7d51622",
-    "sdk_docs_mode": "full"
+    "system_prompt_sha256": "f3c96278bd92b6a49f723d11c3d3c0a23b8a8df27af01c04e55da5292bf881c0",
+    "sdk_docs_mode": "full",
+    "post_success_design_audit": true,
+    "scaffold_mode": "lite"
   },
   "sdk": {
     "sdk_package": "sdk",
@@ -22,13 +24,13 @@
   "environment": {
     "python_version": "3.12.3",
     "platform": "linux-x86_64",
-    "git_commit": "1e4555f77f7536a4a982b644f0c3be731d886039",
+    "git_commit": "1f31ec426ae4756b2bf46a8dc1b012ad3c5f8d1c",
     "uv_lock_sha256": "609c6cb5ce8a26122aaeab4bd2bdcc6e45bacfa426781165809f517f6b02bb83"
   },
   "run_summary": {
-    "turn_count": 33,
-    "tool_call_count": 31,
-    "compile_attempt_count": 10,
+    "turn_count": 12,
+    "tool_call_count": 11,
+    "compile_attempt_count": 6,
     "final_status": "success"
   }
 }

@@ -10,412 +10,446 @@ from sdk import (
     ArticulationType,
     Box,
     Cylinder,
+    ExtrudeGeometry,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    rounded_rect_profile,
 )
 
-PHONE_WIDTH = 0.074
-HALF_DEPTH = 0.080
-HALF_THICKNESS = 0.0064
-CORNER_RADIUS = 0.0095
-HINGE_BACKSET = 0.0062
-SEAM_GAP = 0.0006
-DISPLAY_WIDTH = 0.0695
-DISPLAY_DEPTH = 0.0770
-DISPLAY_THICKNESS = 0.0009
-HINGE_AXIS_Y = 0.0
-HINGE_AXIS_Z = HALF_THICKNESS + SEAM_GAP
-LOWER_HINGE_RADIUS = 0.0038
-UPPER_HINGE_RADIUS = 0.0033
-HINGE_SEGMENT_LENGTH = 0.014
-HINGE_LEAF_LENGTH = HINGE_BACKSET + 0.0010
-HINGE_LEAF_THICKNESS = 0.0018
 
-
-def _add_rounded_slab(
-    part,
-    *,
-    width: float,
-    depth: float,
-    thickness: float,
-    radius: float,
-    origin_xyz: tuple[float, float, float],
-    material,
-    name_prefix: str,
-) -> None:
-    ox, oy, oz = origin_xyz
-    part.visual(
-        Box((width - 2.0 * radius, depth, thickness)),
-        origin=Origin(xyz=(ox, oy, oz + thickness * 0.5)),
-        material=material,
-        name=f"{name_prefix}_core_x",
-    )
-    part.visual(
-        Box((width, depth - 2.0 * radius, thickness)),
-        origin=Origin(xyz=(ox, oy, oz + thickness * 0.5)),
-        material=material,
-        name=f"{name_prefix}_core_y",
-    )
-    for ix, x_sign in enumerate((-1.0, 1.0)):
-        for iy, y_sign in enumerate((-1.0, 1.0)):
-            part.visual(
-                Cylinder(radius=radius, length=thickness),
-                origin=Origin(
-                    xyz=(
-                        ox + x_sign * (width * 0.5 - radius),
-                        oy + y_sign * (depth * 0.5 - radius),
-                        oz + thickness * 0.5,
-                    )
-                ),
-                material=material,
-                name=f"{name_prefix}_corner_{ix}_{iy}",
-            )
-
-
-def _add_hinge_modules(
-    part,
-    *,
-    barrel_x_positions: tuple[float, ...],
-    barrel_radius: float,
-    barrel_center_z: float,
-    leaf_center_z: float,
-    shell_material,
-    hinge_material,
-    name_prefix: str,
-) -> None:
-    for index, center_x in enumerate(barrel_x_positions):
-        part.visual(
-            Cylinder(radius=barrel_radius, length=HINGE_SEGMENT_LENGTH),
-            origin=Origin(
-                xyz=(center_x, HINGE_AXIS_Y, barrel_center_z),
-                rpy=(0.0, math.pi * 0.5, 0.0),
-            ),
-            material=hinge_material,
-            name=f"{name_prefix}_hinge_barrel_{index}",
-        )
-        part.visual(
-            Box((HINGE_SEGMENT_LENGTH * 0.92, HINGE_LEAF_LENGTH, HINGE_LEAF_THICKNESS)),
-            origin=Origin(
-                xyz=(center_x, HINGE_LEAF_LENGTH * 0.5, leaf_center_z),
-            ),
-            material=shell_material,
-            name=f"{name_prefix}_hinge_leaf_{index}",
-        )
+def _rounded_slab_mesh(name: str, *, width: float, depth: float, thickness: float, radius: float):
+    profile = rounded_rect_profile(width, depth, radius, corner_segments=8)
+    return mesh_from_geometry(ExtrudeGeometry(profile, thickness), name)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="smart_flip_phone")
+    model = ArticulatedObject(name="rugged_flip_phone")
 
-    graphite = model.material("graphite", rgba=(0.17, 0.18, 0.20, 1.0))
-    hinge_metal = model.material("hinge_metal", rgba=(0.33, 0.34, 0.37, 1.0))
-    cover_glass = model.material("cover_glass", rgba=(0.05, 0.06, 0.07, 0.97))
-    bump_graphite = model.material("bump_graphite", rgba=(0.14, 0.15, 0.17, 1.0))
-    lens_glass = model.material("lens_glass", rgba=(0.11, 0.13, 0.16, 0.94))
+    body_rubber = model.material("body_rubber", rgba=(0.16, 0.17, 0.18, 1.0))
+    grip_rubber = model.material("grip_rubber", rgba=(0.09, 0.10, 0.11, 1.0))
+    metal = model.material("hinge_metal", rgba=(0.58, 0.60, 0.63, 1.0))
+    screen_black = model.material("screen_black", rgba=(0.04, 0.05, 0.06, 1.0))
+    glass = model.material("screen_glass", rgba=(0.13, 0.26, 0.33, 0.55))
+    keypad_black = model.material("keypad_black", rgba=(0.06, 0.07, 0.08, 1.0))
+    keypad_gray = model.material("keypad_gray", rgba=(0.21, 0.22, 0.24, 1.0))
+    lens_glass = model.material("lens_glass", rgba=(0.09, 0.11, 0.13, 0.85))
+    flash_lens = model.material("flash_lens", rgba=(0.80, 0.82, 0.72, 0.95))
 
-    lower_half = model.part("lower_half")
-    _add_rounded_slab(
-        lower_half,
-        width=PHONE_WIDTH,
-        depth=HALF_DEPTH,
-        thickness=HALF_THICKNESS,
-        radius=CORNER_RADIUS,
-        origin_xyz=(0.0, HINGE_BACKSET + HALF_DEPTH * 0.5, 0.0),
-        material=graphite,
-        name_prefix="lower_shell",
+    lower_w = 0.066
+    lower_d = 0.102
+    lower_t = 0.0148
+
+    upper_w = 0.062
+    upper_d = 0.094
+    upper_t = 0.0138
+
+    hinge_y = -0.057
+    hinge_z = 0.0093
+    hinge_radius = 0.0049
+    center_barrel_len = 0.022
+    sleeve_len = 0.014
+    hinge_cap_len = 0.006
+
+    shell_gap = 0.0032
+    upper_rel_y = upper_d * 0.5 + 0.006
+    upper_world_z = lower_t * 0.5 + shell_gap + upper_t * 0.5
+    upper_rel_z = upper_world_z - hinge_z
+
+    lower_body = model.part("lower_body")
+    lower_body.visual(
+        _rounded_slab_mesh(
+            "lower_body_shell",
+            width=lower_w,
+            depth=lower_d,
+            thickness=lower_t,
+            radius=0.010,
+        ),
+        material=body_rubber,
+        name="lower_shell",
     )
-    _add_hinge_modules(
-        lower_half,
-        barrel_x_positions=(-0.026, 0.0, 0.026),
-        barrel_radius=LOWER_HINGE_RADIUS,
-        barrel_center_z=HINGE_AXIS_Z,
-        leaf_center_z=HALF_THICKNESS - HINGE_LEAF_THICKNESS * 0.5,
-        shell_material=graphite,
-        hinge_material=hinge_metal,
-        name_prefix="lower",
+    lower_body.visual(
+        Box((0.006, lower_d * 0.74, lower_t * 0.72)),
+        origin=Origin(xyz=(lower_w * 0.5 - 0.003, 0.0, 0.0)),
+        material=grip_rubber,
+        name="right_lower_grip",
     )
-    lower_half.inertial = Inertial.from_geometry(
-        Box((PHONE_WIDTH, HALF_DEPTH + HINGE_BACKSET, HALF_THICKNESS)),
-        mass=0.095,
+    lower_body.visual(
+        Box((0.006, lower_d * 0.74, lower_t * 0.72)),
+        origin=Origin(xyz=(-(lower_w * 0.5 - 0.003), 0.0, 0.0)),
+        material=grip_rubber,
+        name="left_lower_grip",
+    )
+    lower_body.visual(
+        Box((lower_w * 0.52, 0.010, lower_t * 0.34)),
+        origin=Origin(xyz=(0.0, lower_d * 0.5 - 0.005, -lower_t * 0.08)),
+        material=grip_rubber,
+        name="front_bumper",
+    )
+    lower_body.visual(
+        Box((0.022, 0.012, 0.0066)),
+        origin=Origin(xyz=(0.0, -0.054, 0.0072)),
+        material=grip_rubber,
+        name="hinge_bridge",
+    )
+    lower_body.visual(
+        Cylinder(radius=hinge_radius, length=center_barrel_len),
+        origin=Origin(xyz=(0.0, hinge_y, hinge_z), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=grip_rubber,
+        name="hinge_barrel",
+    )
+    lower_body.inertial = Inertial.from_geometry(
+        Box((lower_w, lower_d, lower_t)),
+        mass=0.12,
+    )
+
+    upper_body = model.part("upper_body")
+    upper_body.visual(
+        _rounded_slab_mesh(
+            "upper_body_shell",
+            width=upper_w,
+            depth=upper_d,
+            thickness=upper_t,
+            radius=0.009,
+        ),
+        origin=Origin(xyz=(0.0, upper_rel_y, upper_rel_z)),
+        material=body_rubber,
+        name="upper_shell",
+    )
+    upper_body.visual(
+        Box((0.0055, upper_d * 0.73, upper_t * 0.70)),
+        origin=Origin(
+            xyz=(upper_w * 0.5 - 0.00275, upper_rel_y, upper_rel_z),
+        ),
+        material=grip_rubber,
+        name="right_upper_grip",
+    )
+    upper_body.visual(
+        Box((0.0055, upper_d * 0.73, upper_t * 0.70)),
+        origin=Origin(
+            xyz=(-(upper_w * 0.5 - 0.00275), upper_rel_y, upper_rel_z),
+        ),
+        material=grip_rubber,
+        name="left_upper_grip",
+    )
+    upper_body.visual(
+        Box((upper_w * 0.38, 0.008, upper_t * 0.24)),
         origin=Origin(
             xyz=(
                 0.0,
-                (HALF_DEPTH + HINGE_BACKSET) * 0.5,
-                HALF_THICKNESS * 0.5,
+                upper_rel_y + upper_d * 0.5 - 0.0045,
+                upper_rel_z + (upper_t * 0.5) + 0.0004,
+            ),
+        ),
+        material=grip_rubber,
+        name="outer_top_ridge",
+    )
+    right_sleeve_x = (center_barrel_len * 0.5) + (sleeve_len * 0.5)
+    left_sleeve_x = -right_sleeve_x
+    upper_body.visual(
+        Cylinder(radius=hinge_radius + 0.0005, length=sleeve_len),
+        origin=Origin(xyz=(right_sleeve_x, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=body_rubber,
+        name="right_hinge_sleeve",
+    )
+    upper_body.visual(
+        Cylinder(radius=hinge_radius + 0.0005, length=sleeve_len),
+        origin=Origin(xyz=(left_sleeve_x, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=body_rubber,
+        name="left_hinge_sleeve",
+    )
+    cap_x = (center_barrel_len * 0.5) + sleeve_len + (hinge_cap_len * 0.5)
+    upper_body.visual(
+        Cylinder(radius=0.0062, length=hinge_cap_len),
+        origin=Origin(xyz=(cap_x, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=metal,
+        name="right_hinge_cap",
+    )
+    upper_body.visual(
+        Cylinder(radius=0.0062, length=hinge_cap_len),
+        origin=Origin(xyz=(-cap_x, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=metal,
+        name="left_hinge_cap",
+    )
+    upper_body.visual(
+        Box((0.010, 0.018, 0.010)),
+        origin=Origin(xyz=(right_sleeve_x, 0.009, 0.0069)),
+        material=body_rubber,
+        name="right_hinge_cheek",
+    )
+    upper_body.visual(
+        Box((0.010, 0.018, 0.010)),
+        origin=Origin(xyz=(left_sleeve_x, 0.009, 0.0069)),
+        material=body_rubber,
+        name="left_hinge_cheek",
+    )
+    upper_body.visual(
+        Box((0.010, 0.046, 0.006)),
+        origin=Origin(xyz=(right_sleeve_x, 0.040, 0.0090)),
+        material=body_rubber,
+        name="right_hinge_arm",
+    )
+    upper_body.visual(
+        Box((0.010, 0.046, 0.006)),
+        origin=Origin(xyz=(left_sleeve_x, 0.040, 0.0090)),
+        material=body_rubber,
+        name="left_hinge_arm",
+    )
+    upper_body.inertial = Inertial.from_geometry(
+        Box((upper_w, upper_d, upper_t)),
+        mass=0.09,
+        origin=Origin(xyz=(0.0, upper_rel_y, upper_rel_z)),
+    )
+
+    keypad = model.part("keypad_module")
+    keypad.visual(
+        Box((0.056, 0.076, 0.0009)),
+        origin=Origin(xyz=(0.0, 0.0, 0.00045)),
+        material=keypad_black,
+        name="keypad_base",
+    )
+    keypad.visual(
+        Box((0.030, 0.018, 0.0007)),
+        origin=Origin(xyz=(0.0, 0.024, 0.00125)),
+        material=keypad_gray,
+        name="nav_pad",
+    )
+    keypad.visual(
+        Box((0.010, 0.008, 0.0007)),
+        origin=Origin(xyz=(0.0, 0.024, 0.00125)),
+        material=keypad_black,
+        name="nav_select",
+    )
+    keypad.visual(
+        Box((0.012, 0.007, 0.0007)),
+        origin=Origin(xyz=(-0.017, 0.024, 0.00125)),
+        material=keypad_gray,
+        name="call_key",
+    )
+    keypad.visual(
+        Box((0.012, 0.007, 0.0007)),
+        origin=Origin(xyz=(0.017, 0.024, 0.00125)),
+        material=keypad_gray,
+        name="end_key",
+    )
+    for row_index, y_pos in enumerate((0.008, -0.006, -0.020, -0.034)):
+        for col_index, x_pos in enumerate((-0.018, 0.0, 0.018)):
+            keypad.visual(
+                Box((0.012, 0.008, 0.0007)),
+                origin=Origin(xyz=(x_pos, y_pos, 0.00125)),
+                material=keypad_gray,
+                name=f"key_{row_index}_{col_index}",
             )
-        ),
+    keypad.inertial = Inertial.from_geometry(
+        Box((0.056, 0.076, 0.0018)),
+        mass=0.01,
+        origin=Origin(xyz=(0.0, 0.0, 0.0009)),
     )
 
-    upper_half = model.part("upper_half")
-    _add_rounded_slab(
-        upper_half,
-        width=PHONE_WIDTH,
-        depth=HALF_DEPTH,
-        thickness=HALF_THICKNESS,
-        radius=CORNER_RADIUS,
-        origin_xyz=(0.0, HINGE_BACKSET + HALF_DEPTH * 0.5, 0.0),
-        material=graphite,
-        name_prefix="upper_shell",
+    screen = model.part("screen_module")
+    screen.visual(
+        Box((0.052, 0.072, 0.0009)),
+        origin=Origin(xyz=(0.0, 0.0, -0.00045)),
+        material=screen_black,
+        name="screen_bezel",
     )
-    _add_hinge_modules(
-        upper_half,
-        barrel_x_positions=(-0.013, 0.013),
-        barrel_radius=UPPER_HINGE_RADIUS,
-        barrel_center_z=0.0,
-        leaf_center_z=HINGE_LEAF_THICKNESS * 0.5,
-        shell_material=graphite,
-        hinge_material=hinge_metal,
-        name_prefix="upper",
+    screen.visual(
+        Box((0.041, 0.056, 0.0005)),
+        origin=Origin(xyz=(0.0, -0.002, -0.00055)),
+        material=glass,
+        name="display_glass",
     )
-    upper_half.inertial = Inertial.from_geometry(
-        Box((PHONE_WIDTH, HALF_DEPTH + HINGE_BACKSET, HALF_THICKNESS)),
-        mass=0.105,
-        origin=Origin(
-            xyz=(
-                0.0,
-                (HALF_DEPTH + HINGE_BACKSET) * 0.5,
-                HALF_THICKNESS * 0.5,
-            )
-        ),
+    screen.visual(
+        Box((0.014, 0.003, 0.0005)),
+        origin=Origin(xyz=(0.0, 0.029, -0.00055)),
+        material=keypad_gray,
+        name="earpiece_slot",
+    )
+    screen.inertial = Inertial.from_geometry(
+        Box((0.052, 0.072, 0.0012)),
+        mass=0.008,
+        origin=Origin(xyz=(0.0, 0.0, -0.0006)),
     )
 
-    exterior_display = model.part("exterior_display")
-    exterior_display.visual(
-        Box((DISPLAY_WIDTH, DISPLAY_DEPTH, DISPLAY_THICKNESS)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                HINGE_BACKSET + HALF_DEPTH * 0.5,
-                DISPLAY_THICKNESS * 0.5,
-            ),
-        ),
-        material=cover_glass,
-        name="display_panel",
+    camera = model.part("camera_module")
+    camera.visual(
+        Box((0.020, 0.016, 0.0012)),
+        origin=Origin(xyz=(0.0, 0.0, 0.0006)),
+        material=keypad_black,
+        name="camera_island",
     )
-    exterior_display.inertial = Inertial.from_geometry(
-        Box((DISPLAY_WIDTH, DISPLAY_DEPTH, DISPLAY_THICKNESS)),
-        mass=0.016,
-        origin=Origin(
-            xyz=(
-                0.0,
-                HINGE_BACKSET + HALF_DEPTH * 0.5,
-                DISPLAY_THICKNESS * 0.5,
-            ),
-        ),
+    camera.visual(
+        Cylinder(radius=0.0052, length=0.0005),
+        origin=Origin(xyz=(0.0045, 0.0, 0.00145)),
+        material=metal,
+        name="lens_ring",
     )
-
-    camera_module = model.part("camera_module")
-    _add_rounded_slab(
-        camera_module,
-        width=0.028,
-        depth=0.036,
-        thickness=0.0031,
-        radius=0.0048,
-        origin_xyz=(-0.0185, HINGE_BACKSET + 0.020, 0.0),
-        material=bump_graphite,
-        name_prefix="camera_bump",
+    camera.visual(
+        Cylinder(radius=0.0040, length=0.0016),
+        origin=Origin(xyz=(0.0045, 0.0, 0.0020)),
+        material=lens_glass,
+        name="camera_lens",
     )
-    for name, x_pos, y_pos, radius, height in (
-        ("main_lens_upper", -0.0245, HINGE_BACKSET + 0.0135, 0.0042, 0.0018),
-        ("main_lens_lower", -0.0245, HINGE_BACKSET + 0.0280, 0.0042, 0.0018),
-        ("aux_lens", -0.0118, HINGE_BACKSET + 0.0205, 0.0034, 0.0016),
-    ):
-        camera_module.visual(
-            Cylinder(radius=radius, length=height),
-            origin=Origin(
-                xyz=(x_pos, y_pos, 0.0031 + height * 0.5),
-            ),
-            material=lens_glass,
-            name=name,
-        )
-    camera_module.visual(
-        Cylinder(radius=0.0017, length=0.0012),
-        origin=Origin(
-            xyz=(-0.0090, HINGE_BACKSET + 0.0325, 0.0031 + 0.0006),
-        ),
-        material=cover_glass,
-        name="flash_window",
+    camera.visual(
+        Cylinder(radius=0.0017, length=0.0008),
+        origin=Origin(xyz=(-0.0055, 0.0, 0.0016)),
+        material=flash_lens,
+        name="flash",
     )
-    camera_module.inertial = Inertial.from_geometry(
-        Box((0.028, 0.036, 0.0050)),
-        mass=0.014,
-        origin=Origin(xyz=(-0.0185, HINGE_BACKSET + 0.020, 0.0025)),
+    camera.inertial = Inertial.from_geometry(
+        Box((0.020, 0.016, 0.0030)),
+        mass=0.006,
+        origin=Origin(xyz=(0.0, 0.0, 0.0015)),
     )
 
     model.articulation(
-        "fold_hinge",
+        "phone_hinge",
         ArticulationType.REVOLUTE,
-        parent=lower_half,
-        child=upper_half,
-        origin=Origin(xyz=(0.0, HINGE_AXIS_Y, HINGE_AXIS_Z)),
+        parent=lower_body,
+        child=upper_body,
+        origin=Origin(xyz=(0.0, hinge_y, hinge_z)),
         axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(
-            effort=3.0,
-            velocity=6.0,
+            effort=1.5,
+            velocity=3.0,
             lower=0.0,
-            upper=3.08,
+            upper=2.55,
         ),
     )
     model.articulation(
-        "upper_to_display",
+        "lower_to_keypad",
         ArticulationType.FIXED,
-        parent=upper_half,
-        child=exterior_display,
-        origin=Origin(xyz=(0.0, 0.0, HALF_THICKNESS)),
+        parent=lower_body,
+        child=keypad,
+        origin=Origin(xyz=(0.0, 0.007, lower_t * 0.5)),
+    )
+    model.articulation(
+        "upper_to_screen",
+        ArticulationType.FIXED,
+        parent=upper_body,
+        child=screen,
+        origin=Origin(xyz=(0.0, upper_rel_y + 0.003, upper_rel_z - upper_t * 0.5)),
     )
     model.articulation(
         "upper_to_camera",
         ArticulationType.FIXED,
-        parent=upper_half,
-        child=camera_module,
-        origin=Origin(xyz=(0.0, 0.0, HALF_THICKNESS + DISPLAY_THICKNESS)),
+        parent=upper_body,
+        child=camera,
+        origin=Origin(
+            xyz=(0.017, upper_rel_y + 0.021, upper_rel_z + upper_t * 0.5),
+        ),
     )
+
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    lower_half = object_model.get_part("lower_half")
-    upper_half = object_model.get_part("upper_half")
-    exterior_display = object_model.get_part("exterior_display")
-    camera_module = object_model.get_part("camera_module")
-    fold_hinge = object_model.get_articulation("fold_hinge")
-
-    lower_shell = lower_half.get_visual("lower_shell_core_x")
-    upper_shell = upper_half.get_visual("upper_shell_core_x")
-    display_panel = exterior_display.get_visual("display_panel")
-    camera_bump = camera_module.get_visual("camera_bump_core_x")
-    main_lens_upper = camera_module.get_visual("main_lens_upper")
-    upper_hinge_barrel_left = upper_half.get_visual("upper_hinge_barrel_0")
-    upper_hinge_barrel_right = upper_half.get_visual("upper_hinge_barrel_1")
-    lower_hinge_barrel_left = lower_half.get_visual("lower_hinge_barrel_0")
-    lower_hinge_barrel_center = lower_half.get_visual("lower_hinge_barrel_1")
-    lower_hinge_barrel_right = lower_half.get_visual("lower_hinge_barrel_2")
+    lower_body = object_model.get_part("lower_body")
+    upper_body = object_model.get_part("upper_body")
+    keypad = object_model.get_part("keypad_module")
+    screen = object_model.get_part("screen_module")
+    camera = object_model.get_part("camera_module")
+    hinge = object_model.get_articulation("phone_hinge")
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
+    ctx.check_mesh_assets_ready()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    # Preferred default QC stack:
+    # 1) likely-failure grounded-component floating check for disconnected part groups
+    ctx.fail_if_isolated_parts()
+    # 2) noisier warning-tier sensor for same-part disconnected geometry islands
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    # 3) likely-failure rest-pose part-to-part overlap backstop for real 3D interpenetration
+    # This is not an "inside / nested / footprint overlap" check.
+    # Investigate all three. Warning-tier signals are not free passes.
+    # Use `ctx.allow_overlap(...)` only for true intended penetration.
+    # If parts are nested but should remain clear, prove that with exact
+    # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
+    # `expect_within(...)` checks instead.
+    ctx.fail_if_parts_overlap_in_current_pose()
 
+    limits = hinge.motion_limits
+    ctx.check(
+        "hinge axis follows phone width",
+        tuple(hinge.axis) == (1.0, 0.0, 0.0),
+        details=f"expected hinge axis (1, 0, 0), got {hinge.axis}",
+    )
+    ctx.check(
+        "hinge opens to a realistic clamshell angle",
+        limits is not None and limits.lower == 0.0 and limits.upper is not None and limits.upper >= 2.4,
+        details=f"unexpected hinge limits: {limits}",
+    )
+
+    ctx.expect_gap(
+        upper_body,
+        lower_body,
+        axis="z",
+        min_gap=0.0026,
+        max_gap=0.0038,
+        positive_elem="upper_shell",
+        negative_elem="lower_shell",
+        name="closed shell gap",
+    )
     ctx.expect_overlap(
-        upper_half,
-        lower_half,
+        upper_body,
+        lower_body,
         axes="xy",
         min_overlap=0.05,
-        elem_a=upper_shell,
-        elem_b=lower_shell,
+        name="closed halves overlap in plan",
     )
-    ctx.expect_gap(
-        upper_half,
-        lower_half,
-        axis="z",
-        min_gap=0.0003,
-        max_gap=0.0012,
-        positive_elem=upper_shell,
-        negative_elem=lower_shell,
-    )
+    ctx.expect_contact(keypad, lower_body, name="keypad mounted to lower body")
+    ctx.expect_contact(screen, upper_body, name="screen mounted to upper body")
+    ctx.expect_contact(camera, upper_body, name="camera mounted to upper rear")
+    ctx.expect_contact(upper_body, lower_body, name="hinge physically connects both halves")
     ctx.expect_within(
-        exterior_display,
-        upper_half,
+        camera,
+        upper_body,
         axes="xy",
-        inner_elem=display_panel,
-    )
-    ctx.expect_overlap(
-        exterior_display,
-        upper_half,
-        axes="xy",
-        min_overlap=0.069,
-        elem_a=display_panel,
+        margin=0.0,
+        name="camera footprint stays on upper body",
     )
     ctx.expect_gap(
-        exterior_display,
-        upper_half,
+        screen,
+        keypad,
         axis="z",
-        max_gap=0.0005,
-        max_penetration=0.0,
-        positive_elem=display_panel,
-        negative_elem=upper_shell,
+        min_gap=0.0002,
+        max_gap=0.0016,
+        name="closed internals clear screen to keypad",
     )
-    ctx.expect_within(
-        camera_module,
-        exterior_display,
-        axes="xy",
-        inner_elem=camera_bump,
-        outer_elem=display_panel,
-    )
-    ctx.expect_contact(
-        camera_module,
-        exterior_display,
-        elem_a=camera_bump,
-        elem_b=display_panel,
-    )
-    ctx.expect_gap(
-        camera_module,
-        upper_half,
-        axis="z",
-        min_gap=0.0035,
-        positive_elem=main_lens_upper,
-        negative_elem=upper_shell,
-    )
-    ctx.expect_gap(
-        camera_module,
-        camera_module,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=main_lens_upper,
-        negative_elem=camera_bump,
-    )
-    ctx.expect_overlap(
-        upper_half,
-        lower_half,
-        axes="yz",
-        min_overlap=0.006,
-        elem_a=upper_hinge_barrel_left,
-        elem_b=lower_hinge_barrel_center,
-    )
-    ctx.expect_overlap(
-        upper_half,
-        lower_half,
-        axes="yz",
-        min_overlap=0.006,
-        elem_a=upper_hinge_barrel_left,
-        elem_b=lower_hinge_barrel_left,
-    )
-    ctx.expect_overlap(
-        upper_half,
-        lower_half,
-        axes="yz",
-        min_overlap=0.006,
-        elem_a=upper_hinge_barrel_right,
-        elem_b=lower_hinge_barrel_right,
-    )
-    with ctx.pose({fold_hinge: 1.7}):
-        ctx.expect_overlap(
-            upper_half,
-            lower_half,
-            axes="yz",
-            min_overlap=0.006,
-            elem_a=upper_hinge_barrel_left,
-            elem_b=lower_hinge_barrel_center,
+
+    closed_upper_aabb = ctx.part_world_aabb(upper_body)
+    lower_aabb = ctx.part_world_aabb(lower_body)
+    assert closed_upper_aabb is not None
+    assert lower_aabb is not None
+    closed_upper_center_y = (closed_upper_aabb[0][1] + closed_upper_aabb[1][1]) * 0.5
+    closed_upper_max_z = closed_upper_aabb[1][2]
+
+    with ctx.pose({hinge: 2.2}):
+        open_upper_aabb = ctx.part_world_aabb(upper_body)
+        assert open_upper_aabb is not None
+        open_upper_center_y = (open_upper_aabb[0][1] + open_upper_aabb[1][1]) * 0.5
+        open_upper_max_z = open_upper_aabb[1][2]
+        lower_center_y = (lower_aabb[0][1] + lower_aabb[1][1]) * 0.5
+
+        ctx.check(
+            "open pose lifts the display half",
+            open_upper_max_z > closed_upper_max_z + 0.035,
+            details=f"closed max z={closed_upper_max_z:.4f}, open max z={open_upper_max_z:.4f}",
         )
-        ctx.expect_overlap(
-            upper_half,
-            lower_half,
-            axes="yz",
-            min_overlap=0.006,
-            elem_a=upper_hinge_barrel_right,
-            elem_b=lower_hinge_barrel_right,
+        ctx.check(
+            "open pose swings the display half behind the hinge",
+            open_upper_center_y < lower_center_y - 0.015 and open_upper_center_y < closed_upper_center_y - 0.015,
+            details=(
+                f"lower center y={lower_center_y:.4f}, "
+                f"closed upper center y={closed_upper_center_y:.4f}, "
+                f"open upper center y={open_upper_center_y:.4f}"
+            ),
         )
+
     return ctx.report()
 
 

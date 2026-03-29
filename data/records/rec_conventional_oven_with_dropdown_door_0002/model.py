@@ -4,11 +4,11 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
+import os
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -18,603 +18,542 @@ from sdk import (
     TestReport,
 )
 
-ASSETS = AssetContext.from_script(__file__)
-HERE = ASSETS.asset_root
-
-WIDTH = 0.91
-DEPTH = 0.70
-HEIGHT = 0.93
-SIDE_T = 0.03
-TOP_T = 0.045
-BACK_T = 0.025
-FRONT_T = 0.03
-FRAME_W = WIDTH - 2.0 * SIDE_T
-FRONT_Y = DEPTH * 0.5 - FRONT_T * 0.5
-
-DOOR_OPEN_W = 0.78
-DOOR_OPEN_H = 0.50
-DOOR_BOTTOM_Z = 0.20
-DOOR_W = 0.82
-DOOR_H = 0.53
-DOOR_T = 0.032
-DOOR_AXIS_Y = DEPTH * 0.5
-
-DRAWER_OPEN_W = 0.80
-DRAWER_OPEN_H = 0.128
-DRAWER_BOTTOM_Z = 0.03
-DRAWER_FRONT_W = 0.84
-DRAWER_H = 0.14
-DRAWER_FRONT_H = 0.125
-DRAWER_FRONT_T = 0.03
-DRAWER_DEPTH = 0.50
-DRAWER_BACK_Y = 0.365 - (DRAWER_DEPTH - DRAWER_FRONT_T * 0.5)
-
-WINDOW_W = 0.62
-WINDOW_H = 0.285
-WINDOW_BOTTOM_Z = 0.135
-
-GRATE_W = 0.22
-GRATE_D = 0.20
-GRATE_BAR = 0.015
-GRATE_H = 0.018
-
-HINGE_ARM_X = DOOR_W * 0.5 + 0.011
-HINGE_BRACKET_X = HINGE_ARM_X + 0.020
-DRAWER_RUNNER_X = DRAWER_OPEN_W * 0.5 - 0.016
-GUIDE_RAIL_X = WIDTH * 0.5 - SIDE_T - 0.013
+try:
+    os.getcwd()
+except FileNotFoundError:
+    os.chdir("/")
 
 
-def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="professional_range", assets=ASSETS)
+def _build_gas_range() -> ArticulatedObject:
+    model = ArticulatedObject(name="gas_range")
 
-    stainless = model.material("stainless", rgba=(0.72, 0.74, 0.76, 1.0))
-    dark_steel = model.material("dark_steel", rgba=(0.23, 0.24, 0.26, 1.0))
-    cast_iron = model.material("cast_iron", rgba=(0.14, 0.14, 0.15, 1.0))
-    black_enamel = model.material("black_enamel", rgba=(0.08, 0.08, 0.09, 1.0))
-    oven_glass = model.material("oven_glass", rgba=(0.58, 0.70, 0.78, 0.30))
-    brushed_aluminum = model.material("brushed_aluminum", rgba=(0.80, 0.81, 0.82, 1.0))
+    body_enamel = model.material("body_enamel", rgba=(0.93, 0.93, 0.91, 1.0))
+    dark_steel = model.material("dark_steel", rgba=(0.20, 0.21, 0.23, 1.0))
+    grate_iron = model.material("grate_iron", rgba=(0.14, 0.14, 0.15, 1.0))
+    knob_metal = model.material("knob_metal", rgba=(0.74, 0.75, 0.77, 1.0))
+    glass = model.material("glass", rgba=(0.58, 0.71, 0.83, 0.30))
+    cavity_dark = model.material("cavity_dark", rgba=(0.08, 0.08, 0.09, 1.0))
 
     body = model.part("body")
     body.visual(
-        Box((SIDE_T, DEPTH, HEIGHT)),
-        origin=Origin(xyz=(-(WIDTH * 0.5 - SIDE_T * 0.5), 0.0, HEIGHT * 0.5)),
-        material=stainless,
-        name="left_side_panel",
+        Box((0.030, 0.640, 0.830)),
+        origin=Origin(xyz=(-0.365, 0.000, 0.415)),
+        material=body_enamel,
+        name="left_side",
     )
     body.visual(
-        Box((SIDE_T, DEPTH, HEIGHT)),
-        origin=Origin(xyz=(WIDTH * 0.5 - SIDE_T * 0.5, 0.0, HEIGHT * 0.5)),
-        material=stainless,
-        name="right_side_panel",
+        Box((0.030, 0.640, 0.830)),
+        origin=Origin(xyz=(0.365, 0.000, 0.415)),
+        material=body_enamel,
+        name="right_side",
     )
     body.visual(
-        Box((FRAME_W, BACK_T, HEIGHT - TOP_T)),
-        origin=Origin(xyz=(0.0, -(DEPTH * 0.5 - BACK_T * 0.5), (HEIGHT - TOP_T) * 0.5)),
-        material=stainless,
-        name="rear_panel",
+        Box((0.700, 0.030, 0.830)),
+        origin=Origin(xyz=(0.000, -0.305, 0.415)),
+        material=body_enamel,
+        name="back_panel",
     )
     body.visual(
-        Box((WIDTH, DEPTH, TOP_T)),
-        origin=Origin(xyz=(0.0, 0.0, HEIGHT - TOP_T * 0.5)),
-        material=stainless,
-        name="top_shell",
+        Box((0.780, 0.640, 0.030)),
+        origin=Origin(xyz=(0.000, 0.000, 0.845)),
+        material=body_enamel,
+        name="cooktop",
     )
     body.visual(
-        Box((FRAME_W, FRONT_T, HEIGHT - (DOOR_BOTTOM_Z + DOOR_OPEN_H))),
-        origin=Origin(xyz=(0.0, FRONT_Y, DOOR_BOTTOM_Z + DOOR_OPEN_H + (HEIGHT - (DOOR_BOTTOM_Z + DOOR_OPEN_H)) * 0.5)),
-        material=stainless,
-        name="front_frame",
+        Box((0.780, 0.050, 0.180)),
+        origin=Origin(xyz=(0.000, -0.290, 0.950)),
+        material=body_enamel,
+        name="backsplash",
     )
     body.visual(
-        Box((FRAME_W, FRONT_T, DOOR_BOTTOM_Z - (DRAWER_BOTTOM_Z + DRAWER_OPEN_H))),
-        origin=Origin(xyz=(0.0, FRONT_Y, DRAWER_BOTTOM_Z + DRAWER_OPEN_H + (DOOR_BOTTOM_Z - (DRAWER_BOTTOM_Z + DRAWER_OPEN_H)) * 0.5)),
-        material=stainless,
-        name="door_drawer_rail",
+        Box((0.700, 0.040, 0.100)),
+        origin=Origin(xyz=(0.000, -0.245, 0.910)),
+        material=body_enamel,
+        name="control_panel",
     )
     body.visual(
-        Box((FRAME_W, FRONT_T, DRAWER_BOTTOM_Z)),
-        origin=Origin(xyz=(0.0, FRONT_Y, DRAWER_BOTTOM_Z * 0.5)),
-        material=stainless,
-        name="toe_kick_rail",
+        Box((0.700, 0.068, 0.140)),
+        origin=Origin(xyz=(0.000, 0.254, 0.750)),
+        material=body_enamel,
+        name="upper_front_panel",
     )
     body.visual(
-        Box(((FRAME_W - DOOR_OPEN_W) * 0.5, FRONT_T, DOOR_OPEN_H)),
-        origin=Origin(xyz=(-(DOOR_OPEN_W * 0.5 + (FRAME_W - DOOR_OPEN_W) * 0.25), FRONT_Y, DOOR_BOTTOM_Z + DOOR_OPEN_H * 0.5)),
-        material=stainless,
-        name="left_door_jamb",
+        Box((0.760, 0.200, 0.100)),
+        origin=Origin(xyz=(0.000, 0.140, 0.050)),
+        material=body_enamel,
+        name="toe_kick",
     )
     body.visual(
-        Box(((FRAME_W - DOOR_OPEN_W) * 0.5, FRONT_T, DOOR_OPEN_H)),
-        origin=Origin(xyz=(DOOR_OPEN_W * 0.5 + (FRAME_W - DOOR_OPEN_W) * 0.25, FRONT_Y, DOOR_BOTTOM_Z + DOOR_OPEN_H * 0.5)),
-        material=stainless,
-        name="right_door_jamb",
+        Box((0.700, 0.034, 0.010)),
+        origin=Origin(xyz=(0.000, 0.271, 0.095)),
+        material=body_enamel,
+        name="hinge_sill",
     )
     body.visual(
-        Box(((FRAME_W - DRAWER_OPEN_W) * 0.5, FRONT_T, DRAWER_OPEN_H)),
-        origin=Origin(xyz=(-(DRAWER_OPEN_W * 0.5 + (FRAME_W - DRAWER_OPEN_W) * 0.25), FRONT_Y, DRAWER_BOTTOM_Z + DRAWER_OPEN_H * 0.5)),
-        material=stainless,
-        name="left_drawer_jamb",
+        Box((0.660, 0.034, 0.030)),
+        origin=Origin(xyz=(0.000, 0.271, 0.685)),
+        material=body_enamel,
+        name="front_reveal_top",
     )
     body.visual(
-        Box(((FRAME_W - DRAWER_OPEN_W) * 0.5, FRONT_T, DRAWER_OPEN_H)),
-        origin=Origin(xyz=(DRAWER_OPEN_W * 0.5 + (FRAME_W - DRAWER_OPEN_W) * 0.25, FRONT_Y, DRAWER_BOTTOM_Z + DRAWER_OPEN_H * 0.5)),
-        material=stainless,
-        name="right_drawer_jamb",
+        Box((0.030, 0.034, 0.580)),
+        origin=Origin(xyz=(-0.345, 0.271, 0.390)),
+        material=body_enamel,
+        name="front_reveal_left",
     )
     body.visual(
-        Box((FRAME_W - 0.02, DEPTH - 0.08, 0.008)),
-        origin=Origin(xyz=(0.0, -0.01, HEIGHT - 0.004)),
-        material=black_enamel,
-        name="cooktop_surface",
+        Box((0.030, 0.034, 0.580)),
+        origin=Origin(xyz=(0.345, 0.271, 0.390)),
+        material=body_enamel,
+        name="front_reveal_right",
     )
     body.visual(
-        Box((DOOR_OPEN_W, 0.645, 0.018)),
-        origin=Origin(xyz=(0.0, -0.0025, DOOR_BOTTOM_Z + 0.009)),
-        material=dark_steel,
+        Box((0.660, 0.540, 0.020)),
+        origin=Origin(xyz=(0.000, -0.020, 0.110)),
+        material=cavity_dark,
         name="oven_floor",
     )
     body.visual(
-        Box((DOOR_OPEN_W, 0.645, 0.018)),
-        origin=Origin(xyz=(0.0, -0.0025, DOOR_BOTTOM_Z + DOOR_OPEN_H - 0.009)),
-        material=dark_steel,
+        Box((0.660, 0.540, 0.020)),
+        origin=Origin(xyz=(0.000, -0.020, 0.690)),
+        material=cavity_dark,
         name="oven_ceiling",
     )
     body.visual(
-        Box((0.025, 0.645, DOOR_OPEN_H)),
-        origin=Origin(xyz=(-(DOOR_OPEN_W * 0.5 - 0.0125), -0.0025, DOOR_BOTTOM_Z + DOOR_OPEN_H * 0.5)),
-        material=dark_steel,
-        name="oven_left_liner",
+        Box((0.660, 0.040, 0.560)),
+        origin=Origin(xyz=(0.000, -0.285, 0.400)),
+        material=cavity_dark,
+        name="oven_back_wall",
     )
     body.visual(
-        Box((0.025, 0.645, DOOR_OPEN_H)),
-        origin=Origin(xyz=(DOOR_OPEN_W * 0.5 - 0.0125, -0.0025, DOOR_BOTTOM_Z + DOOR_OPEN_H * 0.5)),
-        material=dark_steel,
-        name="oven_right_liner",
+        Box((0.020, 0.540, 0.560)),
+        origin=Origin(xyz=(-0.340, -0.020, 0.400)),
+        material=cavity_dark,
+        name="oven_left_wall",
     )
     body.visual(
-        Box((DOOR_OPEN_W, 0.015, DOOR_OPEN_H)),
-        origin=Origin(xyz=(0.0, -0.3175, DOOR_BOTTOM_Z + DOOR_OPEN_H * 0.5)),
-        material=dark_steel,
-        name="oven_back_liner",
+        Box((0.020, 0.540, 0.560)),
+        origin=Origin(xyz=(0.340, -0.020, 0.400)),
+        material=cavity_dark,
+        name="oven_right_wall",
     )
-    body.visual(
-        Box((0.026, 0.34, 0.016)),
-        origin=Origin(xyz=(-GUIDE_RAIL_X, -0.005, DRAWER_BOTTOM_Z + 0.055)),
-        material=dark_steel,
-        name="left_guide_rail",
-    )
-    body.visual(
-        Box((0.026, 0.34, 0.016)),
-        origin=Origin(xyz=(GUIDE_RAIL_X, -0.005, DRAWER_BOTTOM_Z + 0.055)),
-        material=dark_steel,
-        name="right_guide_rail",
-    )
-    body.visual(
-        Box((0.022, 0.050, 0.080)),
-        origin=Origin(xyz=(-HINGE_BRACKET_X, 0.336, DOOR_BOTTOM_Z + 0.050)),
-        material=dark_steel,
-        name="left_hinge_bracket",
-    )
-    body.visual(
-        Box((0.022, 0.050, 0.080)),
-        origin=Origin(xyz=(HINGE_BRACKET_X, 0.336, DOOR_BOTTOM_Z + 0.050)),
-        material=dark_steel,
-        name="right_hinge_bracket",
-    )
-    for index, x_pos in enumerate((-0.30, -0.18, -0.06, 0.06, 0.18, 0.30), start=1):
-        body.visual(
-            Cylinder(radius=0.018, length=0.032),
-            origin=Origin(xyz=(x_pos, 0.366, 0.790), rpy=(math.pi * 0.5, 0.0, 0.0)),
-            material=dark_steel,
-            name=f"control_knob_{index}",
-        )
     body.inertial = Inertial.from_geometry(
-        Box((WIDTH, DEPTH, HEIGHT)),
-        mass=110.0,
-        origin=Origin(xyz=(0.0, 0.0, HEIGHT * 0.5)),
+        Box((0.780, 0.640, 1.040)),
+        mass=68.0,
+        origin=Origin(xyz=(0.000, 0.000, 0.520)),
     )
 
-    cooktop = model.part("cooktop")
-    cooktop.visual(
-        Box((0.82, 0.54, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, 0.006)),
-        material=black_enamel,
-        name="grate_support_tray",
-    )
-    grate_positions = [
-        (-0.27, 0.12),
-        (0.0, 0.12),
-        (0.27, 0.12),
-        (-0.27, -0.10),
-        (0.0, -0.10),
-        (0.27, -0.10),
-    ]
-    for index, (x_pos, y_pos) in enumerate(grate_positions, start=1):
-        cooktop.visual(
-            Box((GRATE_W, GRATE_BAR, GRATE_H)),
-            origin=Origin(xyz=(x_pos, y_pos - (GRATE_D * 0.5 - GRATE_BAR * 0.5), GRATE_H * 0.5)),
-            material=cast_iron,
-            name=f"grate_{index}",
+    burner_positions = {
+        "front_left": (-0.185, 0.125),
+        "front_right": (0.185, 0.125),
+        "rear_left": (-0.185, -0.125),
+        "rear_right": (0.185, -0.125),
+    }
+    for burner_name, (x_pos, y_pos) in burner_positions.items():
+        burner = model.part(f"{burner_name}_burner")
+        burner.visual(
+            Cylinder(radius=0.072, length=0.004),
+            origin=Origin(xyz=(0.000, 0.000, 0.002)),
+            material=dark_steel,
+            name="burner_ring",
         )
-        cooktop.visual(
-            Box((GRATE_W, GRATE_BAR, GRATE_H)),
-            origin=Origin(xyz=(x_pos, y_pos + (GRATE_D * 0.5 - GRATE_BAR * 0.5), GRATE_H * 0.5)),
-            material=cast_iron,
-            name=f"grate_{index}_rear_bar",
+        burner.visual(
+            Cylinder(radius=0.044, length=0.012),
+            origin=Origin(xyz=(0.000, 0.000, 0.010)),
+            material=dark_steel,
+            name="burner_cap",
         )
-        cooktop.visual(
-            Box((GRATE_BAR, GRATE_D - 2.0 * GRATE_BAR, GRATE_H)),
-            origin=Origin(xyz=(x_pos - (GRATE_W * 0.5 - GRATE_BAR * 0.5), y_pos, GRATE_H * 0.5)),
-            material=cast_iron,
-            name=f"grate_{index}_left_bar",
+        burner.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.072, length=0.020),
+            mass=0.45,
+            origin=Origin(xyz=(0.000, 0.000, 0.010)),
         )
-        cooktop.visual(
-            Box((GRATE_BAR, GRATE_D - 2.0 * GRATE_BAR, GRATE_H)),
-            origin=Origin(xyz=(x_pos + (GRATE_W * 0.5 - GRATE_BAR * 0.5), y_pos, GRATE_H * 0.5)),
-            material=cast_iron,
-            name=f"grate_{index}_right_bar",
+        model.articulation(
+            f"body_to_{burner_name}_burner",
+            ArticulationType.FIXED,
+            parent=body,
+            child=burner,
+            origin=Origin(xyz=(x_pos, y_pos, 0.860)),
         )
-        cooktop.visual(
-            Box((GRATE_W * 0.72, GRATE_BAR, GRATE_H)),
-            origin=Origin(xyz=(x_pos, y_pos, GRATE_H * 0.5)),
-            material=cast_iron,
-            name=f"grate_{index}_cross_x",
-        )
-        cooktop.visual(
-            Box((GRATE_BAR, GRATE_D * 0.72, GRATE_H)),
-            origin=Origin(xyz=(x_pos, y_pos, GRATE_H * 0.5)),
-            material=cast_iron,
-            name=f"grate_{index}_cross_y",
-        )
-        cooktop.visual(
-            Cylinder(radius=0.036, length=0.012),
-            origin=Origin(xyz=(x_pos, y_pos, 0.006)),
-            material=black_enamel,
-            name=f"burner_cap_{index}",
-        )
-    cooktop.inertial = Inertial.from_geometry(
-        Box((0.82, 0.54, 0.03)),
-        mass=7.5,
-        origin=Origin(xyz=(0.0, 0.0, 0.015)),
-    )
 
-    door = model.part("door")
+        grate = model.part(f"{burner_name}_grate")
+        grate.visual(
+            Box((0.180, 0.014, 0.006)),
+            origin=Origin(xyz=(0.000, -0.070, 0.015)),
+            material=grate_iron,
+            name="front_bar",
+        )
+        grate.visual(
+            Box((0.180, 0.014, 0.006)),
+            origin=Origin(xyz=(0.000, 0.070, 0.015)),
+            material=grate_iron,
+            name="rear_bar",
+        )
+        grate.visual(
+            Box((0.014, 0.180, 0.006)),
+            origin=Origin(xyz=(-0.070, 0.000, 0.015)),
+            material=grate_iron,
+            name="left_bar",
+        )
+        grate.visual(
+            Box((0.014, 0.180, 0.006)),
+            origin=Origin(xyz=(0.070, 0.000, 0.015)),
+            material=grate_iron,
+            name="right_bar",
+        )
+        grate.visual(
+            Box((0.180, 0.014, 0.006)),
+            origin=Origin(xyz=(0.000, 0.000, 0.021)),
+            material=grate_iron,
+            name="center_bar_x",
+        )
+        grate.visual(
+            Box((0.014, 0.180, 0.006)),
+            origin=Origin(xyz=(0.000, 0.000, 0.021)),
+            material=grate_iron,
+            name="center_bar_y",
+        )
+        for foot_index, (foot_x, foot_y) in enumerate(
+            ((-0.070, -0.070), (0.070, -0.070), (-0.070, 0.070), (0.070, 0.070)),
+            start=1,
+        ):
+            grate.visual(
+                Box((0.018, 0.018, 0.012)),
+                origin=Origin(xyz=(foot_x, foot_y, 0.006)),
+                material=grate_iron,
+                name=f"foot_{foot_index}",
+            )
+        grate.inertial = Inertial.from_geometry(
+            Box((0.180, 0.180, 0.024)),
+            mass=1.1,
+            origin=Origin(xyz=(0.000, 0.000, 0.012)),
+        )
+        model.articulation(
+            f"body_to_{burner_name}_grate",
+            ArticulationType.FIXED,
+            parent=body,
+            child=grate,
+            origin=Origin(xyz=(x_pos, y_pos, 0.860)),
+        )
+
+    for index, knob_x in enumerate((-0.240, -0.080, 0.080, 0.240), start=1):
+        knob = model.part(f"control_knob_{index}")
+        knob.visual(
+            Cylinder(radius=0.010, length=0.004),
+            origin=Origin(xyz=(0.000, 0.002, 0.000), rpy=(math.pi * 0.5, 0.0, 0.0)),
+            material=dark_steel,
+            name="collar",
+        )
+        knob.visual(
+            Cylinder(radius=0.022, length=0.024),
+            origin=Origin(xyz=(0.000, 0.012, 0.000), rpy=(math.pi * 0.5, 0.0, 0.0)),
+            material=knob_metal,
+            name="knob_body",
+        )
+        knob.visual(
+            Box((0.008, 0.006, 0.010)),
+            origin=Origin(xyz=(0.000, 0.023, 0.017)),
+            material=dark_steel,
+            name="indicator",
+        )
+        knob.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.022, length=0.028),
+            mass=0.08,
+            origin=Origin(xyz=(0.000, 0.014, 0.000)),
+        )
+        model.articulation(
+            f"body_to_control_knob_{index}",
+            ArticulationType.REVOLUTE,
+            parent=body,
+            child=knob,
+            origin=Origin(xyz=(knob_x, -0.225, 0.905)),
+            axis=(0.0, 1.0, 0.0),
+            motion_limits=MotionLimits(
+                effort=1.0,
+                velocity=3.0,
+                lower=0.0,
+                upper=math.radians(270.0),
+            ),
+        )
+
+    door = model.part("oven_door")
     door.visual(
-        Box((DOOR_W, DOOR_T, DOOR_H - (WINDOW_BOTTOM_Z + WINDOW_H))),
-        origin=Origin(xyz=(0.0, DOOR_T * 0.5, WINDOW_BOTTOM_Z + WINDOW_H + (DOOR_H - (WINDOW_BOTTOM_Z + WINDOW_H)) * 0.5)),
-        material=stainless,
-        name="door_frame",
-    )
-    door.visual(
-        Box((DOOR_W, DOOR_T, WINDOW_BOTTOM_Z)),
-        origin=Origin(xyz=(0.0, DOOR_T * 0.5, WINDOW_BOTTOM_Z * 0.5)),
-        material=stainless,
+        Box((0.680, 0.024, 0.100)),
+        origin=Origin(xyz=(0.000, 0.010, 0.050)),
+        material=body_enamel,
         name="door_bottom_rail",
     )
     door.visual(
-        Box(((DOOR_W - WINDOW_W) * 0.5, DOOR_T, WINDOW_H)),
-        origin=Origin(xyz=(-(WINDOW_W * 0.5 + (DOOR_W - WINDOW_W) * 0.25), DOOR_T * 0.5, WINDOW_BOTTOM_Z + WINDOW_H * 0.5)),
-        material=stainless,
-        name="door_left_stile",
+        Box((0.680, 0.024, 0.120)),
+        origin=Origin(xyz=(0.000, 0.010, 0.520)),
+        material=body_enamel,
+        name="door_top_rail",
     )
     door.visual(
-        Box(((DOOR_W - WINDOW_W) * 0.5, DOOR_T, WINDOW_H)),
-        origin=Origin(xyz=(WINDOW_W * 0.5 + (DOOR_W - WINDOW_W) * 0.25, DOOR_T * 0.5, WINDOW_BOTTOM_Z + WINDOW_H * 0.5)),
-        material=stainless,
-        name="door_right_stile",
+        Box((0.080, 0.024, 0.580)),
+        origin=Origin(xyz=(-0.300, 0.010, 0.290)),
+        material=body_enamel,
+        name="door_left_rail",
     )
     door.visual(
-        Box((DOOR_W - 0.08, 0.018, DOOR_H - 0.08)),
-        origin=Origin(xyz=(0.0, 0.010, DOOR_H * 0.5)),
-        material=dark_steel,
-        name="door_inner_panel",
+        Box((0.080, 0.024, 0.580)),
+        origin=Origin(xyz=(0.300, 0.010, 0.290)),
+        material=body_enamel,
+        name="door_right_rail",
     )
     door.visual(
-        Box((WINDOW_W - 0.025, 0.004, WINDOW_H - 0.020)),
-        origin=Origin(xyz=(0.0, 0.010, WINDOW_BOTTOM_Z + WINDOW_H * 0.5)),
-        material=oven_glass,
-        name="inner_glass",
+        Box((0.520, 0.006, 0.360)),
+        origin=Origin(xyz=(0.000, 0.015, 0.280)),
+        material=glass,
+        name="window_glass",
     )
     door.visual(
-        Box((WINDOW_W - 0.010, 0.004, WINDOW_H - 0.010)),
-        origin=Origin(xyz=(0.0, 0.024, WINDOW_BOTTOM_Z + WINDOW_H * 0.5)),
-        material=oven_glass,
-        name="outer_glass",
+        Box((0.520, 0.008, 0.360)),
+        origin=Origin(xyz=(0.000, 0.005, 0.280)),
+        material=cavity_dark,
+        name="window_shadow_panel",
     )
     door.visual(
-        Box((WINDOW_W - 0.024, 0.010, 0.012)),
-        origin=Origin(xyz=(0.0, 0.017, WINDOW_BOTTOM_Z + 0.006)),
-        material=dark_steel,
-        name="window_spacer_bottom",
+        Cylinder(radius=0.010, length=0.660),
+        origin=Origin(xyz=(0.000, 0.000, 0.000), rpy=(0.000, math.pi * 0.5, 0.000)),
+        material=grate_iron,
+        name="hinge_barrel",
     )
     door.visual(
-        Box((WINDOW_W - 0.024, 0.010, 0.012)),
-        origin=Origin(xyz=(0.0, 0.017, WINDOW_BOTTOM_Z + WINDOW_H - 0.006)),
-        material=dark_steel,
-        name="window_spacer_top",
+        Box((0.030, 0.022, 0.050)),
+        origin=Origin(xyz=(-0.245, 0.033, 0.540)),
+        material=knob_metal,
+        name="handle_left_post",
     )
     door.visual(
-        Box((0.012, 0.010, WINDOW_H - 0.020)),
-        origin=Origin(xyz=(-(WINDOW_W * 0.5 - 0.006), 0.017, WINDOW_BOTTOM_Z + WINDOW_H * 0.5)),
-        material=dark_steel,
-        name="window_spacer_left",
+        Box((0.030, 0.022, 0.050)),
+        origin=Origin(xyz=(0.245, 0.033, 0.540)),
+        material=knob_metal,
+        name="handle_right_post",
     )
     door.visual(
-        Box((0.012, 0.010, WINDOW_H - 0.020)),
-        origin=Origin(xyz=(WINDOW_W * 0.5 - 0.006, 0.017, WINDOW_BOTTOM_Z + WINDOW_H * 0.5)),
-        material=dark_steel,
-        name="window_spacer_right",
-    )
-    door.visual(
-        Box((0.048, 0.012, 0.072)),
-        origin=Origin(xyz=(-(DOOR_W * 0.5 - 0.075), DOOR_T + 0.006, 0.410)),
-        material=brushed_aluminum,
-        name="left_handle_bracket_base",
-    )
-    door.visual(
-        Box((0.048, 0.012, 0.072)),
-        origin=Origin(xyz=(DOOR_W * 0.5 - 0.075, DOOR_T + 0.006, 0.410)),
-        material=brushed_aluminum,
-        name="right_handle_bracket_base",
-    )
-    door.visual(
-        Box((0.024, 0.034, 0.028)),
-        origin=Origin(xyz=(-(DOOR_W * 0.5 - 0.075), DOOR_T + 0.029, 0.410)),
-        material=brushed_aluminum,
-        name="left_handle_bracket_arm",
-    )
-    door.visual(
-        Box((0.024, 0.034, 0.028)),
-        origin=Origin(xyz=(DOOR_W * 0.5 - 0.075, DOOR_T + 0.029, 0.410)),
-        material=brushed_aluminum,
-        name="right_handle_bracket_arm",
-    )
-    door.visual(
-        Cylinder(radius=0.014, length=DOOR_W - 0.174),
-        origin=Origin(xyz=(0.0, DOOR_T + 0.030, 0.410), rpy=(0.0, math.pi * 0.5, 0.0)),
-        material=brushed_aluminum,
+        Cylinder(radius=0.012, length=0.560),
+        origin=Origin(xyz=(0.000, 0.046, 0.540), rpy=(0.000, math.pi * 0.5, 0.000)),
+        material=knob_metal,
         name="handle_bar",
     )
-    door.visual(
-        Box((0.018, 0.044, 0.018)),
-        origin=Origin(xyz=(-HINGE_ARM_X, 0.033, 0.050)),
-        material=dark_steel,
-        name="left_hinge_arm",
-    )
-    door.visual(
-        Box((0.018, 0.044, 0.018)),
-        origin=Origin(xyz=(HINGE_ARM_X, 0.033, 0.050)),
-        material=dark_steel,
-        name="right_hinge_arm",
-    )
-    door.visual(
-        Box((0.028, 0.032, 0.028)),
-        origin=Origin(xyz=(-(DOOR_W * 0.5 - 0.001), 0.024, 0.050)),
-        material=dark_steel,
-        name="left_hinge_mount",
-    )
-    door.visual(
-        Box((0.028, 0.032, 0.028)),
-        origin=Origin(xyz=(DOOR_W * 0.5 - 0.001, 0.024, 0.050)),
-        material=dark_steel,
-        name="right_hinge_mount",
-    )
     door.inertial = Inertial.from_geometry(
-        Box((DOOR_W, 0.14, DOOR_H)),
-        mass=21.0,
-        origin=Origin(xyz=(0.0, 0.070, DOOR_H * 0.5)),
-    )
-
-    drawer = model.part("drawer")
-    drawer.visual(
-        Box((DRAWER_FRONT_W, DRAWER_FRONT_T, DRAWER_FRONT_H)),
-        origin=Origin(xyz=(0.0, DRAWER_DEPTH - DRAWER_FRONT_T * 0.5, DRAWER_FRONT_H * 0.5)),
-        material=stainless,
-        name="drawer_front",
-    )
-    drawer.visual(
-        Box((0.74, DRAWER_DEPTH - 0.10, 0.012)),
-        origin=Origin(xyz=(0.0, 0.21, 0.006)),
-        material=dark_steel,
-        name="drawer_floor",
-    )
-    drawer.visual(
-        Box((0.012, DRAWER_DEPTH - 0.03, 0.096)),
-        origin=Origin(xyz=(-0.366, 0.235, 0.055)),
-        material=dark_steel,
-        name="drawer_left_side",
-    )
-    drawer.visual(
-        Box((0.012, DRAWER_DEPTH - 0.03, 0.096)),
-        origin=Origin(xyz=(0.366, 0.235, 0.055)),
-        material=dark_steel,
-        name="drawer_right_side",
-    )
-    drawer.visual(
-        Box((0.74, 0.012, 0.096)),
-        origin=Origin(xyz=(0.0, 0.006, 0.055)),
-        material=dark_steel,
-        name="drawer_back",
-    )
-    drawer.visual(
-        Box((0.016, 0.32, 0.016)),
-        origin=Origin(xyz=(-DRAWER_RUNNER_X, 0.17, 0.055)),
-        material=dark_steel,
-        name="left_runner",
-    )
-    drawer.visual(
-        Box((0.016, 0.32, 0.016)),
-        origin=Origin(xyz=(DRAWER_RUNNER_X, 0.17, 0.055)),
-        material=dark_steel,
-        name="right_runner",
-    )
-    drawer.visual(
-        Box((0.016, 0.050, 0.020)),
-        origin=Origin(xyz=(-0.376, 0.160, 0.055)),
-        material=dark_steel,
-        name="left_runner_mount",
-    )
-    drawer.visual(
-        Box((0.016, 0.050, 0.020)),
-        origin=Origin(xyz=(0.376, 0.160, 0.055)),
-        material=dark_steel,
-        name="right_runner_mount",
-    )
-    drawer.inertial = Inertial.from_geometry(
-        Box((DRAWER_FRONT_W, DRAWER_DEPTH, DRAWER_H)),
-        mass=12.0,
-        origin=Origin(xyz=(0.0, DRAWER_DEPTH * 0.5, DRAWER_H * 0.5)),
+        Box((0.680, 0.060, 0.580)),
+        mass=13.5,
+        origin=Origin(xyz=(0.000, 0.020, 0.290)),
     )
 
     model.articulation(
-        "body_to_cooktop",
-        ArticulationType.FIXED,
-        parent=body,
-        child=cooktop,
-        origin=Origin(xyz=(0.0, 0.0, HEIGHT)),
-    )
-    model.articulation(
-        "body_to_door",
+        "oven_door_hinge",
         ArticulationType.REVOLUTE,
         parent=body,
         child=door,
-        origin=Origin(xyz=(0.0, DOOR_AXIS_Y, DOOR_BOTTOM_Z)),
-        axis=(-1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=80.0, velocity=1.6, lower=0.0, upper=1.45),
+        origin=Origin(xyz=(0.000, 0.298, 0.100)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=120.0, velocity=1.8, lower=-1.45, upper=0.0),
     )
-    model.articulation(
-        "body_to_drawer",
-        ArticulationType.PRISMATIC,
-        parent=body,
-        child=drawer,
-        origin=Origin(xyz=(0.0, DRAWER_BACK_Y, DRAWER_BOTTOM_Z)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=45.0, velocity=0.35, lower=0.0, upper=0.24),
-    )
+
     return model
 
 
+def build_object_model() -> ArticulatedObject:
+    return _build_gas_range()
+
+
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    ctx = TestContext(object_model)
+
     body = object_model.get_part("body")
-    cooktop = object_model.get_part("cooktop")
-    door = object_model.get_part("door")
-    drawer = object_model.get_part("drawer")
-    door_hinge = object_model.get_articulation("body_to_door")
-    drawer_slide = object_model.get_articulation("body_to_drawer")
+    door = object_model.get_part("oven_door")
+    door_hinge = object_model.get_articulation("oven_door_hinge")
 
-    front_frame = body.get_visual("front_frame")
-    cooktop_surface = body.get_visual("cooktop_surface")
-    left_guide = body.get_visual("left_guide_rail")
-    right_guide = body.get_visual("right_guide_rail")
-    left_hinge_bracket = body.get_visual("left_hinge_bracket")
-    right_hinge_bracket = body.get_visual("right_hinge_bracket")
+    upper_front_panel = body.get_visual("upper_front_panel")
+    hinge_sill = body.get_visual("hinge_sill")
+    reveal_top = body.get_visual("front_reveal_top")
 
-    door_frame = door.get_visual("door_frame")
     door_bottom_rail = door.get_visual("door_bottom_rail")
-    door_left_stile = door.get_visual("door_left_stile")
-    door_right_stile = door.get_visual("door_right_stile")
-    inner_glass = door.get_visual("inner_glass")
-    outer_glass = door.get_visual("outer_glass")
-    handle_bar = door.get_visual("handle_bar")
-    left_handle_bracket_arm = door.get_visual("left_handle_bracket_arm")
-    right_handle_bracket_arm = door.get_visual("right_handle_bracket_arm")
-    left_hinge_arm = door.get_visual("left_hinge_arm")
-    right_hinge_arm = door.get_visual("right_hinge_arm")
-
-    drawer_front = drawer.get_visual("drawer_front")
-    left_runner = drawer.get_visual("left_runner")
-    right_runner = drawer.get_visual("right_runner")
+    door_top_rail = door.get_visual("door_top_rail")
+    window_glass = door.get_visual("window_glass")
+    shadow_panel = door.get_visual("window_shadow_panel")
+    hinge_barrel = door.get_visual("hinge_barrel")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64, overlap_tol=0.001, overlap_volume_tol=0.0)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.check(
+        "door_hinge_axis_is_full_width_x",
+        tuple(door_hinge.axis) == (1.0, 0.0, 0.0),
+        "The oven door should hinge about the full-width bottom-edge x-axis.",
+    )
 
-    for index in range(1, 7):
-        grate_front = cooktop.get_visual(f"grate_{index}")
-        grate_side = cooktop.get_visual(f"grate_{index}_left_bar")
-        ctx.expect_contact(cooktop, body, elem_a=grate_front, elem_b=cooktop_surface, name=f"grate_{index}_seats_on_cooktop")
-        ctx.expect_overlap(
-            cooktop,
-            body,
-            axes="x",
-            elem_a=grate_front,
-            elem_b=cooktop_surface,
-            min_overlap=0.18,
-            name=f"grate_{index}_spans_burner_width",
-        )
-        ctx.expect_overlap(
-            cooktop,
-            body,
-            axes="y",
-            elem_a=grate_side,
-            elem_b=cooktop_surface,
-            min_overlap=0.15,
-            name=f"grate_{index}_spans_burner_depth",
-        )
-
-    ctx.expect_overlap(door, body, axes="x", elem_a=door_frame, elem_b=front_frame, min_overlap=0.76)
-    ctx.expect_gap(door, drawer, axis="z", positive_elem=door_bottom_rail, negative_elem=drawer_front, min_gap=0.03)
-
-    ctx.expect_overlap(door, door, axes="x", elem_a=outer_glass, elem_b=door_frame, min_overlap=0.60)
-    ctx.expect_overlap(door, door, axes="x", elem_a=outer_glass, elem_b=door_bottom_rail, min_overlap=0.60)
-    ctx.expect_overlap(door, door, axes="z", elem_a=outer_glass, elem_b=door_left_stile, min_overlap=0.24)
-    ctx.expect_overlap(door, door, axes="z", elem_a=outer_glass, elem_b=door_right_stile, min_overlap=0.24)
+    ctx.expect_overlap(door, body, axes="xz", min_overlap=0.25)
+    ctx.expect_gap(
+        door,
+        body,
+        axis="y",
+        max_gap=0.012,
+        max_penetration=0.0,
+        positive_elem=door_top_rail,
+        negative_elem=upper_front_panel,
+    )
+    ctx.expect_gap(
+        door,
+        body,
+        axis="z",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=door_bottom_rail,
+        negative_elem=hinge_sill,
+    )
+    ctx.expect_contact(
+        door,
+        body,
+        elem_a=hinge_barrel,
+        elem_b=hinge_sill,
+        contact_tol=0.001,
+    )
+    ctx.expect_within(door, door, axes="xz", inner_elem=window_glass)
+    ctx.expect_within(door, door, axes="xz", inner_elem=shadow_panel)
     ctx.expect_gap(
         door,
         door,
         axis="y",
-        positive_elem=outer_glass,
-        negative_elem=inner_glass,
-        min_gap=0.010,
-        max_gap=0.020,
+        min_gap=0.001,
+        max_gap=0.012,
+        positive_elem=window_glass,
+        negative_elem=shadow_panel,
     )
-    ctx.expect_contact(door, door, elem_a=handle_bar, elem_b=left_handle_bracket_arm)
-    ctx.expect_contact(door, door, elem_a=handle_bar, elem_b=right_handle_bracket_arm)
-    ctx.expect_overlap(door, door, axes="x", elem_a=handle_bar, elem_b=door_frame, min_overlap=0.60)
-    ctx.expect_gap(door, door, axis="y", positive_elem=handle_bar, negative_elem=outer_glass, min_gap=0.018)
 
-    ctx.expect_overlap(drawer, body, axes="yz", elem_a=left_runner, elem_b=left_guide, min_overlap=0.012)
-    ctx.expect_overlap(drawer, body, axes="yz", elem_a=right_runner, elem_b=right_guide, min_overlap=0.012)
-    ctx.expect_overlap(drawer, body, axes="x", elem_a=drawer_front, elem_b=front_frame, min_overlap=0.78)
-    ctx.expect_contact(door, body, elem_a=left_hinge_arm, elem_b=left_hinge_bracket)
-    ctx.expect_contact(door, body, elem_a=right_hinge_arm, elem_b=right_hinge_bracket)
+    burner_names = ("front_left", "front_right", "rear_left", "rear_right")
+    grate_parts = [object_model.get_part(f"{name}_grate") for name in burner_names]
 
-    with ctx.pose({door_hinge: 1.35}):
+    for index, burner_name in enumerate(burner_names, start=1):
+        burner = object_model.get_part(f"{burner_name}_burner")
+        grate = object_model.get_part(f"{burner_name}_grate")
+        grate_center_bar = grate.get_visual("center_bar_x")
+        knob = object_model.get_part(f"control_knob_{index}")
+        knob_joint = object_model.get_articulation(f"body_to_control_knob_{index}")
+
+        ctx.expect_contact(burner, body, name=f"{burner_name}_burner_contacts_cooktop")
+        ctx.expect_contact(grate, body, name=f"{burner_name}_grate_is_supported")
+        ctx.expect_within(grate, body, axes="xy", margin=0.0, name=f"{burner_name}_grate_within_range_plan")
+        ctx.expect_within(burner, grate, axes="xy", margin=0.0, name=f"{burner_name}_burner_centered_under_grate")
         ctx.expect_gap(
+            grate,
+            burner,
+            axis="z",
+            min_gap=0.001,
+            max_gap=0.010,
+            positive_elem=grate_center_bar,
+            name=f"{burner_name}_grate_clears_burner_cap",
+        )
+        ctx.expect_contact(knob, body, name=f"{knob.name}_mounted_to_panel")
+        ctx.check(
+            f"{knob.name}_joint_axis",
+            tuple(knob_joint.axis) == (0.0, 1.0, 0.0),
+            "Control knobs should rotate about the front-back axis.",
+        )
+
+    ctx.expect_gap(
+        grate_parts[1],
+        grate_parts[0],
+        axis="x",
+        min_gap=0.140,
+        name="front_grates_have_side_clearance",
+    )
+    ctx.expect_gap(
+        grate_parts[3],
+        grate_parts[2],
+        axis="x",
+        min_gap=0.140,
+        name="rear_grates_have_side_clearance",
+    )
+    ctx.expect_gap(
+        grate_parts[0],
+        grate_parts[2],
+        axis="y",
+        min_gap=0.050,
+        name="left_grates_have_realistic_fore_aft_clearance",
+    )
+    ctx.expect_gap(
+        grate_parts[1],
+        grate_parts[3],
+        axis="y",
+        min_gap=0.050,
+        name="right_grates_have_realistic_fore_aft_clearance",
+    )
+
+    door_limits = door_hinge.motion_limits
+    assert door_limits is not None and door_limits.lower is not None and door_limits.upper is not None
+    with ctx.pose({door_hinge: door_limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="oven_door_open_no_overlap")
+        ctx.fail_if_isolated_parts(name="oven_door_open_no_floating")
+        ctx.expect_contact(
             door,
             body,
-            axis="y",
-            positive_elem=left_hinge_arm,
-            negative_elem=left_hinge_bracket,
-            max_gap=0.035,
-            max_penetration=0.0,
-            name="left_hinge_arm_tracks_wall_bracket_when_open",
+            elem_a=hinge_barrel,
+            elem_b=hinge_sill,
+            contact_tol=0.001,
+            name="oven_door_open_hinge_contact",
+        )
+        ctx.expect_gap(
+            body,
+            door,
+            axis="z",
+            min_gap=0.250,
+            positive_elem=reveal_top,
+            negative_elem=door_top_rail,
+            name="oven_door_opens_downward",
         )
         ctx.expect_gap(
             door,
             body,
             axis="y",
-            positive_elem=right_hinge_arm,
-            negative_elem=right_hinge_bracket,
-            max_gap=0.035,
-            max_penetration=0.0,
-            name="right_hinge_arm_tracks_wall_bracket_when_open",
+            min_gap=0.200,
+            positive_elem=door_top_rail,
+            negative_elem=upper_front_panel,
+            name="oven_door_swings_forward",
         )
-        ctx.expect_gap(door, drawer, axis="z", positive_elem=door_bottom_rail, negative_elem=drawer_front, min_gap=0.012)
 
-    with ctx.pose({drawer_slide: 0.22}):
-        ctx.expect_gap(drawer, body, axis="y", positive_elem=drawer_front, negative_elem=front_frame, min_gap=0.18)
-        ctx.expect_overlap(drawer, body, axes="yz", elem_a=left_runner, elem_b=left_guide, min_overlap=0.010)
-        ctx.expect_overlap(drawer, body, axes="yz", elem_a=right_runner, elem_b=right_guide, min_overlap=0.010)
+    def aabb_center(
+        aabb: tuple[tuple[float, float, float], tuple[float, float, float]] | None,
+    ) -> tuple[float, float, float] | None:
+        if aabb is None:
+            return None
+        return tuple((lo + hi) * 0.5 for lo, hi in zip(aabb[0], aabb[1]))
+
+    for index in range(1, 5):
+        knob = object_model.get_part(f"control_knob_{index}")
+        knob_joint = object_model.get_articulation(f"body_to_control_knob_{index}")
+        knob_limits = knob_joint.motion_limits
+        assert knob_limits is not None and knob_limits.upper is not None
+
+        rest_center = aabb_center(ctx.part_element_world_aabb(knob, elem="indicator"))
+        moved_center = None
+        with ctx.pose({knob_joint: knob_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{knob.name}_max_turn_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{knob.name}_max_turn_no_floating")
+            ctx.expect_contact(knob, body, name=f"{knob.name}_still_mounted_at_max_turn")
+            moved_center = aabb_center(ctx.part_element_world_aabb(knob, elem="indicator"))
+
+        indicator_ok = (
+            rest_center is not None
+            and moved_center is not None
+            and abs(moved_center[1] - rest_center[1]) < 0.001
+            and (
+                abs(moved_center[0] - rest_center[0]) > 0.006
+                or abs(moved_center[2] - rest_center[2]) > 0.006
+            )
+        )
+        ctx.check(
+            f"{knob.name}_indicator_rotates_with_joint",
+            indicator_ok,
+            "The knob indicator should move around the knob face when the joint turns.",
+        )
 
     return ctx.report()
 

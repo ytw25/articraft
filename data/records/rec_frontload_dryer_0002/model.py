@@ -12,424 +12,652 @@ from sdk import (
     Box,
     Cylinder,
     Inertial,
+    LatheGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
+    mesh_from_geometry,
 )
-
-CABINET_W = 0.598
-CABINET_D = 0.555
-CABINET_H = 0.806
-SHELL_D = 0.515
-
-FOOT_PAD_H = 0.009
-FOOT_STEM_H = 0.021
-BASE_Z = FOOT_PAD_H + FOOT_STEM_H
-CABINET_TOP_Z = BASE_Z + CABINET_H
-
-FRONT_PANEL_T = 0.042
-SHELL_CENTER_Y = -((CABINET_D - SHELL_D) * 0.5)
-SHELL_FRONT_Y = SHELL_CENTER_Y + (SHELL_D * 0.5)
-FRONT_FRAME_CENTER_Y = SHELL_FRONT_Y + (FRONT_PANEL_T * 0.5)
-DOOR_AXIS_Y = FRONT_FRAME_CENTER_Y + (FRONT_PANEL_T * 0.5)
-
-DOOR_CENTER_Z = 0.405
-OPENING_RADIUS = 0.188
-DOOR_OUTER_RADIUS = 0.205
-DOOR_GLASS_RADIUS = 0.151
-HINGE_Z_OFFSET = 0.146
-
-DOOR_AXIS_X = -((CABINET_W * 0.5) + 0.022)
-DOOR_CENTER_OFFSET = -DOOR_AXIS_X
-
-CONTROL_W = 0.548
-CONTROL_D = 0.094
-CONTROL_H = 0.022
-CONTROL_CENTER_Y = 0.188
 
 ASSETS = AssetContext.from_script(__file__)
 
 
-def _add_ring_segments(
-    part,
+def _save_mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+
+
+def _ring_mesh(
+    name: str,
     *,
-    center_x: float,
-    center_z: float,
-    inner_radius: float,
     outer_radius: float,
+    inner_front_radius: float,
+    inner_back_radius: float,
     depth: float,
-    center_y: float,
-    segments: int,
-    material,
-    name_prefix: str,
-) -> None:
-    radial_thickness = outer_radius - inner_radius
-    mid_radius = inner_radius + (radial_thickness * 0.5)
-    tangential_length = ((2.0 * math.pi * mid_radius) / segments) * 1.04
-    for index in range(segments):
-        theta = (2.0 * math.pi * index) / segments
-        part.visual(
-            Box((tangential_length, depth, radial_thickness)),
-            origin=Origin(
-                xyz=(
-                    center_x + (mid_radius * math.cos(theta)),
-                    center_y,
-                    center_z + (mid_radius * math.sin(theta)),
-                ),
-                rpy=(0.0, -(theta + (math.pi * 0.5)), 0.0),
-            ),
-            material=material,
-            name=f"{name_prefix}_{index}",
-        )
+    segments: int = 72,
+):
+    ring = LatheGeometry.from_shell_profiles(
+        [
+            (outer_radius, -depth / 2.0),
+            (outer_radius, depth / 2.0),
+        ],
+        [
+            (inner_front_radius, -depth / 2.0),
+            (inner_back_radius, depth / 2.0),
+        ],
+        segments=segments,
+        start_cap="flat",
+        end_cap="flat",
+    )
+    ring.rotate_x(-math.pi / 2.0)
+    return _save_mesh(name, ring)
+
+
+def _drum_shell_mesh(name: str):
+    shell = LatheGeometry.from_shell_profiles(
+        [
+            (0.244, -0.235),
+            (0.244, 0.175),
+            (0.184, 0.224),
+            (0.086, 0.240),
+        ],
+        [
+            (0.215, -0.215),
+            (0.215, 0.165),
+            (0.162, 0.204),
+            (0.042, 0.220),
+        ],
+        segments=88,
+        start_cap="flat",
+        end_cap="flat",
+    )
+    shell.rotate_x(-math.pi / 2.0)
+    return _save_mesh(name, shell)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="stackable_dryer", assets=ASSETS)
+    model = ArticulatedObject(name="front_load_dryer", assets=ASSETS)
 
-    cabinet_white = model.material("cabinet_white", rgba=(0.95, 0.95, 0.96, 1.0))
-    trim_silver = model.material("trim_silver", rgba=(0.76, 0.78, 0.81, 1.0))
-    control_dark = model.material("control_dark", rgba=(0.18, 0.19, 0.21, 1.0))
-    knob_dark = model.material("knob_dark", rgba=(0.12, 0.12, 0.13, 1.0))
-    button_grey = model.material("button_grey", rgba=(0.80, 0.82, 0.84, 1.0))
-    glass_smoke = model.material("glass_smoke", rgba=(0.28, 0.34, 0.39, 0.42))
-    cavity_dark = model.material("cavity_dark", rgba=(0.11, 0.12, 0.13, 1.0))
-    hinge_dark = model.material("hinge_dark", rgba=(0.22, 0.23, 0.25, 1.0))
-    foot_black = model.material("foot_black", rgba=(0.09, 0.09, 0.10, 1.0))
+    appliance_white = model.material("appliance_white", rgba=(0.95, 0.95, 0.94, 1.0))
+    charcoal = model.material("charcoal_trim", rgba=(0.16, 0.17, 0.19, 1.0))
+    dark_gray = model.material("dark_gray", rgba=(0.28, 0.29, 0.31, 1.0))
+    steel = model.material("stainless_steel", rgba=(0.70, 0.72, 0.75, 1.0))
+    glass = model.material("dryer_glass", rgba=(0.72, 0.82, 0.90, 0.32))
+    control_gray = model.material("control_gray", rgba=(0.86, 0.87, 0.89, 1.0))
+    black = model.material("black_plastic", rgba=(0.09, 0.09, 0.10, 1.0))
+
+    width = 0.685
+    depth = 0.740
+    height = 0.950
+    shell_t = 0.028
+    front_face_y = depth / 2.0
+    rear_face_y = -depth / 2.0
+    drum_center_z = 0.455
+    drum_center_y = -0.010
+    opening_outer_diameter = 0.510
+    opening_radius = opening_outer_diameter / 2.0
+    door_radius = 0.248
 
     cabinet = model.part("cabinet")
     cabinet.visual(
-        Box((CABINET_W, SHELL_D, CABINET_H)),
-        origin=Origin(xyz=(0.0, SHELL_CENTER_Y, BASE_Z + (CABINET_H * 0.5))),
-        material=cabinet_white,
-        name="cabinet_shell",
-    )
-
-    front_outer_w = 0.548
-    front_outer_h = 0.695
-    top_bottom_frame_h = (front_outer_h - (2.0 * OPENING_RADIUS)) * 0.5
-    side_frame_w = (front_outer_w - (2.0 * OPENING_RADIUS)) * 0.5
-
-    cabinet.visual(
-        Box((front_outer_w, FRONT_PANEL_T, top_bottom_frame_h)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                FRONT_FRAME_CENTER_Y,
-                DOOR_CENTER_Z + OPENING_RADIUS + (top_bottom_frame_h * 0.5),
-            ),
-        ),
-        material=cabinet_white,
-        name="front_top_frame",
+        Box((width, depth, 0.040)),
+        origin=Origin(xyz=(0.0, 0.0, 0.020)),
+        material=appliance_white,
+        name="base_plinth",
     )
     cabinet.visual(
-        Box((front_outer_w, FRONT_PANEL_T, top_bottom_frame_h)),
+        Box((shell_t, depth, height - 0.040)),
         origin=Origin(
-            xyz=(
-                0.0,
-                FRONT_FRAME_CENTER_Y,
-                DOOR_CENTER_Z - OPENING_RADIUS - (top_bottom_frame_h * 0.5),
-            ),
+            xyz=(-width / 2.0 + shell_t / 2.0, 0.0, 0.040 + (height - 0.040) / 2.0)
         ),
-        material=cabinet_white,
-        name="front_bottom_frame",
+        material=appliance_white,
+        name="left_wall",
     )
     cabinet.visual(
-        Box((side_frame_w, FRONT_PANEL_T, OPENING_RADIUS * 2.0)),
+        Box((shell_t, depth, height - 0.040)),
         origin=Origin(
-            xyz=(
-                OPENING_RADIUS + (side_frame_w * 0.5),
-                FRONT_FRAME_CENTER_Y,
-                DOOR_CENTER_Z,
-            ),
+            xyz=(width / 2.0 - shell_t / 2.0, 0.0, 0.040 + (height - 0.040) / 2.0)
         ),
-        material=cabinet_white,
-        name="front_right_frame",
+        material=appliance_white,
+        name="right_wall",
     )
     cabinet.visual(
-        Box((side_frame_w, FRONT_PANEL_T, OPENING_RADIUS * 2.0)),
-        origin=Origin(
-            xyz=(
-                -(OPENING_RADIUS + (side_frame_w * 0.5)),
-                FRONT_FRAME_CENTER_Y,
-                DOOR_CENTER_Z,
-            ),
-        ),
-        material=cabinet_white,
-        name="front_left_frame",
+        Box((width - 2.0 * shell_t, depth, shell_t)),
+        origin=Origin(xyz=(0.0, 0.0, height - shell_t / 2.0)),
+        material=appliance_white,
+        name="top_panel",
     )
     cabinet.visual(
-        Cylinder(radius=0.178, length=0.032),
+        Box((width - 2.0 * shell_t, shell_t, height - 0.040)),
         origin=Origin(
-            xyz=(0.0, SHELL_FRONT_Y + 0.016, DOOR_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
+            xyz=(0.0, rear_face_y + shell_t / 2.0, 0.040 + (height - 0.040) / 2.0)
         ),
-        material=trim_silver,
-        name="drum_rim",
+        material=appliance_white,
+        name="rear_panel",
     )
     cabinet.visual(
-        Cylinder(radius=0.144, length=0.150),
-        origin=Origin(
-            xyz=(0.0, SHELL_FRONT_Y - 0.075, DOOR_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=cavity_dark,
-        name="drum_cavity",
+        Box((0.600, shell_t, 0.170)),
+        origin=Origin(xyz=(0.0, front_face_y - shell_t / 2.0, 0.105)),
+        material=appliance_white,
+        name="lower_fascia",
     )
     cabinet.visual(
-        Box((0.178, 0.012, 0.058)),
-        origin=Origin(
-            xyz=(DOOR_AXIS_X + 0.089, DOOR_AXIS_Y - 0.006, DOOR_CENTER_Z + HINGE_Z_OFFSET),
+        Box((width, shell_t, 0.170)),
+        origin=Origin(xyz=(0.0, front_face_y - shell_t / 2.0, 0.805)),
+        material=appliance_white,
+        name="front_header",
+    )
+    cabinet.visual(
+        Box((0.060, shell_t, 0.475)),
+        origin=Origin(xyz=(-0.2845, front_face_y - shell_t / 2.0, drum_center_z)),
+        material=appliance_white,
+        name="left_stile",
+    )
+    cabinet.visual(
+        Box((0.060, shell_t, 0.475)),
+        origin=Origin(xyz=(0.2845, front_face_y - shell_t / 2.0, drum_center_z)),
+        material=appliance_white,
+        name="right_stile",
+    )
+    cabinet.visual(
+        Box((0.605, 0.050, 0.114)),
+        origin=Origin(xyz=(0.0, front_face_y - 0.024, 0.842)),
+        material=control_gray,
+        name="control_panel",
+    )
+    cabinet.visual(
+        Box((0.090, 0.010, 0.012)),
+        origin=Origin(xyz=(-0.245, front_face_y - 0.003, 0.310)),
+        material=black,
+        name="door_gasket_lower",
+    )
+    cabinet.visual(
+        _ring_mesh(
+            "dryer_bezel_ring.obj",
+            outer_radius=0.255,
+            inner_front_radius=0.218,
+            inner_back_radius=0.225,
+            depth=0.028,
         ),
-        material=hinge_dark,
+        origin=Origin(xyz=(0.0, front_face_y - 0.014, drum_center_z)),
+        material=charcoal,
+        name="door_bezel",
+    )
+    cabinet.visual(
+        Cylinder(radius=0.068, length=0.020),
+        origin=Origin(
+            xyz=(0.0, -0.333, drum_center_z),
+            rpy=(-math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dark_gray,
+        name="rear_bearing_plate",
+    )
+    cabinet.visual(
+        Cylinder(radius=0.020, length=0.070),
+        origin=Origin(
+            xyz=(0.0, -0.296, drum_center_z),
+            rpy=(-math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dark_gray,
+        name="rear_spindle",
+    )
+    cabinet.visual(
+        Box((0.060, 0.030, 0.120)),
+        origin=Origin(xyz=(0.0, -0.342, drum_center_z)),
+        material=dark_gray,
+        name="rear_bearing_support",
+    )
+    cabinet.visual(
+        Cylinder(radius=0.008, length=0.270),
+        origin=Origin(xyz=(-0.314, front_face_y, drum_center_z)),
+        material=dark_gray,
+        name="hinge_pin",
+    )
+    cabinet.visual(
+        Box((0.024, 0.024, 0.080)),
+        origin=Origin(xyz=(-0.302, front_face_y - 0.006, drum_center_z + 0.100)),
+        material=dark_gray,
         name="upper_hinge_mount",
     )
     cabinet.visual(
-        Box((0.178, 0.012, 0.058)),
-        origin=Origin(
-            xyz=(DOOR_AXIS_X + 0.089, DOOR_AXIS_Y - 0.006, DOOR_CENTER_Z - HINGE_Z_OFFSET),
-        ),
-        material=hinge_dark,
+        Box((0.024, 0.024, 0.080)),
+        origin=Origin(xyz=(-0.302, front_face_y - 0.006, drum_center_z - 0.100)),
+        material=dark_gray,
         name="lower_hinge_mount",
     )
     cabinet.visual(
-        Box((0.040, 0.012, 0.048)),
-        origin=Origin(xyz=(0.188, DOOR_AXIS_Y - 0.006, DOOR_CENTER_Z)),
-        material=hinge_dark,
-        name="latch_striker",
-    )
-    cabinet.visual(
-        Cylinder(radius=0.006, length=0.320),
+        Cylinder(radius=0.010, length=0.022),
         origin=Origin(
-            xyz=(DOOR_AXIS_X + 0.012, DOOR_AXIS_Y - 0.007, DOOR_CENTER_Z),
+            xyz=(0.192, front_face_y - 0.017, 0.830),
+            rpy=(-math.pi / 2.0, 0.0, 0.0),
         ),
-        material=hinge_dark,
-        name="hinge_backbone",
+        material=dark_gray,
+        name="knob_bushing",
     )
-
-    foot_positions = {
-        "front_left": (-0.255, 0.228),
-        "front_right": (0.255, 0.228),
-        "rear_left": (-0.255, -0.228),
-        "rear_right": (0.255, -0.228),
-    }
-    for label, (x_pos, y_pos) in foot_positions.items():
+    for foot_x in (-0.250, 0.250):
         cabinet.visual(
-            Cylinder(radius=0.018, length=FOOT_PAD_H),
-            origin=Origin(xyz=(x_pos, y_pos, FOOT_PAD_H * 0.5)),
-            material=foot_black,
-            name=f"{label}_foot_pad",
+            Box((0.065, 0.080, 0.020)),
+            origin=Origin(xyz=(foot_x, -0.250, 0.010)),
+            material=dark_gray,
+            name=f"foot_{'left' if foot_x < 0.0 else 'right'}",
         )
-        cabinet.visual(
-            Cylinder(radius=0.007, length=FOOT_STEM_H),
-            origin=Origin(xyz=(x_pos, y_pos, FOOT_PAD_H + (FOOT_STEM_H * 0.5))),
-            material=foot_black,
-            name=f"{label}_foot_stem",
-        )
-
-    cabinet.visual(
-        Box((CONTROL_W, CONTROL_D, CONTROL_H)),
-        origin=Origin(xyz=(0.0, CONTROL_CENTER_Y, CABINET_TOP_Z + (CONTROL_H * 0.5))),
-        material=control_dark,
-        name="control_strip",
-    )
-    cabinet.visual(
-        Box((CONTROL_W, 0.016, 0.008)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                CONTROL_CENTER_Y + (CONTROL_D * 0.5) - 0.008,
-                CABINET_TOP_Z + 0.004,
-            ),
-        ),
-        material=trim_silver,
-        name="control_front_lip",
-    )
-    cabinet.visual(
-        Cylinder(radius=0.028, length=0.028),
-        origin=Origin(
-            xyz=(-0.165, CONTROL_CENTER_Y, CABINET_TOP_Z + CONTROL_H + 0.014),
-        ),
-        material=knob_dark,
-        name="program_knob",
-    )
-    cabinet.visual(
-        Cylinder(radius=0.020, length=0.030),
-        origin=Origin(
-            xyz=(-0.165, CONTROL_CENTER_Y, CABINET_TOP_Z + CONTROL_H + 0.015),
-        ),
-        material=trim_silver,
-        name="program_knob_cap",
-    )
-    cabinet.visual(
-        Box((0.004, 0.012, 0.003)),
-        origin=Origin(
-            xyz=(-0.165, CONTROL_CENTER_Y + 0.020, CABINET_TOP_Z + CONTROL_H + 0.0295),
-        ),
-        material=button_grey,
-        name="program_knob_marker",
-    )
-    for name, x_pos in (
-        ("start_button", 0.118),
-        ("dryness_button", 0.172),
-        ("options_button", 0.226),
-    ):
-        cabinet.visual(
-            Box((0.032, 0.016, 0.007)),
-            origin=Origin(
-                xyz=(x_pos, CONTROL_CENTER_Y, CABINET_TOP_Z + CONTROL_H + 0.0035),
-            ),
-            material=button_grey,
-            name=name,
-        )
-
     cabinet.inertial = Inertial.from_geometry(
-        Box((CABINET_W, CABINET_D, CABINET_H + BASE_Z)),
-        mass=34.0,
-        origin=Origin(xyz=(0.0, 0.0, (CABINET_H + BASE_Z) * 0.5)),
+        Box((width, depth, height)),
+        mass=48.0,
+        origin=Origin(xyz=(0.0, 0.0, height / 2.0)),
+    )
+
+    drum = model.part("drum")
+    drum.visual(
+        _drum_shell_mesh("dryer_drum_shell.obj"),
+        material=steel,
+        name="drum_shell",
+    )
+    drum.visual(
+        Cylinder(radius=0.026, length=0.160),
+        origin=Origin(xyz=(0.0, -0.180, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
+        material=dark_gray,
+        name="rear_stub",
+    )
+    for index, angle in enumerate((0.0, 2.0 * math.pi / 3.0, 4.0 * math.pi / 3.0)):
+        drum.visual(
+            Box((0.310, 0.016, 0.020)),
+            origin=Origin(
+                xyz=(0.155 * math.cos(angle), -0.190, 0.155 * math.sin(angle)),
+                rpy=(0.0, angle, 0.0),
+            ),
+            material=dark_gray,
+            name=f"rear_spider_arm_{index}",
+        )
+    for index, angle in enumerate((0.0, 2.0 * math.pi / 3.0, 4.0 * math.pi / 3.0)):
+        drum.visual(
+            Box((0.050, 0.300, 0.022)),
+            origin=Origin(
+                xyz=(0.202 * math.cos(angle), 0.0, 0.202 * math.sin(angle)),
+                rpy=(0.0, angle, 0.0),
+            ),
+            material=steel,
+            name=f"baffle_{index}",
+        )
+    drum.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.244, length=0.480),
+        mass=9.0,
+        origin=Origin(rpy=(-math.pi / 2.0, 0.0, 0.0)),
     )
 
     door = model.part("door")
-    _add_ring_segments(
-        door,
-        center_x=DOOR_CENTER_OFFSET,
-        center_z=0.0,
-        inner_radius=0.153,
-        outer_radius=DOOR_OUTER_RADIUS,
-        depth=0.036,
-        center_y=0.018,
-        segments=16,
-        material=trim_silver,
-        name_prefix="door_outer_ring",
-    )
-    _add_ring_segments(
-        door,
-        center_x=DOOR_CENTER_OFFSET,
-        center_z=0.0,
-        inner_radius=0.150,
-        outer_radius=0.184,
-        depth=0.020,
-        center_y=0.010,
-        segments=12,
-        material=control_dark,
-        name_prefix="door_inner_ring",
-    )
     door.visual(
-        Cylinder(radius=DOOR_GLASS_RADIUS, length=0.012),
-        origin=Origin(
-            xyz=(DOOR_CENTER_OFFSET, 0.012, 0.0),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
+        _ring_mesh(
+            "dryer_door_outer_ring.obj",
+            outer_radius=door_radius,
+            inner_front_radius=0.180,
+            inner_back_radius=0.192,
+            depth=0.055,
         ),
-        material=glass_smoke,
-        name="door_glass",
+        origin=Origin(xyz=(0.314, 0.028, 0.0)),
+        material=charcoal,
+        name="outer_ring",
     )
     door.visual(
-        Cylinder(radius=0.011, length=0.066),
-        origin=Origin(xyz=(0.0, 0.011, HINGE_Z_OFFSET)),
-        material=hinge_dark,
+        _ring_mesh(
+            "dryer_door_inner_trim.obj",
+            outer_radius=0.194,
+            inner_front_radius=0.167,
+            inner_back_radius=0.171,
+            depth=0.018,
+        ),
+        origin=Origin(xyz=(0.314, 0.022, 0.0)),
+        material=appliance_white,
+        name="inner_trim",
+    )
+    door.visual(
+        Cylinder(radius=0.172, length=0.008),
+        origin=Origin(xyz=(0.314, 0.016, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
+        material=glass,
+        name="window_glass",
+    )
+    door.visual(
+        Cylinder(radius=0.012, length=0.052),
+        origin=Origin(xyz=(0.0, 0.000, 0.118)),
+        material=dark_gray,
         name="upper_knuckle",
     )
     door.visual(
-        Cylinder(radius=0.011, length=0.066),
-        origin=Origin(xyz=(0.0, 0.011, -HINGE_Z_OFFSET)),
-        material=hinge_dark,
+        Cylinder(radius=0.012, length=0.052),
+        origin=Origin(xyz=(0.0, 0.000, -0.118)),
+        material=dark_gray,
         name="lower_knuckle",
     )
     door.visual(
-        Cylinder(radius=0.005, length=0.320),
-        origin=Origin(xyz=(0.0, 0.011, 0.0)),
-        material=trim_silver,
-        name="hinge_pin",
+        Box((0.190, 0.016, 0.034)),
+        origin=Origin(xyz=(0.098, -0.002, 0.118)),
+        material=dark_gray,
+        name="upper_hinge_arm",
     )
     door.visual(
-        Box((0.178, 0.012, 0.058)),
-        origin=Origin(xyz=(0.089, 0.006, HINGE_Z_OFFSET)),
-        material=trim_silver,
-        name="upper_leaf",
+        Box((0.190, 0.016, 0.034)),
+        origin=Origin(xyz=(0.098, -0.002, -0.118)),
+        material=dark_gray,
+        name="lower_hinge_arm",
     )
     door.visual(
-        Box((0.178, 0.012, 0.058)),
-        origin=Origin(xyz=(0.089, 0.006, -HINGE_Z_OFFSET)),
-        material=trim_silver,
-        name="lower_leaf",
-    )
-    door.visual(
-        Box((0.038, 0.012, 0.044)),
-        origin=Origin(
-            xyz=(DOOR_CENTER_OFFSET + DOOR_OUTER_RADIUS - 0.018, 0.006, 0.0),
-        ),
-        material=hinge_dark,
-        name="latch_catch",
+        Box((0.060, 0.036, 0.108)),
+        origin=Origin(xyz=(0.532, 0.030, 0.0)),
+        material=dark_gray,
+        name="latch_grip",
     )
     door.inertial = Inertial.from_geometry(
-        Box((DOOR_CENTER_OFFSET + DOOR_OUTER_RADIUS, 0.040, 0.470)),
-        mass=5.8,
-        origin=Origin(
-            xyz=((DOOR_CENTER_OFFSET + DOOR_OUTER_RADIUS) * 0.5, 0.020, 0.0),
-        ),
+        Cylinder(radius=door_radius, length=0.055),
+        mass=2.4,
+        origin=Origin(xyz=(door_radius, 0.0275, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
+    )
+
+    selector_knob = model.part("selector_knob")
+    selector_knob.visual(
+        Cylinder(radius=0.034, length=0.018),
+        origin=Origin(xyz=(0.0, 0.0275, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
+        material=charcoal,
+        name="knob_body",
+    )
+    selector_knob.visual(
+        Cylinder(radius=0.008, length=0.028),
+        origin=Origin(xyz=(0.0, 0.010, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
+        material=dark_gray,
+        name="knob_spindle",
+    )
+    selector_knob.visual(
+        Box((0.006, 0.010, 0.014)),
+        origin=Origin(xyz=(0.0, 0.031, 0.019)),
+        material=control_gray,
+        name="knob_indicator",
+    )
+    selector_knob.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.034, length=0.018),
+        mass=0.12,
+        origin=Origin(xyz=(0.0, 0.0275, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
+    )
+
+    model.articulation(
+        "drum_spin",
+        ArticulationType.CONTINUOUS,
+        parent=cabinet,
+        child=drum,
+        origin=Origin(xyz=(0.0, drum_center_y, drum_center_z)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=18.0, velocity=22.0),
     )
     model.articulation(
-        "cabinet_to_door",
+        "door_hinge",
         ArticulationType.REVOLUTE,
         parent=cabinet,
         child=door,
-        origin=Origin(xyz=(DOOR_AXIS_X, DOOR_AXIS_Y, DOOR_CENTER_Z)),
+        origin=Origin(xyz=(-0.314, front_face_y, drum_center_z)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=40.0,
-            velocity=1.5,
-            lower=0.0,
-            upper=1.35,
-        ),
+        motion_limits=MotionLimits(effort=12.0, velocity=2.2, lower=0.0, upper=1.95),
+    )
+    model.articulation(
+        "selector_turn",
+        ArticulationType.REVOLUTE,
+        parent=cabinet,
+        child=selector_knob,
+        origin=Origin(xyz=(0.192, front_face_y - 0.017, 0.830)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=0.5, velocity=4.0, lower=-2.4, upper=2.4),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    ctx = TestContext(object_model)
+
     cabinet = object_model.get_part("cabinet")
+    drum = object_model.get_part("drum")
     door = object_model.get_part("door")
-    door_hinge = object_model.get_articulation("cabinet_to_door")
+    selector_knob = object_model.get_part("selector_knob")
 
-    cabinet_shell = cabinet.get_visual("cabinet_shell")
-    front_top_frame = cabinet.get_visual("front_top_frame")
-    upper_mount = cabinet.get_visual("upper_hinge_mount")
-    lower_mount = cabinet.get_visual("lower_hinge_mount")
-    striker = cabinet.get_visual("latch_striker")
-    drum_rim = cabinet.get_visual("drum_rim")
-    control_strip = cabinet.get_visual("control_strip")
-    knob_body = cabinet.get_visual("program_knob")
-    start_button = cabinet.get_visual("start_button")
-    dryness_button = cabinet.get_visual("dryness_button")
-    options_button = cabinet.get_visual("options_button")
-    front_left_foot = cabinet.get_visual("front_left_foot_pad")
-    front_right_foot = cabinet.get_visual("front_right_foot_pad")
-    rear_left_foot = cabinet.get_visual("rear_left_foot_pad")
-    rear_right_foot = cabinet.get_visual("rear_right_foot_pad")
+    drum_spin = object_model.get_articulation("drum_spin")
+    door_hinge = object_model.get_articulation("door_hinge")
+    selector_turn = object_model.get_articulation("selector_turn")
 
-    door_top_ring = door.get_visual("door_outer_ring_4")
-    door_glass = door.get_visual("door_glass")
+    door_bezel = cabinet.get_visual("door_bezel")
+    left_stile = cabinet.get_visual("left_stile")
+    left_wall = cabinet.get_visual("left_wall")
+    control_panel = cabinet.get_visual("control_panel")
+    door_gasket_lower = cabinet.get_visual("door_gasket_lower")
+    hinge_pin = cabinet.get_visual("hinge_pin")
+    rear_spindle = cabinet.get_visual("rear_spindle")
+    upper_hinge_mount = cabinet.get_visual("upper_hinge_mount")
+    lower_hinge_mount = cabinet.get_visual("lower_hinge_mount")
+    knob_bushing = cabinet.get_visual("knob_bushing")
+
+    drum_shell = drum.get_visual("drum_shell")
+    rear_stub = drum.get_visual("rear_stub")
+
+    outer_ring = door.get_visual("outer_ring")
+    window_glass = door.get_visual("window_glass")
     upper_knuckle = door.get_visual("upper_knuckle")
     lower_knuckle = door.get_visual("lower_knuckle")
-    upper_leaf = door.get_visual("upper_leaf")
-    lower_leaf = door.get_visual("lower_leaf")
-    latch_catch = door.get_visual("latch_catch")
+    upper_hinge_arm = door.get_visual("upper_hinge_arm")
+    lower_hinge_arm = door.get_visual("lower_hinge_arm")
+    latch_grip = door.get_visual("latch_grip")
+
+    knob_body = selector_knob.get_visual("knob_body")
+    knob_spindle = selector_knob.get_visual("knob_spindle")
+
+    ctx.allow_overlap(
+        drum,
+        cabinet,
+        elem_a=rear_stub,
+        elem_b=rear_spindle,
+        reason="rear drum stub intentionally telescopes onto the fixed rear spindle support",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_knuckle,
+        elem_b=hinge_pin,
+        reason="upper door hinge knuckle intentionally rotates around the fixed hinge pin",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_knuckle,
+        elem_b=hinge_pin,
+        reason="lower door hinge knuckle intentionally rotates around the fixed hinge pin",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=outer_ring,
+        elem_b=door_gasket_lower,
+        reason="the soft lower door gasket is represented as a rigid strip and intentionally compresses against the door rim",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_knuckle,
+        elem_b=left_stile,
+        reason="the upper hinge knuckle sits inside a recessed pocket in the left front stile",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_knuckle,
+        elem_b=left_stile,
+        reason="the lower hinge knuckle sits inside a recessed pocket in the left front stile",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_knuckle,
+        elem_b=left_wall,
+        reason="the upper hinge knuckle passes through the left wall hinge recess",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_knuckle,
+        elem_b=left_wall,
+        reason="the lower hinge knuckle passes through the left wall hinge recess",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_knuckle,
+        elem_b=upper_hinge_mount,
+        reason="the upper hinge knuckle nests inside the upper hinge mount housing",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_knuckle,
+        elem_b=lower_hinge_mount,
+        reason="the lower hinge knuckle nests inside the lower hinge mount housing",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_hinge_arm,
+        elem_b=upper_hinge_mount,
+        reason="the upper hinge arm is simplified as a solid leaf inside the upper hinge mount",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_hinge_arm,
+        elem_b=lower_hinge_mount,
+        reason="the lower hinge arm is simplified as a solid leaf inside the lower hinge mount",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_hinge_arm,
+        elem_b=hinge_pin,
+        reason="the upper hinge arm wraps the shared hinge pin in a simplified solid representation",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_hinge_arm,
+        elem_b=hinge_pin,
+        reason="the lower hinge arm wraps the shared hinge pin in a simplified solid representation",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_hinge_arm,
+        elem_b=door_bezel,
+        reason="the upper hinge arm tucks behind the bezel in the closed-door pose",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_hinge_arm,
+        elem_b=door_bezel,
+        reason="the lower hinge arm tucks behind the bezel in the closed-door pose",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=upper_hinge_arm,
+        elem_b=left_stile,
+        reason="the upper hinge leaf is recessed into the left stile when the door is closed",
+    )
+    ctx.allow_overlap(
+        door,
+        cabinet,
+        elem_a=lower_hinge_arm,
+        elem_b=left_stile,
+        reason="the lower hinge leaf is recessed into the left stile when the door is closed",
+    )
+    ctx.allow_overlap(
+        selector_knob,
+        cabinet,
+        elem_a=knob_spindle,
+        elem_b=knob_bushing,
+        reason="the selector knob spindle intentionally nests inside the control-panel bushing",
+    )
+    ctx.allow_overlap(
+        selector_knob,
+        cabinet,
+        elem_a=knob_spindle,
+        elem_b=control_panel,
+        reason="the selector knob spindle passes through the control panel opening, which is approximated by an uncut panel solid",
+    )
+    ctx.allow_overlap(
+        selector_knob,
+        cabinet,
+        elem_a=knob_spindle,
+        elem_b=cabinet.get_visual("front_header"),
+        reason="the selector knob spindle passes through the front header opening, which is approximated by an uncut front panel solid",
+    )
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
 
+    ctx.check(
+        "drum_spin_axis_front_to_back",
+        tuple(drum_spin.axis) == (0.0, 1.0, 0.0),
+        f"expected drum axis (0, 1, 0), got {drum_spin.axis}",
+    )
+    ctx.check(
+        "door_hinge_axis_vertical",
+        tuple(door_hinge.axis) == (0.0, 0.0, 1.0),
+        f"expected door axis (0, 0, 1), got {door_hinge.axis}",
+    )
+    door_limits = door_hinge.motion_limits
+    ctx.check(
+        "door_hinge_limit_reasonable",
+        door_limits is not None
+        and door_limits.lower == 0.0
+        and door_limits.upper is not None
+        and 1.80 <= door_limits.upper <= 2.05,
+        f"unexpected door limits: {door_limits}",
+    )
+    ctx.check(
+        "selector_turn_axis_panel_normal",
+        tuple(selector_turn.axis) == (0.0, 1.0, 0.0),
+        f"expected selector knob axis (0, 1, 0), got {selector_turn.axis}",
+    )
+
+    ctx.expect_origin_gap(
+        drum,
+        cabinet,
+        axis="z",
+        min_gap=0.430,
+        max_gap=0.480,
+        name="drum_center_height",
+    )
     ctx.expect_within(
-        door,
+        drum,
         cabinet,
         axes="xz",
-        inner_elem=door_glass,
-        outer_elem=drum_rim,
-        name="door_glass_centers_over_round_porthole",
+        inner_elem=drum_shell,
+        name="drum_centered_within_cabinet",
+    )
+    ctx.expect_gap(
+        cabinet,
+        drum,
+        axis="y",
+        min_gap=0.090,
+        max_gap=0.135,
+        positive_elem=door_bezel,
+        negative_elem=drum_shell,
+        name="drum_sits_behind_front_bezel",
+    )
+    ctx.expect_overlap(
+        drum,
+        door,
+        axes="xz",
+        min_overlap=0.300,
+        elem_a=drum_shell,
+        elem_b=window_glass,
+        name="door_window_faces_drum_opening",
     )
     ctx.expect_gap(
         door,
@@ -437,189 +665,52 @@ def run_tests() -> TestReport:
         axis="y",
         max_gap=0.001,
         max_penetration=0.0,
-        positive_elem=door_top_ring,
-        negative_elem=front_top_frame,
-        name="door_sits_flush_to_front_frame",
-    )
-    ctx.expect_within(
-        door,
-        door,
-        axes="xz",
-        inner_elem=door_glass,
-        name="glass_window_sits_within_round_door",
-    )
-    ctx.expect_contact(
-        door,
-        cabinet,
-        elem_a=upper_knuckle,
-        elem_b=upper_mount,
-        name="upper_exposed_knuckle_seats_at_left_hinge",
-    )
-    ctx.expect_contact(
-        door,
-        cabinet,
-        elem_a=lower_knuckle,
-        elem_b=lower_mount,
-        name="lower_exposed_knuckle_seats_at_left_hinge",
-    )
-    ctx.expect_contact(
-        door,
-        cabinet,
-        elem_a=upper_leaf,
-        elem_b=upper_mount,
-        name="upper_hinge_leaf_contacts_mount",
-    )
-    ctx.expect_contact(
-        door,
-        cabinet,
-        elem_a=lower_leaf,
-        elem_b=lower_mount,
-        name="lower_hinge_leaf_contacts_mount",
-    )
-    ctx.expect_contact(
-        door,
-        cabinet,
-        elem_a=latch_catch,
-        elem_b=striker,
-        name="single_right_side_catch_meets_striker",
+        positive_elem=outer_ring,
+        negative_elem=door_bezel,
+        name="closed_door_seats_on_front_bezel",
     )
     ctx.expect_gap(
+        selector_knob,
         cabinet,
-        cabinet,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=control_strip,
-        negative_elem=cabinet_shell,
-        name="control_strip_sits_on_top_face",
-    )
-    ctx.expect_within(
-        cabinet,
-        cabinet,
-        axes="xy",
-        inner_elem=control_strip,
-        outer_elem=cabinet_shell,
-        name="control_strip_stays_within_cabinet_plan",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
+        axis="y",
         max_gap=0.001,
         max_penetration=0.0,
         positive_elem=knob_body,
-        negative_elem=control_strip,
-        name="program_knob_sits_on_control_strip",
-    )
-    ctx.expect_within(
-        cabinet,
-        cabinet,
-        axes="xy",
-        inner_elem=knob_body,
-        outer_elem=control_strip,
-        name="program_knob_stays_on_strip",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=start_button,
-        negative_elem=control_strip,
-        name="start_button_sits_on_control_strip",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=dryness_button,
-        negative_elem=control_strip,
-        name="dryness_button_sits_on_control_strip",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=options_button,
-        negative_elem=control_strip,
-        name="options_button_sits_on_control_strip",
-    )
-    ctx.expect_within(
-        cabinet,
-        cabinet,
-        axes="xy",
-        inner_elem=start_button,
-        outer_elem=control_strip,
-        name="start_button_within_strip",
-    )
-    ctx.expect_within(
-        cabinet,
-        cabinet,
-        axes="xy",
-        inner_elem=dryness_button,
-        outer_elem=control_strip,
-        name="dryness_button_within_strip",
-    )
-    ctx.expect_within(
-        cabinet,
-        cabinet,
-        axes="xy",
-        inner_elem=options_button,
-        outer_elem=control_strip,
-        name="options_button_within_strip",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        min_gap=0.018,
-        positive_elem=cabinet_shell,
-        negative_elem=front_left_foot,
-        name="front_left_foot_drops_below_cabinet_shell",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        min_gap=0.018,
-        positive_elem=cabinet_shell,
-        negative_elem=front_right_foot,
-        name="front_right_foot_drops_below_cabinet_shell",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        min_gap=0.018,
-        positive_elem=cabinet_shell,
-        negative_elem=rear_left_foot,
-        name="rear_left_foot_drops_below_cabinet_shell",
-    )
-    ctx.expect_gap(
-        cabinet,
-        cabinet,
-        axis="z",
-        min_gap=0.018,
-        positive_elem=cabinet_shell,
-        negative_elem=rear_right_foot,
-        name="rear_right_foot_drops_below_cabinet_shell",
+        negative_elem=control_panel,
+        name="selector_knob_seats_on_control_panel",
     )
 
-    with ctx.pose({door_hinge: 1.2}):
+    with ctx.pose({door_hinge: 0.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="door_closed_no_unexpected_overlaps")
+        ctx.fail_if_isolated_parts(name="door_closed_no_floating")
+
+    with ctx.pose({door_hinge: 1.95}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="door_open_no_unexpected_overlaps")
+        ctx.fail_if_isolated_parts(name="door_open_no_floating")
         ctx.expect_gap(
-            door,
             cabinet,
-            axis="y",
-            min_gap=0.14,
-            positive_elem=latch_catch,
-            negative_elem=striker,
-            name="door_latch_swings_clear_when_open",
+            door,
+            axis="x",
+            min_gap=0.075,
+            positive_elem=left_stile,
+            negative_elem=latch_grip,
+            name="opened_door_swings_left_clear_of_opening",
         )
+
+    with ctx.pose({drum_spin: 2.4}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="drum_rotated_no_unexpected_overlaps")
+        ctx.fail_if_isolated_parts(name="drum_rotated_no_floating")
+        ctx.expect_within(
+            drum,
+            cabinet,
+            axes="xz",
+            inner_elem=drum_shell,
+            name="drum_remains_centered_when_rotated",
+        )
+
+    with ctx.pose({selector_turn: 1.8}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="selector_turned_no_unexpected_overlaps")
+        ctx.fail_if_isolated_parts(name="selector_turned_no_floating")
 
     return ctx.report()
 

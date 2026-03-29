@@ -1,20 +1,48 @@
 from __future__ import annotations
 
-import os
-
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
+import os
+import pathlib
+from pathlib import Path
 
+_ORIGINAL_PATH_ABSOLUTE = pathlib.Path.absolute
+_ORIGINAL_PATH_CWD = pathlib.Path.cwd
+
+
+def _safe_path_absolute(self):
+    try:
+        return _ORIGINAL_PATH_ABSOLUTE(self)
+    except FileNotFoundError:
+        if self.is_absolute():
+            return self
+        return pathlib.Path("/tmp") / self
+
+
+@classmethod
+def _safe_path_cwd(cls):
+    try:
+        return _ORIGINAL_PATH_CWD()
+    except FileNotFoundError:
+        return pathlib.Path("/tmp")
+
+
+pathlib.Path.absolute = _safe_path_absolute
+pathlib.PosixPath.absolute = _safe_path_absolute
+pathlib.Path.cwd = _safe_path_cwd
+pathlib.PosixPath.cwd = _safe_path_cwd
 try:
-    os.getcwd()
+    os.chdir("/tmp")
 except FileNotFoundError:
-    os.chdir("/")
+    pass
+globals()["__file__"] = "/tmp/model.py"
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -24,618 +52,475 @@ from sdk import (
     TestReport,
 )
 
+ASSETS = AssetContext(Path("/tmp"))
+
+WALL_THICKNESS = 0.004
+RUNG_RADIUS = 0.011
+
+BASE_SPEC = {
+    "section_name": "base",
+    "length": 2.70,
+    "outer_half_width": 0.260,
+    "flange_width": 0.060,
+    "depth": 0.090,
+    "rung_count": 8,
+    "rung_start": 0.19,
+    "rung_pitch": 0.30,
+    "rung_offset_y": -0.012,
+}
+MIDDLE_SPEC = {
+    "section_name": "middle",
+    "length": 2.36,
+    "outer_half_width": 0.188,
+    "flange_width": 0.050,
+    "depth": 0.070,
+    "rung_count": 7,
+    "rung_start": 0.17,
+    "rung_pitch": 0.30,
+    "rung_offset_y": 0.0,
+}
+FLY_SPEC = {
+    "section_name": "fly",
+    "length": 2.08,
+    "outer_half_width": 0.128,
+    "flange_width": 0.040,
+    "depth": 0.050,
+    "rung_count": 6,
+    "rung_start": 0.16,
+    "rung_pitch": 0.30,
+    "rung_offset_y": 0.012,
+}
+
+BASE_TO_MIDDLE_Z = 0.22
+MIDDLE_TO_FLY_Z = 0.18
+MIDDLE_EXTENSION = 1.20
+FLY_EXTENSION = 1.08
+
+
+def _add_section(
+    part,
+    *,
+    section_name: str,
+    length: float,
+    outer_half_width: float,
+    flange_width: float,
+    depth: float,
+    rung_count: int,
+    rung_start: float,
+    rung_pitch: float,
+    rung_offset_y: float,
+    rail_material,
+    rung_material,
+    hardware_material,
+    parent_inner_edge: float | None = None,
+    parent_depth: float | None = None,
+    add_feet: bool = False,
+) -> None:
+    web_center_x = outer_half_width - (WALL_THICKNESS / 2.0)
+    flange_center_x = outer_half_width - (flange_width / 2.0)
+
+    for side_name, sign in (("left", -1.0), ("right", 1.0)):
+        part.visual(
+            Box((WALL_THICKNESS, depth, length)),
+            origin=Origin(xyz=(sign * web_center_x, 0.0, length / 2.0)),
+            material=rail_material,
+            name=f"{section_name}_{side_name}_web",
+        )
+        part.visual(
+            Box((flange_width, WALL_THICKNESS, length)),
+            origin=Origin(
+                xyz=(
+                    sign * flange_center_x,
+                    (depth / 2.0) - (WALL_THICKNESS / 2.0),
+                    length / 2.0,
+                )
+            ),
+            material=rail_material,
+            name=f"{section_name}_{side_name}_front_flange",
+        )
+        part.visual(
+            Box((flange_width, WALL_THICKNESS, length)),
+            origin=Origin(
+                xyz=(
+                    sign * flange_center_x,
+                    -(depth / 2.0) + (WALL_THICKNESS / 2.0),
+                    length / 2.0,
+                )
+            ),
+            material=rail_material,
+            name=f"{section_name}_{side_name}_rear_flange",
+        )
+
+        if parent_inner_edge is not None and parent_depth is not None:
+            guide_thickness = parent_inner_edge - outer_half_width
+            guide_depth = ((parent_depth - depth) / 2.0) + WALL_THICKNESS
+            guide_height = 0.26
+            guide_center_x = outer_half_width + (guide_thickness / 2.0)
+            guide_center_z = 0.20 + (guide_height / 2.0)
+            guide_y = (parent_depth + depth) / 4.0
+            for face_name, guide_sign in (("front", 1.0), ("rear", -1.0)):
+                part.visual(
+                    Box((guide_thickness, guide_depth, guide_height)),
+                    origin=Origin(
+                        xyz=(
+                            sign * guide_center_x,
+                            guide_sign * guide_y,
+                            guide_center_z,
+                        )
+                    ),
+                    material=hardware_material,
+                    name=f"{section_name}_{side_name}_{face_name}_guide",
+                )
+
+    rung_length = 2.0 * web_center_x
+    for index in range(rung_count):
+        rung_z = rung_start + (index * rung_pitch)
+        part.visual(
+            Cylinder(radius=RUNG_RADIUS, length=rung_length),
+            origin=Origin(
+                xyz=(0.0, rung_offset_y, rung_z),
+                rpy=(0.0, math.pi / 2.0, 0.0),
+            ),
+            material=rung_material,
+            name=f"{section_name}_rung_{index + 1}",
+        )
+
+    top_cap_height = 0.028
+    for side_name, sign in (("left", -1.0), ("right", 1.0)):
+        part.visual(
+            Box((flange_width, depth, top_cap_height)),
+            origin=Origin(
+                xyz=(
+                    sign * flange_center_x,
+                    0.0,
+                    length - (top_cap_height / 2.0),
+                )
+            ),
+            material=rail_material,
+            name=f"{section_name}_{side_name}_top_cap",
+        )
+
+    if add_feet:
+        foot_size = (0.068, depth + 0.014, 0.028)
+        foot_x = outer_half_width - (flange_width * 0.60)
+        foot_z = foot_size[2] / 2.0
+        part.visual(
+            Box(foot_size),
+            origin=Origin(xyz=(-foot_x, 0.0, foot_z)),
+            material=hardware_material,
+            name=f"{section_name}_left_foot",
+        )
+        part.visual(
+            Box(foot_size),
+            origin=Origin(xyz=(foot_x, 0.0, foot_z)),
+            material=hardware_material,
+            name=f"{section_name}_right_foot",
+        )
+
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="platform_extension_ladder")
+    model = ArticulatedObject(name="fiberglass_extension_ladder", assets=ASSETS)
 
-    aluminum = model.material("aluminum", rgba=(0.75, 0.77, 0.79, 1.0))
-    steel = model.material("steel", rgba=(0.63, 0.65, 0.68, 1.0))
-    safety_yellow = model.material("safety_yellow", rgba=(0.92, 0.77, 0.14, 1.0))
-    dark_hardware = model.material("dark_hardware", rgba=(0.22, 0.23, 0.25, 1.0))
-    grating = model.material("grating", rgba=(0.69, 0.71, 0.73, 1.0))
-    rubber = model.material("rubber", rgba=(0.13, 0.13, 0.14, 1.0))
+    fiberglass = model.material("fiberglass_yellow", rgba=(0.94, 0.80, 0.22, 1.0))
+    aluminum = model.material("aluminum_rungs", rgba=(0.77, 0.80, 0.83, 1.0))
+    black_hardware = model.material("black_hardware", rgba=(0.10, 0.10, 0.11, 1.0))
 
-    base_stile_x = 0.205
-    fly_stile_x = 0.165
-    fly_y = 0.032
-    platform_half_width = 0.168
-    platform_rear_y = 0.042
-    platform_front_y = 0.310
-    platform_depth = platform_front_y - platform_rear_y
-    platform_z = 1.610
-    platform_top_z = platform_z + 0.014
-    guard_pivot_x = 0.188
-    guard_receiver_x = 0.190
-    step_half_width = 0.132
-
-    def add_cylinder(
-        part,
-        *,
-        name: str,
-        center: tuple[float, float, float],
-        radius: float,
-        length: float,
-        axis: str,
-        material,
-    ) -> None:
-        if axis == "x":
-            rpy = (0.0, math.pi / 2.0, 0.0)
-        elif axis == "y":
-            rpy = (math.pi / 2.0, 0.0, 0.0)
-        else:
-            rpy = (0.0, 0.0, 0.0)
-        part.visual(
-            Cylinder(radius=radius, length=length),
-            origin=Origin(xyz=center, rpy=rpy),
-            material=material,
-            name=name,
-        )
-
-    base = model.part("base_section")
-    base.visual(
-        Box((0.048, 0.028, 2.38)),
-        origin=Origin(xyz=(-base_stile_x, 0.0, 1.19)),
-        material=aluminum,
-        name="base_left_stile",
-    )
-    base.visual(
-        Box((0.048, 0.028, 2.38)),
-        origin=Origin(xyz=(base_stile_x, 0.0, 1.19)),
-        material=aluminum,
-        name="base_right_stile",
-    )
-    for index, z in enumerate((0.24, 0.46, 0.68, 0.90, 1.12, 1.34, 1.56, 1.78, 2.00)):
-        add_cylinder(
-            base,
-            name=f"base_rung_{index}",
-            center=(0.0, 0.0, z),
-            length=0.364,
-            radius=0.0115,
-            axis="x",
-            material=steel,
-        )
-    base.visual(
-        Box((0.060, 0.045, 0.032)),
-        origin=Origin(xyz=(-base_stile_x, 0.0, 0.016)),
-        material=rubber,
-        name="left_foot_pad",
-    )
-    base.visual(
-        Box((0.060, 0.045, 0.032)),
-        origin=Origin(xyz=(base_stile_x, 0.0, 0.016)),
-        material=rubber,
-        name="right_foot_pad",
-    )
-    base.visual(
-        Box((0.070, 0.020, 0.140)),
-        origin=Origin(xyz=(-base_stile_x, 0.004, 2.23)),
-        material=dark_hardware,
-        name="left_top_guide_cap",
-    )
-    base.visual(
-        Box((0.070, 0.020, 0.140)),
-        origin=Origin(xyz=(base_stile_x, 0.004, 2.23)),
-        material=dark_hardware,
-        name="right_top_guide_cap",
+    base = model.part("base")
+    _add_section(
+        base,
+        rail_material=fiberglass,
+        rung_material=aluminum,
+        hardware_material=black_hardware,
+        add_feet=True,
+        **BASE_SPEC,
     )
     base.inertial = Inertial.from_geometry(
-        Box((0.50, 0.07, 2.38)),
-        mass=12.5,
-        origin=Origin(xyz=(0.0, 0.0, 1.19)),
+        Box((0.54, 0.10, BASE_SPEC["length"])),
+        mass=18.0,
+        origin=Origin(xyz=(0.0, 0.0, BASE_SPEC["length"] / 2.0)),
     )
 
-    fly = model.part("fly_section")
-    fly.visual(
-        Box((0.042, 0.024, 1.60)),
-        origin=Origin(xyz=(-fly_stile_x, fly_y, 0.80)),
-        material=aluminum,
-        name="fly_left_stile",
+    middle = model.part("middle")
+    _add_section(
+        middle,
+        rail_material=fiberglass,
+        rung_material=aluminum,
+        hardware_material=black_hardware,
+        parent_inner_edge=BASE_SPEC["outer_half_width"] - BASE_SPEC["flange_width"],
+        parent_depth=BASE_SPEC["depth"],
+        **MIDDLE_SPEC,
     )
-    fly.visual(
-        Box((0.042, 0.024, 1.60)),
-        origin=Origin(xyz=(fly_stile_x, fly_y, 0.80)),
-        material=aluminum,
-        name="fly_right_stile",
+    middle.inertial = Inertial.from_geometry(
+        Box((0.40, 0.08, MIDDLE_SPEC["length"])),
+        mass=13.0,
+        origin=Origin(xyz=(0.0, 0.0, MIDDLE_SPEC["length"] / 2.0)),
     )
-    for index, z in enumerate((0.20, 0.40, 0.60, 0.80, 1.00, 1.20, 1.40)):
-        add_cylinder(
-            fly,
-            name=f"fly_rung_{index}",
-            center=(0.0, fly_y, z),
-            length=0.290,
-            radius=0.0105,
-            axis="x",
-            material=steel,
-        )
-    for side_name, x in (("left", -fly_stile_x), ("right", fly_stile_x)):
-        fly.visual(
-            Box((0.050, 0.006, 0.160)),
-            origin=Origin(xyz=(x, 0.017, 0.32)),
-            material=dark_hardware,
-            name=f"{side_name}_lower_guide_shoe",
-        )
-        fly.visual(
-            Box((0.050, 0.006, 0.160)),
-            origin=Origin(xyz=(x, 0.017, 0.96)),
-            material=dark_hardware,
-            name=f"{side_name}_upper_guide_shoe",
-        )
 
-    fly.visual(
-        Box((0.336, 0.026, 0.028)),
-        origin=Origin(xyz=(0.0, platform_rear_y, platform_z)),
-        material=aluminum,
-        name="platform_rear_bar",
-    )
-    fly.visual(
-        Box((0.336, 0.026, 0.028)),
-        origin=Origin(xyz=(0.0, platform_front_y, platform_z)),
-        material=aluminum,
-        name="platform_front_bar",
-    )
-    fly.visual(
-        Box((0.026, platform_depth, 0.028)),
-        origin=Origin(xyz=(-platform_half_width, 0.176, platform_z)),
-        material=aluminum,
-        name="platform_left_side",
-    )
-    fly.visual(
-        Box((0.026, platform_depth, 0.028)),
-        origin=Origin(xyz=(platform_half_width, 0.176, platform_z)),
-        material=aluminum,
-        name="platform_right_side",
-    )
-    fly.visual(
-        Box((0.300, 0.016, 0.018)),
-        origin=Origin(xyz=(0.0, 0.070, 1.587)),
-        material=aluminum,
-        name="platform_rear_tie",
-    )
-    fly.visual(
-        Box((0.300, 0.016, 0.018)),
-        origin=Origin(xyz=(0.0, 0.252, 1.587)),
-        material=aluminum,
-        name="platform_front_tie",
-    )
-    for side_name, x in (("left", -0.145), ("right", 0.145)):
-        fly.visual(
-            Box((0.018, 0.252, 0.018)),
-            origin=Origin(xyz=(x, 0.144, 1.521), rpy=(0.612, 0.0, 0.0)),
-            material=aluminum,
-            name=f"{side_name}_platform_brace",
-        )
-    for index, y in enumerate((0.070, 0.102, 0.134, 0.166, 0.198, 0.230, 0.262, 0.294)):
-        fly.visual(
-            Box((0.302, 0.006, 0.006)),
-            origin=Origin(xyz=(0.0, y, 1.583)),
-            material=grating,
-            name=f"grate_slat_{index}",
-        )
-    for index, x in enumerate((-0.082, 0.0, 0.082)):
-        fly.visual(
-            Box((0.010, 0.250, 0.006)),
-            origin=Origin(xyz=(x, 0.176, 1.583)),
-            material=grating,
-            name=f"grate_runner_{index}",
-        )
-
-    fly.visual(
-        Box((0.006, 0.024, 0.180)),
-        origin=Origin(xyz=(-0.170, platform_rear_y, 1.714)),
-        material=dark_hardware,
-        name="left_hinge_cheek",
-    )
-    fly.visual(
-        Box((0.006, 0.024, 0.180)),
-        origin=Origin(xyz=(0.170, platform_rear_y, 1.714)),
-        material=dark_hardware,
-        name="right_hinge_cheek",
-    )
-    add_cylinder(
+    fly = model.part("fly")
+    _add_section(
         fly,
-        name="left_guard_pivot_pin",
-        center=(-0.1655, platform_rear_y, 1.714),
-        radius=0.0015,
-        length=0.180,
-        axis="z",
-        material=steel,
-    )
-    add_cylinder(
-        fly,
-        name="right_guard_pivot_pin",
-        center=(0.1655, platform_rear_y, 1.714),
-        radius=0.0015,
-        length=0.180,
-        axis="z",
-        material=steel,
-    )
-    fly.visual(
-        Box((0.040, 0.018, 0.036)),
-        origin=Origin(xyz=(-0.186, 0.322, 1.606)),
-        material=dark_hardware,
-        name="left_guard_receiver",
-    )
-    fly.visual(
-        Box((0.040, 0.018, 0.036)),
-        origin=Origin(xyz=(0.186, 0.322, 1.606)),
-        material=dark_hardware,
-        name="right_guard_receiver",
-    )
-    fly.visual(
-        Box((0.024, 0.012, 0.032)),
-        origin=Origin(xyz=(-step_half_width, 0.314, 1.628)),
-        material=dark_hardware,
-        name="left_step_hinge_cheek",
-    )
-    fly.visual(
-        Box((0.024, 0.012, 0.032)),
-        origin=Origin(xyz=(step_half_width, 0.314, 1.628)),
-        material=dark_hardware,
-        name="right_step_hinge_cheek",
+        rail_material=fiberglass,
+        rung_material=aluminum,
+        hardware_material=black_hardware,
+        parent_inner_edge=MIDDLE_SPEC["outer_half_width"] - MIDDLE_SPEC["flange_width"],
+        parent_depth=MIDDLE_SPEC["depth"],
+        **FLY_SPEC,
     )
     fly.inertial = Inertial.from_geometry(
-        Box((0.48, 0.38, 2.00)),
-        mass=10.8,
-        origin=Origin(xyz=(0.0, 0.17, 1.00)),
-    )
-
-    def add_guard_rail(part_name: str, inward_sign: float) -> None:
-        rail = model.part(part_name)
-        add_cylinder(
-            rail,
-            name="rear_post",
-            center=(0.0, 0.0, 0.450),
-            radius=0.009,
-            length=0.900,
-            axis="z",
-            material=safety_yellow,
-        )
-        add_cylinder(
-            rail,
-            name="front_post",
-            center=(0.0, 0.268, 0.450),
-            radius=0.009,
-            length=0.900,
-            axis="z",
-            material=safety_yellow,
-        )
-        add_cylinder(
-            rail,
-            name="top_rail",
-            center=(0.0, 0.134, 0.882),
-            radius=0.009,
-            length=0.258,
-            axis="y",
-            material=safety_yellow,
-        )
-        add_cylinder(
-            rail,
-            name="mid_rail",
-            center=(0.0, 0.134, 0.470),
-            radius=0.007,
-            length=0.250,
-            axis="y",
-            material=safety_yellow,
-        )
-        rail.visual(
-            Box((0.006, 0.018, 0.160)),
-            origin=Origin(xyz=(-0.012, 0.0, 0.100)),
-            material=dark_hardware,
-            name="left_side_hinge_shoe",
-        )
-        rail.visual(
-            Box((0.006, 0.018, 0.160)),
-            origin=Origin(xyz=(0.012, 0.0, 0.100)),
-            material=dark_hardware,
-            name="right_side_hinge_shoe",
-        )
-        rail.visual(
-            Box((0.014, 0.016, 0.120)),
-            origin=Origin(xyz=(0.012 * inward_sign, 0.268, 0.060)),
-            material=dark_hardware,
-            name="front_latch_lug",
-        )
-        rail.inertial = Inertial.from_geometry(
-            Box((0.06, 0.30, 0.92)),
-            mass=1.7,
-            origin=Origin(xyz=(0.0, 0.134, 0.460)),
-        )
-
-    add_guard_rail("left_guard_rail", inward_sign=-1.0)
-    add_guard_rail("right_guard_rail", inward_sign=1.0)
-
-    step_bar = model.part("step_over_bar")
-    step_bar.visual(
-        Box((0.018, 0.008, 0.016)),
-        origin=Origin(xyz=(-step_half_width, 0.004, 0.008)),
-        material=dark_hardware,
-        name="left_hinge_foot",
-    )
-    step_bar.visual(
-        Box((0.018, 0.008, 0.016)),
-        origin=Origin(xyz=(step_half_width, 0.004, 0.008)),
-        material=dark_hardware,
-        name="right_hinge_foot",
-    )
-    step_bar.visual(
-        Box((0.014, 0.014, 0.216)),
-        origin=Origin(xyz=(-step_half_width, 0.004, 0.124)),
-        material=safety_yellow,
-        name="left_side_bar",
-    )
-    step_bar.visual(
-        Box((0.014, 0.014, 0.216)),
-        origin=Origin(xyz=(step_half_width, 0.004, 0.124)),
-        material=safety_yellow,
-        name="right_side_bar",
-    )
-    step_bar.visual(
-        Box((0.264, 0.014, 0.014)),
-        origin=Origin(xyz=(0.0, 0.004, 0.235)),
-        material=safety_yellow,
-        name="top_bar",
-    )
-    step_bar.inertial = Inertial.from_geometry(
-        Box((0.30, 0.04, 0.25)),
-        mass=1.2,
-        origin=Origin(xyz=(0.0, 0.004, 0.125)),
+        Box((0.28, 0.06, FLY_SPEC["length"])),
+        mass=10.0,
+        origin=Origin(xyz=(0.0, 0.0, FLY_SPEC["length"] / 2.0)),
     )
 
     model.articulation(
-        "base_to_fly",
+        "base_to_middle",
         ArticulationType.PRISMATIC,
         parent=base,
+        child=middle,
+        origin=Origin(xyz=(0.0, 0.0, BASE_TO_MIDDLE_Z)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(
+            effort=220.0,
+            velocity=0.8,
+            lower=0.0,
+            upper=MIDDLE_EXTENSION,
+        ),
+    )
+    model.articulation(
+        "middle_to_fly",
+        ArticulationType.PRISMATIC,
+        parent=middle,
         child=fly,
-        origin=Origin(xyz=(0.0, 0.0, 0.74)),
+        origin=Origin(xyz=(0.0, 0.0, MIDDLE_TO_FLY_Z)),
         axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=45.0,
-            velocity=0.40,
+            effort=180.0,
+            velocity=0.8,
             lower=0.0,
-            upper=0.52,
+            upper=FLY_EXTENSION,
         ),
     )
-    model.articulation(
-        "fly_to_left_guard",
-        ArticulationType.REVOLUTE,
-        parent=fly,
-        child="left_guard_rail",
-        origin=Origin(xyz=(-guard_pivot_x, platform_rear_y, platform_top_z)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=8.0,
-            velocity=1.4,
-            lower=-0.72,
-            upper=0.0,
-        ),
-    )
-    model.articulation(
-        "fly_to_right_guard",
-        ArticulationType.REVOLUTE,
-        parent=fly,
-        child="right_guard_rail",
-        origin=Origin(xyz=(guard_pivot_x, platform_rear_y, platform_top_z)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=8.0,
-            velocity=1.4,
-            lower=0.0,
-            upper=0.72,
-        ),
-    )
-    model.articulation(
-        "fly_to_step_bar",
-        ArticulationType.REVOLUTE,
-        parent=fly,
-        child=step_bar,
-        origin=Origin(xyz=(0.0, platform_front_y, 1.630)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=6.0,
-            velocity=1.8,
-            lower=0.0,
-            upper=1.12,
-        ),
-    )
+
     return model
+
+
+def _aabb_extent(aabb, axis: str) -> float:
+    axis_index = {"x": 0, "y": 1, "z": 2}[axis]
+    return aabb[1][axis_index] - aabb[0][axis_index]
+
+
+def _limits_match(limits: MotionLimits | None, *, lower: float, upper: float) -> bool:
+    if limits is None or limits.lower is None or limits.upper is None:
+        return False
+    return (
+        math.isclose(limits.lower, lower, abs_tol=1e-9)
+        and math.isclose(limits.upper, upper, abs_tol=1e-9)
+        and limits.effort > 0.0
+        and limits.velocity > 0.0
+    )
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    base = object_model.get_part("base_section")
-    fly = object_model.get_part("fly_section")
-    left_guard = object_model.get_part("left_guard_rail")
-    right_guard = object_model.get_part("right_guard_rail")
-    step_bar = object_model.get_part("step_over_bar")
+    base = object_model.get_part("base")
+    middle = object_model.get_part("middle")
+    fly = object_model.get_part("fly")
+    base_to_middle = object_model.get_articulation("base_to_middle")
+    middle_to_fly = object_model.get_articulation("middle_to_fly")
 
-    fly_extension = object_model.get_articulation("base_to_fly")
-    left_hinge = object_model.get_articulation("fly_to_left_guard")
-    right_hinge = object_model.get_articulation("fly_to_right_guard")
-    step_hinge = object_model.get_articulation("fly_to_step_bar")
-
-    base_left_stile = base.get_visual("base_left_stile")
-    base_right_stile = base.get_visual("base_right_stile")
-    left_lower_guide_shoe = fly.get_visual("left_lower_guide_shoe")
-    right_lower_guide_shoe = fly.get_visual("right_lower_guide_shoe")
-    left_upper_guide_shoe = fly.get_visual("left_upper_guide_shoe")
-    right_upper_guide_shoe = fly.get_visual("right_upper_guide_shoe")
-    platform_front_bar = fly.get_visual("platform_front_bar")
-    platform_left_side = fly.get_visual("platform_left_side")
-    platform_grate = fly.get_visual("grate_runner_1")
-    left_hinge_cheek = fly.get_visual("left_hinge_cheek")
-    right_hinge_cheek = fly.get_visual("right_hinge_cheek")
-    left_guard_receiver = fly.get_visual("left_guard_receiver")
-    right_guard_receiver = fly.get_visual("right_guard_receiver")
-    left_step_hinge_cheek = fly.get_visual("left_step_hinge_cheek")
-    right_step_hinge_cheek = fly.get_visual("right_step_hinge_cheek")
-
-    left_hinge_shoe = left_guard.get_visual("right_side_hinge_shoe")
-    right_hinge_shoe = right_guard.get_visual("left_side_hinge_shoe")
-    left_latch_lug = left_guard.get_visual("front_latch_lug")
-    right_latch_lug = right_guard.get_visual("front_latch_lug")
-    left_top_rail = left_guard.get_visual("top_rail")
-    right_top_rail = right_guard.get_visual("top_rail")
-
-    step_left_hinge_foot = step_bar.get_visual("left_hinge_foot")
-    step_right_hinge_foot = step_bar.get_visual("right_hinge_foot")
-    step_top_bar = step_bar.get_visual("top_bar")
+    base_left_front_flange = base.get_visual("base_left_front_flange")
+    base_left_rear_flange = base.get_visual("base_left_rear_flange")
+    base_right_front_flange = base.get_visual("base_right_front_flange")
+    base_right_rear_flange = base.get_visual("base_right_rear_flange")
+    middle_left_front_flange = middle.get_visual("middle_left_front_flange")
+    middle_left_rear_flange = middle.get_visual("middle_left_rear_flange")
+    middle_right_front_flange = middle.get_visual("middle_right_front_flange")
+    middle_right_rear_flange = middle.get_visual("middle_right_rear_flange")
+    middle_left_front_guide = middle.get_visual("middle_left_front_guide")
+    middle_left_rear_guide = middle.get_visual("middle_left_rear_guide")
+    middle_right_front_guide = middle.get_visual("middle_right_front_guide")
+    middle_right_rear_guide = middle.get_visual("middle_right_rear_guide")
+    fly_left_front_guide = fly.get_visual("fly_left_front_guide")
+    fly_left_rear_guide = fly.get_visual("fly_left_rear_guide")
+    fly_right_front_guide = fly.get_visual("fly_right_front_guide")
+    fly_right_rear_guide = fly.get_visual("fly_right_rear_guide")
+    base_right_top_cap = base.get_visual("base_right_top_cap")
+    middle_right_top_cap = middle.get_visual("middle_right_top_cap")
+    fly_right_top_cap = fly.get_visual("fly_right_top_cap")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.allow_overlap(
-        step_bar,
-        fly,
-        reason="step-over bar hinge feet are intentionally captured between the front pivot cheeks",
-    )
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
+    ctx.fail_if_parts_overlap_in_sampled_poses(
+        max_pose_samples=64,
+        ignore_adjacent=False,
         ignore_fixed=True,
     )
 
-    ctx.expect_overlap(fly, base, axes="xz", min_overlap=0.20)
-    ctx.expect_origin_distance(fly, base, axes="x", max_dist=0.03)
-    ctx.expect_gap(
-        fly,
-        base,
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=left_lower_guide_shoe,
-        negative_elem=base_left_stile,
-        name="left_lower_guide_shoe_runs_on_base_stile",
+    base_aabb = ctx.part_world_aabb(base)
+    middle_aabb = ctx.part_world_aabb(middle)
+    fly_aabb = ctx.part_world_aabb(fly)
+    if base_aabb is not None and middle_aabb is not None and fly_aabb is not None:
+        base_width = _aabb_extent(base_aabb, "x")
+        middle_width = _aabb_extent(middle_aabb, "x")
+        fly_width = _aabb_extent(fly_aabb, "x")
+        base_length = _aabb_extent(base_aabb, "z")
+        middle_length = _aabb_extent(middle_aabb, "z")
+        fly_length = _aabb_extent(fly_aabb, "z")
+
+        ctx.check(
+            "section_widths_taper_inward",
+            base_width > middle_width > fly_width,
+            details=(
+                f"expected base > middle > fly widths, got "
+                f"{base_width:.3f}, {middle_width:.3f}, {fly_width:.3f}"
+            ),
+        )
+        ctx.check(
+            "section_lengths_taper_upward",
+            base_length > middle_length > fly_length,
+            details=(
+                f"expected base > middle > fly lengths, got "
+                f"{base_length:.3f}, {middle_length:.3f}, {fly_length:.3f}"
+            ),
+        )
+        ctx.check(
+            "base_section_realistic_size",
+            0.50 <= base_width <= 0.55 and 2.60 <= base_length <= 2.80,
+            details=(
+                f"base section should read as a full-size extension ladder, "
+                f"got width={base_width:.3f} length={base_length:.3f}"
+            ),
+        )
+
+    ctx.check(
+        "base_to_middle_prismatic_axis_and_limits",
+        base_to_middle.articulation_type == ArticulationType.PRISMATIC
+        and tuple(base_to_middle.axis) == (0.0, 0.0, 1.0)
+        and _limits_match(
+            base_to_middle.motion_limits,
+            lower=0.0,
+            upper=MIDDLE_EXTENSION,
+        ),
+        details=(
+            "base_to_middle should be a vertical prismatic section slide "
+            "with the authored extension travel"
+        ),
     )
-    ctx.expect_gap(
-        fly,
-        base,
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=right_lower_guide_shoe,
-        negative_elem=base_right_stile,
-        name="right_lower_guide_shoe_runs_on_base_stile",
+    ctx.check(
+        "middle_to_fly_prismatic_axis_and_limits",
+        middle_to_fly.articulation_type == ArticulationType.PRISMATIC
+        and tuple(middle_to_fly.axis) == (0.0, 0.0, 1.0)
+        and _limits_match(
+            middle_to_fly.motion_limits,
+            lower=0.0,
+            upper=FLY_EXTENSION,
+        ),
+        details=(
+            "middle_to_fly should be a vertical prismatic section slide "
+            "with the authored extension travel"
+        ),
     )
 
-    ctx.expect_gap(
-        fly,
-        fly,
-        axis="z",
-        min_gap=0.010,
-        positive_elem=platform_front_bar,
-        negative_elem=platform_grate,
-        name="grating_sits_recessed_below_platform_frame",
-    )
-    ctx.expect_gap(
-        fly,
-        fly,
-        axis="z",
-        min_gap=0.010,
-        positive_elem=platform_left_side,
-        negative_elem=platform_grate,
-        name="grating_sits_below_platform_side_tube",
-    )
+    ctx.expect_origin_distance(middle, base, axes="xy", max_dist=0.002)
+    ctx.expect_origin_distance(fly, middle, axes="xy", max_dist=0.002)
+    ctx.expect_origin_gap(middle, base, axis="z", min_gap=0.219, max_gap=0.221)
+    ctx.expect_origin_gap(fly, middle, axis="z", min_gap=0.179, max_gap=0.181)
+    ctx.expect_within(middle, base, axes="xy")
+    ctx.expect_within(fly, middle, axes="xy")
+    ctx.expect_contact(middle, base, elem_a=middle_left_front_guide, elem_b=base_left_front_flange)
+    ctx.expect_contact(middle, base, elem_a=middle_left_rear_guide, elem_b=base_left_rear_flange)
+    ctx.expect_contact(middle, base, elem_a=middle_right_front_guide, elem_b=base_right_front_flange)
+    ctx.expect_contact(middle, base, elem_a=middle_right_rear_guide, elem_b=base_right_rear_flange)
+    ctx.expect_contact(fly, middle, elem_a=fly_left_front_guide, elem_b=middle_left_front_flange)
+    ctx.expect_contact(fly, middle, elem_a=fly_left_rear_guide, elem_b=middle_left_rear_flange)
+    ctx.expect_contact(fly, middle, elem_a=fly_right_front_guide, elem_b=middle_right_front_flange)
+    ctx.expect_contact(fly, middle, elem_a=fly_right_rear_guide, elem_b=middle_right_rear_flange)
 
-    ctx.expect_contact(left_guard, fly, elem_a=left_hinge_shoe, elem_b=left_hinge_cheek)
-    ctx.expect_contact(right_guard, fly, elem_a=right_hinge_shoe, elem_b=right_hinge_cheek)
-    ctx.expect_contact(left_guard, fly, elem_a=left_latch_lug, elem_b=left_guard_receiver)
-    ctx.expect_contact(right_guard, fly, elem_a=right_latch_lug, elem_b=right_guard_receiver)
-    ctx.expect_gap(
-        left_guard,
-        fly,
-        axis="z",
-        min_gap=0.78,
-        positive_elem=left_top_rail,
-        negative_elem=platform_grate,
-        name="left_guard_rail_stands_well_above_platform",
-    )
-    ctx.expect_gap(
-        right_guard,
-        fly,
-        axis="z",
-        min_gap=0.78,
-        positive_elem=right_top_rail,
-        negative_elem=platform_grate,
-        name="right_guard_rail_stands_well_above_platform",
-    )
-
-    ctx.expect_contact(step_bar, fly, elem_a=step_left_hinge_foot, elem_b=left_step_hinge_cheek)
-    ctx.expect_contact(step_bar, fly, elem_a=step_right_hinge_foot, elem_b=right_step_hinge_cheek)
-    ctx.expect_gap(
-        step_bar,
-        fly,
-        axis="z",
-        min_gap=0.25,
-        positive_elem=step_top_bar,
-        negative_elem=platform_grate,
-        name="step_over_bar_rises_above_platform_front_edge",
-    )
-
-    with ctx.pose({fly_extension: 0.46}):
-        ctx.expect_overlap(fly, base, axes="xz", min_overlap=0.12)
+    with ctx.pose({base_to_middle: 0.0, middle_to_fly: 0.0}):
         ctx.expect_gap(
-            fly,
             base,
-            axis="y",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=left_upper_guide_shoe,
-            negative_elem=base_left_stile,
-            name="left_upper_guide_shoe_stays_on_base_when_extended",
+            middle,
+            axis="z",
+            positive_elem=base_right_top_cap,
+            negative_elem=middle_right_top_cap,
+            min_gap=0.07,
+            max_gap=0.10,
+            name="middle_retracted_below_base_top",
         )
         ctx.expect_gap(
-            fly,
-            base,
-            axis="y",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=right_upper_guide_shoe,
-            negative_elem=base_right_stile,
-            name="right_upper_guide_shoe_stays_on_base_when_extended",
-        )
-
-    with ctx.pose({left_hinge: -0.68}):
-        ctx.expect_within(
-            left_guard,
-            fly,
-            axes="xy",
-            inner_elem=left_top_rail,
-            name="left_guard_rail_folds_inboard_over_platform",
-        )
-    with ctx.pose({right_hinge: 0.68}):
-        ctx.expect_within(
-            right_guard,
-            fly,
-            axes="xy",
-            inner_elem=right_top_rail,
-            name="right_guard_rail_folds_inboard_over_platform",
-        )
-    with ctx.pose({step_hinge: 1.08}):
-        ctx.expect_within(
-            step_bar,
-            fly,
-            axes="xy",
-            inner_elem=step_top_bar,
-            name="step_over_bar_folds_back_inside_platform_footprint",
-        )
-        ctx.expect_gap(
-            step_bar,
+            middle,
             fly,
             axis="z",
-            min_gap=0.08,
-            max_gap=0.19,
-            positive_elem=step_top_bar,
-            negative_elem=platform_grate,
-            name="folded_step_bar_stows_just_above_grating",
+            positive_elem=middle_right_top_cap,
+            negative_elem=fly_right_top_cap,
+            min_gap=0.05,
+            max_gap=0.08,
+            name="fly_retracted_below_middle_top",
         )
+
+    with ctx.pose({base_to_middle: MIDDLE_EXTENSION * 0.85}):
+        ctx.expect_contact(middle, base, elem_a=middle_left_front_guide, elem_b=base_left_front_flange)
+        ctx.expect_contact(middle, base, elem_a=middle_left_rear_guide, elem_b=base_left_rear_flange)
+        ctx.expect_contact(middle, base, elem_a=middle_right_front_guide, elem_b=base_right_front_flange)
+        ctx.expect_contact(middle, base, elem_a=middle_right_rear_guide, elem_b=base_right_rear_flange)
+        ctx.expect_gap(
+            middle,
+            base,
+            axis="z",
+            positive_elem=middle_right_top_cap,
+            negative_elem=base_right_top_cap,
+            min_gap=0.80,
+            name="middle_projects_above_base_when_extended",
+        )
+
+    with ctx.pose({base_to_middle: MIDDLE_EXTENSION, middle_to_fly: FLY_EXTENSION}):
+        ctx.expect_contact(middle, base, elem_a=middle_left_front_guide, elem_b=base_left_front_flange)
+        ctx.expect_contact(middle, base, elem_a=middle_left_rear_guide, elem_b=base_left_rear_flange)
+        ctx.expect_contact(middle, base, elem_a=middle_right_front_guide, elem_b=base_right_front_flange)
+        ctx.expect_contact(middle, base, elem_a=middle_right_rear_guide, elem_b=base_right_rear_flange)
+        ctx.expect_contact(fly, middle, elem_a=fly_left_front_guide, elem_b=middle_left_front_flange)
+        ctx.expect_contact(fly, middle, elem_a=fly_left_rear_guide, elem_b=middle_left_rear_flange)
+        ctx.expect_contact(fly, middle, elem_a=fly_right_front_guide, elem_b=middle_right_front_flange)
+        ctx.expect_contact(fly, middle, elem_a=fly_right_rear_guide, elem_b=middle_right_rear_flange)
+        ctx.expect_gap(
+            fly,
+            middle,
+            axis="z",
+            positive_elem=fly_right_top_cap,
+            negative_elem=middle_right_top_cap,
+            min_gap=0.90,
+            name="fly_projects_above_middle_when_extended",
+        )
+        ctx.expect_gap(
+            fly,
+            base,
+            axis="z",
+            positive_elem=fly_right_top_cap,
+            negative_elem=base_right_top_cap,
+            min_gap=1.95,
+            name="fly_projects_well_above_base_when_extended",
+        )
+
+    for articulation_name, articulation in (
+        ("base_to_middle", base_to_middle),
+        ("middle_to_fly", middle_to_fly),
+    ):
+        limits = articulation.motion_limits
+        if limits is not None and limits.lower is not None and limits.upper is not None:
+            with ctx.pose({articulation: limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"{articulation_name}_lower_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(name=f"{articulation_name}_lower_no_floating")
+            with ctx.pose({articulation: limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"{articulation_name}_upper_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(name=f"{articulation_name}_upper_no_floating")
 
     return ctx.report()
 

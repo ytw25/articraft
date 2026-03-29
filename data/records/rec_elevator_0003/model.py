@@ -3,12 +3,12 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
-import os
+from pathlib import Path
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -16,519 +16,459 @@ from sdk import (
     Origin,
     TestContext,
     TestReport,
-    ValidationError,
 )
 
-ASSET_ROOT = "/"
-_REAL_GETCWD = os.getcwd
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _REAL_GETCWD()
-    except FileNotFoundError:
-        os.chdir(ASSET_ROOT)
-        return ASSET_ROOT
-
-
-os.getcwd = _safe_getcwd
-os.chdir(_safe_getcwd())
-
-BASE_LENGTH = 1.60
-BASE_WIDTH = 1.05
-BASE_HEIGHT = 0.08
-BASE_LINK_Z = 0.12
-
-PLATFORM_LENGTH = 1.50
-PLATFORM_WIDTH = 1.00
-PLATFORM_THICKNESS = 0.08
-PLATFORM_LINK_LOCAL_Z = -0.08
-
-LINK_LENGTH = 1.10
-LINK_WIDTH = 0.024
-LINK_DEPTH = 0.060
-PIN_RADIUS = 0.028
-PIN_LENGTH = 0.050
-CENTER_PIN_LENGTH = 0.080
-
-PAIR_Y_FRONT = -0.29
-PAIR_Y_REAR = 0.29
-PAIR_LINK_OFFSET = 0.014
-
-LEFT_FIXED_X = -0.54
-CLOSED_SCISSOR_HEIGHT = 0.22
-OPEN_SCISSOR_HEIGHT = 0.72
-
-TRACK_LENGTH = 0.40
-TRACK_WIDTH = 0.090
-TRACK_HEIGHT = 0.036
-
-PLATFORM_CURB_HEIGHT = 0.085
-PLATFORM_CURB_THICKNESS = 0.045
-
-
-def _horizontal_span(height: float) -> float:
-    return math.sqrt(max(LINK_LENGTH**2 - height**2, 0.0))
-
-
-def _vector_angle(height: float) -> float:
-    return math.atan2(height, _horizontal_span(height))
-
-
-CLOSED_LINK_ANGLE = _vector_angle(CLOSED_SCISSOR_HEIGHT)
-OPEN_LINK_ANGLE = _vector_angle(OPEN_SCISSOR_HEIGHT)
-LINK_OPEN_DELTA = OPEN_LINK_ANGLE - CLOSED_LINK_ANGLE
-
-RIGHT_SLIDE_X_CLOSED = LEFT_FIXED_X + _horizontal_span(CLOSED_SCISSOR_HEIGHT)
-RIGHT_SLIDE_X_OPEN = LEFT_FIXED_X + _horizontal_span(OPEN_SCISSOR_HEIGHT)
-TRACK_CENTER_X = 0.5 * (RIGHT_SLIDE_X_CLOSED + RIGHT_SLIDE_X_OPEN)
-
-PLATFORM_CENTER_Z_CLOSED = BASE_LINK_Z + CLOSED_SCISSOR_HEIGHT - PLATFORM_LINK_LOCAL_Z
-PLATFORM_LIFT_TRAVEL = OPEN_SCISSOR_HEIGHT - CLOSED_SCISSOR_HEIGHT
-
-
-def _link_pose(phi: float) -> tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]:
-    dx = LINK_LENGTH * math.cos(phi)
-    dz = LINK_LENGTH * math.sin(phi)
-    center = (0.5 * dx, 0.0, 0.5 * dz)
-    end = (dx, 0.0, dz)
-    rpy = (0.0, -phi, 0.0)
-    return center, end, rpy
-
-
-def _add_link_visuals(part, phi: float, *, slider_name: str, fixed_pin_name: str, center_name: str) -> None:
-    center, end, rpy = _link_pose(phi)
-    part.visual(
-        Box((LINK_LENGTH, LINK_WIDTH, LINK_DEPTH)),
-        origin=Origin(xyz=center, rpy=rpy),
-        name="main_link",
-    )
-    part.visual(
-        Cylinder(radius=PIN_RADIUS, length=PIN_LENGTH),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        name=fixed_pin_name,
-    )
-    part.visual(
-        Cylinder(radius=PIN_RADIUS, length=PIN_LENGTH),
-        origin=Origin(xyz=end, rpy=(math.pi / 2.0, 0.0, 0.0)),
-        name=slider_name,
-    )
-    part.visual(
-        Box((0.12, LINK_WIDTH * 1.4, LINK_DEPTH * 1.2)),
-        origin=Origin(xyz=center, rpy=rpy),
-        name="center_boss",
-    )
-    part.visual(
-        Cylinder(radius=PIN_RADIUS * 0.95, length=CENTER_PIN_LENGTH),
-        origin=Origin(xyz=center, rpy=(math.pi / 2.0, 0.0, 0.0)),
-        name=center_name,
-    )
-
-
-def _add_track_channel(part, *, name: str, xyz: tuple[float, float, float], material) -> None:
-    x, y, z = xyz
-    part.visual(
-        Box((TRACK_LENGTH, TRACK_WIDTH, TRACK_HEIGHT)),
-        origin=Origin(xyz=(x, y, z)),
-        material=material,
-        name=name,
-    )
-    cheek_width = 0.016
-    cheek_height = TRACK_HEIGHT * 1.8
-    cheek_offset = 0.5 * (TRACK_WIDTH - cheek_width)
-    cheek_z = z + 0.20 * TRACK_HEIGHT
-    for suffix, direction in (("left_cheek", 1.0), ("right_cheek", -1.0)):
-        part.visual(
-            Box((TRACK_LENGTH, cheek_width, cheek_height)),
-            origin=Origin(xyz=(x, y + direction * cheek_offset, cheek_z)),
-            material=material,
-            name=f"{name}_{suffix}",
-        )
+ASSETS = AssetContext.from_script(__file__)
+HERE = Path(__file__).resolve().parent
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="scissor_lift_freight_elevator")
+    model = ArticulatedObject(name="hydraulic_freight_elevator", assets=ASSETS)
 
-    dark_steel = model.material("dark_steel", rgba=(0.21, 0.23, 0.25, 1.0))
-    platform_steel = model.material("platform_steel", rgba=(0.54, 0.57, 0.60, 1.0))
-    hydraulic_gray = model.material("hydraulic_gray", rgba=(0.36, 0.39, 0.42, 1.0))
-    pin_black = model.material("pin_black", rgba=(0.12, 0.12, 0.13, 1.0))
+    concrete = model.material("concrete", rgba=(0.62, 0.62, 0.60, 1.0))
+    frame_steel = model.material("frame_steel", rgba=(0.28, 0.30, 0.33, 1.0))
+    guide_steel = model.material("guide_steel", rgba=(0.43, 0.45, 0.48, 1.0))
+    platform_steel = model.material("platform_steel", rgba=(0.46, 0.48, 0.50, 1.0))
+    panel_gray = model.material("panel_gray", rgba=(0.74, 0.75, 0.77, 1.0))
+    safety_yellow = model.material("safety_yellow", rgba=(0.88, 0.76, 0.19, 1.0))
+    hydraulic_black = model.material("hydraulic_black", rgba=(0.12, 0.12, 0.14, 1.0))
+    chrome = model.material("chrome", rgba=(0.80, 0.82, 0.84, 1.0))
 
-    base = model.part("base_frame")
-    base.visual(
-        Box((BASE_LENGTH, 0.09, BASE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.5 * (BASE_WIDTH - 0.09), 0.5 * BASE_HEIGHT)),
-        material=dark_steel,
-        name="left_rail",
+    shaft = model.part("shaft")
+    shaft.visual(
+        Box((0.70, 2.10, 0.10)),
+        origin=Origin(xyz=(-1.20, 0.00, -0.05)),
+        material=concrete,
+        name="left_floor_pad",
     )
-    base.visual(
-        Box((BASE_LENGTH, 0.09, BASE_HEIGHT)),
-        origin=Origin(xyz=(0.0, -0.5 * (BASE_WIDTH - 0.09), 0.5 * BASE_HEIGHT)),
-        material=dark_steel,
-        name="right_rail",
+    shaft.visual(
+        Box((0.70, 2.10, 0.10)),
+        origin=Origin(xyz=(1.20, 0.00, -0.05)),
+        material=concrete,
+        name="right_floor_pad",
     )
-    base.visual(
-        Box((0.10, BASE_WIDTH - 0.18, BASE_HEIGHT)),
-        origin=Origin(xyz=(0.5 * (BASE_LENGTH - 0.10), 0.0, 0.5 * BASE_HEIGHT)),
-        material=dark_steel,
-        name="front_crossmember",
+    shaft.visual(
+        Box((1.70, 0.48, 0.10)),
+        origin=Origin(xyz=(0.00, -0.81, -0.05)),
+        material=concrete,
+        name="rear_floor_pad",
     )
-    base.visual(
-        Box((0.10, BASE_WIDTH - 0.18, BASE_HEIGHT)),
-        origin=Origin(xyz=(-0.5 * (BASE_LENGTH - 0.10), 0.0, 0.5 * BASE_HEIGHT)),
-        material=dark_steel,
-        name="rear_crossmember",
+    shaft.visual(
+        Box((3.10, 0.38, 0.10)),
+        origin=Origin(xyz=(0.00, 0.86, -0.05)),
+        material=concrete,
+        name="front_landing_pad",
     )
-    base.visual(
-        Box((BASE_LENGTH - 0.08, BASE_WIDTH - 0.02, 0.04)),
-        origin=Origin(xyz=(0.0, 0.0, 0.02)),
+    shaft.visual(
+        Box((1.42, 0.20, 0.001)),
+        origin=Origin(xyz=(0.00, 0.61, 0.0005)),
+        material=panel_gray,
+        name="landing_plate",
+    )
+    shaft.visual(
+        Box((2.10, 0.08, 3.20)),
+        origin=Origin(xyz=(0.00, -0.89, 1.60)),
+        material=frame_steel,
+        name="rear_wall",
+    )
+    shaft.visual(
+        Box((0.08, 1.48, 3.20)),
+        origin=Origin(xyz=(-0.97, -0.19, 1.60)),
+        material=frame_steel,
+        name="left_hoistway_wall",
+    )
+    shaft.visual(
+        Box((0.08, 1.48, 3.20)),
+        origin=Origin(xyz=(0.97, -0.19, 1.60)),
+        material=frame_steel,
+        name="right_hoistway_wall",
+    )
+    shaft.visual(
+        Box((1.54, 0.10, 0.20)),
+        origin=Origin(xyz=(0.00, 0.73, 1.84)),
+        material=frame_steel,
+        name="landing_header",
+    )
+    shaft.visual(
+        Box((0.10, 0.10, 1.78)),
+        origin=Origin(xyz=(-0.72, 0.73, 0.89)),
+        material=frame_steel,
+        name="left_jamb",
+    )
+    shaft.visual(
+        Box((0.10, 0.10, 1.78)),
+        origin=Origin(xyz=(0.72, 0.73, 0.89)),
+        material=frame_steel,
+        name="right_jamb",
+    )
+    shaft.visual(
+        Box((2.49, 0.08, 0.06)),
+        origin=Origin(xyz=(0.745, 0.64, 1.75)),
+        material=frame_steel,
+        name="door_track",
+    )
+    shaft.visual(
+        Box((1.34, 0.04, 1.72)),
+        origin=Origin(xyz=(1.32, 0.56, 0.86)),
+        material=panel_gray,
+        name="door_pocket_backer",
+    )
+    shaft.visual(
+        Box((0.10, 0.10, 1.78)),
+        origin=Origin(xyz=(2.04, 0.73, 0.89)),
+        material=frame_steel,
+        name="pocket_end_post",
+    )
+    shaft.visual(
+        Box((0.02, 0.06, 1.70)),
+        origin=Origin(xyz=(-0.66, 0.66, 0.85)),
+        material=safety_yellow,
+        name="door_stop",
+    )
+    shaft.visual(
+        Box((0.04, 0.18, 2.90)),
+        origin=Origin(xyz=(-0.91, -0.03, 1.45)),
+        material=guide_steel,
+        name="left_guide_rail",
+    )
+    shaft.visual(
+        Box((0.04, 0.18, 2.90)),
+        origin=Origin(xyz=(0.91, -0.03, 1.45)),
+        material=guide_steel,
+        name="right_guide_rail",
+    )
+    shaft.visual(
+        Cylinder(radius=0.14, length=0.66),
+        origin=Origin(xyz=(1.15, -0.35, -0.33)),
+        material=hydraulic_black,
+        name="hydraulic_cylinder",
+    )
+    shaft.visual(
+        Cylinder(radius=0.07, length=0.08),
+        origin=Origin(xyz=(1.15, -0.35, 0.04)),
+        material=chrome,
+        name="ram_gland",
+    )
+    shaft.visual(
+        Box((0.32, 0.22, 0.26)),
+        origin=Origin(xyz=(1.08, -0.72, 0.13)),
+        material=hydraulic_black,
+        name="power_unit",
+    )
+    shaft.visual(
+        Box((0.06, 0.58, 0.06)),
+        origin=Origin(xyz=(1.12, -0.54, 0.03)),
+        material=hydraulic_black,
+        name="hydraulic_hose_trunk",
+    )
+    shaft.inertial = Inertial.from_geometry(
+        Box((3.10, 2.10, 3.30)),
+        mass=240.0,
+        origin=Origin(xyz=(0.00, 0.00, 1.55)),
+    )
+
+    car = model.part("car")
+    car.visual(
+        Box((1.66, 1.08, 0.09)),
+        origin=Origin(xyz=(0.00, 0.00, -0.045)),
         material=platform_steel,
-        name="base_plate",
+        name="platform_base",
     )
-    for track_name, track_y in (("base_track_front", PAIR_Y_FRONT), ("base_track_rear", PAIR_Y_REAR)):
-        _add_track_channel(
-            base,
-            name=track_name,
-            xyz=(TRACK_CENTER_X, track_y, BASE_LINK_Z),
-            material=dark_steel,
-        )
-        base.visual(
-            Box((TRACK_LENGTH - 0.02, 0.05, 0.106)),
-            origin=Origin(xyz=(TRACK_CENTER_X, track_y, 0.053)),
-            material=dark_steel,
-            name=f"{track_name}_pedestal",
-        )
-    base.visual(
-        Cylinder(radius=0.075, length=0.68),
-        origin=Origin(xyz=(-0.02, 0.0, 0.18), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=hydraulic_gray,
-        name="hydraulic_housing",
+    car.visual(
+        Box((1.62, 1.04, 0.001)),
+        origin=Origin(xyz=(0.00, 0.00, 0.0005)),
+        material=panel_gray,
+        name="deck_surface",
     )
-    base.visual(
-        Box((0.62, 0.18, 0.05)),
-        origin=Origin(xyz=(-0.02, 0.0, 0.145)),
-        material=dark_steel,
-        name="hydraulic_cradle",
+    car.visual(
+        Box((1.56, 0.05, 1.62)),
+        origin=Origin(xyz=(0.00, -0.515, 0.81)),
+        material=platform_steel,
+        name="back_wall",
     )
-    base.visual(
-        Box((0.66, 0.20, 0.12)),
-        origin=Origin(xyz=(-0.02, 0.0, 0.07)),
-        material=dark_steel,
-        name="hydraulic_support_tower",
+    car.visual(
+        Box((0.04, 0.96, 1.10)),
+        origin=Origin(xyz=(-0.81, -0.03, 0.55)),
+        material=platform_steel,
+        name="left_side_guard",
     )
-    base.visual(
-        Cylinder(radius=0.040, length=0.20),
-        origin=Origin(xyz=(0.25, 0.0, 0.18), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=pin_black,
-        name="hydraulic_rod_stub",
+    car.visual(
+        Box((0.04, 0.96, 1.10)),
+        origin=Origin(xyz=(0.81, -0.03, 0.55)),
+        material=platform_steel,
+        name="right_side_guard",
     )
-    base.inertial = Inertial.from_geometry(
-        Box((BASE_LENGTH, BASE_WIDTH, BASE_HEIGHT)),
-        mass=280.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.5 * BASE_HEIGHT)),
+    car.visual(
+        Box((1.66, 0.06, 0.12)),
+        origin=Origin(xyz=(0.00, 0.48, 0.06)),
+        material=safety_yellow,
+        name="toe_guard",
+    )
+    car.visual(
+        Box((0.06, 0.14, 0.96)),
+        origin=Origin(xyz=(-0.86, -0.03, 0.48)),
+        material=guide_steel,
+        name="left_guide_runner",
+    )
+    car.visual(
+        Box((0.06, 0.14, 0.96)),
+        origin=Origin(xyz=(0.86, -0.03, 0.48)),
+        material=guide_steel,
+        name="right_guide_runner",
+    )
+    car.visual(
+        Box((0.64, 0.34, 0.10)),
+        origin=Origin(xyz=(0.00, -0.18, -0.14)),
+        material=frame_steel,
+        name="underframe",
+    )
+    car.inertial = Inertial.from_geometry(
+        Box((1.66, 1.08, 1.72)),
+        mass=62.0,
+        origin=Origin(xyz=(0.00, 0.00, 0.81)),
     )
 
-    platform = model.part("work_platform")
-    platform.visual(
-        Box((PLATFORM_LENGTH, PLATFORM_WIDTH, PLATFORM_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-        material=platform_steel,
-        name="platform_deck",
+    landing_door = model.part("landing_door")
+    landing_door.visual(
+        Box((1.30, 0.04, 1.64)),
+        origin=Origin(xyz=(0.00, 0.00, 0.82)),
+        material=panel_gray,
+        name="door_panel",
     )
-    for track_name, track_y in (("platform_track_front", PAIR_Y_FRONT), ("platform_track_rear", PAIR_Y_REAR)):
-        _add_track_channel(
-            platform,
-            name=track_name,
-            xyz=(TRACK_CENTER_X, track_y, PLATFORM_LINK_LOCAL_Z),
-            material=dark_steel,
-        )
-        platform.visual(
-            Box((TRACK_LENGTH - 0.02, 0.05, 0.03)),
-            origin=Origin(xyz=(TRACK_CENTER_X, track_y, -0.049)),
-            material=dark_steel,
-            name=f"{track_name}_hanger",
-        )
-    for curb_name, curb_y in (("front_curb", 0.5 * (PLATFORM_WIDTH - PLATFORM_CURB_THICKNESS)), ("rear_curb", -0.5 * (PLATFORM_WIDTH - PLATFORM_CURB_THICKNESS))):
-        platform.visual(
-            Box((PLATFORM_LENGTH, PLATFORM_CURB_THICKNESS, PLATFORM_CURB_HEIGHT)),
-            origin=Origin(
-                xyz=(0.0, curb_y, 0.5 * PLATFORM_THICKNESS + 0.5 * PLATFORM_CURB_HEIGHT),
-            ),
-            material=dark_steel,
-            name=curb_name,
-        )
-    for curb_name, curb_x in (("left_stop", -0.5 * (PLATFORM_LENGTH - PLATFORM_CURB_THICKNESS)), ("right_stop", 0.5 * (PLATFORM_LENGTH - PLATFORM_CURB_THICKNESS))):
-        platform.visual(
-            Box((PLATFORM_CURB_THICKNESS, PLATFORM_WIDTH, PLATFORM_CURB_HEIGHT)),
-            origin=Origin(
-                xyz=(curb_x, 0.0, 0.5 * PLATFORM_THICKNESS + 0.5 * PLATFORM_CURB_HEIGHT),
-            ),
-            material=dark_steel,
-            name=curb_name,
-        )
-    platform.inertial = Inertial.from_geometry(
-        Box((PLATFORM_LENGTH, PLATFORM_WIDTH, PLATFORM_THICKNESS)),
-        mass=190.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+    landing_door.visual(
+        Box((1.30, 0.02, 0.06)),
+        origin=Origin(xyz=(0.00, -0.01, 1.67)),
+        material=frame_steel,
+        name="hanger_bar",
+    )
+    landing_door.visual(
+        Box((0.16, 0.06, 0.02)),
+        origin=Origin(xyz=(-0.41, 0.00, 1.71)),
+        material=guide_steel,
+        name="left_hanger_shoe",
+    )
+    landing_door.visual(
+        Box((0.16, 0.06, 0.02)),
+        origin=Origin(xyz=(0.41, 0.00, 1.71)),
+        material=guide_steel,
+        name="right_hanger_shoe",
+    )
+    landing_door.inertial = Inertial.from_geometry(
+        Box((1.30, 0.06, 1.72)),
+        mass=28.0,
+        origin=Origin(xyz=(0.00, 0.00, 0.86)),
     )
 
     model.articulation(
-        "platform_lift",
+        "car_lift",
         ArticulationType.PRISMATIC,
-        parent=base,
-        child=platform,
-        origin=Origin(xyz=(0.0, 0.0, PLATFORM_CENTER_Z_CLOSED)),
+        parent=shaft,
+        child=car,
+        origin=Origin(xyz=(0.00, -0.03, 0.00)),
         axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=8000.0,
-            velocity=0.30,
+            effort=4500.0,
+            velocity=0.35,
             lower=0.0,
-            upper=PLATFORM_LIFT_TRAVEL,
+            upper=1.35,
         ),
-    )
-
-    front_rise = model.part("front_rise_link")
-    _add_link_visuals(
-        front_rise,
-        CLOSED_LINK_ANGLE,
-        slider_name="top_slider",
-        fixed_pin_name="base_pin",
-        center_name="center_pin",
-    )
-    front_rise.inertial = Inertial.from_geometry(
-        Box((LINK_LENGTH, LINK_WIDTH, LINK_DEPTH)),
-        mass=36.0,
-        origin=Origin(xyz=(0.5 * LINK_LENGTH, 0.0, 0.0)),
     )
     model.articulation(
-        "front_rise_hinge",
-        ArticulationType.REVOLUTE,
-        parent=base,
-        child=front_rise,
-        origin=Origin(xyz=(LEFT_FIXED_X, PAIR_Y_FRONT + PAIR_LINK_OFFSET, BASE_LINK_Z)),
-        axis=(0.0, -1.0, 0.0),
+        "landing_door_slide",
+        ArticulationType.PRISMATIC,
+        parent=shaft,
+        child=landing_door,
+        origin=Origin(xyz=(0.00, 0.64, 0.00)),
+        axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(
-            effort=2400.0,
-            velocity=0.90,
+            effort=900.0,
+            velocity=0.50,
             lower=0.0,
-            upper=LINK_OPEN_DELTA,
+            upper=1.30,
         ),
     )
-
-    front_fall = model.part("front_fall_link")
-    _add_link_visuals(
-        front_fall,
-        -CLOSED_LINK_ANGLE,
-        slider_name="bottom_slider",
-        fixed_pin_name="top_pin",
-        center_name="center_pin",
-    )
-    front_fall.inertial = Inertial.from_geometry(
-        Box((LINK_LENGTH, LINK_WIDTH, LINK_DEPTH)),
-        mass=36.0,
-        origin=Origin(xyz=(0.5 * LINK_LENGTH, 0.0, 0.0)),
-    )
-    model.articulation(
-        "front_fall_hinge",
-        ArticulationType.REVOLUTE,
-        parent=platform,
-        child=front_fall,
-        origin=Origin(xyz=(LEFT_FIXED_X, PAIR_Y_FRONT - PAIR_LINK_OFFSET, PLATFORM_LINK_LOCAL_Z)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=2400.0,
-            velocity=0.90,
-            lower=0.0,
-            upper=LINK_OPEN_DELTA,
-        ),
-    )
-
-    rear_rise = model.part("rear_rise_link")
-    _add_link_visuals(
-        rear_rise,
-        CLOSED_LINK_ANGLE,
-        slider_name="top_slider",
-        fixed_pin_name="base_pin",
-        center_name="center_pin",
-    )
-    rear_rise.inertial = Inertial.from_geometry(
-        Box((LINK_LENGTH, LINK_WIDTH, LINK_DEPTH)),
-        mass=36.0,
-        origin=Origin(xyz=(0.5 * LINK_LENGTH, 0.0, 0.0)),
-    )
-    model.articulation(
-        "rear_rise_hinge",
-        ArticulationType.REVOLUTE,
-        parent=base,
-        child=rear_rise,
-        origin=Origin(xyz=(LEFT_FIXED_X, PAIR_Y_REAR + PAIR_LINK_OFFSET, BASE_LINK_Z)),
-        axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=2400.0,
-            velocity=0.90,
-            lower=0.0,
-            upper=LINK_OPEN_DELTA,
-        ),
-    )
-
-    rear_fall = model.part("rear_fall_link")
-    _add_link_visuals(
-        rear_fall,
-        -CLOSED_LINK_ANGLE,
-        slider_name="bottom_slider",
-        fixed_pin_name="top_pin",
-        center_name="center_pin",
-    )
-    rear_fall.inertial = Inertial.from_geometry(
-        Box((LINK_LENGTH, LINK_WIDTH, LINK_DEPTH)),
-        mass=36.0,
-        origin=Origin(xyz=(0.5 * LINK_LENGTH, 0.0, 0.0)),
-    )
-    model.articulation(
-        "rear_fall_hinge",
-        ArticulationType.REVOLUTE,
-        parent=platform,
-        child=rear_fall,
-        origin=Origin(xyz=(LEFT_FIXED_X, PAIR_Y_REAR - PAIR_LINK_OFFSET, PLATFORM_LINK_LOCAL_Z)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=2400.0,
-            velocity=0.90,
-            lower=0.0,
-            upper=LINK_OPEN_DELTA,
-        ),
-    )
-
-    for link_part in (front_rise, front_fall, rear_rise, rear_fall):
-        for visual_name in ("base_pin", "top_pin", "top_slider", "bottom_slider", "center_pin"):
-            try:
-                link_part.get_visual(visual_name).material = pin_black
-            except ValidationError:
-                continue
-        link_part.get_visual("main_link").material = dark_steel
-        link_part.get_visual("center_boss").material = dark_steel
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSET_ROOT)
+    ctx = TestContext(object_model, asset_root=HERE)
 
-    base = object_model.get_part("base_frame")
-    platform = object_model.get_part("work_platform")
-    front_rise = object_model.get_part("front_rise_link")
-    front_fall = object_model.get_part("front_fall_link")
-    rear_rise = object_model.get_part("rear_rise_link")
-    rear_fall = object_model.get_part("rear_fall_link")
+    shaft = object_model.get_part("shaft")
+    car = object_model.get_part("car")
+    landing_door = object_model.get_part("landing_door")
 
-    platform_lift = object_model.get_articulation("platform_lift")
-    front_rise_hinge = object_model.get_articulation("front_rise_hinge")
-    front_fall_hinge = object_model.get_articulation("front_fall_hinge")
-    rear_rise_hinge = object_model.get_articulation("rear_rise_hinge")
-    rear_fall_hinge = object_model.get_articulation("rear_fall_hinge")
+    car_lift = object_model.get_articulation("car_lift")
+    landing_door_slide = object_model.get_articulation("landing_door_slide")
 
-    platform_deck = platform.get_visual("platform_deck")
-    base_plate = base.get_visual("base_plate")
-    hydraulic_housing = base.get_visual("hydraulic_housing")
-    front_rise_main = front_rise.get_visual("main_link")
-    front_fall_main = front_fall.get_visual("main_link")
-    rear_rise_main = rear_rise.get_visual("main_link")
-    rear_fall_main = rear_fall.get_visual("main_link")
-    front_base_track = base.get_visual("base_track_front")
-    rear_base_track = base.get_visual("base_track_rear")
-    front_platform_track = platform.get_visual("platform_track_front")
-    rear_platform_track = platform.get_visual("platform_track_rear")
+    landing_plate = shaft.get_visual("landing_plate")
+    rear_wall = shaft.get_visual("rear_wall")
+    left_rail = shaft.get_visual("left_guide_rail")
+    right_rail = shaft.get_visual("right_guide_rail")
+    door_track = shaft.get_visual("door_track")
+    door_stop = shaft.get_visual("door_stop")
+    pocket_backer = shaft.get_visual("door_pocket_backer")
 
-    front_rise_slider = front_rise.get_visual("top_slider")
-    rear_rise_slider = rear_rise.get_visual("top_slider")
-    front_fall_slider = front_fall.get_visual("bottom_slider")
-    rear_fall_slider = rear_fall.get_visual("bottom_slider")
-    front_rise_center = front_rise.get_visual("center_pin")
-    rear_rise_center = rear_rise.get_visual("center_pin")
-    front_fall_center = front_fall.get_visual("center_pin")
-    rear_fall_center = rear_fall.get_visual("center_pin")
+    deck_surface = car.get_visual("deck_surface")
+    back_wall = car.get_visual("back_wall")
+    toe_guard = car.get_visual("toe_guard")
+    left_runner = car.get_visual("left_guide_runner")
+    right_runner = car.get_visual("right_guide_runner")
+
+    door_panel = landing_door.get_visual("door_panel")
+    left_shoe = landing_door.get_visual("left_hanger_shoe")
+    right_shoe = landing_door.get_visual("right_hanger_shoe")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.allow_overlap(front_rise, front_fall, reason="front scissor pair shares a common center pivot block")
-    ctx.allow_overlap(rear_rise, rear_fall, reason="rear scissor pair shares a common center pivot block")
-    ctx.allow_overlap(front_rise, platform, reason="front upper slide pin nests inside the platform guide channel")
-    ctx.allow_overlap(rear_rise, platform, reason="rear upper slide pin nests inside the platform guide channel")
-    ctx.allow_overlap(front_fall, base, reason="front lower slide pin nests inside the base guide channel")
-    ctx.allow_overlap(rear_fall, base, reason="rear lower slide pin nests inside the base guide channel")
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.005,
-        overlap_volume_tol=0.0,
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=96)
+
+    car_limits = car_lift.motion_limits
+    door_limits = landing_door_slide.motion_limits
+
+    ctx.check(
+        "car_lift_vertical_axis",
+        tuple(car_lift.axis) == (0.0, 0.0, 1.0),
+        details=f"Expected vertical prismatic axis, got {car_lift.axis!r}",
     )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.005,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
+    ctx.check(
+        "landing_door_horizontal_axis",
+        tuple(landing_door_slide.axis) == (1.0, 0.0, 0.0),
+        details=f"Expected horizontal sliding axis, got {landing_door_slide.axis!r}",
+    )
+    ctx.check(
+        "car_lift_realistic_travel",
+        car_limits is not None
+        and car_limits.lower == 0.0
+        and car_limits.upper is not None
+        and 1.20 <= car_limits.upper <= 1.50,
+        details=f"Expected realistic freight-lift travel, got {car_limits!r}",
+    )
+    ctx.check(
+        "landing_door_travel_matches_single_panel",
+        door_limits is not None
+        and door_limits.lower == 0.0
+        and door_limits.upper is not None
+        and 1.20 <= door_limits.upper <= 1.35,
+        details=f"Expected a single-panel side-slide stroke, got {door_limits!r}",
     )
 
-    ctx.expect_overlap(platform, base, axes="xy", min_overlap=0.75, elem_a=platform_deck, elem_b=base_plate)
-    ctx.expect_gap(platform, base, axis="z", min_gap=0.33, positive_elem=platform_deck, negative_elem=base_plate)
-    ctx.expect_within(base, platform, axes="xy", inner_elem=hydraulic_housing, outer_elem=platform_deck)
-    ctx.expect_overlap(base, front_rise, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=front_rise_main)
-    ctx.expect_overlap(base, front_fall, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=front_fall_main)
-    ctx.expect_overlap(base, rear_rise, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=rear_rise_main)
-    ctx.expect_overlap(base, rear_fall, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=rear_fall_main)
-    ctx.expect_gap(base, front_rise, axis="y", min_gap=0.14, positive_elem=hydraulic_housing, negative_elem=front_rise_main)
-    ctx.expect_gap(base, front_fall, axis="y", min_gap=0.14, positive_elem=hydraulic_housing, negative_elem=front_fall_main)
-    ctx.expect_gap(rear_rise, base, axis="y", min_gap=0.14, positive_elem=rear_rise_main, negative_elem=hydraulic_housing)
-    ctx.expect_gap(rear_fall, base, axis="y", min_gap=0.14, positive_elem=rear_fall_main, negative_elem=hydraulic_housing)
-    ctx.expect_gap(rear_rise, front_rise, axis="y", min_gap=0.52, positive_elem=rear_rise_main, negative_elem=front_rise_main)
-    ctx.expect_gap(rear_fall, front_fall, axis="y", min_gap=0.52, positive_elem=rear_fall_main, negative_elem=front_fall_main)
+    ctx.expect_gap(
+        car,
+        shaft,
+        axis="z",
+        positive_elem=deck_surface,
+        negative_elem=landing_plate,
+        max_gap=0.001,
+        max_penetration=0.0011,
+        name="car_floor_flush_with_landing",
+    )
+    ctx.expect_contact(car, shaft, elem_a=left_runner, elem_b=left_rail)
+    ctx.expect_contact(car, shaft, elem_a=right_runner, elem_b=right_rail)
+    ctx.expect_gap(
+        car,
+        shaft,
+        axis="y",
+        positive_elem=back_wall,
+        negative_elem=rear_wall,
+        min_gap=0.25,
+        max_gap=0.40,
+        name="car_has_rear_hoistway_clearance",
+    )
+    ctx.expect_gap(
+        landing_door,
+        car,
+        axis="y",
+        positive_elem=door_panel,
+        negative_elem=toe_guard,
+        min_gap=0.10,
+        max_gap=0.16,
+        name="landing_door_stays_forward_of_platform",
+    )
+    ctx.expect_gap(
+        landing_door,
+        shaft,
+        axis="x",
+        positive_elem=door_panel,
+        negative_elem=door_stop,
+        max_gap=0.0,
+        max_penetration=0.0,
+        name="landing_door_closes_against_left_stop",
+    )
+    ctx.expect_contact(landing_door, shaft, elem_a=left_shoe, elem_b=door_track)
+    ctx.expect_contact(landing_door, shaft, elem_a=right_shoe, elem_b=door_track)
 
-    ctx.expect_within(front_rise, platform, axes="xy", inner_elem=front_rise_slider, outer_elem=front_platform_track)
-    ctx.expect_within(rear_rise, platform, axes="xy", inner_elem=rear_rise_slider, outer_elem=rear_platform_track)
-    ctx.expect_within(front_fall, base, axes="xy", inner_elem=front_fall_slider, outer_elem=front_base_track)
-    ctx.expect_within(rear_fall, base, axes="xy", inner_elem=rear_fall_slider, outer_elem=rear_base_track)
-    ctx.expect_overlap(front_rise, platform, axes="xz", min_overlap=0.03, elem_a=front_rise_slider, elem_b=front_platform_track)
-    ctx.expect_overlap(rear_rise, platform, axes="xz", min_overlap=0.03, elem_a=rear_rise_slider, elem_b=rear_platform_track)
-    ctx.expect_overlap(front_fall, base, axes="xz", min_overlap=0.03, elem_a=front_fall_slider, elem_b=front_base_track)
-    ctx.expect_overlap(rear_fall, base, axes="xz", min_overlap=0.03, elem_a=rear_fall_slider, elem_b=rear_base_track)
+    if car_limits is not None and car_limits.upper is not None:
+        with ctx.pose({car_lift: car_limits.upper}):
+            ctx.expect_contact(car, shaft, elem_a=left_runner, elem_b=left_rail)
+            ctx.expect_contact(car, shaft, elem_a=right_runner, elem_b=right_rail)
+            ctx.expect_gap(
+                car,
+                shaft,
+                axis="z",
+                positive_elem=deck_surface,
+                negative_elem=landing_plate,
+                min_gap=1.34,
+                max_gap=1.36,
+                name="car_rises_through_full_freight_travel",
+            )
+            ctx.fail_if_parts_overlap_in_current_pose(name="car_lift_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="car_lift_upper_no_floating")
 
-    ctx.expect_overlap(front_rise, front_fall, axes="xz", min_overlap=0.05, elem_a=front_rise_center, elem_b=front_fall_center)
-    ctx.expect_overlap(rear_rise, rear_fall, axes="xz", min_overlap=0.05, elem_a=rear_rise_center, elem_b=rear_fall_center)
+    if door_limits is not None and door_limits.upper is not None:
+        with ctx.pose({landing_door_slide: door_limits.upper}):
+            ctx.expect_contact(landing_door, shaft, elem_a=left_shoe, elem_b=door_track)
+            ctx.expect_contact(landing_door, shaft, elem_a=right_shoe, elem_b=door_track)
+            ctx.expect_gap(
+                landing_door,
+                shaft,
+                axis="x",
+                positive_elem=door_panel,
+                negative_elem=door_stop,
+                min_gap=1.29,
+                max_gap=1.31,
+                name="single_landing_door_slides_full_width",
+            )
+            ctx.expect_within(
+                landing_door,
+                shaft,
+                axes="xz",
+                inner_elem=door_panel,
+                outer_elem=pocket_backer,
+                name="door_stows_inside_right_pocket",
+            )
+            ctx.fail_if_parts_overlap_in_current_pose(name="landing_door_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="landing_door_upper_no_floating")
 
-    with ctx.pose(
-        {
-            platform_lift: PLATFORM_LIFT_TRAVEL,
-            front_rise_hinge: LINK_OPEN_DELTA,
-            front_fall_hinge: LINK_OPEN_DELTA,
-            rear_rise_hinge: LINK_OPEN_DELTA,
-            rear_fall_hinge: LINK_OPEN_DELTA,
-        }
+    if (
+        car_limits is not None
+        and car_limits.upper is not None
+        and door_limits is not None
+        and door_limits.upper is not None
     ):
-        ctx.expect_overlap(platform, base, axes="xy", min_overlap=0.75, elem_a=platform_deck, elem_b=base_plate)
-        ctx.expect_gap(platform, base, axis="z", min_gap=0.83, positive_elem=platform_deck, negative_elem=base_plate)
-        ctx.expect_within(base, platform, axes="xy", inner_elem=hydraulic_housing, outer_elem=platform_deck)
-        ctx.expect_overlap(base, front_rise, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=front_rise_main)
-        ctx.expect_overlap(base, front_fall, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=front_fall_main)
-        ctx.expect_overlap(base, rear_rise, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=rear_rise_main)
-        ctx.expect_overlap(base, rear_fall, axes="xz", min_overlap=0.12, elem_a=hydraulic_housing, elem_b=rear_fall_main)
-        ctx.expect_gap(base, front_rise, axis="y", min_gap=0.14, positive_elem=hydraulic_housing, negative_elem=front_rise_main)
-        ctx.expect_gap(base, front_fall, axis="y", min_gap=0.14, positive_elem=hydraulic_housing, negative_elem=front_fall_main)
-        ctx.expect_gap(rear_rise, base, axis="y", min_gap=0.14, positive_elem=rear_rise_main, negative_elem=hydraulic_housing)
-        ctx.expect_gap(rear_fall, base, axis="y", min_gap=0.14, positive_elem=rear_fall_main, negative_elem=hydraulic_housing)
-        ctx.expect_gap(rear_rise, front_rise, axis="y", min_gap=0.52, positive_elem=rear_rise_main, negative_elem=front_rise_main)
-        ctx.expect_gap(rear_fall, front_fall, axis="y", min_gap=0.52, positive_elem=rear_fall_main, negative_elem=front_fall_main)
-        ctx.expect_within(front_rise, platform, axes="xy", inner_elem=front_rise_slider, outer_elem=front_platform_track)
-        ctx.expect_within(rear_rise, platform, axes="xy", inner_elem=rear_rise_slider, outer_elem=rear_platform_track)
-        ctx.expect_within(front_fall, base, axes="xy", inner_elem=front_fall_slider, outer_elem=front_base_track)
-        ctx.expect_within(rear_fall, base, axes="xy", inner_elem=rear_fall_slider, outer_elem=rear_base_track)
-        ctx.expect_overlap(front_rise, platform, axes="xz", min_overlap=0.03, elem_a=front_rise_slider, elem_b=front_platform_track)
-        ctx.expect_overlap(rear_rise, platform, axes="xz", min_overlap=0.03, elem_a=rear_rise_slider, elem_b=rear_platform_track)
-        ctx.expect_overlap(front_fall, base, axes="xz", min_overlap=0.03, elem_a=front_fall_slider, elem_b=front_base_track)
-        ctx.expect_overlap(rear_fall, base, axes="xz", min_overlap=0.03, elem_a=rear_fall_slider, elem_b=rear_base_track)
-        ctx.expect_overlap(front_rise, front_fall, axes="xz", min_overlap=0.05, elem_a=front_rise_center, elem_b=front_fall_center)
-        ctx.expect_overlap(rear_rise, rear_fall, axes="xz", min_overlap=0.05, elem_a=rear_rise_center, elem_b=rear_fall_center)
+        with ctx.pose({car_lift: car_limits.upper, landing_door_slide: door_limits.upper}):
+            ctx.expect_contact(car, shaft, elem_a=left_runner, elem_b=left_rail)
+            ctx.expect_contact(car, shaft, elem_a=right_runner, elem_b=right_rail)
+            ctx.expect_contact(landing_door, shaft, elem_a=left_shoe, elem_b=door_track)
+            ctx.expect_contact(landing_door, shaft, elem_a=right_shoe, elem_b=door_track)
+            ctx.fail_if_parts_overlap_in_current_pose(name="combined_upper_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name="combined_upper_pose_no_floating")
+
+    for articulation, prefix in (
+        (car_lift, "car_lift"),
+        (landing_door_slide, "landing_door_slide"),
+    ):
+        limits = articulation.motion_limits
+        if limits is not None and limits.lower is not None and limits.upper is not None:
+            with ctx.pose({articulation: limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{prefix}_lower_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{prefix}_lower_no_floating")
+            with ctx.pose({articulation: limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{prefix}_upper_pose_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{prefix}_upper_pose_no_floating")
 
     return ctx.report()
 

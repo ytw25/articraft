@@ -1,9 +1,28 @@
 from __future__ import annotations
 
+import os
+
+_ORIG_GETCWD = os.getcwd
+
+
+def _safe_getcwd() -> str:
+    try:
+        return _ORIG_GETCWD()
+    except FileNotFoundError:
+        os.chdir("/")
+        return _ORIG_GETCWD()
+
+
+os.getcwd = _safe_getcwd
+
+try:
+    os.chdir("/")
+except OSError:
+    pass
+
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
 from pathlib import Path
 
 from sdk import (
@@ -19,479 +38,596 @@ from sdk import (
     TestReport,
 )
 
+HERE = Path(__file__).resolve().parent
 ASSETS = AssetContext.from_script(__file__)
 
-
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="dumbwaiter", assets=ASSETS)
+    model = ArticulatedObject(name="panoramic_glass_elevator", assets=ASSETS)
 
-    steel = model.material("steel", rgba=(0.60, 0.62, 0.64, 1.0))
-    rail_steel = model.material("rail_steel", rgba=(0.42, 0.44, 0.46, 1.0))
-    car_shell = model.material("car_shell", rgba=(0.78, 0.80, 0.74, 1.0))
-    door_finish = model.material("door_finish", rgba=(0.72, 0.67, 0.56, 1.0))
-    rope_fiber = model.material("rope_fiber", rgba=(0.66, 0.55, 0.35, 1.0))
-
-    shaft_w = 0.34
-    shaft_d = 0.28
-    shaft_h = 0.86
-    wall_t = 0.012
-    left_inner_x = -shaft_w / 2.0 + wall_t
-    right_inner_x = shaft_w / 2.0 - wall_t
-
-    rail_t = 0.006
-    rail_leg_y = 0.028
-    rail_leg_x = 0.022
-    rail_corner_y = 0.052
-    rail_z0 = 0.14
-    rail_h = 0.66
-
-    car_w = 0.22
-    car_d = 0.18
-    shell_t = 0.012
-    car_z0 = 0.02
-    car_h = 0.24
-    roof_t = 0.012
-    front_plane_y = -car_d / 2.0
-    back_plane_y = car_d / 2.0
+    steel = model.material("steel", rgba=(0.57, 0.59, 0.62, 1.0))
+    dark_steel = model.material("dark_steel", rgba=(0.22, 0.24, 0.27, 1.0))
+    brushed_bronze = model.material("brushed_bronze", rgba=(0.54, 0.46, 0.34, 1.0))
+    podium_stone = model.material("podium_stone", rgba=(0.73, 0.75, 0.76, 1.0))
+    shaft_glass = model.material("shaft_glass", rgba=(0.70, 0.84, 0.92, 0.22))
+    car_glass = model.material("car_glass", rgba=(0.67, 0.86, 0.95, 0.28))
+    door_glass = model.material("door_glass", rgba=(0.73, 0.90, 0.98, 0.25))
+    floor_dark = model.material("floor_dark", rgba=(0.18, 0.18, 0.19, 1.0))
+    light_panel = model.material("light_panel", rgba=(0.92, 0.94, 0.95, 0.95))
 
     shaft = model.part("shaft")
     shaft.visual(
-        Box((wall_t, shaft_d, shaft_h)),
-        origin=Origin(xyz=(-shaft_w / 2.0 + wall_t / 2.0, 0.0, shaft_h / 2.0)),
-        material=steel,
-        name="left_wall",
+        Box((1.64, 1.30, 0.06)),
+        origin=Origin(xyz=(0.0, 0.0, -0.03)),
+        material=podium_stone,
+        name="podium",
     )
     shaft.visual(
-        Box((wall_t, shaft_d, shaft_h)),
-        origin=Origin(xyz=(shaft_w / 2.0 - wall_t / 2.0, 0.0, shaft_h / 2.0)),
-        material=steel,
-        name="right_wall",
+        Box((1.10, 0.28, 0.045)),
+        origin=Origin(xyz=(0.0, 0.71, 0.0225)),
+        material=podium_stone,
+        name="landing_threshold",
     )
-    shaft.visual(
-        Box((shaft_w - 2.0 * wall_t, wall_t, shaft_h)),
-        origin=Origin(xyz=(0.0, shaft_d / 2.0 - wall_t / 2.0, shaft_h / 2.0)),
-        material=steel,
-        name="back_wall",
-    )
-    shaft.visual(
-        Box((shaft_w, shaft_d, 0.018)),
-        origin=Origin(xyz=(0.0, 0.0, 0.009)),
-        material=steel,
-        name="base_plate",
-    )
-    shaft.visual(
-        Box((shaft_w, 0.028, 0.020)),
-        origin=Origin(xyz=(0.0, -shaft_d / 2.0 + 0.014, shaft_h - 0.010)),
-        material=steel,
-        name="front_lintel",
-    )
-    shaft.visual(
-        Box((shaft_w, 0.100, 0.020)),
-        origin=Origin(xyz=(0.0, 0.075, shaft_h - 0.010)),
-        material=steel,
-        name="top_crosshead",
-    )
-
-    shaft.visual(
-        Box((rail_t, rail_leg_y, rail_h)),
-        origin=Origin(
-            xyz=(
-                left_inner_x + rail_t / 2.0,
-                rail_corner_y + rail_leg_y / 2.0,
-                rail_z0 + rail_h / 2.0,
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            post_name = (
+                f"{'front' if y_sign > 0.0 else 'rear'}_"
+                f"{'right' if x_sign > 0.0 else 'left'}_tower_post"
             )
-        ),
-        material=rail_steel,
-        name="left_rail_wall",
-    )
-    shaft.visual(
-        Box((rail_leg_x, rail_t, rail_h)),
-        origin=Origin(
-            xyz=(
-                left_inner_x + rail_t + rail_leg_x / 2.0,
-                rail_corner_y + rail_t / 2.0,
-                rail_z0 + rail_h / 2.0,
+            shaft.visual(
+                Box((0.06, 0.06, 3.30)),
+                origin=Origin(xyz=(0.68 * x_sign, 0.56 * y_sign, 1.65)),
+                material=brushed_bronze,
+                name=post_name,
             )
-        ),
-        material=rail_steel,
-        name="left_rail_flange",
+    shaft.visual(
+        Box((1.42, 1.10, 0.10)),
+        origin=Origin(xyz=(0.0, 0.0, 3.34)),
+        material=brushed_bronze,
+        name="crown",
     )
     shaft.visual(
-        Box((rail_t, rail_leg_y, rail_h)),
-        origin=Origin(
-            xyz=(
-                right_inner_x - rail_t / 2.0,
-                rail_corner_y + rail_leg_y / 2.0,
-                rail_z0 + rail_h / 2.0,
-            )
-        ),
-        material=rail_steel,
-        name="right_rail_wall",
+        Box((0.04, 0.72, 3.29)),
+        origin=Origin(xyz=(-0.63, -0.17, 1.645)),
+        material=shaft_glass,
+        name="left_shaft_glass",
     )
     shaft.visual(
-        Box((rail_leg_x, rail_t, rail_h)),
-        origin=Origin(
-            xyz=(
-                right_inner_x - rail_t - rail_leg_x / 2.0,
-                rail_corner_y + rail_t / 2.0,
-                rail_z0 + rail_h / 2.0,
-            )
-        ),
-        material=rail_steel,
-        name="right_rail_flange",
-    )
-
-    pulley_x = -0.112
-    pulley_y = -0.106
-    pulley_z = 0.815
-    pulley_radius = 0.028
-    pulley_width = 0.018
-
-    shaft.visual(
-        Box((0.006, 0.022, 0.050)),
-        origin=Origin(xyz=(pulley_x - 0.012, -0.111, shaft_h - 0.035)),
-        material=steel,
-        name="pulley_left_bracket",
+        Box((0.04, 0.72, 3.29)),
+        origin=Origin(xyz=(0.63, -0.17, 1.645)),
+        material=shaft_glass,
+        name="right_shaft_glass",
     )
     shaft.visual(
-        Box((0.006, 0.022, 0.050)),
-        origin=Origin(xyz=(pulley_x + 0.012, -0.111, shaft_h - 0.035)),
-        material=steel,
-        name="pulley_right_bracket",
+        Box((1.22, 0.08, 3.29)),
+        origin=Origin(xyz=(0.0, -0.49, 1.645)),
+        material=shaft_glass,
+        name="rear_shaft_glass",
     )
     shaft.visual(
-        Cylinder(radius=0.003, length=0.030),
-        origin=Origin(xyz=(pulley_x, pulley_y, pulley_z), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=steel,
-        name="pulley_axle",
+        Box((1.30, 0.06, 0.10)),
+        origin=Origin(xyz=(0.0, 0.56, 3.06)),
+        material=brushed_bronze,
+        name="front_header",
     )
     shaft.visual(
-        Cylinder(radius=pulley_radius, length=pulley_width),
-        origin=Origin(xyz=(pulley_x, pulley_y, pulley_z), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=rail_steel,
-        name="pulley_wheel",
+        Box((0.02, 0.05, 3.29)),
+        origin=Origin(xyz=(-0.45, -0.465, 1.645)),
+        material=dark_steel,
+        name="left_guide_rail",
     )
     shaft.visual(
-        Cylinder(radius=0.003, length=0.052),
-        origin=Origin(xyz=(pulley_x, pulley_y, pulley_z + pulley_radius - 0.001), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=rope_fiber,
-        name="top_rope_bridge",
-    )
-    shaft.visual(
-        Cylinder(radius=0.003, length=0.560),
-        origin=Origin(xyz=(pulley_x, pulley_y - pulley_radius, 0.547), rpy=(0.0, 0.0, 0.0)),
-        material=rope_fiber,
-        name="hand_pull_rope",
+        Box((0.02, 0.05, 3.29)),
+        origin=Origin(xyz=(0.45, -0.465, 1.645)),
+        material=dark_steel,
+        name="right_guide_rail",
     )
     shaft.inertial = Inertial.from_geometry(
-        Box((shaft_w, shaft_d, shaft_h)),
-        mass=18.0,
-        origin=Origin(xyz=(0.0, 0.0, shaft_h / 2.0)),
+        Box((1.64, 1.30, 3.50)),
+        mass=80.0,
+        origin=Origin(xyz=(0.0, 0.0, 1.72)),
     )
 
     car = model.part("car")
     car.visual(
-        Box((car_w, car_d, shell_t)),
-        origin=Origin(xyz=(0.0, 0.0, car_z0 + shell_t / 2.0)),
-        material=car_shell,
+        Box((1.02, 0.86, 0.045)),
+        origin=Origin(xyz=(0.0, 0.0, 0.0225)),
+        material=floor_dark,
         name="floor",
     )
     car.visual(
-        Box((car_w, car_d, roof_t)),
-        origin=Origin(xyz=(0.0, 0.0, car_z0 + car_h - roof_t / 2.0)),
-        material=car_shell,
+        Box((0.92, 0.76, 0.01)),
+        origin=Origin(xyz=(0.0, 0.0, 0.050)),
+        material=brushed_bronze,
+        name="floor_inlay",
+    )
+    car.visual(
+        Box((1.04, 0.88, 0.06)),
+        origin=Origin(xyz=(0.0, 0.0, 2.095)),
+        material=steel,
         name="roof",
     )
     car.visual(
-        Box((shell_t, car_d, car_h - roof_t)),
-        origin=Origin(xyz=(-car_w / 2.0 + shell_t / 2.0, 0.0, car_z0 + (car_h - roof_t) / 2.0)),
-        material=car_shell,
-        name="left_side",
+        Box((0.74, 0.20, 0.01)),
+        origin=Origin(xyz=(0.0, -0.18, 2.06)),
+        material=light_panel,
+        name="ceiling_light",
     )
     car.visual(
-        Box((shell_t, car_d, car_h - roof_t)),
-        origin=Origin(xyz=(car_w / 2.0 - shell_t / 2.0, 0.0, car_z0 + (car_h - roof_t) / 2.0)),
-        material=car_shell,
-        name="right_side",
+        Box((0.05, 0.05, 2.02)),
+        origin=Origin(xyz=(-0.485, -0.405, 1.055)),
+        material=steel,
+        name="rear_left_post",
     )
     car.visual(
-        Box((car_w, shell_t, car_h - roof_t)),
-        origin=Origin(xyz=(0.0, back_plane_y - shell_t / 2.0, car_z0 + (car_h - roof_t) / 2.0)),
-        material=car_shell,
-        name="back_panel",
+        Box((0.05, 0.05, 2.02)),
+        origin=Origin(xyz=(0.485, -0.405, 1.055)),
+        material=steel,
+        name="rear_right_post",
     )
     car.visual(
-        Box((0.148, 0.012, 0.012)),
-        origin=Origin(xyz=(0.0, -0.084, 0.026)),
-        material=car_shell,
-        name="front_sill",
+        Box((0.06, 0.06, 2.00)),
+        origin=Origin(xyz=(-0.48, 0.41, 1.045)),
+        material=steel,
+        name="front_left_jamb",
     )
     car.visual(
-        Box((0.024, 0.012, 0.162)),
-        origin=Origin(xyz=(-0.086, -0.084, 0.113)),
-        material=car_shell,
-        name="left_post",
+        Box((0.06, 0.06, 2.00)),
+        origin=Origin(xyz=(0.48, 0.41, 1.045)),
+        material=steel,
+        name="front_right_jamb",
     )
     car.visual(
-        Box((0.024, 0.012, 0.162)),
-        origin=Origin(xyz=(0.086, -0.084, 0.113)),
-        material=car_shell,
-        name="right_post",
-    )
-
-    track_y = -0.096
-    car.visual(
-        Box((0.300, 0.014, 0.006)),
-        origin=Origin(xyz=(0.0, track_y, 0.197)),
-        material=rail_steel,
-        name="track_web",
+        Box((1.18, 0.02, 0.05)),
+        origin=Origin(xyz=(0.0, 0.44, 2.03)),
+        material=dark_steel,
+        name="door_header_guide",
     )
     car.visual(
-        Box((0.300, 0.002, 0.018)),
-        origin=Origin(xyz=(0.0, track_y - 0.007, 0.188)),
-        material=rail_steel,
-        name="track_front_lip",
+        Box((1.18, 0.02, 0.022)),
+        origin=Origin(xyz=(0.0, 0.44, 0.056)),
+        material=dark_steel,
+        name="door_sill_guide",
     )
     car.visual(
-        Box((0.300, 0.002, 0.018)),
-        origin=Origin(xyz=(0.0, track_y + 0.007, 0.188)),
-        material=rail_steel,
-        name="track_rear_lip",
-    )
-
-    tab_height = 0.045
-    side_tab_x = 0.046
-    side_tab_y = 0.020
-    side_tab_center_y = 0.042
-    rear_tab_x = 0.042
-    rear_tab_y = 0.032
-    rear_tab_center_x = 0.131
-    upper_tab_z = 0.175
-    lower_tab_z = 0.085
-
-    car.visual(
-        Box((side_tab_x, side_tab_y, tab_height)),
-        origin=Origin(xyz=(-0.129, side_tab_center_y, upper_tab_z)),
-        material=rail_steel,
-        name="left_upper_side_tab",
+        Box((0.88, 0.03, 0.31)),
+        origin=Origin(xyz=(0.0, 0.405, 1.91)),
+        material=car_glass,
+        name="front_transom_glass",
     )
     car.visual(
-        Box((rear_tab_x, rear_tab_y, tab_height)),
-        origin=Origin(xyz=(-rear_tab_center_x, 0.074, upper_tab_z)),
-        material=rail_steel,
-        name="left_upper_rear_tab",
+        Box((0.91, 0.012, 2.02)),
+        origin=Origin(xyz=(0.0, -0.39, 1.055)),
+        material=car_glass,
+        name="rear_glass",
     )
     car.visual(
-        Box((side_tab_x, side_tab_y, tab_height)),
-        origin=Origin(xyz=(-0.129, side_tab_center_y, lower_tab_z)),
-        material=rail_steel,
-        name="left_lower_side_tab",
+        Box((0.012, 0.76, 2.02)),
+        origin=Origin(xyz=(-0.45, -0.01, 1.055)),
+        material=car_glass,
+        name="left_glass",
     )
     car.visual(
-        Box((rear_tab_x, rear_tab_y, tab_height)),
-        origin=Origin(xyz=(-rear_tab_center_x, 0.074, lower_tab_z)),
-        material=rail_steel,
-        name="left_lower_rear_tab",
+        Box((0.012, 0.76, 2.02)),
+        origin=Origin(xyz=(0.45, -0.01, 1.055)),
+        material=car_glass,
+        name="right_glass",
     )
     car.visual(
-        Box((side_tab_x, side_tab_y, tab_height)),
-        origin=Origin(xyz=(0.129, side_tab_center_y, upper_tab_z)),
-        material=rail_steel,
-        name="right_upper_side_tab",
+        Cylinder(radius=0.012, length=0.72),
+        origin=Origin(xyz=(0.0, -0.372, 0.94), rpy=(0.0, 1.57079632679, 0.0)),
+        material=steel,
+        name="rear_handrail",
     )
     car.visual(
-        Box((rear_tab_x, rear_tab_y, tab_height)),
-        origin=Origin(xyz=(rear_tab_center_x, 0.074, upper_tab_z)),
-        material=rail_steel,
-        name="right_upper_rear_tab",
+        Cylinder(radius=0.012, length=0.48),
+        origin=Origin(xyz=(-0.432, 0.0, 0.94), rpy=(1.57079632679, 0.0, 0.0)),
+        material=steel,
+        name="left_handrail",
     )
     car.visual(
-        Box((side_tab_x, side_tab_y, tab_height)),
-        origin=Origin(xyz=(0.129, side_tab_center_y, lower_tab_z)),
-        material=rail_steel,
-        name="right_lower_side_tab",
+        Cylinder(radius=0.012, length=0.48),
+        origin=Origin(xyz=(0.432, 0.0, 0.94), rpy=(1.57079632679, 0.0, 0.0)),
+        material=steel,
+        name="right_handrail",
     )
     car.visual(
-        Box((rear_tab_x, rear_tab_y, tab_height)),
-        origin=Origin(xyz=(rear_tab_center_x, 0.074, lower_tab_z)),
-        material=rail_steel,
-        name="right_lower_rear_tab",
+        Box((0.02, 0.044, 1.55)),
+        origin=Origin(xyz=(-0.43, -0.418, 1.05)),
+        material=dark_steel,
+        name="left_guide_pad",
+    )
+    car.visual(
+        Box((0.02, 0.044, 1.55)),
+        origin=Origin(xyz=(0.43, -0.418, 1.05)),
+        material=dark_steel,
+        name="right_guide_pad",
     )
     car.inertial = Inertial.from_geometry(
-        Box((car_w, car_d, car_h)),
-        mass=6.0,
-        origin=Origin(xyz=(0.0, 0.0, car_h / 2.0)),
+        Box((1.06, 0.90, 2.20)),
+        mass=18.0,
+        origin=Origin(xyz=(0.0, 0.0, 1.10)),
     )
 
-    door = model.part("door")
-    door.visual(
-        Box((0.150, 0.008, 0.154)),
-        origin=Origin(xyz=(0.0, 0.0, -0.085)),
-        material=door_finish,
-        name="door_panel",
+    left_door = model.part("left_door")
+    left_door.visual(
+        Box((0.425, 0.012, 1.66)),
+        origin=Origin(xyz=(0.0, 0.0, 0.89)),
+        material=door_glass,
+        name="glass",
     )
-    door.visual(
-        Box((0.018, 0.006, 0.008)),
-        origin=Origin(xyz=(-0.045, 0.0, -0.004)),
-        material=rail_steel,
-        name="left_hanger",
+    left_door.visual(
+        Box((0.425, 0.028, 0.12)),
+        origin=Origin(xyz=(0.0, 0.0, 0.06)),
+        material=steel,
+        name="bottom_rail",
     )
-    door.visual(
-        Box((0.018, 0.006, 0.008)),
-        origin=Origin(xyz=(0.045, 0.0, -0.004)),
-        material=rail_steel,
-        name="right_hanger",
+    left_door.visual(
+        Box((0.425, 0.028, 0.20)),
+        origin=Origin(xyz=(0.0, 0.0, 1.84)),
+        material=steel,
+        name="top_rail",
     )
-    door.inertial = Inertial.from_geometry(
-        Box((0.150, 0.008, 0.154)),
-        mass=1.2,
-        origin=Origin(xyz=(0.0, 0.0, -0.085)),
+    left_door.visual(
+        Box((0.022, 0.028, 1.78)),
+        origin=Origin(xyz=(-0.2015, 0.0, 0.93)),
+        material=steel,
+        name="outer_stile",
+    )
+    left_door.visual(
+        Box((0.020, 0.028, 1.78)),
+        origin=Origin(xyz=(0.2015, 0.0, 0.93)),
+        material=steel,
+        name="meeting_stile",
+    )
+    left_door.visual(
+        Box((0.34, 0.03, 0.04)),
+        origin=Origin(xyz=(0.0, 0.0, 1.915)),
+        material=dark_steel,
+        name="hanger_bar",
+    )
+    left_door.visual(
+        Box((0.26, 0.03, 0.018)),
+        origin=Origin(xyz=(0.0, 0.0, 0.009)),
+        material=dark_steel,
+        name="bottom_guide_bar",
+    )
+    left_door.inertial = Inertial.from_geometry(
+        Box((0.425, 0.03, 1.94)),
+        mass=2.4,
+        origin=Origin(xyz=(0.0, 0.0, 0.97)),
+    )
+
+    right_door = model.part("right_door")
+    right_door.visual(
+        Box((0.425, 0.012, 1.66)),
+        origin=Origin(xyz=(0.0, 0.0, 0.89)),
+        material=door_glass,
+        name="glass",
+    )
+    right_door.visual(
+        Box((0.425, 0.028, 0.12)),
+        origin=Origin(xyz=(0.0, 0.0, 0.06)),
+        material=steel,
+        name="bottom_rail",
+    )
+    right_door.visual(
+        Box((0.425, 0.028, 0.20)),
+        origin=Origin(xyz=(0.0, 0.0, 1.84)),
+        material=steel,
+        name="top_rail",
+    )
+    right_door.visual(
+        Box((0.022, 0.028, 1.78)),
+        origin=Origin(xyz=(0.2015, 0.0, 0.93)),
+        material=steel,
+        name="outer_stile",
+    )
+    right_door.visual(
+        Box((0.020, 0.028, 1.78)),
+        origin=Origin(xyz=(-0.2015, 0.0, 0.93)),
+        material=steel,
+        name="meeting_stile",
+    )
+    right_door.visual(
+        Box((0.34, 0.03, 0.04)),
+        origin=Origin(xyz=(0.0, 0.0, 1.915)),
+        material=dark_steel,
+        name="hanger_bar",
+    )
+    right_door.visual(
+        Box((0.26, 0.03, 0.018)),
+        origin=Origin(xyz=(0.0, 0.0, 0.009)),
+        material=dark_steel,
+        name="bottom_guide_bar",
+    )
+    right_door.inertial = Inertial.from_geometry(
+        Box((0.425, 0.03, 1.94)),
+        mass=2.4,
+        origin=Origin(xyz=(0.0, 0.0, 0.97)),
     )
 
     model.articulation(
-        "shaft_to_car",
+        "car_lift",
         ArticulationType.PRISMATIC,
         parent=shaft,
         child=car,
-        origin=Origin(xyz=(0.0, 0.0, 0.18)),
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=60.0, velocity=0.25, lower=0.0, upper=0.34),
+        motion_limits=MotionLimits(effort=40.0, velocity=0.7, lower=0.0, upper=1.05),
     )
     model.articulation(
-        "car_to_door",
+        "left_door_slide",
         ArticulationType.PRISMATIC,
         parent=car,
-        child=door,
-        origin=Origin(xyz=(0.0, -0.096, 0.194)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=15.0, velocity=0.50, lower=0.0, upper=0.075),
+        child=left_door,
+        origin=Origin(xyz=(-0.2125, 0.465, 0.07)),
+        axis=(-1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=10.0, velocity=0.7, lower=0.0, upper=0.2475),
     )
+    model.articulation(
+        "right_door_slide",
+        ArticulationType.PRISMATIC,
+        parent=car,
+        child=right_door,
+        origin=Origin(xyz=(0.2125, 0.465, 0.07)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=10.0, velocity=0.7, lower=0.0, upper=0.2475),
+    )
+
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    ctx = TestContext(object_model, asset_root=HERE, seed=0)
     shaft = object_model.get_part("shaft")
     car = object_model.get_part("car")
-    door = object_model.get_part("door")
-    shaft_to_car = object_model.get_articulation("shaft_to_car")
-    car_to_door = object_model.get_articulation("car_to_door")
+    left_door = object_model.get_part("left_door")
+    right_door = object_model.get_part("right_door")
+    car_lift = object_model.get_articulation("car_lift")
+    left_door_slide = object_model.get_articulation("left_door_slide")
+    right_door_slide = object_model.get_articulation("right_door_slide")
 
-    back_wall = shaft.get_visual("back_wall")
-    left_rail_wall = shaft.get_visual("left_rail_wall")
-    left_rail_flange = shaft.get_visual("left_rail_flange")
-    right_rail_wall = shaft.get_visual("right_rail_wall")
-    right_rail_flange = shaft.get_visual("right_rail_flange")
-    pulley_wheel = shaft.get_visual("pulley_wheel")
-    hand_pull_rope = shaft.get_visual("hand_pull_rope")
-
-    back_panel = car.get_visual("back_panel")
-    roof = car.get_visual("roof")
-    left_post = car.get_visual("left_post")
-    left_upper_side_tab = car.get_visual("left_upper_side_tab")
-    left_upper_rear_tab = car.get_visual("left_upper_rear_tab")
-    left_lower_side_tab = car.get_visual("left_lower_side_tab")
-    left_lower_rear_tab = car.get_visual("left_lower_rear_tab")
-    right_upper_side_tab = car.get_visual("right_upper_side_tab")
-    right_upper_rear_tab = car.get_visual("right_upper_rear_tab")
-    right_lower_side_tab = car.get_visual("right_lower_side_tab")
-    right_lower_rear_tab = car.get_visual("right_lower_rear_tab")
-    track_web = car.get_visual("track_web")
-    track_rear_lip = car.get_visual("track_rear_lip")
-
-    door_panel = door.get_visual("door_panel")
-    left_hanger = door.get_visual("left_hanger")
-    right_hanger = door.get_visual("right_hanger")
+    podium = shaft.get_visual("podium")
+    left_guide_rail = shaft.get_visual("left_guide_rail")
+    right_guide_rail = shaft.get_visual("right_guide_rail")
+    car_floor = car.get_visual("floor")
+    header_guide = car.get_visual("door_header_guide")
+    sill_guide = car.get_visual("door_sill_guide")
+    left_guide_pad = car.get_visual("left_guide_pad")
+    right_guide_pad = car.get_visual("right_guide_pad")
+    left_hanger_bar = left_door.get_visual("hanger_bar")
+    right_hanger_bar = right_door.get_visual("hanger_bar")
+    left_bottom_guide = left_door.get_visual("bottom_guide_bar")
+    right_bottom_guide = right_door.get_visual("bottom_guide_bar")
+    left_meeting_stile = left_door.get_visual("meeting_stile")
+    right_meeting_stile = right_door.get_visual("meeting_stile")
+    car_top = car_lift.motion_limits.upper if car_lift.motion_limits is not None else None
+    left_open = (
+        left_door_slide.motion_limits.upper
+        if left_door_slide.motion_limits is not None
+        else None
+    )
+    right_open = (
+        right_door_slide.motion_limits.upper
+        if right_door_slide.motion_limits is not None
+        else None
+    )
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
 
-    # The car rides on guide tabs but translates along a centered lift axis inside an open shaft cavity,
-    # so the articulation origin is intentionally away from the shaft shell geometry.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.130)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128, overlap_tol=0.001, overlap_volume_tol=0.0)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.001,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
-
-    ctx.expect_origin_distance(car, shaft, axes="xy", max_dist=0.015)
-    ctx.expect_within(car, shaft, axes="xy")
-    ctx.expect_gap(
-        shaft,
+    ctx.expect_origin_distance(
         car,
-        axis="y",
-        min_gap=0.020,
-        max_gap=0.040,
-        positive_elem=back_wall,
-        negative_elem=back_panel,
-        name="car stays forward of the shaft back wall",
-    )
-
-    ctx.expect_contact(car, shaft, elem_a=left_upper_side_tab, elem_b=left_rail_wall)
-    ctx.expect_contact(car, shaft, elem_a=left_upper_rear_tab, elem_b=left_rail_flange)
-    ctx.expect_contact(car, shaft, elem_a=right_upper_side_tab, elem_b=right_rail_wall)
-    ctx.expect_contact(car, shaft, elem_a=right_upper_rear_tab, elem_b=right_rail_flange)
-
-    ctx.expect_contact(door, car, elem_a=left_hanger, elem_b=track_web)
-    ctx.expect_contact(door, car, elem_a=right_hanger, elem_b=track_web)
-    ctx.expect_overlap(door, car, axes="xz", min_overlap=0.14)
-    ctx.expect_gap(
-        car,
-        door,
-        axis="y",
-        max_gap=0.004,
-        max_penetration=0.0,
-        positive_elem=track_rear_lip,
-        negative_elem=door_panel,
-        name="front hatch sits just proud of the car face",
-    )
-    ctx.expect_gap(
-        door,
         shaft,
-        axis="y",
-        min_gap=0.020,
-        max_gap=0.060,
-        positive_elem=door_panel,
-        negative_elem=hand_pull_rope,
-        name="hand pull rope hangs ahead of the car face",
+        axes="xy",
+        max_dist=0.01,
+        name="car_centered_in_shaft",
     )
 
-    with ctx.pose({car_to_door: 0.075}):
-        ctx.expect_contact(door, car, elem_a=left_hanger, elem_b=track_web)
-        ctx.expect_contact(door, car, elem_a=right_hanger, elem_b=track_web)
-        ctx.expect_gap(
-            door,
+    with ctx.pose({car_lift: 0.0, left_door_slide: 0.0, right_door_slide: 0.0}):
+        ctx.expect_within(
             car,
-            axis="x",
-            min_gap=0.070,
-            positive_elem=door_panel,
-            negative_elem=left_post,
-            name="door slides to the right to uncover the opening",
-        )
-
-    with ctx.pose({shaft_to_car: 0.34}):
-        ctx.expect_contact(car, shaft, elem_a=left_lower_side_tab, elem_b=left_rail_wall)
-        ctx.expect_contact(car, shaft, elem_a=left_lower_rear_tab, elem_b=left_rail_flange)
-        ctx.expect_contact(car, shaft, elem_a=right_lower_side_tab, elem_b=right_rail_wall)
-        ctx.expect_contact(car, shaft, elem_a=right_lower_rear_tab, elem_b=right_rail_flange)
-        ctx.expect_gap(
             shaft,
+            axes="xy",
+            name="car_plan_within_shaft_at_landing",
+        )
+        ctx.expect_gap(
+            car,
+            shaft,
+            axis="z",
+            positive_elem=car_floor,
+            negative_elem=podium,
+            max_gap=0.0,
+            max_penetration=0.0,
+            name="car_floor_flush_with_podium_at_landing",
+        )
+        ctx.expect_overlap(
+            car,
+            shaft,
+            axes="xy",
+            elem_a=car_floor,
+            elem_b=podium,
+            min_overlap=0.80,
+            name="car_floor_supported_by_podium",
+        )
+        ctx.expect_contact(
+            car,
+            shaft,
+            elem_a=left_guide_pad,
+            elem_b=left_guide_rail,
+            name="left_guide_pad_contacts_left_rail_at_landing",
+        )
+        ctx.expect_contact(
+            car,
+            shaft,
+            elem_a=right_guide_pad,
+            elem_b=right_guide_rail,
+            name="right_guide_pad_contacts_right_rail_at_landing",
+        )
+        ctx.expect_contact(
+            left_door,
+            car,
+            elem_a=left_hanger_bar,
+            elem_b=header_guide,
+            name="left_door_hanger_supported_at_landing",
+        )
+        ctx.expect_contact(
+            right_door,
+            car,
+            elem_a=right_hanger_bar,
+            elem_b=header_guide,
+            name="right_door_hanger_supported_at_landing",
+        )
+        ctx.expect_gap(
+            left_door,
             car,
             axis="z",
-            min_gap=0.006,
-            max_gap=0.025,
-            positive_elem=pulley_wheel,
-            negative_elem=roof,
-            name="pulley stays just above the car roof at the top of travel",
+            positive_elem=left_bottom_guide,
+            negative_elem=sill_guide,
+            min_gap=0.002,
+            max_gap=0.004,
+            name="left_bottom_guide_clears_sill_at_landing",
         )
+        ctx.expect_gap(
+            right_door,
+            car,
+            axis="z",
+            positive_elem=right_bottom_guide,
+            negative_elem=sill_guide,
+            min_gap=0.002,
+            max_gap=0.004,
+            name="right_bottom_guide_clears_sill_at_landing",
+        )
+        ctx.expect_overlap(
+            left_door,
+            car,
+            axes="x",
+            elem_a=left_bottom_guide,
+            elem_b=sill_guide,
+            min_overlap=0.20,
+            name="left_bottom_guide_stays_over_sill_at_landing",
+        )
+        ctx.expect_overlap(
+            right_door,
+            car,
+            axes="x",
+            elem_a=right_bottom_guide,
+            elem_b=sill_guide,
+            min_overlap=0.20,
+            name="right_bottom_guide_stays_over_sill_at_landing",
+        )
+        ctx.expect_gap(
+            right_door,
+            left_door,
+            axis="x",
+            min_gap=0.001,
+            max_gap=0.003,
+            positive_elem=right_meeting_stile,
+            negative_elem=left_meeting_stile,
+            name="door_meeting_stiles_leave_center_seal_gap",
+        )
+
+    if left_open is not None and right_open is not None:
+        with ctx.pose({left_door_slide: left_open, right_door_slide: right_open}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="doors_open_no_overlap")
+            ctx.fail_if_isolated_parts(name="doors_open_no_floating")
+            ctx.expect_gap(
+                right_door,
+                left_door,
+                axis="x",
+                min_gap=0.49,
+                positive_elem=right_meeting_stile,
+                negative_elem=left_meeting_stile,
+                name="doors_create_clear_center_opening",
+            )
+            ctx.expect_contact(
+                left_door,
+                car,
+                elem_a=left_hanger_bar,
+                elem_b=header_guide,
+                name="left_door_remains_hung_when_open",
+            )
+            ctx.expect_contact(
+                right_door,
+                car,
+                elem_a=right_hanger_bar,
+                elem_b=header_guide,
+                name="right_door_remains_hung_when_open",
+            )
+            ctx.expect_gap(
+                left_door,
+                car,
+                axis="z",
+                positive_elem=left_bottom_guide,
+                negative_elem=sill_guide,
+                min_gap=0.002,
+                max_gap=0.004,
+                name="left_bottom_guide_clears_sill_when_open",
+            )
+            ctx.expect_gap(
+                right_door,
+                car,
+                axis="z",
+                positive_elem=right_bottom_guide,
+                negative_elem=sill_guide,
+                min_gap=0.002,
+                max_gap=0.004,
+                name="right_bottom_guide_clears_sill_when_open",
+            )
+
+    if car_top is not None:
+        with ctx.pose({car_lift: car_top}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="car_top_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name="car_top_pose_no_floating")
+            ctx.expect_contact(
+                car,
+                shaft,
+                elem_a=left_guide_pad,
+                elem_b=left_guide_rail,
+                name="left_guide_pad_contacts_left_rail_at_top",
+            )
+            ctx.expect_contact(
+                car,
+                shaft,
+                elem_a=right_guide_pad,
+                elem_b=right_guide_rail,
+                name="right_guide_pad_contacts_right_rail_at_top",
+            )
+            ctx.expect_within(
+                car,
+                shaft,
+                axes="xy",
+                name="car_plan_within_shaft_at_top",
+            )
+            ctx.expect_gap(
+                car,
+                shaft,
+                axis="z",
+                positive_elem=car_floor,
+                negative_elem=podium,
+                min_gap=1.00,
+                name="car_floor_lifts_clear_of_podium",
+            )
+
+            if left_open is not None and right_open is not None:
+                with ctx.pose({left_door_slide: left_open, right_door_slide: right_open}):
+                    ctx.fail_if_parts_overlap_in_current_pose(
+                        name="top_open_pose_no_overlap"
+                    )
+                    ctx.fail_if_isolated_parts(name="top_open_pose_no_floating")
+                    ctx.expect_gap(
+                        right_door,
+                        left_door,
+                        axis="x",
+                        min_gap=0.49,
+                        positive_elem=right_meeting_stile,
+                        negative_elem=left_meeting_stile,
+                        name="top_open_pose_retains_clear_doorway",
+                    )
 
     return ctx.report()
 

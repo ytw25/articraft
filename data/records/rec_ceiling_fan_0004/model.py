@@ -3,13 +3,6 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import os
-
-try:
-    os.getcwd()
-except FileNotFoundError:
-    os.chdir("/")
-
 import math
 
 from sdk import (
@@ -18,14 +11,13 @@ from sdk import (
     AssetContext,
     Box,
     Cylinder,
-    CylinderGeometry,
     Inertial,
-    MeshGeometry,
+    LatheGeometry,
     MotionLimits,
     Origin,
+    Sphere,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
     repair_loft,
     section_loft,
@@ -33,449 +25,578 @@ from sdk import (
 
 ASSETS = AssetContext.from_script(__file__)
 
-
-def _save_mesh(geometry: MeshGeometry, filename: str):
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(filename))
-
-
-def _merge_geometries(geometries: list[MeshGeometry]) -> MeshGeometry:
-    merged = MeshGeometry()
-    for geometry in geometries:
-        merged.merge(geometry)
-    return merged
+CEILING_Z = 0.38
+CANOPY_HEIGHT = 0.050
+DOWNROD_LENGTH = 0.120
+JOINT_Z = CEILING_Z - CANOPY_HEIGHT - DOWNROD_LENGTH
+BLADE_ANGLES = tuple(index * 2.0 * math.pi / 3.0 for index in range(3))
 
 
-def _ring_band(
+def _save_mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+
+
+def _circle_point(radius: float, angle: float, z: float) -> tuple[float, float, float]:
+    return (radius * math.cos(angle), radius * math.sin(angle), z)
+
+
+def _segment_origin(
+    start: tuple[float, float, float],
+    end: tuple[float, float, float],
+) -> tuple[Origin, float]:
+    dx = end[0] - start[0]
+    dy = end[1] - start[1]
+    dz = end[2] - start[2]
+    length = math.sqrt(dx * dx + dy * dy + dz * dz)
+    yaw = math.atan2(dy, dx)
+    pitch = math.atan2(math.hypot(dx, dy), dz)
+    return (
+        Origin(
+            xyz=((start[0] + end[0]) * 0.5, (start[1] + end[1]) * 0.5, (start[2] + end[2]) * 0.5),
+            rpy=(0.0, pitch, yaw),
+        ),
+        length,
+    )
+
+
+def _add_segmented_hoop(
+    part,
     *,
-    outer_radius: float,
-    inner_radius: float,
-    height: float,
-    z_center: float,
-    radial_segments: int = 56,
-) -> MeshGeometry:
-    outer = CylinderGeometry(radius=outer_radius, height=height, radial_segments=radial_segments)
-    inner = CylinderGeometry(
-        radius=inner_radius,
-        height=height + 0.004,
-        radial_segments=radial_segments,
-    )
-    return boolean_difference(outer, inner).translate(0.0, 0.0, z_center)
-
-
-def _blade_section(span_x: float, chord: float, thickness: float, z_center: float) -> list[tuple[float, float, float]]:
-    half_thickness = thickness * 0.5
-    return [
-        (span_x, -0.50 * chord, z_center + 0.06 * half_thickness),
-        (span_x, -0.22 * chord, z_center + 0.90 * half_thickness),
-        (span_x, 0.10 * chord, z_center + 1.00 * half_thickness),
-        (span_x, 0.42 * chord, z_center + 0.34 * half_thickness),
-        (span_x, 0.50 * chord, z_center - 0.04 * half_thickness),
-        (span_x, 0.20 * chord, z_center - 0.76 * half_thickness),
-        (span_x, -0.10 * chord, z_center - 0.64 * half_thickness),
-        (span_x, -0.46 * chord, z_center - 0.10 * half_thickness),
-    ]
-
-
-def _build_blade_mesh() -> MeshGeometry:
-    return repair_loft(
-        section_loft(
-            [
-                _blade_section(0.22, 0.22, 0.026, -0.010),
-                _blade_section(0.62, 0.21, 0.023, -0.013),
-                _blade_section(1.18, 0.18, 0.018, -0.018),
-                _blade_section(1.76, 0.14, 0.012, -0.023),
-                _blade_section(2.26, 0.10, 0.007, -0.027),
-            ]
+    radius: float,
+    z: float,
+    strand_radius: float,
+    material,
+    prefix: str,
+    segments: int = 18,
+) -> None:
+    chord = 2.0 * radius * math.sin(math.pi / segments) * 1.02
+    for index in range(segments):
+        angle = index * math.tau / segments
+        part.visual(
+            Cylinder(radius=strand_radius, length=chord),
+            origin=Origin(
+                xyz=_circle_point(radius, angle, z),
+                rpy=(0.0, math.pi / 2.0, angle + math.pi / 2.0),
+            ),
+            material=material,
+            name=f"{prefix}_{index + 1}",
         )
+
+
+def _add_polyline_strand(part, points, *, radius: float, material, prefix: str) -> None:
+    for index, (start, end) in enumerate(zip(points, points[1:]), start=1):
+        origin, length = _segment_origin(start, end)
+        part.visual(
+            Cylinder(radius=radius, length=length),
+            origin=origin,
+            material=material,
+            name=f"{prefix}_{index}",
+        )
+
+
+def _rotate_section_point(y: float, z: float, twist: float) -> tuple[float, float]:
+    cos_t = math.cos(twist)
+    sin_t = math.sin(twist)
+    return (y * cos_t - z * sin_t, y * sin_t + z * cos_t)
+
+
+def _blade_loop(
+    x: float,
+    width: float,
+    thickness: float,
+    droop: float,
+    *,
+    twist: float,
+    camber: float,
+) -> list[tuple[float, float, float]]:
+    half_w = width * 0.5
+    raw_loop = [
+        (-half_w, 0.0),
+        (-0.18 * width, thickness * 0.55 + camber),
+        (0.18 * width, thickness * 0.48 + camber * 0.8),
+        (half_w, 0.0),
+        (0.14 * width, -thickness * 0.28),
+        (-0.14 * width, -thickness * 0.32),
+    ]
+    loop: list[tuple[float, float, float]] = []
+    for y, z in raw_loop:
+        rot_y, rot_z = _rotate_section_point(y, z, twist)
+        loop.append((x, rot_y, droop + rot_z))
+    return loop
+
+
+def _build_palm_blade_mesh():
+    sections = [
+        _blade_loop(0.040, 0.060, 0.012, -0.002, twist=0.06, camber=0.0020),
+        _blade_loop(0.170, 0.158, 0.010, -0.012, twist=-0.02, camber=0.0032),
+        _blade_loop(0.325, 0.178, 0.008, -0.024, twist=-0.10, camber=0.0030),
+        _blade_loop(0.485, 0.148, 0.006, -0.040, twist=-0.18, camber=0.0020),
+        _blade_loop(0.585, 0.050, 0.003, -0.056, twist=-0.28, camber=0.0008),
+    ]
+    return _save_mesh("palm_blade.obj", repair_loft(section_loft(sections)))
+
+
+def _build_wicker_housing_mesh():
+    outer_profile = [
+        (0.028, -0.004),
+        (0.044, -0.018),
+        (0.086, -0.050),
+        (0.101, -0.084),
+        (0.088, -0.122),
+        (0.060, -0.154),
+        (0.040, -0.168),
+    ]
+    inner_profile = [
+        (0.018, -0.004),
+        (0.032, -0.020),
+        (0.072, -0.052),
+        (0.086, -0.084),
+        (0.074, -0.120),
+        (0.048, -0.150),
+        (0.030, -0.162),
+    ]
+    return _save_mesh(
+        "wicker_housing.obj",
+        LatheGeometry.from_shell_profiles(
+            outer_profile,
+            inner_profile,
+            segments=72,
+            start_cap="flat",
+            end_cap="flat",
+        ),
     )
 
 
-def _build_hub_ring_mesh() -> MeshGeometry:
-    return _merge_geometries(
-        [
-            _ring_band(
-                outer_radius=0.29,
-                inner_radius=0.105,
-                height=0.055,
-                z_center=0.0,
-                radial_segments=64,
-            ),
-            _ring_band(
-                outer_radius=0.18,
-                inner_radius=0.105,
-                height=0.026,
-                z_center=0.030,
-                radial_segments=56,
-            ),
-            _ring_band(
-                outer_radius=0.16,
-                inner_radius=0.105,
-                height=0.018,
-                z_center=-0.040,
-                radial_segments=56,
-            ),
-        ]
+def _build_globe_shell_mesh():
+    outer_profile = [
+        (0.021, -0.001),
+        (0.034, -0.012),
+        (0.074, -0.050),
+        (0.088, -0.090),
+        (0.078, -0.126),
+        (0.050, -0.157),
+        (0.010, -0.176),
+    ]
+    inner_profile = [
+        (0.015, -0.001),
+        (0.027, -0.012),
+        (0.067, -0.050),
+        (0.081, -0.090),
+        (0.071, -0.124),
+        (0.044, -0.154),
+        (0.000, -0.170),
+    ]
+    return _save_mesh(
+        "ribbed_globe_shell.obj",
+        LatheGeometry.from_shell_profiles(
+            outer_profile,
+            inner_profile,
+            segments=72,
+            start_cap="flat",
+            end_cap="flat",
+        ),
     )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="warehouse_ceiling_fan", assets=ASSETS)
+    model = ArticulatedObject(name="tropical_ceiling_fan", assets=ASSETS)
 
-    matte_black = model.material("matte_black", rgba=(0.16, 0.17, 0.18, 1.0))
-    graphite = model.material("graphite", rgba=(0.28, 0.30, 0.33, 1.0))
-    steel = model.material("steel", rgba=(0.63, 0.66, 0.70, 1.0))
-    aluminum = model.material("aluminum", rgba=(0.79, 0.82, 0.85, 1.0))
+    bronze = model.material("bronze", rgba=(0.34, 0.26, 0.18, 1.0))
+    dark_motor = model.material("dark_motor", rgba=(0.18, 0.15, 0.12, 1.0))
+    wicker_shell = model.material("wicker_shell", rgba=(0.59, 0.42, 0.23, 1.0))
+    wicker_weave = model.material("wicker_weave", rgba=(0.75, 0.61, 0.35, 1.0))
+    palm_leaf = model.material("palm_leaf", rgba=(0.80, 0.70, 0.47, 1.0))
+    palm_vein = model.material("palm_vein", rgba=(0.63, 0.49, 0.28, 1.0))
+    glass = model.material("glass", rgba=(0.95, 0.97, 0.99, 0.30))
+    glass_rib = model.material("glass_rib", rgba=(0.98, 0.99, 1.0, 0.48))
+
+    blade_mesh = _build_palm_blade_mesh()
+    housing_mesh = _build_wicker_housing_mesh()
+    globe_shell_mesh = _build_globe_shell_mesh()
 
     mount = model.part("mount")
     mount.visual(
-        Cylinder(radius=0.16, length=0.06),
-        origin=Origin(xyz=(0.0, 0.0, 1.74)),
-        material=graphite,
-        name="ceiling_canopy",
+        Cylinder(radius=0.078, length=CANOPY_HEIGHT),
+        origin=Origin(xyz=(0.0, 0.0, CEILING_Z - CANOPY_HEIGHT * 0.5)),
+        material=bronze,
+        name="canopy",
     )
     mount.visual(
-        Cylinder(radius=0.026, length=1.42),
-        origin=Origin(xyz=(0.0, 0.0, 0.99)),
-        material=steel,
+        Cylinder(radius=0.011, length=DOWNROD_LENGTH),
+        origin=Origin(xyz=(0.0, 0.0, JOINT_Z + DOWNROD_LENGTH * 0.5)),
+        material=bronze,
         name="downrod",
     )
     mount.visual(
-        Cylinder(radius=0.050, length=0.10),
-        origin=Origin(xyz=(0.0, 0.0, 1.70)),
-        material=matte_black,
-        name="upper_collar",
-    )
-    mount.visual(
-        Cylinder(radius=0.052, length=0.10),
-        origin=Origin(xyz=(0.0, 0.0, 0.27)),
-        material=graphite,
-        name="lower_coupler",
-    )
-    mount.visual(
-        Cylinder(radius=0.038, length=0.14),
-        origin=Origin(xyz=(0.0, 0.0, 0.37)),
-        material=matte_black,
-        name="rod_sleeve",
+        Cylinder(radius=0.019, length=0.022),
+        origin=Origin(xyz=(0.0, 0.0, JOINT_Z + 0.011)),
+        material=bronze,
+        name="downrod_collar",
     )
     mount.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.026, length=1.42),
-        mass=28.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.99)),
-    )
-
-    motor = model.part("motor")
-    motor.visual(
-        Box((0.18, 0.14, 0.09)),
-        origin=Origin(xyz=(0.0, 0.0, 0.065)),
-        material=graphite,
-        name="hanger_block",
-    )
-    motor.visual(
-        Box((0.050, 0.050, 0.16)),
-        origin=Origin(xyz=(0.115, 0.0, 0.04)),
-        material=matte_black,
-        name="yoke_right",
-    )
-    motor.visual(
-        Box((0.050, 0.050, 0.16)),
-        origin=Origin(xyz=(-0.115, 0.0, 0.04)),
-        material=matte_black,
-        name="yoke_left",
-    )
-    motor.visual(
-        Cylinder(radius=0.21, length=0.18),
-        origin=Origin(xyz=(0.0, 0.0, -0.02)),
-        material=graphite,
-        name="motor_shell",
-    )
-    motor.visual(
-        Cylinder(radius=0.135, length=0.08),
-        origin=Origin(xyz=(0.0, 0.0, 0.11)),
-        material=matte_black,
-        name="gearbox_cap",
-    )
-    motor.visual(
-        Cylinder(radius=0.09, length=0.10),
-        origin=Origin(xyz=(0.0, 0.0, -0.12)),
-        material=steel,
-        name="bearing_collar",
-    )
-    motor.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.21, length=0.18),
-        mass=118.0,
-        origin=Origin(xyz=(0.0, 0.0, -0.02)),
+        Box((0.18, 0.18, CANOPY_HEIGHT + DOWNROD_LENGTH)),
+        mass=2.8,
+        origin=Origin(xyz=(0.0, 0.0, JOINT_Z + (CANOPY_HEIGHT + DOWNROD_LENGTH) * 0.5)),
     )
 
     rotor = model.part("rotor")
     rotor.visual(
-        _save_mesh(_build_hub_ring_mesh(), "hub_ring.obj"),
-        origin=Origin(),
-        material=matte_black,
-        name="hub_ring",
+        Cylinder(radius=0.022, length=0.016),
+        origin=Origin(xyz=(0.0, 0.0, -0.008)),
+        material=bronze,
+        name="top_cap",
     )
     rotor.visual(
-        _save_mesh(
-            _ring_band(
-                outer_radius=0.17,
-                inner_radius=0.105,
-                height=0.022,
-                z_center=0.040,
-                radial_segments=56,
-            ),
-            "hub_top_ring.obj",
-        ),
-        origin=Origin(),
-        material=graphite,
-        name="hub_top_ring",
+        Cylinder(radius=0.038, length=0.024),
+        origin=Origin(xyz=(0.0, 0.0, -0.024)),
+        material=bronze,
+        name="upper_hub",
     )
     rotor.visual(
-        _save_mesh(
-            _ring_band(
-                outer_radius=0.15,
-                inner_radius=0.105,
-                height=0.016,
-                z_center=-0.048,
-                radial_segments=56,
-            ),
-            "hub_lower_ring.obj",
-        ),
-        origin=Origin(),
-        material=graphite,
-        name="hub_lower_ring",
+        Cylinder(radius=0.050, length=0.118),
+        origin=Origin(xyz=(0.0, 0.0, -0.091)),
+        material=dark_motor,
+        name="motor_core",
+    )
+    rotor.visual(housing_mesh, material=wicker_shell, name="housing_shell")
+    rotor.visual(
+        Cylinder(radius=0.060, length=0.012),
+        origin=Origin(xyz=(0.0, 0.0, -0.040)),
+        material=bronze,
+        name="upper_trim_ring",
     )
     rotor.visual(
-        Cylinder(radius=0.105, length=0.05),
-        origin=Origin(xyz=(0.0, 0.0, -0.025)),
-        material=graphite,
-        name="hub_core",
+        Cylinder(radius=0.052, length=0.012),
+        origin=Origin(xyz=(0.0, 0.0, -0.158)),
+        material=bronze,
+        name="lower_trim_ring",
+    )
+    rotor.visual(
+        Cylinder(radius=0.034, length=0.016),
+        origin=Origin(xyz=(0.0, 0.0, -0.172)),
+        material=bronze,
+        name="globe_fitter",
     )
 
-    blade_mesh = _save_mesh(_build_blade_mesh(), "blade.obj")
-    for index in range(6):
-        azimuth = index * math.tau / 6.0
+    for index, (radius, z) in enumerate(
+        (
+            (0.037, -0.014),
+            (0.053, -0.032),
+            (0.083, -0.058),
+            (0.098, -0.084),
+            (0.087, -0.112),
+            (0.061, -0.140),
+            (0.043, -0.159),
+        ),
+        start=1,
+    ):
+        _add_segmented_hoop(
+            rotor,
+            radius=radius,
+            z=z,
+            strand_radius=0.0023,
+            material=wicker_weave,
+            prefix=f"hoop_{index}",
+        )
+
+    strand_radii = (0.036, 0.052, 0.074, 0.092, 0.095, 0.081, 0.058, 0.042)
+    strand_zs = (-0.010, -0.028, -0.048, -0.070, -0.094, -0.118, -0.144, -0.160)
+    for strand_index, base_angle in enumerate([i * math.pi / 4.0 for i in range(8)], start=1):
+        forward_points = []
+        reverse_points = []
+        for point_index, (radius, z) in enumerate(zip(strand_radii, strand_zs)):
+            fraction = point_index / (len(strand_zs) - 1)
+            forward_points.append(_circle_point(radius, base_angle + 0.95 * fraction, z))
+            reverse_points.append(_circle_point(radius, base_angle - 0.95 * fraction, z))
+        _add_polyline_strand(
+            rotor,
+            forward_points,
+            radius=0.0019,
+            material=wicker_weave,
+            prefix=f"forward_strand_{strand_index}",
+        )
+        _add_polyline_strand(
+            rotor,
+            reverse_points,
+            radius=0.0019,
+            material=wicker_weave,
+            prefix=f"reverse_strand_{strand_index}",
+        )
+
+    for index, angle in enumerate(BLADE_ANGLES, start=1):
         rotor.visual(
-            blade_mesh,
-            origin=Origin(rpy=(0.0, 0.0, azimuth)),
-            material=aluminum,
-            name=f"blade_{index}",
+            Box((0.074, 0.018, 0.012)),
+            origin=Origin(
+                xyz=(0.066 * math.cos(angle), 0.066 * math.sin(angle), -0.060),
+                rpy=(0.0, 0.0, angle),
+            ),
+            material=bronze,
+            name=f"blade_arm_{index}",
         )
         rotor.visual(
-            Box((0.20, 0.08, 0.04)),
+            Box((0.032, 0.050, 0.012)),
             origin=Origin(
-                xyz=(
-                    0.36 * math.cos(azimuth),
-                    0.36 * math.sin(azimuth),
-                    -0.018,
-                ),
-                rpy=(0.0, 0.0, azimuth),
+                xyz=(0.104 * math.cos(angle), 0.104 * math.sin(angle), -0.060),
+                rpy=(0.0, 0.0, angle),
             ),
-            material=steel,
-            name=f"blade_clamp_{index}",
-        )
-        rotor.visual(
-            Box((0.10, 0.055, 0.006)),
-            origin=Origin(
-                xyz=(
-                    2.30 * math.cos(azimuth),
-                    2.30 * math.sin(azimuth),
-                    -0.027,
-                ),
-                rpy=(0.0, 0.0, azimuth),
-            ),
-            material=aluminum,
-            name=f"blade_tip_{index}",
+            material=bronze,
+            name=f"blade_seat_{index}",
         )
 
     rotor.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.30, length=0.06),
-        mass=74.0,
-        origin=Origin(),
+        Cylinder(radius=0.11, length=0.18),
+        mass=5.6,
+        origin=Origin(xyz=(0.0, 0.0, -0.090)),
+    )
+
+    for index in range(1, 4):
+        blade = model.part(f"blade_{index}")
+        blade.visual(
+            Box((0.044, 0.055, 0.008)),
+            origin=Origin(xyz=(0.022, 0.0, -0.010)),
+            material=bronze,
+            name="root_block",
+        )
+        blade.visual(
+            Box((0.076, 0.032, 0.008)),
+            origin=Origin(xyz=(0.054, 0.0, -0.018), rpy=(0.0, -0.08, 0.0)),
+            material=bronze,
+            name="blade_iron",
+        )
+        blade.visual(
+            blade_mesh,
+            origin=Origin(xyz=(0.0, 0.0, -0.006)),
+            material=palm_leaf,
+            name="leaf_panel",
+        )
+        blade.visual(
+            Cylinder(radius=0.004, length=0.540),
+            origin=Origin(xyz=(0.312, 0.0, -0.033), rpy=(0.0, math.pi / 2.0, 0.0)),
+            material=palm_vein,
+            name="blade_midrib",
+        )
+        blade.inertial = Inertial.from_geometry(
+            Box((0.59, 0.18, 0.07)),
+            mass=0.55,
+            origin=Origin(xyz=(0.305, 0.0, -0.034)),
+        )
+
+    globe = model.part("globe")
+    globe.visual(
+        Cylinder(radius=0.021, length=0.016),
+        origin=Origin(xyz=(0.0, 0.0, -0.008)),
+        material=glass,
+        name="globe_neck",
+    )
+    globe.visual(
+        globe_shell_mesh,
+        material=glass,
+        name="globe_shell",
+    )
+    globe.visual(
+        Cylinder(radius=0.0035, length=0.014),
+        origin=Origin(xyz=(0.0, 0.0, -0.176)),
+        material=glass_rib,
+        name="globe_finial_stem",
+    )
+    globe.visual(
+        Sphere(radius=0.009),
+        origin=Origin(xyz=(0.0, 0.0, -0.186)),
+        material=glass_rib,
+        name="globe_finial",
+    )
+    rib_profile = (
+        (0.021, -0.002),
+        (0.031, -0.012),
+        (0.050, -0.034),
+        (0.072, -0.068),
+        (0.082, -0.104),
+        (0.069, -0.136),
+        (0.043, -0.162),
+        (0.015, -0.179),
+    )
+    for rib_index, angle in enumerate([i * math.tau / 12.0 for i in range(12)], start=1):
+        rib_points = [_circle_point(radius, angle, z) for radius, z in rib_profile]
+        _add_polyline_strand(
+            globe,
+            rib_points,
+            radius=0.0018,
+            material=glass_rib,
+            prefix=f"globe_rib_{rib_index}",
+        )
+    globe.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.089, length=0.186),
+        mass=0.95,
+        origin=Origin(xyz=(0.0, 0.0, -0.093)),
     )
 
     model.articulation(
-        "mount_to_motor",
-        ArticulationType.FIXED,
-        parent=mount,
-        child=motor,
-        origin=Origin(xyz=(0.0, 0.0, 0.30)),
-    )
-    model.articulation(
-        "rotor_spin",
+        "mount_to_rotor",
         ArticulationType.CONTINUOUS,
-        parent=motor,
+        parent=mount,
         child=rotor,
-        origin=Origin(xyz=(0.0, 0.0, -0.17)),
+        origin=Origin(xyz=(0.0, 0.0, JOINT_Z)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=180.0, velocity=2.0),
+        motion_limits=MotionLimits(effort=25.0, velocity=12.0),
     )
+
+    for index, angle in enumerate(BLADE_ANGLES, start=1):
+        model.articulation(
+            f"rotor_to_blade_{index}",
+            ArticulationType.FIXED,
+            parent=rotor,
+            child=f"blade_{index}",
+            origin=Origin(
+                xyz=(0.120 * math.cos(angle), 0.120 * math.sin(angle), -0.060),
+                rpy=(0.0, 0.0, angle),
+            ),
+        )
+
+    model.articulation(
+        "rotor_to_globe",
+        ArticulationType.FIXED,
+        parent=rotor,
+        child=globe,
+        origin=Origin(xyz=(0.0, 0.0, -0.180)),
+    )
+
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    mount = object_model.get_part("mount")
-    motor = object_model.get_part("motor")
-    rotor = object_model.get_part("rotor")
-    rotor_spin = object_model.get_articulation("rotor_spin")
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root, seed=0)
 
-    ceiling_canopy = mount.get_visual("ceiling_canopy")
-    lower_coupler = mount.get_visual("lower_coupler")
-    hanger_block = motor.get_visual("hanger_block")
-    motor_shell = motor.get_visual("motor_shell")
-    gearbox_cap = motor.get_visual("gearbox_cap")
-    bearing_collar = motor.get_visual("bearing_collar")
-    hub_ring = rotor.get_visual("hub_ring")
-    hub_top_ring = rotor.get_visual("hub_top_ring")
-    hub_core = rotor.get_visual("hub_core")
-    blade_clamp_0 = rotor.get_visual("blade_clamp_0")
-    blade_tip_0 = rotor.get_visual("blade_tip_0")
-    blade_tip_3 = rotor.get_visual("blade_tip_3")
+    mount = object_model.get_part("mount")
+    rotor = object_model.get_part("rotor")
+    globe = object_model.get_part("globe")
+    blade_1 = object_model.get_part("blade_1")
+    blade_2 = object_model.get_part("blade_2")
+    blade_3 = object_model.get_part("blade_3")
+    spin = object_model.get_articulation("mount_to_rotor")
+
+    downrod = mount.get_visual("downrod")
+    top_cap = rotor.get_visual("top_cap")
+    fitter = rotor.get_visual("globe_fitter")
+    housing_shell = rotor.get_visual("housing_shell")
+    seat_1 = rotor.get_visual("blade_seat_1")
+    seat_2 = rotor.get_visual("blade_seat_2")
+    seat_3 = rotor.get_visual("blade_seat_3")
+    globe_neck = globe.get_visual("globe_neck")
+    globe_shell = globe.get_visual("globe_shell")
+    blade_1_root = blade_1.get_visual("root_block")
+    blade_2_root = blade_2.get_visual("root_block")
+    blade_3_root = blade_3.get_visual("root_block")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    # Use prompt-specific exact visual checks as the real completion criteria.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - key poses stay believable
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Add prompt-specific exact visual checks below; broad warn_if_* checks are not enough.
-    ctx.expect_origin_distance(
-        mount,
-        motor,
-        axes="xy",
-        max_dist=0.01,
-        name="downrod stays centered over motor assembly",
-    )
-    ctx.expect_overlap(
-        mount,
-        motor,
-        axes="xy",
-        min_overlap=0.09,
-        elem_a=lower_coupler,
-        elem_b=hanger_block,
-        name="lower coupler stays centered in hanger block",
-    )
-    ctx.expect_gap(
-        motor,
-        mount,
-        axis="z",
-        max_gap=0.02,
-        max_penetration=0.02,
-        positive_elem=hanger_block,
-        negative_elem=lower_coupler,
-        name="hanger block seats onto the long downrod coupler",
-    )
-    ctx.expect_gap(
-        mount,
-        motor,
-        axis="z",
-        min_gap=1.25,
-        positive_elem=ceiling_canopy,
-        negative_elem=gearbox_cap,
-        name="long ceiling rod keeps canopy far above the motor",
-    )
-    ctx.expect_overlap(
-        rotor,
-        motor,
-        axes="xy",
-        min_overlap=0.16,
-        elem_a=hub_ring,
-        elem_b=bearing_collar,
-        name="hub ring stays centered around the bearing collar",
-    )
+    ctx.expect_origin_distance(rotor, mount, axes="xy", max_dist=0.001, name="rotor_centered_on_downrod")
+    ctx.expect_origin_distance(globe, rotor, axes="xy", max_dist=0.001, name="globe_centered_under_rotor")
+    ctx.expect_contact(rotor, mount, elem_a=top_cap, elem_b=downrod, name="rotor_contacts_downrod")
     ctx.expect_within(
-        motor,
+        globe,
         rotor,
         axes="xy",
-        inner_elem=bearing_collar,
-        outer_elem=hub_ring,
-        name="bearing collar stays inside the rotor hub footprint",
-    )
-    ctx.expect_contact(
-        rotor,
-        motor,
-        elem_a=hub_core,
-        elem_b=bearing_collar,
-        name="hub core seats against the bearing collar",
+        inner_elem=globe_neck,
+        outer_elem=fitter,
+        name="globe_neck_within_fitter",
     )
     ctx.expect_gap(
-        motor,
         rotor,
+        globe,
         axis="z",
-        min_gap=0.003,
-        positive_elem=motor_shell,
-        negative_elem=hub_top_ring,
-        name="rotor hangs just below the motor housing",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=fitter,
+        negative_elem=globe_neck,
+        name="globe_hangs_from_fitter",
     )
-    ctx.expect_gap(
-        rotor,
-        motor,
-        axis="x",
-        min_gap=1.95,
-        positive_elem=blade_tip_0,
-        negative_elem=motor_shell,
-        name="blade span extends far beyond the motor on the positive x side",
-    )
-    ctx.expect_gap(
-        motor,
-        rotor,
-        axis="x",
-        min_gap=1.95,
-        positive_elem=motor_shell,
-        negative_elem=blade_tip_3,
-        name="blade span extends far beyond the motor on the negative x side",
-    )
-    with ctx.pose({rotor_spin: math.pi / 2.0}):
-        ctx.expect_within(
-            motor,
-            rotor,
-            axes="xy",
-            inner_elem=bearing_collar,
-            outer_elem=hub_ring,
-            name="bearing collar stays inside the hub while spinning",
+    ctx.expect_contact(globe, rotor, elem_a=globe_neck, elem_b=fitter, name="globe_contacts_fitter")
+    ctx.expect_contact(blade_1, rotor, elem_a=blade_1_root, elem_b=seat_1, name="blade_1_root_contact")
+    ctx.expect_contact(blade_2, rotor, elem_a=blade_2_root, elem_b=seat_2, name="blade_2_root_contact")
+    ctx.expect_contact(blade_3, rotor, elem_a=blade_3_root, elem_b=seat_3, name="blade_3_root_contact")
+
+    blade_positions = [ctx.part_world_position(blade) for blade in (blade_1, blade_2, blade_3)]
+    if all(position is not None for position in blade_positions):
+        positions = blade_positions  # type: ignore[assignment]
+        angles = sorted(math.atan2(position[1], position[0]) % (2.0 * math.pi) for position in positions)
+        angle_gaps = [((angles[(index + 1) % 3] - angles[index]) % (2.0 * math.pi)) for index in range(3)]
+        ctx.check(
+            "blade_spacing_even",
+            all(abs(gap - (2.0 * math.pi / 3.0)) < 0.12 for gap in angle_gaps),
+            details=f"blade angle gaps={angle_gaps!r}",
         )
-        ctx.expect_gap(
-            rotor,
-            motor,
-            axis="y",
-            min_gap=1.95,
-            positive_elem=blade_tip_0,
-            negative_elem=motor_shell,
-            name="rotated blade still reads as a warehouse-scale sweep",
+        root_radii = [math.hypot(position[0], position[1]) for position in positions]
+        ctx.check(
+            "blade_roots_at_realistic_radius",
+            all(0.115 <= radius <= 0.125 for radius in root_radii),
+            details=f"blade root radii={root_radii!r}",
         )
-        ctx.expect_gap(
-            motor,
-            rotor,
-            axis="z",
-            min_gap=0.003,
-            positive_elem=motor_shell,
-            negative_elem=blade_clamp_0,
-            name="blade root clamp stays just below the motor while spinning",
+
+    blade_aabbs = [ctx.part_world_aabb(blade) for blade in (blade_1, blade_2, blade_3)]
+    if all(aabb is not None for aabb in blade_aabbs):
+        aabbs = blade_aabbs  # type: ignore[assignment]
+        fan_span = max(
+            max(aabb[1][0] for aabb in aabbs) - min(aabb[0][0] for aabb in aabbs),
+            max(aabb[1][1] for aabb in aabbs) - min(aabb[0][1] for aabb in aabbs),
         )
+        ctx.check(
+            "fan_span_realistic",
+            1.28 <= fan_span <= 1.45,
+            details=f"overall span={fan_span:.3f} m",
+        )
+
+    housing_aabb = ctx.part_element_world_aabb(rotor, elem=housing_shell)
+    if housing_aabb is not None:
+        housing_diameter = max(
+            housing_aabb[1][0] - housing_aabb[0][0],
+            housing_aabb[1][1] - housing_aabb[0][1],
+        )
+        ctx.check(
+            "wicker_housing_diameter_realistic",
+            0.18 <= housing_diameter <= 0.22,
+            details=f"housing diameter={housing_diameter:.3f} m",
+        )
+
+    globe_aabb = ctx.part_element_world_aabb(globe, elem=globe_shell)
+    if globe_aabb is not None:
+        globe_height = globe_aabb[1][2] - globe_aabb[0][2]
+        globe_diameter = max(
+            globe_aabb[1][0] - globe_aabb[0][0],
+            globe_aabb[1][1] - globe_aabb[0][1],
+        )
+        ctx.check(
+            "globe_proportions_realistic",
+            0.16 <= globe_height <= 0.19 and 0.16 <= globe_diameter <= 0.19,
+            details=f"globe height={globe_height:.3f} m diameter={globe_diameter:.3f} m",
+        )
+
+    blade_1_rest = ctx.part_world_position(blade_1)
+    blade_1_spun = None
+    with ctx.pose({spin: math.pi / 3.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="spin_pose_no_overlap")
+        ctx.fail_if_isolated_parts(name="spin_pose_no_floating")
+        ctx.expect_contact(rotor, mount, elem_a=top_cap, elem_b=downrod, name="spin_pose_rotor_contact")
+        ctx.expect_contact(globe, rotor, elem_a=globe_neck, elem_b=fitter, name="spin_pose_globe_contact")
+        ctx.expect_contact(blade_1, rotor, elem_a=blade_1_root, elem_b=seat_1, name="spin_pose_blade_1_contact")
+        blade_1_spun = ctx.part_world_position(blade_1)
+
+    if blade_1_rest is not None and blade_1_spun is not None:
+        rest_radius = math.hypot(blade_1_rest[0], blade_1_rest[1])
+        spun_radius = math.hypot(blade_1_spun[0], blade_1_spun[1])
+        moved = math.hypot(blade_1_rest[0] - blade_1_spun[0], blade_1_rest[1] - blade_1_spun[1]) > 0.08
+        ctx.check(
+            "continuous_spin_moves_blade",
+            moved and abs(rest_radius - spun_radius) < 0.002,
+            details=(
+                f"rest={blade_1_rest!r} spun={blade_1_spun!r} "
+                f"rest_radius={rest_radius:.4f} spun_radius={spun_radius:.4f}"
+            ),
+        )
+
     return ctx.report()
 
 

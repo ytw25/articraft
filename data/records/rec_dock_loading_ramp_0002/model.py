@@ -9,18 +9,14 @@ import os
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
-    Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
 )
 
-SAFE_ASSET_ROOT = "/tmp"
-SAFE_ASSETS = AssetContext(SAFE_ASSET_ROOT)
 _ORIGINAL_GETCWD = os.getcwd
 
 
@@ -28,603 +24,447 @@ def _safe_getcwd() -> str:
     try:
         return _ORIGINAL_GETCWD()
     except FileNotFoundError:
-        os.chdir(SAFE_ASSET_ROOT)
-        return _ORIGINAL_GETCWD()
+        try:
+            os.chdir("/")
+        except OSError:
+            pass
+        return "/"
 
 
 os.getcwd = _safe_getcwd
 
-try:
-    os.getcwd()
-except FileNotFoundError:
-    os.chdir(SAFE_ASSET_ROOT)
-
-
-def _segment_origin(start: tuple[float, float, float], end: tuple[float, float, float]) -> tuple[Origin, float]:
-    dx = end[0] - start[0]
-    dy = end[1] - start[1]
-    dz = end[2] - start[2]
-    length = math.sqrt(dx * dx + dy * dy + dz * dz)
-    if length <= 1e-6:
-        raise ValueError("cylinder segment length must be positive")
-    yaw = math.atan2(dy, dx)
-    pitch = math.atan2(math.hypot(dx, dy), dz)
-    return (
-        Origin(
-            xyz=(
-                (start[0] + end[0]) / 2.0,
-                (start[1] + end[1]) / 2.0,
-                (start[2] + end[2]) / 2.0,
-            ),
-            rpy=(0.0, pitch, yaw),
-        ),
-        length,
-    )
-
-
-def _add_segment(
-    part,
-    *,
-    name: str,
-    start: tuple[float, float, float],
-    end: tuple[float, float, float],
-    radius: float,
-    material,
-) -> None:
-    origin, length = _segment_origin(start, end)
-    part.visual(Cylinder(radius=radius, length=length), origin=origin, material=material, name=name)
-
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="dock_leveler", assets=SAFE_ASSETS)
+    model = ArticulatedObject(name="hydraulic_dock_leveler")
 
-    frame_steel = model.material("frame_steel", rgba=(0.22, 0.24, 0.27, 1.0))
-    deck_steel = model.material("deck_steel", rgba=(0.42, 0.45, 0.48, 1.0))
-    lip_steel = model.material("lip_steel", rgba=(0.37, 0.39, 0.42, 1.0))
-    hydraulic = model.material("hydraulic", rgba=(0.10, 0.11, 0.12, 1.0))
-    pin_metal = model.material("pin_metal", rgba=(0.70, 0.72, 0.74, 1.0))
+    steel = model.material("steel", rgba=(0.43, 0.45, 0.48, 1.0))
+    dark_steel = model.material("dark_steel", rgba=(0.24, 0.26, 0.29, 1.0))
+    pin_steel = model.material("pin_steel", rgba=(0.63, 0.65, 0.68, 1.0))
+    safety_yellow = model.material("safety_yellow", rgba=(0.86, 0.73, 0.12, 1.0))
 
-    frame = model.part("pit_frame")
-    frame.visual(
-        Box((2.22, 0.10, 0.30)),
-        origin=Origin(xyz=(1.00, 0.96, -0.18)),
-        material=frame_steel,
+    rear_hinge_x = 0.03
+    rear_hinge_z = 0.020
+    front_hinge_x = 2.00
+    front_hinge_z = 0.024
+
+    dock_frame = model.part("dock_frame")
+    dock_frame.visual(
+        Box((0.26, 2.32, 0.18)),
+        origin=Origin(xyz=(-0.13, 0.0, -0.05)),
+        material=dark_steel,
+        name="rear_header",
+    )
+    dock_frame.visual(
+        Box((2.06, 0.12, 0.26)),
+        origin=Origin(xyz=(1.03, 1.11, -0.09)),
+        material=dark_steel,
         name="left_wall",
     )
-    frame.visual(
-        Box((2.22, 0.10, 0.30)),
-        origin=Origin(xyz=(1.00, -0.96, -0.18)),
-        material=frame_steel,
+    dock_frame.visual(
+        Box((2.06, 0.12, 0.26)),
+        origin=Origin(xyz=(1.03, -1.11, -0.09)),
+        material=dark_steel,
         name="right_wall",
     )
-    frame.visual(
-        Box((0.18, 2.02, 0.30)),
-        origin=Origin(xyz=(-0.09, 0.00, -0.18)),
-        material=frame_steel,
-        name="rear_wall",
+    dock_frame.visual(
+        Box((2.06, 2.10, 0.03)),
+        origin=Origin(xyz=(1.03, 0.0, -0.235)),
+        material=dark_steel,
+        name="pit_floor",
     )
-    frame.visual(
-        Box((0.08, 0.10, 0.30)),
-        origin=Origin(xyz=(2.15, 0.96, -0.18)),
-        material=frame_steel,
-        name="left_front_corner",
+    dock_frame.visual(
+        Box((0.06, 0.10, 0.10)),
+        origin=Origin(xyz=(rear_hinge_x, 1.03, 0.0)),
+        material=dark_steel,
+        name="left_hinge_lug",
     )
-    frame.visual(
-        Box((0.08, 0.10, 0.30)),
-        origin=Origin(xyz=(2.15, -0.96, -0.18)),
-        material=frame_steel,
-        name="right_front_corner",
+    dock_frame.visual(
+        Box((0.06, 0.10, 0.10)),
+        origin=Origin(xyz=(rear_hinge_x, -1.03, 0.0)),
+        material=dark_steel,
+        name="right_hinge_lug",
     )
-    frame.visual(
-        Box((1.72, 0.10, 0.04)),
-        origin=Origin(xyz=(1.04, 0.86, -0.075)),
-        material=frame_steel,
-        name="left_ledger",
-    )
-    frame.visual(
-        Box((1.72, 0.10, 0.04)),
-        origin=Origin(xyz=(1.04, -0.86, -0.075)),
-        material=frame_steel,
-        name="right_ledger",
-    )
-    frame.visual(
-        Box((0.40, 1.28, 0.10)),
-        origin=Origin(xyz=(0.18, 0.00, -0.16)),
-        material=frame_steel,
-        name="actuator_support_beam",
-    )
-    frame.visual(
-        Box((0.16, 0.18, 0.12)),
-        origin=Origin(xyz=(0.16, 0.55, -0.15)),
-        material=frame_steel,
-        name="left_actuator_saddle",
-    )
-    frame.visual(
-        Box((0.16, 0.18, 0.12)),
-        origin=Origin(xyz=(0.16, -0.55, -0.15)),
-        material=frame_steel,
-        name="right_actuator_saddle",
-    )
-    _add_segment(
-        frame,
-        name="left_rear_hinge_barrel",
-        start=(0.0, 0.33, 0.0),
-        end=(0.0, 0.83, 0.0),
-        radius=0.055,
-        material=frame_steel,
-    )
-    _add_segment(
-        frame,
-        name="right_rear_hinge_barrel",
-        start=(0.0, -0.83, 0.0),
-        end=(0.0, -0.33, 0.0),
-        radius=0.055,
-        material=frame_steel,
-    )
-    _add_segment(
-        frame,
+    dock_frame.visual(
+        Cylinder(radius=0.010, length=2.08),
+        origin=Origin(
+            xyz=(rear_hinge_x, 0.0, rear_hinge_z),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=pin_steel,
         name="rear_hinge_pin",
-        start=(0.0, -0.83, 0.0),
-        end=(0.0, 0.83, 0.0),
-        radius=0.018,
-        material=pin_metal,
-    )
-    frame.inertial = Inertial.from_geometry(
-        Box((2.32, 2.02, 0.30)),
-        mass=900.0,
-        origin=Origin(xyz=(1.00, 0.00, -0.18)),
     )
 
     deck = model.part("deck")
     deck.visual(
-        Box((2.00, 1.82, 0.05)),
-        origin=Origin(xyz=(1.00, 0.00, 0.00)),
-        material=deck_steel,
+        Cylinder(radius=0.018, length=1.96),
+        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=steel,
+        name="rear_hinge_barrel",
+    )
+    deck.visual(
+        Box((1.94, 2.04, 0.012)),
+        origin=Origin(xyz=(1.03, 0.0, 0.040)),
+        material=steel,
         name="deck_plate",
     )
     deck.visual(
-        Box((1.72, 0.10, 0.03)),
-        origin=Origin(xyz=(1.04, 0.86, -0.040)),
-        material=deck_steel,
-        name="left_seat_pad",
+        Box((0.14, 1.92, 0.126)),
+        origin=Origin(xyz=(1.93, 0.0, -0.053)),
+        material=dark_steel,
+        name="front_beam",
     )
     deck.visual(
-        Box((1.72, 0.10, 0.03)),
-        origin=Origin(xyz=(1.04, -0.86, -0.040)),
-        material=deck_steel,
-        name="right_seat_pad",
+        Box((0.14, 1.92, 0.12)),
+        origin=Origin(xyz=(0.11, 0.0, -0.110)),
+        material=dark_steel,
+        name="rear_beam",
     )
     deck.visual(
-        Box((1.86, 0.06, 0.10)),
-        origin=Origin(xyz=(0.98, 0.88, -0.075)),
-        material=deck_steel,
-        name="left_skirt",
+        Box((0.07, 1.88, 0.050)),
+        origin=Origin(xyz=(0.045, 0.0, -0.005)),
+        material=dark_steel,
+        name="rear_hinge_web",
     )
     deck.visual(
-        Box((1.86, 0.06, 0.10)),
-        origin=Origin(xyz=(0.98, -0.88, -0.075)),
-        material=deck_steel,
-        name="right_skirt",
+        Box((1.88, 0.08, 0.13)),
+        origin=Origin(xyz=(1.02, 0.98, -0.030)),
+        material=dark_steel,
+        name="left_side_beam",
     )
     deck.visual(
-        Box((1.18, 0.14, 0.16)),
-        origin=Origin(xyz=(1.13, 0.00, -0.105)),
-        material=deck_steel,
-        name="center_rib",
+        Box((1.88, 0.08, 0.13)),
+        origin=Origin(xyz=(1.02, -0.98, -0.030)),
+        material=dark_steel,
+        name="right_side_beam",
     )
     deck.visual(
-        Box((0.98, 0.10, 0.12)),
-        origin=Origin(xyz=(1.11, 0.44, -0.085)),
-        material=deck_steel,
+        Box((1.80, 0.09, 0.12)),
+        origin=Origin(xyz=(1.00, 0.48, -0.025)),
+        material=dark_steel,
         name="left_rib",
     )
     deck.visual(
-        Box((0.98, 0.10, 0.12)),
-        origin=Origin(xyz=(1.11, -0.44, -0.085)),
-        material=deck_steel,
+        Box((1.80, 0.09, 0.12)),
+        origin=Origin(xyz=(1.00, 0.0, -0.025)),
+        material=dark_steel,
+        name="center_rib",
+    )
+    deck.visual(
+        Box((1.80, 0.09, 0.12)),
+        origin=Origin(xyz=(1.00, -0.48, -0.025)),
+        material=dark_steel,
         name="right_rib",
     )
     deck.visual(
-        Box((0.14, 0.18, 0.06)),
-        origin=Origin(xyz=(0.47, 0.55, -0.055)),
-        material=deck_steel,
-        name="left_actuator_mount",
+        Cylinder(radius=0.017, length=1.84),
+        origin=Origin(
+            xyz=(front_hinge_x, 0.0, front_hinge_z),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=pin_steel,
+        name="front_hinge_barrel",
     )
     deck.visual(
-        Box((0.14, 0.18, 0.06)),
-        origin=Origin(xyz=(0.47, -0.55, -0.055)),
-        material=deck_steel,
-        name="right_actuator_mount",
+        Box((1.82, 0.07, 0.0015)),
+        origin=Origin(xyz=(1.00, 0.95, 0.04625)),
+        material=safety_yellow,
+        name="left_safety_stripe",
     )
     deck.visual(
-        Box((0.08, 1.82, 0.09)),
-        origin=Origin(xyz=(1.96, 0.00, -0.070)),
-        material=deck_steel,
-        name="front_nose",
-    )
-    _add_segment(
-        deck,
-        name="center_rear_hinge_barrel",
-        start=(0.0, -0.29, 0.0),
-        end=(0.0, 0.29, 0.0),
-        radius=0.050,
-        material=deck_steel,
-    )
-    _add_segment(
-        deck,
-        name="left_lip_hinge_barrel",
-        start=(2.0, 0.36, 0.0),
-        end=(2.0, 0.80, 0.0),
-        radius=0.040,
-        material=deck_steel,
-    )
-    _add_segment(
-        deck,
-        name="right_lip_hinge_barrel",
-        start=(2.0, -0.80, 0.0),
-        end=(2.0, -0.36, 0.0),
-        radius=0.040,
-        material=deck_steel,
-    )
-    _add_segment(
-        deck,
-        name="lip_hinge_pin",
-        start=(2.0, -0.80, 0.0),
-        end=(2.0, 0.80, 0.0),
-        radius=0.013,
-        material=pin_metal,
-    )
-    deck.inertial = Inertial.from_geometry(
-        Box((2.00, 1.82, 0.18)),
-        mass=650.0,
-        origin=Origin(xyz=(1.00, 0.00, -0.05)),
+        Box((1.82, 0.07, 0.0015)),
+        origin=Origin(xyz=(1.00, -0.95, 0.04625)),
+        material=safety_yellow,
+        name="right_safety_stripe",
     )
 
     lip = model.part("lip")
     lip.visual(
-        Box((0.05, 1.74, 0.38)),
-        origin=Origin(xyz=(0.025, 0.00, -0.19)),
-        material=lip_steel,
+        Cylinder(radius=0.010, length=1.96),
+        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=pin_steel,
+        name="lip_hinge_pin",
+    )
+    lip.visual(
+        Box((0.38, 1.96, 0.012)),
+        origin=Origin(xyz=(0.200, 0.0, 0.030)),
+        material=steel,
         name="lip_plate",
     )
     lip.visual(
-        Box((0.09, 1.40, 0.06)),
-        origin=Origin(xyz=(0.045, 0.00, -0.06)),
-        material=lip_steel,
-        name="lip_stiffener",
+        Box((0.34, 1.92, 0.016)),
+        origin=Origin(xyz=(0.200, 0.0, 0.018)),
+        material=dark_steel,
+        name="lip_underframe",
     )
     lip.visual(
-        Box((0.10, 1.60, 0.05)),
-        origin=Origin(xyz=(0.05, 0.00, -0.39)),
-        material=lip_steel,
-        name="toe_bar",
+        Box((0.12, 0.03, 0.030)),
+        origin=Origin(xyz=(0.160, 0.945, 0.009)),
+        material=dark_steel,
+        name="left_lip_rib",
     )
-    _add_segment(
-        lip,
-        name="center_hinge_barrel",
-        start=(0.0, -0.32, 0.0),
-        end=(0.0, 0.32, 0.0),
-        radius=0.036,
-        material=lip_steel,
+    lip.visual(
+        Box((0.12, 0.03, 0.030)),
+        origin=Origin(xyz=(0.160, -0.945, 0.009)),
+        material=dark_steel,
+        name="right_lip_rib",
     )
-    lip.inertial = Inertial.from_geometry(
-        Box((0.10, 1.74, 0.42)),
-        mass=120.0,
-        origin=Origin(xyz=(0.05, 0.00, -0.21)),
+    lip.visual(
+        Box((0.10, 0.02, 0.028)),
+        origin=Origin(xyz=(0.065, 0.970, 0.010)),
+        material=dark_steel,
+        name="left_pin_ear",
     )
-
-    left_actuator = model.part("left_actuator")
-    left_actuator.visual(
-        Box((0.10, 0.14, 0.08)),
-        origin=Origin(xyz=(-0.35, 0.00, -0.065)),
-        material=hydraulic,
-        name="lower_clevis",
+    lip.visual(
+        Box((0.10, 0.02, 0.028)),
+        origin=Origin(xyz=(0.065, -0.970, 0.010)),
+        material=dark_steel,
+        name="right_pin_ear",
     )
-    _add_segment(
-        left_actuator,
-        name="barrel",
-        start=(-0.30, 0.00, -0.055),
-        end=(-0.12, 0.00, -0.035),
-        radius=0.050,
-        material=hydraulic,
+    lip.visual(
+        Box((0.06, 1.96, 0.020)),
+        origin=Origin(xyz=(0.380, 0.0, 0.024)),
+        material=steel,
+        name="lip_nose",
     )
-    _add_segment(
-        left_actuator,
-        name="rod",
-        start=(-0.12, 0.00, -0.035),
-        end=(-0.01, 0.00, -0.015),
-        radius=0.028,
-        material=pin_metal,
+    lip.visual(
+        Box((0.24, 0.06, 0.0015)),
+        origin=Origin(xyz=(0.18, 0.93, 0.03575)),
+        material=safety_yellow,
+        name="left_lip_stripe",
     )
-    left_actuator.visual(
-        Box((0.10, 0.14, 0.05)),
-        origin=Origin(xyz=(0.00, 0.00, -0.025)),
-        material=hydraulic,
-        name="upper_eye",
-    )
-    left_actuator.inertial = Inertial.from_geometry(
-        Box((0.48, 0.14, 0.10)),
-        mass=60.0,
-        origin=Origin(xyz=(-0.19, 0.00, -0.035)),
-    )
-
-    right_actuator = model.part("right_actuator")
-    right_actuator.visual(
-        Box((0.10, 0.14, 0.08)),
-        origin=Origin(xyz=(-0.35, 0.00, -0.065)),
-        material=hydraulic,
-        name="lower_clevis",
-    )
-    _add_segment(
-        right_actuator,
-        name="barrel",
-        start=(-0.30, 0.00, -0.055),
-        end=(-0.12, 0.00, -0.035),
-        radius=0.050,
-        material=hydraulic,
-    )
-    _add_segment(
-        right_actuator,
-        name="rod",
-        start=(-0.12, 0.00, -0.035),
-        end=(-0.01, 0.00, -0.015),
-        radius=0.028,
-        material=pin_metal,
-    )
-    right_actuator.visual(
-        Box((0.10, 0.14, 0.05)),
-        origin=Origin(xyz=(0.00, 0.00, -0.025)),
-        material=hydraulic,
-        name="upper_eye",
-    )
-    right_actuator.inertial = Inertial.from_geometry(
-        Box((0.48, 0.14, 0.10)),
-        mass=60.0,
-        origin=Origin(xyz=(-0.19, 0.00, -0.035)),
+    lip.visual(
+        Box((0.24, 0.06, 0.0015)),
+        origin=Origin(xyz=(0.18, -0.93, 0.03575)),
+        material=safety_yellow,
+        name="right_lip_stripe",
     )
 
     model.articulation(
-        "frame_to_deck",
+        "rear_hinge",
         ArticulationType.REVOLUTE,
-        parent=frame,
+        parent=dock_frame,
         child=deck,
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=4500.0, velocity=0.8, lower=-0.35, upper=0.12),
+        origin=Origin(xyz=(rear_hinge_x, 0.0, rear_hinge_z)),
+        axis=(0.0, -1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=35000.0,
+            velocity=0.8,
+            lower=0.0,
+            upper=0.55,
+        ),
     )
     model.articulation(
-        "deck_to_lip",
+        "lip_hinge",
         ArticulationType.REVOLUTE,
         parent=deck,
         child=lip,
-        origin=Origin(xyz=(2.0, 0.0, 0.0)),
+        origin=Origin(xyz=(front_hinge_x, 0.0, front_hinge_z)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=1200.0, velocity=2.0, lower=-1.45, upper=0.10),
-    )
-    model.articulation(
-        "deck_to_left_actuator",
-        ArticulationType.FIXED,
-        parent=deck,
-        child=left_actuator,
-        origin=Origin(xyz=(0.47, 0.55, -0.085)),
-    )
-    model.articulation(
-        "deck_to_right_actuator",
-        ArticulationType.FIXED,
-        parent=deck,
-        child=right_actuator,
-        origin=Origin(xyz=(0.47, -0.55, -0.085)),
+        motion_limits=MotionLimits(
+            effort=12000.0,
+            velocity=1.2,
+            lower=-0.10,
+            upper=1.25,
+        ),
     )
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=SAFE_ASSET_ROOT)
-    frame = object_model.get_part("pit_frame")
+    ctx = TestContext(object_model)
+    dock_frame = object_model.get_part("dock_frame")
     deck = object_model.get_part("deck")
     lip = object_model.get_part("lip")
-    left_actuator = object_model.get_part("left_actuator")
-    right_actuator = object_model.get_part("right_actuator")
-    deck_hinge = object_model.get_articulation("frame_to_deck")
-    lip_hinge = object_model.get_articulation("deck_to_lip")
+    rear_hinge = object_model.get_articulation("rear_hinge")
+    lip_hinge = object_model.get_articulation("lip_hinge")
 
-    left_ledger = frame.get_visual("left_ledger")
-    right_ledger = frame.get_visual("right_ledger")
-    left_front_corner = frame.get_visual("left_front_corner")
-    right_front_corner = frame.get_visual("right_front_corner")
-    left_saddle = frame.get_visual("left_actuator_saddle")
-    right_saddle = frame.get_visual("right_actuator_saddle")
-    support_beam = frame.get_visual("actuator_support_beam")
+    rear_header = dock_frame.get_visual("rear_header")
+    left_wall = dock_frame.get_visual("left_wall")
+    right_wall = dock_frame.get_visual("right_wall")
+    pit_floor = dock_frame.get_visual("pit_floor")
+    rear_hinge_pin = dock_frame.get_visual("rear_hinge_pin")
+    rear_hinge_barrel = deck.get_visual("rear_hinge_barrel")
     deck_plate = deck.get_visual("deck_plate")
-    left_seat_pad = deck.get_visual("left_seat_pad")
-    right_seat_pad = deck.get_visual("right_seat_pad")
+    front_beam = deck.get_visual("front_beam")
+    left_side_beam = deck.get_visual("left_side_beam")
+    right_side_beam = deck.get_visual("right_side_beam")
     center_rib = deck.get_visual("center_rib")
-    left_rib = deck.get_visual("left_rib")
-    right_rib = deck.get_visual("right_rib")
-    front_nose = deck.get_visual("front_nose")
-    left_mount = deck.get_visual("left_actuator_mount")
-    right_mount = deck.get_visual("right_actuator_mount")
-    left_upper_eye = left_actuator.get_visual("upper_eye")
-    right_upper_eye = right_actuator.get_visual("upper_eye")
-    left_lower_clevis = left_actuator.get_visual("lower_clevis")
-    right_lower_clevis = right_actuator.get_visual("lower_clevis")
-    rear_hinge_pin = frame.get_visual("rear_hinge_pin")
-    rear_hinge_barrel = deck.get_visual("center_rear_hinge_barrel")
-    lip_hinge_pin = deck.get_visual("lip_hinge_pin")
-    lip_center_barrel = lip.get_visual("center_hinge_barrel")
-    toe_bar = lip.get_visual("toe_bar")
+    front_hinge_barrel = deck.get_visual("front_hinge_barrel")
+    lip_plate = lip.get_visual("lip_plate")
+    lip_hinge_pin = lip.get_visual("lip_hinge_pin")
+    lip_nose = lip.get_visual("lip_nose")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-
-    ctx.allow_overlap(deck, frame, reason="rear hinge pin runs through interleaved deck and frame barrels")
-    ctx.allow_overlap(lip, deck, reason="front lip hinge pin runs through the deck nose hinge barrels")
-    ctx.allow_overlap(left_actuator, frame, reason="left actuator clevis nests into the rear frame saddle as the deck lifts")
-    ctx.allow_overlap(right_actuator, frame, reason="right actuator clevis nests into the rear frame saddle as the deck lifts")
-
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.expect_gap(
+    ctx.allow_overlap(
+        dock_frame,
         deck,
-        frame,
-        axis="z",
-        max_gap=0.002,
-        max_penetration=0.003,
-        positive_elem=left_seat_pad,
-        negative_elem=left_ledger,
-        name="left side of deck sits on the frame ledger",
+        elem_a="rear_hinge_pin",
+        elem_b="rear_hinge_barrel",
+        reason="rear hinge pin is intentionally captured inside the deck hinge barrel",
     )
-    ctx.expect_gap(
-        deck,
-        frame,
-        axis="z",
-        max_gap=0.002,
-        max_penetration=0.003,
-        positive_elem=right_seat_pad,
-        negative_elem=right_ledger,
-        name="right side of deck sits on the frame ledger",
-    )
-    ctx.expect_contact(
-        left_actuator,
-        frame,
-        elem_a=left_lower_clevis,
-        elem_b=left_saddle,
-    )
-    ctx.expect_contact(
-        right_actuator,
-        frame,
-        elem_a=right_lower_clevis,
-        elem_b=right_saddle,
-    )
-    ctx.expect_contact(
-        deck,
-        frame,
-        elem_a=rear_hinge_barrel,
-        elem_b=rear_hinge_pin,
-    )
-    ctx.expect_contact(
-        lip,
-        deck,
-        elem_a=lip_center_barrel,
-        elem_b=lip_hinge_pin,
-    )
-    ctx.expect_gap(
-        deck,
-        left_actuator,
-        axis="z",
-        max_gap=0.002,
-        max_penetration=0.003,
-        positive_elem=left_mount,
-        negative_elem=left_upper_eye,
-        name="left actuator reaches the deck underside mount",
-    )
-    ctx.expect_gap(
-        deck,
-        right_actuator,
-        axis="z",
-        max_gap=0.002,
-        max_penetration=0.003,
-        positive_elem=right_mount,
-        negative_elem=right_upper_eye,
-        name="right actuator reaches the deck underside mount",
-    )
-    ctx.expect_origin_distance(lip, deck, axes="y", max_dist=0.001)
-    ctx.expect_gap(
+    ctx.allow_overlap(
         deck,
         lip,
-        axis="z",
-        min_gap=0.30,
-        positive_elem=deck_plate,
-        negative_elem=toe_bar,
-        name="stored lip hangs below the deck nose",
+        elem_a="front_hinge_barrel",
+        elem_b="lip_hinge_pin",
+        reason="front lip pin is intentionally captured inside the deck front barrel",
+    )
+    ctx.fail_if_isolated_parts()
+    ctx.fail_if_parts_overlap_in_current_pose()
+
+    ctx.expect_within(
+        dock_frame,
+        deck,
+        axes="xz",
+        inner_elem=rear_hinge_pin,
+        outer_elem=rear_hinge_barrel,
+        name="rear hinge pin stays nested inside the rear barrel",
+    )
+    ctx.expect_contact(
+        dock_frame,
+        deck,
+        elem_a=rear_hinge_pin,
+        elem_b=rear_hinge_barrel,
+        name="rear hinge remains in contact",
     )
     ctx.expect_gap(
         deck,
-        frame,
-        axis="x",
+        dock_frame,
+        axis="y",
+        min_gap=0.02,
+        max_gap=0.04,
+        positive_elem="right_side_beam",
+        negative_elem="right_wall",
+        name="right side beam stays clear of the right pit wall",
+    )
+    ctx.expect_gap(
+        dock_frame,
+        deck,
+        axis="y",
+        min_gap=0.02,
+        max_gap=0.04,
+        positive_elem="left_wall",
+        negative_elem="left_side_beam",
+        name="left side beam stays clear of the left pit wall",
+    )
+    ctx.expect_gap(
+        deck,
+        dock_frame,
+        axis="z",
         min_gap=0.12,
         positive_elem=center_rib,
-        negative_elem=support_beam,
-        name="center deck rib starts forward of the rear actuator beam",
+        negative_elem=pit_floor,
+        name="underside ribs clear the pit floor",
     )
     ctx.expect_gap(
+        lip,
         deck,
-        frame,
         axis="x",
-        min_gap=0.20,
-        positive_elem=left_rib,
-        negative_elem=support_beam,
-        name="left deck rib clears the rear actuator beam",
+        min_gap=0.01,
+        max_gap=0.02,
+        positive_elem=lip_plate,
+        negative_elem=front_beam,
+        name="lip leaf seats just beyond the deck front beam",
     )
-    ctx.expect_gap(
+    ctx.expect_within(
+        lip,
         deck,
-        frame,
-        axis="x",
-        min_gap=0.20,
-        positive_elem=right_rib,
-        negative_elem=support_beam,
-        name="right deck rib clears the rear actuator beam",
+        axes="xz",
+        inner_elem=lip_hinge_pin,
+        outer_elem=front_hinge_barrel,
+        name="lip hinge pin stays nested inside the front barrel",
+    )
+    ctx.expect_contact(
+        deck,
+        lip,
+        elem_a=front_hinge_barrel,
+        elem_b=lip_hinge_pin,
+        name="front hinge remains in contact",
+    )
+    ctx.expect_overlap(
+        lip,
+        deck,
+        axes="y",
+        min_overlap=1.70,
+        elem_a=lip_plate,
+        elem_b=deck_plate,
+        name="lip spans most of the deck width",
     )
 
-    with ctx.pose({deck_hinge: -0.28}):
+    rear_limits = rear_hinge.motion_limits
+    if rear_limits is not None and rear_limits.lower is not None and rear_limits.upper is not None:
+        with ctx.pose({rear_hinge: rear_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="rear_hinge_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="rear_hinge_lower_no_floating")
+        with ctx.pose({rear_hinge: rear_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="rear_hinge_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="rear_hinge_upper_no_floating")
+
+    lip_limits = lip_hinge.motion_limits
+    if lip_limits is not None and lip_limits.lower is not None and lip_limits.upper is not None:
+        with ctx.pose({lip_hinge: lip_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="lip_hinge_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="lip_hinge_lower_no_floating")
+        with ctx.pose({lip_hinge: lip_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="lip_hinge_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="lip_hinge_upper_no_floating")
+
+    with ctx.pose({rear_hinge: 0.52}):
         ctx.expect_gap(
             deck,
-            frame,
+            dock_frame,
             axis="z",
-            min_gap=0.45,
-            positive_elem=front_nose,
-            negative_elem=left_front_corner,
-            name="raised deck clears the left front edge of the pit frame",
-        )
-        ctx.expect_gap(
-            deck,
-            frame,
-            axis="z",
-            min_gap=0.45,
-            positive_elem=front_nose,
-            negative_elem=right_front_corner,
-            name="raised deck clears the right front edge of the pit frame",
+            min_gap=0.80,
+            positive_elem=front_beam,
+            negative_elem=rear_header,
+            name="raised deck front lifts well above the rear header",
         )
         ctx.expect_contact(
-            left_actuator,
-            frame,
-            elem_a=left_lower_clevis,
-            elem_b=left_saddle,
-        )
-        ctx.expect_contact(
-            right_actuator,
-            frame,
-            elem_a=right_lower_clevis,
-            elem_b=right_saddle,
-        )
-        ctx.expect_gap(
+            dock_frame,
             deck,
-            frame,
-            axis="z",
-            min_gap=0.075,
-            positive_elem=center_rib,
-            negative_elem=support_beam,
-            name="raised deck center rib lifts well above the rear actuator beam",
+            elem_a=rear_hinge_pin,
+            elem_b=rear_hinge_barrel,
+            name="rear hinge stays engaged while the deck tilts",
         )
 
-    with ctx.pose({deck_hinge: -0.28, lip_hinge: -1.35}):
+    with ctx.pose({lip_hinge: 1.20}):
+        ctx.expect_gap(
+            deck,
+            lip,
+            axis="z",
+            min_gap=0.30,
+            positive_elem=deck_plate,
+            negative_elem=lip_nose,
+            name="deployed lip hangs below the deck surface",
+        )
         ctx.expect_gap(
             lip,
             deck,
             axis="x",
-            min_gap=0.18,
-            positive_elem=toe_bar,
-            negative_elem=front_nose,
-            name="deployed lip projects out beyond the deck nose",
+            min_gap=0.10,
+            positive_elem=lip_nose,
+            negative_elem=deck_plate,
+            name="deployed lip projects past the deck front edge",
         )
-        ctx.expect_origin_distance(lip, deck, axes="y", max_dist=0.001)
+
+    with ctx.pose({rear_hinge: 0.40, lip_hinge: 1.05}):
+        ctx.expect_contact(
+            deck,
+            lip,
+            elem_a=front_hinge_barrel,
+            elem_b=lip_hinge_pin,
+            name="front hinge stays engaged in a raised deployed pose",
+        )
+        ctx.expect_gap(
+            deck,
+            lip,
+            axis="z",
+            min_gap=0.001,
+            positive_elem=front_beam,
+            negative_elem=lip_nose,
+            name="raised deck still carries a hanging lip below the deck plane",
+        )
 
     return ctx.report()
 

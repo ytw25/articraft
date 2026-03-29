@@ -3,557 +3,409 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
 import os
+from math import pi
 
-_REAL_GETCWD = os.getcwd
+_ORIG_GETCWD = os.getcwd
+_SAFE_CWD = "/tmp"
 
 
-def _safe_getcwd() -> str:
+def _patched_getcwd() -> str:
     try:
-        return _REAL_GETCWD()
+        return _ORIG_GETCWD()
     except FileNotFoundError:
-        try:
-            os.chdir("/")
-        except FileNotFoundError:
-            pass
-        return "/"
+        return _SAFE_CWD
 
 
-os.getcwd = _safe_getcwd
+os.getcwd = _patched_getcwd
+try:
+    _ORIG_GETCWD()
+except FileNotFoundError:
+    try:
+        os.chdir(_SAFE_CWD)
+    except FileNotFoundError:
+        pass
 
-from sdk import (
-    ArticulatedObject,
-    ArticulationType,
-    Box,
-    Cylinder,
-    Inertial,
-    MotionLimits,
-    Origin,
-    TestContext,
-    TestReport,
-)
-
-
-BODY_D = 0.74
-BODY_W = 1.36
-BODY_H = 0.74
-LEG_H = 0.06
-BODY_WALL = 0.028
-BODY_FLOOR = 0.034
-
-LID_D = BODY_D + 0.016
-LID_W = BODY_W + 0.044
-LID_H = 0.056
-LID_LIP_T = 0.018
-LID_LIP_H = 0.028
-LID_TOP = 0.022
-
-HINGE_X = -BODY_D / 2.0 - 0.014
-HINGE_Z = LEG_H + BODY_H + 0.011
-BODY_KNUCKLE_X = HINGE_X - 0.020
-LID_CENTER_X = LID_D / 2.0 + 0.016
-
-HASP_PIVOT_X = BODY_D + 0.026
-HASP_PIVOT_Z = -0.014
-HASP_W = 0.084
-HASP_H = 0.118
-HASP_T = 0.006
-def _add_leveling_leg(part, x: float, y: float, material) -> None:
-    part.visual(
-        Cylinder(radius=0.013, length=0.044),
-        origin=Origin(xyz=(x, y, 0.038)),
-        material=material,
-    )
-    part.visual(
-        Cylinder(radius=0.030, length=0.016),
-        origin=Origin(xyz=(x, y, 0.008)),
-        material=material,
-    )
-
-
-def _add_corner_channel(part, *, x_sign: float, y_sign: float, material) -> None:
-    z_center = LEG_H + (BODY_H * 0.5) + 0.005
-    z_height = BODY_H - 0.065
-    strip_w = 0.054
-    strip_t = 0.007
-    bead = 0.012
-
-    front_back_x = x_sign * (BODY_D / 2.0 - strip_w / 2.0 + 0.001)
-    side_y = y_sign * (BODY_W / 2.0 - strip_w / 2.0 + 0.001)
-    face_y = y_sign * (BODY_W / 2.0 + strip_t / 2.0 - 0.001)
-    face_x = x_sign * (BODY_D / 2.0 + strip_t / 2.0 - 0.001)
-    bead_x = x_sign * (BODY_D / 2.0 + bead / 2.0 - 0.001)
-    bead_y = y_sign * (BODY_W / 2.0 + bead / 2.0 - 0.001)
-
-    part.visual(
-        Box((strip_w, strip_t, z_height)),
-        origin=Origin(xyz=(front_back_x, face_y, z_center)),
-        material=material,
-    )
-    part.visual(
-        Box((strip_t, strip_w, z_height)),
-        origin=Origin(xyz=(face_x, side_y, z_center)),
-        material=material,
-    )
-    part.visual(
-        Box((bead, bead, z_height)),
-        origin=Origin(xyz=(bead_x, bead_y, z_center)),
-        material=material,
-    )
+from sdk import ArticulatedObject, ArticulationType, Box, Cylinder, MotionLimits, Origin, TestContext, TestReport
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="garage_chest_freezer")
+    model = ArticulatedObject(name="chest_freezer")
 
-    freezer_white = model.material("freezer_white", rgba=(0.91, 0.92, 0.90, 1.0))
-    liner_white = model.material("liner_white", rgba=(0.96, 0.97, 0.95, 1.0))
-    hardware_metal = model.material("hardware_metal", rgba=(0.64, 0.67, 0.70, 1.0))
-    channel_metal = model.material("channel_metal", rgba=(0.58, 0.60, 0.63, 1.0))
-    black_plastic = model.material("black_plastic", rgba=(0.10, 0.10, 0.11, 1.0))
-    gasket_dark = model.material("gasket_dark", rgba=(0.18, 0.19, 0.20, 1.0))
+    white = model.material("appliance_white", rgba=(0.95, 0.96, 0.97, 1.0))
+    liner_white = model.material("liner_white", rgba=(0.92, 0.93, 0.94, 1.0))
+    hinge_gray = model.material("hinge_gray", rgba=(0.58, 0.60, 0.63, 1.0))
+    trim_gray = model.material("trim_gray", rgba=(0.75, 0.77, 0.79, 1.0))
+    foot_black = model.material("foot_black", rgba=(0.18, 0.18, 0.19, 1.0))
 
-    body = model.part("body")
-    body.visual(
-        Box((BODY_WALL, BODY_W, BODY_H)),
-        origin=Origin(xyz=(BODY_D / 2.0 - BODY_WALL / 2.0, 0.0, LEG_H + (BODY_H * 0.5))),
-        material=freezer_white,
-        name="front_wall",
-    )
-    body.visual(
-        Box((BODY_WALL, BODY_W, BODY_H)),
-        origin=Origin(xyz=(-BODY_D / 2.0 + BODY_WALL / 2.0, 0.0, LEG_H + (BODY_H * 0.5))),
-        material=freezer_white,
-        name="rear_wall",
-    )
-    body.visual(
-        Box((BODY_D - 2.0 * BODY_WALL, BODY_WALL, BODY_H)),
-        origin=Origin(xyz=(0.0, BODY_W / 2.0 - BODY_WALL / 2.0, LEG_H + (BODY_H * 0.5))),
-        material=freezer_white,
-        name="right_wall",
-    )
-    body.visual(
-        Box((BODY_D - 2.0 * BODY_WALL, BODY_WALL, BODY_H)),
-        origin=Origin(xyz=(0.0, -BODY_W / 2.0 + BODY_WALL / 2.0, LEG_H + (BODY_H * 0.5))),
-        material=freezer_white,
+    cabinet_width = 1.08
+    cabinet_depth = 0.70
+    cabinet_body_height = 0.82
+    feet_height = 0.03
+    cabinet_top_z = feet_height + cabinet_body_height
+
+    wall_thickness = 0.055
+    floor_thickness = 0.070
+    inner_width = cabinet_width - (2.0 * wall_thickness)
+    inner_depth = cabinet_depth - (2.0 * wall_thickness)
+
+    lid_width = 1.10
+    lid_depth = 0.74
+    lid_panel_thickness = 0.030
+    lid_insert_thickness = 0.028
+    lid_center_y = 0.392
+
+    hinge_axis_y = -(cabinet_depth / 2.0) - 0.008
+    hinge_axis_z = cabinet_top_z + 0.012
+    hinge_x_positions = (-0.36, 0.36)
+
+    barrel_radius = 0.008
+    outer_knuckle_length = 0.016
+    center_knuckle_length = 0.020
+    knuckle_offset = 0.018
+
+    cabinet = model.part("cabinet")
+    cabinet.visual(
+        Box((wall_thickness, cabinet_depth, cabinet_body_height)),
+        origin=Origin(
+            xyz=(
+                -(cabinet_width / 2.0) + (wall_thickness / 2.0),
+                0.0,
+                feet_height + (cabinet_body_height / 2.0),
+            )
+        ),
+        material=white,
         name="left_wall",
     )
-    body.visual(
-        Box((BODY_D - 2.0 * BODY_WALL, BODY_W - 2.0 * BODY_WALL, BODY_FLOOR)),
-        origin=Origin(xyz=(0.0, 0.0, LEG_H + BODY_FLOOR / 2.0)),
-        material=liner_white,
-        name="body_floor",
-    )
-    body.visual(
-        Box((0.040, BODY_W - 0.016, 0.020)),
-        origin=Origin(xyz=(BODY_D / 2.0 - 0.020, 0.0, LEG_H + BODY_H - 0.010)),
-        material=freezer_white,
-        name="front_rim",
-    )
-    body.visual(
-        Box((0.030, BODY_W - 0.030, 0.018)),
-        origin=Origin(xyz=(-BODY_D / 2.0 + 0.015, 0.0, LEG_H + BODY_H - 0.009)),
-        material=freezer_white,
-        name="rear_rim",
-    )
-    body.visual(
-        Box((BODY_D - 0.060, 0.020, 0.018)),
-        origin=Origin(xyz=(0.0, BODY_W / 2.0 - 0.010, LEG_H + BODY_H - 0.009)),
-        material=freezer_white,
-        name="right_rim",
-    )
-    body.visual(
-        Box((BODY_D - 0.060, 0.020, 0.018)),
-        origin=Origin(xyz=(0.0, -BODY_W / 2.0 + 0.010, LEG_H + BODY_H - 0.009)),
-        material=freezer_white,
-        name="left_rim",
-    )
-    body.visual(
-        Box((BODY_D - 0.090, BODY_W - 0.090, 0.010)),
-        origin=Origin(xyz=(0.0, 0.0, LEG_H + BODY_FLOOR + 0.005)),
-        material=liner_white,
-        name="interior_floor",
-    )
-    body.visual(
-        Cylinder(radius=0.010, length=BODY_W - 0.050),
+    cabinet.visual(
+        Box((wall_thickness, cabinet_depth, cabinet_body_height)),
         origin=Origin(
-            xyz=(BODY_KNUCKLE_X, 0.0, HINGE_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware_metal,
-        name="body_hinge_knuckle",
-    )
-    body.visual(
-        Box((0.034, BODY_W - 0.070, 0.010)),
-        origin=Origin(xyz=(BODY_KNUCKLE_X + 0.017, 0.0, HINGE_Z - 0.015)),
-        material=hardware_metal,
-        name="body_hinge_leaf",
-    )
-    body.visual(
-        Box((0.034, 0.096, 0.016)),
-        origin=Origin(xyz=(BODY_D / 2.0 - 0.008, 0.0, LEG_H + BODY_H - 0.086)),
-        material=hardware_metal,
-        name="staple_base",
-    )
-    body.visual(
-        Box((0.016, 0.024, 0.031)),
-        origin=Origin(xyz=(BODY_D / 2.0 + 0.008, -0.019, LEG_H + BODY_H - 0.070)),
-        material=hardware_metal,
-        name="staple_left",
-    )
-    body.visual(
-        Box((0.016, 0.024, 0.031)),
-        origin=Origin(xyz=(BODY_D / 2.0 + 0.008, 0.019, LEG_H + BODY_H - 0.070)),
-        material=hardware_metal,
-        name="staple_right",
-    )
-    body.visual(
-        Cylinder(radius=0.006, length=0.044),
-        origin=Origin(
-            xyz=(BODY_D / 2.0 + 0.010, 0.0, LEG_H + BODY_H - 0.086),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware_metal,
-        name="staple_bridge",
-    )
-    for sx in (-1.0, 1.0):
-        for sy in (-1.0, 1.0):
-            _add_leveling_leg(
-                body,
-                sx * (BODY_D / 2.0 - 0.060),
-                sy * (BODY_W / 2.0 - 0.085),
-                black_plastic,
+            xyz=(
+                (cabinet_width / 2.0) - (wall_thickness / 2.0),
+                0.0,
+                feet_height + (cabinet_body_height / 2.0),
             )
-    body.inertial = Inertial.from_geometry(
-        Box((BODY_D, BODY_W, BODY_H + LEG_H)),
-        mass=68.0,
-        origin=Origin(xyz=(0.0, 0.0, (BODY_H + LEG_H) * 0.5)),
+        ),
+        material=white,
+        name="right_wall",
     )
+    cabinet.visual(
+        Box((inner_width, wall_thickness, cabinet_body_height)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                (cabinet_depth / 2.0) - (wall_thickness / 2.0),
+                feet_height + (cabinet_body_height / 2.0),
+            )
+        ),
+        material=white,
+        name="front_wall",
+    )
+    cabinet.visual(
+        Box((inner_width, wall_thickness, cabinet_body_height)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -(cabinet_depth / 2.0) + (wall_thickness / 2.0),
+                feet_height + (cabinet_body_height / 2.0),
+            )
+        ),
+        material=white,
+        name="rear_wall",
+    )
+    cabinet.visual(
+        Box((inner_width, inner_depth, floor_thickness)),
+        origin=Origin(xyz=(0.0, 0.0, feet_height + (floor_thickness / 2.0))),
+        material=liner_white,
+        name="liner_floor",
+    )
+    cabinet.visual(
+        Box((0.24, 0.18, 0.17)),
+        origin=Origin(
+            xyz=(
+                (inner_width / 2.0) - 0.12,
+                -(inner_depth / 2.0) + 0.09,
+                feet_height + floor_thickness + 0.085,
+            )
+        ),
+        material=liner_white,
+        name="compressor_hump",
+    )
+    cabinet.visual(
+        Box((0.28, 0.018, 0.040)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                (cabinet_depth / 2.0) + 0.009,
+                cabinet_top_z - 0.090,
+            )
+        ),
+        material=trim_gray,
+        name="front_handle_recess",
+    )
+    for foot_name, foot_x, foot_y in (
+        ("front_left_foot", -0.44, 0.26),
+        ("front_right_foot", 0.44, 0.26),
+        ("rear_left_foot", -0.44, -0.26),
+        ("rear_right_foot", 0.44, -0.26),
+    ):
+        cabinet.visual(
+            Box((0.06, 0.06, feet_height)),
+            origin=Origin(xyz=(foot_x, foot_y, feet_height / 2.0)),
+            material=foot_black,
+            name=foot_name,
+        )
 
-    corner_channels = model.part("corner_channels")
-    for x_sign in (-1.0, 1.0):
-        for y_sign in (-1.0, 1.0):
-            _add_corner_channel(corner_channels, x_sign=x_sign, y_sign=y_sign, material=channel_metal)
-    corner_channels.visual(
-        Box((BODY_D - 0.104, 0.007, 0.018)),
-        origin=Origin(xyz=(0.0, BODY_W / 2.0 + 0.002, LEG_H + 0.039)),
-        material=channel_metal,
-        name="right_lower_trim",
-    )
-    corner_channels.visual(
-        Box((BODY_D - 0.104, 0.007, 0.018)),
-        origin=Origin(xyz=(0.0, -BODY_W / 2.0 - 0.002, LEG_H + 0.039)),
-        material=channel_metal,
-        name="left_lower_trim",
-    )
-    corner_channels.visual(
-        Box((0.007, BODY_W - 0.104, 0.018)),
-        origin=Origin(xyz=(-BODY_D / 2.0 - 0.002, 0.0, LEG_H + 0.039)),
-        material=channel_metal,
-        name="rear_lower_trim",
-    )
-    corner_channels.inertial = Inertial.from_geometry(
-        Box((BODY_D + 0.020, BODY_W + 0.020, BODY_H)),
-        mass=5.0,
-        origin=Origin(xyz=(0.0, 0.0, LEG_H + BODY_H * 0.5)),
-    )
+    for side_name, hinge_x in (("left", hinge_x_positions[0]), ("right", hinge_x_positions[1])):
+        for position_name, x_center in (
+            ("outer_knuckle_a", hinge_x - knuckle_offset),
+            ("outer_knuckle_b", hinge_x + knuckle_offset),
+        ):
+            cabinet.visual(
+                Box((outer_knuckle_length, 0.030, 0.036)),
+                origin=Origin(xyz=(x_center, hinge_axis_y, cabinet_top_z - 0.008)),
+                material=hinge_gray,
+                name=f"{side_name}_{position_name}_leaf",
+            )
+            cabinet.visual(
+                Cylinder(radius=barrel_radius, length=outer_knuckle_length),
+                origin=Origin(
+                    xyz=(x_center, hinge_axis_y, hinge_axis_z),
+                    rpy=(0.0, pi / 2.0, 0.0),
+                ),
+                material=hinge_gray,
+                name=f"{side_name}_{position_name}",
+            )
 
     lid = model.part("lid")
     lid.visual(
-        Box((LID_D - 0.032, LID_W, LID_TOP)),
-        origin=Origin(xyz=(LID_CENTER_X - 0.002, 0.0, 0.003)),
-        material=freezer_white,
-        name="lid_shell",
+        Box((lid_width, lid_depth, lid_panel_thickness)),
+        origin=Origin(xyz=(0.0, lid_center_y, 0.003)),
+        material=white,
+        name="top_panel",
     )
     lid.visual(
-        Box((LID_LIP_T, LID_W - 0.040, LID_LIP_H)),
-        origin=Origin(
-            xyz=(LID_CENTER_X - 0.002 + (LID_D - 0.032) / 2.0 + LID_LIP_T / 2.0, 0.0, -0.022),
-        ),
-        material=freezer_white,
-        name="lid_front_lip",
+        Box((inner_width - 0.012, inner_depth - 0.014, lid_insert_thickness)),
+        origin=Origin(xyz=(0.0, (inner_depth / 2.0) + 0.061, -0.026)),
+        material=liner_white,
+        name="lid_plug",
     )
     lid.visual(
-        Box((0.050, LID_W - 0.082, 0.012)),
-        origin=Origin(xyz=(0.025, 0.0, -0.005)),
-        material=freezer_white,
-        name="lid_rear_leaf",
-    )
-    lid.visual(
-        Box((LID_D - 0.060, LID_LIP_T, LID_LIP_H)),
-        origin=Origin(xyz=(LID_CENTER_X - 0.010, LID_W / 2.0 - LID_LIP_T / 2.0, -0.022)),
-        material=freezer_white,
-        name="lid_right_lip",
-    )
-    lid.visual(
-        Box((LID_D - 0.060, LID_LIP_T, LID_LIP_H)),
-        origin=Origin(xyz=(LID_CENTER_X - 0.010, -LID_W / 2.0 + LID_LIP_T / 2.0, -0.022)),
-        material=freezer_white,
-        name="lid_left_lip",
-    )
-    lid.visual(
-        Box((BODY_D - 0.100, BODY_W - 0.100, 0.008)),
-        origin=Origin(xyz=(BODY_D / 2.0 + 0.014, 0.0, -0.012)),
-        material=gasket_dark,
-        name="lid_gasket",
-    )
-    lid.visual(
-        Cylinder(radius=0.010, length=BODY_W - 0.030),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=hardware_metal,
-        name="lid_hinge_knuckle",
-    )
-    lid.visual(
-        Box((0.012, 0.064, 0.010)),
-        origin=Origin(xyz=(HASP_PIVOT_X - 0.004, 0.0, -0.015)),
-        material=hardware_metal,
-        name="hasp_mount",
-    )
-    lid.visual(
-        Cylinder(radius=0.0065, length=0.082),
-        origin=Origin(
-            xyz=(HASP_PIVOT_X, 0.0, HASP_PIVOT_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware_metal,
-        name="hasp_pivot_pin",
-    )
-    lid.inertial = Inertial.from_geometry(
-        Box((LID_D, LID_W, LID_H)),
-        mass=16.0,
-        origin=Origin(xyz=(LID_CENTER_X, 0.0, 0.0)),
+        Box((0.34, 0.038, 0.050)),
+        origin=Origin(xyz=(0.0, lid_center_y + (lid_depth / 2.0) + 0.010, -0.010)),
+        material=trim_gray,
+        name="front_handle",
     )
 
-    hasp_plate = model.part("hasp_plate")
-    hasp_plate.visual(
-        Box((HASP_T, HASP_W, HASP_H)),
-        origin=Origin(xyz=(HASP_T * 0.5, 0.0, -(HASP_H * 0.5))),
-        material=hardware_metal,
-        name="hasp_plate",
-    )
-    hasp_plate.visual(
-        Cylinder(radius=0.0075, length=0.046),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=hardware_metal,
-        name="plate_sleeve",
-    )
-    hasp_plate.visual(
-        Cylinder(radius=0.013, length=0.010),
-        origin=Origin(
-            xyz=(0.010, 0.0, -0.092),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=hardware_metal,
-        name="padlock_boss",
-    )
-    hasp_plate.inertial = Inertial.from_geometry(
-        Box((0.020, HASP_W, HASP_H)),
-        mass=0.45,
-        origin=Origin(xyz=(0.010, 0.0, -(HASP_H * 0.5))),
-    )
+    for side_name, hinge_x in (("left", hinge_x_positions[0]), ("right", hinge_x_positions[1])):
+        lid.visual(
+            Box((0.024, 0.034, 0.022)),
+            origin=Origin(xyz=(hinge_x, 0.012, -0.003)),
+            material=hinge_gray,
+            name=f"{side_name}_hinge_strap",
+        )
+        lid.visual(
+            Cylinder(radius=barrel_radius, length=center_knuckle_length),
+            origin=Origin(
+                xyz=(hinge_x, 0.0, 0.0),
+                rpy=(0.0, pi / 2.0, 0.0),
+            ),
+            material=hinge_gray,
+            name=f"{side_name}_center_knuckle",
+        )
 
     model.articulation(
-        "body_to_corner_channels",
-        ArticulationType.FIXED,
-        parent=body,
-        child=corner_channels,
-        origin=Origin(),
-    )
-    model.articulation(
-        "body_to_lid",
+        "rear_hinge",
         ArticulationType.REVOLUTE,
-        parent=body,
+        parent=cabinet,
         child=lid,
-        origin=Origin(xyz=(HINGE_X, 0.0, HINGE_Z)),
-        axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(effort=40.0, velocity=1.8, lower=0.0, upper=1.22),
-    )
-    model.articulation(
-        "lid_to_hasp",
-        ArticulationType.REVOLUTE,
-        parent=lid,
-        child=hasp_plate,
-        origin=Origin(xyz=(HASP_PIVOT_X, 0.0, HASP_PIVOT_Z)),
-        axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(effort=4.0, velocity=3.0, lower=0.0, upper=1.38),
+        origin=Origin(xyz=(0.0, hinge_axis_y, hinge_axis_z)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=30.0,
+            velocity=1.5,
+            lower=0.0,
+            upper=1.25,
+        ),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    body = object_model.get_part("body")
-    corner_channels = object_model.get_part("corner_channels")
+    ctx = TestContext(object_model, seed=0)
+
+    cabinet = object_model.get_part("cabinet")
     lid = object_model.get_part("lid")
-    hasp_plate = object_model.get_part("hasp_plate")
-    lid_hinge = object_model.get_articulation("body_to_lid")
-    hasp_hinge = object_model.get_articulation("lid_to_hasp")
-    body_knuckle = body.get_visual("body_hinge_knuckle")
-    body_floor = body.get_visual("body_floor")
-    front_wall = body.get_visual("front_wall")
-    right_wall = body.get_visual("right_wall")
-    staple_base = body.get_visual("staple_base")
-    staple_bridge = body.get_visual("staple_bridge")
-    lid_front_lip = lid.get_visual("lid_front_lip")
-    lid_right_lip = lid.get_visual("lid_right_lip")
-    lid_gasket = lid.get_visual("lid_gasket")
-    lid_knuckle = lid.get_visual("lid_hinge_knuckle")
-    lid_shell = lid.get_visual("lid_shell")
-    lid_pin = lid.get_visual("hasp_pivot_pin")
-    plate_face = hasp_plate.get_visual("hasp_plate")
-    plate_sleeve = hasp_plate.get_visual("plate_sleeve")
-    padlock_boss = hasp_plate.get_visual("padlock_boss")
+    rear_hinge = object_model.get_articulation("rear_hinge")
+
+    def dims_from_aabb(aabb):
+        if aabb is None:
+            return None
+        low, high = aabb
+        return (high[0] - low[0], high[1] - low[1], high[2] - low[2])
+
+    def center_from_aabb(aabb):
+        if aabb is None:
+            return None
+        low, high = aabb
+        return (
+            (low[0] + high[0]) / 2.0,
+            (low[1] + high[1]) / 2.0,
+            (low[2] + high[2]) / 2.0,
+        )
+
+    def require_elem_center(part_name: str, elem_name: str):
+        aabb = ctx.part_element_world_aabb(part_name, elem=elem_name)
+        ctx.check(
+            f"{part_name}_{elem_name}_present",
+            aabb is not None,
+            f"Expected visual {elem_name!r} on part {part_name!r}.",
+        )
+        return center_from_aabb(aabb)
+
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.allow_overlap(hasp_plate, lid, reason="hasp sleeve nests around the lid pivot pin")
-    ctx.check_articulation_overlaps(
-        max_pose_samples=96,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-    )
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(
-        max_pose_samples=96,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
+    cabinet_aabb = ctx.part_world_aabb(cabinet)
+    lid_aabb = ctx.part_world_aabb(lid)
+    cabinet_dims = dims_from_aabb(cabinet_aabb)
+    lid_dims = dims_from_aabb(lid_aabb)
+
+    ctx.check("cabinet_exists", cabinet_aabb is not None, "Cabinet geometry should resolve.")
+    ctx.check("lid_exists", lid_aabb is not None, "Lid geometry should resolve.")
+    ctx.check(
+        "rear_hinge_axis_is_widthwise",
+        rear_hinge.axis == (1.0, 0.0, 0.0),
+        f"Expected lid hinge axis along freezer width; got {rear_hinge.axis!r}.",
     )
 
-    ctx.expect_contact(corner_channels, body)
-    ctx.expect_overlap(corner_channels, body, axes="z", min_overlap=0.60)
-    ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.62)
-    ctx.expect_origin_distance(lid, body, axes="y", max_dist=0.01)
-    ctx.expect_within(
-        lid,
-        body,
-        axes="xy",
-        inner_elem=lid_gasket,
-        outer_elem=body_floor,
-        name="lid_gasket_sits_inside_the_body_opening",
-    )
-    ctx.expect_gap(
-        lid,
-        body,
-        axis="x",
-        max_gap=0.002,
-        max_penetration=0.0,
-        positive_elem=lid_knuckle,
-        negative_elem=body_knuckle,
-        name="rear_piano_knuckles_run_close_without_intersection",
-    )
-    ctx.expect_overlap(
-        lid,
-        body,
-        axes="yz",
-        min_overlap=0.018,
-        elem_a=lid_knuckle,
-        elem_b=body_knuckle,
-        name="rear_piano_knuckles_run_the_full_body_width",
-    )
-    ctx.expect_gap(
-        lid,
-        body,
-        axis="x",
-        max_gap=0.004,
-        max_penetration=0.0,
-        positive_elem=lid_front_lip,
-        negative_elem=front_wall,
-        name="front_lid_lip_covers_the_front_face_without_cutting_in",
-    )
-    ctx.expect_gap(
-        lid,
-        body,
-        axis="y",
-        max_gap=0.006,
-        max_penetration=0.0,
-        positive_elem=lid_right_lip,
-        negative_elem=right_wall,
-        name="side_lid_lip_covers_the_side_face_without_cutting_in",
-    )
-    ctx.expect_overlap(
-        hasp_plate,
-        lid,
-        axes="yz",
-        min_overlap=0.012,
-        elem_a=plate_sleeve,
-        elem_b=lid_pin,
-        name="hasp_plate_mounts_on_front_pivot_pin",
-    )
-    ctx.expect_overlap(
-        hasp_plate,
-        body,
-        axes="yz",
-        min_overlap=0.008,
-        elem_a=padlock_boss,
-        elem_b=staple_bridge,
-        name="padlock_boss_aligns_with_staple_when_latched",
-    )
-    ctx.expect_gap(
-        hasp_plate,
-        body,
-        axis="x",
-        max_gap=0.005,
-        max_penetration=0.002,
-        positive_elem=plate_face,
-        negative_elem=staple_base,
-        name="latched_hasp_swings_over_fixed_staple_bracket",
-    )
-    with ctx.pose({hasp_hinge: 1.25}):
-        ctx.expect_gap(
-            hasp_plate,
-            body,
-            axis="z",
-            min_gap=0.020,
-            positive_elem=padlock_boss,
-            negative_elem=staple_bridge,
-            name="opened_hasp_lifts_clear_of_the_staple",
+    if cabinet_dims is not None:
+        ctx.check(
+            "cabinet_realistic_width",
+            1.0 <= cabinet_dims[0] <= 1.15,
+            f"Cabinet width {cabinet_dims[0]:.3f} m is not chest-freezer sized.",
         )
-        ctx.expect_overlap(
-            hasp_plate,
+        ctx.check(
+            "cabinet_realistic_depth",
+            0.65 <= cabinet_dims[1] <= 0.76,
+            f"Cabinet depth {cabinet_dims[1]:.3f} m is not chest-freezer sized.",
+        )
+        ctx.check(
+            "cabinet_realistic_height",
+            0.82 <= cabinet_dims[2] <= 0.88,
+            f"Cabinet height {cabinet_dims[2]:.3f} m is not realistic.",
+        )
+
+    if lid_dims is not None and cabinet_dims is not None:
+        ctx.check(
+            "lid_overhangs_cabinet_width",
+            lid_dims[0] > cabinet_dims[0],
+            "Lid should slightly overhang the cabinet width.",
+        )
+        ctx.check(
+            "lid_overhangs_cabinet_depth",
+            lid_dims[1] > cabinet_dims[1],
+            "Lid should slightly overhang the cabinet depth.",
+        )
+
+    left_hinge = require_elem_center("lid", "left_center_knuckle")
+    right_hinge = require_elem_center("lid", "right_center_knuckle")
+    handle_center = require_elem_center("lid", "front_handle")
+
+    if left_hinge is not None and right_hinge is not None:
+        ctx.check(
+            "hinges_are_spaced_left_right",
+            left_hinge[0] < -0.25 and right_hinge[0] > 0.25,
+            f"Hinge centers should sit near opposite rear corners, got {left_hinge!r} and {right_hinge!r}.",
+        )
+        ctx.check(
+            "hinges_share_rear_axis",
+            abs(left_hinge[1] - right_hinge[1]) <= 0.002 and abs(left_hinge[2] - right_hinge[2]) <= 0.002,
+            f"Both hinge knuckles should lie on one rear hinge axis, got {left_hinge!r} and {right_hinge!r}.",
+        )
+
+    if handle_center is not None:
+        ctx.check(
+            "handle_is_front_mounted",
+            handle_center[1] > 0.30,
+            f"Front handle should sit on the front edge of the lid, got center {handle_center!r}.",
+        )
+
+    with ctx.pose({rear_hinge: 0.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="rear_hinge_lower_no_overlap")
+        ctx.fail_if_isolated_parts(name="rear_hinge_lower_no_floating")
+        ctx.expect_contact(lid, cabinet, name="lid_closed_contacts_cabinet")
+        ctx.expect_overlap(lid, cabinet, axes="xy", min_overlap=0.68, name="lid_closed_covers_cabinet")
+        ctx.expect_contact(
             lid,
-            axes="yz",
-            min_overlap=0.012,
-            elem_a=plate_sleeve,
-            elem_b=lid_pin,
-            name="hasp_stays_carried_by_the_lid_when_opened",
+            cabinet,
+            elem_a="left_center_knuckle",
+            elem_b="left_outer_knuckle_a",
+            name="left_hinge_contact_closed_a",
         )
-    with ctx.pose({lid_hinge: 1.05, hasp_hinge: 1.25}):
-        ctx.expect_gap(
+        ctx.expect_contact(
             lid,
-            body,
-            axis="x",
-            max_gap=0.002,
-            max_penetration=0.0,
-            positive_elem=lid_knuckle,
-            negative_elem=body_knuckle,
-            name="rear_knuckles_remain_seated_as_the_lid_opens",
+            cabinet,
+            elem_a="left_center_knuckle",
+            elem_b="left_outer_knuckle_b",
+            name="left_hinge_contact_closed_b",
         )
-        ctx.expect_gap(
+        ctx.expect_contact(
             lid,
-            body,
-            axis="z",
-            min_gap=0.45,
-            positive_elem=lid_front_lip,
-            negative_elem=staple_base,
-            name="opened_lid_lifts_well_clear_of_the_front_face",
+            cabinet,
+            elem_a="right_center_knuckle",
+            elem_b="right_outer_knuckle_a",
+            name="right_hinge_contact_closed_a",
         )
-        ctx.expect_overlap(
-            hasp_plate,
+        ctx.expect_contact(
             lid,
-            axes="yz",
-            min_overlap=0.012,
-            elem_a=plate_sleeve,
-            elem_b=lid_pin,
-            name="hasp_pivot_remains_nested_with_lid_open",
+            cabinet,
+            elem_a="right_center_knuckle",
+            elem_b="right_outer_knuckle_b",
+            name="right_hinge_contact_closed_b",
         )
+
+    limits = rear_hinge.motion_limits
+    if limits is not None and limits.lower is not None and limits.upper is not None:
+        with ctx.pose({rear_hinge: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="rear_hinge_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="rear_hinge_upper_no_floating")
+            ctx.expect_contact(
+                lid,
+                cabinet,
+                elem_a="left_center_knuckle",
+                elem_b="left_outer_knuckle_a",
+                name="left_hinge_contact_open",
+            )
+            ctx.expect_contact(
+                lid,
+                cabinet,
+                elem_a="right_center_knuckle",
+                elem_b="right_outer_knuckle_a",
+                name="right_hinge_contact_open",
+            )
+
+        with ctx.pose({rear_hinge: limits.lower}):
+            closed_handle_center = center_from_aabb(ctx.part_element_world_aabb("lid", elem="front_handle"))
+        with ctx.pose({rear_hinge: limits.upper}):
+            open_handle_center = center_from_aabb(ctx.part_element_world_aabb("lid", elem="front_handle"))
+
+        if closed_handle_center is not None and open_handle_center is not None:
+            ctx.check(
+                "lid_opens_upward",
+                open_handle_center[2] > closed_handle_center[2] + 0.28,
+                f"Handle should rise substantially when the lid opens, got closed {closed_handle_center!r} and open {open_handle_center!r}.",
+            )
+            ctx.check(
+                "lid_swings_from_rear_edge",
+                open_handle_center[1] < closed_handle_center[1] - 0.18,
+                f"Front edge should swing rearward as the lid rotates up, got closed {closed_handle_center!r} and open {open_handle_center!r}.",
+            )
+
     return ctx.report()
 
 

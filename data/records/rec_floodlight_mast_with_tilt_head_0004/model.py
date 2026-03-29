@@ -3,663 +3,496 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
 import os
-from pathlib import Path
 
-_ORIGINAL_GETCWD = os.getcwd
+os.chdir("/")
+if not os.path.isabs(__file__):
+    __file__ = f"/{os.path.basename(__file__)}"
 
-
-def _safe_getcwd() -> str:
-    try:
-        return _ORIGINAL_GETCWD()
-    except FileNotFoundError:
-        os.chdir("/")
-        return _ORIGINAL_GETCWD()
-
-
-os.getcwd = _safe_getcwd
-os.chdir(_safe_getcwd())
+import math
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
-    Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
 )
 
-ASSETS = AssetContext.from_script(__file__)
+BASE_HEIGHT = 0.22
+PEDESTAL_HEIGHT = 0.12
+LOWER_MAST_RADIUS = 0.06
+LOWER_MAST_HEIGHT = 1.95
+HINGE_X = 0.18
+HINGE_Z = BASE_HEIGHT + PEDESTAL_HEIGHT + LOWER_MAST_HEIGHT
 
-BASE_LENGTH = 1.20
-BASE_WIDTH = 0.82
-FRAME_RAIL = 0.08
-FRAME_HEIGHT = 0.05
-FRAME_CENTER_Z = 0.085
-FRAME_TOP_Z = FRAME_CENTER_Z + (FRAME_HEIGHT * 0.5)
-FOOT_SOCKET_HEIGHT = 0.036
-FOOT_SOCKET_CENTER_Z = 0.042
-FOOT_STEM_LENGTH = 0.044
-FOOT_STEM_CENTER_Z = 0.038
-FOOT_PAD_LENGTH = 0.016
-FOOT_PAD_CENTER_Z = 0.008
-FOOT_NUT_LENGTH = 0.020
-FOOT_NUT_CENTER_Z = 0.026
-FOOT_X = (BASE_LENGTH * 0.5) - (FRAME_RAIL * 0.5)
-FOOT_Y = (BASE_WIDTH * 0.5) - (FRAME_RAIL * 0.5)
+UPPER_MAST_RADIUS = 0.05
+UPPER_MAST_HEIGHT = 1.34
+UPPER_HEAD_Z = 1.67
+HEAD_PIVOT_X = 0.12
 
-MAST_SIZE = 0.12
-MAST_SECTION_HEIGHT = 0.74
-MAST_BASE_FLANGE_HEIGHT = 0.022
-MAST_TOP_PLATE_HEIGHT = 0.022
-MAST_TOTAL_HEIGHT = (3.0 * MAST_SECTION_HEIGHT) + MAST_BASE_FLANGE_HEIGHT + MAST_TOP_PLATE_HEIGHT
-
-HEAD_CROSSBAR_Z = 0.26
-HEAD_YOKE_CENTER_Z = 0.125
-HEAD_LAMP_AXIS_Z = 0.105
-LAMP_CENTER_Y = 0.21
-YOKE_OFFSET_Y = 0.142
-YOKE_CHEEK_THICKNESS = 0.012
-LAMP_AXLE_LENGTH = 2.0 * (YOKE_OFFSET_Y - (YOKE_CHEEK_THICKNESS * 0.5))
-def _add_corner_foot(part, prefix: str, x_pos: float, y_pos: float, metal, rubber) -> None:
-    part.visual(
-        Box((0.10, 0.10, FOOT_SOCKET_HEIGHT)),
-        origin=Origin(xyz=(x_pos, y_pos, FOOT_SOCKET_CENTER_Z)),
-        material=metal,
-        name=f"{prefix}_socket",
-    )
-    part.visual(
-        Cylinder(radius=0.012, length=FOOT_STEM_LENGTH),
-        origin=Origin(xyz=(x_pos, y_pos, FOOT_STEM_CENTER_Z)),
-        material=metal,
-        name=f"{prefix}_stem",
-    )
-    part.visual(
-        Cylinder(radius=0.028, length=FOOT_NUT_LENGTH),
-        origin=Origin(xyz=(x_pos, y_pos, FOOT_NUT_CENTER_Z)),
-        material=metal,
-        name=f"{prefix}_nut",
-    )
-    part.visual(
-        Cylinder(radius=0.055, length=FOOT_PAD_LENGTH),
-        origin=Origin(xyz=(x_pos, y_pos, FOOT_PAD_CENTER_Z)),
-        material=rubber,
-        name=f"{prefix}_pad",
-    )
-
-
-def _add_collar(part, prefix: str, z_pos: float, collar_metal, bolt_metal) -> None:
-    part.visual(
-        Box((0.014, 0.148, 0.054)),
-        origin=Origin(xyz=(0.067, 0.0, z_pos)),
-        material=collar_metal,
-        name=f"{prefix}_front_plate",
-    )
-    part.visual(
-        Box((0.014, 0.148, 0.054)),
-        origin=Origin(xyz=(-0.067, 0.0, z_pos)),
-        material=collar_metal,
-        name=f"{prefix}_back_plate",
-    )
-    part.visual(
-        Box((0.148, 0.014, 0.054)),
-        origin=Origin(xyz=(0.0, 0.067, z_pos)),
-        material=collar_metal,
-        name=f"{prefix}_left_plate",
-    )
-    part.visual(
-        Box((0.148, 0.014, 0.054)),
-        origin=Origin(xyz=(0.0, -0.067, z_pos)),
-        material=collar_metal,
-        name=f"{prefix}_right_plate",
-    )
-
-    for bolt_index, y_pos in enumerate((-0.052, 0.052), start=1):
-        for row_index, z_offset in enumerate((-0.014, 0.014), start=1):
-            part.visual(
-                Cylinder(radius=0.007, length=0.014),
-                origin=Origin(
-                    xyz=(0.081, y_pos, z_pos + z_offset),
-                    rpy=(0.0, math.pi * 0.5, 0.0),
-                ),
-                material=bolt_metal,
-                name=f"{prefix}_front_bolt_{bolt_index}_{row_index}",
-            )
-            part.visual(
-                Cylinder(radius=0.007, length=0.014),
-                origin=Origin(
-                    xyz=(-0.081, y_pos, z_pos + z_offset),
-                    rpy=(0.0, math.pi * 0.5, 0.0),
-                ),
-                material=bolt_metal,
-                name=f"{prefix}_back_bolt_{bolt_index}_{row_index}",
-            )
-
-
-def _add_yoke(part, prefix: str, center_y: float, metal, bolt_metal) -> None:
-    outer_y = center_y + YOKE_OFFSET_Y
-    inner_y = center_y - YOKE_OFFSET_Y
-    if center_y < 0.0:
-        outer_y, inner_y = center_y - YOKE_OFFSET_Y, center_y + YOKE_OFFSET_Y
-    pin_head_length = 0.016
-    outer_head_sign = 1.0 if outer_y > center_y else -1.0
-    inner_head_sign = 1.0 if inner_y > center_y else -1.0
-
-    part.visual(
-        Box((0.060, YOKE_CHEEK_THICKNESS, 0.210)),
-        origin=Origin(xyz=(0.120, outer_y, HEAD_YOKE_CENTER_Z)),
-        material=metal,
-        name=f"{prefix}_yoke_outer",
-    )
-    part.visual(
-        Box((0.060, YOKE_CHEEK_THICKNESS, 0.210)),
-        origin=Origin(xyz=(0.120, inner_y, HEAD_YOKE_CENTER_Z)),
-        material=metal,
-        name=f"{prefix}_yoke_inner",
-    )
-    part.visual(
-        Cylinder(radius=0.016, length=pin_head_length),
-        origin=Origin(
-            xyz=(
-                0.120,
-                outer_y + (outer_head_sign * ((YOKE_CHEEK_THICKNESS * 0.5) + (pin_head_length * 0.5))),
-                HEAD_LAMP_AXIS_Z,
-            ),
-            rpy=(-math.pi * 0.5, 0.0, 0.0),
-        ),
-        material=bolt_metal,
-        name=f"{prefix}_pin_head_outer",
-    )
-    part.visual(
-        Cylinder(radius=0.016, length=pin_head_length),
-        origin=Origin(
-            xyz=(
-                0.120,
-                inner_y + (inner_head_sign * ((YOKE_CHEEK_THICKNESS * 0.5) + (pin_head_length * 0.5))),
-                HEAD_LAMP_AXIS_Z,
-            ),
-            rpy=(-math.pi * 0.5, 0.0, 0.0),
-        ),
-        material=bolt_metal,
-        name=f"{prefix}_pin_head_inner",
-    )
-
-
-def _add_floodlight_body(part, shell_material, lens_material, emitter_material, rear_material) -> None:
-    part.visual(
-        Box((0.112, 0.226, 0.170)),
-        origin=Origin(xyz=(0.010, 0.0, 0.0)),
-        material=shell_material,
-        name="shell",
-    )
-    part.visual(
-        Box((0.048, 0.200, 0.146)),
-        origin=Origin(xyz=(-0.052, 0.0, 0.0)),
-        material=shell_material,
-        name="rear_taper",
-    )
-    part.visual(
-        Box((0.016, 0.250, 0.014)),
-        origin=Origin(xyz=(0.063, 0.0, 0.089)),
-        material=shell_material,
-        name="bezel_top",
-    )
-    part.visual(
-        Box((0.016, 0.250, 0.014)),
-        origin=Origin(xyz=(0.063, 0.0, -0.089)),
-        material=shell_material,
-        name="bezel_bottom",
-    )
-    part.visual(
-        Box((0.016, 0.014, 0.178)),
-        origin=Origin(xyz=(0.063, 0.118, 0.0)),
-        material=shell_material,
-        name="bezel_left",
-    )
-    part.visual(
-        Box((0.016, 0.014, 0.178)),
-        origin=Origin(xyz=(0.063, -0.118, 0.0)),
-        material=shell_material,
-        name="bezel_right",
-    )
-    part.visual(
-        Box((0.004, 0.188, 0.134)),
-        origin=Origin(xyz=(0.045, 0.0, 0.0)),
-        material=lens_material,
-        name="lens",
-    )
-    part.visual(
-        Box((0.014, 0.160, 0.108)),
-        origin=Origin(xyz=(0.028, 0.0, 0.0)),
-        material=emitter_material,
-        name="emitter",
-    )
-    part.visual(
-        Box((0.030, 0.154, 0.110)),
-        origin=Origin(xyz=(-0.028, 0.0, 0.0)),
-        material=rear_material,
-        name="driver_box",
-    )
-    part.visual(
-        Cylinder(radius=0.014, length=LAMP_AXLE_LENGTH),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(-math.pi * 0.5, 0.0, 0.0)),
-        material=rear_material,
-        name="trunnion_axle",
-    )
+HEAD_SPECS = (
+    ("left", -0.30),
+    ("center", 0.0),
+    ("right", 0.30),
+)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="temporary_light_tower", assets=ASSETS)
+    model = ArticulatedObject(name="hinged_mast_floodlight_pole")
 
-    galvanized = model.material("galvanized", rgba=(0.69, 0.73, 0.76, 1.0))
-    zinc = model.material("zinc", rgba=(0.77, 0.79, 0.81, 1.0))
-    dark_frame = model.material("dark_frame", rgba=(0.20, 0.21, 0.23, 1.0))
-    lamp_black = model.material("lamp_black", rgba=(0.17, 0.18, 0.19, 1.0))
-    lens_glass = model.material("lens_glass", rgba=(0.84, 0.90, 0.96, 0.58))
-    emitter_white = model.material("emitter_white", rgba=(0.95, 0.94, 0.86, 1.0))
-    rubber = model.material("rubber", rgba=(0.10, 0.10, 0.10, 1.0))
+    concrete = model.material("concrete", rgba=(0.63, 0.64, 0.66, 1.0))
+    galvanized = model.material("galvanized_steel", rgba=(0.58, 0.60, 0.62, 1.0))
+    dark = model.material("dark_housing", rgba=(0.17, 0.18, 0.19, 1.0))
+    black = model.material("bracket_black", rgba=(0.10, 0.10, 0.11, 1.0))
+    lens_frame = model.material("lens_frame", rgba=(0.22, 0.23, 0.24, 1.0))
+    glass = model.material("lens_glass", rgba=(0.82, 0.88, 0.94, 0.42))
 
-    base = model.part("base_frame")
+    base = model.part("base_assembly")
     base.visual(
-        Box((BASE_LENGTH, FRAME_RAIL, FRAME_HEIGHT)),
-        origin=Origin(xyz=(0.0, (BASE_WIDTH * 0.5) - (FRAME_RAIL * 0.5), FRAME_CENTER_Z)),
-        material=dark_frame,
-        name="left_rail",
+        Box((0.72, 0.52, BASE_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, BASE_HEIGHT * 0.5)),
+        material=concrete,
+        name="foundation",
     )
     base.visual(
-        Box((BASE_LENGTH, FRAME_RAIL, FRAME_HEIGHT)),
-        origin=Origin(xyz=(0.0, -((BASE_WIDTH * 0.5) - (FRAME_RAIL * 0.5)), FRAME_CENTER_Z)),
-        material=dark_frame,
-        name="right_rail",
-    )
-    base.visual(
-        Box((FRAME_RAIL, BASE_WIDTH - FRAME_RAIL, FRAME_HEIGHT)),
-        origin=Origin(xyz=((BASE_LENGTH * 0.5) - (FRAME_RAIL * 0.5), 0.0, FRAME_CENTER_Z)),
-        material=dark_frame,
-        name="front_rail",
-    )
-    base.visual(
-        Box((FRAME_RAIL, BASE_WIDTH - FRAME_RAIL, FRAME_HEIGHT)),
-        origin=Origin(xyz=(-((BASE_LENGTH * 0.5) - (FRAME_RAIL * 0.5)), 0.0, FRAME_CENTER_Z)),
-        material=dark_frame,
-        name="rear_rail",
-    )
-    base.visual(
-        Box((BASE_LENGTH - 0.14, 0.060, 0.050)),
-        origin=Origin(xyz=(0.0, 0.0, FRAME_CENTER_Z)),
-        material=dark_frame,
-        name="center_tie",
-    )
-    base.visual(
-        Box((0.30, 0.24, 0.018)),
-        origin=Origin(xyz=(0.0, 0.0, FRAME_TOP_Z + 0.009)),
+        Box((0.18, 0.18, PEDESTAL_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, BASE_HEIGHT + PEDESTAL_HEIGHT * 0.5)),
         material=galvanized,
-        name="mast_mount_plate",
+        name="anchor_pedestal",
     )
-    _add_corner_foot(base, "front_left", FOOT_X, FOOT_Y, zinc, rubber)
-    _add_corner_foot(base, "front_right", FOOT_X, -FOOT_Y, zinc, rubber)
-    _add_corner_foot(base, "rear_left", -FOOT_X, FOOT_Y, zinc, rubber)
-    _add_corner_foot(base, "rear_right", -FOOT_X, -FOOT_Y, zinc, rubber)
-    base.inertial = Inertial.from_geometry(
-        Box((BASE_LENGTH, BASE_WIDTH, 0.16)),
-        mass=52.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.08)),
+    base.visual(
+        Cylinder(radius=LOWER_MAST_RADIUS, length=LOWER_MAST_HEIGHT),
+        origin=Origin(xyz=(0.0, 0.0, BASE_HEIGHT + PEDESTAL_HEIGHT + LOWER_MAST_HEIGHT * 0.5)),
+        material=galvanized,
+        name="lower_mast",
+    )
+    base.visual(
+        Cylinder(radius=0.085, length=0.14),
+        origin=Origin(xyz=(0.0, 0.0, HINGE_Z - 0.07)),
+        material=galvanized,
+        name="lower_mast_collar",
+    )
+    base.visual(
+        Box((0.03, 0.13, 0.08)),
+        origin=Origin(xyz=(HINGE_X - 0.0775, 0.0, HINGE_Z - 0.07)),
+        material=black,
+        name="hinge_spine",
+    )
+    base.visual(
+        Box((0.17, 0.008, 0.16)),
+        origin=Origin(xyz=(HINGE_X - 0.04, 0.055, HINGE_Z)),
+        material=black,
+        name="hinge_pos_cheek",
+    )
+    base.visual(
+        Box((0.17, 0.008, 0.16)),
+        origin=Origin(xyz=(HINGE_X - 0.04, -0.055, HINGE_Z)),
+        material=black,
+        name="hinge_neg_cheek",
+    )
+    base.visual(
+        Box((0.085, 0.13, 0.035)),
+        origin=Origin(xyz=(HINGE_X - 0.0975, 0.0, HINGE_Z - 0.0625)),
+        material=black,
+        name="hinge_saddle",
     )
 
-    mast = model.part("mast")
-    mast.visual(
-        Box((0.190, 0.190, MAST_BASE_FLANGE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, MAST_BASE_FLANGE_HEIGHT * 0.5)),
-        material=galvanized,
-        name="base_flange",
+    upper = model.part("upper_mast")
+    upper.visual(
+        Box((0.05, 0.086, 0.10)),
+        origin=Origin(xyz=(0.01, 0.0, 0.05)),
+        material=black,
+        name="hinge_block",
     )
-    mast.visual(
-        Box((MAST_SIZE, MAST_SIZE, MAST_SECTION_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, MAST_BASE_FLANGE_HEIGHT + (MAST_SECTION_HEIGHT * 0.5))),
-        material=galvanized,
-        name="lower_section",
+    upper.visual(
+        Cylinder(radius=0.04, length=0.008),
+        origin=Origin(xyz=(0.0, 0.047, 0.0), rpy=(math.pi * 0.5, 0.0, 0.0)),
+        material=black,
+        name="hinge_pos_trunnion",
     )
-    mast.visual(
-        Box((MAST_SIZE, MAST_SIZE, MAST_SECTION_HEIGHT)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                0.0,
-                MAST_BASE_FLANGE_HEIGHT + MAST_SECTION_HEIGHT + (MAST_SECTION_HEIGHT * 0.5),
+    upper.visual(
+        Cylinder(radius=0.04, length=0.008),
+        origin=Origin(xyz=(0.0, -0.047, 0.0), rpy=(math.pi * 0.5, 0.0, 0.0)),
+        material=black,
+        name="hinge_neg_trunnion",
+    )
+    upper.visual(
+        Box((0.14, 0.08, 0.18)),
+        origin=Origin(xyz=(0.08, 0.0, 0.16)),
+        material=black,
+        name="mast_transition",
+    )
+    upper.visual(
+        Cylinder(radius=UPPER_MAST_RADIUS, length=UPPER_MAST_HEIGHT),
+        origin=Origin(xyz=(0.12, 0.0, 0.24 + UPPER_MAST_HEIGHT * 0.5)),
+        material=galvanized,
+        name="upper_mast_column",
+    )
+    upper.visual(
+        Box((0.16, 0.16, 0.18)),
+        origin=Origin(xyz=(0.0, 0.0, UPPER_HEAD_Z)),
+        material=black,
+        name="top_hub",
+    )
+    upper.visual(
+        Box((0.06, 0.84, 0.06)),
+        origin=Origin(xyz=(0.03, 0.0, UPPER_HEAD_Z)),
+        material=black,
+        name="array_crossarm",
+    )
+    upper.visual(
+        Box((0.05, 0.24, 0.05)),
+        origin=Origin(xyz=(0.07, 0.0, UPPER_HEAD_Z - 0.045)),
+        material=black,
+        name="array_spine",
+    )
+
+    for head_name, y_pos in HEAD_SPECS:
+        upper.visual(
+            Box((0.09, 0.006, 0.10)),
+            origin=Origin(xyz=(0.095, y_pos + 0.054, UPPER_HEAD_Z)),
+            material=black,
+            name=f"head_{head_name}_pos_cheek",
+        )
+        upper.visual(
+            Box((0.09, 0.006, 0.10)),
+            origin=Origin(xyz=(0.095, y_pos - 0.054, UPPER_HEAD_Z)),
+            material=black,
+            name=f"head_{head_name}_neg_cheek",
+        )
+        upper.visual(
+            Box((0.09, 0.028, 0.04)),
+            origin=Origin(xyz=(0.03, y_pos, UPPER_HEAD_Z - 0.01)),
+            material=black,
+            name=f"head_{head_name}_arm",
+        )
+        upper.visual(
+            Box((0.03, 0.114, 0.014)),
+            origin=Origin(xyz=(0.03, y_pos, UPPER_HEAD_Z + 0.035)),
+            material=black,
+            name=f"head_{head_name}_bridge",
+        )
+
+        head = model.part(f"head_{head_name}")
+        head.visual(
+            Box((0.145, 0.096, 0.09)),
+            origin=Origin(xyz=(0.1275, 0.0, -0.01)),
+            material=dark,
+            name="housing",
+        )
+        head.visual(
+            Box((0.055, 0.088, 0.074)),
+            origin=Origin(xyz=(0.0275, 0.0, -0.012)),
+            material=dark,
+            name="rear_can",
+        )
+        head.visual(
+            Box((0.018, 0.104, 0.092)),
+            origin=Origin(xyz=(0.209, 0.0, -0.01)),
+            material=lens_frame,
+            name="bezel",
+        )
+        head.visual(
+            Box((0.004, 0.090, 0.074)),
+            origin=Origin(xyz=(0.220, 0.0, -0.01)),
+            material=glass,
+            name="lens",
+        )
+        head.visual(
+            Box((0.036, 0.110, 0.012)),
+            origin=Origin(xyz=(0.190, 0.0, 0.041)),
+            material=lens_frame,
+            name="visor",
+        )
+        for fin_index, x_pos in enumerate((0.004, 0.014, 0.024), start=1):
+            head.visual(
+                Box((0.006, 0.082, 0.078)),
+                origin=Origin(xyz=(x_pos, 0.0, -0.012)),
+                material=lens_frame,
+                name=f"cooling_fin_{fin_index}",
             )
-        ),
-        material=galvanized,
-        name="middle_section",
-    )
-    mast.visual(
-        Box((MAST_SIZE, MAST_SIZE, MAST_SECTION_HEIGHT)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                0.0,
-                MAST_BASE_FLANGE_HEIGHT + (2.0 * MAST_SECTION_HEIGHT) + (MAST_SECTION_HEIGHT * 0.5),
-            )
-        ),
-        material=galvanized,
-        name="upper_section",
-    )
-    lower_seam_z = MAST_BASE_FLANGE_HEIGHT + MAST_SECTION_HEIGHT
-    upper_seam_z = MAST_BASE_FLANGE_HEIGHT + (2.0 * MAST_SECTION_HEIGHT)
-    top_mount_z = MAST_BASE_FLANGE_HEIGHT + (3.0 * MAST_SECTION_HEIGHT)
-    _add_collar(mast, "lower_collar", lower_seam_z, zinc, dark_frame)
-    _add_collar(mast, "upper_collar", upper_seam_z, zinc, dark_frame)
-    _add_collar(mast, "top_collar", top_mount_z, zinc, dark_frame)
-    mast.visual(
-        Box((0.170, 0.170, MAST_TOP_PLATE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.0, top_mount_z + (MAST_TOP_PLATE_HEIGHT * 0.5))),
-        material=galvanized,
-        name="top_plate",
-    )
-    mast.inertial = Inertial.from_geometry(
-        Box((0.22, 0.22, MAST_TOTAL_HEIGHT)),
-        mass=66.0,
-        origin=Origin(xyz=(0.0, 0.0, MAST_TOTAL_HEIGHT * 0.5)),
-    )
+        head.visual(
+            Cylinder(radius=0.020, length=0.008),
+            origin=Origin(xyz=(0.0, 0.047, 0.0), rpy=(math.pi * 0.5, 0.0, 0.0)),
+            material=lens_frame,
+            name="pos_trunnion",
+        )
+        head.visual(
+            Cylinder(radius=0.020, length=0.008),
+            origin=Origin(xyz=(0.0, -0.047, 0.0), rpy=(math.pi * 0.5, 0.0, 0.0)),
+            material=lens_frame,
+            name="neg_trunnion",
+        )
 
-    head = model.part("head_frame")
-    head.visual(
-        Box((0.10, 0.10, 0.070)),
-        origin=Origin(xyz=(0.0, 0.0, 0.035)),
-        material=galvanized,
-        name="spigot",
-    )
-    head.visual(
-        Box((0.080, 0.080, 0.240)),
-        origin=Origin(xyz=(0.0, 0.0, 0.120)),
-        material=galvanized,
-        name="upright",
-    )
-    head.visual(
-        Box((0.180, 0.080, 0.060)),
-        origin=Origin(xyz=(0.090, 0.0, HEAD_CROSSBAR_Z)),
-        material=galvanized,
-        name="forward_arm",
-    )
-    head.visual(
-        Box((0.080, 0.840, 0.060)),
-        origin=Origin(xyz=(0.120, 0.0, HEAD_CROSSBAR_Z)),
-        material=galvanized,
-        name="crossbar",
-    )
-    _add_yoke(head, "left", LAMP_CENTER_Y, galvanized, dark_frame)
-    _add_yoke(head, "right", -LAMP_CENTER_Y, galvanized, dark_frame)
-    head.inertial = Inertial.from_geometry(
-        Box((0.26, 0.90, 0.34)),
-        mass=18.0,
-        origin=Origin(xyz=(0.08, 0.0, 0.17)),
-    )
-
-    left_light = model.part("left_floodlight")
-    _add_floodlight_body(left_light, lamp_black, lens_glass, emitter_white, dark_frame)
-    left_light.inertial = Inertial.from_geometry(
-        Box((0.14, 0.28, 0.20)),
-        mass=5.5,
-        origin=Origin(),
-    )
-
-    right_light = model.part("right_floodlight")
-    _add_floodlight_body(right_light, lamp_black, lens_glass, emitter_white, dark_frame)
-    right_light.inertial = Inertial.from_geometry(
-        Box((0.14, 0.28, 0.20)),
-        mass=5.5,
-        origin=Origin(),
-    )
+        model.articulation(
+            f"head_{head_name}_tilt",
+            ArticulationType.REVOLUTE,
+            parent=upper,
+            child=head,
+            origin=Origin(xyz=(HEAD_PIVOT_X, y_pos, UPPER_HEAD_Z)),
+            axis=(0.0, 1.0, 0.0),
+            motion_limits=MotionLimits(
+                effort=10.0,
+                velocity=1.2,
+                lower=-0.45,
+                upper=0.45,
+            ),
+        )
 
     model.articulation(
-        "base_to_mast",
-        ArticulationType.FIXED,
+        "mast_lowering_hinge",
+        ArticulationType.REVOLUTE,
         parent=base,
-        child=mast,
-        origin=Origin(xyz=(0.0, 0.0, FRAME_TOP_Z + 0.018)),
-    )
-    model.articulation(
-        "mast_to_head",
-        ArticulationType.FIXED,
-        parent=mast,
-        child=head,
-        origin=Origin(xyz=(0.0, 0.0, top_mount_z + MAST_TOP_PLATE_HEIGHT)),
-    )
-    model.articulation(
-        "head_to_left_floodlight",
-        ArticulationType.REVOLUTE,
-        parent=head,
-        child=left_light,
-        origin=Origin(xyz=(0.120, LAMP_CENTER_Y, HEAD_LAMP_AXIS_Z)),
+        child=upper,
+        origin=Origin(xyz=(HINGE_X, 0.0, HINGE_Z)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=18.0, velocity=1.5, lower=-1.0, upper=0.18),
-    )
-    model.articulation(
-        "head_to_right_floodlight",
-        ArticulationType.REVOLUTE,
-        parent=head,
-        child=right_light,
-        origin=Origin(xyz=(0.120, -LAMP_CENTER_Y, HEAD_LAMP_AXIS_Z)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=18.0, velocity=1.5, lower=-1.0, upper=0.18),
+        motion_limits=MotionLimits(
+            effort=150.0,
+            velocity=0.5,
+            lower=-1.10,
+            upper=0.10,
+        ),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    base = object_model.get_part("base_frame")
-    mast = object_model.get_part("mast")
-    head = object_model.get_part("head_frame")
-    left_light = object_model.get_part("left_floodlight")
-    right_light = object_model.get_part("right_floodlight")
+    ctx = TestContext(object_model, asset_root="/")
+    base = object_model.get_part("base_assembly")
+    upper = object_model.get_part("upper_mast")
+    heads = {
+        name: object_model.get_part(f"head_{name}")
+        for name, _ in HEAD_SPECS
+    }
 
-    left_tilt = object_model.get_articulation("head_to_left_floodlight")
-    right_tilt = object_model.get_articulation("head_to_right_floodlight")
+    mast_hinge = object_model.get_articulation("mast_lowering_hinge")
+    head_tilts = {
+        name: object_model.get_articulation(f"head_{name}_tilt")
+        for name, _ in HEAD_SPECS
+    }
 
-    mast_mount_plate = base.get_visual("mast_mount_plate")
-    front_rail = base.get_visual("front_rail")
-    front_left_pad = base.get_visual("front_left_pad")
-    rear_left_pad = base.get_visual("rear_left_pad")
-    front_right_pad = base.get_visual("front_right_pad")
-
-    mast_base_flange = mast.get_visual("base_flange")
-    mast_top_plate = mast.get_visual("top_plate")
-    lower_section = mast.get_visual("lower_section")
-    lower_collar_front = mast.get_visual("lower_collar_front_plate")
-    lower_collar_back = mast.get_visual("lower_collar_back_plate")
-    upper_section = mast.get_visual("upper_section")
-    upper_collar_front = mast.get_visual("upper_collar_front_plate")
-    upper_collar_back = mast.get_visual("upper_collar_back_plate")
-
-    head_spigot = head.get_visual("spigot")
-    crossbar = head.get_visual("crossbar")
-    left_yoke_outer = head.get_visual("left_yoke_outer")
-    left_yoke_inner = head.get_visual("left_yoke_inner")
-    right_yoke_outer = head.get_visual("right_yoke_outer")
-    right_yoke_inner = head.get_visual("right_yoke_inner")
-
-    left_shell = left_light.get_visual("shell")
-    left_lens = left_light.get_visual("lens")
-    left_bezel_top = left_light.get_visual("bezel_top")
-    left_axle = left_light.get_visual("trunnion_axle")
-
-    right_shell = right_light.get_visual("shell")
-    right_axle = right_light.get_visual("trunnion_axle")
+    hinge_pos_cheek = base.get_visual("hinge_pos_cheek")
+    hinge_neg_cheek = base.get_visual("hinge_neg_cheek")
+    hinge_spine = base.get_visual("hinge_spine")
+    hinge_pos_trunnion = upper.get_visual("hinge_pos_trunnion")
+    hinge_neg_trunnion = upper.get_visual("hinge_neg_trunnion")
+    hinge_block = upper.get_visual("hinge_block")
+    upper_column = upper.get_visual("upper_mast_column")
+    lower_collar = base.get_visual("lower_mast_collar")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts(max_pose_samples=16)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
+    ctx.fail_if_parts_overlap_in_sampled_poses(max_pose_samples=64, ignore_adjacent=True, ignore_fixed=True)
 
-    # The lamp tilt axes sit centered between wide yoke cheeks, so a tighter default
-    # consumer-scale tolerance would report the intentional open clevis spacing.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.13)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    def axis_is_y(articulation) -> bool:
+        return tuple(round(value, 6) for value in articulation.axis) == (0.0, 1.0, 0.0)
 
-    ctx.expect_overlap(mast, base, axes="xy", elem_a=mast_base_flange, elem_b=mast_mount_plate, min_overlap=0.03)
+    ctx.check(
+        "mast_lowering_hinge_axis",
+        axis_is_y(mast_hinge),
+        details=f"expected mast hinge axis (0, 1, 0), got {mast_hinge.axis}",
+    )
+    for head_name, articulation in head_tilts.items():
+        ctx.check(
+            f"{head_name}_tilt_axis",
+            axis_is_y(articulation),
+            details=f"expected {head_name} tilt axis (0, 1, 0), got {articulation.axis}",
+        )
+
+    ctx.expect_contact(upper, base, elem_a=hinge_pos_trunnion, elem_b=hinge_pos_cheek, name="mast_pos_pin_contact")
+    ctx.expect_contact(upper, base, elem_a=hinge_neg_trunnion, elem_b=hinge_neg_cheek, name="mast_neg_pin_contact")
+    ctx.expect_within(
+        upper,
+        base,
+        axes="xz",
+        inner_elem=hinge_pos_trunnion,
+        outer_elem=hinge_pos_cheek,
+        margin=0.001,
+        name="mast_pos_pin_within_cheek",
+    )
+    ctx.expect_within(
+        upper,
+        base,
+        axes="xz",
+        inner_elem=hinge_neg_trunnion,
+        outer_elem=hinge_neg_cheek,
+        margin=0.001,
+        name="mast_neg_pin_within_cheek",
+    )
     ctx.expect_gap(
-        mast,
+        upper,
+        base,
+        axis="x",
+        positive_elem=hinge_block,
+        negative_elem=hinge_spine,
+        min_gap=0.03,
+        max_gap=0.07,
+        name="mast_hinge_block_clears_spine",
+    )
+    ctx.expect_gap(
+        upper,
         base,
         axis="z",
-        positive_elem=mast_base_flange,
-        negative_elem=mast_mount_plate,
-        max_gap=0.001,
-        max_penetration=0.002,
+        positive_elem=upper_column,
+        negative_elem=lower_collar,
+        min_gap=0.22,
+        max_gap=0.26,
+        name="upper_tube_stands_above_lower_collar",
     )
-    ctx.expect_overlap(head, mast, axes="xy", elem_a=head_spigot, elem_b=mast_top_plate, min_overlap=0.01)
-    ctx.expect_gap(
-        head,
-        mast,
-        axis="z",
-        positive_elem=head_spigot,
-        negative_elem=mast_top_plate,
-        max_gap=0.001,
-        max_penetration=0.002,
-    )
-    ctx.expect_within(head, mast, axes="xy", inner_elem=head_spigot, outer_elem=mast_top_plate)
-    ctx.expect_gap(base, base, axis="z", positive_elem=front_rail, negative_elem=front_left_pad, min_gap=0.035)
-    ctx.expect_gap(
-        base,
-        base,
-        axis="x",
-        positive_elem=front_left_pad,
-        negative_elem=rear_left_pad,
-        min_gap=1.00,
-    )
-    ctx.expect_gap(
-        base,
-        base,
-        axis="y",
-        positive_elem=front_left_pad,
-        negative_elem=front_right_pad,
-        min_gap=0.60,
-    )
-    ctx.expect_gap(
-        mast,
-        mast,
-        axis="x",
-        positive_elem=lower_collar_front,
-        negative_elem=lower_section,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(
-        mast,
-        mast,
-        axis="x",
-        positive_elem=upper_section,
-        negative_elem=upper_collar_back,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(
-        mast,
-        mast,
-        axis="x",
-        positive_elem=upper_collar_front,
-        negative_elem=upper_section,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(left_light, left_light, axis="x", positive_elem=left_bezel_top, negative_elem=left_lens, min_gap=0.005)
-    ctx.expect_gap(
-        head,
-        left_light,
-        axis="y",
-        positive_elem=left_yoke_outer,
-        negative_elem=left_shell,
-        min_gap=0.020,
-    )
-    ctx.expect_gap(
-        left_light,
-        head,
-        axis="y",
-        positive_elem=left_shell,
-        negative_elem=left_yoke_inner,
-        min_gap=0.020,
-    )
-    ctx.expect_gap(
-        right_light,
-        head,
-        axis="y",
-        positive_elem=right_shell,
-        negative_elem=right_yoke_outer,
-        min_gap=0.020,
-    )
-    ctx.expect_gap(
-        head,
-        right_light,
-        axis="y",
-        positive_elem=right_yoke_inner,
-        negative_elem=right_shell,
-        min_gap=0.020,
-    )
-    ctx.expect_contact(left_light, head, elem_a=left_axle, elem_b=left_yoke_outer)
-    ctx.expect_contact(left_light, head, elem_a=left_axle, elem_b=left_yoke_inner)
-    ctx.expect_contact(right_light, head, elem_a=right_axle, elem_b=right_yoke_outer)
-    ctx.expect_contact(right_light, head, elem_a=right_axle, elem_b=right_yoke_inner)
-    ctx.expect_gap(
-        left_light,
-        right_light,
-        axis="y",
-        positive_elem=left_shell,
-        negative_elem=right_shell,
-        min_gap=0.10,
-    )
-    with ctx.pose({left_tilt: -0.85, right_tilt: 0.12}):
-        ctx.expect_contact(left_light, head, elem_a=left_axle, elem_b=left_yoke_outer)
-        ctx.expect_contact(left_light, head, elem_a=left_axle, elem_b=left_yoke_inner)
-        ctx.expect_contact(right_light, head, elem_a=right_axle, elem_b=right_yoke_outer)
-        ctx.expect_contact(right_light, head, elem_a=right_axle, elem_b=right_yoke_inner)
-        ctx.expect_gap(
+
+    head_visuals = {}
+    for head_name, _ in HEAD_SPECS:
+        head = heads[head_name]
+        head_visuals[head_name] = {
+            "pos_cheek": upper.get_visual(f"head_{head_name}_pos_cheek"),
+            "neg_cheek": upper.get_visual(f"head_{head_name}_neg_cheek"),
+            "arm": upper.get_visual(f"head_{head_name}_arm"),
+            "bridge": upper.get_visual(f"head_{head_name}_bridge"),
+            "pos_trunnion": head.get_visual("pos_trunnion"),
+            "neg_trunnion": head.get_visual("neg_trunnion"),
+            "rear_can": head.get_visual("rear_can"),
+            "visor": head.get_visual("visor"),
+        }
+
+        ctx.expect_contact(
             head,
-            left_light,
-            axis="y",
-            positive_elem=left_yoke_outer,
-            negative_elem=left_shell,
-            min_gap=0.010,
+            upper,
+            elem_a=head_visuals[head_name]["pos_trunnion"],
+            elem_b=head_visuals[head_name]["pos_cheek"],
+            name=f"{head_name}_pos_trunnion_contact",
+        )
+        ctx.expect_contact(
+            head,
+            upper,
+            elem_a=head_visuals[head_name]["neg_trunnion"],
+            elem_b=head_visuals[head_name]["neg_cheek"],
+            name=f"{head_name}_neg_trunnion_contact",
+        )
+        ctx.expect_within(
+            head,
+            upper,
+            axes="xz",
+            inner_elem=head_visuals[head_name]["pos_trunnion"],
+            outer_elem=head_visuals[head_name]["pos_cheek"],
+            name=f"{head_name}_pos_trunnion_within_bracket",
+        )
+        ctx.expect_within(
+            head,
+            upper,
+            axes="xz",
+            inner_elem=head_visuals[head_name]["neg_trunnion"],
+            outer_elem=head_visuals[head_name]["neg_cheek"],
+            name=f"{head_name}_neg_trunnion_within_bracket",
         )
         ctx.expect_gap(
-            left_light,
+            upper,
             head,
-            axis="y",
-            positive_elem=left_shell,
-            negative_elem=left_yoke_inner,
-            min_gap=0.010,
-        )
-        ctx.expect_gap(
-            head,
-            left_light,
             axis="z",
-            positive_elem=crossbar,
-            negative_elem=left_shell,
-            min_gap=0.015,
+            positive_elem=head_visuals[head_name]["bridge"],
+            negative_elem=head_visuals[head_name]["rear_can"],
+            min_gap=0.002,
+            max_gap=0.010,
+            name=f"{head_name}_bridge_above_rear_can",
         )
         ctx.expect_gap(
             head,
-            right_light,
-            axis="z",
-            positive_elem=crossbar,
-            negative_elem=right_shell,
-            min_gap=0.015,
+            upper,
+            axis="x",
+            positive_elem=head_visuals[head_name]["rear_can"],
+            negative_elem=head_visuals[head_name]["arm"],
+            min_gap=0.035,
+            max_gap=0.055,
+            name=f"{head_name}_head_clears_mount_arm",
+        )
+
+    ctx.expect_gap(heads["center"], base, axis="z", min_gap=1.40, name="head_array_height")
+    ctx.expect_gap(heads["center"], heads["left"], axis="y", min_gap=0.18, name="left_to_center_head_spacing")
+    ctx.expect_gap(heads["right"], heads["center"], axis="y", min_gap=0.18, name="center_to_right_head_spacing")
+
+    mast_limits = mast_hinge.motion_limits
+    if mast_limits is not None and mast_limits.lower is not None and mast_limits.upper is not None:
+        for pose_name, pose_value in (("lower", mast_limits.lower), ("upper", mast_limits.upper)):
+            with ctx.pose({mast_hinge: pose_value}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"mast_{pose_name}_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"mast_{pose_name}_no_floating")
+                ctx.expect_contact(
+                    upper,
+                    base,
+                    elem_a=hinge_pos_trunnion,
+                    elem_b=hinge_pos_cheek,
+                    name=f"mast_{pose_name}_pos_pin_contact",
+                )
+                ctx.expect_contact(
+                    upper,
+                    base,
+                    elem_a=hinge_neg_trunnion,
+                    elem_b=hinge_neg_cheek,
+                    name=f"mast_{pose_name}_neg_pin_contact",
+                )
+                ctx.expect_gap(
+                    heads["center"],
+                    base,
+                    axis="z",
+                    min_gap=0.18,
+                    name=f"mast_{pose_name}_head_clear_of_base",
+                )
+
+    for head_name, articulation in head_tilts.items():
+        limits = articulation.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            continue
+        for pose_name, pose_value in (("lower", limits.lower), ("upper", limits.upper)):
+            with ctx.pose({articulation: pose_value}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{head_name}_{pose_name}_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{head_name}_{pose_name}_no_floating")
+                ctx.expect_contact(
+                    heads[head_name],
+                    upper,
+                    elem_a=head_visuals[head_name]["pos_trunnion"],
+                    elem_b=head_visuals[head_name]["pos_cheek"],
+                    name=f"{head_name}_{pose_name}_pos_pin_contact",
+                )
+                ctx.expect_contact(
+                    heads[head_name],
+                    upper,
+                    elem_a=head_visuals[head_name]["neg_trunnion"],
+                    elem_b=head_visuals[head_name]["neg_cheek"],
+                    name=f"{head_name}_{pose_name}_neg_pin_contact",
+                )
+
+    with ctx.pose(
+        {
+            head_tilts["left"]: 0.45,
+            head_tilts["center"]: -0.40,
+            head_tilts["right"]: 0.35,
+        }
+    ):
+        ctx.fail_if_parts_overlap_in_current_pose(name="mixed_head_pose_no_overlap")
+        ctx.fail_if_isolated_parts(name="mixed_head_pose_no_floating")
+        ctx.expect_gap(
+            heads["center"],
+            heads["left"],
+            axis="y",
+            min_gap=0.12,
+            name="mixed_pose_left_center_spacing",
         )
         ctx.expect_gap(
-            left_light,
-            right_light,
+            heads["right"],
+            heads["center"],
             axis="y",
-            positive_elem=left_shell,
-            negative_elem=right_shell,
-            min_gap=0.10,
+            min_gap=0.12,
+            name="mixed_pose_center_right_spacing",
         )
+
     return ctx.report()
 
 
