@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_twojoint_revolute_chain_0f3d33b5acc441fcba455f28ca5ffc51",
+  "created_at": "2026-03-29T15:31:29Z",
+  "updated_at": "2026-03-29T15:57:27Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "twojoint_revolute_chain",
+  "source": {
+    "run_id": "run_20260329_153123_999887_20260329-sdk-hybrid-realism-backfill-to-10-gpt54",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260329_sdk_hybrid_realism_backfill_to_10_gpt54_high",
+    "row_id": "twojoint_revolute_chain_to10_realism_high_10",
+    "prompt_index": 150
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Two-joint revolute chain Realism Backfill 10",
+    "prompt_preview": "A compact bench arm with a grounded clevis, a broad primary link, a narrow secondary link, and a square tool tab at the nose. The assembly should show a clea..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "ed11c677fd97c6b58d438cfa11846b017bfdaee7723ab8b3a659e01e41ad3f7c",
+    "model_py_sha256": "947863875de65343a328b869a2c97960c9930d04fd0b22867bb2eaa36ba2403a"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

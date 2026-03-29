@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_telescoping_boom_030d5e8e3d7c456dabde1cb0bc6685ff",
+  "created_at": "2026-03-29T15:31:29Z",
+  "updated_at": "2026-03-29T15:52:30Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "telescoping_boom",
+  "source": {
+    "run_id": "run_20260329_153123_999887_20260329-sdk-hybrid-realism-backfill-to-10-gpt54",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260329_sdk_hybrid_realism_backfill_to_10_gpt54_high",
+    "row_id": "telescoping_boom_to10_realism_high_08",
+    "prompt_index": 127
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Telescoping boom Realism Backfill 8",
+    "prompt_preview": "A service boom with a fixed root bracket, a stout outer box beam, and nested rectangular inner beams ending in a forked tip. The stage sizes should step down..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "a84447a15c399333406422d1eee32f9957743ecfc359450213e664ea6775fdb0",
+    "model_py_sha256": "6ee3e9c7e57b07062bc13482807d5bda99583cd6aa9cf86f2ebb4ba653c7cc25"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

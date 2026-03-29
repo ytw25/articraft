@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_orthogonal_xy_stage_409874cbd942404e98559909be63225e",
+  "created_at": "2026-03-29T15:31:29Z",
+  "updated_at": "2026-03-29T15:45:09Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "orthogonal_xy_stage",
+  "source": {
+    "run_id": "run_20260329_153123_999887_20260329-sdk-hybrid-realism-backfill-to-10-gpt54",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260329_sdk_hybrid_realism_backfill_to_10_gpt54_high",
+    "row_id": "orthogonal_xy_stage_to10_realism_high_10",
+    "prompt_index": 60
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Orthogonal XY stage Realism Backfill 10",
+    "prompt_preview": "A precision slide table with a rectangular base plate, a long lower carriage, and a shorter cross-slide supporting a top instrument pad. The lower and upper..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "dd24c2ec8f5424a89681685ac9b42fa8b029ad95d45347ed9f830c817e7d5bb2",
+    "model_py_sha256": "c86c9b9c4ea2167aa7f2857b3e0141245cb781b9ac5747f2ea0340dea9a69a4c"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
