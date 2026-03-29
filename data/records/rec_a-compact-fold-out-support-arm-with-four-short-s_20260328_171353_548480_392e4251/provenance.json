@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_a-compact-fold-out-support-arm-with-four-short-s_20260328_171353_548480_392e4251",
+  "generation": {
+    "provider": "openai",
+    "model_id": "gpt-5.4",
+    "thinking_level": "high",
+    "openai_transport": "http",
+    "openai_reasoning_summary": "auto",
+    "max_turns": 50
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt_openai_hybrid.txt",
+    "system_prompt_sha256": "db9ceb78cb523d19faa14c780163b8db5384fc25dd2ce6c1c0ae63ce607b3f61",
+    "sdk_docs_mode": "full",
+    "post_success_design_audit": true,
+    "scaffold_mode": "lite"
+  },
+  "sdk": {
+    "sdk_package": "sdk_hybrid",
+    "sdk_version": "workspace",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "darwin-arm64",
+    "git_commit": "d61780ab19687ff00082b6b70d4327efb5200516",
+    "uv_lock_sha256": "609c6cb5ce8a26122aaeab4bd2bdcc6e45bacfa426781165809f517f6b02bb83"
+  },
+  "run_summary": {
+    "turn_count": 18,
+    "tool_call_count": 18,
+    "compile_attempt_count": 7,
+    "final_status": "success"
+  }
+}
