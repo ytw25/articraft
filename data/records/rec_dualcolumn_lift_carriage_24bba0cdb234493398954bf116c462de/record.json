@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_dualcolumn_lift_carriage_24bba0cdb234493398954bf116c462de",
+  "created_at": "2026-03-29T15:31:29Z",
+  "updated_at": "2026-03-29T15:42:21Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "dualcolumn_lift_carriage",
+  "source": {
+    "run_id": "run_20260329_153123_999887_20260329-sdk-hybrid-realism-backfill-to-10-gpt54",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260329_sdk_hybrid_realism_backfill_to_10_gpt54_high",
+    "row_id": "dualcolumn_lift_carriage_to10_realism_high_09",
+    "prompt_index": 17
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Dual-column lift carriage Realism Backfill 9",
+    "prompt_preview": "A clean-room style lift axis with twin round posts, a compact base can, a narrow top bridge, and a precise carriage block carrying a small rectangular table...."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "530e3ffbdb7d42b3f73897ec393a24133cadb592a006daa6425acb4abdb2ca9a",
+    "model_py_sha256": "d9d4d1e8a1a7d80a0e40a39824fea26ec9bdbe216afd472c03588b6143395812"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

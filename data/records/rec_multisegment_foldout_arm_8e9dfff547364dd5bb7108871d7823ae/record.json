@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_multisegment_foldout_arm_8e9dfff547364dd5bb7108871d7823ae",
+  "created_at": "2026-03-29T15:31:29Z",
+  "updated_at": "2026-03-29T15:57:42Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "multisegment_foldout_arm",
+  "source": {
+    "run_id": "run_20260329_153123_999887_20260329-sdk-hybrid-realism-backfill-to-10-gpt54",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260329_sdk_hybrid_realism_backfill_to_10_gpt54_high",
+    "row_id": "multisegment_foldout_arm_to10_realism_high_10",
+    "prompt_index": 51
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Multi-segment fold-out arm Realism Backfill 10",
+    "prompt_preview": "A service hatch deployable arm with a grounded base shoe, four folding link stages, and a narrow support pad at the far end. The chain should appear capable..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "e615b23c6642ba6a0302290561279e6d433e0f86c8142af0751b4e1efacb05ee",
+    "model_py_sha256": "093efb08ad430354da82450d9fce8ddc663cd530e4477360242c68d4db2c6186"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
