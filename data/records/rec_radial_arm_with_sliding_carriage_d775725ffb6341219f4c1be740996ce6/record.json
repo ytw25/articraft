@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_radial_arm_with_sliding_carriage_d775725ffb6341219f4c1be740996ce6",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:39:17Z",
+  "rating": 4,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "radial_arm_with_sliding_carriage",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "radial_arm_with_sliding_carriage_to7_high_06",
+    "prompt_index": 64
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Radial arm with sliding carriage Backfill 6",
+    "prompt_preview": "A radial drill-style arm module with a stout vertical column, a horizontal beam swinging around the column, and a carriage saddle traveling along the beam. T..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "63a39dd41a766aa75164a17b90edbb36da7033a4be6ea8450dc69c80576efab6",
+    "model_py_sha256": "a447c70e3a9ce44362e55414429b525cd7c85387075d71f0353ac068dcda5d1c"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

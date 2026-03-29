@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_cantilever_articulated_arm_103301a53c084c64bb6461cbb9de5b74",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:39:30Z",
+  "rating": 3,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "cantilever_articulated_arm",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "cantilever_articulated_arm_to7_high_06",
+    "prompt_index": 5
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Cantilever articulated arm Backfill 6",
+    "prompt_preview": "A floor-pedestal service arm with a heavy root column, an offset shoulder yoke, a long upper link, a shorter forearm, and a compact circular tool flange. The..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "bf809cc3b205ccabaf4a820f4188421b8d79345dfe49f52e86df78e57f5c3137",
+    "model_py_sha256": "56d2b5a74299cb1a64b3ec804570757cd34a06b9695a483908da30f69575a78c"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

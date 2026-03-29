@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_yawpitch_module_15c3998b4f1b4a328bcb18473ceee379",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:38:58Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "yawpitch_module",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "yawpitch_module_to7_high_07",
+    "prompt_index": 113
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Yaw-pitch module Backfill 7",
+    "prompt_preview": "A marine sensor pan-tilt head with a low yaw turntable, tall side fork, and rectangular sensor frame suspended between the fork arms. The upper frame should..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "8a7ddb761a5e0eae7ee0d88527af1d8e54e3f940797c3b4cbc1257dc1d2356ca",
+    "model_py_sha256": "a8aaed2ef653a70ccc83e8e2fa38f62508719c3868a4d1d676c16693f2d8f6e1"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
