@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type JSX } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type JSX } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Search } from "lucide-react";
 
@@ -153,8 +153,42 @@ function MultiSelectFilter({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
+  const [menuOffsetLeft, setMenuOffsetLeft] = useState(0);
   const hasActiveFilter = selectedValues.length > 0;
+
+  useLayoutEffect(() => {
+    if (!open || !containerRef.current || !menuRef.current) {
+      setMenuOffsetLeft(0);
+      return;
+    }
+
+    const updateOffset = () => {
+      if (!containerRef.current || !menuRef.current) {
+        return;
+      }
+
+      const menuRect = menuRef.current.getBoundingClientRect();
+      const sidebarRect = containerRef.current.closest("aside")?.getBoundingClientRect();
+      if (!sidebarRect) {
+        setMenuOffsetLeft(0);
+        return;
+      }
+
+      const maxRight = sidebarRect.right - 12;
+      const overflowRight = menuRect.right - maxRight;
+      setMenuOffsetLeft(overflowRight > 0 ? -overflowRight : 0);
+    };
+
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    window.addEventListener("scroll", updateOffset, true);
+    return () => {
+      window.removeEventListener("resize", updateOffset);
+      window.removeEventListener("scroll", updateOffset, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -234,7 +268,11 @@ function MultiSelectFilter({
       </button>
 
       {open ? (
-        <div className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-64 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.02)]">
+        <div
+          ref={menuRef}
+          className="absolute left-0 top-[calc(100%+0.375rem)] z-50 w-64 rounded-lg border border-[var(--border-default)] bg-[var(--surface-0)] p-1 shadow-[0_4px_16px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.02)]"
+          style={menuOffsetLeft === 0 ? undefined : { left: menuOffsetLeft }}
+        >
           <div className="flex items-center justify-between px-2 py-1">
             <span className="text-[10px] font-medium uppercase tracking-[0.04em] text-[var(--text-tertiary)]">{title}</span>
             {selectedValues.length > 0 ? (
