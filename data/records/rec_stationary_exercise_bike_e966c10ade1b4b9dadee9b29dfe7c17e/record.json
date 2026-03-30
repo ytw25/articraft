@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_stationary_exercise_bike_e966c10ade1b4b9dadee9b29dfe7c17e",
+  "created_at": "2026-03-30T16:32:53Z",
+  "updated_at": "2026-03-30T16:52:12Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "stationary_exercise_bike",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "stationary_exercise_bike_backfill_7",
+    "prompt_index": 143
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Stationary exercise bike Backfill 9",
+    "prompt_preview": "Build a precision professional Stationary exercise bike tuned for calibration and repeatable alignment. Use a bike frame with crank set, flywheel housing, sa..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "5b3eab2449403f70fa576af196bbf690b96364025794e8df6ca88906aecf98c3",
+    "model_py_sha256": "7bf95edaa82043313891582aa45feb83a2d04144d07a7ceef6cb2e06b25cc99f"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

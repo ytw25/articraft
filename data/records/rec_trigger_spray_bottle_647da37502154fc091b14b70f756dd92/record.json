@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_trigger_spray_bottle_647da37502154fc091b14b70f756dd92",
+  "created_at": "2026-03-30T16:47:56Z",
+  "updated_at": "2026-03-30T17:07:12Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "trigger_spray_bottle",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "trigger_spray_bottle_backfill_3",
+    "prompt_index": 219
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Trigger spray bottle Backfill 5",
+    "prompt_preview": "Generate a compact apartment/desktop version of Trigger spray bottle. Keep footprint and envelope efficient while preserving full functional articulation fro..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "ec0f18eeaf778368cb890cf052b4363d3f3b3c8e74e97992718290251d888bb5",
+    "model_py_sha256": "4789d7cf1e8f864996337e9250013391635b7c7774b2ddfab0434f1cdcc983a2"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

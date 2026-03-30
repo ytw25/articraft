@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_stationary_exercise_bike_9a435a7fd5654b2496a86d552a6ae9b9",
+  "created_at": "2026-03-30T16:31:48Z",
+  "updated_at": "2026-03-30T17:01:27Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "stationary_exercise_bike",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "stationary_exercise_bike_backfill_1",
+    "prompt_index": 137
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Stationary exercise bike Backfill 3",
+    "prompt_preview": "Design Stationary exercise bike as a field-service workhorse. Build it around a bike frame with crank set, flywheel housing, saddle post, and bars. Prioritiz..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "e28bc5eb357329b5710ecb2f8e821865ee94542c5e173f797be7050ca5fa968b",
+    "model_py_sha256": "eba298d1ef282fbe7f179487d8dc5f3a75d2228fb8ef3c09943b7cdaad9b647c"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

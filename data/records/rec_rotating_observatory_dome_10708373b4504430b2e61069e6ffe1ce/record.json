@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_rotating_observatory_dome_10708373b4504430b2e61069e6ffe1ce",
+  "created_at": "2026-03-30T16:08:09Z",
+  "updated_at": "2026-03-30T16:53:23Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "rotating_observatory_dome",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "rotating_observatory_dome_backfill_6",
+    "prompt_index": 38
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Rotating observatory dome Backfill 8",
+    "prompt_preview": "Create a cost-optimized mass-manufacturable Rotating observatory dome. Base architecture: a dome shell seated on a ring track with a slit aperture subsystem...."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "03496f82e687b80f928300fbd8cf2cedd0134b388a93cacddece43e5b36838f5",
+    "model_py_sha256": "c8422beca25a2440c2787c355f9305df172d9e906c0a49a8e450b49d514f2a71"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

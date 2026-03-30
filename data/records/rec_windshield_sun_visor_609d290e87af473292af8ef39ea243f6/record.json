@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_windshield_sun_visor_609d290e87af473292af8ef39ea243f6",
+  "created_at": "2026-03-30T17:13:19Z",
+  "updated_at": "2026-03-30T17:19:47Z",
+  "rating": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "windshield_sun_visor",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "windshield_sun_visor_backfill_6",
+    "prompt_index": 326
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Windshield sun visor Backfill 8",
+    "prompt_preview": "Create a cost-optimized mass-manufacturable Windshield sun visor. Base architecture: a visor panel on a roof hinge arm plus secondary swing pivot. Reduce par..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "5dd3eb62e26fc0da0b406d14933f705c583ffe742c3dc3e394e1144ab0be0860",
+    "model_py_sha256": "da37cd968db2897a65a56afce9b3f96c08466585e948c9b59dcb537af9efcbe1"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
