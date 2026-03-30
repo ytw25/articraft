@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_tripodmounted_device_75c5975f337d4a87bd95e28f198b3401",
+  "created_at": "2026-03-30T16:51:48Z",
+  "updated_at": "2026-03-30T19:32:16Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "tripodmounted_device",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "tripodmounted_device_backfill_3",
+    "prompt_index": 227
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Tripod-mounted device Backfill 5",
+    "prompt_preview": "Generate a compact apartment/desktop version of Tripodmounted device. Keep footprint and envelope efficient while preserving full functional articulation fro..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "e6484f490223d736718fe3aa37f4dc8c8d6fcefa9d32918f92facfeb27454d55",
+    "model_py_sha256": "257b3ad0e7e2cd5a27a200aa93529db0b380cacc13fec436baf1eeb99aee8e87"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "rated_by": "shawlyu",
+  "author": "shawlyu"
+}

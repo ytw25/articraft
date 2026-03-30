@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_wheelbarrow_96af30b6ac7a45c4b5848c66c7ed4aae",
+  "created_at": "2026-03-30T17:07:06Z",
+  "updated_at": "2026-03-30T19:36:55Z",
+  "rating": 4,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "wheelbarrow",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "wheelbarrow_backfill_8",
+    "prompt_index": 296
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Wheelbarrow Backfill 10",
+    "prompt_preview": "Design a retrofit/legacy-inspired Wheelbarrow that blends old-school construction cues with modern reliability. Keep the core as a tray, front wheel fork/axl..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "6fead7299f320b632894ae2973565bbca5e4d47a770c8cda128160c1e9ad2fa5",
+    "model_py_sha256": "fb4e57fb080126dbf4c2c29ba73a0af76bf6e328713813a1ed9ba5d0f670f9f1"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "rated_by": "shawlyu",
+  "author": "shawlyu"
+}
