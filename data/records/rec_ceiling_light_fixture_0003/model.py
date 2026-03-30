@@ -3,431 +3,588 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
+import math
 import os
+import pathlib
+import sys
 
 _REAL_GETCWD = os.getcwd
+_REAL_PATH_ABSOLUTE = pathlib.Path.absolute
+_REAL_PATH_CWD = pathlib.Path.cwd
 
 
 def _safe_getcwd() -> str:
     try:
         return _REAL_GETCWD()
     except FileNotFoundError:
-        try:
-            os.chdir("/")
-        except FileNotFoundError:
-            pass
-        return "/"
+        os.chdir("/")
+        return _REAL_GETCWD()
 
 
 os.getcwd = _safe_getcwd
-_safe_getcwd()
+pathlib.os.getcwd = _safe_getcwd
+
+
+def _safe_path_absolute(self):
+    try:
+        return _REAL_PATH_ABSOLUTE(self)
+    except FileNotFoundError:
+        os.chdir("/")
+        return _REAL_PATH_ABSOLUTE(self)
+
+
+@classmethod
+def _safe_path_cwd(cls):
+    try:
+        return _REAL_PATH_CWD()
+    except FileNotFoundError:
+        os.chdir("/")
+        return _REAL_PATH_CWD()
+
+
+pathlib.Path.absolute = _safe_path_absolute
+pathlib.Path.cwd = _safe_path_cwd
+
+if isinstance(globals().get("__file__"), str) and not os.path.isabs(__file__):
+    argv0 = sys.argv[0] if sys.argv else ""
+    if isinstance(argv0, str) and os.path.isabs(argv0):
+        __file__ = argv0
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,
     Cylinder,
+    Inertial,
     MotionLimits,
     Origin,
+    Sphere,
     TestContext,
     TestReport,
 )
 
-TRACK_LENGTH = 1.20
-TRACK_WIDTH = 0.08
-TOP_THICKNESS = 0.008
-SIDE_THICKNESS = 0.008
-SIDE_HEIGHT = 0.042
-LIP_WIDTH = 0.019
-LIP_THICKNESS = 0.006
-SLOT_WIDTH = 0.026
 
-CANOPY_X = (-0.42, 0.42)
-LAMP_SPECS = (
-    ("1", -0.32, -0.06, 0.06),
-    ("2", 0.00, -0.06, 0.06),
-    ("3", 0.32, -0.06, 0.06),
-)
+TRACK_LENGTH = 0.78
+TRACK_WIDTH = 0.038
+TRACK_HEIGHT = 0.030
+CANOPY_WIDTH = 0.180
+CANOPY_DEPTH = 0.120
+CANOPY_HEIGHT = 0.022
+DROP_TUBE_RADIUS = 0.016
+DROP_TUBE_LENGTH = 0.023
+SEAT_WIDTH = 0.050
+SEAT_DEPTH = 0.030
+SEAT_HEIGHT = 0.008
+HEAD_SPACING = 0.240
+HEAD_BASE_PITCH = 0.82
+YOKE_ARM_CENTER_Y = 0.034
+MOUNT_TOP_Z = 0.038
+TILT_ORIGIN_Z = 0.078
+TRACK_TOP_Z = CANOPY_HEIGHT + DROP_TUBE_LENGTH
+TRACK_CENTER_Z = TRACK_TOP_Z + TRACK_HEIGHT / 2.0
+TRACK_BOTTOM_Z = TRACK_TOP_Z + TRACK_HEIGHT
+SEAT_CENTER_Z = TRACK_BOTTOM_Z + SEAT_HEIGHT / 2.0
+SWIVEL_ORIGIN_Z = TRACK_BOTTOM_Z + SEAT_HEIGHT
+
+
+def _axis_offset(distance: float) -> tuple[float, float, float]:
+    return (
+        math.sin(HEAD_BASE_PITCH) * distance,
+        0.0,
+        math.cos(HEAD_BASE_PITCH) * distance,
+    )
+
+
+def _aabb_center(aabb):
+    return tuple((aabb[0][axis] + aabb[1][axis]) / 2.0 for axis in range(3))
+
+
+def _element_center(ctx: TestContext, part, elem_name: str):
+    aabb = ctx.part_element_world_aabb(part, elem=elem_name)
+    if aabb is None:
+        return None
+    return _aabb_center(aabb)
+
+
+def _add_spotlight(
+    model: ArticulatedObject,
+    rail,
+    *,
+    name: str,
+    x_pos: float,
+    seat_name: str,
+    head_finish,
+    hardware_finish,
+    trim_finish,
+    lens_finish,
+) -> None:
+    mount = model.part(f"{name}_mount")
+    mount.visual(
+        Box((0.040, 0.020, 0.008)),
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
+        material=hardware_finish,
+        name="track_shoe",
+    )
+    mount.visual(
+        Box((0.022, 0.020, 0.006)),
+        origin=Origin(xyz=(0.0, 0.0, 0.011)),
+        material=hardware_finish,
+        name="shoe_collar",
+    )
+    mount.visual(
+        Cylinder(radius=0.012, length=0.018),
+        origin=Origin(xyz=(0.0, 0.0, 0.023)),
+        material=hardware_finish,
+        name="swivel_pedestal",
+    )
+    mount.visual(
+        Cylinder(radius=0.014, length=0.006),
+        origin=Origin(xyz=(0.0, 0.0, 0.035)),
+        material=hardware_finish,
+        name="swivel_cap",
+    )
+    mount.inertial = Inertial.from_geometry(
+        Box((0.060, 0.040, 0.040)),
+        mass=0.14,
+        origin=Origin(xyz=(0.0, 0.0, 0.020)),
+    )
+
+    yoke = model.part(f"{name}_yoke")
+    yoke.visual(
+        Cylinder(radius=0.014, length=0.008),
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
+        material=hardware_finish,
+        name="swivel_collar",
+    )
+    yoke.visual(
+        Box((0.010, 0.016, 0.034)),
+        origin=Origin(xyz=(0.0, 0.0, 0.021)),
+        material=hardware_finish,
+        name="upright",
+    )
+    yoke.visual(
+        Box((0.014, 0.068, 0.012)),
+        origin=Origin(xyz=(0.0, 0.0, 0.044)),
+        material=hardware_finish,
+        name="yoke_bridge",
+    )
+    yoke.visual(
+        Box((0.010, 0.008, 0.056)),
+        origin=Origin(xyz=(0.0, -YOKE_ARM_CENTER_Y, 0.078)),
+        material=hardware_finish,
+        name="yoke_arm_left",
+    )
+    yoke.visual(
+        Box((0.010, 0.008, 0.056)),
+        origin=Origin(xyz=(0.0, YOKE_ARM_CENTER_Y, 0.078)),
+        material=hardware_finish,
+        name="yoke_arm_right",
+    )
+    yoke.inertial = Inertial.from_geometry(
+        Box((0.050, 0.090, 0.110)),
+        mass=0.18,
+        origin=Origin(xyz=(0.0, 0.0, 0.052)),
+    )
+
+    head = model.part(f"{name}_head")
+    head.visual(
+        Box((0.012, 0.060, 0.018)),
+        origin=Origin(xyz=(-0.011, 0.0, 0.0)),
+        material=trim_finish,
+        name="pivot_block",
+    )
+    head.visual(
+        Sphere(radius=0.010),
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+        material=trim_finish,
+        name="pivot_knuckle",
+    )
+    rear_can_center = _axis_offset(0.012)
+    body_center = _axis_offset(0.045)
+    bezel_center = _axis_offset(0.088)
+    baffle_center = _axis_offset(0.092)
+    lens_center = _axis_offset(0.097)
+    barrel_rpy = (0.0, HEAD_BASE_PITCH, 0.0)
+    head.visual(
+        Cylinder(radius=0.018, length=0.024),
+        origin=Origin(xyz=rear_can_center, rpy=barrel_rpy),
+        material=head_finish,
+        name="rear_can",
+    )
+    head.visual(
+        Cylinder(radius=0.024, length=0.078),
+        origin=Origin(xyz=body_center, rpy=barrel_rpy),
+        material=head_finish,
+        name="body_shell",
+    )
+    head.visual(
+        Cylinder(radius=0.028, length=0.016),
+        origin=Origin(xyz=bezel_center, rpy=barrel_rpy),
+        material=head_finish,
+        name="front_bezel",
+    )
+    head.visual(
+        Cylinder(radius=0.021, length=0.008),
+        origin=Origin(xyz=baffle_center, rpy=barrel_rpy),
+        material=trim_finish,
+        name="inner_baffle",
+    )
+    head.visual(
+        Cylinder(radius=0.023, length=0.003),
+        origin=Origin(xyz=lens_center, rpy=barrel_rpy),
+        material=lens_finish,
+        name="lens",
+    )
+    head.inertial = Inertial.from_geometry(
+        Box((0.110, 0.080, 0.085)),
+        mass=0.38,
+        origin=Origin(xyz=(0.040, 0.0, 0.030)),
+    )
+
+    model.articulation(
+        f"{name}_mount_joint",
+        ArticulationType.FIXED,
+        parent=rail,
+        child=mount,
+        origin=Origin(xyz=(x_pos, 0.0, TRACK_BOTTOM_Z + SEAT_HEIGHT)),
+    )
+    model.articulation(
+        f"{name}_swivel",
+        ArticulationType.REVOLUTE,
+        parent=mount,
+        child=yoke,
+        origin=Origin(xyz=(0.0, 0.0, MOUNT_TOP_Z)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(
+            effort=10.0,
+            velocity=2.5,
+            lower=-2.8,
+            upper=2.8,
+        ),
+        meta={"seat_visual": seat_name},
+    )
+    model.articulation(
+        f"{name}_tilt",
+        ArticulationType.REVOLUTE,
+        parent=yoke,
+        child=head,
+        origin=Origin(xyz=(0.0, 0.0, TILT_ORIGIN_Z)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=6.0,
+            velocity=2.0,
+            lower=-0.45,
+            upper=0.75,
+        ),
+    )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="track_lighting_bar")
+    model = ArticulatedObject(name="track_lighting_fixture")
 
-    satin_black = model.material("satin_black", color=(0.14, 0.14, 0.15, 1.0))
-    matte_graphite = model.material("matte_graphite", color=(0.24, 0.25, 0.27, 1.0))
-    warm_white = model.material("warm_white", color=(0.92, 0.92, 0.90, 1.0))
-    brushed_aluminum = model.material("brushed_aluminum", color=(0.74, 0.75, 0.77, 1.0))
-    copper_strip = model.material("copper_strip", color=(0.76, 0.48, 0.28, 1.0))
-    lens_glass = model.material("lens_glass", color=(0.84, 0.88, 0.93, 0.38))
+    rail_white = model.material("rail_white", rgba=(0.95, 0.95, 0.94, 1.0))
+    hardware_gray = model.material("hardware_gray", rgba=(0.42, 0.44, 0.47, 1.0))
+    trim_black = model.material("trim_black", rgba=(0.11, 0.11, 0.12, 1.0))
+    lens_glass = model.material("lens_glass", rgba=(0.95, 0.90, 0.78, 0.82))
 
-    track = model.part("track")
-    track.visual(
-        Box((TRACK_LENGTH, TRACK_WIDTH, TOP_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0, 0.021)),
-        material=satin_black,
-        name="top_web",
+    rail = model.part("rail")
+    rail.visual(
+        Box((CANOPY_WIDTH, CANOPY_DEPTH, CANOPY_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, CANOPY_HEIGHT / 2.0)),
+        material=rail_white,
+        name="ceiling_canopy",
     )
-    track.visual(
-        Box((TRACK_LENGTH, SIDE_THICKNESS, SIDE_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.036, 0.000)),
-        material=satin_black,
-        name="side_right",
+    rail.visual(
+        Cylinder(radius=DROP_TUBE_RADIUS, length=DROP_TUBE_LENGTH),
+        origin=Origin(xyz=(0.0, 0.0, CANOPY_HEIGHT + DROP_TUBE_LENGTH / 2.0)),
+        material=hardware_gray,
+        name="drop_tube",
     )
-    track.visual(
-        Box((TRACK_LENGTH, SIDE_THICKNESS, SIDE_HEIGHT)),
-        origin=Origin(xyz=(0.0, -0.036, 0.000)),
-        material=satin_black,
-        name="side_left",
+    rail.visual(
+        Box((TRACK_LENGTH, TRACK_WIDTH, TRACK_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, TRACK_CENTER_Z)),
+        material=rail_white,
+        name="rail_body",
     )
-    track.visual(
-        Box((TRACK_LENGTH, LIP_WIDTH, LIP_THICKNESS)),
-        origin=Origin(xyz=(0.0, 0.0225, -0.019)),
-        material=matte_graphite,
-        name="lip_right",
+    rail.visual(
+        Box((TRACK_LENGTH * 0.92, 0.012, 0.004)),
+        origin=Origin(xyz=(0.0, 0.0, TRACK_BOTTOM_Z - 0.002)),
+        material=trim_black,
+        name="conductor_slot",
     )
-    track.visual(
-        Box((TRACK_LENGTH, LIP_WIDTH, LIP_THICKNESS)),
-        origin=Origin(xyz=(0.0, -0.0225, -0.019)),
-        material=matte_graphite,
-        name="lip_left",
-    )
-    track.visual(
-        Box((TRACK_LENGTH - 0.04, 0.012, 0.003)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0155)),
-        material=copper_strip,
-        name="contact_strip",
+    for seat_name, x_pos in (
+        ("seat_left", -HEAD_SPACING),
+        ("seat_center", 0.0),
+        ("seat_right", HEAD_SPACING),
+    ):
+        rail.visual(
+            Box((SEAT_WIDTH, SEAT_DEPTH, SEAT_HEIGHT)),
+            origin=Origin(xyz=(x_pos, 0.0, SEAT_CENTER_Z)),
+            material=hardware_gray,
+            name=seat_name,
+        )
+    rail.inertial = Inertial.from_geometry(
+        Box((TRACK_LENGTH, CANOPY_DEPTH, TRACK_BOTTOM_Z)),
+        mass=2.8,
+        origin=Origin(xyz=(0.0, 0.0, TRACK_BOTTOM_Z / 2.0)),
     )
 
-    for side_name, canopy_x in zip(("left", "right"), CANOPY_X):
-        canopy = model.part(f"canopy_{side_name}")
-        canopy.visual(
-            Cylinder(radius=0.055, length=0.018),
-            origin=Origin(xyz=(0.0, 0.0, 0.016)),
-            material=brushed_aluminum,
-            name="cap",
-        )
-        canopy.visual(
-            Cylinder(radius=0.015, length=0.008),
-            origin=Origin(xyz=(0.0, 0.0, 0.004)),
-            material=brushed_aluminum,
-            name="stem",
-        )
-        model.articulation(
-            f"track_to_canopy_{side_name}",
-            ArticulationType.FIXED,
-            parent=track,
-            child=canopy,
-            origin=Origin(xyz=(canopy_x, 0.0, 0.025)),
-        )
-
-    for lamp_id, x0, lower, upper in LAMP_SPECS:
-        carriage = model.part(f"carriage_{lamp_id}")
-        carriage.visual(
-            Box((0.052, 0.038, 0.008)),
-            origin=Origin(xyz=(0.0, 0.0, 0.000)),
-            material=matte_graphite,
-            name="shoulder",
-        )
-        carriage.visual(
-            Box((0.022, SLOT_WIDTH - 0.006, 0.018)),
-            origin=Origin(xyz=(0.0, 0.0, 0.013)),
-            material=matte_graphite,
-            name="neck",
-        )
-        carriage.visual(
-            Box((0.048, 0.042, 0.012)),
-            origin=Origin(xyz=(0.0, 0.0, 0.028)),
-            material=matte_graphite,
-            name="adapter",
-        )
-        carriage.visual(
-            Cylinder(radius=0.006, length=0.012),
-            origin=Origin(xyz=(0.012, 0.0, -0.010)),
-            material=brushed_aluminum,
-            name="lock_knob",
-        )
-        carriage.visual(
-            Cylinder(radius=0.005, length=0.074),
-            origin=Origin(xyz=(0.0, 0.0, -0.041)),
-            material=brushed_aluminum,
-            name="pendant_stem",
-        )
-        carriage.visual(
-            Box((0.014, 0.082, 0.010)),
-            origin=Origin(xyz=(0.0, 0.0, -0.083)),
-            material=matte_graphite,
-            name="yoke_bridge",
-        )
-        carriage.visual(
-            Box((0.010, 0.008, 0.068)),
-            origin=Origin(xyz=(0.0, 0.038, -0.117)),
-            material=matte_graphite,
-            name="yoke_right",
-        )
-        carriage.visual(
-            Box((0.010, 0.008, 0.068)),
-            origin=Origin(xyz=(0.0, -0.038, -0.117)),
-            material=matte_graphite,
-            name="yoke_left",
-        )
-        carriage.visual(
-            Cylinder(radius=0.003, length=0.068),
-            origin=Origin(xyz=(0.0, 0.0, -0.117), rpy=(1.57079632679, 0.0, 0.0)),
-            material=brushed_aluminum,
-            name="pivot_axle",
-        )
-
-        head = model.part(f"lamp_{lamp_id}")
-        head.visual(
-            Cylinder(radius=0.004, length=0.068),
-            origin=Origin(rpy=(1.57079632679, 0.0, 0.0)),
-            material=brushed_aluminum,
-            name="trunnion",
-        )
-        head.visual(
-            Cylinder(radius=0.017, length=0.030),
-            origin=Origin(xyz=(0.0, 0.0, -0.017)),
-            material=matte_graphite,
-            name="hub",
-        )
-        head.visual(
-            Cylinder(radius=0.030, length=0.090),
-            origin=Origin(xyz=(0.0, 0.0, -0.066)),
-            material=warm_white,
-            name="body_shell",
-        )
-        head.visual(
-            Cylinder(radius=0.033, length=0.010),
-            origin=Origin(xyz=(0.0, 0.0, -0.111)),
-            material=brushed_aluminum,
-            name="bezel",
-        )
-        head.visual(
-            Cylinder(radius=0.025, length=0.003),
-            origin=Origin(xyz=(0.0, 0.0, -0.1175)),
-            material=lens_glass,
-            name="lens",
-        )
-
-        model.articulation(
-            f"track_to_carriage_{lamp_id}",
-            ArticulationType.PRISMATIC,
-            parent=track,
-            child=carriage,
-            origin=Origin(xyz=(x0, 0.0, -0.026)),
-            axis=(1.0, 0.0, 0.0),
-            motion_limits=MotionLimits(
-                effort=20.0,
-                velocity=0.40,
-                lower=lower,
-                upper=upper,
-            ),
-        )
-        model.articulation(
-            f"carriage_{lamp_id}_to_lamp_{lamp_id}",
-            ArticulationType.REVOLUTE,
-            parent=carriage,
-            child=head,
-            origin=Origin(xyz=(0.0, 0.0, -0.117)),
-            axis=(0.0, 1.0, 0.0),
-            motion_limits=MotionLimits(
-                effort=8.0,
-                velocity=2.0,
-                lower=-0.95,
-                upper=0.70,
-            ),
-        )
+    _add_spotlight(
+        model,
+        rail,
+        name="spotlight_left",
+        x_pos=-HEAD_SPACING,
+        seat_name="seat_left",
+        head_finish=rail_white,
+        hardware_finish=hardware_gray,
+        trim_finish=trim_black,
+        lens_finish=lens_glass,
+    )
+    _add_spotlight(
+        model,
+        rail,
+        name="spotlight_center",
+        x_pos=0.0,
+        seat_name="seat_center",
+        head_finish=rail_white,
+        hardware_finish=hardware_gray,
+        trim_finish=trim_black,
+        lens_finish=lens_glass,
+    )
+    _add_spotlight(
+        model,
+        rail,
+        name="spotlight_right",
+        x_pos=HEAD_SPACING,
+        seat_name="seat_right",
+        head_finish=rail_white,
+        hardware_finish=hardware_gray,
+        trim_finish=trim_black,
+        lens_finish=lens_glass,
+    )
 
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    track = object_model.get_part("track")
-    top_web = track.get_visual("top_web")
-    lip_left = track.get_visual("lip_left")
-    lip_right = track.get_visual("lip_right")
-    contact_strip = track.get_visual("contact_strip")
 
-    for lamp_id, _, _, _ in LAMP_SPECS:
-        carriage = object_model.get_part(f"carriage_{lamp_id}")
-        lamp = object_model.get_part(f"lamp_{lamp_id}")
-        ctx.allow_overlap(
-            track,
-            carriage,
-            reason="track adapter nests inside the channel while the clamp shoulder hooks under the slot lips",
-        )
-        ctx.allow_overlap(
-            carriage,
-            lamp,
-            reason="lamp trunnion is captured by the yoke cheeks to form the pivoting head mount",
-        )
+    rail = object_model.get_part("rail")
+    rail_body = rail.get_visual("rail_body")
+    seat_left = rail.get_visual("seat_left")
+    seat_center = rail.get_visual("seat_center")
+    seat_right = rail.get_visual("seat_right")
+
+    left_mount = object_model.get_part("spotlight_left_mount")
+    center_mount = object_model.get_part("spotlight_center_mount")
+    right_mount = object_model.get_part("spotlight_right_mount")
+
+    left_yoke = object_model.get_part("spotlight_left_yoke")
+    center_yoke = object_model.get_part("spotlight_center_yoke")
+    right_yoke = object_model.get_part("spotlight_right_yoke")
+
+    left_head = object_model.get_part("spotlight_left_head")
+    center_head = object_model.get_part("spotlight_center_head")
+    right_head = object_model.get_part("spotlight_right_head")
+
+    left_swivel = object_model.get_articulation("spotlight_left_swivel")
+    center_swivel = object_model.get_articulation("spotlight_center_swivel")
+    right_swivel = object_model.get_articulation("spotlight_right_swivel")
+    left_tilt = object_model.get_articulation("spotlight_left_tilt")
+    center_tilt = object_model.get_articulation("spotlight_center_tilt")
+    right_tilt = object_model.get_articulation("spotlight_right_tilt")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-    ctx.expect_overlap(
-        track,
-        track,
-        axes="x",
-        min_overlap=1.10,
-        elem_a=contact_strip,
-        elem_b=top_web,
-        name="contact_strip_runs_nearly_full_track_length",
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    for yoke, head in (
+        (left_yoke, left_head),
+        (center_yoke, center_head),
+        (right_yoke, right_head),
+    ):
+        ctx.allow_overlap(
+            yoke,
+            head,
+            reason="Tilt hinge captures the lamp pivot block between the yoke cheeks in this simplified spotlight assembly.",
+        )
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_parts_overlap_in_sampled_poses(
+        max_pose_samples=64,
+        ignore_adjacent=True,
+        ignore_fixed=True,
     )
 
-    for side_name in ("left", "right"):
-        canopy = object_model.get_part(f"canopy_{side_name}")
-        canopy_cap = canopy.get_visual("cap")
-        canopy_stem = canopy.get_visual("stem")
-        ctx.expect_overlap(canopy, track, axes="xy", min_overlap=0.004, elem_a=canopy_cap)
-        ctx.expect_gap(
-            canopy,
-            track,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=canopy_stem,
-            negative_elem=top_web,
-            name=f"{side_name}_canopy_seated_on_track",
-        )
+    ctx.expect_origin_gap(
+        center_mount,
+        left_mount,
+        axis="x",
+        min_gap=0.22,
+        max_gap=0.26,
+        name="left_to_center_spacing",
+    )
+    ctx.expect_origin_gap(
+        right_mount,
+        center_mount,
+        axis="x",
+        min_gap=0.22,
+        max_gap=0.26,
+        name="center_to_right_spacing",
+    )
 
-    for lamp_id, _, _, _ in LAMP_SPECS:
-        carriage = object_model.get_part(f"carriage_{lamp_id}")
-        lamp = object_model.get_part(f"lamp_{lamp_id}")
-        slide = object_model.get_articulation(f"track_to_carriage_{lamp_id}")
-        pitch = object_model.get_articulation(f"carriage_{lamp_id}_to_lamp_{lamp_id}")
-
-        shoulder = carriage.get_visual("shoulder")
-        adapter = carriage.get_visual("adapter")
-        lock_knob = carriage.get_visual("lock_knob")
-        yoke_left = carriage.get_visual("yoke_left")
-        yoke_right = carriage.get_visual("yoke_right")
-        pivot_axle = carriage.get_visual("pivot_axle")
-        body_shell = lamp.get_visual("body_shell")
-        trunnion = lamp.get_visual("trunnion")
-
-        ctx.expect_origin_distance(carriage, track, axes="y", max_dist=0.001)
-        ctx.expect_within(carriage, track, axes="x")
-        ctx.expect_gap(
-            track,
-            carriage,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=lip_left,
-            negative_elem=shoulder,
-            name=f"lamp_{lamp_id}_left_lip_clamp_seat",
-        )
-        ctx.expect_gap(
-            track,
-            carriage,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=lip_right,
-            negative_elem=shoulder,
-            name=f"lamp_{lamp_id}_right_lip_clamp_seat",
-        )
-        ctx.expect_gap(
-            track,
-            carriage,
-            axis="z",
-            min_gap=0.004,
-            positive_elem=contact_strip,
-            negative_elem=adapter,
-            name=f"lamp_{lamp_id}_adapter_clears_contact_strip",
-        )
-        ctx.expect_gap(
-            track,
-            carriage,
-            axis="z",
-            min_gap=0.006,
-            positive_elem=lip_left,
-            negative_elem=lock_knob,
-            name=f"lamp_{lamp_id}_lock_knob_hangs_below_track",
-        )
-        ctx.expect_contact(
-            carriage,
-            lamp,
-            elem_a=yoke_left,
-            elem_b=trunnion,
-            name=f"lamp_{lamp_id}_left_yoke_contact",
-        )
-        ctx.expect_contact(
-            carriage,
-            lamp,
-            elem_a=yoke_right,
-            elem_b=trunnion,
-            name=f"lamp_{lamp_id}_right_yoke_contact",
-        )
+    for mount, yoke, head, seat in (
+        (left_mount, left_yoke, left_head, seat_left),
+        (center_mount, center_yoke, center_head, seat_center),
+        (right_mount, right_yoke, right_head, seat_right),
+    ):
         ctx.expect_within(
-            carriage,
-            lamp,
-            axes="xz",
-            inner_elem=pivot_axle,
-            outer_elem=trunnion,
-            name=f"lamp_{lamp_id}_pivot_axle_nested_in_trunnion",
+            mount,
+            rail,
+            inner_elem="track_shoe",
+            outer_elem=seat,
+            axes="xy",
         )
+        ctx.expect_contact(rail, mount, elem_a=seat, elem_b="track_shoe")
+        ctx.expect_contact(mount, yoke, elem_a="swivel_cap", elem_b="swivel_collar")
+        ctx.expect_contact(yoke, head, elem_a="yoke_arm_left", elem_b="pivot_block")
+        ctx.expect_contact(yoke, head, elem_a="yoke_arm_right", elem_b="pivot_block")
         ctx.expect_gap(
-            carriage,
-            lamp,
+            head,
+            rail,
             axis="z",
-            min_gap=0.08,
-            positive_elem=shoulder,
-            negative_elem=body_shell,
-            name=f"lamp_{lamp_id}_reads_as_pendant",
+            min_gap=0.090,
+            positive_elem="body_shell",
+            negative_elem=rail_body,
         )
 
-        with ctx.pose({slide: 0.85 * slide.motion_limits.upper, pitch: 0.55}):
-            ctx.expect_within(carriage, track, axes="x", name=f"lamp_{lamp_id}_stays_on_track_at_forward_pose")
-            ctx.expect_gap(
-                track,
-                carriage,
-                axis="z",
-                max_gap=0.001,
-                max_penetration=0.0,
-                positive_elem=lip_left,
-                negative_elem=shoulder,
-                name=f"lamp_{lamp_id}_left_lip_stays_seated_forward",
+    mixed_pose = {
+        left_swivel: 1.15,
+        center_swivel: -0.95,
+        right_swivel: 0.75,
+        left_tilt: -0.30,
+        center_tilt: 0.55,
+        right_tilt: 0.25,
+    }
+    with ctx.pose(mixed_pose):
+        ctx.fail_if_isolated_parts(name="mixed_pose_no_floating")
+        ctx.fail_if_parts_overlap_in_current_pose(name="mixed_pose_no_overlap")
+        for mount, yoke, head, seat in (
+            (left_mount, left_yoke, left_head, seat_left),
+            (center_mount, center_yoke, center_head, seat_center),
+            (right_mount, right_yoke, right_head, seat_right),
+        ):
+            ctx.expect_within(
+                mount,
+                rail,
+                inner_elem="track_shoe",
+                outer_elem=seat,
+                axes="xy",
+                name=f"{mount.name}_shoe_within_seat_mixed_pose",
             )
             ctx.expect_contact(
-                carriage,
-                lamp,
-                elem_a=yoke_right,
-                elem_b=trunnion,
-                name=f"lamp_{lamp_id}_pivot_stays_engaged_forward",
+                rail,
+                mount,
+                elem_a=seat,
+                elem_b="track_shoe",
+                name=f"{mount.name}_shoe_contact_mixed_pose",
+            )
+            ctx.expect_contact(
+                mount,
+                yoke,
+                elem_a="swivel_cap",
+                elem_b="swivel_collar",
+                name=f"{yoke.name}_swivel_contact_mixed_pose",
+            )
+            ctx.expect_contact(
+                yoke,
+                head,
+                elem_a="yoke_arm_left",
+                elem_b="pivot_block",
+                name=f"{head.name}_left_pivot_contact_mixed_pose",
+            )
+            ctx.expect_contact(
+                yoke,
+                head,
+                elem_a="yoke_arm_right",
+                elem_b="pivot_block",
+                name=f"{head.name}_right_pivot_contact_mixed_pose",
+            )
+            ctx.expect_gap(
+                head,
+                rail,
+                axis="z",
+                min_gap=0.090,
+                positive_elem="body_shell",
+                negative_elem=rail_body,
+                name=f"{head.name}_rail_clearance_mixed_pose",
             )
 
-        with ctx.pose({slide: 0.85 * slide.motion_limits.lower, pitch: -0.60}):
-            ctx.expect_within(carriage, track, axes="x", name=f"lamp_{lamp_id}_stays_on_track_at_back_pose")
+    left_rest_center = _element_center(ctx, left_head, "body_shell")
+    with ctx.pose({left_swivel: 1.35}):
+        left_swiveled_center = _element_center(ctx, left_head, "body_shell")
+    ctx.check(
+        "left_swivel_changes_azimuth",
+        left_rest_center is not None
+        and left_swiveled_center is not None
+        and abs(left_swiveled_center[1] - left_rest_center[1]) > 0.020,
+        details=f"rest={left_rest_center}, swiveled={left_swiveled_center}",
+    )
+
+    center_rest_center = _element_center(ctx, center_head, "body_shell")
+    with ctx.pose({center_tilt: 0.60}):
+        center_raised_center = _element_center(ctx, center_head, "body_shell")
+    with ctx.pose({center_tilt: -0.35}):
+        center_dropped_center = _element_center(ctx, center_head, "body_shell")
+    ctx.check(
+        "center_tilt_can_raise_head",
+        center_rest_center is not None
+        and center_raised_center is not None
+        and center_raised_center[2] < center_rest_center[2] - 0.010,
+        details=f"rest={center_rest_center}, raised={center_raised_center}",
+    )
+    ctx.check(
+        "center_tilt_can_drop_head",
+        center_rest_center is not None
+        and center_dropped_center is not None
+        and center_dropped_center[2] > center_rest_center[2] + 0.006,
+        details=f"rest={center_rest_center}, dropped={center_dropped_center}",
+    )
+
+    for articulation in (
+        left_swivel,
+        center_swivel,
+        right_swivel,
+        left_tilt,
+        center_tilt,
+        right_tilt,
+    ):
+        limits = articulation.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            continue
+        with ctx.pose({articulation: limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{articulation.name}_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{articulation.name}_lower_no_floating")
             ctx.expect_gap(
-                track,
-                carriage,
+                center_head if articulation is center_tilt else left_head if articulation is left_tilt else right_head if articulation is right_tilt else left_head,
+                rail,
                 axis="z",
-                max_gap=0.001,
-                max_penetration=0.0,
-                positive_elem=lip_right,
-                negative_elem=shoulder,
-                name=f"lamp_{lamp_id}_right_lip_stays_seated_back",
-            )
+                min_gap=0.085,
+                positive_elem="body_shell",
+                negative_elem=rail_body,
+                name=f"{articulation.name}_lower_rail_gap",
+            ) if articulation in (left_tilt, center_tilt, right_tilt) else None
+        with ctx.pose({articulation: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{articulation.name}_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{articulation.name}_upper_no_floating")
             ctx.expect_gap(
-                carriage,
-                lamp,
+                center_head if articulation is center_tilt else left_head if articulation is left_tilt else right_head if articulation is right_tilt else left_head,
+                rail,
                 axis="z",
-                min_gap=0.06,
-                positive_elem=shoulder,
-                negative_elem=body_shell,
-                name=f"lamp_{lamp_id}_still_reads_as_pendant_when_tilted",
-            )
+                min_gap=0.085,
+                positive_elem="body_shell",
+                negative_elem=rail_body,
+                name=f"{articulation.name}_upper_rail_gap",
+            ) if articulation in (left_tilt, center_tilt, right_tilt) else None
 
     return ctx.report()
 

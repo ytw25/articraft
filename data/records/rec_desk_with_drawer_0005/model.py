@@ -4,597 +4,490 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
+import os
+from pathlib import Path
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
-    Inertial,
     MotionLimits,
     Origin,
-    Sphere,
     TestContext,
     TestReport,
 )
 
-SAFE_ASSET_ROOT = "/tmp"
+try:
+    os.getcwd()
+except FileNotFoundError:
+    os.chdir("/tmp")
 
-
-CASE_WIDTH = 0.94
-CASE_DEPTH = 0.42
-FOOT_HEIGHT = 0.11
-CASE_HEIGHT = 1.46
-SIDE_THICKNESS = 0.022
-BACK_THICKNESS = 0.016
-TOP_THICKNESS = 0.024
-FRAME_DEPTH = 0.020
-FRONT_STILE_WIDTH = 0.075
-
-LID_WIDTH = 0.782
-LID_HEIGHT = 0.552
-LID_THICKNESS = 0.024
-LID_BOTTOM_Z = 0.79
-
-DRAWER_FRONT_WIDTH = 0.782
-DRAWER_FRONT_HEIGHT = 0.234
-DRAWER_FRONT_THICKNESS = 0.022
-DRAWER_BOX_WIDTH = 0.76
-DRAWER_BOX_DEPTH = 0.325
-DRAWER_BOX_HEIGHT = 0.205
-DRAWER_SIDE_THICKNESS = 0.012
-DRAWER_BOTTOM_THICKNESS = 0.010
-LOWER_DRAWER_Z = 0.172
-UPPER_DRAWER_Z = 0.462
-
-GUIDE_RAIL_THICKNESS = 0.014
-RUNNER_THICKNESS = 0.010
-GUIDE_RAIL_HEIGHT = 0.018
-GUIDE_RAIL_LENGTH = 0.285
-GUIDE_RAIL_START_Y = 0.055
-OPEN_LID_ANGLE = 1.53
-STAY_X = 0.365
-STAY_PAD_Y = LID_THICKNESS - 0.007
-STAY_PAD_Z = 0.210
-STAY_ANCHOR_Y = 0.048 - 0.018 / 2.0
-STAY_ANCHOR_Z = LID_BOTTOM_Z + 0.258
+ASSETS = AssetContext.from_script(__file__)
+HERE = Path(__file__).resolve().parent
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="secretary_desk")
+    model = ArticulatedObject(name="secretary_desk", assets=ASSETS)
 
-    walnut = model.material("walnut", rgba=(0.36, 0.22, 0.13, 1.0))
-    walnut_dark = model.material("walnut_dark", rgba=(0.24, 0.14, 0.08, 1.0))
-    maple = model.material("maple", rgba=(0.71, 0.58, 0.42, 1.0))
-    leather = model.material("leather_green", rgba=(0.18, 0.29, 0.17, 1.0))
-    brass = model.material("aged_brass", rgba=(0.72, 0.61, 0.31, 1.0))
+    wood = model.material("wood", rgba=(0.37, 0.22, 0.13, 1.0))
+    wood_dark = model.material("wood_dark", rgba=(0.24, 0.14, 0.09, 1.0))
+    interior = model.material("interior", rgba=(0.66, 0.54, 0.40, 1.0))
+    brass = model.material("brass", rgba=(0.76, 0.63, 0.28, 1.0))
 
-    cabinet = model.part("cabinet")
-    cabinet.visual(
-        Box((CASE_WIDTH - 0.24, 0.028, 0.048)),
-        origin=Origin(xyz=(0.0, 0.014, 0.086)),
-        material=walnut_dark,
-        name="front_bracket_apron",
+    body = model.part("body")
+    flap = model.part("flap")
+    drawer = model.part("drawer")
+
+    case_width = 0.92
+    case_depth = 0.44
+    case_front_y = case_depth / 2.0
+    plinth_height = 0.07
+    lower_case_height = 0.82
+    hutch_height = 0.48
+    side_thickness = 0.03
+    back_thickness = 0.018
+    top_thickness = 0.028
+    frame_depth = 0.024
+
+    opening_width = 0.68
+    flap_height = 0.38
+    flap_thickness = 0.022
+    hinge_radius = 0.006
+    front_frame_y = 0.19
+    hinge_y = 0.208
+    hinge_z = 0.334
+    opening_bottom_z = hinge_z + hinge_radius
+    opening_top_z = opening_bottom_z + flap_height
+    stile_width = 0.09
+
+    compartment_floor_thickness = 0.018
+    compartment_floor_depth = 0.334
+    compartment_floor_center_y = -0.035
+
+    drawer_outer_width = 0.54
+    drawer_height = 0.08
+    drawer_front_thickness = 0.018
+    drawer_side_thickness = 0.012
+    drawer_back_thickness = 0.012
+    drawer_bottom_thickness = 0.008
+    drawer_side_depth = 0.17
+    drawer_depth_total = drawer_side_depth + drawer_front_thickness
+    drawer_closed_front_y = 0.07
+    drawer_bottom_z = 0.445
+    drawer_travel = 0.14
+    guide_thickness = case_width / 2.0 - side_thickness - drawer_outer_width / 2.0
+    guide_height = 0.06
+    guide_length = 0.32
+    guide_center_y = -0.02
+    guide_center_z = drawer_bottom_z + guide_height / 2.0
+
+    body.visual(
+        Box((case_width, case_depth, plinth_height)),
+        origin=Origin(xyz=(0.0, 0.0, plinth_height / 2.0)),
+        material=wood_dark,
+        name="plinth",
     )
-    cabinet.visual(
-        Box((0.028, CASE_DEPTH - 0.14, 0.050)),
+    body.visual(
+        Box((side_thickness, case_depth, lower_case_height - plinth_height)),
         origin=Origin(
             xyz=(
-                -(CASE_WIDTH / 2.0) + 0.014,
-                0.11 + (CASE_DEPTH - 0.14) / 2.0,
-                0.085,
+                -(case_width / 2.0 - side_thickness / 2.0),
+                0.0,
+                plinth_height + (lower_case_height - plinth_height) / 2.0,
             )
         ),
-        material=walnut_dark,
-        name="left_side_skirt",
+        material=wood,
+        name="left_lower_side",
     )
-    cabinet.visual(
-        Box((0.028, CASE_DEPTH - 0.14, 0.050)),
+    body.visual(
+        Box((side_thickness, case_depth, lower_case_height - plinth_height)),
         origin=Origin(
             xyz=(
-                (CASE_WIDTH / 2.0) - 0.014,
-                0.11 + (CASE_DEPTH - 0.14) / 2.0,
-                0.085,
+                case_width / 2.0 - side_thickness / 2.0,
+                0.0,
+                plinth_height + (lower_case_height - plinth_height) / 2.0,
             )
         ),
-        material=walnut_dark,
-        name="right_side_skirt",
+        material=wood,
+        name="right_lower_side",
     )
-    cabinet.visual(
-        Box((CASE_WIDTH - 0.06, 0.028, 0.058)),
-        origin=Origin(xyz=(0.0, CASE_DEPTH - 0.014, 0.081)),
-        material=walnut_dark,
-        name="rear_stretcher",
-    )
-    for side, sign in ((("front_left_foot"), -1.0), (("front_right_foot"), 1.0)):
-        cabinet.visual(
-            Box((0.100, 0.102, FOOT_HEIGHT)),
-            origin=Origin(
-                xyz=(
-                    sign * ((CASE_WIDTH / 2.0) - 0.050),
-                    0.051,
-                    FOOT_HEIGHT / 2.0,
-                )
-            ),
-            material=walnut_dark,
-            name=side,
-        )
-    for side, sign in ((("rear_left_foot"), -1.0), (("rear_right_foot"), 1.0)):
-        cabinet.visual(
-            Box((0.075, 0.082, FOOT_HEIGHT * 0.92)),
-            origin=Origin(
-                xyz=(
-                    sign * ((CASE_WIDTH / 2.0) - 0.0375),
-                    CASE_DEPTH - 0.041,
-                    FOOT_HEIGHT * 0.46,
-                )
-            ),
-            material=walnut_dark,
-            name=side,
-        )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * SIDE_THICKNESS, CASE_DEPTH - BACK_THICKNESS, 0.022)),
+    body.visual(
+        Box((case_width - 2.0 * side_thickness, back_thickness, lower_case_height - plinth_height)),
         origin=Origin(
             xyz=(
                 0.0,
-                (CASE_DEPTH - BACK_THICKNESS) / 2.0,
-                FOOT_HEIGHT + 0.011,
+                -(case_depth / 2.0 - back_thickness / 2.0),
+                plinth_height + (lower_case_height - plinth_height) / 2.0,
             )
         ),
-        material=walnut_dark,
-        name="case_floor",
+        material=wood,
+        name="lower_back",
     )
-    cabinet.visual(
-        Box((SIDE_THICKNESS, CASE_DEPTH, CASE_HEIGHT)),
-        origin=Origin(
-            xyz=(
-                -(CASE_WIDTH / 2.0) + (SIDE_THICKNESS / 2.0),
-                CASE_DEPTH / 2.0,
-                FOOT_HEIGHT + CASE_HEIGHT / 2.0,
-            )
-        ),
-        material=walnut,
-        name="left_side",
-    )
-    cabinet.visual(
-        Box((SIDE_THICKNESS, CASE_DEPTH, CASE_HEIGHT)),
-        origin=Origin(
-            xyz=(
-                (CASE_WIDTH / 2.0) - (SIDE_THICKNESS / 2.0),
-                CASE_DEPTH / 2.0,
-                FOOT_HEIGHT + CASE_HEIGHT / 2.0,
-            )
-        ),
-        material=walnut,
-        name="right_side",
-    )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * SIDE_THICKNESS, BACK_THICKNESS, CASE_HEIGHT - TOP_THICKNESS)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                CASE_DEPTH - BACK_THICKNESS / 2.0,
-                FOOT_HEIGHT + (CASE_HEIGHT - TOP_THICKNESS) / 2.0,
-            )
-        ),
-        material=walnut,
-        name="back_panel",
-    )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * SIDE_THICKNESS, CASE_DEPTH, TOP_THICKNESS)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                CASE_DEPTH / 2.0,
-                FOOT_HEIGHT + CASE_HEIGHT - TOP_THICKNESS / 2.0,
-            )
-        ),
-        material=walnut_dark,
+    body.visual(
+        Box((case_width, case_depth, top_thickness)),
+        origin=Origin(xyz=(0.0, 0.0, lower_case_height - top_thickness / 2.0)),
+        material=wood_dark,
         name="case_top",
     )
-    cabinet.visual(
-        Box((CASE_WIDTH + 0.04, CASE_DEPTH + 0.03, 0.03)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                (CASE_DEPTH + 0.03) / 2.0 - 0.01,
-                FOOT_HEIGHT + CASE_HEIGHT + 0.015,
-            )
-        ),
-        material=walnut_dark,
-        name="top_cornice",
-    )
-    cabinet.visual(
-        Box((FRONT_STILE_WIDTH, FRAME_DEPTH, 1.32)),
-        origin=Origin(
-            xyz=(
-                -(CASE_WIDTH / 2.0) + FRONT_STILE_WIDTH / 2.0,
-                FRAME_DEPTH / 2.0,
-                0.28 + 1.32 / 2.0,
-            )
-        ),
-        material=walnut_dark,
-        name="front_stile_left",
-    )
-    cabinet.visual(
-        Box((FRONT_STILE_WIDTH, FRAME_DEPTH, 1.32)),
-        origin=Origin(
-            xyz=(
-                (CASE_WIDTH / 2.0) - FRONT_STILE_WIDTH / 2.0,
-                FRAME_DEPTH / 2.0,
-                0.28 + 1.32 / 2.0,
-            )
-        ),
-        material=walnut_dark,
-        name="front_stile_right",
-    )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * FRONT_STILE_WIDTH, FRAME_DEPTH, 0.058)),
-        origin=Origin(xyz=(0.0, FRAME_DEPTH / 2.0, FOOT_HEIGHT + 0.029)),
-        material=walnut_dark,
-        name="drawer_bottom_rail",
-    )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * FRONT_STILE_WIDTH, FRAME_DEPTH, 0.048)),
-        origin=Origin(xyz=(0.0, FRAME_DEPTH / 2.0, 0.434)),
-        material=walnut_dark,
-        name="drawer_mid_rail",
-    )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * FRONT_STILE_WIDTH, FRAME_DEPTH, 0.094)),
-        origin=Origin(xyz=(0.0, FRAME_DEPTH / 2.0, 0.743)),
-        material=walnut_dark,
-        name="hinge_rail",
-    )
-    cabinet.visual(
-        Box((CASE_WIDTH - 2.0 * FRONT_STILE_WIDTH, FRAME_DEPTH, 0.080)),
-        origin=Origin(xyz=(0.0, FRAME_DEPTH / 2.0, 1.39)),
-        material=walnut_dark,
-        name="top_rail",
-    )
-    cabinet.visual(
-        Box((0.62, CASE_DEPTH - BACK_THICKNESS - 0.05, 0.020)),
-        origin=Origin(
-            xyz=(
-                0.0,
-                0.05 + (CASE_DEPTH - BACK_THICKNESS - 0.05) / 2.0,
-                LID_BOTTOM_Z + 0.012,
-            )
-        ),
-        material=maple,
-        name="desk_floor",
-    )
-    cabinet.visual(
-        Box((0.60, 0.19, 0.014)),
-        origin=Origin(xyz=(0.0, CASE_DEPTH - BACK_THICKNESS - 0.19 / 2.0, 1.11)),
-        material=maple,
-        name="organizer_shelf",
-    )
-    cabinet.visual(
-        Box((0.012, 0.19, 0.19)),
-        origin=Origin(xyz=(-0.16, CASE_DEPTH - BACK_THICKNESS - 0.19 / 2.0, 1.015)),
-        material=maple,
-        name="organizer_divider_left",
-    )
-    cabinet.visual(
-        Box((0.012, 0.19, 0.19)),
-        origin=Origin(xyz=(0.16, CASE_DEPTH - BACK_THICKNESS - 0.19 / 2.0, 1.015)),
-        material=maple,
-        name="organizer_divider_right",
-    )
-    rail_x = DRAWER_BOX_WIDTH / 2.0 + RUNNER_THICKNESS + GUIDE_RAIL_THICKNESS / 2.0
-    rail_support_width = (
-        ((CASE_WIDTH / 2.0) - SIDE_THICKNESS) - (rail_x + GUIDE_RAIL_THICKNESS / 2.0) + 0.004
-    )
-    rail_support_center_x = rail_x + GUIDE_RAIL_THICKNESS / 2.0 + rail_support_width / 2.0 - 0.002
-    rail_y = GUIDE_RAIL_START_Y + GUIDE_RAIL_LENGTH / 2.0
-    for prefix, z0 in (("lower", LOWER_DRAWER_Z), ("upper", UPPER_DRAWER_Z)):
-        cabinet.visual(
-            Box((GUIDE_RAIL_THICKNESS, GUIDE_RAIL_LENGTH, GUIDE_RAIL_HEIGHT)),
-            origin=Origin(xyz=(-rail_x, rail_y, z0 + 0.12)),
-            material=walnut_dark,
-            name=f"{prefix}_left_rail",
-        )
-        cabinet.visual(
-            Box((GUIDE_RAIL_THICKNESS, GUIDE_RAIL_LENGTH, GUIDE_RAIL_HEIGHT)),
-            origin=Origin(xyz=(rail_x, rail_y, z0 + 0.12)),
-            material=walnut_dark,
-            name=f"{prefix}_right_rail",
-        )
-        cabinet.visual(
-            Box((rail_support_width, GUIDE_RAIL_LENGTH, GUIDE_RAIL_HEIGHT)),
-            origin=Origin(xyz=(-rail_support_center_x, rail_y, z0 + 0.12)),
-            material=walnut_dark,
-            name=f"{prefix}_left_rail_support",
-        )
-        cabinet.visual(
-            Box((rail_support_width, GUIDE_RAIL_LENGTH, GUIDE_RAIL_HEIGHT)),
-            origin=Origin(xyz=(rail_support_center_x, rail_y, z0 + 0.12)),
-            material=walnut_dark,
-            name=f"{prefix}_right_rail_support",
-        )
 
-    hinge_bracket_x = LID_WIDTH / 2.0 + 0.010
-    cabinet.visual(
-        Box((0.022, 0.024, 0.040)),
-        origin=Origin(xyz=(-hinge_bracket_x, 0.012, LID_BOTTOM_Z + 0.020)),
-        material=brass,
-        name="left_hinge_bracket",
+    body.visual(
+        Box((case_width - 0.06, frame_depth, 0.08)),
+        origin=Origin(xyz=(0.0, front_frame_y, 0.16)),
+        material=wood_dark,
+        name="false_drawer_lower",
     )
-    cabinet.visual(
-        Box((0.022, 0.024, 0.040)),
-        origin=Origin(xyz=(hinge_bracket_x, 0.012, LID_BOTTOM_Z + 0.020)),
-        material=brass,
-        name="right_hinge_bracket",
+    body.visual(
+        Box((case_width - 0.06, frame_depth, 0.08)),
+        origin=Origin(xyz=(0.0, front_frame_y, 0.255)),
+        material=wood_dark,
+        name="false_drawer_upper",
     )
-    cabinet.visual(
-        Box((0.022, 0.018, 0.028)),
-        origin=Origin(xyz=(-0.365, 0.048, LID_BOTTOM_Z + 0.258)),
-        material=brass,
-        name="left_stay_anchor",
-    )
-    cabinet.visual(
-        Box((0.022, 0.018, 0.028)),
-        origin=Origin(xyz=(0.365, 0.048, LID_BOTTOM_Z + 0.258)),
-        material=brass,
-        name="right_stay_anchor",
-    )
-    anchor_bridge_width = ((CASE_WIDTH / 2.0) - SIDE_THICKNESS) - (0.365 + 0.022 / 2.0) + 0.004
-    anchor_bridge_center_x = 0.365 + 0.022 / 2.0 + anchor_bridge_width / 2.0 - 0.002
-    cabinet.visual(
-        Box((anchor_bridge_width, 0.018, 0.028)),
-        origin=Origin(xyz=(-anchor_bridge_center_x, 0.048, LID_BOTTOM_Z + 0.258)),
-        material=brass,
-        name="left_stay_anchor_bridge",
-    )
-    cabinet.visual(
-        Box((anchor_bridge_width, 0.018, 0.028)),
-        origin=Origin(xyz=(anchor_bridge_center_x, 0.048, LID_BOTTOM_Z + 0.258)),
-        material=brass,
-        name="right_stay_anchor_bridge",
-    )
-    cabinet.inertial = Inertial.from_geometry(
-        Box((CASE_WIDTH, CASE_DEPTH, FOOT_HEIGHT + CASE_HEIGHT + 0.03)),
-        mass=48.0,
+    body.visual(
+        Cylinder(radius=0.009, length=0.018),
         origin=Origin(
-            xyz=(0.0, CASE_DEPTH / 2.0, (FOOT_HEIGHT + CASE_HEIGHT + 0.03) / 2.0)
-        ),
-    )
-
-    lid = model.part("lid_panel")
-    lid.visual(
-        Box((LID_WIDTH, LID_THICKNESS, LID_HEIGHT)),
-        origin=Origin(xyz=(0.0, LID_THICKNESS / 2.0, LID_HEIGHT / 2.0)),
-        material=walnut,
-        name="lid_face",
-    )
-    lid.visual(
-        Box((LID_WIDTH - 0.12, 0.004, LID_HEIGHT - 0.11)),
-        origin=Origin(
-            xyz=(0.0, LID_THICKNESS - 0.002, 0.055 + (LID_HEIGHT - 0.11) / 2.0)
-        ),
-        material=leather,
-        name="writing_surface",
-    )
-    lid.visual(
-        Box((LID_WIDTH - 0.06, 0.008, LID_HEIGHT - 0.05)),
-        origin=Origin(xyz=(0.0, 0.004, LID_HEIGHT / 2.0)),
-        material=walnut_dark,
-        name="outer_raised_panel",
-    )
-    lid.visual(
-        Cylinder(radius=0.0065, length=0.014),
-        origin=Origin(
-            xyz=(-(LID_WIDTH / 2.0) + 0.006, LID_THICKNESS / 2.0, 0.014),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=brass,
-        name="left_pin",
-    )
-    lid.visual(
-        Cylinder(radius=0.0065, length=0.014),
-        origin=Origin(
-            xyz=((LID_WIDTH / 2.0) - 0.006, LID_THICKNESS / 2.0, 0.014),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=brass,
-        name="right_pin",
-    )
-    lid.visual(
-        Box((0.022, 0.014, 0.020)),
-        origin=Origin(xyz=(-STAY_X, STAY_PAD_Y, STAY_PAD_Z)),
-        material=brass,
-        name="left_stay_pad",
-    )
-    lid.visual(
-        Box((0.022, 0.014, 0.020)),
-        origin=Origin(xyz=(STAY_X, STAY_PAD_Y, STAY_PAD_Z)),
-        material=brass,
-        name="right_stay_pad",
-    )
-    anchor_local_y = math.cos(OPEN_LID_ANGLE) * STAY_ANCHOR_Y + math.sin(OPEN_LID_ANGLE) * (
-        STAY_ANCHOR_Z - LID_BOTTOM_Z
-    )
-    anchor_local_z = -math.sin(OPEN_LID_ANGLE) * STAY_ANCHOR_Y + math.cos(OPEN_LID_ANGLE) * (
-        STAY_ANCHOR_Z - LID_BOTTOM_Z
-    )
-    stay_dy = anchor_local_y - STAY_PAD_Y
-    stay_dz = anchor_local_z - STAY_PAD_Z
-    stay_length = math.hypot(stay_dy, stay_dz)
-    stay_roll = -math.atan2(stay_dy, stay_dz)
-    for side_name, sign in ((("left_drop_stay"), -1.0), (("right_drop_stay"), 1.0)):
-        lid.visual(
-            Cylinder(radius=0.0032, length=stay_length),
-            origin=Origin(
-                xyz=(sign * STAY_X, STAY_PAD_Y + stay_dy / 2.0, STAY_PAD_Z + stay_dz / 2.0),
-                rpy=(stay_roll, 0.0, 0.0),
-            ),
-            material=brass,
-            name=side_name,
-        )
-    lid.visual(
-        Cylinder(radius=0.012, length=0.004),
-        origin=Origin(
-            xyz=(0.0, -0.002, LID_HEIGHT * 0.53),
+            xyz=(-0.15, front_frame_y + frame_depth / 2.0 + 0.009, 0.255),
             rpy=(math.pi / 2.0, 0.0, 0.0),
         ),
         material=brass,
-        name="lid_escutcheon",
+        name="false_drawer_pull_left",
     )
-    lid.inertial = Inertial.from_geometry(
-        Box((LID_WIDTH, LID_THICKNESS, LID_HEIGHT)),
-        mass=7.0,
-        origin=Origin(xyz=(0.0, LID_THICKNESS / 2.0, LID_HEIGHT / 2.0)),
+    body.visual(
+        Cylinder(radius=0.009, length=0.018),
+        origin=Origin(
+            xyz=(0.15, front_frame_y + frame_depth / 2.0 + 0.009, 0.255),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=brass,
+        name="false_drawer_pull_right",
     )
 
-    def _build_drawer(name: str) -> tuple[object, float]:
-        drawer = model.part(name)
-        drawer.visual(
-            Box((DRAWER_FRONT_WIDTH, DRAWER_FRONT_THICKNESS, DRAWER_FRONT_HEIGHT)),
-            origin=Origin(
-                xyz=(
-                    0.0,
-                    DRAWER_FRONT_THICKNESS / 2.0,
-                    DRAWER_FRONT_HEIGHT / 2.0,
-                )
-            ),
-            material=walnut,
-            name="drawer_front",
-        )
-        drawer.visual(
-            Box((DRAWER_BOX_WIDTH, DRAWER_BOX_DEPTH, DRAWER_BOTTOM_THICKNESS)),
-            origin=Origin(
-                xyz=(
-                    0.0,
-                    DRAWER_FRONT_THICKNESS + DRAWER_BOX_DEPTH / 2.0,
-                    DRAWER_BOTTOM_THICKNESS / 2.0,
-                )
-            ),
-            material=maple,
-            name="drawer_bottom",
-        )
-        drawer.visual(
-            Box((DRAWER_SIDE_THICKNESS, DRAWER_BOX_DEPTH, DRAWER_BOX_HEIGHT)),
-            origin=Origin(
-                xyz=(
-                    -(DRAWER_BOX_WIDTH / 2.0) + DRAWER_SIDE_THICKNESS / 2.0,
-                    DRAWER_FRONT_THICKNESS + DRAWER_BOX_DEPTH / 2.0,
-                    DRAWER_BOX_HEIGHT / 2.0,
-                )
-            ),
-            material=maple,
-            name="left_side",
-        )
-        drawer.visual(
-            Box((DRAWER_SIDE_THICKNESS, DRAWER_BOX_DEPTH, DRAWER_BOX_HEIGHT)),
-            origin=Origin(
-                xyz=(
-                    (DRAWER_BOX_WIDTH / 2.0) - DRAWER_SIDE_THICKNESS / 2.0,
-                    DRAWER_FRONT_THICKNESS + DRAWER_BOX_DEPTH / 2.0,
-                    DRAWER_BOX_HEIGHT / 2.0,
-                )
-            ),
-            material=maple,
-            name="right_side",
-        )
-        drawer.visual(
-            Box((DRAWER_BOX_WIDTH - 2.0 * DRAWER_SIDE_THICKNESS, DRAWER_SIDE_THICKNESS, DRAWER_BOX_HEIGHT)),
-            origin=Origin(
-                xyz=(
-                    0.0,
-                    DRAWER_FRONT_THICKNESS + DRAWER_BOX_DEPTH - DRAWER_SIDE_THICKNESS / 2.0,
-                    DRAWER_BOX_HEIGHT / 2.0,
-                )
-            ),
-            material=maple,
-            name="back",
-        )
-        runner_y = GUIDE_RAIL_START_Y + (GUIDE_RAIL_LENGTH - 0.002) / 2.0
-        for side, sign in (("left", -1.0), ("right", 1.0)):
-            drawer.visual(
-                Box((RUNNER_THICKNESS, GUIDE_RAIL_LENGTH - 0.002, GUIDE_RAIL_HEIGHT - 0.002)),
-                origin=Origin(
-                    xyz=(
-                        sign * (DRAWER_BOX_WIDTH / 2.0 + RUNNER_THICKNESS / 2.0),
-                        runner_y,
-                        0.12,
-                    )
-                ),
-                material=walnut_dark,
-                name=f"{side}_runner",
+    body.visual(
+        Box((stile_width, frame_depth, flap_height)),
+        origin=Origin(
+            xyz=(
+                -(opening_width / 2.0 + stile_width / 2.0),
+                front_frame_y,
+                opening_bottom_z + flap_height / 2.0,
             )
-        for x_pos in (-0.18, 0.18):
-            drawer.visual(
-                Cylinder(radius=0.005, length=0.014),
-                origin=Origin(
-                    xyz=(x_pos, -0.007, DRAWER_FRONT_HEIGHT / 2.0),
-                    rpy=(math.pi / 2.0, 0.0, 0.0),
-                ),
-                material=brass,
-                name=f"pull_post_{'left' if x_pos < 0 else 'right'}",
+        ),
+        material=wood_dark,
+        name="opening_left_stile",
+    )
+    body.visual(
+        Box((stile_width, frame_depth, flap_height)),
+        origin=Origin(
+            xyz=(
+                opening_width / 2.0 + stile_width / 2.0,
+                front_frame_y,
+                opening_bottom_z + flap_height / 2.0,
             )
-            drawer.visual(
-                Sphere(radius=0.011),
-                origin=Origin(xyz=(x_pos, -0.017, DRAWER_FRONT_HEIGHT / 2.0)),
-                material=brass,
-                name=f"pull_knob_{'left' if x_pos < 0 else 'right'}",
+        ),
+        material=wood_dark,
+        name="opening_right_stile",
+    )
+    body.visual(
+        Box((opening_width, frame_depth, 0.048)),
+        origin=Origin(
+            xyz=(0.0, front_frame_y, opening_bottom_z - 0.024)
+        ),
+        material=wood_dark,
+        name="opening_bottom_rail",
+    )
+    body.visual(
+        Box((opening_width, frame_depth, 0.07)),
+        origin=Origin(
+            xyz=(0.0, front_frame_y, opening_top_z + 0.035)
+        ),
+        material=wood_dark,
+        name="opening_top_rail",
+    )
+    body.visual(
+        Cylinder(radius=hinge_radius, length=0.14),
+        origin=Origin(
+            xyz=(-0.27, hinge_y, hinge_z),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=brass,
+        name="hinge_knuckle_left",
+    )
+    body.visual(
+        Cylinder(radius=hinge_radius, length=0.14),
+        origin=Origin(
+            xyz=(0.27, hinge_y, hinge_z),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=brass,
+        name="hinge_knuckle_right",
+    )
+    body.visual(
+        Box((opening_width, compartment_floor_depth, compartment_floor_thickness)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                compartment_floor_center_y,
+                hinge_z + flap_thickness - compartment_floor_thickness / 2.0,
             )
-        drawer.inertial = Inertial.from_geometry(
-            Box((DRAWER_BOX_WIDTH, DRAWER_FRONT_THICKNESS + DRAWER_BOX_DEPTH, DRAWER_BOX_HEIGHT)),
-            mass=4.8,
-            origin=Origin(
-                xyz=(
-                    0.0,
-                    (DRAWER_FRONT_THICKNESS + DRAWER_BOX_DEPTH) / 2.0,
-                    DRAWER_BOX_HEIGHT / 2.0,
-                )
-            ),
-        )
-        return drawer
+        ),
+        material=interior,
+        name="compartment_floor",
+    )
+    body.visual(
+        Box((guide_thickness, guide_length, guide_height)),
+        origin=Origin(
+            xyz=(
+                -(case_width / 2.0 - side_thickness - guide_thickness / 2.0),
+                guide_center_y,
+                guide_center_z,
+            )
+        ),
+        material=interior,
+        name="drawer_guide_left",
+    )
+    body.visual(
+        Box((guide_thickness, guide_length, guide_height)),
+        origin=Origin(
+            xyz=(
+                case_width / 2.0 - side_thickness - guide_thickness / 2.0,
+                guide_center_y,
+                guide_center_z,
+            )
+        ),
+        material=interior,
+        name="drawer_guide_right",
+    )
+    body.visual(
+        Box((0.78, 0.24, 0.018)),
+        origin=Origin(xyz=(0.0, -0.082, 0.59)),
+        material=interior,
+        name="cubby_shelf_mid",
+    )
+    body.visual(
+        Box((0.78, 0.24, 0.018)),
+        origin=Origin(xyz=(0.0, -0.082, 0.68)),
+        material=interior,
+        name="cubby_shelf_upper",
+    )
+    body.visual(
+        Box((0.015, 0.24, 0.16)),
+        origin=Origin(xyz=(-0.17, -0.082, 0.61)),
+        material=interior,
+        name="cubby_divider_left",
+    )
+    body.visual(
+        Box((0.015, 0.24, 0.16)),
+        origin=Origin(xyz=(0.0, -0.082, 0.61)),
+        material=interior,
+        name="cubby_divider_center",
+    )
+    body.visual(
+        Box((0.015, 0.24, 0.16)),
+        origin=Origin(xyz=(0.17, -0.082, 0.61)),
+        material=interior,
+        name="cubby_divider_right",
+    )
+    body.visual(
+        Box((side_thickness, 0.24, hutch_height)),
+        origin=Origin(
+            xyz=(
+                -(case_width / 2.0 - side_thickness / 2.0),
+                -0.10,
+                lower_case_height + hutch_height / 2.0,
+            )
+        ),
+        material=wood,
+        name="hutch_left_side",
+    )
+    body.visual(
+        Box((side_thickness, 0.24, hutch_height)),
+        origin=Origin(
+            xyz=(
+                case_width / 2.0 - side_thickness / 2.0,
+                -0.10,
+                lower_case_height + hutch_height / 2.0,
+            )
+        ),
+        material=wood,
+        name="hutch_right_side",
+    )
+    body.visual(
+        Box((case_width - 2.0 * side_thickness, back_thickness, hutch_height)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -(case_depth / 2.0 - back_thickness / 2.0),
+                lower_case_height + hutch_height / 2.0,
+            )
+        ),
+        material=wood,
+        name="hutch_back",
+    )
+    body.visual(
+        Box((case_width, 0.24, top_thickness)),
+        origin=Origin(
+            xyz=(0.0, -0.10, lower_case_height + hutch_height - top_thickness / 2.0)
+        ),
+        material=wood_dark,
+        name="hutch_top",
+    )
+    body.visual(
+        Box((0.78, 0.22, 0.018)),
+        origin=Origin(xyz=(0.0, -0.10, 0.96)),
+        material=wood,
+        name="hutch_shelf_lower",
+    )
+    body.visual(
+        Box((0.78, 0.22, 0.018)),
+        origin=Origin(xyz=(0.0, -0.10, 1.12)),
+        material=wood,
+        name="hutch_shelf_upper",
+    )
 
-    upper_drawer = _build_drawer("upper_drawer")
-    lower_drawer = _build_drawer("lower_drawer")
+    flap.visual(
+        Box((opening_width, flap_thickness, flap_height)),
+        origin=Origin(
+            xyz=(0.0, -flap_thickness / 2.0, hinge_radius + flap_height / 2.0)
+        ),
+        material=wood_dark,
+        name="flap_panel",
+    )
+    flap.visual(
+        Cylinder(radius=hinge_radius, length=0.40),
+        origin=Origin(
+            xyz=(0.0, 0.0, 0.0),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=brass,
+        name="hinge_knuckle_center",
+    )
+    flap.visual(
+        Box((0.44, 0.014, 0.018)),
+        origin=Origin(
+            xyz=(0.0, -0.007, hinge_radius + flap_height - 0.009)
+        ),
+        material=wood,
+        name="writing_lip",
+    )
+    flap.visual(
+        Cylinder(radius=0.010, length=0.014),
+        origin=Origin(
+            xyz=(-0.18, 0.007, hinge_radius + 0.23),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=brass,
+        name="flap_pull_left",
+    )
+    flap.visual(
+        Cylinder(radius=0.010, length=0.014),
+        origin=Origin(
+            xyz=(0.18, 0.007, hinge_radius + 0.23),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=brass,
+        name="flap_pull_right",
+    )
+
+    drawer.visual(
+        Box((drawer_outer_width, drawer_front_thickness, drawer_height)),
+        origin=Origin(
+            xyz=(0.0, drawer_front_thickness / 2.0, drawer_height / 2.0)
+        ),
+        material=wood_dark,
+        name="drawer_front",
+    )
+    drawer.visual(
+        Box(
+            (
+                drawer_outer_width - 2.0 * drawer_side_thickness,
+                drawer_side_depth,
+                drawer_bottom_thickness,
+            )
+        ),
+        origin=Origin(
+            xyz=(0.0, -drawer_side_depth / 2.0, drawer_bottom_thickness / 2.0)
+        ),
+        material=interior,
+        name="drawer_bottom",
+    )
+    drawer.visual(
+        Box((drawer_side_thickness, drawer_side_depth, drawer_height - 0.025)),
+        origin=Origin(
+            xyz=(
+                -(drawer_outer_width / 2.0 - drawer_side_thickness / 2.0),
+                -drawer_side_depth / 2.0,
+                (drawer_height - 0.025) / 2.0,
+            )
+        ),
+        material=interior,
+        name="drawer_side_left",
+    )
+    drawer.visual(
+        Box((drawer_side_thickness, drawer_side_depth, drawer_height - 0.025)),
+        origin=Origin(
+            xyz=(
+                drawer_outer_width / 2.0 - drawer_side_thickness / 2.0,
+                -drawer_side_depth / 2.0,
+                (drawer_height - 0.025) / 2.0,
+            )
+        ),
+        material=interior,
+        name="drawer_side_right",
+    )
+    drawer.visual(
+        Box(
+            (
+                drawer_outer_width - 2.0 * drawer_side_thickness,
+                drawer_back_thickness,
+                drawer_height - 0.025,
+            )
+        ),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -drawer_side_depth + drawer_back_thickness / 2.0,
+                (drawer_height - 0.025) / 2.0,
+            )
+        ),
+        material=interior,
+        name="drawer_back",
+    )
+    drawer.visual(
+        Cylinder(radius=0.008, length=0.014),
+        origin=Origin(
+            xyz=(0.0, drawer_front_thickness + 0.007, drawer_height / 2.0),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=brass,
+        name="drawer_pull",
+    )
 
     model.articulation(
-        "cabinet_to_lid",
+        "body_to_flap",
         ArticulationType.REVOLUTE,
-        parent=cabinet,
-        child=lid,
-        origin=Origin(xyz=(0.0, 0.0, LID_BOTTOM_Z)),
+        parent=body,
+        child=flap,
+        origin=Origin(xyz=(0.0, hinge_y, hinge_z)),
         axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(
-            effort=18.0,
-            velocity=1.0,
-            lower=0.0,
-            upper=OPEN_LID_ANGLE,
+            effort=20.0,
+            velocity=1.5,
+            lower=-math.pi / 2.0,
+            upper=0.0,
         ),
     )
     model.articulation(
-        "cabinet_to_upper_drawer",
+        "body_to_drawer",
         ArticulationType.PRISMATIC,
-        parent=cabinet,
-        child=upper_drawer,
-        origin=Origin(xyz=(0.0, 0.0, UPPER_DRAWER_Z)),
-        axis=(0.0, -1.0, 0.0),
+        parent=body,
+        child=drawer,
+        origin=Origin(xyz=(0.0, drawer_closed_front_y, drawer_bottom_z)),
+        axis=(0.0, 1.0, 0.0),
         motion_limits=MotionLimits(
-            effort=12.0,
-            velocity=0.5,
+            effort=40.0,
+            velocity=0.3,
             lower=0.0,
-            upper=0.18,
-        ),
-    )
-    model.articulation(
-        "cabinet_to_lower_drawer",
-        ArticulationType.PRISMATIC,
-        parent=cabinet,
-        child=lower_drawer,
-        origin=Origin(xyz=(0.0, 0.0, LOWER_DRAWER_Z)),
-        axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=12.0,
-            velocity=0.5,
-            lower=0.0,
-            upper=0.20,
+            upper=drawer_travel,
         ),
     )
 
@@ -602,167 +495,165 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=SAFE_ASSET_ROOT)
-    cabinet = object_model.get_part("cabinet")
-    lid = object_model.get_part("lid_panel")
-    upper_drawer = object_model.get_part("upper_drawer")
-    lower_drawer = object_model.get_part("lower_drawer")
+    ctx = TestContext(object_model, asset_root=HERE)
+    body = object_model.get_part("body")
+    flap = object_model.get_part("flap")
+    drawer = object_model.get_part("drawer")
+    flap_hinge = object_model.get_articulation("body_to_flap")
+    drawer_slide = object_model.get_articulation("body_to_drawer")
 
-    lid_hinge = object_model.get_articulation("cabinet_to_lid")
-    upper_slide = object_model.get_articulation("cabinet_to_upper_drawer")
-    lower_slide = object_model.get_articulation("cabinet_to_lower_drawer")
-
-    lid_face = lid.get_visual("lid_face")
-    writing_surface = lid.get_visual("writing_surface")
-    left_pin = lid.get_visual("left_pin")
-    right_pin = lid.get_visual("right_pin")
-    left_stay = lid.get_visual("left_drop_stay")
-    right_stay = lid.get_visual("right_drop_stay")
-    left_bracket = cabinet.get_visual("left_hinge_bracket")
-    right_bracket = cabinet.get_visual("right_hinge_bracket")
-    left_anchor = cabinet.get_visual("left_stay_anchor")
-    right_anchor = cabinet.get_visual("right_stay_anchor")
-    desk_floor = cabinet.get_visual("desk_floor")
-    hinge_rail = cabinet.get_visual("hinge_rail")
-    top_rail = cabinet.get_visual("top_rail")
-    frame_left = cabinet.get_visual("front_stile_left")
-    frame_ref = cabinet.get_visual("drawer_mid_rail")
-    upper_front = upper_drawer.get_visual("drawer_front")
-    lower_front = lower_drawer.get_visual("drawer_front")
-    upper_left_runner = upper_drawer.get_visual("left_runner")
-    upper_right_runner = upper_drawer.get_visual("right_runner")
-    lower_left_runner = lower_drawer.get_visual("left_runner")
-    lower_right_runner = lower_drawer.get_visual("right_runner")
-    upper_left_rail = cabinet.get_visual("upper_left_rail")
-    upper_right_rail = cabinet.get_visual("upper_right_rail")
-    lower_left_rail = cabinet.get_visual("lower_left_rail")
-    lower_right_rail = cabinet.get_visual("lower_right_rail")
+    flap_panel = flap.get_visual("flap_panel")
+    flap_knuckle = flap.get_visual("hinge_knuckle_center")
+    writing_lip = flap.get_visual("writing_lip")
+    drawer_front = drawer.get_visual("drawer_front")
+    drawer_bottom = drawer.get_visual("drawer_bottom")
+    drawer_side_left = drawer.get_visual("drawer_side_left")
+    drawer_side_right = drawer.get_visual("drawer_side_right")
+    opening_bottom_rail = body.get_visual("opening_bottom_rail")
+    opening_top_rail = body.get_visual("opening_top_rail")
+    left_knuckle = body.get_visual("hinge_knuckle_left")
+    right_knuckle = body.get_visual("hinge_knuckle_right")
+    compartment_floor = body.get_visual("compartment_floor")
+    drawer_guide_left = body.get_visual("drawer_guide_left")
+    drawer_guide_right = body.get_visual("drawer_guide_right")
+    cubby_shelf_mid = body.get_visual("cubby_shelf_mid")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
 
-    # Use prompt-specific exact visual checks as the real completion criteria.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - key poses stay believable
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Add prompt-specific exact visual checks below; broad warn_if_* checks are not enough.
-    ctx.allow_overlap(
-        lid,
-        cabinet,
-        elem_a=left_pin,
-        elem_b=left_bracket,
-        reason="left hinge pin intentionally nests into the brass side bracket",
-    )
-    ctx.allow_overlap(
-        lid,
-        cabinet,
-        elem_a=right_pin,
-        elem_b=right_bracket,
-        reason="right hinge pin intentionally nests into the brass side bracket",
-    )
-    ctx.expect_contact(lid, cabinet, elem_a=left_pin, elem_b=left_bracket)
-    ctx.expect_contact(lid, cabinet, elem_a=right_pin, elem_b=right_bracket)
-    ctx.expect_overlap(lid, cabinet, axes="x", min_overlap=0.74, elem_a=lid_face, elem_b=top_rail)
-    ctx.expect_overlap(lid, cabinet, axes="z", min_overlap=0.45, elem_a=lid_face, elem_b=frame_left)
+    ctx.expect_contact(flap, body, elem_a=flap_knuckle, elem_b=left_knuckle)
+    ctx.expect_contact(flap, body, elem_a=flap_knuckle, elem_b=right_knuckle)
     ctx.expect_gap(
-        lid,
-        upper_drawer,
+        flap,
+        body,
         axis="z",
-        min_gap=0.09,
-        positive_elem=lid_face,
-        negative_elem=upper_front,
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=flap_panel,
+        negative_elem=opening_bottom_rail,
     )
     ctx.expect_gap(
-        upper_drawer,
-        lower_drawer,
+        body,
+        flap,
+        axis="z",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=opening_top_rail,
+        negative_elem=flap_panel,
+    )
+    ctx.expect_contact(drawer, body, elem_a=drawer_side_left, elem_b=drawer_guide_left)
+    ctx.expect_contact(drawer, body, elem_a=drawer_side_right, elem_b=drawer_guide_right)
+    ctx.expect_gap(
+        body,
+        drawer,
+        axis="y",
+        min_gap=0.08,
+        positive_elem=opening_bottom_rail,
+        negative_elem=drawer_front,
+    )
+    ctx.expect_gap(
+        body,
+        drawer,
         axis="z",
         min_gap=0.05,
-        positive_elem=upper_front,
-        negative_elem=lower_front,
+        positive_elem=cubby_shelf_mid,
+        negative_elem=drawer_front,
+    )
+    ctx.expect_gap(
+        drawer,
+        body,
+        axis="z",
+        min_gap=0.07,
+        positive_elem=drawer_bottom,
+        negative_elem=compartment_floor,
     )
 
-    ctx.expect_contact(upper_drawer, cabinet, elem_a=upper_left_runner, elem_b=upper_left_rail)
-    ctx.expect_contact(upper_drawer, cabinet, elem_a=upper_right_runner, elem_b=upper_right_rail)
-    ctx.expect_contact(lower_drawer, cabinet, elem_a=lower_left_runner, elem_b=lower_left_rail)
-    ctx.expect_contact(lower_drawer, cabinet, elem_a=lower_right_runner, elem_b=lower_right_rail)
+    flap_limits = flap_hinge.motion_limits
+    drawer_limits = drawer_slide.motion_limits
 
-    with ctx.pose({lid_hinge: OPEN_LID_ANGLE}):
-        ctx.expect_contact(lid, cabinet, elem_a=left_stay, elem_b=left_anchor)
-        ctx.expect_contact(lid, cabinet, elem_a=right_stay, elem_b=right_anchor)
-        ctx.expect_gap(
-            lid,
-            cabinet,
-            axis="z",
-            max_gap=0.002,
-            max_penetration=0.0,
-            positive_elem=writing_surface,
-            negative_elem=desk_floor,
-        )
-        ctx.expect_overlap(lid, cabinet, axes="x", min_overlap=0.60, elem_a=writing_surface, elem_b=desk_floor)
-        ctx.expect_gap(
-            cabinet,
-            lid,
-            axis="y",
-            min_gap=0.05,
-            positive_elem=hinge_rail,
-            negative_elem=writing_surface,
-        )
-        ctx.expect_gap(
-            lid,
-            upper_drawer,
-            axis="z",
-            min_gap=0.09,
-            positive_elem=writing_surface,
-            negative_elem=upper_front,
-        )
+    if flap_limits is not None and flap_limits.lower is not None:
+        with ctx.pose({flap_hinge: flap_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="flap_open_no_overlap")
+            ctx.fail_if_isolated_parts(name="flap_open_no_floating")
+            ctx.expect_contact(
+                flap,
+                body,
+                elem_a=flap_knuckle,
+                elem_b=left_knuckle,
+                name="flap_left_knuckle_open_contact",
+            )
+            ctx.expect_contact(
+                flap,
+                body,
+                elem_a=flap_knuckle,
+                elem_b=right_knuckle,
+                name="flap_right_knuckle_open_contact",
+            )
+            ctx.expect_gap(
+                flap,
+                body,
+                axis="y",
+                min_gap=0.35,
+                positive_elem=writing_lip,
+                negative_elem=opening_bottom_rail,
+                name="flap_opens_forward",
+            )
+            ctx.expect_gap(
+                drawer,
+                flap,
+                axis="z",
+                min_gap=0.07,
+                positive_elem=drawer_bottom,
+                negative_elem=flap_panel,
+                name="drawer_clears_open_flap",
+            )
 
-    with ctx.pose({upper_slide: 0.18}):
-        ctx.expect_gap(
-            cabinet,
-            upper_drawer,
-            axis="y",
-            min_gap=0.14,
-            positive_elem=frame_ref,
-            negative_elem=upper_front,
-        )
-        ctx.expect_contact(upper_drawer, cabinet, elem_a=upper_left_runner, elem_b=upper_left_rail)
-        ctx.expect_contact(upper_drawer, cabinet, elem_a=upper_right_runner, elem_b=upper_right_rail)
-
-    with ctx.pose({lower_slide: 0.20}):
-        ctx.expect_gap(
-            cabinet,
-            lower_drawer,
-            axis="y",
-            min_gap=0.16,
-            positive_elem=frame_ref,
-            negative_elem=lower_front,
-        )
-        ctx.expect_contact(lower_drawer, cabinet, elem_a=lower_left_runner, elem_b=lower_left_rail)
-        ctx.expect_contact(lower_drawer, cabinet, elem_a=lower_right_runner, elem_b=lower_right_rail)
+    if (
+        flap_limits is not None
+        and flap_limits.lower is not None
+        and drawer_limits is not None
+        and drawer_limits.upper is not None
+    ):
+        with ctx.pose({flap_hinge: flap_limits.lower, drawer_slide: drawer_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="combined_open_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name="combined_open_pose_no_floating")
+            ctx.expect_contact(
+                drawer,
+                body,
+                elem_a=drawer_side_left,
+                elem_b=drawer_guide_left,
+                name="drawer_left_guide_contact_open",
+            )
+            ctx.expect_contact(
+                drawer,
+                body,
+                elem_a=drawer_side_right,
+                elem_b=drawer_guide_right,
+                name="drawer_right_guide_contact_open",
+            )
+            ctx.expect_gap(
+                drawer,
+                body,
+                axis="y",
+                min_gap=0.005,
+                positive_elem=drawer_front,
+                negative_elem=opening_bottom_rail,
+                name="drawer_protrudes_past_case",
+            )
+            ctx.expect_gap(
+                drawer,
+                flap,
+                axis="z",
+                min_gap=0.07,
+                positive_elem=drawer_bottom,
+                negative_elem=flap_panel,
+                name="drawer_clears_flap_when_both_open",
+            )
 
     return ctx.report()
 

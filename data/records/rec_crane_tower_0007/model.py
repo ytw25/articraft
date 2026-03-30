@@ -4,48 +4,9 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-import os
-import pathlib
-
-# The compile harness can keep a module path that later gets normalized through
-# pathlib, even after its original working directory has disappeared. Capture a
-# stable cwd while it exists and provide a fallback getcwd so later stdlib path
-# normalization cannot fail with FileNotFoundError.
-_REAL_GETCWD = os.getcwd
-try:
-    _STABLE_CWD = _REAL_GETCWD()
-except FileNotFoundError:
-    _STABLE_CWD = "/"
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _REAL_GETCWD()
-    except FileNotFoundError:
-        return _STABLE_CWD
-
-
-os.getcwd = _safe_getcwd
-pathlib.os.getcwd = _safe_getcwd
-
-_REAL_PATH_ABSOLUTE = pathlib.Path.absolute
-
-
-def _safe_path_absolute(self):
-    try:
-        return _REAL_PATH_ABSOLUTE(self)
-    except FileNotFoundError:
-        if self.is_absolute():
-            return self
-        return pathlib.Path(_STABLE_CWD) / self
-
-
-pathlib.Path.absolute = _safe_path_absolute
-pathlib.Path.cwd = classmethod(lambda cls: cls(_safe_getcwd()))
-if "__file__" in globals() and not os.path.isabs(__file__):
-    __file__ = os.path.join(_STABLE_CWD, __file__)
 
 from sdk import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -55,763 +16,536 @@ from sdk import (
     Origin,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    tube_from_spline_points,
 )
 
 
+ASSETS = AssetContext.from_script(__file__)
+
+
+def _midpoint(
+    a: tuple[float, float, float], b: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5)
+
+
+def _distance(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
+    return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2)
+
+
+def _rpy_for_cylinder(
+    a: tuple[float, float, float], b: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    dx = b[0] - a[0]
+    dy = b[1] - a[1]
+    dz = b[2] - a[2]
+    length_xy = math.hypot(dx, dy)
+    yaw = math.atan2(dy, dx)
+    pitch = math.atan2(length_xy, dz)
+    return (0.0, pitch, yaw)
+
+
+def _add_member(part, a, b, radius: float, material, *, name: str | None = None) -> None:
+    part.visual(
+        Cylinder(radius=radius, length=_distance(a, b)),
+        origin=Origin(xyz=_midpoint(a, b), rpy=_rpy_for_cylinder(a, b)),
+        material=material,
+        name=name,
+    )
+
+
+def _add_box(
+    part,
+    size: tuple[float, float, float],
+    xyz: tuple[float, float, float],
+    *,
+    rpy: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    material=None,
+    name: str | None = None,
+) -> None:
+    part.visual(Box(size), origin=Origin(xyz=xyz, rpy=rpy), material=material, name=name)
+
+
+def _add_square_mast(
+    part,
+    *,
+    width: float,
+    bottom_z: float,
+    top_z: float,
+    panels: int,
+    chord_radius: float,
+    brace_radius: float,
+    material,
+) -> None:
+    half = width * 0.5
+    corners = [
+        (half, half),
+        (half, -half),
+        (-half, -half),
+        (-half, half),
+    ]
+    levels = [bottom_z + (top_z - bottom_z) * i / panels for i in range(panels + 1)]
+
+    for x, y in corners:
+        _add_member(part, (x, y, bottom_z), (x, y, top_z), chord_radius, material)
+
+    for z in levels:
+        for i in range(4):
+            x0, y0 = corners[i]
+            x1, y1 = corners[(i + 1) % 4]
+            _add_member(part, (x0, y0, z), (x1, y1, z), brace_radius, material)
+
+    for z0, z1 in zip(levels[:-1], levels[1:]):
+        for i in range(4):
+            x0, y0 = corners[i]
+            x1, y1 = corners[(i + 1) % 4]
+            _add_member(part, (x0, y0, z0), (x1, y1, z1), brace_radius, material)
+            _add_member(part, (x1, y1, z0), (x0, y0, z1), brace_radius, material)
+
+
+def _add_triangular_truss(
+    part,
+    *,
+    x_start: float,
+    x_end: float,
+    bottom_z: float,
+    half_width: float,
+    root_top_z: float,
+    tip_top_z: float,
+    panels: int,
+    chord_radius: float,
+    brace_radius: float,
+    material,
+) -> dict[str, list[tuple[float, float, float]]]:
+    xs = [x_start + (x_end - x_start) * i / panels for i in range(panels + 1)]
+    span = x_end - x_start
+
+    def top_z(x: float) -> float:
+        t = 0.0 if abs(span) < 1e-9 else (x - x_start) / span
+        return root_top_z + (tip_top_z - root_top_z) * t
+
+    lower_left = [(x, -half_width, bottom_z) for x in xs]
+    lower_right = [(x, half_width, bottom_z) for x in xs]
+    upper = [(x, 0.0, top_z(x)) for x in xs]
+
+    for i in range(panels):
+        _add_member(part, lower_left[i], lower_left[i + 1], chord_radius, material)
+        _add_member(part, lower_right[i], lower_right[i + 1], chord_radius, material)
+        _add_member(part, upper[i], upper[i + 1], chord_radius, material)
+
+    for i in range(panels + 1):
+        _add_member(part, lower_left[i], lower_right[i], brace_radius, material)
+        _add_member(part, lower_left[i], upper[i], brace_radius, material)
+        _add_member(part, lower_right[i], upper[i], brace_radius, material)
+
+    for i in range(panels):
+        if i % 2 == 0:
+            _add_member(part, lower_left[i], upper[i + 1], brace_radius, material)
+            _add_member(part, lower_right[i], upper[i + 1], brace_radius, material)
+        else:
+            _add_member(part, upper[i], lower_left[i + 1], brace_radius, material)
+            _add_member(part, upper[i], lower_right[i + 1], brace_radius, material)
+
+    return {"lower_left": lower_left, "lower_right": lower_right, "upper": upper}
+
+
+def _aabb_center(aabb) -> tuple[float, float, float] | None:
+    if aabb is None:
+        return None
+    lower, upper = aabb
+    return tuple((lower[i] + upper[i]) * 0.5 for i in range(3))
+
+
+def _build_hook_mesh():
+    mesh_path = ASSETS.mesh_path("tower_crane_hook.obj")
+    hook_geom = tube_from_spline_points(
+        [
+            (0.00, 0.0, 0.00),
+            (0.11, 0.0, -0.16),
+            (0.18, 0.0, -0.34),
+            (0.20, 0.0, -0.55),
+            (0.12, 0.0, -0.74),
+            (-0.02, 0.0, -0.86),
+            (-0.18, 0.0, -0.80),
+            (-0.24, 0.0, -0.64),
+            (-0.18, 0.0, -0.46),
+        ],
+        radius=0.055,
+        samples_per_segment=18,
+        radial_segments=18,
+        up_hint=(0.0, 1.0, 0.0),
+    )
+    return mesh_from_geometry(hook_geom, mesh_path)
+
+
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="self_erecting_tower_crane")
+    model = ArticulatedObject(name="luffing_jib_tower_crane", assets=ASSETS)
 
-    crane_yellow = model.material("crane_yellow", rgba=(0.89, 0.75, 0.16, 1.0))
-    dark_grey = model.material("dark_grey", rgba=(0.21, 0.23, 0.26, 1.0))
-    steel = model.material("steel", rgba=(0.58, 0.60, 0.63, 1.0))
-    concrete = model.material("concrete", rgba=(0.64, 0.64, 0.61, 1.0))
-    warning_red = model.material("warning_red", rgba=(0.76, 0.14, 0.12, 1.0))
-    cable = model.material("cable", rgba=(0.14, 0.14, 0.16, 1.0))
+    tower_yellow = model.material("tower_yellow", rgba=(0.90, 0.74, 0.16, 1.0))
+    dark_grey = model.material("dark_grey", rgba=(0.24, 0.25, 0.28, 1.0))
+    steel = model.material("steel", rgba=(0.58, 0.59, 0.61, 1.0))
+    concrete = model.material("concrete", rgba=(0.66, 0.66, 0.64, 1.0))
+    ballast = model.material("ballast", rgba=(0.48, 0.49, 0.50, 1.0))
+    cable = model.material("cable", rgba=(0.14, 0.14, 0.15, 1.0))
+    cab_glass = model.material("cab_glass", rgba=(0.62, 0.77, 0.86, 0.45))
+    safety_red = model.material("safety_red", rgba=(0.76, 0.16, 0.10, 1.0))
+    hook_mesh = _build_hook_mesh()
 
-    def midpoint(
-        a: tuple[float, float, float], b: tuple[float, float, float]
-    ) -> tuple[float, float, float]:
-        return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5)
+    mast = model.part("mast")
+    _add_box(mast, (6.0, 6.0, 1.2), (0.0, 0.0, 0.6), material=concrete, name="foundation_slab")
+    _add_box(mast, (2.2, 2.2, 1.0), (0.0, 0.0, 1.7), material=dark_grey, name="base_pedestal")
+    _add_square_mast(
+        mast,
+        width=2.0,
+        bottom_z=2.2,
+        top_z=28.2,
+        panels=9,
+        chord_radius=0.11,
+        brace_radius=0.065,
+        material=tower_yellow,
+    )
+    _add_box(mast, (3.0, 3.0, 0.5), (0.0, 0.0, 28.45), material=dark_grey, name="mast_head_platform")
+    mast.inertial = Inertial.from_geometry(
+        Box((6.0, 6.0, 30.0)),
+        mass=120000.0,
+        origin=Origin(xyz=(0.0, 0.0, 15.0)),
+    )
 
-    def distance(
-        a: tuple[float, float, float], b: tuple[float, float, float]
-    ) -> float:
-        return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2)
-
-    def rpy_for_member(
-        a: tuple[float, float, float], b: tuple[float, float, float]
-    ) -> tuple[float, float, float]:
-        dx = b[0] - a[0]
-        dy = b[1] - a[1]
-        dz = b[2] - a[2]
-        yaw = math.atan2(dy, dx)
-        pitch = math.atan2(math.hypot(dx, dy), dz)
-        return (0.0, pitch, yaw)
-
-    def add_member(
-        part,
-        a: tuple[float, float, float],
-        b: tuple[float, float, float],
-        radius: float,
-        material,
-        name: str | None = None,
-    ) -> None:
-        part.visual(
-            Cylinder(radius=radius, length=distance(a, b)),
-            origin=Origin(xyz=midpoint(a, b), rpy=rpy_for_member(a, b)),
-            material=material,
-            name=name,
-        )
-
-    def add_square_ring(
-        part,
-        *,
-        half_span: float,
-        width: float,
-        z: float,
-        thickness: float,
-        material,
-        prefix: str,
-    ) -> None:
-        part.visual(
-            Box((thickness, width, thickness)),
-            origin=Origin(xyz=(half_span, 0.0, z)),
-            material=material,
-            name=f"{prefix}_right",
-        )
-        part.visual(
-            Box((thickness, width, thickness)),
-            origin=Origin(xyz=(-half_span, 0.0, z)),
-            material=material,
-            name=f"{prefix}_left",
-        )
-        part.visual(
-            Box((width, thickness, thickness)),
-            origin=Origin(xyz=(0.0, half_span, z)),
-            material=material,
-            name=f"{prefix}_front",
-        )
-        part.visual(
-            Box((width, thickness, thickness)),
-            origin=Origin(xyz=(0.0, -half_span, z)),
-            material=material,
-            name=f"{prefix}_back",
-        )
-
-    chassis = model.part("chassis")
-    chassis.visual(
-        Box((2.60, 0.28, 0.14)),
-        origin=Origin(xyz=(-0.05, 0.0, 0.07)),
+    upperworks = model.part("upperworks")
+    upperworks.visual(
+        Cylinder(radius=1.4, length=0.4),
+        origin=Origin(xyz=(0.0, 0.0, 0.2)),
         material=dark_grey,
-        name="main_beam",
+        name="slew_ring",
     )
-    chassis.visual(
-        Box((1.70, 0.52, 0.06)),
-        origin=Origin(xyz=(0.18, 0.0, 0.17)),
-        material=steel,
-        name="upper_deck",
-    )
-    chassis.visual(
-        Box((0.28, 1.14, 0.07)),
-        origin=Origin(xyz=(-0.42, 0.0, 0.175)),
-        material=steel,
-        name="rear_outrigger_beam",
-    )
-    chassis.visual(
-        Box((0.28, 1.14, 0.07)),
-        origin=Origin(xyz=(0.58, 0.0, 0.175)),
-        material=steel,
-        name="front_outrigger_beam",
-    )
-    chassis.visual(
-        Box((0.62, 0.44, 0.30)),
-        origin=Origin(xyz=(0.70, 0.0, 0.32)),
-        material=dark_grey,
-        name="machinery_house",
-    )
-    chassis.visual(
-        Box((0.18, 0.18, 0.126)),
-        origin=Origin(xyz=(0.0, 0.0, 0.300)),
-        material=steel,
-        name="pivot_pedestal",
-    )
-    chassis.visual(
-        Box((0.12, 0.03, 0.18)),
-        origin=Origin(xyz=(0.0, -0.105, 0.41)),
-        material=steel,
-        name="pivot_cheek_left",
-    )
-    chassis.visual(
-        Box((0.12, 0.03, 0.18)),
-        origin=Origin(xyz=(0.0, 0.105, 0.41)),
-        material=steel,
-        name="pivot_cheek_right",
-    )
-    chassis.visual(
-        Box((0.16, 0.12, 0.18)),
-        origin=Origin(xyz=(-1.18, 0.0, 0.23)),
-        material=dark_grey,
-        name="transport_saddle_post",
-    )
-    chassis.visual(
-        Box((0.24, 0.22, 0.06)),
-        origin=Origin(xyz=(-1.18, 0.0, 0.35)),
-        material=steel,
-        name="transport_saddle",
-    )
-    chassis.visual(
-        Box((0.10, 0.10, 0.05)),
-        origin=Origin(xyz=(-0.98, 0.0, 0.165)),
-        material=concrete,
-        name="counter_pad",
-    )
-    chassis.inertial = Inertial.from_geometry(
-        Box((2.70, 1.18, 0.75)),
-        mass=22.0,
-        origin=Origin(xyz=(-0.02, 0.0, 0.375)),
-    )
+    _add_box(upperworks, (5.4, 3.1, 0.4), (-0.05, 0.0, 0.55), material=dark_grey, name="machinery_deck")
+    _add_box(upperworks, (1.0, 1.0, 0.55), (2.25, 0.0, 0.78), material=dark_grey, name="front_knuckle")
+    _add_box(upperworks, (0.8, 1.0, 0.18), (2.65, 0.0, 1.05), material=steel, name="jib_hinge_crosshead")
+    _add_box(upperworks, (0.36, 0.06, 0.90), (2.92, 0.53, 1.35), material=steel, name="left_hinge_plate")
+    _add_box(upperworks, (0.36, 0.06, 0.90), (2.92, -0.53, 1.35), material=steel, name="right_hinge_plate")
 
-    mast_outer = model.part("mast_outer")
-    mast_outer.visual(
-        Cylinder(radius=0.037, length=0.24),
-        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=steel,
-        name="pivot_barrel",
-    )
-    mast_outer.visual(
-        Box((0.18, 0.22, 0.10)),
-        origin=Origin(xyz=(0.0, 0.0, 0.09)),
-        material=dark_grey,
-        name="base_knuckle",
-    )
-    for x in (-0.105, 0.105):
-        for y in (-0.105, 0.105):
-            mast_outer.visual(
-                Box((0.03, 0.03, 1.42)),
-                origin=Origin(xyz=(x, y, 0.84)),
-                material=crane_yellow,
-            )
-    for i, z in enumerate((0.20, 0.58, 0.96, 1.34, 1.52)):
-        add_square_ring(
-            mast_outer,
-            half_span=0.105,
-            width=0.24,
-            z=z,
-            thickness=0.03,
-            material=crane_yellow,
-            prefix=f"outer_ring_{i}",
-        )
-    mast_outer.visual(
-        Box((0.008, 0.10, 0.16)),
-        origin=Origin(xyz=(0.080, 0.0, 1.46)),
-        material=steel,
-        name="sleeve_pad_right",
-    )
-    mast_outer.visual(
-        Box((0.008, 0.10, 0.16)),
-        origin=Origin(xyz=(-0.080, 0.0, 1.46)),
-        material=steel,
-        name="sleeve_pad_left",
-    )
-    mast_outer.visual(
-        Box((0.10, 0.008, 0.16)),
-        origin=Origin(xyz=(0.0, 0.080, 1.46)),
-        material=steel,
-        name="sleeve_pad_front",
-    )
-    mast_outer.visual(
-        Box((0.10, 0.008, 0.16)),
-        origin=Origin(xyz=(0.0, -0.080, 1.46)),
-        material=steel,
-        name="sleeve_pad_back",
-    )
-    mast_outer.visual(
-        Cylinder(radius=0.018, length=0.04),
-        origin=Origin(xyz=(-0.090, 0.0, 1.46), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=steel,
-        name="top_guide_bushing_left",
-    )
-    mast_outer.visual(
-        Cylinder(radius=0.018, length=0.04),
-        origin=Origin(xyz=(0.090, 0.0, 1.46), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=steel,
-        name="top_guide_bushing_right",
-    )
-    mast_outer.visual(
-        Box((0.06, 0.16, 0.18)),
-        origin=Origin(xyz=(0.011, 0.0, 1.18)),
-        material=dark_grey,
-        name="transport_rest",
-    )
-    mast_outer.inertial = Inertial.from_geometry(
-        Box((0.34, 0.34, 1.62)),
-        mass=6.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.81)),
-    )
+    _add_box(upperworks, (1.8, 2.0, 1.4), (-1.6, 0.0, 1.45), material=dark_grey, name="machinery_house")
+    _add_box(upperworks, (0.9, 0.8, 0.8), (1.3, -1.45, 1.15), material=dark_grey, name="operator_cab_shell")
+    _add_box(upperworks, (0.76, 0.70, 0.62), (1.36, -1.45, 1.18), material=cab_glass, name="operator_cab_glass")
 
-    mast_inner = model.part("mast_inner")
-    for x in (-0.065, 0.065):
-        for y in (-0.065, 0.065):
-            mast_inner.visual(
-                Box((0.024, 0.024, 1.46)),
-                origin=Origin(xyz=(x, y, 0.73)),
-                material=crane_yellow,
-            )
-    for i, z in enumerate((0.06, 0.32, 0.58, 0.84, 1.10, 1.36)):
-        add_square_ring(
-            mast_inner,
-            half_span=0.065,
-            width=0.154,
-            z=z,
-            thickness=0.024,
-            material=crane_yellow,
-            prefix=f"inner_ring_{i}",
-        )
-    mast_inner.visual(
-        Box((0.18, 0.18, 0.10)),
-        origin=Origin(xyz=(0.0, 0.0, 1.50)),
-        material=steel,
-        name="head_cap",
+    counter_truss = _add_triangular_truss(
+        upperworks,
+        x_start=-0.6,
+        x_end=-6.3,
+        bottom_z=0.78,
+        half_width=0.55,
+        root_top_z=2.6,
+        tip_top_z=1.2,
+        panels=4,
+        chord_radius=0.09,
+        brace_radius=0.05,
+        material=tower_yellow,
     )
-    mast_inner.visual(
-        Box((0.006, 0.06, 0.14)),
-        origin=Origin(xyz=(0.071, 0.0, 0.38)),
-        material=steel,
-        name="guide_strip_right",
-    )
-    mast_inner.visual(
-        Box((0.006, 0.06, 0.14)),
-        origin=Origin(xyz=(-0.071, 0.0, 0.38)),
-        material=steel,
-        name="guide_strip_left",
-    )
-    mast_inner.visual(
-        Box((0.06, 0.006, 0.14)),
-        origin=Origin(xyz=(0.0, 0.071, 0.38)),
-        material=steel,
-        name="guide_strip_front",
-    )
-    mast_inner.visual(
-        Box((0.06, 0.006, 0.14)),
-        origin=Origin(xyz=(0.0, -0.071, 0.38)),
-        material=steel,
-        name="guide_strip_back",
-    )
-    mast_inner.visual(
-        Box((0.05, 0.08, 0.06)),
-        origin=Origin(xyz=(0.0, 0.0, 0.38)),
-        material=warning_red,
-        name="lock_lug",
-    )
-    mast_inner.inertial = Inertial.from_geometry(
-        Box((0.20, 0.20, 1.60)),
-        mass=4.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.80)),
+    _add_box(upperworks, (2.2, 1.2, 0.6), (-3.8, 0.0, 1.05), material=ballast, name="counterweight_pack")
+    _add_box(upperworks, (1.2, 1.0, 0.6), (-5.0, 0.0, 1.05), material=ballast)
+
+    a_frame_apex = (-0.9, 0.0, 5.2)
+    _add_member(upperworks, (-0.2, -0.7, 0.75), a_frame_apex, 0.12, tower_yellow)
+    _add_member(upperworks, (-0.2, 0.7, 0.75), a_frame_apex, 0.12, tower_yellow)
+    _add_member(upperworks, (-1.6, -0.55, 1.0), a_frame_apex, 0.08, tower_yellow)
+    _add_member(upperworks, (-1.6, 0.55, 1.0), a_frame_apex, 0.08, tower_yellow)
+    _add_box(upperworks, (0.5, 0.5, 0.35), a_frame_apex, material=tower_yellow, name="a_frame_head")
+    _add_member(upperworks, a_frame_apex, counter_truss["upper"][-1], 0.04, cable)
+    upperworks.inertial = Inertial.from_geometry(
+        Box((12.0, 4.5, 6.0)),
+        mass=65000.0,
+        origin=Origin(xyz=(-1.2, 0.0, 1.8)),
     )
 
     jib = model.part("jib")
     jib.visual(
-        Box((0.24, 0.18, 0.10)),
-        origin=Origin(xyz=(0.02, 0.0, 0.05)),
+        Cylinder(radius=0.16, length=1.0),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
         material=steel,
-        name="jib_mount_block",
+        name="hinge_barrel",
     )
-    jib.visual(
-        Box((0.16, 0.16, 0.24)),
-        origin=Origin(xyz=(0.0, 0.0, 0.18)),
-        material=crane_yellow,
-        name="mast_head_frame",
+    _add_box(jib, (1.30, 0.72, 1.70), (0.81, 0.0, 0.425), material=dark_grey, name="root_knuckle")
+    jib_truss = _add_triangular_truss(
+        jib,
+        x_start=1.1,
+        x_end=18.0,
+        bottom_z=-0.35,
+        half_width=0.45,
+        root_top_z=1.2,
+        tip_top_z=0.40,
+        panels=9,
+        chord_radius=0.10,
+        brace_radius=0.055,
+        material=tower_yellow,
     )
-    jib.visual(
-        Box((2.12, 0.04, 0.04)),
-        origin=Origin(xyz=(1.00, -0.075, -0.03)),
-        material=steel,
-        name="rail_left",
-    )
-    jib.visual(
-        Box((2.12, 0.04, 0.04)),
-        origin=Origin(xyz=(1.00, 0.075, -0.03)),
-        material=steel,
-        name="rail_right",
-    )
-    jib.visual(
-        Box((2.10, 0.12, 0.04)),
-        origin=Origin(xyz=(1.02, 0.0, 0.02)),
-        material=steel,
-        name="bottom_chord",
-    )
-    jib.visual(
-        Box((1.96, 0.04, 0.04)),
-        origin=Origin(xyz=(1.06, 0.0, 0.28)),
-        material=crane_yellow,
-        name="top_chord",
-    )
-    jib.visual(
-        Box((0.16, 0.12, 0.12)),
-        origin=Origin(xyz=(2.08, 0.0, 0.10)),
-        material=warning_red,
-        name="jib_tip_marker",
-    )
-    jib.visual(
-        Box((0.38, 0.14, 0.14)),
-        origin=Origin(xyz=(-0.34, 0.0, 0.12)),
-        material=dark_grey,
-        name="ballast_pack",
-    )
-    add_member(jib, (0.04, -0.06, 0.28), (2.02, -0.05, 0.08), 0.010, crane_yellow)
-    add_member(jib, (0.04, 0.06, 0.28), (2.02, 0.05, 0.08), 0.010, crane_yellow)
-    add_member(jib, (0.18, 0.0, 0.34), (2.08, 0.0, 0.14), 0.010, crane_yellow)
-    add_member(jib, (-0.16, 0.0, 0.24), (-0.52, 0.0, 0.10), 0.009, crane_yellow)
-    add_member(jib, (0.0, 0.0, 0.40), (1.20, 0.0, 0.30), 0.004, cable)
-    add_member(jib, (0.0, 0.0, 0.40), (2.04, 0.0, 0.16), 0.004, cable)
+    _add_box(jib, (0.90, 0.90, 0.18), (18.00, 0.0, 0.58), material=dark_grey, name="tip_frame")
+    _add_box(jib, (0.24, 0.06, 0.30), (18.22, 0.21, 0.0), material=steel, name="tip_left_plate")
+    _add_box(jib, (0.24, 0.06, 0.30), (18.22, -0.21, 0.0), material=steel, name="tip_right_plate")
+    _add_member(jib, jib_truss["upper"][-2], (18.3, 0.0, 0.32), 0.06, steel)
+    _add_member(jib, jib_truss["lower_left"][-2], (18.18, -0.25, -0.10), 0.06, steel)
+    _add_member(jib, jib_truss["lower_right"][-2], (18.18, 0.25, -0.10), 0.06, steel)
     jib.inertial = Inertial.from_geometry(
-        Box((2.80, 0.36, 0.56)),
-        mass=5.0,
-        origin=Origin(xyz=(0.90, 0.0, 0.18)),
+        Box((18.8, 1.5, 2.2)),
+        mass=28000.0,
+        origin=Origin(xyz=(9.4, 0.0, 0.25)),
     )
 
-    trolley = model.part("trolley")
-    trolley.visual(
-        Box((0.17, 0.11, 0.06)),
-        origin=Origin(xyz=(0.0, 0.0, -0.13)),
-        material=dark_grey,
-        name="trolley_body",
-    )
-    trolley.visual(
-        Box((0.18, 0.05, 0.02)),
-        origin=Origin(xyz=(0.0, 0.0, -0.01)),
+    hook = model.part("hook")
+    hook.visual(
+        Cylinder(radius=0.05, length=0.36),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
         material=steel,
-        name="upper_yoke",
+        name="hanger_barrel",
     )
-    trolley.visual(
-        Box((0.20, 0.05, 0.03)),
-        origin=Origin(xyz=(0.0, 0.0, -0.078)),
-        material=steel,
-        name="carriage_crossbeam",
-    )
-    trolley.visual(
-        Box((0.14, 0.024, 0.04)),
-        origin=Origin(xyz=(0.0, -0.075, -0.045)),
-        material=steel,
-        name="roller_left",
-    )
-    trolley.visual(
-        Box((0.14, 0.024, 0.04)),
-        origin=Origin(xyz=(0.0, 0.075, -0.045)),
-        material=steel,
-        name="roller_right",
-    )
-    trolley.visual(
-        Box((0.04, 0.014, 0.095)),
-        origin=Origin(xyz=(-0.05, -0.06, -0.088)),
-        material=steel,
-        name="hanger_left_front",
-    )
-    trolley.visual(
-        Box((0.04, 0.014, 0.095)),
-        origin=Origin(xyz=(0.05, -0.06, -0.088)),
-        material=steel,
-        name="hanger_left_rear",
-    )
-    trolley.visual(
-        Box((0.04, 0.014, 0.095)),
-        origin=Origin(xyz=(-0.05, 0.06, -0.088)),
-        material=steel,
-        name="hanger_right_front",
-    )
-    trolley.visual(
-        Box((0.04, 0.014, 0.095)),
-        origin=Origin(xyz=(0.05, 0.06, -0.088)),
-        material=steel,
-        name="hanger_right_rear",
-    )
-    trolley.visual(
-        Cylinder(radius=0.008, length=0.60),
-        origin=Origin(xyz=(0.0, 0.0, -0.36)),
+    _add_box(hook, (0.18, 0.26, 0.20), (0.0, 0.0, -0.13), material=steel, name="hanger_head")
+    hook.visual(
+        Cylinder(radius=0.035, length=5.6),
+        origin=Origin(xyz=(0.0, 0.0, -2.93)),
         material=cable,
-        name="hoist_line",
+        name="hook_cable",
     )
-    trolley.visual(
-        Box((0.10, 0.08, 0.12)),
-        origin=Origin(xyz=(0.0, 0.0, -0.72)),
-        material=warning_red,
-        name="hook_block",
-    )
-    trolley.inertial = Inertial.from_geometry(
-        Box((0.22, 0.16, 0.92)),
-        mass=0.9,
-        origin=Origin(xyz=(0.0, 0.0, -0.36)),
-    )
-
-    lock_pin = model.part("lock_pin")
-    lock_pin.visual(
-        Cylinder(radius=0.016, length=0.20),
-        origin=Origin(rpy=(0.0, math.pi / 2.0, 0.0)),
+    _add_box(hook, (0.70, 0.55, 0.70), (0.0, 0.0, -6.08), material=tower_yellow, name="hook_block")
+    _add_box(hook, (0.55, 0.40, 0.40), (0.0, 0.0, -6.63), material=steel, name="lower_yoke")
+    hook.visual(
+        Cylinder(radius=0.05, length=0.55),
+        origin=Origin(xyz=(0.0, 0.0, -7.105)),
         material=steel,
-        name="pin_shaft",
+        name="hook_stem",
     )
-    lock_pin.visual(
-        Box((0.05, 0.09, 0.02)),
-        origin=Origin(xyz=(-0.115, 0.0, 0.0)),
-        material=warning_red,
-        name="pin_handle",
+    hook.visual(
+        hook_mesh,
+        origin=Origin(xyz=(0.0, 0.0, -6.84)),
+        material=safety_red,
+        name="hook_tip",
     )
-    lock_pin.inertial = Inertial.from_geometry(
-        Box((0.26, 0.10, 0.04)),
-        mass=0.18,
-        origin=Origin(),
+    hook.inertial = Inertial.from_geometry(
+        Box((0.9, 0.8, 7.8)),
+        mass=6000.0,
+        origin=Origin(xyz=(0.0, 0.0, -3.9)),
     )
 
     model.articulation(
-        "mast_erection",
+        "mast_to_upperworks",
+        ArticulationType.CONTINUOUS,
+        parent=mast,
+        child=upperworks,
+        origin=Origin(xyz=(0.0, 0.0, 28.7)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=200000.0, velocity=0.20),
+    )
+    model.articulation(
+        "upperworks_to_jib",
         ArticulationType.REVOLUTE,
-        parent=chassis,
-        child=mast_outer,
-        origin=Origin(xyz=(0.0, 0.0, 0.40)),
+        parent=upperworks,
+        child=jib,
+        origin=Origin(xyz=(2.92, 0.0, 1.35)),
+        axis=(0.0, -1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=160000.0,
+            velocity=0.22,
+            lower=0.0,
+            upper=1.05,
+        ),
+    )
+    model.articulation(
+        "jib_to_hook",
+        ArticulationType.REVOLUTE,
+        parent=jib,
+        child=hook,
+        origin=Origin(xyz=(18.22, 0.0, 0.0)),
         axis=(0.0, 1.0, 0.0),
         motion_limits=MotionLimits(
-            effort=100.0,
-            velocity=0.4,
-            lower=-math.pi / 2.0,
-            upper=0.02,
-        ),
-    )
-    model.articulation(
-        "mast_telescoping",
-        ArticulationType.PRISMATIC,
-        parent=mast_outer,
-        child=mast_inner,
-        origin=Origin(xyz=(0.0, 0.0, 1.08)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=70.0,
-            velocity=0.35,
-            lower=-0.56,
-            upper=0.0,
-        ),
-    )
-    model.articulation(
-        "mast_to_jib",
-        ArticulationType.FIXED,
-        parent=mast_inner,
-        child=jib,
-        origin=Origin(xyz=(0.0, 0.0, 1.55)),
-    )
-    model.articulation(
-        "trolley_travel",
-        ArticulationType.PRISMATIC,
-        parent=jib,
-        child=trolley,
-        origin=Origin(xyz=(1.00, 0.0, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=14.0,
+            effort=10000.0,
             velocity=0.8,
-            lower=-0.72,
-            upper=0.78,
+            lower=-1.20,
+            upper=1.20,
         ),
     )
-    model.articulation(
-        "lock_pin_slide",
-        ArticulationType.PRISMATIC,
-        parent=mast_outer,
-        child=lock_pin,
-        origin=Origin(xyz=(0.0, 0.0, 1.46)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=3.0,
-            velocity=0.12,
-            lower=-0.10,
-            upper=0.0,
-        ),
-    )
-
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    chassis = object_model.get_part("chassis")
-    mast_outer = object_model.get_part("mast_outer")
-    mast_inner = object_model.get_part("mast_inner")
+
+    mast = object_model.get_part("mast")
+    upperworks = object_model.get_part("upperworks")
     jib = object_model.get_part("jib")
-    trolley = object_model.get_part("trolley")
-    lock_pin = object_model.get_part("lock_pin")
+    hook = object_model.get_part("hook")
 
-    mast_erection = object_model.get_articulation("mast_erection")
-    mast_telescoping = object_model.get_articulation("mast_telescoping")
-    trolley_travel = object_model.get_articulation("trolley_travel")
-    lock_pin_slide = object_model.get_articulation("lock_pin_slide")
+    mast_to_upperworks = object_model.get_articulation("mast_to_upperworks")
+    upperworks_to_jib = object_model.get_articulation("upperworks_to_jib")
+    jib_to_hook = object_model.get_articulation("jib_to_hook")
 
-    pivot_cheek_left = chassis.get_visual("pivot_cheek_left")
-    pivot_pedestal = chassis.get_visual("pivot_pedestal")
-    transport_saddle = chassis.get_visual("transport_saddle")
-
-    pivot_barrel = mast_outer.get_visual("pivot_barrel")
-    sleeve_pad_right = mast_outer.get_visual("sleeve_pad_right")
-    top_guide_bushing_right = mast_outer.get_visual("top_guide_bushing_right")
-    transport_rest = mast_outer.get_visual("transport_rest")
-
-    head_cap = mast_inner.get_visual("head_cap")
-    guide_strip_right = mast_inner.get_visual("guide_strip_right")
-    lock_lug = mast_inner.get_visual("lock_lug")
-
-    jib_mount_block = jib.get_visual("jib_mount_block")
-    rail_left = jib.get_visual("rail_left")
-    rail_right = jib.get_visual("rail_right")
-
-    roller_left = trolley.get_visual("roller_left")
-    roller_right = trolley.get_visual("roller_right")
-
-    pin_shaft = lock_pin.get_visual("pin_shaft")
-
-    ctx.allow_overlap(
-        jib,
-        trolley,
-        reason="The travel trolley wheel shoes ride clamped against the jib bottom-rail running surfaces.",
-    )
-    ctx.allow_overlap(
-        mast_outer,
-        mast_inner,
-        reason="The telescoping mast section remains nested inside the outer sleeve over its travel.",
-    )
-    ctx.allow_overlap(
-        chassis,
-        mast_outer,
-        reason="The erection hinge barrel nests between the chassis cheek plates.",
-    )
-    ctx.allow_overlap(
-        lock_pin,
-        mast_outer,
-        reason="The locking pin slides inside the top-sleeve guide bushings.",
-    )
-    ctx.allow_overlap(
-        lock_pin,
-        mast_inner,
-        reason="The locking pin passes through the mast lock lug at working height.",
-    )
+    foundation_slab = mast.get_visual("foundation_slab")
+    mast_head_platform = mast.get_visual("mast_head_platform")
+    slew_ring = upperworks.get_visual("slew_ring")
+    left_hinge_plate = upperworks.get_visual("left_hinge_plate")
+    right_hinge_plate = upperworks.get_visual("right_hinge_plate")
+    hinge_barrel = jib.get_visual("hinge_barrel")
+    tip_frame = jib.get_visual("tip_frame")
+    tip_left_plate = jib.get_visual("tip_left_plate")
+    tip_right_plate = jib.get_visual("tip_right_plate")
+    hanger_barrel = hook.get_visual("hanger_barrel")
+    hook_block = hook.get_visual("hook_block")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.002,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.002,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    ctx.expect_overlap(
-        mast_outer,
-        chassis,
-        axes="xz",
-        min_overlap=0.06,
-        elem_a=pivot_barrel,
-        elem_b=pivot_cheek_left,
-        name="pivot_barrel_aligned_with_cheek_plate",
-    )
-    ctx.expect_contact(
-        mast_outer,
-        chassis,
-        elem_a=pivot_barrel,
-        elem_b=pivot_pedestal,
-        name="mast_hinge_seated_on_pivot_pedestal",
-    )
-    ctx.expect_within(
-        mast_inner,
-        mast_outer,
-        axes="xy",
-        name="inner_mast_within_outer_sleeve_plan",
+    ctx.expect_gap(
+        mast,
+        mast,
+        axis="z",
+        min_gap=26.5,
+        positive_elem=mast_head_platform,
+        negative_elem=foundation_slab,
+        name="mast_head_sits_far_above_foundation",
     )
     ctx.expect_gap(
-        mast_outer,
-        mast_inner,
-        axis="x",
-        max_gap=0.004,
-        max_penetration=0.0,
-        positive_elem=sleeve_pad_right,
-        negative_elem=guide_strip_right,
-        name="top_sleeve_guides_inner_mast",
-    )
-    ctx.expect_gap(
-        jib,
-        mast_inner,
+        upperworks,
+        mast,
         axis="z",
         max_gap=0.001,
         max_penetration=0.0,
-        positive_elem=jib_mount_block,
-        negative_elem=head_cap,
-        name="jib_mount_block_seated_on_mast_head",
+        positive_elem=slew_ring,
+        negative_elem=mast_head_platform,
+        name="slew_ring_bears_on_mast_head",
+    )
+    ctx.expect_gap(
+        upperworks,
+        jib,
+        axis="y",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=left_hinge_plate,
+        negative_elem=hinge_barrel,
+        name="left_jib_hinge_plate_touches_barrel",
     )
     ctx.expect_gap(
         jib,
-        trolley,
-        axis="z",
-        min_gap=-0.03,
-        max_gap=0.002,
-        positive_elem=rail_left,
-        negative_elem=roller_left,
-        name="trolley_left_roller_seated_under_rail",
+        upperworks,
+        axis="y",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=hinge_barrel,
+        negative_elem=right_hinge_plate,
+        name="right_jib_hinge_plate_touches_barrel",
     )
     ctx.expect_gap(
         jib,
-        trolley,
+        upperworks,
+        axis="x",
+        min_gap=15.0,
+        positive_elem=tip_frame,
+        negative_elem=slew_ring,
+        name="jib_reaches_far_forward_of_tower",
+    )
+    ctx.expect_gap(
+        jib,
+        hook,
+        axis="y",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=tip_left_plate,
+        negative_elem=hanger_barrel,
+        name="left_tip_plate_supports_hook_hanger",
+    )
+    ctx.expect_gap(
+        hook,
+        jib,
+        axis="y",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=hanger_barrel,
+        negative_elem=tip_right_plate,
+        name="right_tip_plate_supports_hook_hanger",
+    )
+    ctx.expect_gap(
+        jib,
+        hook,
         axis="z",
-        min_gap=-0.03,
-        max_gap=0.002,
-        positive_elem=rail_right,
-        negative_elem=roller_right,
-        name="trolley_right_roller_seated_under_rail",
-    )
-    ctx.expect_overlap(
-        jib,
-        trolley,
-        axes="yz",
-        min_overlap=0.02,
-        elem_a=rail_left,
-        elem_b=roller_left,
-        name="trolley_left_bogie_nested_on_left_rail",
-    )
-    ctx.expect_overlap(
-        jib,
-        trolley,
-        axes="yz",
-        min_overlap=0.02,
-        elem_a=rail_right,
-        elem_b=roller_right,
-        name="trolley_right_bogie_nested_on_right_rail",
-    )
-    ctx.expect_overlap(
-        lock_pin,
-        mast_outer,
-        axes="yz",
-        min_overlap=0.02,
-        elem_a=pin_shaft,
-        elem_b=top_guide_bushing_right,
-        name="lock_pin_aligned_with_top_sleeve_bushing",
-    )
-    ctx.expect_overlap(
-        lock_pin,
-        mast_inner,
-        axes="yz",
-        min_overlap=0.028,
-        elem_a=pin_shaft,
-        elem_b=lock_lug,
-        name="lock_pin_crosses_mast_lock_lug",
+        min_gap=5.2,
+        positive_elem=tip_frame,
+        negative_elem=hook_block,
+        name="hook_block_hangs_below_jib_tip",
     )
 
-    with ctx.pose({trolley_travel: -0.68}):
-        ctx.expect_gap(
-            jib,
-            trolley,
-            axis="z",
-            min_gap=-0.03,
-            max_gap=0.002,
-            positive_elem=rail_left,
-            negative_elem=roller_left,
-            name="trolley_stays_on_rail_at_inner_limit",
-        )
-        ctx.expect_overlap(
-            jib,
-            trolley,
-            axes="yz",
-            min_overlap=0.02,
-            elem_a=rail_left,
-            elem_b=roller_left,
-            name="trolley_left_bogie_stays_nested_at_inner_limit",
-        )
-    with ctx.pose({trolley_travel: 0.72}):
-        ctx.expect_gap(
-            jib,
-            trolley,
-            axis="z",
-            min_gap=-0.03,
-            max_gap=0.002,
-            positive_elem=rail_right,
-            negative_elem=roller_right,
-            name="trolley_stays_on_rail_at_outer_limit",
-        )
-        ctx.expect_overlap(
-            jib,
-            trolley,
-            axes="yz",
-            min_overlap=0.02,
-            elem_a=rail_right,
-            elem_b=roller_right,
-            name="trolley_right_bogie_stays_nested_at_outer_limit",
-        )
+    rest_tip_center = _aabb_center(ctx.part_element_world_aabb(jib, elem=tip_frame))
+    ctx.check(
+        "rest_jib_points_forward",
+        rest_tip_center is not None and rest_tip_center[0] > 20.0 and abs(rest_tip_center[1]) < 0.5,
+        details=f"tip center at rest was {rest_tip_center}",
+    )
 
-    with ctx.pose(
-        {
-            mast_erection: -math.pi / 2.0,
-            mast_telescoping: -0.56,
-            lock_pin_slide: -0.09,
-        }
-    ):
+    luff_limits = upperworks_to_jib.motion_limits
+    if luff_limits is not None and luff_limits.upper is not None:
+        with ctx.pose({upperworks_to_jib: luff_limits.upper, jib_to_hook: luff_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="luffed_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name="luffed_pose_no_floating")
+            ctx.expect_gap(
+                jib,
+                mast,
+                axis="z",
+                min_gap=13.0,
+                positive_elem=tip_frame,
+                negative_elem=mast_head_platform,
+                name="luffed_jib_tip_rises_high_above_mast_head",
+            )
+            ctx.expect_gap(
+                jib,
+                hook,
+                axis="z",
+                min_gap=5.0,
+                positive_elem=tip_frame,
+                negative_elem=hook_block,
+                name="hook_remains_below_tip_when_jib_luffs",
+            )
+
+            luffed_tip_center = _aabb_center(ctx.part_element_world_aabb(jib, elem=tip_frame))
+            luffed_hook_center = _aabb_center(ctx.part_element_world_aabb(hook, elem=hook_block))
+            hangs_under_tip = (
+                luffed_tip_center is not None
+                and luffed_hook_center is not None
+                and abs(luffed_tip_center[0] - luffed_hook_center[0]) < 1.0
+                and abs(luffed_tip_center[1] - luffed_hook_center[1]) < 0.35
+                and luffed_hook_center[2] < luffed_tip_center[2] - 5.0
+            )
+            ctx.check(
+                "hook_tracks_under_tip_in_luffed_pose",
+                hangs_under_tip,
+                details=f"tip center={luffed_tip_center}, hook center={luffed_hook_center}",
+            )
+
+    hook_limits = jib_to_hook.motion_limits
+    if hook_limits is not None and hook_limits.lower is not None and hook_limits.upper is not None:
+        with ctx.pose({jib_to_hook: hook_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="hook_swing_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="hook_swing_lower_no_floating")
+        with ctx.pose({jib_to_hook: hook_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="hook_swing_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="hook_swing_upper_no_floating")
+
+    with ctx.pose({mast_to_upperworks: math.pi / 2.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="slewed_pose_no_overlap")
+        ctx.fail_if_isolated_parts(name="slewed_pose_no_floating")
         ctx.expect_gap(
-            mast_outer,
-            chassis,
+            upperworks,
+            mast,
             axis="z",
-            max_gap=0.003,
+            max_gap=0.001,
             max_penetration=0.0,
-            positive_elem=transport_rest,
-            negative_elem=transport_saddle,
-            name="stored_mast_rests_on_transport_saddle",
+            positive_elem=slew_ring,
+            negative_elem=mast_head_platform,
+            name="slew_ring_stays_seated_during_rotation",
         )
-        ctx.expect_overlap(
-            mast_outer,
-            chassis,
-            axes="xy",
-            min_overlap=0.08,
-            elem_a=transport_rest,
-            elem_b=transport_saddle,
-            name="stored_mast_transport_rest_centered_on_saddle",
+        slewed_tip_center = _aabb_center(ctx.part_element_world_aabb(jib, elem=tip_frame))
+        ctx.check(
+            "slewing_swings_jib_sideways",
+            slewed_tip_center is not None and abs(slewed_tip_center[1]) > 18.0 and abs(slewed_tip_center[0]) < 4.0,
+            details=f"tip center in slewed pose was {slewed_tip_center}",
         )
 
     return ctx.report()

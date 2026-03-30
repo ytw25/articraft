@@ -3,11 +3,18 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
+import os
+from pathlib import Path
+
+try:
+    os.getcwd()
+except FileNotFoundError:
+    os.chdir("/")
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
     MotionLimits,
@@ -16,327 +23,288 @@ from sdk import (
     TestReport,
 )
 
+ASSETS = AssetContext.from_script(__file__)
+
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="mag_drill_tilting_adapter")
+    model = ArticulatedObject(name="radial_drill_press", assets=ASSETS)
 
-    tilt_axis_z = 0.086
+    cast_iron = model.material("cast_iron", rgba=(0.30, 0.33, 0.36, 1.0))
+    machine_blue = model.material("machine_blue", rgba=(0.22, 0.37, 0.56, 1.0))
+    steel = model.material("steel", rgba=(0.63, 0.66, 0.70, 1.0))
+    dark_trim = model.material("dark_trim", rgba=(0.14, 0.15, 0.17, 1.0))
 
-    frame_gray = model.material("frame_gray", rgba=(0.34, 0.37, 0.40, 1.0))
-    steel = model.material("steel", rgba=(0.62, 0.64, 0.67, 1.0))
-    dark_steel = model.material("dark_steel", rgba=(0.16, 0.17, 0.18, 1.0))
-    machine_green = model.material("machine_green", rgba=(0.20, 0.42, 0.28, 1.0))
-    knob_black = model.material("knob_black", rgba=(0.08, 0.08, 0.09, 1.0))
-    clamp_black = model.material("clamp_black", rgba=(0.10, 0.10, 0.11, 1.0))
-
-    frame = model.part("frame")
-    frame.visual(
-        Box((0.260, 0.170, 0.022)),
-        origin=Origin(xyz=(0.000, 0.000, 0.011)),
-        material=frame_gray,
-        name="base_plate",
+    base = model.part("base")
+    base.visual(
+        Box((0.80, 0.56, 0.08)),
+        origin=Origin(xyz=(0.0, 0.0, 0.04)),
+        material=cast_iron,
+        name="base_slab",
     )
-    frame.visual(
-        Box((0.170, 0.020, 0.028)),
-        origin=Origin(xyz=(-0.020, -0.060, 0.036)),
-        material=frame_gray,
-        name="front_rail",
+    base.visual(
+        Box((0.24, 0.24, 0.10)),
+        origin=Origin(xyz=(-0.22, 0.0, 0.13)),
+        material=cast_iron,
+        name="column_plinth",
     )
-    frame.visual(
-        Box((0.170, 0.020, 0.028)),
-        origin=Origin(xyz=(-0.020, 0.060, 0.036)),
-        material=frame_gray,
-        name="rear_rail",
+    base.visual(
+        Box((0.16, 0.16, 0.22)),
+        origin=Origin(xyz=(0.18, 0.0, 0.19)),
+        material=cast_iron,
+        name="table_pedestal",
     )
-    frame.visual(
-        Box((0.050, 0.120, 0.040)),
-        origin=Origin(xyz=(-0.075, 0.000, 0.042)),
-        material=frame_gray,
-        name="left_spine",
-    )
-    frame.visual(
-        Box((0.028, 0.018, 0.064)),
-        origin=Origin(xyz=(0.000, -0.082, 0.054)),
-        material=frame_gray,
-        name="front_pivot_block",
-    )
-    frame.visual(
-        Box((0.028, 0.018, 0.064)),
-        origin=Origin(xyz=(0.000, 0.082, 0.054)),
-        material=steel,
-        name="rear_pivot_block",
-    )
-    frame.visual(
-        Box((0.055, 0.060, 0.050)),
-        origin=Origin(xyz=(0.105, 0.000, 0.047)),
-        material=frame_gray,
-        name="worm_pedestal",
-    )
-    frame.visual(
-        Box((0.016, 0.028, 0.024)),
-        origin=Origin(xyz=(0.085, 0.000, 0.063)),
-        material=steel,
-        name="left_bearing_block",
-    )
-    frame.visual(
-        Box((0.016, 0.028, 0.024)),
-        origin=Origin(xyz=(0.125, 0.000, 0.063)),
-        material=steel,
-        name="right_bearing_block",
+    base.visual(
+        Box((0.34, 0.24, 0.03)),
+        origin=Origin(xyz=(0.18, 0.0, 0.315)),
+        material=cast_iron,
+        name="work_table",
     )
 
-    platform = model.part("tilt_platform")
-    platform.visual(
-        Cylinder(radius=0.011, length=0.018),
-        origin=Origin(xyz=(0.000, -0.064, 0.000), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=steel,
-        name="front_trunnion",
+    column = model.part("column")
+    column.visual(
+        Cylinder(radius=0.085, length=0.03),
+        origin=Origin(xyz=(0.0, 0.0, 0.015)),
+        material=dark_trim,
+        name="base_flange",
     )
-    platform.visual(
-        Cylinder(radius=0.011, length=0.018),
-        origin=Origin(xyz=(0.000, 0.064, 0.000), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=steel,
-        name="rear_trunnion",
+    column.visual(
+        Cylinder(radius=0.055, length=0.92),
+        origin=Origin(xyz=(0.0, 0.0, 0.49)),
+        material=machine_blue,
+        name="column_shaft",
     )
-    platform.visual(
-        Box((0.030, 0.110, 0.034)),
-        origin=Origin(xyz=(-0.022, 0.000, 0.018)),
-        material=frame_gray,
-        name="tilt_web",
-    )
-    platform.visual(
-        Box((0.076, 0.110, 0.026)),
-        origin=Origin(xyz=(0.016, 0.000, 0.022)),
-        material=steel,
-        name="center_rib",
-    )
-    platform.visual(
-        Box((0.210, 0.148, 0.012)),
-        origin=Origin(xyz=(-0.008, 0.000, 0.034)),
-        material=frame_gray,
-        name="platform_plate",
-    )
-    platform.visual(
-        Box((0.010, 0.020, 0.088)),
-        origin=Origin(xyz=(0.050, 0.000, 0.000)),
-        material=frame_gray,
-        name="sector_bracket",
-    )
-    platform.visual(
-        Box((0.016, 0.112, 0.032)),
-        origin=Origin(xyz=(0.034, 0.000, 0.020)),
-        material=steel,
-        name="side_cheek",
-    )
-    tooth_angles = (-0.52, -0.40, -0.28, -0.16, -0.04, 0.08, 0.20, 0.32, 0.44)
-    for index, angle in enumerate(tooth_angles):
-        tooth_radius = 0.068
-        platform.visual(
-            Box((0.012, 0.018, 0.012)),
-            origin=Origin(
-                xyz=(0.060 * math.cos(angle), 0.000, 0.060 * math.sin(angle)),
-                rpy=(0.0, angle, 0.0),
-            ),
-            material=frame_gray,
-            name=f"sector_back_{index}",
-        )
-        platform.visual(
-            Box((0.012, 0.018, 0.010)),
-            origin=Origin(
-                xyz=(tooth_radius * math.cos(angle), 0.000, tooth_radius * math.sin(angle)),
-                rpy=(0.0, angle, 0.0),
-            ),
-            material=steel,
-            name=f"sector_tooth_{index}",
-        )
-
-    clamp = model.part("drill_clamp")
-    clamp.visual(
-        Box((0.132, 0.104, 0.010)),
-        origin=Origin(xyz=(0.000, 0.000, 0.005)),
-        material=clamp_black,
-        name="clamp_bottom",
-    )
-    clamp.visual(
-        Box((0.010, 0.086, 0.036)),
-        origin=Origin(xyz=(-0.056, 0.000, 0.023)),
-        material=clamp_black,
-        name="left_guide",
-    )
-    clamp.visual(
-        Box((0.010, 0.086, 0.036)),
-        origin=Origin(xyz=(0.056, 0.000, 0.023)),
-        material=clamp_black,
-        name="right_guide",
-    )
-    clamp.visual(
-        Box((0.112, 0.094, 0.008)),
-        origin=Origin(xyz=(0.000, 0.000, 0.042)),
-        material=clamp_black,
-        name="top_strap",
-    )
-    clamp.visual(
-        Box((0.018, 0.112, 0.030)),
-        origin=Origin(xyz=(-0.042, 0.000, 0.020)),
-        material=clamp_black,
-        name="rear_stop",
+    column.visual(
+        Cylinder(radius=0.075, length=0.04),
+        origin=Origin(xyz=(0.0, 0.0, 0.97)),
+        material=dark_trim,
+        name="top_cap",
     )
 
-    drill = model.part("magnetic_drill")
-    drill.visual(
-        Box((0.102, 0.074, 0.036)),
-        origin=Origin(xyz=(0.000, 0.000, 0.018)),
-        material=dark_steel,
-        name="mag_base",
+    carriage = model.part("carriage")
+    carriage.visual(
+        Box((0.035, 0.18, 0.24)),
+        origin=Origin(xyz=(-0.0725, 0.0, 0.0)),
+        material=machine_blue,
+        name="rear_clamp",
     )
-    drill.visual(
-        Cylinder(radius=0.017, length=0.214),
-        origin=Origin(xyz=(-0.020, 0.000, 0.143)),
-        material=dark_steel,
-        name="column",
+    carriage.visual(
+        Box((0.15, 0.035, 0.24)),
+        origin=Origin(xyz=(0.02, 0.0725, 0.0)),
+        material=machine_blue,
+        name="side_clamp_left",
     )
-    drill.visual(
-        Box((0.066, 0.058, 0.094)),
-        origin=Origin(xyz=(0.006, 0.000, 0.152)),
-        material=machine_green,
-        name="slide_carriage",
+    carriage.visual(
+        Box((0.15, 0.035, 0.24)),
+        origin=Origin(xyz=(0.02, -0.0725, 0.0)),
+        material=machine_blue,
+        name="side_clamp_right",
     )
-    drill.visual(
-        Cylinder(radius=0.031, length=0.108),
-        origin=Origin(xyz=(0.026, 0.000, 0.208), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=machine_green,
-        name="motor_housing",
+    carriage.visual(
+        Box((0.14, 0.18, 0.20)),
+        origin=Origin(xyz=(0.125, 0.0, 0.0)),
+        material=machine_blue,
+        name="front_housing",
     )
-    drill.visual(
-        Box((0.050, 0.050, 0.060)),
-        origin=Origin(xyz=(0.024, 0.000, 0.146)),
-        material=machine_green,
-        name="gearbox",
+    carriage.visual(
+        Box((0.48, 0.11, 0.014)),
+        origin=Origin(xyz=(0.33, 0.0, -0.05)),
+        material=dark_trim,
+        name="arm_way_surface",
     )
-    drill.visual(
-        Cylinder(radius=0.011, length=0.064),
-        origin=Origin(xyz=(0.030, 0.000, 0.096)),
-        material=steel,
-        name="spindle_nose",
+    carriage.visual(
+        Box((0.20, 0.11, 0.014)),
+        origin=Origin(xyz=(0.18, 0.0, 0.057)),
+        material=dark_trim,
+        name="top_bridge",
     )
-    drill.visual(
-        Cylinder(radius=0.018, length=0.018),
-        origin=Origin(xyz=(-0.035, 0.000, 0.166), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=steel,
-        name="feed_hub",
+    carriage.visual(
+        Box((0.26, 0.012, 0.08)),
+        origin=Origin(xyz=(0.17, 0.051, 0.0)),
+        material=dark_trim,
+        name="guide_cheek_left",
     )
-    drill.visual(
-        Cylinder(radius=0.0045, length=0.054),
-        origin=Origin(xyz=(-0.062, 0.000, 0.184), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=knob_black,
-        name="feed_handle_top",
-    )
-    drill.visual(
-        Cylinder(radius=0.0045, length=0.054),
-        origin=Origin(xyz=(-0.062, 0.016, 0.157), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=knob_black,
-        name="feed_handle_front",
-    )
-    drill.visual(
-        Cylinder(radius=0.0045, length=0.054),
-        origin=Origin(xyz=(-0.062, -0.016, 0.157), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=knob_black,
-        name="feed_handle_rear",
+    carriage.visual(
+        Box((0.26, 0.012, 0.08)),
+        origin=Origin(xyz=(0.17, -0.051, 0.0)),
+        material=dark_trim,
+        name="guide_cheek_right",
     )
 
-    worm = model.part("worm_drive")
-    worm.visual(
-        Cylinder(radius=0.005, length=0.082),
-        origin=Origin(xyz=(0.030, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=dark_steel,
-        name="shaft",
+    arm = model.part("arm")
+    arm.visual(
+        Box((0.70, 0.09, 0.086)),
+        origin=Origin(xyz=(0.55, 0.0, 0.0)),
+        material=machine_blue,
+        name="arm_beam",
     )
-    worm.visual(
-        Cylinder(radius=0.010, length=0.044),
-        origin=Origin(xyz=(0.000, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
+    arm.visual(
+        Box((0.12, 0.088, 0.02)),
+        origin=Origin(xyz=(0.28, 0.0, -0.033)),
+        material=dark_trim,
+        name="slide_block",
+    )
+
+    head = model.part("head")
+    head.visual(
+        Box((0.18, 0.16, 0.02)),
+        origin=Origin(xyz=(0.09, 0.0, 0.053)),
+        material=dark_trim,
+        name="saddle_top",
+    )
+    head.visual(
+        Box((0.18, 0.018, 0.12)),
+        origin=Origin(xyz=(0.09, 0.054, -0.01)),
+        material=dark_trim,
+        name="side_cheek_left",
+    )
+    head.visual(
+        Box((0.18, 0.018, 0.12)),
+        origin=Origin(xyz=(0.09, -0.054, -0.01)),
+        material=dark_trim,
+        name="side_cheek_right",
+    )
+    head.visual(
+        Box((0.12, 0.04, 0.04)),
+        origin=Origin(xyz=(0.09, -0.067, 0.03)),
+        material=dark_trim,
+        name="motor_mount",
+    )
+    head.visual(
+        Box((0.14, 0.09, 0.18)),
+        origin=Origin(xyz=(0.10, -0.11, -0.07)),
+        material=machine_blue,
+        name="motor_box",
+    )
+    head.visual(
+        Cylinder(radius=0.04, length=0.03),
+        origin=Origin(xyz=(0.10, -0.11, 0.035)),
+        material=machine_blue,
+        name="motor_cap",
+    )
+    head.visual(
+        Box((0.05, 0.08, 0.03)),
+        origin=Origin(xyz=(0.08, 0.0, -0.08)),
+        material=dark_trim,
+        name="quill_cap",
+    )
+    head.visual(
+        Box((0.03, 0.08, 0.14)),
+        origin=Origin(xyz=(0.095, 0.0, -0.14)),
+        material=machine_blue,
+        name="quill_rear_web",
+    )
+    head.visual(
+        Box((0.03, 0.08, 0.14)),
+        origin=Origin(xyz=(0.165, 0.0, -0.14)),
+        material=machine_blue,
+        name="quill_front_web",
+    )
+    head.visual(
+        Box((0.04, 0.01, 0.20)),
+        origin=Origin(xyz=(0.13, 0.045, -0.10)),
+        material=dark_trim,
+        name="quill_guide_left",
+    )
+    head.visual(
+        Box((0.04, 0.01, 0.20)),
+        origin=Origin(xyz=(0.13, -0.045, -0.10)),
+        material=dark_trim,
+        name="quill_guide_right",
+    )
+
+    quill = model.part("quill")
+    quill.visual(
+        Cylinder(radius=0.022, length=0.16),
+        origin=Origin(xyz=(0.0, 0.0, -0.08)),
         material=steel,
-        name="worm_body",
+        name="quill_body",
     )
-    for index, x_pos in enumerate((-0.018, -0.010, -0.002, 0.006, 0.014)):
-        worm.visual(
-            Cylinder(radius=0.012, length=0.004),
-            origin=Origin(xyz=(x_pos, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=steel,
-            name=f"worm_thread_{index}",
-        )
-    worm.visual(
-        Cylinder(radius=0.011, length=0.010),
-        origin=Origin(xyz=(-0.010, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
+    quill.visual(
+        Box((0.012, 0.02, 0.12)),
+        origin=Origin(xyz=(0.0, 0.03, -0.06)),
         material=steel,
-        name="left_bearing_collar",
+        name="guide_key_left",
     )
-    worm.visual(
-        Cylinder(radius=0.011, length=0.010),
-        origin=Origin(xyz=(0.030, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
+    quill.visual(
+        Box((0.012, 0.02, 0.12)),
+        origin=Origin(xyz=(0.0, -0.03, -0.06)),
         material=steel,
-        name="right_bearing_collar",
+        name="guide_key_right",
     )
-    worm.visual(
-        Cylinder(radius=0.010, length=0.012),
-        origin=Origin(xyz=(0.050, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
+    quill.visual(
+        Cylinder(radius=0.014, length=0.05),
+        origin=Origin(xyz=(0.0, 0.0, -0.185)),
         material=steel,
-        name="handwheel_hub",
+        name="chuck",
     )
-    worm.visual(
-        Cylinder(radius=0.032, length=0.006),
-        origin=Origin(xyz=(0.068, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
+    quill.visual(
+        Cylinder(radius=0.004, length=0.07),
+        origin=Origin(xyz=(0.0, 0.0, -0.245)),
         material=steel,
-        name="handwheel_rim",
+        name="drill_bit",
     )
-    for index, angle in enumerate((0.0, 2.0 * math.pi / 3.0, 4.0 * math.pi / 3.0)):
-        worm.visual(
-            Box((0.004, 0.004, 0.050)),
-            origin=Origin(
-                xyz=(0.068, -0.012 * math.sin(angle), 0.012 * math.cos(angle)),
-                rpy=(angle, 0.0, 0.0),
-            ),
-            material=steel,
-            name=f"handwheel_spoke_{index}",
-        )
 
     model.articulation(
-        "frame_to_platform",
-        ArticulationType.REVOLUTE,
-        parent=frame,
-        child=platform,
-        origin=Origin(xyz=(0.000, 0.000, tilt_axis_z)),
-        axis=(0.0, 1.0, 0.0),
+        "base_to_column",
+        ArticulationType.FIXED,
+        parent=base,
+        child=column,
+        origin=Origin(xyz=(-0.22, 0.0, 0.18)),
+    )
+    model.articulation(
+        "column_to_carriage",
+        ArticulationType.PRISMATIC,
+        parent=column,
+        child=carriage,
+        origin=Origin(xyz=(0.0, 0.0, 0.59)),
+        axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=40.0,
-            velocity=0.8,
-            lower=-0.45,
-            upper=0.30,
+            effort=180.0,
+            velocity=0.20,
+            lower=0.0,
+            upper=0.18,
         ),
     )
     model.articulation(
-        "platform_to_clamp",
-        ArticulationType.FIXED,
-        parent=platform,
-        child=clamp,
-        origin=Origin(xyz=(-0.008, 0.000, 0.040)),
-    )
-    model.articulation(
-        "clamp_to_drill",
-        ArticulationType.FIXED,
-        parent=clamp,
-        child=drill,
-        origin=Origin(xyz=(0.000, 0.000, 0.010)),
-    )
-    model.articulation(
-        "frame_to_worm",
-        ArticulationType.CONTINUOUS,
-        parent=frame,
-        child=worm,
-        origin=Origin(xyz=(0.095, 0.000, tilt_axis_z)),
+        "carriage_to_arm",
+        ArticulationType.PRISMATIC,
+        parent=carriage,
+        child=arm,
+        origin=Origin(xyz=(0.08, 0.0, 0.0)),
         axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(
-            effort=8.0,
-            velocity=3.0,
+            effort=140.0,
+            velocity=0.25,
+            lower=0.0,
+            upper=0.24,
+        ),
+    )
+    model.articulation(
+        "arm_to_head",
+        ArticulationType.PRISMATIC,
+        parent=arm,
+        child=head,
+        origin=Origin(xyz=(0.52, 0.0, 0.0)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=90.0,
+            velocity=0.28,
+            lower=0.0,
+            upper=0.26,
+        ),
+    )
+    model.articulation(
+        "head_to_quill",
+        ArticulationType.PRISMATIC,
+        parent=head,
+        child=quill,
+        origin=Origin(xyz=(0.13, 0.0, -0.05)),
+        axis=(0.0, 0.0, -1.0),
+        motion_limits=MotionLimits(
+            effort=60.0,
+            velocity=0.20,
+            lower=0.0,
+            upper=0.08,
         ),
     )
 
@@ -345,147 +313,216 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    frame = object_model.get_part("frame")
-    platform = object_model.get_part("tilt_platform")
-    clamp = object_model.get_part("drill_clamp")
-    drill = object_model.get_part("magnetic_drill")
-    worm = object_model.get_part("worm_drive")
-    tilt = object_model.get_articulation("frame_to_platform")
+    base = object_model.get_part("base")
+    column = object_model.get_part("column")
+    carriage = object_model.get_part("carriage")
+    arm = object_model.get_part("arm")
+    head = object_model.get_part("head")
+    quill = object_model.get_part("quill")
 
-    base_plate = frame.get_visual("base_plate")
-    front_pivot_block = frame.get_visual("front_pivot_block")
-    rear_pivot_block = frame.get_visual("rear_pivot_block")
-    left_bearing_block = frame.get_visual("left_bearing_block")
-    right_bearing_block = frame.get_visual("right_bearing_block")
+    sleeve_lift = object_model.get_articulation("column_to_carriage")
+    arm_slide = object_model.get_articulation("carriage_to_arm")
+    head_slide = object_model.get_articulation("arm_to_head")
+    quill_feed = object_model.get_articulation("head_to_quill")
 
-    platform_plate = platform.get_visual("platform_plate")
-    front_trunnion = platform.get_visual("front_trunnion")
-    rear_trunnion = platform.get_visual("rear_trunnion")
-    sector_tooth_rest = platform.get_visual("sector_tooth_4")
-    sector_tooth_down = platform.get_visual("sector_tooth_1")
-    sector_tooth_up = platform.get_visual("sector_tooth_6")
-
-    clamp_bottom = clamp.get_visual("clamp_bottom")
-    left_guide = clamp.get_visual("left_guide")
-    right_guide = clamp.get_visual("right_guide")
-    drill_base = drill.get_visual("mag_base")
-    worm_body = worm.get_visual("worm_body")
-    left_bearing_collar = worm.get_visual("left_bearing_collar")
-    right_bearing_collar = worm.get_visual("right_bearing_collar")
-    handwheel_rim = worm.get_visual("handwheel_rim")
+    column_plinth = base.get_visual("column_plinth")
+    work_table = base.get_visual("work_table")
+    base_flange = column.get_visual("base_flange")
+    column_shaft = column.get_visual("column_shaft")
+    rear_clamp = carriage.get_visual("rear_clamp")
+    carriage_way = carriage.get_visual("arm_way_surface")
+    guide_cheek_left = carriage.get_visual("guide_cheek_left")
+    arm_beam = arm.get_visual("arm_beam")
+    head_saddle = head.get_visual("saddle_top")
+    side_cheek_left = head.get_visual("side_cheek_left")
+    quill_guide_left = head.get_visual("quill_guide_left")
+    drill_bit = quill.get_visual("drill_bit")
+    guide_key_left = quill.get_visual("guide_key_left")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.002,
-        overlap_volume_tol=0.0,
+
+    ctx.fail_if_isolated_parts(max_pose_samples=12)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
+
+    base_aabb = ctx.part_world_aabb(base)
+    column_aabb = ctx.part_world_aabb(column)
+    arm_aabb = ctx.part_world_aabb(arm)
+
+    if base_aabb is not None:
+        base_dx = base_aabb[1][0] - base_aabb[0][0]
+        base_dy = base_aabb[1][1] - base_aabb[0][1]
+        ctx.check(
+            "wide_base_footprint",
+            base_dx >= 0.75 and base_dy >= 0.52,
+            f"base footprint was {base_dx:.3f} x {base_dy:.3f} m",
+        )
+    if column_aabb is not None:
+        column_height = column_aabb[1][2] - column_aabb[0][2]
+        ctx.check(
+            "column_height_realistic",
+            column_height >= 0.95,
+            f"column height was {column_height:.3f} m",
+        )
+    if arm_aabb is not None:
+        arm_length = arm_aabb[1][0] - arm_aabb[0][0]
+        ctx.check(
+            "radial_arm_reach_realistic",
+            arm_length >= 0.70,
+            f"arm length was {arm_length:.3f} m",
+        )
+
+    ctx.check(
+        "carriage_lifts_vertically",
+        carriage in (carriage,) and sleeve_lift.axis == (0.0, 0.0, 1.0),
+        f"column_to_carriage axis was {sleeve_lift.axis}",
     )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.002,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
+    ctx.check(
+        "arm_extends_horizontally",
+        arm_slide.axis == (1.0, 0.0, 0.0),
+        f"carriage_to_arm axis was {arm_slide.axis}",
+    )
+    ctx.check(
+        "head_traverses_along_arm",
+        head_slide.axis == (1.0, 0.0, 0.0),
+        f"arm_to_head axis was {head_slide.axis}",
+    )
+    ctx.check(
+        "quill_feeds_downward",
+        quill_feed.axis == (0.0, 0.0, -1.0),
+        f"head_to_quill axis was {quill_feed.axis}",
     )
 
-    ctx.allow_overlap(
-        platform,
-        worm,
-        reason="worm threads intentionally mesh into the side sector teeth across the tilt range",
-    )
-    ctx.expect_contact(frame, platform, elem_a=front_pivot_block, elem_b=front_trunnion)
-    ctx.expect_contact(frame, platform, elem_a=rear_pivot_block, elem_b=rear_trunnion)
+    ctx.expect_within(column, base, axes="xy")
     ctx.expect_gap(
-        clamp,
-        platform,
+        column,
+        base,
         axis="z",
+        positive_elem=base_flange,
+        negative_elem=column_plinth,
         max_gap=0.001,
         max_penetration=0.0,
-        positive_elem=clamp_bottom,
-        negative_elem=platform_plate,
+        name="column_seats_on_base_plinth",
     )
-    ctx.expect_within(
-        clamp,
-        platform,
-        axes="xy",
-        inner_elem=clamp_bottom,
-        outer_elem=platform_plate,
-    )
-    ctx.expect_gap(
-        drill,
-        clamp,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=drill_base,
-        negative_elem=clamp_bottom,
-    )
-    ctx.expect_overlap(
-        drill,
-        clamp,
-        axes="xy",
-        min_overlap=0.060,
-        elem_a=drill_base,
-        elem_b=clamp_bottom,
-    )
-    ctx.expect_contact(clamp, drill, elem_a=left_guide, elem_b=drill_base)
-    ctx.expect_contact(clamp, drill, elem_a=right_guide, elem_b=drill_base)
-    ctx.expect_gap(
-        drill,
-        frame,
-        axis="z",
-        min_gap=0.080,
-        positive_elem=drill_base,
-        negative_elem=base_plate,
-    )
-    ctx.expect_contact(frame, worm, elem_a=left_bearing_block, elem_b=left_bearing_collar)
-    ctx.expect_contact(frame, worm, elem_a=right_bearing_block, elem_b=right_bearing_collar)
-    ctx.expect_overlap(
-        platform,
-        worm,
-        axes="yz",
-        min_overlap=0.008,
-        elem_a=sector_tooth_rest,
-        elem_b=worm_body,
-    )
-    ctx.expect_gap(
-        worm,
-        frame,
-        axis="x",
-        min_gap=0.010,
-        positive_elem=handwheel_rim,
-        negative_elem=right_bearing_block,
+    ctx.expect_contact(
+        carriage,
+        column,
+        elem_a=rear_clamp,
+        elem_b=column_shaft,
+        name="carriage_clamps_column",
     )
 
-    with ctx.pose({tilt: -0.40}):
+    ctx.expect_overlap(carriage, column, axes="z", min_overlap=0.20)
+    ctx.expect_overlap(arm, carriage, axes="xy", min_overlap=0.03)
+    ctx.expect_gap(
+        arm,
+        carriage,
+        axis="z",
+        positive_elem=arm_beam,
+        negative_elem=carriage_way,
+        max_gap=0.001,
+        max_penetration=0.0,
+        name="arm_rides_on_carriage_way",
+    )
+    ctx.expect_contact(
+        arm,
+        carriage,
+        elem_a=arm_beam,
+        elem_b=guide_cheek_left,
+        name="arm_guided_laterally_by_carriage",
+    )
+    ctx.expect_overlap(head, arm, axes="xy", min_overlap=0.04)
+    ctx.expect_gap(
+        head,
+        arm,
+        axis="z",
+        positive_elem=head_saddle,
+        negative_elem=arm_beam,
+        max_gap=0.001,
+        max_penetration=0.0,
+        name="head_saddle_seats_on_arm",
+    )
+    ctx.expect_contact(
+        head,
+        arm,
+        elem_a=side_cheek_left,
+        elem_b=arm_beam,
+        name="head_cheeks_capture_arm",
+    )
+    ctx.expect_contact(
+        quill,
+        head,
+        elem_a=guide_key_left,
+        elem_b=quill_guide_left,
+        name="quill_guided_by_head_frame",
+    )
+    ctx.expect_gap(
+        quill,
+        base,
+        axis="z",
+        positive_elem=drill_bit,
+        negative_elem=work_table,
+        min_gap=0.02,
+        max_gap=0.14,
+        name="bit_hangs_above_work_table",
+    )
+
+    with ctx.pose({sleeve_lift: 0.18}):
         ctx.expect_gap(
-            drill,
-            frame,
+            quill,
+            base,
             axis="z",
-            min_gap=0.040,
-            positive_elem=drill_base,
-            negative_elem=base_plate,
+            positive_elem=drill_bit,
+            negative_elem=work_table,
+            min_gap=0.18,
+            name="raised_arm_lifts_tool_clear_of_table",
         )
-        ctx.expect_overlap(
-            platform,
-            worm,
-            axes="yz",
-            min_overlap=0.004,
-            elem_a=sector_tooth_down,
-            elem_b=worm_body,
+
+    with ctx.pose({arm_slide: 0.24, head_slide: 0.26}):
+        ctx.expect_overlap(arm, carriage, axes="xy", min_overlap=0.01)
+        ctx.expect_overlap(head, arm, axes="xy", min_overlap=0.01)
+        ctx.expect_gap(
+            head,
+            arm,
+            axis="z",
+            positive_elem=head_saddle,
+            negative_elem=arm_beam,
+            max_gap=0.001,
+            max_penetration=0.0,
+            name="head_remains_seated_when_fully_extended",
         )
-    with ctx.pose({tilt: 0.20}):
-        ctx.expect_overlap(
-            platform,
-            worm,
-            axes="yz",
-            min_overlap=0.004,
-            elem_a=sector_tooth_up,
-            elem_b=worm_body,
+        ctx.expect_gap(
+            head,
+            column,
+            axis="x",
+            min_gap=0.55,
+            name="head_projects_far_forward_of_column",
         )
+        ctx.fail_if_isolated_parts(name="full_reach_no_floating")
+        ctx.fail_if_parts_overlap_in_current_pose(name="full_reach_no_overlap")
+
+    with ctx.pose({quill_feed: 0.08}):
+        ctx.expect_contact(
+            quill,
+            head,
+            elem_a=guide_key_left,
+            elem_b=quill_guide_left,
+            name="quill_remains_guided_at_full_feed",
+        )
+        ctx.expect_gap(
+            quill,
+            base,
+            axis="z",
+            positive_elem=drill_bit,
+            negative_elem=work_table,
+            min_gap=0.015,
+            max_gap=0.08,
+            name="full_feed_still_clears_table",
+        )
+        ctx.fail_if_isolated_parts(name="full_feed_no_floating")
+        ctx.fail_if_parts_overlap_in_current_pose(name="full_feed_no_overlap")
 
     return ctx.report()
 

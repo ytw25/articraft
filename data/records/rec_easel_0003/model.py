@@ -3,200 +3,296 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
+import os
+
+try:
+    os.getcwd()
+except FileNotFoundError:
+    os.chdir("/tmp")
+
+import math
+
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
+    Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
 )
 
-ASSETS = AssetContext.from_script(__file__)
+
+def _clamp(value: float, lower: float, upper: float) -> float:
+    return max(lower, min(upper, value))
+
+
+def _vec_sub(a: tuple[float, float, float], b: tuple[float, float, float]) -> tuple[float, float, float]:
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def _vec_len(v: tuple[float, float, float]) -> float:
+    return math.sqrt((v[0] * v[0]) + (v[1] * v[1]) + (v[2] * v[2]))
+
+
+def _leg_rpy_and_center(
+    hinge_xyz: tuple[float, float, float],
+    foot_xyz: tuple[float, float, float],
+) -> tuple[tuple[float, float, float], tuple[float, float, float], float]:
+    foot_vector = _vec_sub(foot_xyz, hinge_xyz)
+    length = _vec_len(foot_vector)
+    axis_z = tuple(-component / length for component in foot_vector)
+    roll = -math.asin(_clamp(axis_z[1], -1.0, 1.0))
+    pitch = math.atan2(axis_z[0], axis_z[2])
+    center = (foot_vector[0] * 0.5, foot_vector[1] * 0.5, foot_vector[2] * 0.5)
+    return (roll, pitch, 0.0), center, length
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="h_frame_display_easel", assets=ASSETS)
+    model = ArticulatedObject(name="tripod_field_easel")
 
-    oak = model.material("oak", rgba=(0.70, 0.56, 0.39, 1.0))
-    walnut = model.material("walnut", rgba=(0.35, 0.24, 0.16, 1.0))
-    iron = model.material("iron", rgba=(0.20, 0.20, 0.22, 1.0))
+    ash = model.material("ash", rgba=(0.72, 0.60, 0.42, 1.0))
+    walnut = model.material("walnut", rgba=(0.47, 0.35, 0.22, 1.0))
+    steel = model.material("steel", rgba=(0.23, 0.25, 0.27, 1.0))
 
-    front_frame = model.part("front_frame")
-    front_frame.visual(
-        Box((0.07, 0.032, 1.52)),
-        origin=Origin(xyz=(-0.19, 0.0, 0.76)),
-        material=oak,
-        name="left_stile",
+    crown_z = 1.505
+    front_hinge = (0.0, 0.040, crown_z)
+    rear_left_hinge = (-0.038, -0.026, crown_z)
+    rear_right_hinge = (0.038, -0.026, crown_z)
+
+    frame = model.part("frame")
+    frame.visual(
+        Box((0.058, 0.030, 1.43)),
+        origin=Origin(xyz=(0.0, 0.0, 0.825)),
+        material=ash,
+        name="mast",
     )
-    front_frame.visual(
-        Box((0.07, 0.032, 1.52)),
-        origin=Origin(xyz=(0.19, 0.0, 0.76)),
-        material=oak,
-        name="right_stile",
-    )
-    front_frame.visual(
-        Box((0.45, 0.028, 0.06)),
-        origin=Origin(xyz=(0.0, -0.002, 1.47)),
-        material=oak,
-        name="top_rail",
-    )
-    front_frame.visual(
-        Box((0.45, 0.032, 0.08)),
-        origin=Origin(xyz=(0.0, -0.002, 0.18)),
-        material=oak,
-        name="bottom_crossbar",
-    )
-    front_frame.visual(
-        Box((0.05, 0.02, 1.22)),
-        origin=Origin(xyz=(0.0, -0.018, 0.83)),
+    frame.visual(
+        Box((0.140, 0.080, 0.120)),
+        origin=Origin(xyz=(0.0, 0.0, 1.595)),
         material=walnut,
-        name="center_mast",
+        name="crown_block",
     )
-    front_frame.visual(
-        Box((0.06, 0.02, 0.05)),
-        origin=Origin(xyz=(-0.19, -0.026, 1.47)),
-        material=iron,
-        name="left_pivot_block",
+    frame.visual(
+        Box((0.124, 0.024, 0.210)),
+        origin=Origin(xyz=(0.0, -0.015, 0.455)),
+        material=walnut,
+        name="lower_block",
     )
-    front_frame.visual(
-        Box((0.06, 0.02, 0.05)),
-        origin=Origin(xyz=(0.19, -0.026, 1.47)),
-        material=iron,
-        name="right_pivot_block",
+    frame.visual(
+        Box((0.180, 0.020, 0.010)),
+        origin=Origin(xyz=(0.0, 0.0135, 0.395)),
+        material=steel,
+        name="ledge_mount",
     )
-    front_frame.visual(
-        Cylinder(radius=0.008, length=0.44),
-        origin=Origin(xyz=(0.0, -0.036, 1.47), rpy=(0.0, 1.5708, 0.0)),
-        material=iron,
-        name="pivot_pin",
+    frame.visual(
+        Cylinder(radius=0.0045, length=0.170),
+        origin=Origin(xyz=(0.0, 0.028, 0.395), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=steel,
+        name="ledge_pin",
     )
-    front_frame.visual(
-        Box((0.12, 0.034, 0.05)),
-        origin=Origin(xyz=(0.0, -0.032, 0.98)),
-        material=iron,
-        name="upper_backbar_anchor",
+    frame.visual(
+        Box((0.050, 0.018, 0.024)),
+        origin=Origin(xyz=(front_hinge[0], 0.031, front_hinge[2])),
+        material=steel,
+        name="front_hinge_tab",
     )
-    front_frame.visual(
-        Box((0.12, 0.034, 0.05)),
-        origin=Origin(xyz=(0.0, -0.032, 0.60)),
-        material=iron,
-        name="lower_backbar_anchor",
+    frame.visual(
+        Box((0.032, 0.018, 0.024)),
+        origin=Origin(xyz=(front_hinge[0], 0.028, 1.523)),
+        material=steel,
+        name="front_hinge_bridge",
+    )
+    frame.visual(
+        Box((0.044, 0.018, 0.024)),
+        origin=Origin(xyz=(rear_left_hinge[0], -0.017, rear_left_hinge[2])),
+        material=steel,
+        name="rear_left_hinge_tab",
+    )
+    frame.visual(
+        Box((0.044, 0.018, 0.024)),
+        origin=Origin(xyz=(rear_right_hinge[0], -0.017, rear_right_hinge[2])),
+        material=steel,
+        name="rear_right_hinge_tab",
+    )
+    frame.inertial = Inertial.from_geometry(
+        Box((0.140, 0.080, 1.56)),
+        mass=3.8,
+        origin=Origin(xyz=(0.0, 0.0, 0.88)),
     )
 
-    rear_support = model.part("rear_support")
-    rear_support.visual(
-        Box((0.06, 0.02, 0.05)),
-        origin=Origin(xyz=(-0.19, -0.01, 0.0)),
-        material=iron,
-        name="left_pivot_ear",
+    def add_leg(
+        name: str,
+        hinge_xyz: tuple[float, float, float],
+        foot_xyz: tuple[float, float, float],
+        *,
+        cap_y: float,
+        lower: float,
+        upper: float,
+    ) -> None:
+        rpy, _center, length = _leg_rpy_and_center(hinge_xyz, foot_xyz)
+        foot_vector = _vec_sub(foot_xyz, hinge_xyz)
+        bar_inset = 0.018
+        foot_inset = 0.018
+        bar_length = length - (bar_inset + foot_inset)
+        unit_to_foot = tuple(component / length for component in foot_vector)
+        bar_center = tuple(component * (bar_inset + (bar_length * 0.5)) for component in unit_to_foot)
+        foot_center = tuple(component * (length - (foot_inset * 0.5)) for component in unit_to_foot)
+
+        leg = model.part(name)
+        leg.visual(
+            Box((0.046, 0.018, 0.018)),
+            origin=Origin(xyz=(0.0, cap_y, -0.008)),
+            material=steel,
+            name="hinge_cap",
+        )
+        leg.visual(
+            Box((0.028, 0.020, bar_length)),
+            origin=Origin(xyz=bar_center, rpy=rpy),
+            material=ash,
+            name="leg_bar",
+        )
+        leg.visual(
+            Box((0.058, 0.034, 0.018)),
+            origin=Origin(xyz=foot_center, rpy=rpy),
+            material=walnut,
+            name="foot",
+        )
+        leg.inertial = Inertial.from_geometry(
+            Box((0.058, 0.034, bar_length)),
+            mass=0.95,
+            origin=Origin(xyz=bar_center, rpy=rpy),
+        )
+        model.articulation(
+            f"{name}_hinge",
+            ArticulationType.REVOLUTE,
+            parent=frame,
+            child=leg,
+            origin=Origin(xyz=hinge_xyz),
+            axis=(1.0, 0.0, 0.0),
+            motion_limits=MotionLimits(
+                effort=14.0,
+                velocity=1.0,
+                lower=lower,
+                upper=upper,
+            ),
+        )
+
+    add_leg(
+        "front_leg",
+        front_hinge,
+        (0.0, 0.435, 0.035),
+        cap_y=0.009,
+        lower=0.0,
+        upper=0.28,
     )
-    rear_support.visual(
-        Box((0.06, 0.02, 0.05)),
-        origin=Origin(xyz=(0.19, -0.01, 0.0)),
-        material=iron,
-        name="right_pivot_ear",
+    add_leg(
+        "rear_left_leg",
+        rear_left_hinge,
+        (-0.340, -0.305, 0.030),
+        cap_y=-0.009,
+        lower=-0.28,
+        upper=0.0,
     )
-    rear_support.visual(
-        Box((0.38, 0.04, 0.04)),
-        origin=Origin(xyz=(0.0, -0.02, 0.0)),
-        material=walnut,
-        name="rear_top_yoke",
-    )
-    rear_support.visual(
-        Box((0.08, 0.032, 1.28)),
-        origin=Origin(xyz=(0.0, -0.291, -0.604), rpy=(-0.42, 0.0, 0.0)),
-        material=oak,
-        name="rear_stile",
-    )
-    rear_support.visual(
-        Box((0.11, 0.273, 0.026)),
-        origin=Origin(xyz=(0.0, -0.1495, -0.49)),
-        material=walnut,
-        name="upper_backbar",
-    )
-    rear_support.visual(
-        Box((0.11, 0.427, 0.04)),
-        origin=Origin(xyz=(0.0, -0.2265, -0.85)),
-        material=walnut,
-        name="lower_backbar",
+    add_leg(
+        "rear_right_leg",
+        rear_right_hinge,
+        (0.340, -0.305, 0.030),
+        cap_y=-0.009,
+        lower=-0.28,
+        upper=0.0,
     )
 
-    ledge = model.part("display_ledge")
-    ledge.visual(
-        Box((0.43, 0.012, 0.02)),
-        origin=Origin(xyz=(0.0, 0.006, 0.0)),
-        material=iron,
-        name="ledge_hinge_leaf",
-    )
-    ledge.visual(
-        Box((0.42, 0.16, 0.018)),
-        origin=Origin(xyz=(0.0, 0.092, 0.0)),
-        material=oak,
-        name="ledge_board",
-    )
-    ledge.visual(
-        Box((0.42, 0.018, 0.035)),
-        origin=Origin(xyz=(0.0, 0.181, 0.008)),
+    canvas_rail = model.part("canvas_rail")
+    canvas_rail.visual(
+        Box((0.044, 0.018, 0.780)),
+        origin=Origin(xyz=(0.0, 0.024, 0.390)),
         material=walnut,
-        name="ledge_lip",
+        name="rail_strip",
     )
-
-    hold_down = model.part("hold_down_bar")
-    hold_down.visual(
-        Box((0.34, 0.024, 0.012)),
-        origin=Origin(xyz=(0.0, -0.001, 0.010)),
-        material=iron,
-        name="clamp_saddle",
+    canvas_rail.visual(
+        Box((0.098, 0.014, 0.022)),
+        origin=Origin(xyz=(0.0, 0.020, 0.736)),
+        material=steel,
+        name="top_clip",
     )
-    hold_down.visual(
-        Box((0.34, 0.012, 0.11)),
-        origin=Origin(xyz=(0.0, 0.024, -0.074)),
-        material=iron,
-        name="clamp_bar",
+    canvas_rail.visual(
+        Box((0.242, 0.052, 0.016)),
+        origin=Origin(xyz=(0.0, 0.045, 0.094)),
+        material=ash,
+        name="rail_shelf",
     )
-    hold_down.visual(
-        Box((0.03, 0.018, 0.034)),
-        origin=Origin(xyz=(-0.152, 0.012, -0.010)),
-        material=iron,
-        name="left_hook_cheek",
+    canvas_rail.visual(
+        Box((0.242, 0.014, 0.026)),
+        origin=Origin(xyz=(0.0, 0.064, 0.099)),
+        material=walnut,
+        name="rail_lip",
     )
-    hold_down.visual(
-        Box((0.03, 0.018, 0.034)),
-        origin=Origin(xyz=(0.152, 0.012, -0.010)),
-        material=iron,
-        name="right_hook_cheek",
+    canvas_rail.inertial = Inertial.from_geometry(
+        Box((0.242, 0.064, 0.780)),
+        mass=1.0,
+        origin=Origin(xyz=(0.0, 0.032, 0.390)),
     )
-
     model.articulation(
-        "rear_support_hinge",
-        ArticulationType.REVOLUTE,
-        parent=front_frame,
-        child=rear_support,
-        origin=Origin(xyz=(0.0, -0.036, 1.47)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=20.0, velocity=1.0, lower=0.0, upper=0.10),
+        "canvas_rail_slide",
+        ArticulationType.PRISMATIC,
+        parent=frame,
+        child=canvas_rail,
+        origin=Origin(xyz=(0.0, 0.0, 0.475)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(
+            effort=18.0,
+            velocity=0.35,
+            lower=0.0,
+            upper=0.24,
+        ),
+    )
+
+    display_ledge = model.part("display_ledge")
+    display_ledge.visual(
+        Cylinder(radius=0.0065, length=0.148),
+        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=steel,
+        name="hinge_barrel",
+    )
+    display_ledge.visual(
+        Box((0.170, 0.012, 0.012)),
+        origin=Origin(xyz=(0.0, 0.012, -0.006)),
+        material=walnut,
+        name="tray_back",
+    )
+    display_ledge.visual(
+        Box((0.282, 0.056, 0.014)),
+        origin=Origin(xyz=(0.0, 0.036, -0.010)),
+        material=ash,
+        name="tray",
+    )
+    display_ledge.visual(
+        Box((0.282, 0.012, 0.022)),
+        origin=Origin(xyz=(0.0, 0.062, 0.002)),
+        material=walnut,
+        name="tray_lip",
+    )
+    display_ledge.inertial = Inertial.from_geometry(
+        Box((0.282, 0.060, 0.030)),
+        mass=0.55,
+        origin=Origin(xyz=(0.0, 0.036, -0.004)),
     )
     model.articulation(
-        "ledge_hinge",
+        "display_ledge_hinge",
         ArticulationType.REVOLUTE,
-        parent=front_frame,
-        child=ledge,
-        origin=Origin(xyz=(0.0, 0.014, 0.17)),
+        parent=frame,
+        child=display_ledge,
+        origin=Origin(xyz=(0.0, 0.028, 0.395)),
         axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=15.0, velocity=1.5, lower=0.0, upper=1.10),
-    )
-    model.articulation(
-        "hold_down_hinge",
-        ArticulationType.REVOLUTE,
-        parent=front_frame,
-        child=hold_down,
-        origin=Origin(xyz=(0.0, 0.012, 1.496)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=8.0, velocity=1.5, lower=0.0, upper=0.60),
+        motion_limits=MotionLimits(
+            effort=8.0,
+            velocity=1.0,
+            lower=-1.0,
+            upper=0.0,
+        ),
     )
 
     return model
@@ -204,171 +300,238 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    front_frame = object_model.get_part("front_frame")
-    rear_support = object_model.get_part("rear_support")
-    ledge = object_model.get_part("display_ledge")
-    hold_down = object_model.get_part("hold_down_bar")
+    frame = object_model.get_part("frame")
+    front_leg = object_model.get_part("front_leg")
+    rear_left_leg = object_model.get_part("rear_left_leg")
+    rear_right_leg = object_model.get_part("rear_right_leg")
+    canvas_rail = object_model.get_part("canvas_rail")
+    display_ledge = object_model.get_part("display_ledge")
 
-    rear_support_hinge = object_model.get_articulation("rear_support_hinge")
-    ledge_hinge = object_model.get_articulation("ledge_hinge")
-    hold_down_hinge = object_model.get_articulation("hold_down_hinge")
+    front_leg_hinge = object_model.get_articulation("front_leg_hinge")
+    rear_left_leg_hinge = object_model.get_articulation("rear_left_leg_hinge")
+    rear_right_leg_hinge = object_model.get_articulation("rear_right_leg_hinge")
+    canvas_rail_slide = object_model.get_articulation("canvas_rail_slide")
+    display_ledge_hinge = object_model.get_articulation("display_ledge_hinge")
 
-    left_stile = front_frame.get_visual("left_stile")
-    right_stile = front_frame.get_visual("right_stile")
-    top_rail = front_frame.get_visual("top_rail")
-    bottom_crossbar = front_frame.get_visual("bottom_crossbar")
-    center_mast = front_frame.get_visual("center_mast")
-    left_pivot_block = front_frame.get_visual("left_pivot_block")
-    right_pivot_block = front_frame.get_visual("right_pivot_block")
-    pivot_pin = front_frame.get_visual("pivot_pin")
-    upper_anchor = front_frame.get_visual("upper_backbar_anchor")
-    lower_anchor = front_frame.get_visual("lower_backbar_anchor")
+    mast = frame.get_visual("mast")
+    lower_block = frame.get_visual("lower_block")
+    ledge_mount = frame.get_visual("ledge_mount")
+    ledge_pin = frame.get_visual("ledge_pin")
+    front_hinge_tab = frame.get_visual("front_hinge_tab")
+    rear_left_hinge_tab = frame.get_visual("rear_left_hinge_tab")
+    rear_right_hinge_tab = frame.get_visual("rear_right_hinge_tab")
 
-    left_pivot_ear = rear_support.get_visual("left_pivot_ear")
-    right_pivot_ear = rear_support.get_visual("right_pivot_ear")
-    rear_top_yoke = rear_support.get_visual("rear_top_yoke")
-    rear_stile = rear_support.get_visual("rear_stile")
-    upper_backbar = rear_support.get_visual("upper_backbar")
-    lower_backbar = rear_support.get_visual("lower_backbar")
+    front_hinge_cap = front_leg.get_visual("hinge_cap")
+    rear_left_hinge_cap = rear_left_leg.get_visual("hinge_cap")
+    rear_right_hinge_cap = rear_right_leg.get_visual("hinge_cap")
+    front_foot = front_leg.get_visual("foot")
+    rear_left_foot = rear_left_leg.get_visual("foot")
+    rear_right_foot = rear_right_leg.get_visual("foot")
 
-    ledge_hinge_leaf = ledge.get_visual("ledge_hinge_leaf")
-    ledge_board = ledge.get_visual("ledge_board")
-    ledge_lip = ledge.get_visual("ledge_lip")
+    rail_strip = canvas_rail.get_visual("rail_strip")
+    rail_shelf = canvas_rail.get_visual("rail_shelf")
+    top_clip = canvas_rail.get_visual("top_clip")
 
-    clamp_saddle = hold_down.get_visual("clamp_saddle")
-    clamp_bar = hold_down.get_visual("clamp_bar")
-    left_hook_cheek = hold_down.get_visual("left_hook_cheek")
-    right_hook_cheek = hold_down.get_visual("right_hook_cheek")
+    hinge_barrel = display_ledge.get_visual("hinge_barrel")
+    tray = display_ledge.get_visual("tray")
+    tray_lip = display_ledge.get_visual("tray_lip")
 
     ctx.allow_overlap(
-        rear_support,
-        front_frame,
-        reason="rear pivot ears and back-bar ends seat into the front anchor hardware around the shared top pin",
+        frame,
+        front_leg,
+        reason="Front leg hinge cap wraps a crown pin with localized hinge hardware overlap.",
+        elem_a=front_hinge_tab,
+        elem_b=front_hinge_cap,
     )
     ctx.allow_overlap(
-        ledge,
-        front_frame,
-        reason="the fold-out ledge hinge leaf nests directly against the front crossbar at the pivot",
+        frame,
+        rear_left_leg,
+        reason="Rear left leg hinge cap wraps a crown pin with localized hinge hardware overlap.",
+        elem_a=rear_left_hinge_tab,
+        elem_b=rear_left_hinge_cap,
     )
     ctx.allow_overlap(
-        hold_down,
-        front_frame,
-        reason="the hold-down clamp cap wraps over the top rail while pivoting on that rail",
+        frame,
+        rear_right_leg,
+        reason="Rear right leg hinge cap wraps a crown pin with localized hinge hardware overlap.",
+        elem_a=rear_right_hinge_tab,
+        elem_b=rear_right_hinge_cap,
+    )
+    ctx.allow_overlap(
+        frame,
+        display_ledge,
+        reason="Display ledge hinge barrel rotates around a steel pin; the pin volume stands in for unmodeled bore clearance.",
+        elem_a=ledge_pin,
+        elem_b=hinge_barrel,
     )
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=96)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.expect_contact(frame, front_leg, elem_a=front_hinge_tab, elem_b=front_hinge_cap)
+    ctx.expect_contact(frame, rear_left_leg, elem_a=rear_left_hinge_tab, elem_b=rear_left_hinge_cap)
+    ctx.expect_contact(frame, rear_right_leg, elem_a=rear_right_hinge_tab, elem_b=rear_right_hinge_cap)
 
     ctx.expect_gap(
-        front_frame,
-        front_frame,
-        axis="x",
-        positive_elem=right_stile,
-        negative_elem=left_stile,
-        min_gap=0.30,
-        name="front stiles stand as a wide pair",
-    )
-    ctx.expect_contact(front_frame, front_frame, elem_a=top_rail, elem_b=left_stile)
-    ctx.expect_contact(front_frame, front_frame, elem_a=top_rail, elem_b=right_stile)
-    ctx.expect_contact(front_frame, front_frame, elem_a=bottom_crossbar, elem_b=left_stile)
-    ctx.expect_contact(front_frame, front_frame, elem_a=bottom_crossbar, elem_b=right_stile)
-
-    ctx.expect_contact(rear_support, front_frame, elem_a=left_pivot_ear, elem_b=left_pivot_block)
-    ctx.expect_contact(rear_support, front_frame, elem_a=right_pivot_ear, elem_b=right_pivot_block)
-    ctx.expect_contact(rear_support, front_frame, elem_a=rear_top_yoke, elem_b=pivot_pin)
-    ctx.expect_contact(rear_support, front_frame, elem_a=upper_backbar, elem_b=upper_anchor)
-    ctx.expect_contact(rear_support, front_frame, elem_a=lower_backbar, elem_b=lower_anchor)
-    ctx.expect_gap(
-        front_frame,
-        rear_support,
+        canvas_rail,
+        frame,
         axis="y",
-        positive_elem=center_mast,
-        negative_elem=rear_stile,
-        min_gap=0.01,
-        name="rear stile sits behind the front frame",
-    )
-
-    ctx.expect_contact(ledge, front_frame, elem_a=ledge_hinge_leaf, elem_b=bottom_crossbar)
-    ctx.expect_overlap(ledge, front_frame, axes="x", min_overlap=0.38, elem_a=ledge_board, elem_b=bottom_crossbar)
-    ctx.expect_gap(
-        ledge,
-        front_frame,
-        axis="y",
-        positive_elem=ledge_lip,
-        negative_elem=bottom_crossbar,
-        min_gap=0.15,
-        name="display ledge projects forward from the bottom rail",
-    )
-
-    ctx.expect_contact(hold_down, front_frame, elem_a=clamp_saddle, elem_b=top_rail)
-    ctx.expect_within(hold_down, front_frame, axes="x", inner_elem=clamp_bar, outer_elem=top_rail)
-    ctx.expect_gap(
-        hold_down,
-        front_frame,
-        axis="y",
-        positive_elem=left_hook_cheek,
-        negative_elem=top_rail,
-        max_gap=0.006,
-        max_penetration=0.001,
-        name="left clamp cheek hooks over the top rail",
-    )
-    ctx.expect_gap(
-        hold_down,
-        front_frame,
-        axis="y",
-        positive_elem=right_hook_cheek,
-        negative_elem=top_rail,
-        max_gap=0.006,
-        max_penetration=0.001,
-        name="right clamp cheek hooks over the top rail",
-    )
-    ctx.expect_overlap(hold_down, front_frame, axes="x", min_overlap=0.28, elem_a=clamp_bar, elem_b=top_rail)
-    ctx.expect_gap(
-        hold_down,
-        front_frame,
-        axis="y",
-        positive_elem=clamp_bar,
-        negative_elem=top_rail,
-        max_gap=0.02,
+        max_gap=0.001,
         max_penetration=0.0,
-        name="clamp bar seats against the front of the top rail",
+        positive_elem=rail_strip,
+        negative_elem=mast,
+    )
+    ctx.expect_within(
+        canvas_rail,
+        frame,
+        axes="x",
+        inner_elem=rail_strip,
+        outer_elem=mast,
+        margin=0.008,
+    )
+    ctx.expect_overlap(canvas_rail, frame, axes="x", elem_a=rail_strip, elem_b=mast, min_overlap=0.040)
+    ctx.expect_origin_distance(canvas_rail, frame, axes="x", max_dist=0.005)
+
+    ctx.expect_overlap(frame, display_ledge, axes="x", elem_a=ledge_pin, elem_b=hinge_barrel, min_overlap=0.14)
+    ctx.expect_origin_distance(display_ledge, frame, axes="x", max_dist=0.01)
+    ctx.expect_gap(
+        canvas_rail,
+        display_ledge,
+        axis="z",
+        min_gap=0.10,
+        positive_elem=rail_shelf,
+        negative_elem=tray,
+    )
+    ctx.expect_overlap(canvas_rail, display_ledge, axes="x", min_overlap=0.16)
+    ctx.expect_within(
+        display_ledge,
+        frame,
+        axes="x",
+        inner_elem=hinge_barrel,
+        outer_elem=lower_block,
+        margin=0.02,
     )
 
-    with ctx.pose({ledge_hinge: 1.05}):
-        ctx.expect_gap(
-            ledge,
-            front_frame,
-            axis="z",
-            positive_elem=ledge_lip,
-            negative_elem=bottom_crossbar,
-            min_gap=0.03,
-            name="ledge lip lifts above the lower rail when folded up",
-        )
-        ctx.expect_overlap(ledge, front_frame, axes="x", min_overlap=0.38, elem_a=ledge_board, elem_b=bottom_crossbar)
+    ctx.check(
+        "leg_hinges_are_revolute",
+        (
+            front_leg_hinge.articulation_type == ArticulationType.REVOLUTE
+            and rear_left_leg_hinge.articulation_type == ArticulationType.REVOLUTE
+            and rear_right_leg_hinge.articulation_type == ArticulationType.REVOLUTE
+        ),
+        "All three legs should articulate as crown-mounted revolute hinges.",
+    )
+    ctx.check(
+        "canvas_rail_is_prismatic_vertical",
+        canvas_rail_slide.articulation_type == ArticulationType.PRISMATIC
+        and tuple(canvas_rail_slide.axis) == (0.0, 0.0, 1.0),
+        "Canvas rail should move on a vertical prismatic joint.",
+    )
+    ctx.check(
+        "display_ledge_is_revolute",
+        display_ledge_hinge.articulation_type == ArticulationType.REVOLUTE
+        and tuple(display_ledge_hinge.axis) == (1.0, 0.0, 0.0),
+        "Display ledge should fold on a horizontal revolute hinge.",
+    )
 
-    with ctx.pose({hold_down_hinge: 0.55}):
+    with ctx.pose({canvas_rail_slide: 0.24}):
         ctx.expect_gap(
-            hold_down,
-            front_frame,
+            canvas_rail,
+            frame,
             axis="y",
-            positive_elem=clamp_bar,
-            negative_elem=top_rail,
-            min_gap=0.020,
-            name="hold-down bar swings clear to release a canvas",
+            max_gap=0.001,
+            max_penetration=0.0,
+            positive_elem=rail_strip,
+            negative_elem=mast,
+        )
+        ctx.expect_gap(
+            canvas_rail,
+            display_ledge,
+            axis="z",
+            min_gap=0.22,
+            positive_elem=rail_shelf,
+            negative_elem=tray,
+        )
+        raised_shelf_aabb = ctx.part_element_world_aabb(canvas_rail, elem=rail_shelf)
+        raised_clip_aabb = ctx.part_element_world_aabb(canvas_rail, elem=top_clip)
+        ctx.check(
+            "canvas_rail_raises_supports",
+            raised_shelf_aabb is not None
+            and raised_clip_aabb is not None
+            and raised_shelf_aabb[0][2] > 0.80
+            and raised_clip_aabb[1][2] > 1.44,
+            "Raised prismatic rail should lift both the support shelf and top clip.",
         )
 
-    with ctx.pose({rear_support_hinge: 0.08}):
-        ctx.expect_contact(rear_support, front_frame, elem_a=left_pivot_ear, elem_b=left_pivot_block)
-        ctx.expect_contact(rear_support, front_frame, elem_a=right_pivot_ear, elem_b=right_pivot_block)
+    with ctx.pose({display_ledge_hinge: -1.05}):
+        ctx.expect_overlap(frame, display_ledge, axes="x", elem_a=ledge_pin, elem_b=hinge_barrel, min_overlap=0.14)
+        folded_tray_aabb = ctx.part_element_world_aabb(display_ledge, elem=tray)
+        ctx.check(
+            "display_ledge_folds_down",
+            folded_tray_aabb is not None and folded_tray_aabb[1][2] < 0.40,
+            "Folded display ledge should swing below its hinge line.",
+        )
+
+    with ctx.pose(
+        {
+            front_leg_hinge: 0.28,
+            rear_left_leg_hinge: -0.28,
+            rear_right_leg_hinge: -0.28,
+        }
+    ):
+        ctx.expect_contact(frame, front_leg, elem_a=front_hinge_tab, elem_b=front_hinge_cap)
+        ctx.expect_contact(frame, rear_left_leg, elem_a=rear_left_hinge_tab, elem_b=rear_left_hinge_cap)
+        ctx.expect_contact(frame, rear_right_leg, elem_a=rear_right_hinge_tab, elem_b=rear_right_hinge_cap)
+        front_foot_aabb = ctx.part_element_world_aabb(front_leg, elem=front_foot)
+        rear_left_foot_aabb = ctx.part_element_world_aabb(rear_left_leg, elem=rear_left_foot)
+        rear_right_foot_aabb = ctx.part_element_world_aabb(rear_right_leg, elem=rear_right_foot)
+        ctx.check(
+            "tripod_footprint_reads_as_tripod",
+            front_foot_aabb is not None
+            and rear_left_foot_aabb is not None
+            and rear_right_foot_aabb is not None
+            and front_foot_aabb[0][1] > rear_left_foot_aabb[1][1] + 0.45
+            and rear_left_foot_aabb[1][0] < -0.22
+            and rear_right_foot_aabb[0][0] > 0.22,
+            "Tripod should stand with one forward foot and two splayed rear feet.",
+        )
+
+    frame_aabb = ctx.part_world_aabb(frame)
+    tray_aabb = ctx.part_element_world_aabb(display_ledge, elem=tray)
+    tray_lip_aabb = ctx.part_element_world_aabb(display_ledge, elem=tray_lip)
+    ctx.check(
+        "overall_height_is_field_easel_scale",
+        frame_aabb is not None and (frame_aabb[1][2] - frame_aabb[0][2]) > 1.45,
+        "Field easel should be near human standing height.",
+    )
+    ctx.check(
+        "display_ledge_has_retaining_lip",
+        tray_aabb is not None
+        and tray_lip_aabb is not None
+        and tray_lip_aabb[1][2] > tray_aabb[1][2] + 0.005,
+        "Display ledge should include a raised retaining lip.",
+    )
+
+    for joint in (
+        front_leg_hinge,
+        rear_left_leg_hinge,
+        rear_right_leg_hinge,
+        canvas_rail_slide,
+        display_ledge_hinge,
+    ):
+        limits = joint.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            continue
+        with ctx.pose({joint: limits.lower}):
+            ctx.fail_if_isolated_parts(name=f"{joint.name}_lower_no_floating")
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{joint.name}_lower_no_unintended_overlap")
+        with ctx.pose({joint: limits.upper}):
+            ctx.fail_if_isolated_parts(name=f"{joint.name}_upper_no_floating")
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{joint.name}_upper_no_unintended_overlap")
 
     return ctx.report()
 

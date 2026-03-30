@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
@@ -19,242 +21,394 @@ from sdk import (
 )
 
 ASSETS = AssetContext.from_script(__file__)
-HERE = ASSETS.asset_root
+HERE = Path(__file__).resolve().parent
+
+BASE_DECK_HEIGHT = 0.14
+BALLAST_PACK_HEIGHT = 0.06
+SOCKET_HEIGHT = 0.18
+
+LOWER_STAGE_LENGTH = 1.16
+UPPER_STAGE_LENGTH = 0.90
+LOWER_TO_UPPER_START = 0.36
+MAST_EXTENSION = 0.42
+
+SOCKET_OUTER = 0.18
+SOCKET_INNER = 0.148
+LOWER_STAGE_OUTER = 0.14
+LOWER_STAGE_INNER = 0.108
+UPPER_STAGE_OUTER = 0.10
+UPPER_STAGE_INNER = 0.072
+UPPER_TOP_CAP_THICKNESS = 0.014
+
+LOWER_GUIDE_HEIGHT = 0.12
+UPPER_GUIDE_HEIGHT = 0.14
+
+BRACKET_AXIS_HEIGHT = 0.17
+BRACKET_CHEEK_CENTER_Y = 0.170
+BRACKET_CHEEK_THICKNESS = 0.012
+
+TRUNNION_RADIUS = 0.016
+TRUNNION_LENGTH = 0.032
+TRUNNION_CENTER_Y = 0.148
+
+HEAD_TILT_LOWER = -0.60
+HEAD_TILT_UPPER = 0.70
+
+
+def _add_square_tube(
+    part,
+    *,
+    outer: float,
+    inner: float,
+    height: float,
+    material,
+    name_prefix: str,
+    bottom_z: float = 0.0,
+) -> None:
+    wall = (outer - inner) * 0.5
+    side_center = inner * 0.5 + wall * 0.5
+    mid_z = bottom_z + height * 0.5
+
+    part.visual(
+        Box((wall, outer, height)),
+        origin=Origin(xyz=(side_center, 0.0, mid_z)),
+        material=material,
+        name=f"{name_prefix}_right_wall",
+    )
+    part.visual(
+        Box((wall, outer, height)),
+        origin=Origin(xyz=(-side_center, 0.0, mid_z)),
+        material=material,
+        name=f"{name_prefix}_left_wall",
+    )
+    part.visual(
+        Box((outer, wall, height)),
+        origin=Origin(xyz=(0.0, side_center, mid_z)),
+        material=material,
+        name=f"{name_prefix}_front_wall",
+    )
+    part.visual(
+        Box((outer, wall, height)),
+        origin=Origin(xyz=(0.0, -side_center, mid_z)),
+        material=material,
+        name=f"{name_prefix}_rear_wall",
+    )
+
+
+def _add_guide_pads(
+    part,
+    *,
+    carrier_outer: float,
+    target_inner: float,
+    height: float,
+    material,
+    name_prefix: str,
+    bottom_z: float = 0.0,
+) -> None:
+    pad = (target_inner - carrier_outer) * 0.5
+    if pad <= 0.0:
+        return
+
+    side_center = carrier_outer * 0.5 + pad * 0.5
+    mid_z = bottom_z + height * 0.5
+    span = carrier_outer * 0.72
+
+    part.visual(
+        Box((pad, span, height)),
+        origin=Origin(xyz=(side_center, 0.0, mid_z)),
+        material=material,
+        name=f"{name_prefix}_right_pad",
+    )
+    part.visual(
+        Box((pad, span, height)),
+        origin=Origin(xyz=(-side_center, 0.0, mid_z)),
+        material=material,
+        name=f"{name_prefix}_left_pad",
+    )
+    part.visual(
+        Box((span, pad, height)),
+        origin=Origin(xyz=(0.0, side_center, mid_z)),
+        material=material,
+        name=f"{name_prefix}_front_pad",
+    )
+    part.visual(
+        Box((span, pad, height)),
+        origin=Origin(xyz=(0.0, -side_center, mid_z)),
+        material=material,
+        name=f"{name_prefix}_rear_pad",
+    )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="rooftop_floodlight", assets=ASSETS)
+    model = ArticulatedObject(name="telescoping_floodlight_mast", assets=ASSETS)
 
-    painted_steel = model.material("painted_steel", rgba=(0.34, 0.37, 0.39, 1.0))
-    dark_steel = model.material("dark_steel", rgba=(0.18, 0.19, 0.20, 1.0))
-    galvanized = model.material("galvanized", rgba=(0.56, 0.58, 0.60, 1.0))
-    glass = model.material("glass", rgba=(0.74, 0.84, 0.92, 0.32))
-    black = model.material("black", rgba=(0.10, 0.10, 0.11, 1.0))
+    ballast = model.material("ballast", rgba=(0.25, 0.27, 0.29, 1.0))
+    ballast_dark = model.material("ballast_dark", rgba=(0.18, 0.19, 0.21, 1.0))
+    steel = model.material("steel", rgba=(0.63, 0.66, 0.70, 1.0))
+    painted_steel = model.material("painted_steel", rgba=(0.84, 0.84, 0.82, 1.0))
+    head_housing = model.material("head_housing", rgba=(0.16, 0.17, 0.18, 1.0))
+    lens_glass = model.material("lens_glass", rgba=(0.77, 0.84, 0.90, 0.55))
 
     base = model.part("base")
     base.visual(
-        Box((0.180, 0.140, 0.008)),
-        origin=Origin(xyz=(0.0, 0.0, 0.004)),
-        material=galvanized,
+        Box((1.02, 0.70, BASE_DECK_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, BASE_DECK_HEIGHT * 0.5)),
+        material=ballast,
+        name="deck",
+    )
+    base.visual(
+        Box((0.30, 0.26, BALLAST_PACK_HEIGHT)),
+        origin=Origin(
+            xyz=(-0.27, 0.0, BASE_DECK_HEIGHT + BALLAST_PACK_HEIGHT * 0.5)
+        ),
+        material=ballast_dark,
+        name="left_ballast_pack",
+    )
+    base.visual(
+        Box((0.30, 0.26, BALLAST_PACK_HEIGHT)),
+        origin=Origin(
+            xyz=(0.27, 0.0, BASE_DECK_HEIGHT + BALLAST_PACK_HEIGHT * 0.5)
+        ),
+        material=ballast_dark,
+        name="right_ballast_pack",
+    )
+    base.visual(
+        Box((0.09, 0.09, 0.04)),
+        origin=Origin(xyz=(0.0, 0.0, BASE_DECK_HEIGHT + 0.02)),
+        material=ballast_dark,
+        name="mast_plinth",
+    )
+    _add_square_tube(
+        base,
+        outer=SOCKET_OUTER,
+        inner=SOCKET_INNER,
+        height=SOCKET_HEIGHT,
+        material=painted_steel,
+        name_prefix="mast_socket",
+        bottom_z=BASE_DECK_HEIGHT,
+    )
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            base.visual(
+                Box((0.10, 0.07, 0.02)),
+                origin=Origin(xyz=(0.35 * x_sign, 0.24 * y_sign, 0.01)),
+                material=ballast_dark,
+            )
+    base.inertial = Inertial.from_geometry(
+        Box((1.02, 0.70, 0.22)),
+        mass=72.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.11)),
+    )
+
+    lower_stage = model.part("lower_stage")
+    _add_square_tube(
+        lower_stage,
+        outer=LOWER_STAGE_OUTER,
+        inner=LOWER_STAGE_INNER,
+        height=LOWER_STAGE_LENGTH,
+        material=painted_steel,
+        name_prefix="lower_shell",
+    )
+    _add_guide_pads(
+        lower_stage,
+        carrier_outer=LOWER_STAGE_OUTER,
+        target_inner=SOCKET_INNER,
+        height=LOWER_GUIDE_HEIGHT,
+        material=steel,
+        name_prefix="socket_guides",
+        bottom_z=0.02,
+    )
+    lower_stage.inertial = Inertial.from_geometry(
+        Box((SOCKET_INNER, SOCKET_INNER, LOWER_STAGE_LENGTH)),
+        mass=9.0,
+        origin=Origin(xyz=(0.0, 0.0, LOWER_STAGE_LENGTH * 0.5)),
+    )
+
+    upper_stage = model.part("upper_stage")
+    _add_square_tube(
+        upper_stage,
+        outer=UPPER_STAGE_OUTER,
+        inner=UPPER_STAGE_INNER,
+        height=UPPER_STAGE_LENGTH,
+        material=steel,
+        name_prefix="upper_shell",
+    )
+    _add_guide_pads(
+        upper_stage,
+        carrier_outer=UPPER_STAGE_OUTER,
+        target_inner=LOWER_STAGE_INNER,
+        height=UPPER_GUIDE_HEIGHT,
+        material=steel,
+        name_prefix="stage_guides",
+        bottom_z=0.02,
+    )
+    upper_stage.visual(
+        Box((0.14, 0.14, UPPER_TOP_CAP_THICKNESS)),
+        origin=Origin(
+            xyz=(0.0, 0.0, UPPER_STAGE_LENGTH + UPPER_TOP_CAP_THICKNESS * 0.5)
+        ),
+        material=painted_steel,
+        name="top_cap",
+    )
+    upper_stage.inertial = Inertial.from_geometry(
+        Box((0.14, 0.14, UPPER_STAGE_LENGTH + UPPER_TOP_CAP_THICKNESS)),
+        mass=6.0,
+        origin=Origin(
+            xyz=(0.0, 0.0, (UPPER_STAGE_LENGTH + UPPER_TOP_CAP_THICKNESS) * 0.5)
+        ),
+    )
+
+    bracket = model.part("bracket")
+    bracket.visual(
+        Box((0.16, 0.14, 0.016)),
+        origin=Origin(xyz=(-0.02, 0.0, 0.008)),
+        material=head_housing,
         name="base_plate",
     )
-    base.visual(
-        Box((0.080, 0.060, 0.020)),
-        origin=Origin(xyz=(0.0, 0.0, 0.018)),
+    bracket.visual(
+        Box((0.032, 0.110, 0.10)),
+        origin=Origin(xyz=(-0.074, -0.120, 0.066)),
         material=painted_steel,
-        name="pedestal_block",
-    )
-    base.visual(
-        Cylinder(radius=0.036, length=0.030),
-        origin=Origin(xyz=(0.0, 0.0, 0.033)),
-        material=dark_steel,
-        name="bearing_collar",
-    )
-    base.visual(
-        Box((0.020, 0.020, 0.010)),
-        origin=Origin(xyz=(0.060, 0.045, 0.009)),
-        material=galvanized,
-        name="front_right_anchor",
-    )
-    base.visual(
-        Box((0.020, 0.020, 0.010)),
-        origin=Origin(xyz=(-0.060, 0.045, 0.009)),
-        material=galvanized,
-        name="front_left_anchor",
-    )
-    base.visual(
-        Box((0.020, 0.020, 0.010)),
-        origin=Origin(xyz=(0.060, -0.045, 0.009)),
-        material=galvanized,
-        name="rear_right_anchor",
-    )
-    base.visual(
-        Box((0.020, 0.020, 0.010)),
-        origin=Origin(xyz=(-0.060, -0.045, 0.009)),
-        material=galvanized,
-        name="rear_left_anchor",
-    )
-    base.inertial = Inertial.from_geometry(
-        Box((0.180, 0.140, 0.060)),
-        mass=7.5,
-        origin=Origin(xyz=(0.0, 0.0, 0.030)),
-    )
-
-    head = model.part("swivel_head")
-    head.visual(
-        Cylinder(radius=0.028, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, 0.003)),
-        material=galvanized,
-        name="swivel_flange",
-    )
-    head.visual(
-        Cylinder(radius=0.016, length=0.132),
-        origin=Origin(xyz=(0.0, 0.0, 0.069)),
-        material=painted_steel,
-        name="column_shaft",
-    )
-    head.visual(
-        Box((0.042, 0.042, 0.018)),
-        origin=Origin(xyz=(0.0, 0.0, 0.138)),
-        material=dark_steel,
-        name="column_head",
-    )
-    head.visual(
-        Box((0.042, 0.012, 0.050)),
-        origin=Origin(xyz=(0.016, 0.0, 0.158)),
-        material=dark_steel,
-        name="t_bracket_web",
-    )
-    head.visual(
-        Box((0.030, 0.006, 0.040)),
-        origin=Origin(xyz=(0.030, 0.016, 0.153), rpy=(0.0, math.pi / 4.0, 0.0)),
-        material=dark_steel,
         name="left_gusset",
     )
-    head.visual(
-        Box((0.030, 0.006, 0.040)),
-        origin=Origin(xyz=(0.030, -0.016, 0.153), rpy=(0.0, math.pi / 4.0, 0.0)),
-        material=dark_steel,
+    bracket.visual(
+        Box((0.032, 0.110, 0.10)),
+        origin=Origin(xyz=(-0.074, 0.120, 0.066)),
+        material=painted_steel,
         name="right_gusset",
     )
-    head.visual(
-        Cylinder(radius=0.011, length=0.152),
-        origin=Origin(xyz=(0.081, 0.0, 0.168), rpy=(0.0, math.pi / 2.0, 0.0)),
+    bracket.visual(
+        Box((0.012, 0.34, 0.014)),
+        origin=Origin(xyz=(-0.054, 0.0, 0.301)),
         material=painted_steel,
-        name="arm_tube",
+        name="top_tie",
     )
-    head.visual(
-        Box((0.022, 0.122, 0.022)),
-        origin=Origin(xyz=(0.128, 0.0, 0.168)),
-        material=dark_steel,
-        name="yoke_crown",
-    )
-    head.visual(
-        Box((0.074, 0.004, 0.076)),
-        origin=Origin(xyz=(0.168, -0.059, 0.122)),
+    bracket.visual(
+        Box((0.080, BRACKET_CHEEK_THICKNESS, 0.28)),
+        origin=Origin(xyz=(-0.020, -BRACKET_CHEEK_CENTER_Y, BRACKET_AXIS_HEIGHT)),
         material=painted_steel,
-        name="left_yoke_plate",
+        name="left_cheek",
     )
-    head.visual(
-        Box((0.074, 0.004, 0.076)),
-        origin=Origin(xyz=(0.168, 0.059, 0.122)),
+    bracket.visual(
+        Box((0.080, BRACKET_CHEEK_THICKNESS, 0.28)),
+        origin=Origin(xyz=(-0.020, BRACKET_CHEEK_CENTER_Y, BRACKET_AXIS_HEIGHT)),
         material=painted_steel,
-        name="right_yoke_plate",
+        name="right_cheek",
     )
-    head.inertial = Inertial.from_geometry(
-        Box((0.230, 0.124, 0.184)),
-        mass=4.2,
-        origin=Origin(xyz=(0.115, 0.0, 0.092)),
+    bracket.inertial = Inertial.from_geometry(
+        Box((0.16, 0.36, 0.31)),
+        mass=3.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.155)),
     )
 
-    lamp = model.part("lamp")
-    lamp.visual(
-        Box((0.094, 0.102, 0.064)),
-        origin=Origin(xyz=(0.024, 0.0, 0.0)),
-        material=painted_steel,
-        name="housing_shell",
+    head = model.part("head")
+    head.visual(
+        Box((0.18, 0.24, 0.14)),
+        origin=Origin(xyz=(0.09, 0.0, 0.0)),
+        material=head_housing,
+        name="housing",
     )
-    lamp.visual(
-        Box((0.064, 0.086, 0.010)),
-        origin=Origin(xyz=(0.016, 0.0, 0.027)),
-        material=painted_steel,
-        name="top_taper",
-    )
-    lamp.visual(
-        Box((0.006, 0.096, 0.074)),
-        origin=Origin(xyz=(0.074, 0.0, 0.0)),
-        material=black,
-        name="front_bezel",
-    )
-    lamp.visual(
-        Box((0.003, 0.088, 0.064)),
-        origin=Origin(xyz=(0.078, 0.0, 0.0)),
-        material=glass,
-        name="lens",
-    )
-    lamp.visual(
-        Box((0.012, 0.060, 0.044)),
-        origin=Origin(xyz=(-0.030, 0.0, 0.0)),
-        material=dark_steel,
+    head.visual(
+        Box((0.032, 0.20, 0.10)),
+        origin=Origin(xyz=(0.016, 0.0, 0.0)),
+        material=head_housing,
         name="rear_cap",
     )
-    lamp.visual(
-        Box((0.024, 0.092, 0.004)),
-        origin=Origin(xyz=(0.060, 0.0, 0.031)),
+    head.visual(
+        Box((0.018, 0.22, 0.12)),
+        origin=Origin(xyz=(0.171, 0.0, 0.0)),
         material=painted_steel,
+        name="bezel",
+    )
+    head.visual(
+        Box((0.006, 0.19, 0.09)),
+        origin=Origin(xyz=(0.183, 0.0, 0.0)),
+        material=lens_glass,
+        name="lens",
+    )
+    head.visual(
+        Box((0.070, 0.24, 0.018)),
+        origin=Origin(xyz=(0.145, 0.0, 0.079)),
+        material=head_housing,
         name="visor",
     )
-    lamp.visual(
-        Box((0.022, 0.006, 0.034)),
-        origin=Origin(xyz=(0.0, -0.053, 0.0)),
-        material=dark_steel,
-        name="left_ear",
+    head.visual(
+        Box((0.030, 0.024, 0.060)),
+        origin=Origin(xyz=(0.008, -0.132, 0.0)),
+        material=head_housing,
+        name="left_boss",
     )
-    lamp.visual(
-        Box((0.022, 0.006, 0.034)),
-        origin=Origin(xyz=(0.0, 0.053, 0.0)),
-        material=dark_steel,
-        name="right_ear",
+    head.visual(
+        Box((0.030, 0.024, 0.060)),
+        origin=Origin(xyz=(0.008, 0.132, 0.0)),
+        material=head_housing,
+        name="right_boss",
     )
-    lamp.visual(
-        Cylinder(radius=0.005, length=0.010),
-        origin=Origin(xyz=(0.0, -0.058, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=galvanized,
-        name="left_pin_shank",
+    head.visual(
+        Cylinder(radius=TRUNNION_RADIUS, length=TRUNNION_LENGTH),
+        origin=Origin(
+            xyz=(0.0, -TRUNNION_CENTER_Y, 0.0),
+            rpy=(math.pi * 0.5, 0.0, 0.0),
+        ),
+        material=steel,
+        name="left_trunnion",
     )
-    lamp.visual(
-        Cylinder(radius=0.007, length=0.004),
-        origin=Origin(xyz=(0.0, -0.063, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=galvanized,
-        name="left_pin_cap",
+    head.visual(
+        Cylinder(radius=TRUNNION_RADIUS, length=TRUNNION_LENGTH),
+        origin=Origin(
+            xyz=(0.0, TRUNNION_CENTER_Y, 0.0),
+            rpy=(math.pi * 0.5, 0.0, 0.0),
+        ),
+        material=steel,
+        name="right_trunnion",
     )
-    lamp.visual(
-        Cylinder(radius=0.005, length=0.010),
-        origin=Origin(xyz=(0.0, 0.058, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=galvanized,
-        name="right_pin_shank",
-    )
-    lamp.visual(
-        Cylinder(radius=0.007, length=0.004),
-        origin=Origin(xyz=(0.0, 0.063, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=galvanized,
-        name="right_pin_cap",
-    )
-    lamp.visual(
-        Box((0.020, 0.054, 0.003)),
-        origin=Origin(xyz=(-0.024, 0.0, 0.021)),
-        material=dark_steel,
-        name="rear_fin_upper",
-    )
-    lamp.visual(
-        Box((0.018, 0.050, 0.003)),
-        origin=Origin(xyz=(-0.031, 0.0, 0.011)),
-        material=dark_steel,
-        name="rear_fin_lower",
-    )
-    lamp.inertial = Inertial.from_geometry(
-        Box((0.102, 0.112, 0.082)),
-        mass=3.6,
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+    head.inertial = Inertial.from_geometry(
+        Box((0.19, 0.32, 0.16)),
+        mass=4.2,
+        origin=Origin(xyz=(0.095, 0.0, 0.0)),
     )
 
     model.articulation(
-        "base_to_swivel",
-        ArticulationType.CONTINUOUS,
+        "base_to_lower_stage",
+        ArticulationType.FIXED,
         parent=base,
-        child=head,
-        origin=Origin(xyz=(0.0, 0.0, 0.048)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=16.0, velocity=1.8),
+        child=lower_stage,
+        origin=Origin(xyz=(0.0, 0.0, BASE_DECK_HEIGHT)),
     )
     model.articulation(
-        "yoke_to_lamp",
+        "lower_to_upper_stage",
+        ArticulationType.PRISMATIC,
+        parent=lower_stage,
+        child=upper_stage,
+        origin=Origin(xyz=(0.0, 0.0, LOWER_TO_UPPER_START)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(
+            effort=60.0,
+            velocity=0.25,
+            lower=0.0,
+            upper=MAST_EXTENSION,
+        ),
+    )
+    model.articulation(
+        "upper_stage_to_bracket",
+        ArticulationType.FIXED,
+        parent=upper_stage,
+        child=bracket,
+        origin=Origin(xyz=(0.0, 0.0, UPPER_STAGE_LENGTH + UPPER_TOP_CAP_THICKNESS)),
+    )
+    model.articulation(
+        "head_tilt",
         ArticulationType.REVOLUTE,
-        parent=head,
-        child=lamp,
-        origin=Origin(xyz=(0.182, 0.0, 0.122)),
+        parent=bracket,
+        child=head,
+        origin=Origin(xyz=(0.0, 0.0, BRACKET_AXIS_HEIGHT)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=10.0, velocity=1.6, lower=-0.70, upper=0.45),
+        motion_limits=MotionLimits(
+            effort=18.0,
+            velocity=1.6,
+            lower=HEAD_TILT_LOWER,
+            upper=HEAD_TILT_UPPER,
+        ),
     )
 
     return model
@@ -263,143 +417,149 @@ def build_object_model() -> ArticulatedObject:
 def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=HERE)
     base = object_model.get_part("base")
-    head = object_model.get_part("swivel_head")
-    lamp = object_model.get_part("lamp")
-    swivel = object_model.get_articulation("base_to_swivel")
-    tilt = object_model.get_articulation("yoke_to_lamp")
+    lower_stage = object_model.get_part("lower_stage")
+    upper_stage = object_model.get_part("upper_stage")
+    bracket = object_model.get_part("bracket")
+    head = object_model.get_part("head")
+    mast_extend = object_model.get_articulation("lower_to_upper_stage")
+    head_tilt = object_model.get_articulation("head_tilt")
 
-    base_plate = base.get_visual("base_plate")
-    bearing_collar = base.get_visual("bearing_collar")
-    swivel_flange = head.get_visual("swivel_flange")
-    column_shaft = head.get_visual("column_shaft")
-    column_head = head.get_visual("column_head")
-    t_bracket_web = head.get_visual("t_bracket_web")
-    arm_tube = head.get_visual("arm_tube")
-    yoke_crown = head.get_visual("yoke_crown")
-    left_yoke = head.get_visual("left_yoke_plate")
-    right_yoke = head.get_visual("right_yoke_plate")
-    housing_shell = lamp.get_visual("housing_shell")
-    lens = lamp.get_visual("lens")
-    left_ear = lamp.get_visual("left_ear")
-    right_ear = lamp.get_visual("right_ear")
-    left_pin_shank = lamp.get_visual("left_pin_shank")
-    left_pin_cap = lamp.get_visual("left_pin_cap")
-    right_pin_shank = lamp.get_visual("right_pin_shank")
-    right_pin_cap = lamp.get_visual("right_pin_cap")
+    deck = base.get_visual("deck")
+    socket_right_wall = base.get_visual("mast_socket_right_wall")
+    socket_front_wall = base.get_visual("mast_socket_front_wall")
+    lower_shell_right = lower_stage.get_visual("lower_shell_right_wall")
+    lower_shell_front = lower_stage.get_visual("lower_shell_front_wall")
+    lower_socket_right_pad = lower_stage.get_visual("socket_guides_right_pad")
+    lower_socket_front_pad = lower_stage.get_visual("socket_guides_front_pad")
+    upper_stage_right_pad = upper_stage.get_visual("stage_guides_right_pad")
+    upper_stage_front_pad = upper_stage.get_visual("stage_guides_front_pad")
+    top_cap = upper_stage.get_visual("top_cap")
+    base_plate = bracket.get_visual("base_plate")
+    left_cheek = bracket.get_visual("left_cheek")
+    right_cheek = bracket.get_visual("right_cheek")
+    housing = head.get_visual("housing")
+    lens = head.get_visual("lens")
+    left_trunnion = head.get_visual("left_trunnion")
+    right_trunnion = head.get_visual("right_trunnion")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts(max_pose_samples=12)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.045)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.expect_contact(head, base, elem_a=swivel_flange, elem_b=bearing_collar)
-    ctx.expect_overlap(head, base, axes="xy", min_overlap=0.02, elem_a=column_shaft, elem_b=bearing_collar)
-    ctx.expect_contact(head, head, elem_a=column_head, elem_b=t_bracket_web)
-    ctx.expect_contact(head, head, elem_a=t_bracket_web, elem_b=arm_tube)
-    ctx.expect_contact(head, head, elem_a=arm_tube, elem_b=yoke_crown)
-    ctx.expect_gap(
-        head,
+    ctx.expect_origin_distance(lower_stage, base, axes="xy", max_dist=0.002)
+    ctx.expect_contact(
+        lower_stage,
         base,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=swivel_flange,
-        negative_elem=bearing_collar,
+        elem_a=lower_socket_right_pad,
+        elem_b=socket_right_wall,
     )
-    ctx.expect_gap(
-        lamp,
-        head,
-        axis="x",
-        min_gap=0.05,
-        positive_elem=lens,
-        negative_elem=column_shaft,
-    )
-    ctx.expect_overlap(lamp, head, axes="xz", min_overlap=0.010, elem_a=left_ear, elem_b=left_yoke)
-    ctx.expect_overlap(lamp, head, axes="xz", min_overlap=0.010, elem_a=right_ear, elem_b=right_yoke)
-    ctx.expect_gap(
-        lamp,
-        head,
-        axis="y",
-        min_gap=0.0,
-        max_gap=0.002,
-        max_penetration=0.0,
-        positive_elem=left_ear,
-        negative_elem=left_yoke,
-    )
-    ctx.expect_gap(
-        head,
-        lamp,
-        axis="y",
-        min_gap=0.0,
-        max_gap=0.002,
-        max_penetration=0.0,
-        positive_elem=right_yoke,
-        negative_elem=right_ear,
-    )
-    ctx.expect_contact(lamp, head, elem_a=left_pin_cap, elem_b=left_yoke)
-    ctx.expect_contact(lamp, head, elem_a=right_pin_cap, elem_b=right_yoke)
-    ctx.expect_contact(lamp, head, elem_a=left_pin_shank, elem_b=left_yoke)
-    ctx.expect_contact(lamp, head, elem_a=right_pin_shank, elem_b=right_yoke)
-    ctx.expect_gap(
-        lamp,
+    ctx.expect_contact(
+        lower_stage,
         base,
-        axis="z",
-        min_gap=0.07,
-        positive_elem=housing_shell,
-        negative_elem=base_plate,
+        elem_a=lower_socket_front_pad,
+        elem_b=socket_front_wall,
     )
+    ctx.expect_origin_gap(
+        upper_stage,
+        lower_stage,
+        axis="z",
+        min_gap=LOWER_TO_UPPER_START - 0.001,
+        max_gap=LOWER_TO_UPPER_START + 0.001,
+    )
+    ctx.expect_origin_distance(upper_stage, lower_stage, axes="xy", max_dist=0.002)
+    ctx.expect_contact(
+        upper_stage,
+        lower_stage,
+        elem_a=upper_stage_right_pad,
+        elem_b=lower_shell_right,
+    )
+    ctx.expect_contact(
+        upper_stage,
+        lower_stage,
+        elem_a=upper_stage_front_pad,
+        elem_b=lower_shell_front,
+    )
+    ctx.expect_contact(bracket, upper_stage, elem_a=base_plate, elem_b=top_cap)
+    ctx.expect_gap(
+        head,
+        upper_stage,
+        axis="z",
+        min_gap=0.10,
+        positive_elem=housing,
+        negative_elem=top_cap,
+    )
+    ctx.expect_contact(head, bracket, elem_a=left_trunnion, elem_b=left_cheek)
+    ctx.expect_contact(head, bracket, elem_a=right_trunnion, elem_b=right_cheek)
 
-    with ctx.pose({tilt: 0.35}):
-        ctx.expect_overlap(lamp, head, axes="xz", min_overlap=0.010, elem_a=left_ear, elem_b=left_yoke)
-        ctx.expect_overlap(lamp, head, axes="xz", min_overlap=0.010, elem_a=right_ear, elem_b=right_yoke)
-        ctx.expect_contact(lamp, head, elem_a=left_pin_cap, elem_b=left_yoke)
-        ctx.expect_contact(lamp, head, elem_a=right_pin_cap, elem_b=right_yoke)
-        ctx.expect_contact(lamp, head, elem_a=left_pin_shank, elem_b=left_yoke)
-        ctx.expect_contact(lamp, head, elem_a=right_pin_shank, elem_b=right_yoke)
+    with ctx.pose({mast_extend: 0.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="mast_retracted_no_overlap")
+        ctx.fail_if_isolated_parts(name="mast_retracted_no_floating")
+
+    with ctx.pose({mast_extend: MAST_EXTENSION}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="mast_extended_no_overlap")
+        ctx.fail_if_isolated_parts(name="mast_extended_no_floating")
+        ctx.expect_origin_gap(
+            upper_stage,
+            lower_stage,
+            axis="z",
+            min_gap=LOWER_TO_UPPER_START + MAST_EXTENSION - 0.001,
+            max_gap=LOWER_TO_UPPER_START + MAST_EXTENSION + 0.001,
+        )
+        ctx.expect_origin_distance(upper_stage, lower_stage, axes="xy", max_dist=0.002)
+        ctx.expect_contact(
+            upper_stage,
+            lower_stage,
+            elem_a=upper_stage_right_pad,
+            elem_b=lower_shell_right,
+            name="extended_right_guide_contact",
+        )
+        ctx.expect_contact(
+            upper_stage,
+            lower_stage,
+            elem_a=upper_stage_front_pad,
+            elem_b=lower_shell_front,
+            name="extended_front_guide_contact",
+        )
         ctx.expect_gap(
-            lamp,
+            bracket,
             base,
             axis="z",
-            min_gap=0.08,
-            positive_elem=lens,
-            negative_elem=base_plate,
+            min_gap=1.45,
+            positive_elem=base_plate,
+            negative_elem=deck,
         )
-
-    with ctx.pose({tilt: -0.65}):
-        ctx.expect_overlap(lamp, head, axes="xz", min_overlap=0.008, elem_a=left_ear, elem_b=left_yoke)
-        ctx.expect_overlap(lamp, head, axes="xz", min_overlap=0.008, elem_a=right_ear, elem_b=right_yoke)
-        ctx.expect_contact(lamp, head, elem_a=left_pin_cap, elem_b=left_yoke)
-        ctx.expect_contact(lamp, head, elem_a=right_pin_cap, elem_b=right_yoke)
-        ctx.expect_contact(lamp, head, elem_a=left_pin_shank, elem_b=left_yoke)
-        ctx.expect_contact(lamp, head, elem_a=right_pin_shank, elem_b=right_yoke)
         ctx.expect_gap(
-            lamp,
-            base,
-            axis="z",
-            min_gap=0.04,
-            positive_elem=lens,
-            negative_elem=base_plate,
-        )
-
-    with ctx.pose({swivel: 1.15, tilt: 0.20}):
-        ctx.expect_contact(head, base, elem_a=swivel_flange, elem_b=bearing_collar)
-        ctx.expect_gap(
-            lamp,
             head,
-            axis="x",
-            min_gap=0.045,
+            base,
+            axis="z",
+            min_gap=1.60,
             positive_elem=lens,
-            negative_elem=column_shaft,
+            negative_elem=deck,
         )
-        ctx.expect_contact(lamp, head, elem_a=left_pin_cap, elem_b=left_yoke)
-        ctx.expect_contact(lamp, head, elem_a=right_pin_cap, elem_b=right_yoke)
+
+    with ctx.pose({head_tilt: HEAD_TILT_LOWER}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="head_tilt_down_no_overlap")
+        ctx.fail_if_isolated_parts(name="head_tilt_down_no_floating")
+        ctx.expect_contact(head, bracket, elem_a=left_trunnion, elem_b=left_cheek)
+        ctx.expect_contact(head, bracket, elem_a=right_trunnion, elem_b=right_cheek)
+        ctx.expect_gap(
+            head,
+            upper_stage,
+            axis="z",
+            min_gap=0.008,
+            positive_elem=housing,
+            negative_elem=top_cap,
+        )
+
+    with ctx.pose({head_tilt: HEAD_TILT_UPPER}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="head_tilt_up_no_overlap")
+        ctx.fail_if_isolated_parts(name="head_tilt_up_no_floating")
+        ctx.expect_contact(head, bracket, elem_a=left_trunnion, elem_b=left_cheek)
+        ctx.expect_contact(head, bracket, elem_a=right_trunnion, elem_b=right_cheek)
+
     return ctx.report()
 
 

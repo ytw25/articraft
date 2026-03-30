@@ -4,54 +4,12 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import os
-import pathlib
-
-_ORIG_GETCWD = os.getcwd
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _ORIG_GETCWD()
-    except FileNotFoundError:
-        try:
-            os.chdir("/")
-        except FileNotFoundError:
-            pass
-        return "/"
-
-
-os.getcwd = _safe_getcwd
-pathlib.os.getcwd = _safe_getcwd
-
-
-@classmethod
-def _safe_path_cwd(cls):
-    return cls("/")
-
-
-pathlib.Path.cwd = _safe_path_cwd
-pathlib.PosixPath.cwd = _safe_path_cwd
-
-_ORIG_PATH_RESOLVE = pathlib.Path.resolve
-
-
-def _safe_path_resolve(self, strict: bool = False):
-    try:
-        return _ORIG_PATH_RESOLVE(self, strict=strict)
-    except FileNotFoundError:
-        if self.is_absolute():
-            return self
-        return pathlib.Path("/") / self
-
-
-pathlib.Path.resolve = _safe_path_resolve
-pathlib.PosixPath.resolve = _safe_path_resolve
-
-from math import pi
+from pathlib import Path
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -61,644 +19,416 @@ from sdk import (
     TestReport,
 )
 
-CASE_W = 0.205
-CASE_D = 0.320
-CASE_H = 0.335
-
-PANEL_TH = 0.003
-PANEL_D = CASE_D - 0.018
-PANEL_H = CASE_H - 0.012
-
-FRONT_W = CASE_W - 0.018
-FRONT_H = CASE_H - 0.012
-
-GRILLE_W = 0.168
-GRILLE_D = 0.252
+# Some harness stages appear to retain a deleted working directory. Guard both
+# os.getcwd() and the process cwd itself so any later pathlib absolute/resolve
+# call can still succeed.
+_ORIG_GETCWD = os.getcwd
 
 
-def _add_thumb_screw(part, *, y: float, z: float, material, name: str) -> None:
-    part.visual(
-        Cylinder(radius=0.006, length=0.005),
-        origin=Origin(xyz=(0.004, y, z), rpy=(0.0, pi / 2.0, 0.0)),
-        material=material,
-        name=f"{name}_head",
-    )
-    part.visual(
-        Cylinder(radius=0.0022, length=0.007),
-        origin=Origin(xyz=(0.0008, y, z), rpy=(0.0, pi / 2.0, 0.0)),
-        material=material,
-        name=name,
-    )
+def _safe_getcwd() -> str:
+    try:
+        return _ORIG_GETCWD()
+    except FileNotFoundError:
+        return "/tmp"
+
+
+os.getcwd = _safe_getcwd
+try:
+    _ORIG_GETCWD()
+except FileNotFoundError:
+    os.chdir("/tmp")
+
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+
+CASE_W = 0.220
+CASE_D = 0.440
+CASE_H = 0.450
+SHEET = 0.002
+BEZEL_T = 0.006
+
+SIDE_PANEL_T = 0.0012
+SIDE_PANEL_DEPTH = CASE_D - SHEET - BEZEL_T
+SIDE_PANEL_H = CASE_H - 2.0 * SHEET
+SIDE_PANEL_LIP_W = 0.006
+SIDE_PANEL_LIP_D = 0.018
+SIDE_PANEL_LIP_H = 0.414
+SIDE_PANEL_OPEN = 1.92
+
+HINGE_R = 0.004
+HINGE_LOWER_LEN = 0.090
+HINGE_MID_LEN = 0.090
+HINGE_UPPER_LEN = 0.070
+HINGE_PANEL_LEN = 0.090
+HINGE_LOWER_Z = -0.170
+HINGE_PANEL_LOWER_Z = -0.080
+HINGE_MID_Z = 0.010
+HINGE_PANEL_UPPER_Z = 0.100
+HINGE_UPPER_Z = 0.180
+
+DRIVE_FACE_W = 0.148
+DRIVE_FACE_H = 0.042
+DRIVE_CENTER_Z = 0.390
+
+TRAY_BODY_W = 0.138
+TRAY_BODY_H = 0.014
+TRAY_BODY_D = 0.155
+TRAY_FACE_T = 0.004
+TRAY_RAIL_T = 0.003
+TRAY_RAIL_H = 0.008
+TRAY_OPEN = 0.110
+
+GUIDE_T = 0.003
+GUIDE_H = 0.028
+BAY_DEPTH = 0.180
+BAY_PLATE_T = 0.003
+BAY_BACKSTOP_T = 0.020
+
+OPENING_SIDE_W = (CASE_W - DRIVE_FACE_W) / 2.0
+LOWER_BEZEL_H = DRIVE_CENTER_Z - DRIVE_FACE_H / 2.0
+UPPER_BEZEL_H = CASE_H - (DRIVE_CENTER_Z + DRIVE_FACE_H / 2.0)
+TRAY_HOME_Y = -CASE_D / 2.0 + TRAY_BODY_D / 2.0 + TRAY_FACE_T
+TRAY_RAIL_CENTER_X = TRAY_BODY_W / 2.0 + TRAY_RAIL_T / 2.0
+GUIDE_CENTER_X = TRAY_BODY_W / 2.0 + TRAY_RAIL_T + GUIDE_T / 2.0
+BAY_Y_CENTER = -CASE_D / 2.0 + SHEET + BAY_DEPTH / 2.0
+BAY_PLATE_W = TRAY_BODY_W + 2.0 * (TRAY_RAIL_T + GUIDE_T)
+BAY_ROOF_Z = DRIVE_CENTER_Z + GUIDE_H / 2.0 + BAY_PLATE_T / 2.0
+BAY_FLOOR_Z = DRIVE_CENTER_Z - GUIDE_H / 2.0 - BAY_PLATE_T / 2.0
+BAY_BACKSTOP_W = TRAY_BODY_W + 2.0 * TRAY_RAIL_T
+BAY_BACKSTOP_Y = TRAY_HOME_Y + TRAY_BODY_D / 2.0 + BAY_BACKSTOP_T / 2.0
+
+SIDE_PANEL_STOP_W = 0.006
+SIDE_PANEL_STOP_D = 0.032
+SIDE_PANEL_STOP_H = 0.360
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="mini_itx_sff_case")
+    model = ArticulatedObject(name="mid_tower_pc", assets=ASSETS)
 
-    powder_black = model.material("powder_black", rgba=(0.14, 0.15, 0.16, 1.0))
-    dark_frame = model.material("dark_frame", rgba=(0.18, 0.19, 0.20, 1.0))
-    aluminum = model.material("aluminum", rgba=(0.76, 0.78, 0.80, 1.0))
-    matte_mesh = model.material("matte_mesh", rgba=(0.10, 0.11, 0.12, 1.0))
-    io_black = model.material("io_black", rgba=(0.05, 0.05, 0.06, 1.0))
-    screw_steel = model.material("screw_steel", rgba=(0.62, 0.64, 0.66, 1.0))
-    port_metal = model.material("port_metal", rgba=(0.57, 0.59, 0.62, 1.0))
+    steel = model.material("steel", rgba=(0.24, 0.25, 0.27, 1.0))
+    steel_panel = model.material("steel_panel", rgba=(0.20, 0.21, 0.23, 1.0))
+    bezel_black = model.material("bezel_black", rgba=(0.10, 0.10, 0.11, 1.0))
+    drive_gray = model.material("drive_gray", rgba=(0.74, 0.76, 0.79, 1.0))
 
     chassis = model.part("chassis")
     chassis.visual(
-        Box((0.194, 0.308, 0.008)),
-        origin=Origin(xyz=(0.000, 0.000, 0.004)),
-        material=dark_frame,
-        name="bottom_floor",
+        Box((CASE_W, CASE_D, SHEET)),
+        origin=Origin(xyz=(0.0, 0.0, SHEET / 2.0)),
+        material=steel,
+        name="bottom_shell",
     )
     chassis.visual(
-        Box((0.004, 0.300, 0.304)),
-        origin=Origin(xyz=(-0.099, 0.000, 0.160)),
-        material=powder_black,
-        name="left_wall",
+        Box((CASE_W, CASE_D, SHEET)),
+        origin=Origin(xyz=(0.0, 0.0, CASE_H - SHEET / 2.0)),
+        material=steel,
+        name="top_shell",
     )
     chassis.visual(
-        Box((0.178, 0.012, 0.044)),
-        origin=Origin(xyz=(-0.004, 0.154, 0.292)),
-        material=powder_black,
-        name="front_top_bar",
+        Box((SHEET, CASE_D, CASE_H - 2.0 * SHEET)),
+        origin=Origin(xyz=(-CASE_W / 2.0 + SHEET / 2.0, 0.0, CASE_H / 2.0)),
+        material=steel,
+        name="left_shell",
     )
     chassis.visual(
-        Box((0.178, 0.012, 0.050)),
-        origin=Origin(xyz=(-0.004, 0.154, 0.060)),
-        material=powder_black,
-        name="front_bottom_bar",
+        Box((CASE_W, SHEET, CASE_H)),
+        origin=Origin(xyz=(0.0, CASE_D / 2.0 - SHEET / 2.0, CASE_H / 2.0)),
+        material=steel,
+        name="rear_shell",
     )
     chassis.visual(
-        Box((0.010, 0.012, 0.324)),
-        origin=Origin(xyz=(-0.093, 0.154, 0.169)),
-        material=powder_black,
-        name="front_left_post",
+        Box((OPENING_SIDE_W, BEZEL_T, CASE_H)),
+        origin=Origin(
+            xyz=(
+                -CASE_W / 2.0 + OPENING_SIDE_W / 2.0,
+                -CASE_D / 2.0 + BEZEL_T / 2.0,
+                CASE_H / 2.0,
+            )
+        ),
+        material=bezel_black,
+        name="front_left_bezel",
     )
     chassis.visual(
-        Box((0.010, 0.012, 0.324)),
-        origin=Origin(xyz=(0.085, 0.154, 0.169)),
-        material=powder_black,
-        name="front_right_post",
+        Box((OPENING_SIDE_W, BEZEL_T, CASE_H)),
+        origin=Origin(
+            xyz=(
+                CASE_W / 2.0 - OPENING_SIDE_W / 2.0,
+                -CASE_D / 2.0 + BEZEL_T / 2.0,
+                CASE_H / 2.0,
+            )
+        ),
+        material=bezel_black,
+        name="front_right_bezel",
     )
     chassis.visual(
-        Box((0.004, 0.002, 0.240)),
-        origin=Origin(xyz=(0.0905, 0.151, 0.164)),
-        material=dark_frame,
-        name="panel_stop",
+        Box((DRIVE_FACE_W, BEZEL_T, LOWER_BEZEL_H)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -CASE_D / 2.0 + BEZEL_T / 2.0,
+                LOWER_BEZEL_H / 2.0,
+            )
+        ),
+        material=bezel_black,
+        name="front_lower_bezel",
     )
     chassis.visual(
-        Box((0.178, 0.012, 0.034)),
-        origin=Origin(xyz=(-0.004, -0.154, 0.302)),
-        material=powder_black,
-        name="rear_top_bar",
+        Box((DRIVE_FACE_W, BEZEL_T, UPPER_BEZEL_H)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -CASE_D / 2.0 + BEZEL_T / 2.0,
+                DRIVE_CENTER_Z + DRIVE_FACE_H / 2.0 + UPPER_BEZEL_H / 2.0,
+            )
+        ),
+        material=bezel_black,
+        name="front_upper_bezel",
     )
     chassis.visual(
-        Box((0.178, 0.012, 0.070)),
-        origin=Origin(xyz=(-0.004, -0.154, 0.062)),
-        material=powder_black,
-        name="rear_bottom_bar",
+        Box((SIDE_PANEL_STOP_W, SIDE_PANEL_STOP_D, SIDE_PANEL_STOP_H)),
+        origin=Origin(
+            xyz=(
+                CASE_W / 2.0 - SIDE_PANEL_LIP_W - SIDE_PANEL_STOP_W / 2.0,
+                -CASE_D / 2.0 + SHEET + SIDE_PANEL_STOP_D / 2.0,
+                CASE_H / 2.0,
+            )
+        ),
+        material=steel,
+        name="side_panel_stop",
+    )
+
+    chassis.visual(
+        Box((BAY_PLATE_W, BAY_DEPTH, BAY_PLATE_T)),
+        origin=Origin(xyz=(0.0, BAY_Y_CENTER, BAY_ROOF_Z)),
+        material=steel,
+        name="bay_roof",
     )
     chassis.visual(
-        Box((0.010, 0.012, 0.324)),
-        origin=Origin(xyz=(-0.093, -0.154, 0.169)),
-        material=powder_black,
-        name="rear_left_post",
+        Box((BAY_PLATE_W, BAY_DEPTH, BAY_PLATE_T)),
+        origin=Origin(xyz=(0.0, BAY_Y_CENTER, BAY_FLOOR_Z)),
+        material=steel,
+        name="bay_floor",
     )
     chassis.visual(
-        Box((0.010, 0.012, 0.324)),
-        origin=Origin(xyz=(0.085, -0.154, 0.169)),
-        material=powder_black,
-        name="rear_right_post",
+        Box((GUIDE_T, BAY_DEPTH, GUIDE_H)),
+        origin=Origin(xyz=(-GUIDE_CENTER_X, BAY_Y_CENTER, DRIVE_CENTER_Z)),
+        material=steel,
+        name="bay_left_guide",
     )
     chassis.visual(
-        Box((0.090, 0.300, 0.008)),
-        origin=Origin(xyz=(-0.051, 0.000, 0.331)),
-        material=powder_black,
-        name="roof_left_strip",
+        Box((GUIDE_T, BAY_DEPTH, GUIDE_H)),
+        origin=Origin(xyz=(GUIDE_CENTER_X, BAY_Y_CENTER, DRIVE_CENTER_Z)),
+        material=steel,
+        name="bay_right_guide",
     )
     chassis.visual(
-        Box((0.016, 0.290, 0.008)),
-        origin=Origin(xyz=(0.082, 0.000, 0.331)),
-        material=powder_black,
-        name="roof_right_strip",
+        Box((BAY_BACKSTOP_W, BAY_BACKSTOP_T, GUIDE_H)),
+        origin=Origin(xyz=(0.0, BAY_BACKSTOP_Y, DRIVE_CENTER_Z)),
+        material=steel,
+        name="bay_backstop",
     )
     chassis.visual(
-        Box((0.188, 0.012, 0.008)),
-        origin=Origin(xyz=(0.000, 0.149, 0.331)),
-        material=powder_black,
-        name="roof_front_bar",
+        Cylinder(radius=HINGE_R, length=HINGE_LOWER_LEN),
+        origin=Origin(xyz=(CASE_W / 2.0, CASE_D / 2.0 - SHEET, CASE_H / 2.0 + HINGE_LOWER_Z)),
+        material=steel,
+        name="chassis_hinge_lower",
     )
     chassis.visual(
-        Box((0.188, 0.012, 0.008)),
-        origin=Origin(xyz=(0.000, -0.149, 0.331)),
-        material=powder_black,
-        name="roof_rear_bar",
+        Cylinder(radius=HINGE_R, length=HINGE_MID_LEN),
+        origin=Origin(xyz=(CASE_W / 2.0, CASE_D / 2.0 - SHEET, CASE_H / 2.0 + HINGE_MID_Z)),
+        material=steel,
+        name="chassis_hinge_middle",
     )
     chassis.visual(
-        Box((GRILLE_W, 0.008, 0.008)),
-        origin=Origin(xyz=(0.000, 0.122, 0.331)),
-        material=dark_frame,
-        name="vent_front_support",
+        Cylinder(radius=HINGE_R, length=HINGE_UPPER_LEN),
+        origin=Origin(xyz=(CASE_W / 2.0, CASE_D / 2.0 - SHEET, CASE_H / 2.0 + HINGE_UPPER_Z)),
+        material=steel,
+        name="chassis_hinge_upper",
     )
-    chassis.visual(
-        Box((GRILLE_W, 0.008, 0.008)),
-        origin=Origin(xyz=(0.000, -0.122, 0.331)),
-        material=dark_frame,
-        name="vent_rear_support",
-    )
-    chassis.visual(
-        Box((0.004, 0.276, 0.010)),
-        origin=Origin(xyz=(0.0905, 0.000, 0.323)),
-        material=dark_frame,
-        name="right_guide_top",
-    )
-    chassis.visual(
-        Box((0.004, 0.276, 0.010)),
-        origin=Origin(xyz=(0.0905, 0.000, 0.012)),
-        material=dark_frame,
-        name="right_guide_bottom",
-    )
-    for x_sign, y_sign in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
-        chassis.visual(
-            Box((0.020, 0.020, 0.006)),
-            origin=Origin(
-                xyz=(
-                    x_sign * 0.070,
-                    y_sign * 0.105,
-                    -0.003,
-                )
-            ),
-            material=io_black,
-            name=f"foot_{'l' if x_sign < 0 else 'r'}_{'r' if y_sign < 0 else 'f'}",
-        )
     chassis.inertial = Inertial.from_geometry(
         Box((CASE_W, CASE_D, CASE_H)),
-        mass=6.8,
-        origin=Origin(xyz=(0.000, 0.000, CASE_H / 2.0)),
+        mass=10.0,
+        origin=Origin(xyz=(0.0, 0.0, CASE_H / 2.0)),
     )
 
     side_panel = model.part("side_panel")
     side_panel.visual(
-        Box((PANEL_TH, PANEL_D, PANEL_H)),
-        material=aluminum,
-        name="panel_shell",
+        Box((SIDE_PANEL_T, SIDE_PANEL_DEPTH, SIDE_PANEL_H)),
+        origin=Origin(
+            xyz=(
+                -SIDE_PANEL_T / 2.0,
+                -SIDE_PANEL_DEPTH / 2.0,
+                0.0,
+            )
+        ),
+        material=steel_panel,
+        name="panel_sheet",
     )
     side_panel.visual(
-        Box((0.010, 0.276, 0.010)),
-        origin=Origin(xyz=(-0.0065, 0.000, 0.1545)),
-        material=aluminum,
-        name="panel_top_flange",
+        Box((SIDE_PANEL_LIP_W, SIDE_PANEL_LIP_D, SIDE_PANEL_LIP_H)),
+        origin=Origin(
+            xyz=(
+                -SIDE_PANEL_LIP_W / 2.0,
+                -SIDE_PANEL_DEPTH + SIDE_PANEL_LIP_D / 2.0,
+                0.0,
+            )
+        ),
+        material=steel_panel,
+        name="front_lip",
     )
     side_panel.visual(
-        Box((0.010, 0.276, 0.010)),
-        origin=Origin(xyz=(-0.0065, 0.000, -0.1545)),
-        material=aluminum,
-        name="panel_bottom_flange",
+        Cylinder(radius=HINGE_R, length=HINGE_PANEL_LEN),
+        origin=Origin(xyz=(0.0, 0.0, HINGE_PANEL_LOWER_Z)),
+        material=steel_panel,
+        name="panel_hinge_lower",
     )
     side_panel.visual(
-        Box((0.010, 0.006, PANEL_H - 0.060)),
-        origin=Origin(xyz=(-0.0065, (PANEL_D / 2.0) - 0.004, 0.000)),
-        material=aluminum,
-        name="panel_front_lip",
-    )
-    side_panel.visual(
-        Box((0.010, 0.010, PANEL_H - 0.090)),
-        origin=Origin(xyz=(-0.0065, -(PANEL_D / 2.0) + 0.005, 0.000)),
-        material=aluminum,
-        name="panel_rear_hook",
-    )
-    _add_thumb_screw(
-        side_panel,
-        y=-(PANEL_D / 2.0) + 0.020,
-        z=0.108,
-        material=screw_steel,
-        name="thumb_screw_top",
-    )
-    _add_thumb_screw(
-        side_panel,
-        y=-(PANEL_D / 2.0) + 0.020,
-        z=-0.108,
-        material=screw_steel,
-        name="thumb_screw_bottom",
+        Cylinder(radius=HINGE_R, length=HINGE_PANEL_LEN),
+        origin=Origin(xyz=(0.0, 0.0, HINGE_PANEL_UPPER_Z)),
+        material=steel_panel,
+        name="panel_hinge_upper",
     )
     side_panel.inertial = Inertial.from_geometry(
-        Box((0.014, PANEL_D, PANEL_H)),
-        mass=1.0,
-        origin=Origin(),
+        Box((SIDE_PANEL_LIP_W, SIDE_PANEL_DEPTH, SIDE_PANEL_H)),
+        mass=1.8,
+        origin=Origin(xyz=(-SIDE_PANEL_LIP_W / 2.0, -SIDE_PANEL_DEPTH / 2.0, 0.0)),
     )
 
-    front_panel = model.part("front_panel")
-    front_panel.visual(
-        Box((0.012, 0.004, FRONT_H)),
-        origin=Origin(xyz=(-(FRONT_W / 2.0) + 0.006, 0.000, 0.000)),
-        material=powder_black,
-        name="bezel_left",
+    optical_tray = model.part("optical_tray")
+    optical_tray.visual(
+        Box((TRAY_BODY_W, TRAY_BODY_D, TRAY_BODY_H)),
+        material=drive_gray,
+        name="tray_body",
     )
-    front_panel.visual(
-        Box((0.012, 0.004, FRONT_H)),
-        origin=Origin(xyz=((FRONT_W / 2.0) - 0.006, 0.000, 0.000)),
-        material=powder_black,
-        name="bezel_right",
+    optical_tray.visual(
+        Box((DRIVE_FACE_W, TRAY_FACE_T, DRIVE_FACE_H)),
+        origin=Origin(xyz=(0.0, -TRAY_BODY_D / 2.0 - TRAY_FACE_T / 2.0, 0.0)),
+        material=bezel_black,
+        name="tray_face",
     )
-    front_panel.visual(
-        Box((FRONT_W, 0.004, 0.018)),
-        origin=Origin(xyz=(0.000, 0.000, (FRONT_H / 2.0) - 0.009)),
-        material=powder_black,
-        name="bezel_top",
+    optical_tray.visual(
+        Box((TRAY_RAIL_T, TRAY_BODY_D, TRAY_RAIL_H)),
+        origin=Origin(xyz=(-TRAY_RAIL_CENTER_X, 0.0, 0.0)),
+        material=drive_gray,
+        name="tray_left_rail",
     )
-    front_panel.visual(
-        Box((FRONT_W, 0.004, 0.018)),
-        origin=Origin(xyz=(0.000, 0.000, -(FRONT_H / 2.0) + 0.009)),
-        material=powder_black,
-        name="bezel_bottom",
+    optical_tray.visual(
+        Box((TRAY_RAIL_T, TRAY_BODY_D, TRAY_RAIL_H)),
+        origin=Origin(xyz=(TRAY_RAIL_CENTER_X, 0.0, 0.0)),
+        material=drive_gray,
+        name="tray_right_rail",
     )
-    front_panel.visual(
-        Box((FRONT_W - 0.024, 0.004, 0.070)),
-        origin=Origin(xyz=(0.000, 0.000, 0.110)),
-        material=powder_black,
-        name="io_fascia",
-    )
-    front_panel.visual(
-        Box((FRONT_W - 0.040, 0.002, 0.008)),
-        origin=Origin(xyz=(0.000, 0.000, 0.071)),
-        material=matte_mesh,
-        name="mesh_top_bridge",
-    )
-    front_panel.visual(
-        Box((FRONT_W - 0.040, 0.002, 0.010)),
-        origin=Origin(xyz=(0.000, 0.000, -0.1385)),
-        material=matte_mesh,
-        name="mesh_bottom_bridge",
-    )
-    for index, x in enumerate((-0.060, -0.048, -0.036, -0.024, -0.012, 0.000, 0.012, 0.024, 0.036, 0.048, 0.060)):
-        front_panel.visual(
-            Box((0.004, 0.002, 0.205)),
-            origin=Origin(xyz=(x, 0.000, -0.0335)),
-            material=matte_mesh,
-            name=f"mesh_vertical_{index}",
-        )
-    for index, z in enumerate((-0.110, -0.086, -0.062, -0.038, -0.014, 0.010, 0.034)):
-        front_panel.visual(
-            Box((FRONT_W - 0.048, 0.002, 0.003)),
-            origin=Origin(xyz=(0.000, 0.000, z)),
-            material=matte_mesh,
-            name=f"mesh_horizontal_{index}",
-        )
-    front_panel.visual(
-        Box((0.010, 0.008, 0.016)),
-        origin=Origin(xyz=(-0.083, -0.006, 0.105)),
-        material=powder_black,
-        name="snap_tab_tl",
-    )
-    front_panel.visual(
-        Box((0.010, 0.008, 0.016)),
-        origin=Origin(xyz=(-0.083, -0.006, -0.105)),
-        material=powder_black,
-        name="snap_tab_bl",
-    )
-    front_panel.visual(
-        Box((0.010, 0.008, 0.016)),
-        origin=Origin(xyz=(0.0765, -0.006, 0.105)),
-        material=powder_black,
-        name="snap_tab_tr",
-    )
-    front_panel.visual(
-        Box((0.010, 0.008, 0.016)),
-        origin=Origin(xyz=(0.0765, -0.006, -0.105)),
-        material=powder_black,
-        name="snap_tab_br",
-    )
-    front_panel.visual(
-        Cylinder(radius=0.009, length=0.006),
-        origin=Origin(xyz=(0.060, 0.001, 0.113), rpy=(pi / 2.0, 0.0, 0.0)),
-        material=io_black,
-        name="power_button",
-    )
-    front_panel.visual(
-        Box((0.014, 0.006, 0.006)),
-        origin=Origin(xyz=(0.010, -0.001, 0.113)),
-        material=port_metal,
-        name="usb_a",
-    )
-    front_panel.visual(
-        Box((0.010, 0.005, 0.004)),
-        origin=Origin(xyz=(0.028, -0.001, 0.113)),
-        material=port_metal,
-        name="usb_c",
-    )
-    front_panel.visual(
-        Cylinder(radius=0.0035, length=0.005),
-        origin=Origin(xyz=(0.046, 0.000, 0.091), rpy=(pi / 2.0, 0.0, 0.0)),
-        material=io_black,
-        name="audio_left",
-    )
-    front_panel.visual(
-        Cylinder(radius=0.0035, length=0.005),
-        origin=Origin(xyz=(0.056, 0.000, 0.091), rpy=(pi / 2.0, 0.0, 0.0)),
-        material=io_black,
-        name="audio_right",
-    )
-    front_panel.inertial = Inertial.from_geometry(
-        Box((FRONT_W, 0.014, FRONT_H)),
-        mass=0.55,
-        origin=Origin(),
-    )
-
-    top_grille = model.part("top_grille")
-    top_grille.visual(
-        Box((0.008, GRILLE_D, 0.003)),
-        origin=Origin(xyz=(-(GRILLE_W / 2.0) + 0.004, 0.000, 0.000)),
-        material=powder_black,
-        name="grille_left_rail",
-    )
-    top_grille.visual(
-        Box((0.008, GRILLE_D, 0.003)),
-        origin=Origin(xyz=((GRILLE_W / 2.0) - 0.004, 0.000, 0.000)),
-        material=powder_black,
-        name="grille_right_rail",
-    )
-    top_grille.visual(
-        Box((GRILLE_W, 0.008, 0.003)),
-        origin=Origin(xyz=(0.000, (GRILLE_D / 2.0) - 0.004, 0.000)),
-        material=powder_black,
-        name="grille_front_rail",
-    )
-    top_grille.visual(
-        Box((GRILLE_W, 0.008, 0.003)),
-        origin=Origin(xyz=(0.000, -(GRILLE_D / 2.0) + 0.004, 0.000)),
-        material=powder_black,
-        name="grille_rear_rail",
-    )
-    for index, y in enumerate((-0.094, -0.067, -0.040, -0.013, 0.014, 0.041, 0.068, 0.095)):
-        top_grille.visual(
-            Box((GRILLE_W - 0.016, 0.004, 0.002)),
-            origin=Origin(xyz=(0.000, y, 0.000)),
-            material=matte_mesh,
-            name=f"grille_slat_{index}",
-        )
-    top_grille.inertial = Inertial.from_geometry(
-        Box((GRILLE_W, GRILLE_D, 0.005)),
-        mass=0.22,
-        origin=Origin(),
+    optical_tray.inertial = Inertial.from_geometry(
+        Box((DRIVE_FACE_W, TRAY_BODY_D + TRAY_FACE_T, DRIVE_FACE_H)),
+        mass=0.35,
+        origin=Origin(xyz=(0.0, -TRAY_FACE_T / 2.0, 0.0)),
     )
 
     model.articulation(
-        "side_panel_slide",
-        ArticulationType.PRISMATIC,
+        "side_panel_hinge",
+        ArticulationType.REVOLUTE,
         parent=chassis,
         child=side_panel,
-        origin=Origin(xyz=(0.104, 0.000, CASE_H / 2.0)),
+        origin=Origin(xyz=(CASE_W / 2.0, CASE_D / 2.0 - SHEET, CASE_H / 2.0)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=12.0, velocity=1.2, lower=0.0, upper=SIDE_PANEL_OPEN),
+    )
+    model.articulation(
+        "optical_tray_slide",
+        ArticulationType.PRISMATIC,
+        parent=chassis,
+        child=optical_tray,
+        origin=Origin(xyz=(0.0, TRAY_HOME_Y, DRIVE_CENTER_Z)),
         axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=30.0,
-            velocity=0.30,
-            lower=0.0,
-            upper=0.050,
-        ),
+        motion_limits=MotionLimits(effort=5.0, velocity=0.16, lower=0.0, upper=TRAY_OPEN),
     )
-    model.articulation(
-        "front_panel_mount",
-        ArticulationType.FIXED,
-        parent=chassis,
-        child=front_panel,
-        origin=Origin(xyz=(0.000, (CASE_D / 2.0) + 0.002, CASE_H / 2.0)),
-    )
-    model.articulation(
-        "top_grille_mount",
-        ArticulationType.FIXED,
-        parent=chassis,
-        child=top_grille,
-        origin=Origin(xyz=(0.000, 0.000, CASE_H + 0.0015)),
-    )
+
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
+    ctx = TestContext(object_model, asset_root=HERE)
     chassis = object_model.get_part("chassis")
     side_panel = object_model.get_part("side_panel")
-    front_panel = object_model.get_part("front_panel")
-    top_grille = object_model.get_part("top_grille")
-    side_panel_slide = object_model.get_articulation("side_panel_slide")
+    optical_tray = object_model.get_part("optical_tray")
+    side_panel_hinge = object_model.get_articulation("side_panel_hinge")
+    optical_tray_slide = object_model.get_articulation("optical_tray_slide")
 
-    right_guide_top = chassis.get_visual("right_guide_top")
-    right_guide_bottom = chassis.get_visual("right_guide_bottom")
-    panel_stop = chassis.get_visual("panel_stop")
-    front_left_post = chassis.get_visual("front_left_post")
-    front_right_post = chassis.get_visual("front_right_post")
-    front_top_bar = chassis.get_visual("front_top_bar")
-    roof_left_strip = chassis.get_visual("roof_left_strip")
-
-    panel_shell = side_panel.get_visual("panel_shell")
-    panel_top_flange = side_panel.get_visual("panel_top_flange")
-    panel_bottom_flange = side_panel.get_visual("panel_bottom_flange")
-    panel_front_lip = side_panel.get_visual("panel_front_lip")
-    thumb_screw_top = side_panel.get_visual("thumb_screw_top")
-    thumb_screw_bottom = side_panel.get_visual("thumb_screw_bottom")
-
-    io_fascia = front_panel.get_visual("io_fascia")
-    mesh_vertical_5 = front_panel.get_visual("mesh_vertical_5")
-    mesh_top_bridge = front_panel.get_visual("mesh_top_bridge")
-    mesh_bottom_bridge = front_panel.get_visual("mesh_bottom_bridge")
-    snap_tab_tl = front_panel.get_visual("snap_tab_tl")
-    snap_tab_bl = front_panel.get_visual("snap_tab_bl")
-    snap_tab_tr = front_panel.get_visual("snap_tab_tr")
-    snap_tab_br = front_panel.get_visual("snap_tab_br")
-    power_button = front_panel.get_visual("power_button")
-    usb_a = front_panel.get_visual("usb_a")
-    usb_c = front_panel.get_visual("usb_c")
-    audio_left = front_panel.get_visual("audio_left")
-    audio_right = front_panel.get_visual("audio_right")
-
-    grille_left_rail = top_grille.get_visual("grille_left_rail")
-    grille_right_rail = top_grille.get_visual("grille_right_rail")
-    grille_slat_3 = top_grille.get_visual("grille_slat_3")
+    side_panel_stop = chassis.get_visual("side_panel_stop")
+    bay_left_guide = chassis.get_visual("bay_left_guide")
+    bay_right_guide = chassis.get_visual("bay_right_guide")
+    bay_backstop = chassis.get_visual("bay_backstop")
+    front_lower_bezel = chassis.get_visual("front_lower_bezel")
+    chassis_hinge_lower = chassis.get_visual("chassis_hinge_lower")
+    chassis_hinge_upper = chassis.get_visual("chassis_hinge_upper")
+    panel_sheet = side_panel.get_visual("panel_sheet")
+    front_lip = side_panel.get_visual("front_lip")
+    panel_hinge_lower = side_panel.get_visual("panel_hinge_lower")
+    panel_hinge_upper = side_panel.get_visual("panel_hinge_upper")
+    tray_body = optical_tray.get_visual("tray_body")
+    tray_face = optical_tray.get_visual("tray_face")
+    tray_left_rail = optical_tray.get_visual("tray_left_rail")
+    tray_right_rail = optical_tray.get_visual("tray_right_rail")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.fail_if_isolated_parts(max_pose_samples=12, name="sampled_no_floating_parts")
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.42, elem_a=panel_sheet)
+    ctx.expect_contact(side_panel, chassis, elem_a=front_lip, elem_b=side_panel_stop)
+    ctx.expect_contact(side_panel, chassis, elem_a=panel_hinge_lower, elem_b=chassis_hinge_lower)
+    ctx.expect_contact(side_panel, chassis, elem_a=panel_hinge_upper, elem_b=chassis_hinge_upper)
 
-    # Use prompt-specific exact visual checks as the real completion criteria.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - key poses stay believable
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Add prompt-specific exact visual checks below; broad warn_if_* checks are not enough.
-    ctx.expect_gap(
-        side_panel,
-        chassis,
-        axis="x",
-        positive_elem=panel_top_flange,
-        negative_elem=right_guide_top,
-        max_gap=0.001,
-        max_penetration=1e-5,
-    )
-    ctx.expect_gap(
-        side_panel,
-        chassis,
-        axis="x",
-        positive_elem=panel_bottom_flange,
-        negative_elem=right_guide_bottom,
-        max_gap=0.001,
-        max_penetration=1e-5,
-    )
-    ctx.expect_gap(
-        chassis,
-        side_panel,
-        axis="y",
-        positive_elem=panel_stop,
-        negative_elem=panel_front_lip,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.04)
-    ctx.expect_within(
-        side_panel,
-        side_panel,
-        axes="yz",
-        inner_elem=thumb_screw_top,
-        outer_elem=panel_shell,
-    )
-    ctx.expect_within(
-        side_panel,
-        side_panel,
-        axes="yz",
-        inner_elem=thumb_screw_bottom,
-        outer_elem=panel_shell,
-    )
-    ctx.expect_gap(
-        side_panel,
-        side_panel,
-        axis="y",
-        positive_elem=thumb_screw_top,
-        negative_elem=side_panel.get_visual("panel_rear_hook"),
-        min_gap=0.004,
-        max_gap=0.010,
-    )
-    ctx.expect_gap(
-        side_panel,
-        side_panel,
-        axis="y",
-        positive_elem=thumb_screw_bottom,
-        negative_elem=side_panel.get_visual("panel_rear_hook"),
-        min_gap=0.004,
-        max_gap=0.010,
-    )
+    ctx.expect_contact(optical_tray, chassis, elem_a=tray_left_rail, elem_b=bay_left_guide)
+    ctx.expect_contact(optical_tray, chassis, elem_a=tray_right_rail, elem_b=bay_right_guide)
+    ctx.expect_contact(optical_tray, chassis, elem_a=tray_body, elem_b=bay_backstop)
+    ctx.expect_overlap(optical_tray, chassis, axes="x", min_overlap=0.14, elem_a=tray_face)
+    ctx.expect_overlap(optical_tray, chassis, axes="z", min_overlap=0.04, elem_a=tray_face)
 
-    ctx.expect_gap(
-        front_panel,
-        chassis,
-        axis="y",
-        positive_elem=io_fascia,
-        negative_elem=front_top_bar,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_overlap(front_panel, chassis, axes="xz", min_overlap=0.18)
-    ctx.expect_contact(front_panel, chassis, elem_a=snap_tab_tl, elem_b=front_left_post)
-    ctx.expect_contact(front_panel, chassis, elem_a=snap_tab_bl, elem_b=front_left_post)
-    ctx.expect_contact(front_panel, chassis, elem_a=snap_tab_tr, elem_b=front_right_post)
-    ctx.expect_contact(front_panel, chassis, elem_a=snap_tab_br, elem_b=front_right_post)
-    ctx.expect_contact(front_panel, front_panel, elem_a=mesh_vertical_5, elem_b=mesh_top_bridge)
-    ctx.expect_contact(front_panel, front_panel, elem_a=mesh_vertical_5, elem_b=mesh_bottom_bridge)
-    ctx.expect_gap(
-        front_panel,
-        front_panel,
-        axis="z",
-        positive_elem=io_fascia,
-        negative_elem=mesh_top_bridge,
-        max_gap=0.001,
-        max_penetration=1e-5,
-    )
-    ctx.expect_within(
-        front_panel,
-        front_panel,
-        axes="xz",
-        inner_elem=power_button,
-        outer_elem=io_fascia,
-    )
-    ctx.expect_within(
-        front_panel,
-        front_panel,
-        axes="xz",
-        inner_elem=usb_a,
-        outer_elem=io_fascia,
-    )
-    ctx.expect_within(
-        front_panel,
-        front_panel,
-        axes="xz",
-        inner_elem=usb_c,
-        outer_elem=io_fascia,
-    )
-    ctx.expect_within(
-        front_panel,
-        front_panel,
-        axes="xz",
-        inner_elem=audio_left,
-        outer_elem=io_fascia,
-    )
-    ctx.expect_within(
-        front_panel,
-        front_panel,
-        axes="xz",
-        inner_elem=audio_right,
-        outer_elem=io_fascia,
-    )
+    side_limits = side_panel_hinge.motion_limits
+    tray_limits = optical_tray_slide.motion_limits
 
-    ctx.expect_gap(
-        top_grille,
-        chassis,
-        axis="z",
-        positive_elem=grille_left_rail,
-        negative_elem=roof_left_strip,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_overlap(top_grille, chassis, axes="xy", min_overlap=0.15)
-    ctx.expect_contact(top_grille, top_grille, elem_a=grille_slat_3, elem_b=grille_left_rail)
-    ctx.expect_contact(top_grille, top_grille, elem_a=grille_slat_3, elem_b=grille_right_rail)
+    if side_limits is not None and side_limits.lower is not None and side_limits.upper is not None:
+        with ctx.pose({side_panel_hinge: side_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="side_panel_closed_no_overlap")
+            ctx.fail_if_isolated_parts(name="side_panel_closed_no_floating")
+        with ctx.pose({side_panel_hinge: side_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="side_panel_open_no_overlap")
+            ctx.fail_if_isolated_parts(name="side_panel_open_no_floating")
+            ctx.expect_contact(side_panel, chassis, elem_a=panel_hinge_lower, elem_b=chassis_hinge_lower)
+            ctx.expect_contact(side_panel, chassis, elem_a=panel_hinge_upper, elem_b=chassis_hinge_upper)
+            ctx.expect_gap(
+                side_panel,
+                chassis,
+                axis="x",
+                min_gap=0.15,
+                positive_elem=front_lip,
+                negative_elem=side_panel_stop,
+            )
 
-    with ctx.pose({side_panel_slide: 0.040}):
-        ctx.expect_gap(
-            chassis,
-            side_panel,
-            axis="y",
-            positive_elem=panel_stop,
-            negative_elem=panel_front_lip,
-            min_gap=0.035,
-        )
-        ctx.expect_gap(
-            side_panel,
-            chassis,
-            axis="x",
-            positive_elem=panel_top_flange,
-            negative_elem=right_guide_top,
-            max_gap=0.001,
-            max_penetration=1e-5,
-        )
-        ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.20)
+    if tray_limits is not None and tray_limits.lower is not None and tray_limits.upper is not None:
+        with ctx.pose({optical_tray_slide: tray_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="tray_closed_no_overlap")
+            ctx.fail_if_isolated_parts(name="tray_closed_no_floating")
+        with ctx.pose({optical_tray_slide: tray_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="tray_open_no_overlap")
+            ctx.fail_if_isolated_parts(name="tray_open_no_floating")
+            ctx.expect_contact(optical_tray, chassis, elem_a=tray_left_rail, elem_b=bay_left_guide)
+            ctx.expect_contact(optical_tray, chassis, elem_a=tray_right_rail, elem_b=bay_right_guide)
+            ctx.expect_gap(
+                chassis,
+                optical_tray,
+                axis="y",
+                min_gap=0.10,
+                positive_elem=front_lower_bezel,
+                negative_elem=tray_face,
+            )
+            ctx.expect_overlap(optical_tray, chassis, axes="x", min_overlap=0.13, elem_a=tray_body)
+            ctx.expect_overlap(optical_tray, chassis, axes="z", min_overlap=0.01, elem_a=tray_body)
+
     return ctx.report()
 
 

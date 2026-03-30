@@ -3,9 +3,6 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import os
-os.chdir("/")
-
 import math
 
 from sdk import (
@@ -13,313 +10,426 @@ from sdk import (
     ArticulationType,
     Box,
     Cylinder,
+    ExtrudeGeometry,
+    ExtrudeWithHolesGeometry,
     Inertial,
     MotionLimits,
     Origin,
-    Sphere,
     TestContext,
     TestReport,
+    TorusGeometry,
+    mesh_from_geometry,
+    section_loft,
 )
 
 
-def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="victorian_station_tower")
+def _rect_loop(width: float, depth: float, z: float) -> list[tuple[float, float, float]]:
+    half_w = width * 0.5
+    half_d = depth * 0.5
+    return [
+        (-half_w, -half_d, z),
+        (half_w, -half_d, z),
+        (half_w, half_d, z),
+        (-half_w, half_d, z),
+    ]
 
-    sandstone = model.material("sandstone", rgba=(0.70, 0.62, 0.51, 1.0))
-    limestone = model.material("limestone", rgba=(0.84, 0.79, 0.71, 1.0))
-    slate = model.material("slate", rgba=(0.28, 0.30, 0.34, 1.0))
-    clock_ivory = model.material("clock_ivory", rgba=(0.93, 0.91, 0.84, 1.0))
-    clock_iron = model.material("clock_iron", rgba=(0.17, 0.17, 0.18, 1.0))
-    aged_metal = model.material("aged_metal", rgba=(0.34, 0.35, 0.32, 1.0))
+
+def _shift_profile(
+    profile: list[tuple[float, float]],
+    *,
+    dx: float = 0.0,
+    dy: float = 0.0,
+) -> list[tuple[float, float]]:
+    return [(x + dx, y + dy) for x, y in profile]
+
+
+def _pointed_arch_profile(width: float, height: float) -> list[tuple[float, float]]:
+    half_w = width * 0.5
+    shoulder = height * 0.58
+    inner_shoulder = width * 0.18
+    return [
+        (-half_w, 0.0),
+        (half_w, 0.0),
+        (half_w, shoulder),
+        (inner_shoulder, height * 0.80),
+        (0.0, height),
+        (-inner_shoulder, height * 0.80),
+        (-half_w, shoulder),
+    ]
+
+
+def _belfry_panel_mesh(
+    *,
+    name: str,
+    panel_width: float,
+    panel_height: float,
+    panel_thickness: float,
+    hole_profiles: list[list[tuple[float, float]]],
+):
+    outer = [
+        (-panel_width * 0.5, 0.0),
+        (panel_width * 0.5, 0.0),
+        (panel_width * 0.5, panel_height),
+        (-panel_width * 0.5, panel_height),
+    ]
+    geom = ExtrudeWithHolesGeometry(
+        outer,
+        hole_profiles,
+        panel_thickness,
+        center=True,
+        cap=True,
+        closed=True,
+    ).rotate_x(-math.pi / 2.0)
+    return mesh_from_geometry(geom, name)
+
+
+def _gable_mesh(name: str, width: float, height: float, depth: float):
+    half_w = width * 0.5
+    profile = [
+        (-half_w, 0.0),
+        (half_w, 0.0),
+        (half_w * 0.72, height * 0.18),
+        (0.0, height),
+        (-half_w * 0.72, height * 0.18),
+    ]
+    geom = ExtrudeGeometry.centered(profile, depth, cap=True, closed=True).rotate_x(-math.pi / 2.0)
+    return mesh_from_geometry(geom, name)
+
+
+def _hand_mesh(
+    *,
+    name: str,
+    length: float,
+    base_width: float,
+    tip_width: float,
+    tail_length: float,
+    tail_width: float,
+    thickness: float,
+):
+    profile = [
+        (-tail_width * 0.5, -tail_length),
+        (tail_width * 0.5, -tail_length),
+        (tail_width * 0.5, -0.10),
+        (base_width * 0.5, 0.04),
+        (base_width * 0.26, length * 0.62),
+        (tip_width * 0.7, length * 0.85),
+        (0.0, length),
+        (-tip_width * 0.7, length * 0.85),
+        (-base_width * 0.26, length * 0.62),
+        (-base_width * 0.5, 0.04),
+        (-tail_width * 0.5, -0.10),
+    ]
+    geom = ExtrudeGeometry.centered(profile, thickness, cap=True, closed=True).rotate_x(-math.pi / 2.0)
+    return mesh_from_geometry(geom, name)
+
+
+def build_object_model() -> ArticulatedObject:
+    model = ArticulatedObject(name="gothic_clock_tower")
+
+    stone = model.material("stone", rgba=(0.69, 0.68, 0.64, 1.0))
+    trim_stone = model.material("trim_stone", rgba=(0.58, 0.57, 0.53, 1.0))
+    slate = model.material("slate", rgba=(0.18, 0.21, 0.24, 1.0))
+    dial_ivory = model.material("dial_ivory", rgba=(0.90, 0.87, 0.79, 1.0))
+    bronze = model.material("bronze", rgba=(0.30, 0.22, 0.12, 1.0))
+    belfry_shadow = model.material("belfry_shadow", rgba=(0.14, 0.11, 0.09, 1.0))
 
     tower = model.part("tower")
+
+    shaft_width = 4.8
+    shaft_depth = 4.2
+    shaft_height = 20.6
+    plinth_height = 1.4
+    shaft_top = plinth_height + shaft_height
+    clock_center_z = 16.8
+    front_face_y = shaft_depth * 0.5
+
     tower.visual(
-        Box((0.304, 0.304, 0.036)),
-        origin=Origin(xyz=(0.0, 0.0, 0.018)),
-        material=limestone,
+        Box((6.2, 5.4, plinth_height)),
+        origin=Origin(xyz=(0.0, 0.0, plinth_height * 0.5)),
+        material=trim_stone,
         name="plinth",
     )
     tower.visual(
-        Box((0.270, 0.270, 0.210)),
-        origin=Origin(xyz=(0.0, 0.0, 0.105)),
-        material=sandstone,
-        name="base_core",
-    )
-    for index, z_center in enumerate((0.022, 0.064, 0.106, 0.148, 0.190)):
-        tower.visual(
-            Box((0.292 - 0.008 * (index % 2), 0.292 - 0.008 * (index % 2), 0.038)),
-            origin=Origin(xyz=(0.0, 0.0, z_center)),
-            material=sandstone,
-            name=f"rusticated_course_{index}",
-        )
-    tower.visual(
-        Box((0.288, 0.288, 0.018)),
-        origin=Origin(xyz=(0.0, 0.0, 0.219)),
-        material=limestone,
-        name="base_transition",
-    )
-    tower.visual(
-        Box((0.214, 0.022, 0.470)),
-        origin=Origin(xyz=(0.0, -0.096, 0.459)),
-        material=sandstone,
-        name="rear_wall",
-    )
-    tower.visual(
-        Box((0.022, 0.214, 0.470)),
-        origin=Origin(xyz=(-0.096, 0.0, 0.459)),
-        material=sandstone,
-        name="left_wall",
-    )
-    tower.visual(
-        Box((0.022, 0.214, 0.470)),
-        origin=Origin(xyz=(0.096, 0.0, 0.459)),
-        material=sandstone,
-        name="right_wall",
-    )
-    tower.visual(
-        Box((0.214, 0.022, 0.242)),
-        origin=Origin(xyz=(0.0, 0.096, 0.345)),
-        material=sandstone,
-        name="front_lower_wall",
-    )
-    tower.visual(
-        Box((0.214, 0.022, 0.078)),
-        origin=Origin(xyz=(0.0, 0.096, 0.655)),
-        material=sandstone,
-        name="front_upper_wall",
-    )
-    tower.visual(
-        Box((0.024, 0.238, 0.154)),
-        origin=Origin(xyz=(-0.109, 0.0, 0.544)),
-        material=limestone,
-        name="left_belt_wrap",
-    )
-    tower.visual(
-        Box((0.024, 0.238, 0.154)),
-        origin=Origin(xyz=(0.109, 0.0, 0.544)),
-        material=limestone,
-        name="right_belt_wrap",
-    )
-    tower.visual(
-        Box((0.238, 0.024, 0.154)),
-        origin=Origin(xyz=(0.0, -0.109, 0.544)),
-        material=limestone,
-        name="rear_belt_wrap",
-    )
-    tower.visual(
-        Cylinder(radius=0.058, length=0.050),
-        origin=Origin(xyz=(0.0, 0.093, 0.544), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=aged_metal,
-        name="clock_seat",
-    )
-    tower.visual(
-        Box((0.028, 0.024, 0.122)),
-        origin=Origin(xyz=(-0.071, 0.119, 0.544)),
-        material=limestone,
-        name="clock_ring_left",
-    )
-    tower.visual(
-        Box((0.028, 0.024, 0.122)),
-        origin=Origin(xyz=(0.071, 0.119, 0.544)),
-        material=limestone,
-        name="clock_ring_right",
-    )
-    tower.visual(
-        Box((0.130, 0.024, 0.030)),
-        origin=Origin(xyz=(0.0, 0.119, 0.611)),
-        material=limestone,
-        name="clock_ring_top",
-    )
-    tower.visual(
-        Box((0.130, 0.024, 0.030)),
-        origin=Origin(xyz=(0.0, 0.119, 0.477)),
-        material=limestone,
-        name="clock_ring_bottom",
-    )
-    for name_suffix, x_center, z_center in (
-        ("nw", -0.051, 0.593),
-        ("ne", 0.051, 0.593),
-        ("sw", -0.051, 0.495),
-        ("se", 0.051, 0.495),
-    ):
-        tower.visual(
-            Box((0.024, 0.024, 0.024)),
-            origin=Origin(xyz=(x_center, 0.119, z_center)),
-            material=limestone,
-            name=f"clock_ring_diag_{name_suffix}",
-        )
-    for level, z_center in enumerate((0.270, 0.340, 0.410, 0.480, 0.550, 0.620)):
-        span_x = 0.034 if level % 2 == 0 else 0.022
-        span_y = 0.022 if level % 2 == 0 else 0.034
-        x_offset = 0.107 - span_x / 2.0 if span_x > span_y else 0.107 + span_x / 2.0
-        y_offset = 0.107 - span_y / 2.0 if span_y > span_x else 0.107 + span_y / 2.0
-        for x_sign in (-1.0, 1.0):
-            for y_sign in (-1.0, 1.0):
-                tower.visual(
-                    Box((span_x, span_y, 0.068)),
-                    origin=Origin(xyz=(x_sign * x_offset, y_sign * y_offset, z_center)),
-                    material=limestone,
-                    name=f"quoin_{level}_{int(x_sign > 0)}_{int(y_sign > 0)}",
-                )
-    tower.visual(
-        Box((0.278, 0.278, 0.018)),
-        origin=Origin(xyz=(0.0, 0.0, 0.703)),
-        material=limestone,
-        name="cornice_lower",
-    )
-    tower.visual(
-        Box((0.248, 0.248, 0.016)),
-        origin=Origin(xyz=(0.0, 0.0, 0.720)),
-        material=limestone,
-        name="cornice_upper",
-    )
-    tower.visual(
-        Box((0.194, 0.194, 0.050)),
-        origin=Origin(xyz=(0.0, 0.0, 0.753)),
-        material=slate,
-        name="roof_peak_lower",
-    )
-    tower.visual(
-        Box((0.132, 0.132, 0.050)),
-        origin=Origin(xyz=(0.0, 0.0, 0.803)),
-        material=slate,
-        name="roof_peak_mid",
-    )
-    tower.visual(
-        Box((0.066, 0.066, 0.060)),
-        origin=Origin(xyz=(0.0, 0.0, 0.858)),
-        material=slate,
-        name="roof_peak",
-    )
-    tower.visual(
-        Cylinder(radius=0.004, length=0.120),
-        origin=Origin(xyz=(0.0, 0.0, 0.948)),
-        material=aged_metal,
-        name="flagpole",
-    )
-    tower.visual(
-        Sphere(radius=0.009),
-        origin=Origin(xyz=(0.0, 0.0, 1.017)),
-        material=aged_metal,
-        name="flagpole_finial",
-    )
-    tower.inertial = Inertial.from_geometry(
-        Box((0.320, 0.320, 1.030)),
-        mass=48.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.515)),
+        Box((shaft_width, shaft_depth, shaft_height)),
+        origin=Origin(xyz=(0.0, 0.0, plinth_height + shaft_height * 0.5)),
+        material=stone,
+        name="shaft",
     )
 
-    clock_face = model.part("clock_face")
-    clock_face.visual(
-        Cylinder(radius=0.063, length=0.008),
-        origin=Origin(rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=clock_ivory,
-        name="clock_face_disk",
+    buttress_height = 18.2
+    buttress_origin_z = plinth_height + buttress_height * 0.5
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            tower.visual(
+                Box((0.72, 0.56, buttress_height)),
+                origin=Origin(
+                    xyz=(
+                        x_sign * (shaft_width * 0.5 - 0.36),
+                        y_sign * (shaft_depth * 0.5 - 0.28),
+                        buttress_origin_z,
+                    )
+                ),
+                material=trim_stone,
+                name=f"buttress_{'r' if x_sign > 0 else 'l'}_{'f' if y_sign > 0 else 'b'}",
+            )
+
+    tower.visual(
+        Box((3.6, 0.36, 0.22)),
+        origin=Origin(xyz=(0.0, front_face_y + 0.18, 15.0)),
+        material=trim_stone,
+        name="dial_ledge",
     )
-    clock_face.visual(
-        Cylinder(radius=0.057, length=0.024),
-        origin=Origin(xyz=(0.0, -0.016, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=aged_metal,
-        name="clock_mount",
+
+    clock_gable = _gable_mesh("clock_gable", width=3.4, height=1.65, depth=0.28)
+    tower.visual(
+        clock_gable,
+        origin=Origin(xyz=(0.0, front_face_y + 0.14, 19.35)),
+        material=trim_stone,
+        name="clock_gable",
     )
-    clock_face.visual(
-        Cylinder(radius=0.010, length=0.014),
-        origin=Origin(xyz=(0.0, 0.010, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=clock_iron,
-        name="hub_boss",
+
+    tower.visual(
+        Cylinder(radius=1.55, length=0.10),
+        origin=Origin(
+            xyz=(0.0, front_face_y + 0.05, clock_center_z),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dial_ivory,
+        name="clock_dial",
     )
-    clock_face.inertial = Inertial.from_geometry(
-        Box((0.130, 0.034, 0.130)),
-        mass=0.9,
-        origin=Origin(xyz=(0.0, -0.007, 0.0)),
+    bezel_geom = TorusGeometry(radius=1.65, tube=0.10, radial_segments=20, tubular_segments=56).rotate_x(
+        math.pi / 2.0
+    )
+    tower.visual(
+        mesh_from_geometry(bezel_geom, "clock_bezel"),
+        origin=Origin(xyz=(0.0, front_face_y + 0.09, clock_center_z)),
+        material=trim_stone,
+        name="clock_bezel",
+    )
+    tower.visual(
+        Cylinder(radius=0.14, length=0.04),
+        origin=Origin(
+            xyz=(0.0, front_face_y + 0.12, clock_center_z),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=bronze,
+        name="clock_hub",
+    )
+
+    tower.visual(
+        Box((5.6, 5.0, 0.8)),
+        origin=Origin(xyz=(0.0, 0.0, shaft_top + 0.4)),
+        material=trim_stone,
+        name="belfry_lower_cornice",
+    )
+
+    belfry_panel_height = 4.4
+    belfry_base_z = shaft_top + 0.8
+    belfry_mid_z = belfry_base_z + belfry_panel_height * 0.5
+    belfry_top_z = belfry_base_z + belfry_panel_height
+
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            tower.visual(
+                Box((0.60, 0.60, belfry_panel_height)),
+                origin=Origin(
+                    xyz=(
+                        x_sign * 2.50,
+                        y_sign * 2.20,
+                        belfry_mid_z,
+                    )
+                ),
+                material=stone,
+                name=f"belfry_pier_{'r' if x_sign > 0 else 'l'}_{'f' if y_sign > 0 else 'b'}",
+            )
+
+    front_panel = _belfry_panel_mesh(
+        name="front_belfry_panel",
+        panel_width=4.20,
+        panel_height=belfry_panel_height,
+        panel_thickness=0.18,
+        hole_profiles=[
+            _shift_profile(_pointed_arch_profile(1.16, 3.50), dx=-0.92, dy=0.52),
+            _shift_profile(_pointed_arch_profile(1.16, 3.50), dx=0.92, dy=0.52),
+        ],
+    )
+    side_panel = _belfry_panel_mesh(
+        name="side_belfry_panel",
+        panel_width=3.70,
+        panel_height=belfry_panel_height,
+        panel_thickness=0.18,
+        hole_profiles=[_shift_profile(_pointed_arch_profile(1.32, 3.50), dy=0.52)],
+    )
+
+    tower.visual(
+        front_panel,
+        origin=Origin(xyz=(0.0, 2.41, belfry_base_z)),
+        material=trim_stone,
+        name="front_belfry_panel",
+    )
+    tower.visual(
+        front_panel,
+        origin=Origin(xyz=(0.0, -2.41, belfry_base_z)),
+        material=trim_stone,
+        name="rear_belfry_panel",
+    )
+    tower.visual(
+        side_panel,
+        origin=Origin(xyz=(2.71, 0.0, belfry_base_z), rpy=(0.0, 0.0, math.pi / 2.0)),
+        material=trim_stone,
+        name="right_belfry_panel",
+    )
+    tower.visual(
+        side_panel,
+        origin=Origin(xyz=(-2.71, 0.0, belfry_base_z), rpy=(0.0, 0.0, math.pi / 2.0)),
+        material=trim_stone,
+        name="left_belfry_panel",
+    )
+
+    tower.visual(
+        Box((3.0, 2.6, belfry_panel_height)),
+        origin=Origin(xyz=(0.0, 0.0, belfry_mid_z)),
+        material=belfry_shadow,
+        name="belfry_shadow_core",
+    )
+
+    tower.visual(
+        Box((6.0, 5.4, 0.8)),
+        origin=Origin(xyz=(0.0, 0.0, belfry_top_z + 0.4)),
+        material=trim_stone,
+        name="belfry_upper_cornice",
+    )
+
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            tower.visual(
+                Box((0.34, 0.34, 1.2)),
+                origin=Origin(
+                    xyz=(
+                        x_sign * 2.66,
+                        y_sign * 2.36,
+                        belfry_top_z + 1.4,
+                    )
+                ),
+                material=trim_stone,
+                name=f"pinnacle_{'r' if x_sign > 0 else 'l'}_{'f' if y_sign > 0 else 'b'}",
+            )
+
+    roof_geom = section_loft(
+        [
+            _rect_loop(5.8, 5.2, 0.0),
+            _rect_loop(3.2, 2.8, 2.6),
+            _rect_loop(1.2, 1.0, 5.8),
+            _rect_loop(0.25, 0.25, 7.6),
+        ]
+    )
+    tower.visual(
+        mesh_from_geometry(roof_geom, "spire_roof"),
+        origin=Origin(xyz=(0.0, 0.0, belfry_top_z + 0.8)),
+        material=slate,
+        name="spire_roof",
+    )
+    tower.visual(
+        Cylinder(radius=0.08, length=1.4),
+        origin=Origin(xyz=(0.0, 0.0, belfry_top_z + 0.8 + 8.3)),
+        material=bronze,
+        name="spire_finial",
+    )
+
+    tower.inertial = Inertial.from_geometry(
+        Box((6.2, 5.4, 37.0)),
+        mass=18000.0,
+        origin=Origin(xyz=(0.0, 0.0, 18.5)),
     )
 
     hour_hand = model.part("hour_hand")
     hour_hand.visual(
-        Cylinder(radius=0.011, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=clock_iron,
-        name="hour_cap",
+        _hand_mesh(
+            name="hour_hand_blade",
+            length=0.96,
+            base_width=0.20,
+            tip_width=0.07,
+            tail_length=0.30,
+            tail_width=0.08,
+            thickness=0.022,
+        ),
+        origin=Origin(xyz=(0.0, 0.011, 0.0)),
+        material=bronze,
+        name="hour_blade",
     )
     hour_hand.visual(
-        Box((0.012, 0.004, 0.030)),
-        origin=Origin(xyz=(0.0, 0.0, 0.015)),
-        material=clock_iron,
-        name="hour_arm",
-    )
-    hour_hand.visual(
-        Box((0.006, 0.004, 0.010)),
-        origin=Origin(xyz=(0.0, 0.0, 0.035)),
-        material=clock_iron,
-        name="hour_tip",
-    )
-    hour_hand.visual(
-        Box((0.007, 0.004, 0.010)),
-        origin=Origin(xyz=(0.0, 0.0, -0.006)),
-        material=clock_iron,
-        name="hour_tail",
+        Cylinder(radius=0.16, length=0.022),
+        origin=Origin(xyz=(0.0, 0.011, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=bronze,
+        name="hour_hub",
     )
     hour_hand.inertial = Inertial.from_geometry(
-        Box((0.020, 0.004, 0.046)),
-        mass=0.05,
-        origin=Origin(xyz=(0.0, 0.0, 0.010)),
+        Box((0.32, 0.022, 1.30)),
+        mass=4.0,
+        origin=Origin(xyz=(0.0, 0.011, 0.33)),
     )
 
     minute_hand = model.part("minute_hand")
     minute_hand.visual(
-        Cylinder(radius=0.0085, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=clock_iron,
+        _hand_mesh(
+            name="minute_hand_blade",
+            length=1.38,
+            base_width=0.16,
+            tip_width=0.055,
+            tail_length=0.38,
+            tail_width=0.06,
+            thickness=0.018,
+        ),
+        origin=Origin(xyz=(0.0, 0.031, 0.0)),
+        material=bronze,
+        name="minute_blade",
+    )
+    minute_hand.visual(
+        Cylinder(radius=0.12, length=0.018),
+        origin=Origin(xyz=(0.0, 0.031, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=bronze,
+        name="minute_hub",
+    )
+    minute_hand.visual(
+        Cylinder(radius=0.07, length=0.014),
+        origin=Origin(xyz=(0.0, 0.047, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=bronze,
         name="minute_cap",
     )
-    minute_hand.visual(
-        Box((0.010, 0.004, 0.046)),
-        origin=Origin(xyz=(0.0, 0.0, 0.023)),
-        material=clock_iron,
-        name="minute_arm",
-    )
-    minute_hand.visual(
-        Box((0.005, 0.004, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, 0.052)),
-        material=clock_iron,
-        name="minute_tip",
-    )
-    minute_hand.visual(
-        Box((0.006, 0.004, 0.014)),
-        origin=Origin(xyz=(0.0, 0.0, -0.008)),
-        material=clock_iron,
-        name="minute_tail",
-    )
     minute_hand.inertial = Inertial.from_geometry(
-        Box((0.018, 0.004, 0.066)),
-        mass=0.04,
-        origin=Origin(xyz=(0.0, 0.0, 0.014)),
+        Box((0.26, 0.050, 1.78)),
+        mass=3.0,
+        origin=Origin(xyz=(0.0, 0.031, 0.49)),
     )
 
+    clock_joint_origin = Origin(xyz=(0.0, front_face_y + 0.14, clock_center_z))
     model.articulation(
-        "tower_to_clock_face",
-        ArticulationType.FIXED,
+        "tower_to_hour_hand",
+        ArticulationType.REVOLUTE,
         parent=tower,
-        child=clock_face,
-        origin=Origin(xyz=(0.0, 0.104, 0.544)),
-    )
-    model.articulation(
-        "clock_face_to_hour_hand",
-        ArticulationType.CONTINUOUS,
-        parent=clock_face,
         child=hour_hand,
-        origin=Origin(xyz=(0.0, 0.019, 0.0)),
+        origin=clock_joint_origin,
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=0.3, velocity=6.0),
+        motion_limits=MotionLimits(
+            effort=2.0,
+            velocity=1.0,
+            lower=-math.tau,
+            upper=math.tau,
+        ),
     )
     model.articulation(
-        "clock_face_to_minute_hand",
-        ArticulationType.CONTINUOUS,
-        parent=clock_face,
+        "tower_to_minute_hand",
+        ArticulationType.REVOLUTE,
+        parent=tower,
         child=minute_hand,
-        origin=Origin(xyz=(0.0, 0.023, 0.0)),
+        origin=clock_joint_origin,
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=0.3, velocity=12.0),
+        motion_limits=MotionLimits(
+            effort=2.0,
+            velocity=1.0,
+            lower=-math.tau,
+            upper=math.tau,
+        ),
     )
 
     return model
@@ -328,119 +438,135 @@ def build_object_model() -> ArticulatedObject:
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     tower = object_model.get_part("tower")
-    clock_face = object_model.get_part("clock_face")
     hour_hand = object_model.get_part("hour_hand")
     minute_hand = object_model.get_part("minute_hand")
-    hour_spin = object_model.get_articulation("clock_face_to_hour_hand")
-    minute_spin = object_model.get_articulation("clock_face_to_minute_hand")
-
-    clock_seat = tower.get_visual("clock_seat")
-    roof_peak = tower.get_visual("roof_peak")
-    roof_peak_lower = tower.get_visual("roof_peak_lower")
-    flagpole = tower.get_visual("flagpole")
-    flagpole_finial = tower.get_visual("flagpole_finial")
-    cornice_lower = tower.get_visual("cornice_lower")
-    cornice_upper = tower.get_visual("cornice_upper")
-    clock_ring_left = tower.get_visual("clock_ring_left")
-    clock_ring_right = tower.get_visual("clock_ring_right")
-    clock_ring_top = tower.get_visual("clock_ring_top")
-    clock_ring_bottom = tower.get_visual("clock_ring_bottom")
-    rusticated_course = tower.get_visual("rusticated_course_2")
-    quoin = tower.get_visual("quoin_2_1_1")
-    plinth = tower.get_visual("plinth")
-
-    clock_disk = clock_face.get_visual("clock_face_disk")
-    clock_mount = clock_face.get_visual("clock_mount")
-    hub_boss = clock_face.get_visual("hub_boss")
-
-    hour_cap = hour_hand.get_visual("hour_cap")
-    hour_tip = hour_hand.get_visual("hour_tip")
-    minute_cap = minute_hand.get_visual("minute_cap")
-    minute_tip = minute_hand.get_visual("minute_tip")
+    hour_joint = object_model.get_articulation("tower_to_hour_hand")
+    minute_joint = object_model.get_articulation("tower_to_minute_hand")
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
+    ctx.check_mesh_assets_ready()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    # Preferred default QC stack:
+    # 1) likely-failure grounded-component floating check for disconnected part groups
+    ctx.fail_if_isolated_parts()
+    # 2) noisier warning-tier sensor for same-part disconnected geometry islands
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    # 3) likely-failure rest-pose part-to-part overlap backstop for real 3D interpenetration
+    # This is not an "inside / nested / footprint overlap" check.
+    # Investigate all three. Warning-tier signals are not free passes.
+    # Use `ctx.allow_overlap(...)` only for true intended penetration.
+    # If parts are nested but should remain clear, prove that with exact
+    # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
+    # `expect_within(...)` checks instead.
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    ctx.expect_contact(clock_face, tower, elem_a=clock_mount, elem_b=clock_seat)
-    ctx.expect_overlap(clock_face, tower, axes="xz", elem_a=clock_disk, elem_b=clock_ring_left, min_overlap=0.005)
-    ctx.expect_overlap(clock_face, tower, axes="xz", elem_a=clock_disk, elem_b=clock_ring_right, min_overlap=0.005)
-    ctx.expect_overlap(clock_face, tower, axes="xz", elem_a=clock_disk, elem_b=clock_ring_top, min_overlap=0.010)
-    ctx.expect_overlap(clock_face, tower, axes="xz", elem_a=clock_disk, elem_b=clock_ring_bottom, min_overlap=0.010)
-    ctx.expect_within(clock_face, tower, axes="xz", inner_elem=clock_disk)
-    ctx.expect_contact(clock_face, hour_hand, elem_a=hub_boss, elem_b=hour_cap)
-    ctx.expect_contact(hour_hand, minute_hand, elem_a=hour_cap, elem_b=minute_cap)
+    ctx.expect_contact(
+        hour_hand,
+        tower,
+        elem_a="hour_hub",
+        elem_b="clock_hub",
+        name="hour hand seats on center arbor",
+    )
+    ctx.expect_contact(
+        minute_hand,
+        hour_hand,
+        elem_a="minute_hub",
+        elem_b="hour_hub",
+        name="minute hand stacks on hour hand hub",
+    )
     ctx.expect_gap(
         minute_hand,
         hour_hand,
-        axis="z",
-        min_gap=0.005,
-        positive_elem=minute_tip,
-        negative_elem=hour_tip,
+        axis="y",
+        positive_elem="minute_hub",
+        negative_elem="hour_hub",
+        min_gap=0.0,
+        max_gap=0.001,
+        name="clock hand stack stays separated by face planes",
     )
     ctx.expect_within(
         hour_hand,
-        clock_face,
+        tower,
         axes="xz",
-        inner_elem=hour_tip,
-        outer_elem=clock_disk,
+        inner_elem="hour_blade",
+        outer_elem="clock_dial",
+        margin=0.08,
+        name="hour hand remains within dial extent",
     )
     ctx.expect_within(
         minute_hand,
-        clock_face,
+        tower,
         axes="xz",
-        inner_elem=minute_tip,
-        outer_elem=clock_disk,
+        inner_elem="minute_blade",
+        outer_elem="clock_dial",
+        margin=0.08,
+        name="minute hand remains within dial extent",
     )
-    ctx.expect_contact(tower, tower, elem_a=quoin, elem_b=tower.get_visual("right_wall"))
-    ctx.expect_within(tower, tower, axes="xy", inner_elem=rusticated_course, outer_elem=plinth)
-    ctx.expect_contact(tower, tower, elem_a=plinth, elem_b=tower.get_visual("rusticated_course_0"))
-    ctx.expect_contact(tower, tower, elem_a=cornice_upper, elem_b=cornice_lower)
-    ctx.expect_contact(tower, tower, elem_a=roof_peak_lower, elem_b=cornice_upper)
-    ctx.expect_contact(tower, tower, elem_a=flagpole, elem_b=roof_peak)
-    ctx.expect_contact(tower, tower, elem_a=flagpole_finial, elem_b=flagpole)
+    ctx.check(
+        "hour joint axis faces out of the clock face",
+        tuple(hour_joint.axis) == (0.0, 1.0, 0.0),
+        f"axis={hour_joint.axis!r}",
+    )
+    ctx.check(
+        "minute joint axis faces out of the clock face",
+        tuple(minute_joint.axis) == (0.0, 1.0, 0.0),
+        f"axis={minute_joint.axis!r}",
+    )
 
-    with ctx.pose({hour_spin: -math.pi / 3.0, minute_spin: math.pi / 2.0}):
-        ctx.expect_within(
+    minute_rest = ctx.part_element_world_aabb(minute_hand, elem="minute_blade")
+    assert minute_rest is not None
+    with ctx.pose({minute_joint: math.pi / 2.0}):
+        minute_quarter = ctx.part_element_world_aabb(minute_hand, elem="minute_blade")
+        assert minute_quarter is not None
+        ctx.check(
+            "minute hand rotates across the dial",
+            minute_quarter[0][0] < minute_rest[0][0] - 1.1,
+            f"rest_min_x={minute_rest[0][0]:.3f}, turned_min_x={minute_quarter[0][0]:.3f}",
+        )
+        ctx.expect_contact(
+            minute_hand,
             hour_hand,
-            clock_face,
-            axes="xz",
-            inner_elem=hour_tip,
-            outer_elem=clock_disk,
+            elem_a="minute_hub",
+            elem_b="hour_hub",
+            name="minute hand hub stays seated while rotated",
         )
         ctx.expect_within(
             minute_hand,
-            clock_face,
+            tower,
             axes="xz",
-            inner_elem=minute_tip,
-            outer_elem=clock_disk,
+            inner_elem="minute_blade",
+            outer_elem="clock_dial",
+            margin=0.08,
+            name="minute hand quarter-turn still stays on the dial",
         )
-        ctx.expect_contact(clock_face, hour_hand, elem_a=hub_boss, elem_b=hour_cap)
-        ctx.expect_contact(hour_hand, minute_hand, elem_a=hour_cap, elem_b=minute_cap)
 
-    with ctx.pose({hour_spin: math.pi / 6.0, minute_spin: math.pi}):
+    hour_rest = ctx.part_element_world_aabb(hour_hand, elem="hour_blade")
+    assert hour_rest is not None
+    with ctx.pose({hour_joint: -math.pi / 3.0}):
+        hour_offset = ctx.part_element_world_aabb(hour_hand, elem="hour_blade")
+        assert hour_offset is not None
+        ctx.check(
+            "hour hand rotates away from noon",
+            hour_offset[1][0] > hour_rest[1][0] + 0.65,
+            f"rest_max_x={hour_rest[1][0]:.3f}, turned_max_x={hour_offset[1][0]:.3f}",
+        )
+        ctx.expect_contact(
+            hour_hand,
+            tower,
+            elem_a="hour_hub",
+            elem_b="clock_hub",
+            name="hour hand arbor contact persists under rotation",
+        )
         ctx.expect_within(
             hour_hand,
-            clock_face,
+            tower,
             axes="xz",
-            inner_elem=hour_tip,
-            outer_elem=clock_disk,
+            inner_elem="hour_blade",
+            outer_elem="clock_dial",
+            margin=0.08,
+            name="hour hand rotated pose still stays on the dial",
         )
-        ctx.expect_within(
-            minute_hand,
-            clock_face,
-            axes="xz",
-            inner_elem=minute_tip,
-            outer_elem=clock_disk,
-        )
+
     return ctx.report()
 
 

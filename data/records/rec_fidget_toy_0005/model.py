@@ -8,10 +8,10 @@ import math
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
+    Box,
     Cylinder,
+    ExtrudeWithHolesGeometry,
     Inertial,
-    LatheGeometry,
     MotionLimits,
     Origin,
     TestContext,
@@ -19,284 +19,312 @@ from sdk import (
     mesh_from_geometry,
 )
 
-ASSETS = AssetContext.from_script(__file__)
 
-COLLAR_LENGTH = 0.006
-COLLAR_RADIUS = 0.0125
-END_CLEARANCE = 0.004
-INTER_RING_GAP = 0.005
-RING_WIDTH = 0.018
-TRACK_LENGTH = RING_WIDTH
-SHAFT_RADIUS = 0.0072
-TRACK_RADIUS = 0.0082
-RING_INNER_RADIUS = 0.0080
-RING_OUTER_EDGE_RADIUS = 0.0186
-RING_OUTER_CROWN_RADIUS = 0.0202
-RING_MID_BAND_HALF = 0.0048
-RING_Z_POSITIONS = (-0.023, 0.0, 0.023)
-ROD_LENGTH = (2.0 * COLLAR_LENGTH) + (3.0 * RING_WIDTH) + (2.0 * END_CLEARANCE) + (2.0 * INTER_RING_GAP)
-COLLAR_OFFSET = (ROD_LENGTH * 0.5) - (COLLAR_LENGTH * 0.5)
-
-
-def _save_mesh(name: str, geometry):
-    ASSETS.mesh_dir.mkdir(parents=True, exist_ok=True)
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+FINGER_HOLE_RADIUS = 0.0135
+AXLE_RING_OUTER_RADIUS = 0.0200
+AXLE_RING_HEIGHT = 0.0080
+BASE_WEB_THICKNESS = 0.0020
+PLANET_ORBIT_RADIUS = 0.0335
+PLANET_TOOTH_COUNT = 12
+PLANET_ROOT_RADIUS = 0.0102
+PLANET_TIP_RADIUS = 0.0120
+PLANET_BORE_RADIUS = 0.0046
+PLANET_THICKNESS = 0.0050
+PLANET_HUB_HEIGHT = 0.0014
+PLANET_CUTOUT_RADIUS = 0.0023
+PLANET_CUTOUT_ORBIT = 0.0072
+SEAT_RADIUS = 0.0078
+SEAT_HEIGHT = 0.0015
+AXLE_POST_RADIUS = 0.0040
+AXLE_POST_HEIGHT = 0.0062
 
 
-def _ring_band_mesh():
-    outer_profile = [
-        (RING_OUTER_EDGE_RADIUS, -(RING_WIDTH * 0.5)),
-        (RING_OUTER_CROWN_RADIUS, -RING_MID_BAND_HALF),
-        (RING_OUTER_CROWN_RADIUS, RING_MID_BAND_HALF),
-        (RING_OUTER_EDGE_RADIUS, RING_WIDTH * 0.5),
+def _circle_profile(radius: float, *, segments: int = 48, phase: float = 0.0) -> list[tuple[float, float]]:
+    return [
+        (
+            radius * math.cos(phase + math.tau * index / segments),
+            radius * math.sin(phase + math.tau * index / segments),
+        )
+        for index in range(segments)
     ]
-    inner_profile = [
-        (RING_INNER_RADIUS, -(RING_WIDTH * 0.5)),
-        (RING_INNER_RADIUS, RING_WIDTH * 0.5),
+
+
+def _offset_profile(
+    profile: list[tuple[float, float]],
+    *,
+    dx: float = 0.0,
+    dy: float = 0.0,
+) -> list[tuple[float, float]]:
+    return [(x + dx, y + dy) for x, y in profile]
+
+
+def _gear_outline(
+    tooth_count: int,
+    *,
+    root_radius: float,
+    tip_radius: float,
+    tip_fraction: float = 0.42,
+) -> list[tuple[float, float]]:
+    outline: list[tuple[float, float]] = []
+    pitch = math.tau / tooth_count
+    tip_half_angle = pitch * tip_fraction * 0.5
+    for tooth_index in range(tooth_count):
+        tooth_center = tooth_index * pitch
+        outline.extend(
+            [
+                (
+                    root_radius * math.cos(tooth_center - pitch * 0.5),
+                    root_radius * math.sin(tooth_center - pitch * 0.5),
+                ),
+                (
+                    tip_radius * math.cos(tooth_center - tip_half_angle),
+                    tip_radius * math.sin(tooth_center - tip_half_angle),
+                ),
+                (
+                    tip_radius * math.cos(tooth_center + tip_half_angle),
+                    tip_radius * math.sin(tooth_center + tip_half_angle),
+                ),
+                (
+                    root_radius * math.cos(tooth_center + pitch * 0.5),
+                    root_radius * math.sin(tooth_center + pitch * 0.5),
+                ),
+            ]
+        )
+    return outline
+
+
+def _planet_centers() -> list[tuple[float, float]]:
+    return [
+        (
+            PLANET_ORBIT_RADIUS * math.cos(angle),
+            PLANET_ORBIT_RADIUS * math.sin(angle),
+        )
+        for angle in (math.pi / 2.0, math.pi / 2.0 + 2.0 * math.pi / 3.0, math.pi / 2.0 + 4.0 * math.pi / 3.0)
     ]
-    return _save_mesh(
-        "magnetic_ring_band.obj",
-        LatheGeometry.from_shell_profiles(
-            outer_profile,
-            inner_profile,
-            segments=88,
-            start_cap="flat",
-            end_cap="flat",
-        ),
-    )
-
-
-def _add_cylindrical_segment(part, *, name: str, radius: float, length: float, center_z: float, material) -> None:
-    part.visual(
-        Cylinder(radius=radius, length=length),
-        origin=Origin(xyz=(0.0, 0.0, center_z)),
-        material=material,
-        name=name,
-    )
-
-
-def _add_ring(model: ArticulatedObject, core, *, index: int, z_pos: float, band_mesh, material):
-    ring = model.part(f"ring_{index}")
-    ring.visual(band_mesh, material=material, name="band")
-    ring.inertial = Inertial.from_geometry(
-        Cylinder(radius=RING_OUTER_CROWN_RADIUS, length=RING_WIDTH),
-        mass=0.040,
-    )
-    model.articulation(
-        f"core_to_ring_{index}",
-        ArticulationType.CONTINUOUS,
-        parent=core,
-        child=ring,
-        origin=Origin(xyz=(0.0, 0.0, z_pos)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=0.2, velocity=35.0),
-    )
-    return ring
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="magnetic_ring_fidget", assets=ASSETS)
+    model = ArticulatedObject(name="gear_ring_fidget")
 
-    shaft_black = model.material("shaft_black", rgba=(0.16, 0.17, 0.19, 1.0))
-    track_steel = model.material("track_steel", rgba=(0.73, 0.75, 0.78, 1.0))
-    bronze = model.material("bronze", rgba=(0.67, 0.46, 0.28, 1.0))
-    titanium = model.material("titanium", rgba=(0.60, 0.63, 0.68, 1.0))
-    gunmetal = model.material("gunmetal", rgba=(0.31, 0.35, 0.39, 1.0))
+    frame_graphite = model.material("frame_graphite", rgba=(0.14, 0.15, 0.18, 1.0))
+    frame_trim = model.material("frame_trim", rgba=(0.31, 0.33, 0.36, 1.0))
+    gear_brass = model.material("gear_brass", rgba=(0.77, 0.62, 0.31, 1.0))
 
-    band_mesh = _ring_band_mesh()
-
-    core = model.part("core")
-    _add_cylindrical_segment(
-        core,
-        name="collar_lower",
-        radius=COLLAR_RADIUS,
-        length=COLLAR_LENGTH,
-        center_z=-COLLAR_OFFSET,
-        material=track_steel,
+    axle_ring_mesh = mesh_from_geometry(
+        ExtrudeWithHolesGeometry(
+            _circle_profile(AXLE_RING_OUTER_RADIUS, segments=72),
+            [_circle_profile(FINGER_HOLE_RADIUS, segments=72)],
+            AXLE_RING_HEIGHT,
+            center=True,
+        ),
+        "gear_ring_axle_ring",
     )
-    _add_cylindrical_segment(
-        core,
-        name="neck_lower",
-        radius=SHAFT_RADIUS,
-        length=END_CLEARANCE,
-        center_z=-(ROD_LENGTH * 0.5) + COLLAR_LENGTH + (END_CLEARANCE * 0.5),
-        material=shaft_black,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="track_1",
-        radius=TRACK_RADIUS,
-        length=TRACK_LENGTH,
-        center_z=RING_Z_POSITIONS[0],
-        material=track_steel,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="spacer_1",
-        radius=SHAFT_RADIUS,
-        length=INTER_RING_GAP,
-        center_z=-0.0115,
-        material=shaft_black,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="track_2",
-        radius=TRACK_RADIUS,
-        length=TRACK_LENGTH,
-        center_z=RING_Z_POSITIONS[1],
-        material=track_steel,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="spacer_2",
-        radius=SHAFT_RADIUS,
-        length=INTER_RING_GAP,
-        center_z=0.0115,
-        material=shaft_black,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="track_3",
-        radius=TRACK_RADIUS,
-        length=TRACK_LENGTH,
-        center_z=RING_Z_POSITIONS[2],
-        material=track_steel,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="neck_upper",
-        radius=SHAFT_RADIUS,
-        length=END_CLEARANCE,
-        center_z=(ROD_LENGTH * 0.5) - COLLAR_LENGTH - (END_CLEARANCE * 0.5),
-        material=shaft_black,
-    )
-    _add_cylindrical_segment(
-        core,
-        name="collar_upper",
-        radius=COLLAR_RADIUS,
-        length=COLLAR_LENGTH,
-        center_z=COLLAR_OFFSET,
-        material=track_steel,
-    )
-    core.inertial = Inertial.from_geometry(
-        Cylinder(radius=COLLAR_RADIUS, length=ROD_LENGTH),
-        mass=0.14,
+    axle_ring_trim_mesh = mesh_from_geometry(
+        ExtrudeWithHolesGeometry(
+            _circle_profile(AXLE_RING_OUTER_RADIUS - 0.0014, segments=72),
+            [_circle_profile(FINGER_HOLE_RADIUS + 0.0010, segments=72)],
+            0.0018,
+            center=True,
+        ),
+        "gear_ring_axle_ring_trim",
     )
 
-    _add_ring(model, core, index=1, z_pos=RING_Z_POSITIONS[0], band_mesh=band_mesh, material=bronze)
-    _add_ring(model, core, index=2, z_pos=RING_Z_POSITIONS[1], band_mesh=band_mesh, material=titanium)
-    _add_ring(model, core, index=3, z_pos=RING_Z_POSITIONS[2], band_mesh=band_mesh, material=gunmetal)
+    planet_body_mesh = mesh_from_geometry(
+        ExtrudeWithHolesGeometry(
+            _gear_outline(
+                PLANET_TOOTH_COUNT,
+                root_radius=PLANET_ROOT_RADIUS,
+                tip_radius=PLANET_TIP_RADIUS,
+            ),
+            [
+                _circle_profile(PLANET_BORE_RADIUS, segments=48),
+                *[
+                    _offset_profile(
+                        _circle_profile(PLANET_CUTOUT_RADIUS, segments=24, phase=0.15),
+                        dx=PLANET_CUTOUT_ORBIT * math.cos(angle),
+                        dy=PLANET_CUTOUT_ORBIT * math.sin(angle),
+                    )
+                    for angle in (0.0, 2.0 * math.pi / 3.0, 4.0 * math.pi / 3.0)
+                ],
+            ],
+            PLANET_THICKNESS,
+            center=True,
+        ),
+        "planet_gear_body",
+    )
+
+    planet_hub_mesh = mesh_from_geometry(
+        ExtrudeWithHolesGeometry(
+            _circle_profile(0.0072, segments=40),
+            [_circle_profile(PLANET_BORE_RADIUS, segments=40)],
+            PLANET_HUB_HEIGHT,
+            center=True,
+        ),
+        "planet_gear_hub",
+    )
+
+    carrier = model.part("carrier")
+    carrier.visual(
+        axle_ring_mesh,
+        origin=Origin(xyz=(0.0, 0.0, AXLE_RING_HEIGHT * 0.5)),
+        material=frame_graphite,
+        name="axle_ring",
+    )
+    carrier.visual(
+        axle_ring_trim_mesh,
+        origin=Origin(xyz=(0.0, 0.0, AXLE_RING_HEIGHT - 0.0009)),
+        material=frame_trim,
+        name="axle_ring_trim",
+    )
+
+    planet_centers = _planet_centers()
+    spoke_length = 0.0180
+    for index, (x_pos, y_pos) in enumerate(planet_centers, start=1):
+        angle = math.atan2(y_pos, x_pos)
+        carrier.visual(
+            Box((spoke_length, 0.0080, BASE_WEB_THICKNESS)),
+            origin=Origin(
+                xyz=(
+                    (AXLE_RING_OUTER_RADIUS + PLANET_ORBIT_RADIUS) * 0.5 * math.cos(angle),
+                    (AXLE_RING_OUTER_RADIUS + PLANET_ORBIT_RADIUS) * 0.5 * math.sin(angle),
+                    BASE_WEB_THICKNESS * 0.5,
+                ),
+                rpy=(0.0, 0.0, angle),
+            ),
+            material=frame_graphite,
+            name=f"spoke_{index}",
+        )
+        carrier.visual(
+            Cylinder(radius=SEAT_RADIUS, length=SEAT_HEIGHT),
+            origin=Origin(xyz=(x_pos, y_pos, SEAT_HEIGHT * 0.5)),
+            material=frame_trim,
+            name=f"seat_{index}",
+        )
+        carrier.visual(
+            Cylinder(radius=AXLE_POST_RADIUS, length=AXLE_POST_HEIGHT),
+            origin=Origin(xyz=(x_pos, y_pos, AXLE_POST_HEIGHT * 0.5)),
+            material=frame_graphite,
+            name=f"axle_{index}",
+        )
+
+    bridge_length = 0.0460
+    for index in range(len(planet_centers)):
+        x0, y0 = planet_centers[index]
+        x1, y1 = planet_centers[(index + 1) % len(planet_centers)]
+        carrier.visual(
+            Box((bridge_length, 0.0080, BASE_WEB_THICKNESS)),
+            origin=Origin(
+                xyz=((x0 + x1) * 0.5, (y0 + y1) * 0.5, BASE_WEB_THICKNESS * 0.5),
+                rpy=(0.0, 0.0, math.atan2(y1 - y0, x1 - x0)),
+            ),
+            material=frame_graphite,
+            name=f"bridge_{index + 1}",
+        )
+
+    carrier.inertial = Inertial.from_geometry(
+        Box((0.094, 0.094, AXLE_RING_HEIGHT)),
+        mass=0.085,
+        origin=Origin(xyz=(0.0, 0.0, AXLE_RING_HEIGHT * 0.5)),
+    )
+
+    gear_stack_height = PLANET_THICKNESS + PLANET_HUB_HEIGHT
+    for index, (x_pos, y_pos) in enumerate(planet_centers, start=1):
+        planet = model.part(f"planet_{index}")
+        planet.visual(
+            planet_body_mesh,
+            origin=Origin(xyz=(0.0, 0.0, PLANET_THICKNESS * 0.5)),
+            material=gear_brass,
+            name="gear_body",
+        )
+        planet.visual(
+            planet_hub_mesh,
+            origin=Origin(xyz=(0.0, 0.0, PLANET_THICKNESS - 0.0001 + PLANET_HUB_HEIGHT * 0.5)),
+            material=frame_trim,
+            name="hub_ring",
+        )
+        planet.inertial = Inertial.from_geometry(
+            Cylinder(radius=PLANET_TIP_RADIUS, length=gear_stack_height),
+            mass=0.014,
+            origin=Origin(xyz=(0.0, 0.0, gear_stack_height * 0.5)),
+        )
+        model.articulation(
+            f"carrier_to_planet_{index}",
+            ArticulationType.REVOLUTE,
+            parent=carrier,
+            child=planet,
+            origin=Origin(xyz=(x_pos, y_pos, SEAT_HEIGHT)),
+            axis=(0.0, 0.0, 1.0),
+            motion_limits=MotionLimits(
+                effort=0.25,
+                velocity=24.0,
+                lower=-math.tau,
+                upper=math.tau,
+            ),
+        )
+
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    core = object_model.get_part("core")
-    ring_1 = object_model.get_part("ring_1")
-    ring_2 = object_model.get_part("ring_2")
-    ring_3 = object_model.get_part("ring_3")
-    spin_1 = object_model.get_articulation("core_to_ring_1")
-    spin_2 = object_model.get_articulation("core_to_ring_2")
-    spin_3 = object_model.get_articulation("core_to_ring_3")
-
-    collar_lower = core.get_visual("collar_lower")
-    collar_upper = core.get_visual("collar_upper")
-    track_1 = core.get_visual("track_1")
-    track_2 = core.get_visual("track_2")
-    track_3 = core.get_visual("track_3")
-    band_1 = ring_1.get_visual("band")
-    band_2 = ring_2.get_visual("band")
-    band_3 = ring_3.get_visual("band")
+    ctx = TestContext(object_model)
+    carrier = object_model.get_part("carrier")
+    planets = [object_model.get_part(f"planet_{index}") for index in range(1, 4)]
+    planet_joints = [object_model.get_articulation(f"carrier_to_planet_{index}") for index in range(1, 4)]
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    for ring in (ring_1, ring_2, ring_3):
-        ctx.allow_overlap(ring, core, reason="ring band lightly preloads its bearing track so the spinner does not float off the core")
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.001,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.001,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
+    ctx.check_mesh_assets_ready()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    for ring, band, track in (
-        (ring_1, band_1, track_1),
-        (ring_2, band_2, track_2),
-        (ring_3, band_3, track_3),
-    ):
-        ctx.expect_origin_distance(ring, core, axes="xy", max_dist=0.0005)
-        ctx.expect_overlap(ring, core, axes="xy", min_overlap=TRACK_RADIUS * 1.9, elem_a=band, elem_b=track)
-        ctx.expect_within(core, ring, axes="xy", inner_elem=track, outer_elem=band)
-
-    ctx.expect_gap(
-        ring_1,
-        core,
-        axis="z",
-        min_gap=0.0035,
-        max_gap=0.0045,
-        positive_elem=band_1,
-        negative_elem=collar_lower,
-    )
-    ctx.expect_gap(
-        ring_2,
-        ring_1,
-        axis="z",
-        min_gap=0.0045,
-        max_gap=0.0055,
-        positive_elem=band_2,
-        negative_elem=band_1,
-    )
-    ctx.expect_gap(
-        ring_3,
-        ring_2,
-        axis="z",
-        min_gap=0.0045,
-        max_gap=0.0055,
-        positive_elem=band_3,
-        negative_elem=band_2,
-    )
-    ctx.expect_gap(
-        core,
-        ring_3,
-        axis="z",
-        min_gap=0.0035,
-        max_gap=0.0045,
-        positive_elem=collar_upper,
-        negative_elem=band_3,
-    )
-    ctx.expect_within(core, core, axes="xy", inner_elem=track_1, outer_elem=collar_lower)
-    ctx.expect_within(core, core, axes="xy", inner_elem=track_3, outer_elem=collar_upper)
-
-    with ctx.pose({spin_1: 1.3, spin_2: -2.2, spin_3: 3.7}):
-        ctx.expect_within(core, ring_1, axes="xy", inner_elem=track_1, outer_elem=band_1)
-        ctx.expect_within(core, ring_2, axes="xy", inner_elem=track_2, outer_elem=band_2)
-        ctx.expect_within(core, ring_3, axes="xy", inner_elem=track_3, outer_elem=band_3)
-        ctx.expect_gap(
-            ring_2,
-            ring_1,
-            axis="z",
-            min_gap=0.0045,
-            max_gap=0.0055,
-            positive_elem=band_2,
-            negative_elem=band_1,
+    for index, (planet, joint) in enumerate(zip(planets, planet_joints, strict=True), start=1):
+        ctx.expect_contact(
+            planet,
+            carrier,
+            elem_a="gear_body",
+            elem_b=f"seat_{index}",
+            name=f"planet_{index}_seated_on_carrier",
         )
-        ctx.expect_gap(
-            ring_3,
-            ring_2,
-            axis="z",
-            min_gap=0.0045,
-            max_gap=0.0055,
-            positive_elem=band_3,
-            negative_elem=band_2,
+        ctx.expect_origin_distance(
+            planet,
+            carrier,
+            axes="xy",
+            min_dist=PLANET_ORBIT_RADIUS - 0.0006,
+            max_dist=PLANET_ORBIT_RADIUS + 0.0006,
+            name=f"planet_{index}_orbit_radius",
         )
+        ctx.expect_origin_gap(
+            planet,
+            carrier,
+            axis="z",
+            min_gap=SEAT_HEIGHT - 1e-6,
+            max_gap=SEAT_HEIGHT + 1e-6,
+            name=f"planet_{index}_mount_height",
+        )
+        ctx.check(
+            f"planet_{index}_spin_axis",
+            tuple(round(value, 6) for value in joint.axis) == (0.0, 0.0, 1.0),
+            details=f"Expected vertical spin axis for {joint.name}, got {joint.axis}",
+        )
+
+    planet_1_rest = ctx.part_world_position(planets[0])
+    assert planet_1_rest is not None
+    with ctx.pose({planet_joints[0]: math.pi / 2.0}):
+        planet_1_rotated = ctx.part_world_position(planets[0])
+        assert planet_1_rotated is not None
+        ctx.check(
+            "planet_1_rotation_keeps_center",
+            all(abs(a - b) <= 1e-9 for a, b in zip(planet_1_rest, planet_1_rotated, strict=True)),
+            details=f"Planet center moved during spin: rest={planet_1_rest}, posed={planet_1_rotated}",
+        )
+        ctx.expect_contact(
+            planets[0],
+            carrier,
+            elem_a="gear_body",
+            elem_b="seat_1",
+            name="planet_1_seated_when_rotated",
+        )
+
     return ctx.report()
 
 

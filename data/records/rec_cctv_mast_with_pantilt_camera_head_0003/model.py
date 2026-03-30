@@ -23,225 +23,246 @@ from sdk import (
 ASSETS = AssetContext.from_script(__file__)
 
 
-def _annular_band_mesh(filename: str, outer_radius: float, inner_radius: float, height: float):
-    return mesh_from_geometry(
-        LatheGeometry.from_shell_profiles(
-            [
-                (outer_radius, -0.5 * height),
-                (outer_radius, 0.5 * height),
-            ],
-            [
-                (inner_radius, -0.5 * height),
-                (inner_radius, 0.5 * height),
-            ],
-            segments=56,
-            start_cap="flat",
-            end_cap="flat",
-        ),
-        ASSETS.mesh_path(filename),
+def _save_mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+
+
+def _build_upper_housing_shell():
+    return LatheGeometry.from_shell_profiles(
+        [
+            (0.023, -0.024),
+            (0.027, -0.014),
+            (0.028, 0.000),
+            (0.023, 0.012),
+            (0.015, 0.017),
+            (0.006, 0.019),
+        ],
+        [
+            (0.017, -0.022),
+            (0.020, -0.013),
+            (0.021, -0.001),
+            (0.017, 0.010),
+            (0.010, 0.014),
+            (0.003, 0.016),
+        ],
+        segments=56,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_dome_bubble_shell():
+    return LatheGeometry.from_shell_profiles(
+        [
+            (0.004, -0.051),
+            (0.010, -0.048),
+            (0.021, -0.041),
+            (0.031, -0.032),
+            (0.038, -0.022),
+            (0.042, -0.010),
+            (0.043, 0.000),
+        ],
+        [
+            (0.0015, -0.048),
+            (0.007, -0.045),
+            (0.017, -0.038),
+            (0.027, -0.030),
+            (0.033, -0.021),
+            (0.038, -0.010),
+            (0.040, -0.001),
+        ],
+        segments=56,
+        start_cap="flat",
+        end_cap="flat",
     )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="corner_mount_dome_head", assets=ASSETS)
+    model = ArticulatedObject(name="wall_mounted_cctv_arm", assets=ASSETS)
 
-    galvanized = model.material("galvanized", rgba=(0.63, 0.66, 0.69, 1.0))
-    painted_gray = model.material("painted_gray", rgba=(0.43, 0.46, 0.50, 1.0))
-    smoked_dome = model.material("smoked_dome", rgba=(0.36, 0.43, 0.47, 0.38))
-    sensor_black = model.material("sensor_black", rgba=(0.08, 0.09, 0.10, 1.0))
-    lens_glass = model.material("lens_glass", rgba=(0.12, 0.18, 0.24, 0.60))
+    bracket_gray = model.material("bracket_gray", rgba=(0.34, 0.36, 0.39, 1.0))
+    housing_white = model.material("housing_white", rgba=(0.87, 0.89, 0.91, 1.0))
+    matte_black = model.material("matte_black", rgba=(0.10, 0.11, 0.12, 1.0))
+    smoked_clear = model.material("smoked_clear", rgba=(0.36, 0.42, 0.48, 0.34))
+    lens_glass = model.material("lens_glass", rgba=(0.18, 0.22, 0.26, 0.78))
 
-    dome_shell = mesh_from_geometry(
-        LatheGeometry.from_shell_profiles(
-            [
-                (0.056, 0.000),
-                (0.055, 0.010),
-                (0.050, 0.027),
-                (0.040, 0.046),
-                (0.022, 0.061),
-                (0.000, 0.068),
-            ],
-            [
-                (0.046, 0.004),
-                (0.045, 0.013),
-                (0.041, 0.028),
-                (0.033, 0.045),
-                (0.018, 0.059),
-                (0.000, 0.064),
-            ],
-            segments=64,
-            start_cap="flat",
-            end_cap="flat",
-        ),
-        ASSETS.mesh_path("dome_shell.obj"),
-    )
-    bearing_seat_mesh = _annular_band_mesh("bearing_seat.obj", 0.024, 0.020, 0.012)
-    turret_ring_mesh = _annular_band_mesh("turret_ring.obj", 0.029, 0.020, 0.012)
-    dome_skirt_mesh = _annular_band_mesh("dome_skirt.obj", 0.046, 0.028, 0.012)
-    dome_flange_mesh = _annular_band_mesh("dome_flange.obj", 0.056, 0.044, 0.006)
+    upper_shell_mesh = _save_mesh("cctv_upper_shell.obj", _build_upper_housing_shell())
+    bubble_shell_mesh = _save_mesh("cctv_dome_bubble.obj", _build_dome_bubble_shell())
 
-    mount = model.part("mount")
-    mount.visual(
-        Box((0.110, 0.110, 0.008)),
-        origin=Origin(xyz=(0.055, 0.055, 0.004)),
-        material=galvanized,
-        name="roof_plate",
+    bracket = model.part("bracket")
+    bracket.visual(
+        Box((0.010, 0.150, 0.180)),
+        origin=Origin(xyz=(0.005, 0.000, 0.090)),
+        material=bracket_gray,
+        name="wall_plate",
     )
-    mount.visual(
-        Box((0.006, 0.110, 0.070)),
-        origin=Origin(xyz=(0.003, 0.055, -0.035)),
-        material=galvanized,
-        name="wall_plate_x",
+    bracket.visual(
+        Box((0.156, 0.040, 0.024)),
+        origin=Origin(xyz=(0.088, 0.000, 0.126)),
+        material=bracket_gray,
+        name="arm_beam",
     )
-    mount.visual(
-        Box((0.110, 0.006, 0.070)),
-        origin=Origin(xyz=(0.055, 0.003, -0.035)),
-        material=galvanized,
-        name="wall_plate_y",
+    bracket.visual(
+        Box((0.124, 0.034, 0.012)),
+        origin=Origin(xyz=(0.058, 0.000, 0.082), rpy=(0.000, math.pi / 4.0, 0.000)),
+        material=bracket_gray,
+        name="angle_gusset",
     )
-    mount.visual(
-        Box((0.034, 0.034, 0.090)),
-        origin=Origin(xyz=(0.036, 0.036, 0.053)),
-        material=painted_gray,
-        name="post_shaft",
+    bracket.visual(
+        Cylinder(radius=0.020, length=0.030),
+        origin=Origin(xyz=(0.160, 0.000, 0.131)),
+        material=matte_black,
+        name="pan_mount_pad",
     )
-    mount.visual(
-        Box((0.046, 0.046, 0.008)),
-        origin=Origin(xyz=(0.036, 0.036, 0.102)),
-        material=painted_gray,
-        name="post_cap",
-    )
-    mount.visual(
-        bearing_seat_mesh,
-        origin=Origin(xyz=(0.036, 0.036, 0.112)),
-        material=painted_gray,
-        name="bearing_seat",
-    )
-    mount.inertial = Inertial.from_geometry(
-        Box((0.110, 0.110, 0.188)),
-        mass=3.6,
-        origin=Origin(xyz=(0.055, 0.055, 0.024)),
+    for index, (y_pos, z_pos) in enumerate(((-0.042, 0.048), (0.042, 0.048), (-0.042, 0.132), (0.042, 0.132))):
+        bracket.visual(
+            Cylinder(radius=0.008, length=0.004),
+            origin=Origin(xyz=(0.010, y_pos, z_pos), rpy=(0.000, math.pi / 2.0, 0.000)),
+            material=matte_black,
+            name=f"mount_screw_{index + 1}",
+        )
+    bracket.inertial = Inertial.from_geometry(
+        Box((0.180, 0.160, 0.190)),
+        mass=1.6,
+        origin=Origin(xyz=(0.090, 0.000, 0.095)),
     )
 
-    turret = model.part("turret")
-    turret.visual(
-        turret_ring_mesh,
-        origin=Origin(xyz=(0.0, 0.0, 0.006)),
-        material=painted_gray,
-        name="turret_ring",
+    pan_head = model.part("pan_head")
+    pan_head.visual(
+        Cylinder(radius=0.018, length=0.020),
+        origin=Origin(xyz=(0.000, 0.000, -0.010)),
+        material=housing_white,
+        name="pan_collar",
     )
-    turret.visual(
-        Cylinder(radius=0.020, length=0.012),
-        origin=Origin(xyz=(0.0, 0.0, 0.006)),
-        material=painted_gray,
-        name="turret_hub",
+    pan_head.visual(
+        Cylinder(radius=0.010, length=0.038),
+        origin=Origin(xyz=(0.000, 0.000, -0.039)),
+        material=housing_white,
+        name="drop_stem",
     )
-    turret.visual(
-        dome_skirt_mesh,
-        origin=Origin(xyz=(0.0, 0.0, 0.017)),
-        material=painted_gray,
-        name="dome_skirt",
+    pan_head.visual(
+        Box((0.032, 0.084, 0.012)),
+        origin=Origin(xyz=(0.014, 0.000, -0.064)),
+        material=housing_white,
+        name="yoke_bridge",
     )
-    turret.visual(
-        dome_flange_mesh,
-        origin=Origin(xyz=(0.0, 0.0, 0.025)),
-        material=painted_gray,
-        name="dome_flange",
+    pan_head.visual(
+        Box((0.012, 0.012, 0.052)),
+        origin=Origin(xyz=(0.014, 0.036, -0.096)),
+        material=housing_white,
+        name="left_yoke_arm",
     )
-    turret.visual(
-        dome_shell,
-        origin=Origin(xyz=(0.0, 0.0, 0.027)),
-        material=smoked_dome,
-        name="dome_shell",
+    pan_head.visual(
+        Box((0.012, 0.012, 0.052)),
+        origin=Origin(xyz=(0.014, -0.036, -0.096)),
+        material=housing_white,
+        name="right_yoke_arm",
     )
-    turret.visual(
-        Box((0.006, 0.010, 0.028)),
-        origin=Origin(xyz=(0.017, 0.0, 0.026)),
-        material=painted_gray,
-        name="lug_right",
-    )
-    turret.visual(
-        Box((0.006, 0.010, 0.028)),
-        origin=Origin(xyz=(-0.017, 0.0, 0.026)),
-        material=painted_gray,
-        name="lug_left",
-    )
-    turret.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.040, length=0.090),
-        mass=0.75,
-        origin=Origin(xyz=(0.0, 0.0, 0.034)),
+    pan_head.inertial = Inertial.from_geometry(
+        Box((0.050, 0.090, 0.130)),
+        mass=0.5,
+        origin=Origin(xyz=(0.010, 0.000, -0.060)),
     )
 
-    cradle = model.part("cradle")
-    cradle.visual(
-        Cylinder(radius=0.0035, length=0.040),
-        origin=Origin(rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=painted_gray,
-        name="tilt_pin",
+    camera_body = model.part("camera_body")
+    camera_body.visual(
+        Cylinder(radius=0.009, length=0.064),
+        origin=Origin(xyz=(0.000, 0.000, 0.000), rpy=(math.pi / 2.0, 0.000, 0.000)),
+        material=housing_white,
+        name="tilt_axle",
     )
-    cradle.visual(
-        Box((0.006, 0.008, 0.024)),
-        origin=Origin(xyz=(-0.008, 0.0, -0.012)),
-        material=painted_gray,
-        name="hanger_left",
+    camera_body.visual(
+        Box((0.016, 0.008, 0.024)),
+        origin=Origin(xyz=(0.006, 0.026, -0.002)),
+        material=housing_white,
+        name="left_tilt_cheek",
     )
-    cradle.visual(
-        Box((0.006, 0.008, 0.024)),
-        origin=Origin(xyz=(0.008, 0.0, -0.012)),
-        material=painted_gray,
-        name="hanger_right",
+    camera_body.visual(
+        Box((0.016, 0.008, 0.024)),
+        origin=Origin(xyz=(0.006, -0.026, -0.002)),
+        material=housing_white,
+        name="right_tilt_cheek",
     )
-    cradle.visual(
-        Box((0.020, 0.006, 0.004)),
-        origin=Origin(xyz=(0.0, 0.0, -0.004)),
-        material=painted_gray,
-        name="bridge",
+    camera_body.visual(
+        Box((0.018, 0.028, 0.018)),
+        origin=Origin(xyz=(0.014, 0.000, -0.012)),
+        material=housing_white,
+        name="neck_block",
     )
-    cradle.visual(
-        Box((0.008, 0.008, 0.010)),
-        origin=Origin(xyz=(0.0, 0.0, -0.011)),
-        material=painted_gray,
-        name="neck",
+    camera_body.visual(
+        upper_shell_mesh,
+        origin=Origin(xyz=(0.040, 0.000, -0.014)),
+        material=housing_white,
+        name="upper_housing_shell",
     )
-    cradle.visual(
-        Box((0.018, 0.014, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, -0.021)),
-        material=sensor_black,
-        name="payload_body",
+    camera_body.visual(
+        Cylinder(radius=0.034, length=0.004),
+        origin=Origin(xyz=(0.042, 0.000, -0.039)),
+        material=housing_white,
+        name="trim_ring",
     )
-    cradle.visual(
-        Cylinder(radius=0.0045, length=0.008),
-        origin=Origin(xyz=(0.0, 0.008, -0.021), rpy=(math.pi / 2.0, 0.0, 0.0)),
+    camera_body.visual(
+        Cylinder(radius=0.038, length=0.008),
+        origin=Origin(xyz=(0.042, 0.000, -0.045)),
+        material=matte_black,
+        name="dome_ring",
+    )
+    camera_body.visual(
+        bubble_shell_mesh,
+        origin=Origin(xyz=(0.042, 0.000, -0.045)),
+        material=smoked_clear,
+        name="dome_bubble",
+    )
+    camera_body.visual(
+        Cylinder(radius=0.010, length=0.022),
+        origin=Origin(xyz=(0.038, 0.000, -0.032)),
+        material=matte_black,
+        name="sensor_mount",
+    )
+    camera_body.visual(
+        Box((0.026, 0.020, 0.018)),
+        origin=Origin(xyz=(0.048, 0.000, -0.048), rpy=(0.000, 0.000, 0.000)),
+        material=matte_black,
+        name="sensor_block",
+    )
+    camera_body.visual(
+        Cylinder(radius=0.008, length=0.014),
+        origin=Origin(xyz=(0.062, 0.000, -0.049), rpy=(0.000, math.pi / 2.0, 0.000)),
         material=lens_glass,
         name="lens_barrel",
     )
-    cradle.inertial = Inertial.from_geometry(
-        Box((0.022, 0.016, 0.036)),
-        mass=0.45,
-        origin=Origin(xyz=(0.0, 0.0, -0.017)),
+    camera_body.inertial = Inertial.from_geometry(
+        Box((0.090, 0.090, 0.080)),
+        mass=0.9,
+        origin=Origin(xyz=(0.026, 0.000, -0.032)),
     )
 
     model.articulation(
-        "azimuth",
-        ArticulationType.CONTINUOUS,
-        parent=mount,
-        child=turret,
-        origin=Origin(xyz=(0.036, 0.036, 0.118)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=12.0, velocity=2.5),
+        "pan_joint",
+        ArticulationType.REVOLUTE,
+        parent=bracket,
+        child=pan_head,
+        origin=Origin(xyz=(0.160, 0.000, 0.116)),
+        axis=(0.000, 0.000, 1.000),
+        motion_limits=MotionLimits(
+            effort=12.0,
+            velocity=2.2,
+            lower=-3.05,
+            upper=3.05,
+        ),
     )
     model.articulation(
-        "tilt",
+        "tilt_joint",
         ArticulationType.REVOLUTE,
-        parent=turret,
-        child=cradle,
-        origin=Origin(xyz=(0.0, 0.0, 0.040)),
-        axis=(1.0, 0.0, 0.0),
+        parent=pan_head,
+        child=camera_body,
+        origin=Origin(xyz=(0.014, 0.000, -0.090)),
+        axis=(0.000, 1.000, 0.000),
         motion_limits=MotionLimits(
             effort=8.0,
             velocity=2.0,
-            lower=-1.05,
-            upper=0.35,
+            lower=-0.70,
+            upper=0.52,
         ),
     )
 
@@ -250,165 +271,257 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    mount = object_model.get_part("mount")
-    turret = object_model.get_part("turret")
-    cradle = object_model.get_part("cradle")
-    azimuth = object_model.get_articulation("azimuth")
-    tilt = object_model.get_articulation("tilt")
-    bearing_seat = mount.get_visual("bearing_seat")
-    post_cap = mount.get_visual("post_cap")
-    turret_ring = turret.get_visual("turret_ring")
-    turret_hub = turret.get_visual("turret_hub")
-    dome_flange = turret.get_visual("dome_flange")
-    dome_shell = turret.get_visual("dome_shell")
-    lug_left = turret.get_visual("lug_left")
-    lug_right = turret.get_visual("lug_right")
-    tilt_pin = cradle.get_visual("tilt_pin")
-    payload_body = cradle.get_visual("payload_body")
-    lens_barrel = cradle.get_visual("lens_barrel")
+    bracket = object_model.get_part("bracket")
+    pan_head = object_model.get_part("pan_head")
+    camera_body = object_model.get_part("camera_body")
+    pan_joint = object_model.get_articulation("pan_joint")
+    tilt_joint = object_model.get_articulation("tilt_joint")
+
+    wall_plate = bracket.get_visual("wall_plate")
+    pan_mount_pad = bracket.get_visual("pan_mount_pad")
+    pan_collar = pan_head.get_visual("pan_collar")
+    drop_stem = pan_head.get_visual("drop_stem")
+    yoke_bridge = pan_head.get_visual("yoke_bridge")
+    left_yoke_arm = pan_head.get_visual("left_yoke_arm")
+    right_yoke_arm = pan_head.get_visual("right_yoke_arm")
+    left_tilt_cheek = camera_body.get_visual("left_tilt_cheek")
+    right_tilt_cheek = camera_body.get_visual("right_tilt_cheek")
+    neck_block = camera_body.get_visual("neck_block")
+    upper_housing_shell = camera_body.get_visual("upper_housing_shell")
+    dome_ring = camera_body.get_visual("dome_ring")
+    dome_bubble = camera_body.get_visual("dome_bubble")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.check(
+        "pan_joint_axis_is_vertical",
+        tuple(pan_joint.axis) == (0.0, 0.0, 1.0),
+        f"Expected vertical pan axis, got {pan_joint.axis!r}",
+    )
+    ctx.check(
+        "tilt_joint_axis_is_horizontal",
+        tuple(tilt_joint.axis) == (0.0, 1.0, 0.0),
+        f"Expected horizontal tilt axis, got {tilt_joint.axis!r}",
+    )
+    pan_limits = pan_joint.motion_limits
+    tilt_limits = tilt_joint.motion_limits
+    ctx.check(
+        "pan_joint_has_realistic_sweep",
+        pan_limits is not None
+        and pan_limits.lower is not None
+        and pan_limits.upper is not None
+        and pan_limits.lower <= -2.9
+        and pan_limits.upper >= 2.9,
+        f"Pan limits should allow near-full surveillance sweep, got {pan_limits!r}",
+    )
+    ctx.check(
+        "tilt_joint_has_realistic_range",
+        tilt_limits is not None
+        and tilt_limits.lower is not None
+        and tilt_limits.upper is not None
+        and tilt_limits.lower <= -0.65
+        and tilt_limits.upper >= 0.45,
+        f"Tilt limits should allow downward watch and slight upward bias, got {tilt_limits!r}",
+    )
 
-    # Use prompt-specific exact visual checks as the real completion criteria.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - key poses stay believable
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
     ctx.expect_contact(
-        turret,
-        mount,
-        elem_a=turret_ring,
-        elem_b=bearing_seat,
-        name="turret_ring_seats_on_bearing",
+        pan_head,
+        bracket,
+        elem_a=pan_collar,
+        elem_b=pan_mount_pad,
+        name="pan_head_seated_on_mount_pad",
     )
     ctx.expect_overlap(
-        turret,
-        mount,
+        pan_head,
+        bracket,
         axes="xy",
-        min_overlap=0.020,
-        elem_a=turret_ring,
-        elem_b=bearing_seat,
-        name="turret_ring_centered_on_bearing",
-    )
-    ctx.expect_within(
-        turret,
-        mount,
-        axes="xy",
-        inner_elem=turret_hub,
-        outer_elem=bearing_seat,
-        name="turret_hub_stays_within_bearing_seat_footprint",
+        min_overlap=0.030,
+        elem_a=pan_collar,
+        elem_b=pan_mount_pad,
+        name="pan_axis_centered_on_mount_pad",
     )
     ctx.expect_gap(
-        turret,
-        mount,
+        camera_body,
+        bracket,
+        axis="x",
+        min_gap=0.150,
+        positive_elem=dome_ring,
+        negative_elem=wall_plate,
+        name="camera_hangs_away_from_wall",
+    )
+    ctx.expect_contact(
+        camera_body,
+        pan_head,
+        elem_a=left_tilt_cheek,
+        elem_b=left_yoke_arm,
+        name="left_tilt_cheek_seated_in_yoke",
+    )
+    ctx.expect_contact(
+        camera_body,
+        pan_head,
+        elem_a=right_tilt_cheek,
+        elem_b=right_yoke_arm,
+        name="right_tilt_cheek_seated_in_yoke",
+    )
+    ctx.expect_gap(
+        camera_body,
+        pan_head,
+        axis="x",
+        min_gap=0.006,
+        max_gap=0.015,
+        positive_elem=neck_block,
+        negative_elem=drop_stem,
+        name="neck_block_sits_ahead_of_drop_stem",
+    )
+    ctx.expect_gap(
+        pan_head,
+        camera_body,
+        axis="z",
+        min_gap=0.010,
+        positive_elem=yoke_bridge,
+        negative_elem=upper_housing_shell,
+        name="upper_housing_sits_below_yoke_bridge",
+    )
+    ctx.expect_gap(
+        pan_head,
+        camera_body,
         axis="z",
         min_gap=0.020,
-        positive_elem=dome_flange,
-        negative_elem=post_cap,
-        name="dome_flange_stands_above_post_cap",
+        positive_elem=pan_collar,
+        negative_elem=dome_bubble,
+        name="dome_sits_below_pan_axis",
     )
-    ctx.expect_contact(
-        cradle,
-        turret,
-        elem_a=tilt_pin,
-        elem_b=lug_left,
-        name="tilt_pin_contacts_left_lug",
-    )
-    ctx.expect_contact(
-        cradle,
-        turret,
-        elem_a=tilt_pin,
-        elem_b=lug_right,
-        name="tilt_pin_contacts_right_lug",
-    )
-    ctx.expect_within(
-        cradle,
-        turret,
-        axes="xy",
-        inner_elem=payload_body,
-        outer_elem=dome_flange,
-        name="payload_body_stays_under_dome_flange",
-    )
-    ctx.expect_within(
-        cradle,
-        turret,
-        axes="xy",
-        inner_elem=lens_barrel,
-        outer_elem=dome_flange,
-        name="lens_stays_under_dome_flange",
-    )
-    ctx.expect_within(
-        cradle,
-        turret,
-        axes="xy",
-        inner_elem=payload_body,
-        outer_elem=dome_shell,
-        name="dome_shell_covers_payload_body",
-    )
-    with ctx.pose({tilt: -1.00}):
-        ctx.expect_within(
-            cradle,
-            turret,
-            axes="xy",
-            inner_elem=payload_body,
-            outer_elem=dome_flange,
-            name="payload_body_stays_under_flange_tilted_down",
-        )
-        ctx.expect_within(
-            cradle,
-            turret,
-            axes="xy",
-            inner_elem=lens_barrel,
-            outer_elem=dome_flange,
-            name="lens_stays_under_flange_tilted_down",
-        )
-        ctx.expect_within(
-            cradle,
-            turret,
-            axes="xy",
-            inner_elem=payload_body,
-            outer_elem=dome_shell,
-            name="payload_body_stays_under_dome_shell_tilted_down",
-        )
-        ctx.expect_within(
-            cradle,
-            turret,
-            axes="xy",
-            inner_elem=lens_barrel,
-            outer_elem=dome_shell,
-            name="lens_stays_under_dome_shell_tilted_down",
-        )
-    with ctx.pose({tilt: 0.25, azimuth: math.pi / 2.0}):
+    with ctx.pose({pan_joint: 1.6}):
         ctx.expect_contact(
-            turret,
-            mount,
-            elem_a=turret_ring,
-            elem_b=bearing_seat,
-            name="turret_ring_stays_seated_while_rotated",
+            pan_head,
+            bracket,
+            elem_a=pan_collar,
+            elem_b=pan_mount_pad,
+            name="pan_mount_stays_seated_when_swiveled",
         )
-        ctx.expect_within(
-            cradle,
-            turret,
-            axes="xy",
-            inner_elem=lens_barrel,
-            outer_elem=dome_flange,
-            name="lens_stays_under_flange_in_combined_pose",
+        ctx.expect_gap(
+            camera_body,
+            bracket,
+            axis="x",
+            min_gap=0.090,
+            positive_elem=dome_ring,
+            negative_elem=wall_plate,
+            name="swiveled_camera_stays_off_wall",
         )
+    with ctx.pose({tilt_joint: -0.60}):
+        ctx.expect_contact(
+            camera_body,
+            pan_head,
+            elem_a=left_tilt_cheek,
+            elem_b=left_yoke_arm,
+            name="left_tilt_contact_at_down_tilt",
+        )
+        ctx.expect_contact(
+            camera_body,
+            pan_head,
+            elem_a=right_tilt_cheek,
+            elem_b=right_yoke_arm,
+            name="right_tilt_contact_at_down_tilt",
+        )
+        ctx.expect_gap(
+            camera_body,
+            bracket,
+            axis="x",
+            min_gap=0.160,
+            positive_elem=dome_ring,
+            negative_elem=wall_plate,
+            name="down_tilt_keeps_dome_ahead_of_wall",
+        )
+        ctx.expect_gap(
+            pan_head,
+            camera_body,
+            axis="z",
+            min_gap=0.050,
+            positive_elem=pan_collar,
+            negative_elem=dome_bubble,
+            name="down_tilt_keeps_dome_below_pan_axis",
+        )
+    with ctx.pose({tilt_joint: 0.42}):
+        ctx.expect_contact(
+            camera_body,
+            pan_head,
+            elem_a=left_tilt_cheek,
+            elem_b=left_yoke_arm,
+            name="left_tilt_contact_at_up_tilt",
+        )
+        ctx.expect_contact(
+            camera_body,
+            pan_head,
+            elem_a=right_tilt_cheek,
+            elem_b=right_yoke_arm,
+            name="right_tilt_contact_at_up_tilt",
+        )
+        ctx.expect_gap(
+            camera_body,
+            bracket,
+            axis="x",
+            min_gap=0.130,
+            positive_elem=dome_ring,
+            negative_elem=wall_plate,
+            name="up_tilt_keeps_camera_off_wall",
+        )
+
+    pan_limits = pan_joint.motion_limits
+    tilt_limits = tilt_joint.motion_limits
+    if pan_limits is not None and pan_limits.lower is not None and pan_limits.upper is not None:
+        with ctx.pose({pan_joint: pan_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="pan_joint_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="pan_joint_lower_no_floating")
+            ctx.expect_gap(
+                camera_body,
+                bracket,
+                axis="x",
+                min_gap=0.0,
+                positive_elem=dome_ring,
+                negative_elem=wall_plate,
+                name="pan_joint_lower_keeps_dome_off_wall",
+            )
+        with ctx.pose({pan_joint: pan_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="pan_joint_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="pan_joint_upper_no_floating")
+            ctx.expect_gap(
+                camera_body,
+                bracket,
+                axis="x",
+                min_gap=0.0,
+                positive_elem=dome_ring,
+                negative_elem=wall_plate,
+                name="pan_joint_upper_keeps_dome_off_wall",
+            )
+    if tilt_limits is not None and tilt_limits.lower is not None and tilt_limits.upper is not None:
+        with ctx.pose({tilt_joint: tilt_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="tilt_joint_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="tilt_joint_lower_no_floating")
+            ctx.expect_gap(
+                pan_head,
+                camera_body,
+                axis="z",
+                min_gap=0.040,
+                positive_elem=pan_collar,
+                negative_elem=dome_bubble,
+                name="tilt_joint_lower_keeps_dome_below_pan_axis",
+            )
+        with ctx.pose({tilt_joint: tilt_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="tilt_joint_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="tilt_joint_upper_no_floating")
+            ctx.expect_gap(
+                camera_body,
+                bracket,
+                axis="x",
+                min_gap=0.120,
+                positive_elem=dome_ring,
+                negative_elem=wall_plate,
+                name="tilt_joint_upper_keeps_dome_off_wall",
+            )
+
     return ctx.report()
 
 

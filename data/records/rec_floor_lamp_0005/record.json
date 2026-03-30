@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_floor_lamp_0005",
+  "created_at": "2026-03-27T12:54:55Z",
+  "updated_at": "2026-03-29T12:04:27Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "floor_lamp",
+  "source": {
+    "run_id": "run_20260326_115111_793307_base-sdk-categories-part1-20260326",
+    "prompt_batch_id": null,
+    "batch_spec_id": "base_sdk_categories_part1_20260326",
+    "row_id": "row_0199",
+    "prompt_index": 199
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Floor lamp \u2014 multi-arm three cylinder shades",
+    "prompt_preview": "A multi-arm floor lamp with a round weighted base, a central column, and three articulated arms each on a revolute joint carrying a small cylinder shade."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "c968a71217884dbda09129184e1a00e0a95778e0d97498fc4955518401d1ca4e",
+    "model_py_sha256": "040ac3c7c86b13cfbe404872b513648d10d97b83b6278d98f52544ae89db9f95"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

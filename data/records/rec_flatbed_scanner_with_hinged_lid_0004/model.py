@@ -1,17 +1,35 @@
 from __future__ import annotations
 
+import os
+
+_ORIG_GETCWD = os.getcwd
+
+
+def _safe_getcwd() -> str:
+    try:
+        return _ORIG_GETCWD()
+    except FileNotFoundError:
+        try:
+            os.chdir("/")
+        except Exception:
+            return "/"
+        return "/"
+
+
+os.getcwd = _safe_getcwd
+_safe_getcwd()
+
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-from pathlib import Path
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
+    Inertial,
     MotionLimits,
     Origin,
     TestContext,
@@ -19,534 +37,424 @@ from sdk import (
 )
 
 
-_SCRIPT_PATH = Path(globals().get("__file__", "/tmp/model.py"))
-_SCRIPT_ROOT = _SCRIPT_PATH.parent if _SCRIPT_PATH.is_absolute() else Path("/tmp")
-ASSETS = AssetContext(_SCRIPT_ROOT)
-
-
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="a3_flatbed_scanner", assets=ASSETS)
+    model = ArticulatedObject(name="scanner_printer_combo")
 
-    body_color = model.material("body_shell", rgba=(0.86, 0.87, 0.88, 1.0))
-    trim_color = model.material("trim_dark", rgba=(0.18, 0.19, 0.21, 1.0))
-    liner_color = model.material("lid_liner", rgba=(0.95, 0.95, 0.94, 1.0))
-    glass_color = model.material("glass", rgba=(0.56, 0.70, 0.78, 0.35))
-    metal_color = model.material("hinge_metal", rgba=(0.60, 0.61, 0.63, 1.0))
-    rubber_color = model.material("rubber", rgba=(0.12, 0.12, 0.13, 1.0))
+    body_color = model.material("body_charcoal", rgba=(0.23, 0.24, 0.26, 1.0))
+    lid_color = model.material("lid_silver", rgba=(0.78, 0.80, 0.82, 1.0))
+    tray_color = model.material("tray_light_gray", rgba=(0.72, 0.74, 0.77, 1.0))
+    trim_color = model.material("trim_gray", rgba=(0.52, 0.54, 0.57, 1.0))
+    dark_trim = model.material("dark_trim", rgba=(0.10, 0.11, 0.12, 1.0))
+    glass = model.material("glass", rgba=(0.08, 0.12, 0.15, 0.55))
 
-    base = model.part("base")
-    lid = model.part("lid")
-    left_guide = model.part("left_guide")
-    right_guide = model.part("right_guide")
-    usb_cover = model.part("usb_cover")
+    body_width = 0.50
+    body_depth = 0.36
+    body_height = 0.13
+    wall = 0.012
+    top_thickness = 0.012
 
-    body_w = 0.660
-    body_d = 0.480
-    body_h = 0.090
-    foot_h = 0.012
-    top_plane_z = foot_h + body_h
-
-    base.visual(
-        Box((body_w, body_d, body_h)),
-        origin=Origin(xyz=(0.0, 0.0, foot_h + body_h / 2.0)),
+    body = model.part("body")
+    body.visual(
+        Box((body_width, body_depth, 0.010)),
+        origin=Origin(xyz=(0.0, 0.0, 0.005)),
         material=body_color,
-        name="body_shell",
+        name="bottom_plate",
     )
-    for x_sign, y_sign, name in (
-        (-1.0, -1.0, "foot_fl"),
-        (1.0, -1.0, "foot_fr"),
-        (-1.0, 1.0, "foot_rl"),
-        (1.0, 1.0, "foot_rr"),
-    ):
-        base.visual(
-            Box((0.050, 0.050, foot_h)),
-            origin=Origin(xyz=(x_sign * 0.275, y_sign * 0.185, foot_h / 2.0)),
-            material=rubber_color,
-            name=name,
-        )
-
-    base.visual(
-        Box((0.516, 0.044, 0.006)),
-        origin=Origin(xyz=(0.0, -0.198, top_plane_z + 0.003)),
-        material=trim_color,
-        name="top_frame_front",
-    )
-    base.visual(
-        Box((0.516, 0.044, 0.006)),
-        origin=Origin(xyz=(0.0, 0.198, top_plane_z + 0.003)),
-        material=trim_color,
-        name="top_frame_rear",
-    )
-    base.visual(
-        Box((0.072, 0.392, 0.006)),
-        origin=Origin(xyz=(-0.294, 0.0, top_plane_z + 0.003)),
-        material=trim_color,
-        name="top_frame_left",
-    )
-    base.visual(
-        Box((0.072, 0.392, 0.006)),
-        origin=Origin(xyz=(0.294, 0.0, top_plane_z + 0.003)),
-        material=trim_color,
-        name="top_frame_right",
-    )
-    base.visual(
-        Box((0.500, 0.360, 0.004)),
-        origin=Origin(xyz=(0.0, 0.0, top_plane_z - 0.001)),
-        material=glass_color,
-        name="platen_glass",
-    )
-    base.visual(
-        Box((0.628, 0.010, 0.006)),
-        origin=Origin(xyz=(0.0, 0.235, top_plane_z + 0.003)),
-        material=metal_color,
-        name="base_hinge_leaf",
-    )
-    base.visual(
-        Box((0.008, 0.026, 0.016)),
-        origin=Origin(xyz=(-0.024, -0.222, top_plane_z + 0.008)),
-        material=trim_color,
-        name="keeper_left",
-    )
-    base.visual(
-        Box((0.008, 0.026, 0.016)),
-        origin=Origin(xyz=(0.024, -0.222, top_plane_z + 0.008)),
-        material=trim_color,
-        name="keeper_right",
-    )
-    base.visual(
-        Box((0.056, 0.006, 0.016)),
-        origin=Origin(xyz=(0.0, -0.214, top_plane_z + 0.008)),
-        material=trim_color,
-        name="keeper_stop",
-    )
-    base.visual(
-        Box((0.044, 0.008, 0.028)),
-        origin=Origin(xyz=(0.220, -0.236, 0.056)),
-        material=trim_color,
-        name="usb_bezel",
-    )
-    base.visual(
-        Box((0.034, 0.006, 0.004)),
-        origin=Origin(xyz=(0.220, -0.233, 0.067)),
-        material=metal_color,
-        name="usb_hinge_seat",
-    )
-
-    lid.visual(
-        Box((0.646, 0.462, 0.004)),
-        origin=Origin(xyz=(0.0, -0.231, 0.012)),
-        material=body_color,
-        name="top_skin",
-    )
-    lid.visual(
-        Box((0.272, 0.010, 0.020)),
-        origin=Origin(xyz=(-0.187, -0.463, 0.004)),
-        material=body_color,
-        name="front_wall_left",
-    )
-    lid.visual(
-        Box((0.272, 0.010, 0.020)),
-        origin=Origin(xyz=(0.187, -0.463, 0.004)),
-        material=body_color,
-        name="front_wall_right",
-    )
-    lid.visual(
-        Box((0.060, 0.010, 0.008)),
-        origin=Origin(xyz=(0.0, -0.463, 0.010)),
-        material=body_color,
-        name="front_bridge",
-    )
-    lid.visual(
-        Box((0.646, 0.008, 0.020)),
-        origin=Origin(xyz=(0.0, -0.004, 0.004)),
-        material=body_color,
-        name="rear_wall",
-    )
-    lid.visual(
-        Box((0.010, 0.460, 0.020)),
-        origin=Origin(xyz=(-0.318, -0.230, 0.004)),
+    body.visual(
+        Box((wall, body_depth, body_height)),
+        origin=Origin(xyz=(-(body_width - wall) / 2.0, 0.0, body_height / 2.0)),
         material=body_color,
         name="left_wall",
     )
-    lid.visual(
-        Box((0.010, 0.460, 0.020)),
-        origin=Origin(xyz=(0.318, -0.230, 0.004)),
+    body.visual(
+        Box((wall, body_depth, body_height)),
+        origin=Origin(xyz=((body_width - wall) / 2.0, 0.0, body_height / 2.0)),
         material=body_color,
         name="right_wall",
     )
-    lid.visual(
-        Box((0.620, 0.170, 0.004)),
-        origin=Origin(xyz=(0.0, -0.326, 0.008)),
-        material=liner_color,
-        name="front_inner_band",
+    body.visual(
+        Box((body_width, wall, 0.100)),
+        origin=Origin(xyz=(0.0, -(body_depth - wall) / 2.0, 0.050)),
+        material=body_color,
+        name="rear_wall",
     )
-    lid.visual(
-        Box((0.620, 0.130, 0.004)),
-        origin=Origin(xyz=(0.0, -0.145, 0.008)),
-        material=liner_color,
-        name="rear_inner_band",
+    body.visual(
+        Box((0.074, wall, 0.024)),
+        origin=Origin(xyz=(-0.213, (body_depth - wall) / 2.0, 0.012)),
+        material=body_color,
+        name="front_lower_left",
     )
-    lid.visual(
-        Box((0.560, 0.004, 0.004)),
-        origin=Origin(xyz=(0.0, -0.239, 0.008)),
+    body.visual(
+        Box((0.074, wall, 0.024)),
+        origin=Origin(xyz=(0.213, (body_depth - wall) / 2.0, 0.012)),
+        material=body_color,
+        name="front_lower_right",
+    )
+    body.visual(
+        Box((body_width, wall, 0.052)),
+        origin=Origin(xyz=(0.0, (body_depth - wall) / 2.0, 0.104)),
+        material=body_color,
+        name="front_upper_fascia",
+    )
+    body.visual(
+        Box((0.092, body_depth - wall, top_thickness)),
+        origin=Origin(xyz=(-0.204, 0.0, 0.112)),
+        material=body_color,
+        name="top_frame_left",
+    )
+    body.visual(
+        Box((0.092, body_depth - wall, top_thickness)),
+        origin=Origin(xyz=(0.204, 0.0, 0.112)),
+        material=body_color,
+        name="top_frame_right",
+    )
+    body.visual(
+        Box((body_width, 0.064, top_thickness)),
+        origin=Origin(xyz=(0.0, 0.142, 0.112)),
+        material=body_color,
+        name="top_frame_front",
+    )
+    body.visual(
+        Box((0.320, 0.228, 0.012)),
+        origin=Origin(xyz=(0.0, -0.006, 0.110)),
+        material=dark_trim,
+        name="scan_well",
+    )
+    body.visual(
+        Box((0.316, 0.224, 0.002)),
+        origin=Origin(xyz=(0.0, -0.006, 0.117)),
+        material=glass,
+        name="scanner_glass",
+    )
+    body.visual(
+        Box((0.150, 0.060, 0.004)),
+        origin=Origin(xyz=(0.122, 0.140, 0.132)),
         material=trim_color,
-        name="slot_front_rail",
+        name="control_panel",
     )
-    lid.visual(
-        Box((0.560, 0.004, 0.004)),
-        origin=Origin(xyz=(0.0, -0.212, 0.008)),
-        material=trim_color,
-        name="slot_rear_rail",
+    body.visual(
+        Box((0.052, 0.024, 0.0015)),
+        origin=Origin(xyz=(0.070, 0.140, 0.13475)),
+        material=dark_trim,
+        name="display",
     )
-    lid.visual(
-        Box((0.040, 0.016, 0.012)),
-        origin=Origin(xyz=(0.0, -0.466, 0.000)),
-        material=trim_color,
-        name="latch_tongue",
+    body.visual(
+        Box((0.050, 0.022, 0.002)),
+        origin=Origin(xyz=(0.140, 0.140, 0.135)),
+        material=dark_trim,
+        name="buttons",
     )
-    lid.visual(
-        Box((0.634, 0.008, 0.004)),
-        origin=Origin(xyz=(0.0, -0.001, -0.004)),
-        material=metal_color,
-        name="lid_hinge_leaf",
+    body.visual(
+        Box((0.270, 0.004, 0.018)),
+        origin=Origin(xyz=(0.0, 0.166, 0.069)),
+        material=dark_trim,
+        name="paper_slot",
     )
-    lid.visual(
-        Cylinder(radius=0.004, length=0.634),
-        origin=Origin(xyz=(0.0, -0.001, -0.002), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal_color,
-        name="hinge_barrel",
+    body.visual(
+        Box((0.300, 0.180, 0.054)),
+        origin=Origin(xyz=(0.0, 0.078, 0.061)),
+        material=dark_trim,
+        name="paper_path_shadow",
+    )
+    for sx in (-1.0, 1.0):
+        for sy in (-1.0, 1.0):
+            body.visual(
+                Box((0.030, 0.030, 0.010)),
+                origin=Origin(xyz=(0.212 * sx, 0.142 * sy, 0.005)),
+                material=dark_trim,
+                name=f"foot_{'l' if sx < 0 else 'r'}_{'rear' if sy < 0 else 'front'}",
+            )
+    for side, x in (("left", -0.110), ("right", 0.110)):
+        body.visual(
+            Box((0.092, 0.180, 0.012)),
+            origin=Origin(xyz=(x, 0.066, 0.016)),
+            material=trim_color,
+            name=f"tray_support_{side}",
+        )
+    for side, x in (("left", -0.176), ("right", 0.176)):
+        body.visual(
+            Box((0.020, 0.028, 0.026)),
+            origin=Origin(xyz=(x, -0.176, 0.109)),
+            material=trim_color,
+            name=f"hinge_support_{side}",
+        )
+        body.visual(
+            Cylinder(radius=0.009, length=0.028),
+            origin=Origin(
+                xyz=(x, -0.189, 0.121),
+                rpy=(0.0, math.pi / 2.0, 0.0),
+            ),
+            material=trim_color,
+            name=f"body_hinge_{side}",
+        )
+    body.inertial = Inertial.from_geometry(
+        Box((body_width, body_depth, body_height)),
+        mass=8.8,
+        origin=Origin(xyz=(0.0, 0.0, body_height / 2.0)),
     )
 
-    left_guide.visual(
-        Box((0.034, 0.014, 0.003)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0035)),
-        material=trim_color,
-        name="shoe",
+    lid = model.part("lid")
+    lid.visual(
+        Box((0.472, 0.312, 0.016)),
+        origin=Origin(xyz=(0.0, 0.183, 0.007)),
+        material=lid_color,
+        name="lid_shell",
     )
-    left_guide.visual(
-        Box((0.004, 0.020, 0.014)),
-        origin=Origin(xyz=(0.0, 0.0, 0.010)),
-        material=liner_color,
-        name="fence",
+    lid.visual(
+        Box((0.306, 0.220, 0.002)),
+        origin=Origin(xyz=(0.0, 0.183, 0.000)),
+        material=trim_color,
+        name="lid_liner",
+    )
+    lid.visual(
+        Box((0.170, 0.014, 0.008)),
+        origin=Origin(xyz=(0.0, 0.316, 0.019)),
+        material=trim_color,
+        name="lid_front_grip",
+    )
+    for side, x in (("left", -0.148), ("right", 0.148)):
+        lid.visual(
+            Box((0.024, 0.030, 0.012)),
+            origin=Origin(xyz=(x, 0.015, 0.003)),
+            material=trim_color,
+            name=f"lid_hinge_bridge_{side}",
+        )
+        lid.visual(
+            Cylinder(radius=0.009, length=0.028),
+            origin=Origin(
+                xyz=(x, 0.0, 0.0),
+                rpy=(0.0, math.pi / 2.0, 0.0),
+            ),
+            material=trim_color,
+            name=f"lid_hinge_{side}",
+        )
+    lid.inertial = Inertial.from_geometry(
+        Box((0.472, 0.312, 0.016)),
+        mass=1.9,
+        origin=Origin(xyz=(0.0, 0.183, 0.007)),
     )
 
-    right_guide.visual(
-        Box((0.034, 0.014, 0.003)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0035)),
-        material=trim_color,
-        name="shoe",
+    tray = model.part("tray")
+    tray.visual(
+        Box((0.340, 0.180, 0.004)),
+        origin=Origin(xyz=(0.0, 0.090, 0.010)),
+        material=tray_color,
+        name="tray_deck",
     )
-    right_guide.visual(
-        Box((0.004, 0.020, 0.014)),
-        origin=Origin(xyz=(0.0, 0.0, 0.010)),
-        material=liner_color,
-        name="fence",
+    tray.visual(
+        Box((0.330, 0.008, 0.026)),
+        origin=Origin(xyz=(0.0, 0.176, 0.013)),
+        material=tray_color,
+        name="tray_front_lip",
     )
-
-    usb_cover.visual(
-        Box((0.038, 0.003, 0.024)),
-        origin=Origin(xyz=(0.0, 0.0015, -0.012)),
-        material=trim_color,
-        name="cover_panel",
-    )
-    usb_cover.visual(
-        Cylinder(radius=0.002, length=0.032),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal_color,
-        name="cover_hinge_barrel",
+    for side, x in (("left", -0.167), ("right", 0.167)):
+        tray.visual(
+            Box((0.006, 0.160, 0.014)),
+            origin=Origin(xyz=(x, 0.090, 0.017)),
+            material=tray_color,
+            name=f"tray_side_rail_{side}",
+        )
+    for side, x in (("left", -0.110), ("right", 0.110)):
+        tray.visual(
+            Box((0.090, 0.160, 0.012)),
+            origin=Origin(xyz=(x, 0.080, 0.006)),
+            material=dark_trim,
+            name=f"tray_runner_{side}",
+        )
+    tray.inertial = Inertial.from_geometry(
+        Box((0.340, 0.180, 0.030)),
+        mass=0.55,
+        origin=Origin(xyz=(0.0, 0.090, 0.010)),
     )
 
     model.articulation(
         "lid_hinge",
         ArticulationType.REVOLUTE,
-        parent=base,
+        parent=body,
         child=lid,
-        origin=Origin(xyz=(0.0, 0.245, top_plane_z + 0.012)),
-        axis=(-1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=40.0,
-            velocity=1.0,
-            lower=0.0,
-            upper=1.30,
-        ),
-    )
-    model.articulation(
-        "left_guide_slide",
-        ArticulationType.PRISMATIC,
-        parent=lid,
-        child=left_guide,
-        origin=Origin(xyz=(-0.180, -0.2255, 0.0)),
+        origin=Origin(xyz=(0.0, -0.189, 0.121)),
         axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(
-            effort=3.0,
-            velocity=0.15,
-            lower=-0.080,
-            upper=0.120,
-        ),
-    )
-    model.articulation(
-        "right_guide_slide",
-        ArticulationType.PRISMATIC,
-        parent=lid,
-        child=right_guide,
-        origin=Origin(xyz=(0.180, -0.2255, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=3.0,
-            velocity=0.15,
-            lower=-0.120,
-            upper=0.080,
-        ),
-    )
-    model.articulation(
-        "usb_cover_hinge",
-        ArticulationType.REVOLUTE,
-        parent=base,
-        child=usb_cover,
-        origin=Origin(xyz=(0.220, -0.243, 0.067)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=1.0,
+            effort=18.0,
             velocity=2.0,
-            lower=-1.20,
-            upper=0.0,
+            lower=0.0,
+            upper=1.15,
         ),
     )
-
+    model.articulation(
+        "tray_slide",
+        ArticulationType.PRISMATIC,
+        parent=body,
+        child=tray,
+        origin=Origin(xyz=(0.0, 0.0, 0.022)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=10.0,
+            velocity=0.20,
+            lower=0.0,
+            upper=0.125,
+        ),
+    )
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    base = object_model.get_part("base")
+    ctx = TestContext(object_model, seed=0)
+    body = object_model.get_part("body")
     lid = object_model.get_part("lid")
-    left_guide = object_model.get_part("left_guide")
-    right_guide = object_model.get_part("right_guide")
-    usb_cover = object_model.get_part("usb_cover")
+    tray = object_model.get_part("tray")
     lid_hinge = object_model.get_articulation("lid_hinge")
-    left_slide = object_model.get_articulation("left_guide_slide")
-    right_slide = object_model.get_articulation("right_guide_slide")
-    usb_hinge = object_model.get_articulation("usb_cover_hinge")
+    tray_slide = object_model.get_articulation("tray_slide")
 
-    top_frame_front = base.get_visual("top_frame_front")
-    top_frame_rear = base.get_visual("top_frame_rear")
-    base_hinge_leaf = base.get_visual("base_hinge_leaf")
-    keeper_stop = base.get_visual("keeper_stop")
-    usb_bezel = base.get_visual("usb_bezel")
-    usb_hinge_seat = base.get_visual("usb_hinge_seat")
+    bottom_plate = body.get_visual("bottom_plate")
+    scanner_glass = body.get_visual("scanner_glass")
+    control_panel = body.get_visual("control_panel")
+    paper_slot = body.get_visual("paper_slot")
+    tray_support_left = body.get_visual("tray_support_left")
+    tray_support_right = body.get_visual("tray_support_right")
+    body_hinge_left = body.get_visual("body_hinge_left")
+    body_hinge_right = body.get_visual("body_hinge_right")
 
-    front_wall_left = lid.get_visual("front_wall_left")
-    front_wall_right = lid.get_visual("front_wall_right")
-    latch_tongue = lid.get_visual("latch_tongue")
-    lid_hinge_leaf = lid.get_visual("lid_hinge_leaf")
-    hinge_barrel = lid.get_visual("hinge_barrel")
-    slot_front_rail = lid.get_visual("slot_front_rail")
-    slot_rear_rail = lid.get_visual("slot_rear_rail")
+    lid_shell = lid.get_visual("lid_shell")
+    lid_front_grip = lid.get_visual("lid_front_grip")
+    lid_hinge_left = lid.get_visual("lid_hinge_left")
+    lid_hinge_right = lid.get_visual("lid_hinge_right")
 
-    left_shoe = left_guide.get_visual("shoe")
-    right_shoe = right_guide.get_visual("shoe")
-    usb_panel = usb_cover.get_visual("cover_panel")
-    usb_barrel = usb_cover.get_visual("cover_hinge_barrel")
+    tray_front_lip = tray.get_visual("tray_front_lip")
+    tray_runner_left = tray.get_visual("tray_runner_left")
+    tray_runner_right = tray.get_visual("tray_runner_right")
+    tray_deck = tray.get_visual("tray_deck")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.expect_overlap(lid, base, axes="xy", min_overlap=0.20)
-    ctx.expect_gap(
-        lid,
-        base,
-        axis="z",
-        max_gap=0.002,
-        max_penetration=0.0,
-        positive_elem=front_wall_left,
-        negative_elem=top_frame_front,
-    )
-    ctx.expect_gap(
-        lid,
-        base,
-        axis="z",
-        max_gap=0.002,
-        max_penetration=0.0,
-        positive_elem=front_wall_right,
-        negative_elem=top_frame_front,
-    )
-    ctx.expect_gap(
-        lid,
-        base,
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=lid_hinge_leaf,
-        negative_elem=base_hinge_leaf,
-    )
-    ctx.expect_gap(
-        lid,
-        base,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0001,
-        positive_elem=lid_hinge_leaf,
-        negative_elem=base_hinge_leaf,
-    )
-    ctx.expect_overlap(
-        lid,
-        base,
-        axes="x",
-        min_overlap=0.62,
-        elem_a=lid_hinge_leaf,
-        elem_b=base_hinge_leaf,
-    )
-    ctx.expect_overlap(
-        lid,
-        base,
-        axes="xz",
-        min_overlap=0.01,
-        elem_a=latch_tongue,
-        elem_b=keeper_stop,
-    )
-    ctx.expect_contact(lid, base, elem_a=latch_tongue, elem_b=keeper_stop)
-
-    ctx.expect_within(left_guide, lid, axes="x", inner_elem=left_shoe)
-    ctx.expect_within(right_guide, lid, axes="x", inner_elem=right_shoe)
-    ctx.expect_gap(
-        left_guide,
-        lid,
-        axis="y",
-        min_gap=0.001,
-        positive_elem=left_shoe,
-        negative_elem=slot_front_rail,
-    )
-    ctx.expect_gap(
-        lid,
-        left_guide,
-        axis="y",
-        min_gap=0.001,
-        positive_elem=slot_rear_rail,
-        negative_elem=left_shoe,
-    )
-    ctx.expect_gap(
-        right_guide,
-        lid,
-        axis="y",
-        min_gap=0.001,
-        positive_elem=right_shoe,
-        negative_elem=slot_front_rail,
-    )
-    ctx.expect_gap(
-        lid,
-        right_guide,
-        axis="y",
-        min_gap=0.001,
-        positive_elem=slot_rear_rail,
-        negative_elem=right_shoe,
-    )
-
-    ctx.expect_contact(usb_cover, base, elem_a=usb_panel, elem_b=usb_bezel)
-    ctx.expect_overlap(
-        usb_cover,
-        base,
-        axes="x",
-        min_overlap=0.030,
-        elem_a=usb_barrel,
-        elem_b=usb_hinge_seat,
-    )
-
-    with ctx.pose({lid_hinge: 1.15}):
-        ctx.expect_gap(
-            lid,
-            base,
-            axis="z",
-            min_gap=0.18,
-            positive_elem=front_wall_left,
-            negative_elem=top_frame_rear,
+    body_aabb = ctx.part_world_aabb(body)
+    if body_aabb is None:
+        ctx.fail("body_has_world_bounds", "Body AABB was not available.")
+    else:
+        width = body_aabb[1][0] - body_aabb[0][0]
+        depth = body_aabb[1][1] - body_aabb[0][1]
+        height = body_aabb[1][2] - body_aabb[0][2]
+        ctx.check(
+            "body_is_wide_desktop_printer_scale",
+            width > 0.46 and depth > 0.32 and 0.12 <= height <= 0.16 and width > depth,
+            f"Expected a wide desktop all-in-one printer body, got dims {(width, depth, height)}.",
         )
-        ctx.expect_gap(
-            lid,
-            base,
-            axis="z",
-            min_gap=0.18,
-            positive_elem=front_wall_right,
-            negative_elem=top_frame_rear,
-        )
+
+    lid_limits = lid_hinge.motion_limits
+    tray_limits = tray_slide.motion_limits
+    ctx.check(
+        "lid_hinge_axis_is_x",
+        tuple(lid_hinge.axis) == (1.0, 0.0, 0.0),
+        f"Expected lid hinge axis (1, 0, 0), got {lid_hinge.axis}.",
+    )
+    ctx.check(
+        "tray_slide_axis_is_y",
+        tuple(tray_slide.axis) == (0.0, 1.0, 0.0),
+        f"Expected tray slide axis (0, 1, 0), got {tray_slide.axis}.",
+    )
+    ctx.check(
+        "lid_hinge_limits_realistic",
+        lid_limits is not None
+        and lid_limits.lower == 0.0
+        and lid_limits.upper is not None
+        and 1.05 <= lid_limits.upper <= 1.35,
+        f"Unexpected lid hinge limits: {lid_limits}.",
+    )
+    ctx.check(
+        "tray_slide_limits_realistic",
+        tray_limits is not None
+        and tray_limits.lower == 0.0
+        and tray_limits.upper is not None
+        and 0.10 <= tray_limits.upper <= 0.14,
+        f"Unexpected tray slide limits: {tray_limits}.",
+    )
+
+    with ctx.pose({lid_hinge: 0.0, tray_slide: 0.0}):
         ctx.expect_overlap(
             lid,
-            base,
+            body,
+            axes="xy",
+            min_overlap=0.21,
+            elem_a=lid_shell,
+            elem_b=scanner_glass,
+        )
+        ctx.expect_gap(
+            lid,
+            body,
+            axis="z",
+            min_gap=0.0015,
+            max_gap=0.0035,
+            positive_elem=lid_shell,
+            negative_elem=scanner_glass,
+        )
+        ctx.expect_contact(lid, body, elem_a=lid_hinge_left, elem_b=body_hinge_left)
+        ctx.expect_contact(lid, body, elem_a=lid_hinge_right, elem_b=body_hinge_right)
+        ctx.expect_contact(tray, body, elem_a=tray_runner_left, elem_b=tray_support_left)
+        ctx.expect_contact(tray, body, elem_a=tray_runner_right, elem_b=tray_support_right)
+        ctx.expect_within(
+            tray,
+            body,
             axes="x",
-            min_overlap=0.62,
-            elem_a=hinge_barrel,
-            elem_b=base_hinge_leaf,
+            margin=0.0,
+            inner_elem=tray_deck,
+            outer_elem=bottom_plate,
+        )
+        ctx.expect_gap(
+            tray,
+            body,
+            axis="y",
+            min_gap=0.002,
+            max_gap=0.008,
+            positive_elem=tray_front_lip,
+            negative_elem=paper_slot,
         )
 
-    with ctx.pose({left_slide: 0.10, right_slide: -0.10}):
-        ctx.expect_within(left_guide, lid, axes="x", inner_elem=left_shoe)
-        ctx.expect_within(right_guide, lid, axes="x", inner_elem=right_shoe)
-        ctx.expect_gap(
-            left_guide,
-            lid,
-            axis="y",
-            min_gap=0.001,
-            positive_elem=left_shoe,
-            negative_elem=slot_front_rail,
-        )
-        ctx.expect_gap(
-            lid,
-            left_guide,
-            axis="y",
-            min_gap=0.001,
-            positive_elem=slot_rear_rail,
-            negative_elem=left_shoe,
-        )
-        ctx.expect_gap(
-            right_guide,
-            lid,
-            axis="y",
-            min_gap=0.001,
-            positive_elem=right_shoe,
-            negative_elem=slot_front_rail,
-        )
-        ctx.expect_gap(
-            lid,
-            right_guide,
-            axis="y",
-            min_gap=0.001,
-            positive_elem=slot_rear_rail,
-            negative_elem=right_shoe,
-        )
-        ctx.expect_gap(
-            right_guide,
-            left_guide,
-            axis="x",
-            min_gap=0.04,
-            positive_elem=right_shoe,
-            negative_elem=left_shoe,
-        )
+    with ctx.pose({lid_hinge: 0.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_lower_no_overlap")
+        ctx.fail_if_isolated_parts(name="lid_hinge_lower_no_floating")
 
-    with ctx.pose({usb_hinge: -1.05}):
+    with ctx.pose({lid_hinge: lid_limits.upper}):
+        ctx.expect_contact(lid, body, elem_a=lid_hinge_left, elem_b=body_hinge_left)
+        ctx.expect_contact(lid, body, elem_a=lid_hinge_right, elem_b=body_hinge_right)
         ctx.expect_gap(
-            base,
-            usb_cover,
+            lid,
+            body,
+            axis="z",
+            min_gap=0.18,
+            positive_elem=lid_front_grip,
+            negative_elem=control_panel,
+        )
+        ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_upper_no_overlap")
+        ctx.fail_if_isolated_parts(name="lid_hinge_upper_no_floating")
+
+    with ctx.pose({tray_slide: 0.0}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="tray_slide_lower_no_overlap")
+        ctx.fail_if_isolated_parts(name="tray_slide_lower_no_floating")
+
+    with ctx.pose({tray_slide: tray_limits.upper}):
+        ctx.expect_contact(tray, body, elem_a=tray_runner_left, elem_b=tray_support_left)
+        ctx.expect_contact(tray, body, elem_a=tray_runner_right, elem_b=tray_support_right)
+        ctx.expect_gap(
+            tray,
+            body,
             axis="y",
-            min_gap=0.001,
-            positive_elem=usb_bezel,
-            negative_elem=usb_panel,
+            min_gap=0.12,
+            max_gap=0.14,
+            positive_elem=tray_front_lip,
+            negative_elem=paper_slot,
         )
-        ctx.expect_overlap(
-            usb_cover,
-            base,
-            axes="x",
-            min_overlap=0.030,
-            elem_a=usb_barrel,
-            elem_b=usb_hinge_seat,
-        )
+        ctx.fail_if_parts_overlap_in_current_pose(name="tray_slide_upper_no_overlap")
+        ctx.fail_if_isolated_parts(name="tray_slide_upper_no_floating")
+
+    with ctx.pose({lid_hinge: lid_limits.upper, tray_slide: tray_limits.upper}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="scanner_printer_fully_open_no_overlap")
+        ctx.fail_if_isolated_parts(name="scanner_printer_fully_open_no_floating")
+
     return ctx.report()
 
 

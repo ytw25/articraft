@@ -3,329 +3,572 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-from pathlib import Path
 import math
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
     Inertial,
     MotionLimits,
     Origin,
-    Sphere,
     TestContext,
     TestReport,
 )
 
-SAFE_ASSET_ROOT = Path("/")
-ASSETS = AssetContext(SAFE_ASSET_ROOT)
+BODY_WIDTH = 1.00
+BODY_DEPTH = 0.44
+BODY_HEIGHT = 2.10
+
+PLINTH_WIDTH = 0.94
+PLINTH_DEPTH = 0.38
+PLINTH_HEIGHT = 0.08
+
+WALL_THICKNESS = 0.025
+BACK_THICKNESS = 0.018
+FRAME_THICKNESS = 0.012
+TOP_PANEL_THICKNESS = 0.025
+BOTTOM_PANEL_THICKNESS = 0.020
+
+JAMB_WIDTH = 0.035
+CENTER_STILE_WIDTH = 0.036
+
+DOOR_THICKNESS = 0.030
+DOOR_REST_GAP = 0.001
+HINGE_FRONT_OFFSET = 0.008
+OUTER_REVEAL = 0.012
+CENTER_SEAM = 0.004
+DOOR_BOTTOM = 0.10
+DOOR_HEIGHT = 1.95
+DOOR_WIDTH = (BODY_WIDTH / 2.0) - OUTER_REVEAL - (CENTER_SEAM / 2.0)
+DOOR_TOP = DOOR_BOTTOM + DOOR_HEIGHT
+
+HINGE_AXIS_Y = (BODY_DEPTH / 2.0) + DOOR_REST_GAP + DOOR_THICKNESS + HINGE_FRONT_OFFSET
+HINGE_LEAF_DEPTH = HINGE_AXIS_Y - (BODY_DEPTH / 2.0)
+HINGE_RADIUS = 0.008
+HINGE_MOUNT_WIDTH = 0.020
+HINGE_KNUCKLE_WIDTH = 0.018
+HINGE_KNUCKLE_DEPTH = 0.012
+HINGE_KNUCKLE_OFFSET = 0.010
+HINGE_KNUCKLE_ATTACH_Y = -0.002
+HINGE_BLOCK_HEIGHT = 0.22
+LOWER_HINGE_Z = 0.30
+UPPER_HINGE_Z = BODY_HEIGHT - 0.30
+
+HANDLE_WIDTH = 0.024
+HANDLE_GRIP_DEPTH = 0.014
+HANDLE_GRIP_HEIGHT = 0.16
+HANDLE_SPINDLE_RADIUS = 0.0035
+HANDLE_SPINDLE_LENGTH = 0.004
+HANDLE_PIVOT_RADIUS = 0.007
+HANDLE_PIVOT_LENGTH = 0.006
+HANDLE_PIVOT_STANDOFF = HANDLE_SPINDLE_LENGTH
+HANDLE_GRIP_Z_OFFSET = -0.055
+HANDLE_TOE_Z_OFFSET = -0.115
+HANDLE_CENTER_Z = 1.12
+HANDLE_INSET = 0.055
+HANDLE_SWING = math.radians(30.0)
+
+LATCH_BOLT_WIDTH = 0.014
+LATCH_BOLT_DEPTH = 0.004
+LATCH_BOLT_HEIGHT = 0.20
+STRIKE_WIDTH = 0.012
+STRIKE_DEPTH = 0.010
+STRIKE_HEIGHT = 0.22
+STRIKE_X_OFFSET = 0.010
 
 
-def _yz_vector(length: float, angle: float) -> tuple[float, float, float]:
-    return (0.0, -length * math.sin(angle), length * math.cos(angle))
+def _left_hinge_x() -> float:
+    return -(BODY_WIDTH / 2.0) + OUTER_REVEAL
 
 
-def _yz_perp(offset: float, angle: float) -> tuple[float, float, float]:
-    return (0.0, -offset * math.cos(angle), -offset * math.sin(angle))
+def _right_hinge_x() -> float:
+    return (BODY_WIDTH / 2.0) - OUTER_REVEAL
 
 
-def _scaled(vec: tuple[float, float, float], scale: float) -> tuple[float, float, float]:
-    return (vec[0] * scale, vec[1] * scale, vec[2] * scale)
+def _door_panel_center_y() -> float:
+    return -(HINGE_FRONT_OFFSET + (DOOR_THICKNESS / 2.0))
 
 
-def _added(a: tuple[float, float, float], b: tuple[float, float, float]) -> tuple[float, float, float]:
-    return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
+def _door_front_trim_y() -> float:
+    return -(HINGE_FRONT_OFFSET + 0.002)
+
+
+def _door_front_surface_y() -> float:
+    return -HINGE_FRONT_OFFSET
+
+
+def _door_latch_bolt_y() -> float:
+    return -(HINGE_FRONT_OFFSET + DOOR_THICKNESS - (LATCH_BOLT_DEPTH / 2.0))
+
+
+def _handle_local_z() -> float:
+    return HANDLE_CENTER_Z - DOOR_BOTTOM
+
+
+def _aabb_center_x(aabb: tuple[tuple[float, float, float], tuple[float, float, float]] | None) -> float | None:
+    if aabb is None:
+        return None
+    return (aabb[0][0] + aabb[1][0]) / 2.0
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="dead_front_equipment_bay", assets=ASSETS)
+    model = ArticulatedObject(name="mcc_panel")
 
-    cabinet = model.material("cabinet_gray", rgba=(0.56, 0.58, 0.61, 1.0))
-    panel_gray = model.material("panel_gray", rgba=(0.81, 0.82, 0.84, 1.0))
-    hardware = model.material("hardware", rgba=(0.67, 0.69, 0.72, 1.0))
-    dark_hardware = model.material("dark_hardware", rgba=(0.22, 0.24, 0.27, 1.0))
+    steel = model.material("steel", rgba=(0.74, 0.76, 0.79, 1.0))
+    frame_gray = model.material("frame_gray", rgba=(0.61, 0.63, 0.66, 1.0))
+    dark_hardware = model.material("dark_hardware", rgba=(0.16, 0.17, 0.19, 1.0))
+    plinth_gray = model.material("plinth_gray", rgba=(0.28, 0.29, 0.31, 1.0))
 
-    outer_w = 0.64
-    outer_h = 0.50
-    opening_w = 0.56
-    opening_h = 0.392
-    door_w = 0.548
-    door_h = 0.388
-    bezel_t = 0.018
-    cavity_d = 0.28
-    wall_t = 0.012
-    door_t = 0.010
-    side_strip_w = (outer_w - opening_w) / 2.0
-    top_strip_h = (outer_h - opening_h) / 2.0
-
-    hinge_r = 0.0065
-    hinge_axis_y = hinge_r
-    hinge_drop = hinge_r
-    hinge_axis_z = opening_h / 2.0 + hinge_drop
-
-    fastener_x = 0.18
-    fastener_z = -door_h + 0.044
-
-    prop_x = 0.214
-    prop_pivot_y = -0.050
-    prop_pivot_z = -0.050
-    lower_len = 0.18
-    upper_len = 0.21
-    lower_closed_angle = 0.85
-    upper_closed_angle = 2.85
-    lower_open_pose = -1.55
-    upper_open_pose = -2.43
-
-    lower_vec = _yz_vector(lower_len, lower_closed_angle)
-    lower_unit = _scaled(lower_vec, 1.0 / lower_len)
-    lower_mid = _scaled(lower_vec, 0.5)
-    elbow_clevis_center = lower_vec
-
-    upper_vec = _yz_vector(upper_len, upper_closed_angle)
-    upper_mid = _scaled(upper_vec, 0.5)
-    prop_tip_center = upper_vec
-
-    open_lower_angle = lower_closed_angle + lower_open_pose
-    open_upper_angle = upper_closed_angle + lower_open_pose + upper_open_pose
-    open_elbow = _yz_vector(lower_len, open_lower_angle)
-    open_tip_offset = _yz_vector(upper_len, open_upper_angle)
-    open_tip_center = (
-        prop_x,
-        prop_pivot_y + open_elbow[1] + open_tip_offset[1],
-        prop_pivot_z + open_elbow[2] + open_tip_offset[2],
+    cabinet = model.part("cabinet")
+    cabinet.visual(
+        Box((PLINTH_WIDTH, PLINTH_DEPTH, PLINTH_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, PLINTH_HEIGHT / 2.0)),
+        material=plinth_gray,
+        name="plinth",
     )
-
-    strike_thickness = 0.012
-    strike_center_local = (
-        prop_x,
-        open_tip_center[2] + strike_thickness / 2.0 - hinge_axis_z,
-        -(open_tip_center[1] - hinge_axis_y),
-    )
-
-    bay = model.part("bay")
-    bay.visual(
-        Box((outer_w, bezel_t, top_strip_h)),
-        origin=Origin(xyz=(0.0, -bezel_t / 2.0, opening_h / 2.0 + top_strip_h / 2.0)),
-        material=cabinet,
-        name="top_bezel",
-    )
-    bay.visual(
-        Box((outer_w, bezel_t, top_strip_h)),
-        origin=Origin(xyz=(0.0, -bezel_t / 2.0, -opening_h / 2.0 - top_strip_h / 2.0)),
-        material=cabinet,
-        name="bottom_bezel",
-    )
-    bay.visual(
-        Box((side_strip_w, bezel_t, opening_h)),
-        origin=Origin(xyz=(-opening_w / 2.0 - side_strip_w / 2.0, -bezel_t / 2.0, 0.0)),
-        material=cabinet,
-        name="left_bezel",
-    )
-    bay.visual(
-        Box((side_strip_w, bezel_t, opening_h)),
-        origin=Origin(xyz=(opening_w / 2.0 + side_strip_w / 2.0, -bezel_t / 2.0, 0.0)),
-        material=cabinet,
-        name="right_bezel",
-    )
-    bay.visual(
-        Box((wall_t, cavity_d, opening_h + 0.10)),
-        origin=Origin(xyz=(-opening_w / 2.0 - wall_t / 2.0, -cavity_d / 2.0, 0.0)),
-        material=cabinet,
+    cabinet.visual(
+        Box((WALL_THICKNESS, BODY_DEPTH, BODY_HEIGHT - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                -(BODY_WIDTH / 2.0) + (WALL_THICKNESS / 2.0),
+                0.0,
+                PLINTH_HEIGHT + ((BODY_HEIGHT - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=steel,
         name="left_wall",
     )
-    bay.visual(
-        Box((wall_t, cavity_d, opening_h + 0.10)),
-        origin=Origin(xyz=(opening_w / 2.0 + wall_t / 2.0, -cavity_d / 2.0, 0.0)),
-        material=cabinet,
+    cabinet.visual(
+        Box((WALL_THICKNESS, BODY_DEPTH, BODY_HEIGHT - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                (BODY_WIDTH / 2.0) - (WALL_THICKNESS / 2.0),
+                0.0,
+                PLINTH_HEIGHT + ((BODY_HEIGHT - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=steel,
         name="right_wall",
     )
-    bay.visual(
-        Box((opening_w, cavity_d, wall_t)),
-        origin=Origin(xyz=(0.0, -cavity_d / 2.0, opening_h / 2.0 + wall_t / 2.0)),
-        material=cabinet,
-        name="cavity_roof",
+    cabinet.visual(
+        Box((BODY_WIDTH - (2.0 * WALL_THICKNESS), BACK_THICKNESS, BODY_HEIGHT - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -(BODY_DEPTH / 2.0) + (BACK_THICKNESS / 2.0),
+                PLINTH_HEIGHT + ((BODY_HEIGHT - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=steel,
+        name="back_panel",
     )
-    bay.visual(
-        Box((opening_w, cavity_d, wall_t)),
-        origin=Origin(xyz=(0.0, -cavity_d / 2.0, -opening_h / 2.0 - wall_t / 2.0)),
-        material=cabinet,
-        name="cavity_floor",
+    cabinet.visual(
+        Box((BODY_WIDTH - (2.0 * WALL_THICKNESS), BODY_DEPTH - BACK_THICKNESS, TOP_PANEL_THICKNESS)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                BACK_THICKNESS / 2.0,
+                BODY_HEIGHT - (TOP_PANEL_THICKNESS / 2.0),
+            )
+        ),
+        material=steel,
+        name="roof_panel",
     )
-    bay.visual(
-        Box((opening_w + 2.0 * wall_t, wall_t, opening_h + 0.10)),
-        origin=Origin(xyz=(0.0, -cavity_d + wall_t / 2.0, 0.0)),
+    cabinet.visual(
+        Box((BODY_WIDTH - (2.0 * WALL_THICKNESS), BODY_DEPTH - BACK_THICKNESS, BOTTOM_PANEL_THICKNESS)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                BACK_THICKNESS / 2.0,
+                PLINTH_HEIGHT + (BOTTOM_PANEL_THICKNESS / 2.0),
+            )
+        ),
+        material=steel,
+        name="floor_panel",
+    )
+    cabinet.visual(
+        Box((JAMB_WIDTH, FRAME_THICKNESS, DOOR_TOP - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                -(BODY_WIDTH / 2.0) + (JAMB_WIDTH / 2.0),
+                (BODY_DEPTH / 2.0) - (FRAME_THICKNESS / 2.0),
+                PLINTH_HEIGHT + ((DOOR_TOP - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=frame_gray,
+        name="left_jamb",
+    )
+    cabinet.visual(
+        Box((JAMB_WIDTH, FRAME_THICKNESS, DOOR_TOP - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                (BODY_WIDTH / 2.0) - (JAMB_WIDTH / 2.0),
+                (BODY_DEPTH / 2.0) - (FRAME_THICKNESS / 2.0),
+                PLINTH_HEIGHT + ((DOOR_TOP - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=frame_gray,
+        name="right_jamb",
+    )
+    cabinet.visual(
+        Box((BODY_WIDTH - (2.0 * JAMB_WIDTH), FRAME_THICKNESS, BODY_HEIGHT - DOOR_TOP)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                (BODY_DEPTH / 2.0) - (FRAME_THICKNESS / 2.0),
+                DOOR_TOP + ((BODY_HEIGHT - DOOR_TOP) / 2.0),
+            )
+        ),
+        material=frame_gray,
+        name="top_rail",
+    )
+    cabinet.visual(
+        Box((BODY_WIDTH - (2.0 * JAMB_WIDTH), FRAME_THICKNESS, DOOR_BOTTOM - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                (BODY_DEPTH / 2.0) - (FRAME_THICKNESS / 2.0),
+                PLINTH_HEIGHT + ((DOOR_BOTTOM - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=frame_gray,
+        name="bottom_rail",
+    )
+    cabinet.visual(
+        Box((CENTER_STILE_WIDTH, FRAME_THICKNESS, DOOR_TOP - PLINTH_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                (BODY_DEPTH / 2.0) - (FRAME_THICKNESS / 2.0),
+                PLINTH_HEIGHT + ((DOOR_TOP - PLINTH_HEIGHT) / 2.0),
+            )
+        ),
+        material=frame_gray,
+        name="center_stile",
+    )
+
+    for side_name, hinge_x in (("left", _left_hinge_x()), ("right", _right_hinge_x())):
+        mount_x = hinge_x - (HINGE_MOUNT_WIDTH / 2.0) if side_name == "left" else hinge_x + (HINGE_MOUNT_WIDTH / 2.0)
+        for mount_name, hinge_z in (("lower", LOWER_HINGE_Z), ("upper", UPPER_HINGE_Z)):
+            cabinet.visual(
+                Box((HINGE_MOUNT_WIDTH, HINGE_LEAF_DEPTH, HINGE_BLOCK_HEIGHT)),
+                origin=Origin(
+                    xyz=(
+                        mount_x,
+                        (BODY_DEPTH / 2.0) + (HINGE_LEAF_DEPTH / 2.0),
+                        hinge_z,
+                    )
+                ),
+                material=dark_hardware,
+                name=f"{side_name}_{mount_name}_hinge_mount",
+            )
+
+    cabinet.visual(
+        Box((STRIKE_WIDTH, STRIKE_DEPTH, STRIKE_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                -STRIKE_X_OFFSET,
+                (BODY_DEPTH / 2.0) - (STRIKE_DEPTH / 2.0),
+                HANDLE_CENTER_Z,
+            )
+        ),
         material=dark_hardware,
-        name="back_wall",
+        name="left_strike",
     )
-    bay.visual(
-        Cylinder(radius=hinge_r, length=door_w),
+    cabinet.visual(
+        Box((STRIKE_WIDTH, STRIKE_DEPTH, STRIKE_HEIGHT)),
         origin=Origin(
-            xyz=(0.0, hinge_axis_y, hinge_axis_z),
-            rpy=(0.0, math.pi / 2.0, 0.0),
+            xyz=(
+                STRIKE_X_OFFSET,
+                (BODY_DEPTH / 2.0) - (STRIKE_DEPTH / 2.0),
+                HANDLE_CENTER_Z,
+            )
         ),
-        material=hardware,
-        name="hinge_barrel",
+        material=dark_hardware,
+        name="right_strike",
     )
-    bracket_len = opening_w / 2.0 + wall_t / 2.0 - prop_x + 0.006
-    bay.visual(
-        Box((bracket_len, 0.016, 0.046)),
-        origin=Origin(
-            xyz=(prop_x + bracket_len / 2.0 - 0.003, prop_pivot_y, prop_pivot_z),
-        ),
-        material=hardware,
-        name="prop_bracket",
-    )
-    bay.visual(
-        Box((0.026, 0.008, 0.110)),
-        origin=Origin(xyz=(-fastener_x, -0.0205, -0.1515)),
-        material=hardware,
-        name="receiver_left",
-    )
-    bay.visual(
-        Box((0.026, 0.008, 0.110)),
-        origin=Origin(xyz=(fastener_x, -0.0205, -0.1515)),
-        material=hardware,
-        name="receiver_right",
-    )
-    bay.inertial = Inertial.from_geometry(
-        Box((outer_w, cavity_d, outer_h)),
-        mass=11.0,
-        origin=Origin(xyz=(0.0, -cavity_d / 2.0, 0.0)),
+    cabinet.inertial = Inertial.from_geometry(
+        Box((BODY_WIDTH, BODY_DEPTH + 0.06, BODY_HEIGHT)),
+        mass=320.0,
+        origin=Origin(xyz=(0.0, 0.0, BODY_HEIGHT / 2.0)),
     )
 
-    panel = model.part("panel")
-    panel.visual(
-        Box((door_w, door_t, door_h)),
+    left_door = model.part("left_door")
+    left_door.visual(
+        Box((DOOR_WIDTH, DOOR_THICKNESS, DOOR_HEIGHT)),
+        origin=Origin(xyz=(DOOR_WIDTH / 2.0, _door_panel_center_y(), DOOR_HEIGHT / 2.0)),
+        material=steel,
+        name="panel",
+    )
+    left_door.visual(
+        Box((0.05, 0.004, DOOR_HEIGHT - 0.16)),
+        origin=Origin(xyz=(0.035, _door_front_trim_y(), DOOR_HEIGHT / 2.0)),
+        material=frame_gray,
+        name="outer_edge_stile",
+    )
+    left_door.visual(
+        Box((DOOR_WIDTH - 0.10, 0.004, 0.06)),
+        origin=Origin(xyz=(DOOR_WIDTH / 2.0, _door_front_trim_y(), DOOR_HEIGHT - 0.06)),
+        material=frame_gray,
+        name="top_face_rail",
+    )
+    left_door.visual(
+        Box((DOOR_WIDTH - 0.10, 0.004, 0.06)),
+        origin=Origin(xyz=(DOOR_WIDTH / 2.0, _door_front_trim_y(), 0.06)),
+        material=frame_gray,
+        name="bottom_face_rail",
+    )
+    left_door.visual(
+        Box((LATCH_BOLT_WIDTH, LATCH_BOLT_DEPTH, LATCH_BOLT_HEIGHT)),
         origin=Origin(
-            xyz=(0.0, -hinge_axis_y - door_t / 2.0 + 0.0005, -(door_h / 2.0 + hinge_drop)),
+            xyz=(
+                DOOR_WIDTH - 0.009,
+                _door_latch_bolt_y(),
+                _handle_local_z(),
+            )
         ),
-        material=panel_gray,
-        name="outer_face",
+        material=dark_hardware,
+        name="latch_bolt",
     )
-    panel.visual(
-        Box((door_w - 0.070, 0.016, 0.156)),
-        origin=Origin(xyz=(0.0, -0.022, -0.113)),
-        material=panel_gray,
-        name="inner_pan",
+    left_door.visual(
+        Box((0.07, 0.003, 0.26)),
+        origin=Origin(
+            xyz=(
+                DOOR_WIDTH - 0.042,
+                _door_front_trim_y(),
+                _handle_local_z(),
+            )
+        ),
+        material=frame_gray,
+        name="latch_escutcheon",
     )
-    panel.visual(
-        Box((0.024, 0.018, 0.298)),
-        origin=Origin(xyz=(-door_w / 2.0 + 0.022, -0.020, -0.224)),
-        material=panel_gray,
-        name="left_return",
-    )
-    panel.visual(
-        Box((0.024, 0.018, 0.298)),
-        origin=Origin(xyz=(door_w / 2.0 - 0.022, -0.020, -0.224)),
-        material=panel_gray,
-        name="right_return",
-    )
-    panel.visual(
-        Box((0.024, strike_thickness, 0.018)),
-        origin=Origin(xyz=strike_center_local),
-        material=hardware,
-        name="prop_strike",
-    )
-    for side_name, x_pos in (("left", -fastener_x), ("right", fastener_x)):
-        panel.visual(
-            Cylinder(radius=0.014, length=0.006),
-            origin=Origin(
-                xyz=(x_pos, -0.0035, fastener_z),
-                rpy=(math.pi / 2.0, 0.0, 0.0),
-            ),
-            material=hardware,
-            name=f"fastener_{side_name}_head",
-        )
-        panel.visual(
-            Box((0.020, 0.0015, 0.003)),
-            origin=Origin(xyz=(x_pos, -0.0007, fastener_z)),
-            material=dark_hardware,
-            name=f"fastener_{side_name}_slot",
-        )
-        panel.visual(
-            Cylinder(radius=0.005, length=0.018),
-            origin=Origin(
-                xyz=(x_pos, -0.014, fastener_z),
-                rpy=(math.pi / 2.0, 0.0, 0.0),
-            ),
-            material=hardware,
-            name=f"fastener_{side_name}_stem",
-        )
-    panel.inertial = Inertial.from_geometry(
-        Box((door_w, 0.036, door_h)),
-        mass=3.6,
-        origin=Origin(xyz=(0.0, -0.020, -(door_h / 2.0 + hinge_drop))),
+    left_door.inertial = Inertial.from_geometry(
+        Box((DOOR_WIDTH, DOOR_THICKNESS + 0.02, DOOR_HEIGHT)),
+        mass=38.0,
+        origin=Origin(xyz=(DOOR_WIDTH / 2.0, _door_panel_center_y(), DOOR_HEIGHT / 2.0)),
     )
 
-    prop_lower = model.part("prop_lower")
-    prop_lower.visual(
-        Box((0.004, 0.010, lower_len)),
-        origin=Origin(xyz=(0.002, lower_mid[1], lower_mid[2]), rpy=(lower_closed_angle, 0.0, 0.0)),
-        material=hardware,
-        name="lower_arm",
+    right_door = model.part("right_door")
+    right_door.visual(
+        Box((DOOR_WIDTH, DOOR_THICKNESS, DOOR_HEIGHT)),
+        origin=Origin(xyz=(-(DOOR_WIDTH / 2.0), _door_panel_center_y(), DOOR_HEIGHT / 2.0)),
+        material=steel,
+        name="panel",
     )
-    prop_lower.inertial = Inertial.from_geometry(
-        Box((0.030, 0.020, lower_len)),
-        mass=0.30,
-        origin=Origin(xyz=lower_mid, rpy=(lower_closed_angle, 0.0, 0.0)),
+    right_door.visual(
+        Box((0.05, 0.004, DOOR_HEIGHT - 0.16)),
+        origin=Origin(xyz=(-0.035, _door_front_trim_y(), DOOR_HEIGHT / 2.0)),
+        material=frame_gray,
+        name="outer_edge_stile",
+    )
+    right_door.visual(
+        Box((DOOR_WIDTH - 0.10, 0.004, 0.06)),
+        origin=Origin(xyz=(-(DOOR_WIDTH / 2.0), _door_front_trim_y(), DOOR_HEIGHT - 0.06)),
+        material=frame_gray,
+        name="top_face_rail",
+    )
+    right_door.visual(
+        Box((DOOR_WIDTH - 0.10, 0.004, 0.06)),
+        origin=Origin(xyz=(-(DOOR_WIDTH / 2.0), _door_front_trim_y(), 0.06)),
+        material=frame_gray,
+        name="bottom_face_rail",
+    )
+    right_door.visual(
+        Box((LATCH_BOLT_WIDTH, LATCH_BOLT_DEPTH, LATCH_BOLT_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                -(DOOR_WIDTH - 0.009),
+                _door_latch_bolt_y(),
+                _handle_local_z(),
+            )
+        ),
+        material=dark_hardware,
+        name="latch_bolt",
+    )
+    right_door.visual(
+        Box((0.07, 0.003, 0.26)),
+        origin=Origin(
+            xyz=(
+                -(DOOR_WIDTH - 0.042),
+                _door_front_trim_y(),
+                _handle_local_z(),
+            )
+        ),
+        material=frame_gray,
+        name="latch_escutcheon",
+    )
+    right_door.inertial = Inertial.from_geometry(
+        Box((DOOR_WIDTH, DOOR_THICKNESS + 0.02, DOOR_HEIGHT)),
+        mass=38.0,
+        origin=Origin(xyz=(-(DOOR_WIDTH / 2.0), _door_panel_center_y(), DOOR_HEIGHT / 2.0)),
     )
 
-    prop_upper = model.part("prop_upper")
-    prop_upper.visual(
-        Box((0.004, 0.010, upper_len)),
-        origin=Origin(xyz=(-0.002, upper_mid[1], upper_mid[2]), rpy=(upper_closed_angle, 0.0, 0.0)),
-        material=hardware,
-        name="upper_arm",
+    left_handle = model.part("left_handle")
+    left_handle.visual(
+        Cylinder(radius=HANDLE_SPINDLE_RADIUS, length=HANDLE_SPINDLE_LENGTH),
+        origin=Origin(
+            xyz=(0.0, HANDLE_SPINDLE_LENGTH / 2.0, 0.0),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dark_hardware,
+        name="spindle",
     )
-    prop_upper.inertial = Inertial.from_geometry(
-        Box((0.026, 0.020, upper_len)),
-        mass=0.22,
-        origin=Origin(xyz=upper_mid, rpy=(upper_closed_angle, 0.0, 0.0)),
+    left_handle.visual(
+        Cylinder(radius=HANDLE_PIVOT_RADIUS, length=HANDLE_PIVOT_LENGTH),
+        origin=Origin(
+            xyz=(0.0, HANDLE_PIVOT_STANDOFF + (HANDLE_PIVOT_LENGTH / 2.0), 0.0),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dark_hardware,
+        name="pivot_hub",
+    )
+    left_handle.visual(
+        Box((HANDLE_WIDTH, HANDLE_GRIP_DEPTH, HANDLE_GRIP_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                HANDLE_PIVOT_STANDOFF + HANDLE_PIVOT_LENGTH + (HANDLE_GRIP_DEPTH / 2.0),
+                HANDLE_GRIP_Z_OFFSET,
+            )
+        ),
+        material=dark_hardware,
+        name="grip",
+    )
+    left_handle.visual(
+        Box((HANDLE_WIDTH * 0.58, HANDLE_GRIP_DEPTH * 1.2, 0.035)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                HANDLE_PIVOT_STANDOFF + HANDLE_PIVOT_LENGTH + (HANDLE_GRIP_DEPTH * 0.6),
+                HANDLE_TOE_Z_OFFSET,
+            )
+        ),
+        material=dark_hardware,
+        name="toe_piece",
+    )
+    left_handle.inertial = Inertial.from_geometry(
+        Box((0.03, 0.03, 0.18)),
+        mass=0.8,
+        origin=Origin(xyz=(0.0, 0.018, HANDLE_GRIP_Z_OFFSET)),
+    )
+
+    right_handle = model.part("right_handle")
+    right_handle.visual(
+        Cylinder(radius=HANDLE_SPINDLE_RADIUS, length=HANDLE_SPINDLE_LENGTH),
+        origin=Origin(
+            xyz=(0.0, HANDLE_SPINDLE_LENGTH / 2.0, 0.0),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dark_hardware,
+        name="spindle",
+    )
+    right_handle.visual(
+        Cylinder(radius=HANDLE_PIVOT_RADIUS, length=HANDLE_PIVOT_LENGTH),
+        origin=Origin(
+            xyz=(0.0, HANDLE_PIVOT_STANDOFF + (HANDLE_PIVOT_LENGTH / 2.0), 0.0),
+            rpy=(math.pi / 2.0, 0.0, 0.0),
+        ),
+        material=dark_hardware,
+        name="pivot_hub",
+    )
+    right_handle.visual(
+        Box((HANDLE_WIDTH, HANDLE_GRIP_DEPTH, HANDLE_GRIP_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                HANDLE_PIVOT_STANDOFF + HANDLE_PIVOT_LENGTH + (HANDLE_GRIP_DEPTH / 2.0),
+                HANDLE_GRIP_Z_OFFSET,
+            )
+        ),
+        material=dark_hardware,
+        name="grip",
+    )
+    right_handle.visual(
+        Box((HANDLE_WIDTH * 0.58, HANDLE_GRIP_DEPTH * 1.2, 0.035)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                HANDLE_PIVOT_STANDOFF + HANDLE_PIVOT_LENGTH + (HANDLE_GRIP_DEPTH * 0.6),
+                HANDLE_TOE_Z_OFFSET,
+            )
+        ),
+        material=dark_hardware,
+        name="toe_piece",
+    )
+    right_handle.inertial = Inertial.from_geometry(
+        Box((0.03, 0.03, 0.18)),
+        mass=0.8,
+        origin=Origin(xyz=(0.0, 0.018, HANDLE_GRIP_Z_OFFSET)),
     )
 
     model.articulation(
-        "panel_hinge",
+        "left_door_hinge",
         ArticulationType.REVOLUTE,
-        parent=bay,
-        child=panel,
-        origin=Origin(xyz=(0.0, hinge_axis_y, hinge_axis_z)),
-        axis=(1.0, 0.0, 0.0),
+        parent=cabinet,
+        child=left_door,
+        origin=Origin(xyz=(_left_hinge_x(), HINGE_AXIS_Y, DOOR_BOTTOM)),
+        axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=20.0,
+            effort=80.0,
             velocity=1.5,
             lower=0.0,
-            upper=math.pi / 2.0,
+            upper=math.radians(125.0),
         ),
     )
     model.articulation(
-        "prop_base_pivot",
+        "right_door_hinge",
         ArticulationType.REVOLUTE,
-        parent=bay,
-        child=prop_lower,
-        origin=Origin(xyz=(prop_x, prop_pivot_y, prop_pivot_z)),
-        axis=(1.0, 0.0, 0.0),
+        parent=cabinet,
+        child=right_door,
+        origin=Origin(xyz=(_right_hinge_x(), HINGE_AXIS_Y, DOOR_BOTTOM)),
+        axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=6.0,
-            velocity=2.0,
-            lower=-1.55,
+            effort=80.0,
+            velocity=1.5,
+            lower=-math.radians(125.0),
             upper=0.0,
         ),
     )
     model.articulation(
-        "prop_elbow",
+        "left_handle_turn",
         ArticulationType.REVOLUTE,
-        parent=prop_lower,
-        child=prop_upper,
-        origin=Origin(xyz=lower_vec),
-        axis=(1.0, 0.0, 0.0),
+        parent=left_door,
+        child=left_handle,
+        origin=Origin(
+            xyz=(
+                DOOR_WIDTH - HANDLE_INSET,
+                _door_front_surface_y(),
+                _handle_local_z(),
+            )
+        ),
+        axis=(0.0, 1.0, 0.0),
         motion_limits=MotionLimits(
             effort=4.0,
             velocity=2.5,
-            lower=-2.43,
-            upper=0.0,
+            lower=-HANDLE_SWING,
+            upper=HANDLE_SWING,
+        ),
+    )
+    model.articulation(
+        "right_handle_turn",
+        ArticulationType.REVOLUTE,
+        parent=right_door,
+        child=right_handle,
+        origin=Origin(
+            xyz=(
+                -(DOOR_WIDTH - HANDLE_INSET),
+                _door_front_surface_y(),
+                _handle_local_z(),
+            )
+        ),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=4.0,
+            velocity=2.5,
+            lower=-HANDLE_SWING,
+            upper=HANDLE_SWING,
         ),
     )
 
@@ -333,93 +576,352 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=SAFE_ASSET_ROOT)
-    bay = object_model.get_part("bay")
-    panel = object_model.get_part("panel")
-    prop_lower = object_model.get_part("prop_lower")
-    prop_upper = object_model.get_part("prop_upper")
+    ctx = TestContext(object_model)
 
-    panel_hinge = object_model.get_articulation("panel_hinge")
-    prop_base_pivot = object_model.get_articulation("prop_base_pivot")
-    prop_elbow = object_model.get_articulation("prop_elbow")
+    cabinet = object_model.get_part("cabinet")
+    left_door = object_model.get_part("left_door")
+    right_door = object_model.get_part("right_door")
+    left_handle = object_model.get_part("left_handle")
+    right_handle = object_model.get_part("right_handle")
 
-    outer_face = panel.get_visual("outer_face")
-    panel_strike = panel.get_visual("prop_strike")
-    fastener_left_head = panel.get_visual("fastener_left_head")
-    fastener_left_stem = panel.get_visual("fastener_left_stem")
-    fastener_right_stem = panel.get_visual("fastener_right_stem")
+    left_hinge = object_model.get_articulation("left_door_hinge")
+    right_hinge = object_model.get_articulation("right_door_hinge")
+    left_handle_turn = object_model.get_articulation("left_handle_turn")
+    right_handle_turn = object_model.get_articulation("right_handle_turn")
 
-    hinge_barrel = bay.get_visual("hinge_barrel")
-    bay_receiver_left = bay.get_visual("receiver_left")
-    bay_receiver_right = bay.get_visual("receiver_right")
-    back_wall = bay.get_visual("back_wall")
-    prop_bracket = bay.get_visual("prop_bracket")
-    top_bezel = bay.get_visual("top_bezel")
+    left_panel = left_door.get_visual("panel")
+    right_panel = right_door.get_visual("panel")
+    left_outer_stile = left_door.get_visual("outer_edge_stile")
+    right_outer_stile = right_door.get_visual("outer_edge_stile")
+    left_latch_bolt = left_door.get_visual("latch_bolt")
+    right_latch_bolt = right_door.get_visual("latch_bolt")
 
-    lower_arm = prop_lower.get_visual("lower_arm")
-    upper_arm = prop_upper.get_visual("upper_arm")
+    left_jamb = cabinet.get_visual("left_jamb")
+    right_jamb = cabinet.get_visual("right_jamb")
+    center_stile = cabinet.get_visual("center_stile")
+    left_strike = cabinet.get_visual("left_strike")
+    right_strike = cabinet.get_visual("right_strike")
+    left_lower_mount = cabinet.get_visual("left_lower_hinge_mount")
+    left_upper_mount = cabinet.get_visual("left_upper_hinge_mount")
+    right_lower_mount = cabinet.get_visual("right_lower_hinge_mount")
+    right_upper_mount = cabinet.get_visual("right_upper_hinge_mount")
+
+    left_hub = left_handle.get_visual("pivot_hub")
+    right_hub = right_handle.get_visual("pivot_hub")
+    left_grip = left_handle.get_visual("grip")
+    right_grip = right_handle.get_visual("grip")
+    left_spindle = left_handle.get_visual("spindle")
+    right_spindle = right_handle.get_visual("spindle")
+    left_escutcheon = left_door.get_visual("latch_escutcheon")
+    right_escutcheon = right_door.get_visual("latch_escutcheon")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.005,
-        overlap_volume_tol=0.0,
+    ctx.allow_overlap(
+        left_handle,
+        left_door,
+        elem_a=left_spindle,
+        elem_b=left_panel,
+        reason="The left handle spindle passes through the door skin into the internal latch mechanism.",
     )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.005,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
+    ctx.allow_overlap(
+        left_handle,
+        left_door,
+        elem_a=left_spindle,
+        reason="The left handle spindle intentionally penetrates the left door assembly to drive the center-stile latch hardware.",
+    )
+    ctx.allow_overlap(
+        right_handle,
+        right_door,
+        elem_a=right_spindle,
+        elem_b=right_panel,
+        reason="The right handle spindle passes through the door skin into the internal latch mechanism.",
+    )
+    ctx.allow_overlap(
+        right_handle,
+        right_door,
+        elem_a=right_spindle,
+        reason="The right handle spindle intentionally penetrates the right door assembly to drive the center-stile latch hardware.",
+    )
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+
+    ctx.expect_gap(
+        left_door,
+        cabinet,
+        axis="y",
+        positive_elem=left_panel,
+        negative_elem=left_jamb,
+        max_gap=0.002,
+        max_penetration=0.0,
+        name="left door seats just proud of the left jamb",
+    )
+    ctx.expect_gap(
+        right_door,
+        cabinet,
+        axis="y",
+        positive_elem=right_panel,
+        negative_elem=right_jamb,
+        max_gap=0.002,
+        max_penetration=0.0,
+        name="right door seats just proud of the right jamb",
+    )
+    ctx.expect_gap(
+        left_door,
+        cabinet,
+        axis="y",
+        positive_elem=left_panel,
+        negative_elem=center_stile,
+        max_gap=0.002,
+        max_penetration=0.0,
+        name="left door closes against the center stile plane",
+    )
+    ctx.expect_gap(
+        right_door,
+        cabinet,
+        axis="y",
+        positive_elem=right_panel,
+        negative_elem=center_stile,
+        max_gap=0.002,
+        max_penetration=0.0,
+        name="right door closes against the center stile plane",
+    )
+    ctx.expect_gap(
+        right_door,
+        left_door,
+        axis="x",
+        positive_elem=right_panel,
+        negative_elem=left_panel,
+        min_gap=0.0035,
+        max_gap=0.0055,
+        name="closed doors meet with a narrow center seam",
     )
 
-    ctx.expect_overlap(panel, bay, axes="xz", min_overlap=0.18, elem_a=outer_face)
-    ctx.expect_gap(
-        panel,
-        bay,
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.010,
-        positive_elem=outer_face,
-        negative_elem=top_bezel,
-        name="closed_panel_sits_within_bezel_depth",
+    ctx.expect_overlap(
+        left_door,
+        cabinet,
+        axes="xz",
+        elem_a=left_latch_bolt,
+        elem_b=left_strike,
+        min_overlap=0.010,
+        name="left latch aligns to the center stile strike",
     )
-    ctx.expect_contact(prop_lower, bay, elem_a=lower_arm, elem_b=prop_bracket)
-    ctx.expect_contact(prop_upper, prop_lower, elem_a=upper_arm, elem_b=lower_arm)
-    ctx.expect_contact(panel, bay, elem_a=fastener_left_stem, elem_b=bay_receiver_left)
-    ctx.expect_contact(panel, bay, elem_a=fastener_right_stem, elem_b=bay_receiver_right)
+    ctx.expect_overlap(
+        right_door,
+        cabinet,
+        axes="xz",
+        elem_a=right_latch_bolt,
+        elem_b=right_strike,
+        min_overlap=0.010,
+        name="right latch aligns to the center stile strike",
+    )
     ctx.expect_gap(
-        panel,
-        prop_upper,
+        left_door,
+        cabinet,
         axis="y",
-        min_gap=0.004,
-        positive_elem=outer_face,
-        negative_elem=upper_arm,
-        name="closed_prop_stays_behind_deadfront",
+        positive_elem=left_latch_bolt,
+        negative_elem=left_strike,
+        min_gap=0.001,
+        max_gap=0.006,
+        name="left latch sits just ahead of the strike hardware",
+    )
+    ctx.expect_gap(
+        right_door,
+        cabinet,
+        axis="y",
+        positive_elem=right_latch_bolt,
+        negative_elem=right_strike,
+        min_gap=0.001,
+        max_gap=0.006,
+        name="right latch sits just ahead of the strike hardware",
     )
 
-    with ctx.pose(
-        {
-            panel_hinge: math.pi / 2.0,
-            prop_base_pivot: -1.55,
-            prop_elbow: -2.43,
-        }
-    ):
-        ctx.expect_contact(prop_upper, panel, elem_a=upper_arm, elem_b=panel_strike)
-        ctx.expect_gap(
-            panel,
-            bay,
-            axis="y",
-            min_gap=0.55,
-            positive_elem=fastener_left_head,
-            negative_elem=back_wall,
-            name="open_panel_swings_clear_of_bay_depth",
+    ctx.expect_gap(
+        left_door,
+        cabinet,
+        axis="x",
+        positive_elem=left_outer_stile,
+        negative_elem=left_lower_mount,
+        min_gap=0.009,
+        max_gap=0.011,
+        name="left lower hinge leaf sits just outside the left door edge",
+    )
+    ctx.expect_gap(
+        left_door,
+        cabinet,
+        axis="x",
+        positive_elem=left_outer_stile,
+        negative_elem=left_upper_mount,
+        min_gap=0.009,
+        max_gap=0.011,
+        name="left upper hinge leaf sits just outside the left door edge",
+    )
+    ctx.expect_gap(
+        cabinet,
+        right_door,
+        axis="x",
+        positive_elem=right_lower_mount,
+        negative_elem=right_outer_stile,
+        min_gap=0.009,
+        max_gap=0.011,
+        name="right lower hinge leaf sits just outside the right door edge",
+    )
+    ctx.expect_gap(
+        cabinet,
+        right_door,
+        axis="x",
+        positive_elem=right_upper_mount,
+        negative_elem=right_outer_stile,
+        min_gap=0.009,
+        max_gap=0.011,
+        name="right upper hinge leaf sits just outside the right door edge",
+    )
+    ctx.expect_overlap(
+        left_door,
+        cabinet,
+        axes="yz",
+        elem_a=left_outer_stile,
+        elem_b=left_lower_mount,
+        min_overlap=0.003,
+        name="left lower hinge zone aligns along the door edge",
+    )
+    ctx.expect_overlap(
+        left_door,
+        cabinet,
+        axes="yz",
+        elem_a=left_outer_stile,
+        elem_b=left_upper_mount,
+        min_overlap=0.003,
+        name="left upper hinge zone aligns along the door edge",
+    )
+    ctx.expect_overlap(
+        cabinet,
+        right_door,
+        axes="yz",
+        elem_a=right_lower_mount,
+        elem_b=right_outer_stile,
+        min_overlap=0.003,
+        name="right lower hinge zone aligns along the door edge",
+    )
+    ctx.expect_overlap(
+        cabinet,
+        right_door,
+        axes="yz",
+        elem_a=right_upper_mount,
+        elem_b=right_outer_stile,
+        min_overlap=0.003,
+        name="right upper hinge zone aligns along the door edge",
+    )
+
+    ctx.expect_contact(
+        left_handle,
+        left_door,
+        name="left handle is mounted to the door face",
+    )
+    ctx.expect_contact(
+        right_handle,
+        right_door,
+        name="right handle is mounted to the door face",
+    )
+    ctx.expect_gap(
+        right_handle,
+        left_handle,
+        axis="x",
+        min_gap=0.08,
+        name="closed handles remain separated across the center seam",
+    )
+
+    left_closed_panel_aabb = ctx.part_element_world_aabb(left_door, elem=left_panel)
+    right_closed_panel_aabb = ctx.part_element_world_aabb(right_door, elem=right_panel)
+    left_rest_grip_aabb = ctx.part_element_world_aabb(left_handle, elem=left_grip)
+    right_rest_grip_aabb = ctx.part_element_world_aabb(right_handle, elem=right_grip)
+
+    with ctx.pose({left_hinge: left_hinge.motion_limits.upper}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="left_door_open_no_overlap")
+        ctx.fail_if_isolated_parts(name="left_door_open_no_floating")
+        left_open_panel_aabb = ctx.part_element_world_aabb(left_door, elem=left_panel)
+        ctx.check(
+            "left door swings away from the center opening",
+            left_closed_panel_aabb is not None
+            and left_open_panel_aabb is not None
+            and left_open_panel_aabb[0][1] > left_closed_panel_aabb[1][1] + 0.01,
+            details="Left door did not move outward around the left-side hinge as expected.",
         )
-        ctx.expect_overlap(panel, bay, axes="x", min_overlap=0.40, elem_a=outer_face)
-        ctx.expect_contact(prop_lower, bay, elem_a=lower_arm, elem_b=prop_bracket)
+
+    with ctx.pose({right_hinge: right_hinge.motion_limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="right_door_open_no_overlap")
+        ctx.fail_if_isolated_parts(name="right_door_open_no_floating")
+        right_open_panel_aabb = ctx.part_element_world_aabb(right_door, elem=right_panel)
+        ctx.check(
+            "right door swings away from the center opening",
+            right_closed_panel_aabb is not None
+            and right_open_panel_aabb is not None
+            and right_open_panel_aabb[0][1] > right_closed_panel_aabb[1][1] + 0.01,
+            details="Right door did not move outward around the right-side hinge as expected.",
+        )
+
+    with ctx.pose({left_hinge: left_hinge.motion_limits.upper, right_hinge: right_hinge.motion_limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="both_doors_open_no_overlap")
+        ctx.fail_if_isolated_parts(name="both_doors_open_no_floating")
+
+    with ctx.pose({left_handle_turn: left_handle_turn.motion_limits.upper}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="left_handle_turned_no_overlap")
+        left_turned_grip_aabb = ctx.part_element_world_aabb(left_handle, elem=left_grip)
+        ctx.expect_gap(
+            left_handle,
+            left_door,
+            axis="y",
+            positive_elem=left_hub,
+            negative_elem=left_escutcheon,
+            min_gap=0.0,
+            max_gap=0.005,
+            name="left handle stays closely seated to the escutcheon while turning",
+        )
+        ctx.check(
+            "left handle rotates about its latch hub",
+            left_rest_grip_aabb is not None
+            and left_turned_grip_aabb is not None
+            and _aabb_center_x(left_rest_grip_aabb) is not None
+            and _aabb_center_x(left_turned_grip_aabb) is not None
+            and abs(_aabb_center_x(left_turned_grip_aabb) - _aabb_center_x(left_rest_grip_aabb)) > 0.02,
+            details="Left handle grip center did not shift enough to show real rotation.",
+        )
+
+    with ctx.pose({right_handle_turn: right_handle_turn.motion_limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="right_handle_turned_no_overlap")
+        right_turned_grip_aabb = ctx.part_element_world_aabb(right_handle, elem=right_grip)
+        ctx.expect_gap(
+            right_handle,
+            right_door,
+            axis="y",
+            positive_elem=right_hub,
+            negative_elem=right_escutcheon,
+            min_gap=0.0,
+            max_gap=0.005,
+            name="right handle stays closely seated to the escutcheon while turning",
+        )
+        ctx.check(
+            "right handle rotates about its latch hub",
+            right_rest_grip_aabb is not None
+            and right_turned_grip_aabb is not None
+            and _aabb_center_x(right_rest_grip_aabb) is not None
+            and _aabb_center_x(right_turned_grip_aabb) is not None
+            and abs(_aabb_center_x(right_turned_grip_aabb) - _aabb_center_x(right_rest_grip_aabb)) > 0.02,
+            details="Right handle grip center did not shift enough to show real rotation.",
+        )
+
+    for joint in (left_hinge, right_hinge):
+        limits = joint.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            continue
+        with ctx.pose({joint: limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{joint.name}_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{joint.name}_lower_no_floating")
+        with ctx.pose({joint: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{joint.name}_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{joint.name}_upper_no_floating")
+
     return ctx.report()
 
 

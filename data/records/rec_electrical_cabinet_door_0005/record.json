@@ -1,0 +1,39 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_electrical_cabinet_door_0005",
+  "created_at": "2026-03-27T12:37:46Z",
+  "updated_at": "2026-03-29T11:50:31Z",
+  "rating": 4,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "electrical_cabinet_door",
+  "source": {
+    "run_id": "run_20260326_115111_793307_base-sdk-categories-part1-20260326",
+    "prompt_batch_id": null,
+    "batch_spec_id": "base_sdk_categories_part1_20260326",
+    "row_id": "row_0159",
+    "prompt_index": 159
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Electrical cabinet door \u2014 wall-mount distribution board 180-degree",
+    "prompt_preview": "A wall-mount distribution board with a recessed steel box and a cover door that swings open 180 degrees on revolute hinge pins at the side edge."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "83d39a064b52e97aa7a91f8bff120b362e2274f0aaeb096e0792d384d49ba9c3",
+    "model_py_sha256": "7c97882db94b3649cc19be1ee54eb4fdefd795027879ceeef7c3f227eebf5492"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

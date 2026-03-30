@@ -4,7 +4,6 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-from pathlib import Path
 
 from sdk import (
     ArticulatedObject,
@@ -12,755 +11,551 @@ from sdk import (
     AssetContext,
     Box,
     Cylinder,
-    Inertial,
+    MeshGeometry,
     MotionLimits,
     Origin,
+    TorusGeometry,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    repair_loft,
+    section_loft,
+    superellipse_profile,
 )
 
 ASSETS = AssetContext.from_script(__file__)
+REST_IPD_YAW = math.radians(14.0)
 
 
-def _midpoint(
-    a: tuple[float, float, float], b: tuple[float, float, float]
-) -> tuple[float, float, float]:
-    return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5)
+def _save_mesh(name: str, geometry: MeshGeometry):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
 
 
-def _distance(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
-    return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2)
+def _merge_geometries(geometries: list[MeshGeometry]) -> MeshGeometry:
+    merged = MeshGeometry()
+    for geometry in geometries:
+        merged.merge(geometry)
+    return merged
 
 
-def _rpy_for_cylinder(
-    a: tuple[float, float, float], b: tuple[float, float, float]
-) -> tuple[float, float, float]:
-    dx = b[0] - a[0]
-    dy = b[1] - a[1]
-    dz = b[2] - a[2]
-    length_xy = math.hypot(dx, dy)
-    yaw = math.atan2(dy, dx)
-    pitch = math.atan2(length_xy, dz)
-    return (0.0, pitch, yaw)
+def _yz_section(
+    x_pos: float,
+    y_center: float,
+    z_center: float,
+    width: float,
+    height: float,
+    *,
+    exponent: float,
+    segments: int = 44,
+) -> list[tuple[float, float, float]]:
+    profile = superellipse_profile(width, height, exponent=exponent, segments=segments)
+    return [(x_pos, y_center + y, z_center + z) for y, z in profile]
 
 
-def _add_member(part, a, b, radius: float, material, name: str | None = None) -> None:
+def _half_shell_geometry(side_sign: float) -> MeshGeometry:
+    sections = [
+        _yz_section(-0.044, side_sign * 0.054, 0.045, 0.034, 0.048, exponent=2.3),
+        _yz_section(-0.012, side_sign * 0.052, 0.046, 0.044, 0.062, exponent=2.6),
+        _yz_section(0.018, side_sign * 0.058, 0.046, 0.058, 0.080, exponent=3.0),
+        _yz_section(0.048, side_sign * 0.066, 0.042, 0.062, 0.074, exponent=2.8),
+        _yz_section(0.074, side_sign * 0.070, 0.040, 0.050, 0.060, exponent=2.3),
+    ]
+    return repair_loft(section_loft(sections))
+
+
+def _knurl_band_geometry(
+    radius: float,
+    length: float,
+    tooth_depth: float,
+    tooth_count: int,
+) -> MeshGeometry:
+    base = MeshGeometry()
+    half = length * 0.5
+    for index in range(tooth_count):
+        angle = math.tau * index / tooth_count
+        next_angle = math.tau * (index + 1) / tooth_count
+        r0 = radius
+        r1 = radius + tooth_depth
+        if index % 2:
+            r0, r1 = r1, r0
+        y0 = r0 * math.cos(angle)
+        z0 = r0 * math.sin(angle)
+        y1 = r1 * math.cos(next_angle)
+        z1 = r1 * math.sin(next_angle)
+        y2 = r1 * math.cos(angle)
+        z2 = r1 * math.sin(angle)
+        y3 = r0 * math.cos(next_angle)
+        z3 = r0 * math.sin(next_angle)
+        a = base.add_vertex(-half, y0, z0)
+        b = base.add_vertex(-half, y1, z1)
+        c = base.add_vertex(half, y1, z1)
+        d = base.add_vertex(half, y0, z0)
+        e = base.add_vertex(-half, y2, z2)
+        f = base.add_vertex(half, y2, z2)
+        g = base.add_vertex(-half, y3, z3)
+        h = base.add_vertex(half, y3, z3)
+        base.add_face(a, b, c)
+        base.add_face(a, c, d)
+        base.add_face(a, e, f)
+        base.add_face(a, f, d)
+        base.add_face(b, g, h)
+        base.add_face(b, h, c)
+        base.add_face(e, g, b)
+        base.add_face(e, b, a)
+        base.add_face(d, c, h)
+        base.add_face(d, h, f)
+    return base
+
+
+def _focus_knob_geometry() -> MeshGeometry:
+    knob = _knurl_band_geometry(radius=0.016, length=0.026, tooth_depth=0.0018, tooth_count=28)
+    hub = _knurl_band_geometry(radius=0.011, length=0.034, tooth_depth=0.0009, tooth_count=18)
+    return _merge_geometries([knob, hub])
+
+
+def _diopter_ring_geometry() -> MeshGeometry:
+    ring = TorusGeometry(radius=0.0290, tube=0.0010, radial_segments=18, tubular_segments=42)
+    ring.rotate_y(math.pi / 2.0)
+    return ring
+
+
+def _add_half_body_visuals(part, *, side_sign: float, shell_mesh_name: str, armor, metal, glass) -> None:
     part.visual(
-        Cylinder(radius=radius, length=_distance(a, b)),
-        origin=Origin(xyz=_midpoint(a, b), rpy=_rpy_for_cylinder(a, b)),
-        material=material,
-        name=name,
+        Box((0.018, 0.012, 0.018)),
+        origin=Origin(xyz=(0.000, side_sign * 0.012, 0.024)),
+        material=metal,
+        name="hinge_lug",
+    )
+    part.visual(
+        Box((0.040, 0.016, 0.020)),
+        origin=Origin(xyz=(0.004, side_sign * 0.0245, 0.024)),
+        material=armor,
+        name="lower_bridge_arm",
+    )
+    part.visual(
+        Box((0.028, 0.014, 0.016)),
+        origin=Origin(xyz=(-0.016, side_sign * 0.040, 0.042)),
+        material=armor,
+        name="upper_bridge_arm",
+    )
+    part.visual(
+        _save_mesh(shell_mesh_name, _half_shell_geometry(side_sign)),
+        material=armor,
+        name="armor_shell",
+    )
+    part.visual(
+        Box((0.038, 0.020, 0.020)),
+        origin=Origin(xyz=(0.044, side_sign * 0.068, 0.026)),
+        material=armor,
+        name="objective_saddle",
+    )
+    part.visual(
+        Box((0.018, 0.018, 0.016)),
+        origin=Origin(xyz=(-0.028, side_sign * 0.060, 0.050)),
+        material=armor,
+        name="ocular_saddle",
+    )
+    part.visual(
+        Cylinder(radius=0.034, length=0.058),
+        origin=Origin(
+            xyz=(0.092, side_sign * 0.072, 0.030),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=armor,
+        name="objective_armor",
+    )
+    part.visual(
+        Cylinder(radius=0.038, length=0.008),
+        origin=Origin(
+            xyz=(0.125, side_sign * 0.072, 0.030),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=metal,
+        name="objective_lip",
+    )
+    part.visual(
+        Cylinder(radius=0.025, length=0.003),
+        origin=Origin(
+            xyz=(0.130, side_sign * 0.072, 0.030),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=glass,
+        name="objective_lens",
+    )
+    part.visual(
+        Cylinder(radius=0.020, length=0.022),
+        origin=Origin(
+            xyz=(-0.031, side_sign * 0.072, 0.048),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=armor,
+        name="ocular_neck",
+    )
+    part.visual(
+        Cylinder(radius=0.025, length=0.036),
+        origin=Origin(
+            xyz=(-0.060, side_sign * 0.072, 0.048),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=armor,
+        name="ocular_housing",
+    )
+    part.visual(
+        Cylinder(radius=0.029, length=0.020),
+        origin=Origin(
+            xyz=(-0.087, side_sign * 0.072, 0.048),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=armor,
+        name="eyecup",
+    )
+    part.visual(
+        Cylinder(radius=0.017, length=0.004),
+        origin=Origin(
+            xyz=(-0.099, side_sign * 0.072, 0.048),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=glass,
+        name="ocular_lens",
     )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="marine_tripod_binocular", assets=ASSETS)
+    model = ArticulatedObject(name="marine_7x50_porro_binocular", assets=ASSETS)
 
-    aluminum = model.material("aluminum", rgba=(0.74, 0.76, 0.79, 1.0))
-    cast_gray = model.material("cast_gray", rgba=(0.42, 0.44, 0.47, 1.0))
-    dark_metal = model.material("dark_metal", rgba=(0.18, 0.19, 0.21, 1.0))
-    rubber_black = model.material("rubber_black", rgba=(0.07, 0.07, 0.08, 1.0))
-    scale_white = model.material("scale_white", rgba=(0.84, 0.84, 0.80, 1.0))
-    glass = model.material("glass", rgba=(0.24, 0.34, 0.39, 0.32))
+    armor = model.material("rubber_armor", rgba=(0.12, 0.13, 0.14, 1.0))
+    armor_dark = model.material("rubber_trim", rgba=(0.08, 0.09, 0.10, 1.0))
+    metal = model.material("dark_metal", rgba=(0.30, 0.32, 0.35, 1.0))
+    glass = model.material("coated_glass", rgba=(0.45, 0.58, 0.68, 0.42))
 
-    tripod = model.part("tripod")
-    tripod.visual(
-        Cylinder(radius=0.085, length=0.048),
-        origin=Origin(xyz=(0.0, 0.0, 0.995)),
-        material=dark_metal,
-        name="crown",
+    bridge = model.part("bridge")
+    bridge.visual(
+        Cylinder(radius=0.0055, length=0.042),
+        origin=Origin(xyz=(0.0, 0.0, 0.024)),
+        material=metal,
+        name="hinge_spindle",
     )
-    tripod.visual(
-        Cylinder(radius=0.027, length=0.120),
-        origin=Origin(xyz=(0.0, 0.0, 1.078)),
-        material=aluminum,
-        name="center_column",
+    bridge.visual(
+        Box((0.020, 0.006, 0.018)),
+        origin=Origin(xyz=(-0.004, 0.0, 0.024)),
+        material=armor_dark,
+        name="hinge_block",
     )
-    tripod.visual(
-        Cylinder(radius=0.038, length=0.044),
-        origin=Origin(xyz=(0.0, 0.0, 1.150)),
-        material=dark_metal,
-        name="head_receiver",
-    )
-    tripod.visual(
-        Box((0.124, 0.124, 0.016)),
-        origin=Origin(xyz=(0.0, 0.0, 1.172)),
-        material=dark_metal,
-        name="top_platform",
-    )
-    tripod.visual(
-        Cylinder(radius=0.048, length=0.026),
-        origin=Origin(xyz=(0.0, 0.0, 0.690)),
-        material=dark_metal,
-        name="spreader_hub",
-    )
-    for index in range(3):
-        angle = (2.0 * math.pi * index) / 3.0 + math.pi / 6.0
-        ca = math.cos(angle)
-        sa = math.sin(angle)
-        top = (0.082 * ca, 0.082 * sa, 0.985)
-        mid = (0.215 * ca, 0.215 * sa, 0.555)
-        foot = (0.448 * ca, 0.448 * sa, 0.040)
-        tip = (0.472 * ca, 0.472 * sa, 0.006)
-        _add_member(tripod, top, mid, 0.0125, aluminum, name=f"upper_leg_{index}")
-        _add_member(tripod, mid, foot, 0.0105, aluminum, name=f"lower_leg_{index}")
-        _add_member(tripod, foot, tip, 0.0145, rubber_black, name=f"foot_cap_{index}")
-        _add_member(tripod, (0.0, 0.0, 0.690), mid, 0.0060, aluminum, name=f"spreader_{index}")
-    tripod.inertial = Inertial.from_geometry(
-        Box((1.04, 1.04, 1.22)),
-        mass=10.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.610)),
-    )
-
-    collar = model.part("swivel_collar")
-    collar.visual(
-        Cylinder(radius=0.108, length=0.018),
-        origin=Origin(xyz=(0.0, 0.0, 0.009)),
-        material=cast_gray,
-        name="azimuth_ring",
-    )
-    collar.visual(
-        Cylinder(radius=0.052, length=0.074),
-        origin=Origin(xyz=(0.0, 0.0, 0.055)),
-        material=dark_metal,
-        name="vertical_collar",
-    )
-    collar.visual(
-        Cylinder(radius=0.078, length=0.026),
-        origin=Origin(xyz=(0.0, 0.0, 0.105)),
-        material=cast_gray,
-        name="top_flange",
-    )
-    for tick_index in range(12):
-        angle = (2.0 * math.pi * tick_index) / 12.0
-        radius = 0.100
-        tick_length = 0.018 if tick_index % 3 == 0 else 0.011
-        collar.visual(
-            Box((tick_length, 0.0035, 0.005)),
-            origin=Origin(
-                xyz=(radius * math.cos(angle), radius * math.sin(angle), 0.0205),
-                rpy=(0.0, 0.0, angle),
-            ),
-            material=scale_white,
-            name=f"azimuth_tick_{tick_index}",
-        )
-    collar.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.108, length=0.118),
-        mass=1.8,
-        origin=Origin(xyz=(0.0, 0.0, 0.059)),
-    )
-
-    yoke = model.part("cradle_yoke")
-    yoke.visual(
-        Box((0.120, 0.050, 0.018)),
-        origin=Origin(xyz=(-0.050, 0.0, 0.009)),
-        material=cast_gray,
-        name="pivot_base",
-    )
-    yoke.visual(
-        Box((0.090, 0.060, 0.010)),
-        origin=Origin(xyz=(-0.055, 0.0, 0.029)),
-        material=cast_gray,
-        name="saddle",
-    )
-    yoke.visual(
-        Box((0.040, 0.032, 0.016)),
-        origin=Origin(xyz=(-0.055, 0.0, 0.026)),
-        material=cast_gray,
-        name="saddle_post",
-    )
-    yoke.visual(
-        Box((0.114, 0.012, 0.108)),
-        origin=Origin(xyz=(-0.002, 0.184, 0.066)),
-        material=cast_gray,
-        name="left_arm",
-    )
-    yoke.visual(
-        Box((0.114, 0.012, 0.108)),
-        origin=Origin(xyz=(-0.002, -0.184, 0.066)),
-        material=cast_gray,
-        name="right_arm",
-    )
-    _add_member(
-        yoke,
-        (-0.030, 0.022, 0.010),
-        (-0.028, 0.180, 0.026),
-        0.008,
-        cast_gray,
-        name="left_brace",
-    )
-    _add_member(
-        yoke,
-        (-0.030, -0.022, 0.010),
-        (-0.028, -0.180, 0.026),
-        0.008,
-        cast_gray,
-        name="right_brace",
-    )
-    yoke.visual(
-        Cylinder(radius=0.028, length=0.016),
-        origin=Origin(xyz=(0.0, 0.175, 0.069), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_metal,
-        name="left_pivot_collar",
-    )
-    yoke.visual(
-        Cylinder(radius=0.028, length=0.016),
-        origin=Origin(xyz=(0.0, -0.175, 0.069), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_metal,
-        name="right_pivot_collar",
-    )
-    yoke.inertial = Inertial.from_geometry(
-        Box((0.180, 0.370, 0.140)),
-        mass=2.4,
-        origin=Origin(xyz=(0.0, 0.0, 0.055)),
-    )
-
-    body = model.part("binocular_body")
-    for side_name, side_y in (("left", 0.086), ("right", -0.086)):
-        body.visual(
-            Cylinder(radius=0.068, length=0.340),
-            origin=Origin(xyz=(0.002, side_y * 1.06, 0.034), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=cast_gray,
-            name=f"{side_name}_objective_tube",
-        )
-        body.visual(
-            Cylinder(radius=0.074, length=0.250),
-            origin=Origin(xyz=(-0.012, side_y * 1.06, 0.036), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=rubber_black,
-            name=f"{side_name}_armor",
-        )
-        body.visual(
-            Cylinder(radius=0.079, length=0.016),
-            origin=Origin(xyz=(0.176, side_y * 1.06, 0.034), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=dark_metal,
-            name=f"{side_name}_objective_rim",
-        )
-        body.visual(
-            Cylinder(radius=0.031, length=0.072),
-            origin=Origin(xyz=(-0.184, side_y * 0.83, 0.028), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=rubber_black,
-            name=f"{side_name}_eyepiece",
-        )
-        body.visual(
-            Cylinder(radius=0.026, length=0.028),
-            origin=Origin(xyz=(-0.220, side_y * 0.83, 0.028), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=rubber_black,
-            name=f"{side_name}_eyecup",
-        )
-        body.visual(
-            Cylinder(radius=0.019, length=0.012),
-            origin=Origin(xyz=(-0.239, side_y * 0.83, 0.028), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=glass,
-            name=f"{side_name}_eyelens",
-        )
-        body.visual(
-            Cylinder(radius=0.059, length=0.008),
-            origin=Origin(xyz=(0.184, side_y * 1.06, 0.034), rpy=(0.0, math.pi / 2.0, 0.0)),
-            material=glass,
-            name=f"{side_name}_objective_glass",
-        )
-    body.visual(
-        Box((0.170, 0.184, 0.086)),
-        origin=Origin(xyz=(-0.022, 0.0, 0.050)),
-        material=cast_gray,
-        name="center_housing",
-    )
-    body.visual(
-        Box((0.112, 0.140, 0.054)),
-        origin=Origin(xyz=(-0.052, 0.0, 0.094)),
-        material=cast_gray,
-        name="prism_housing",
-    )
-    body.visual(
-        Box((0.100, 0.110, 0.044)),
-        origin=Origin(xyz=(-0.126, 0.0, 0.058)),
-        material=cast_gray,
-        name="eyepiece_bridge",
-    )
-    body.visual(
-        Box((0.124, 0.090, 0.020)),
-        origin=Origin(xyz=(-0.006, 0.0, -0.025)),
-        material=dark_metal,
-        name="mount_foot",
-    )
-    body.visual(
-        Box((0.086, 0.078, 0.014)),
-        origin=Origin(xyz=(-0.012, 0.0, -0.008)),
-        material=rubber_black,
-        name="underside_armor",
-    )
-    body.visual(
-        Cylinder(radius=0.021, length=0.020),
-        origin=Origin(xyz=(0.0, 0.159, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_metal,
-        name="left_trunnion",
-    )
-    body.visual(
-        Cylinder(radius=0.021, length=0.020),
-        origin=Origin(xyz=(0.0, -0.159, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_metal,
-        name="right_trunnion",
-    )
-    body.visual(
-        Cylinder(radius=0.023, length=0.042),
-        origin=Origin(xyz=(-0.036, 0.0, 0.142)),
-        material=dark_metal,
+    bridge.visual(
+        Box((0.016, 0.004, 0.016)),
+        origin=Origin(xyz=(-0.018, 0.0, 0.030)),
+        material=armor_dark,
         name="focus_bridge",
     )
-    body.visual(
-        Cylinder(radius=0.006, length=0.024),
-        origin=Origin(xyz=(0.169, 0.09116, 0.110), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_metal,
-        name="left_cap_pin",
-    )
-    body.visual(
-        Cylinder(radius=0.006, length=0.024),
-        origin=Origin(xyz=(0.169, -0.09116, 0.110), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_metal,
-        name="right_cap_pin",
-    )
-    body.inertial = Inertial.from_geometry(
-        Box((0.470, 0.360, 0.220)),
-        mass=5.6,
-        origin=Origin(xyz=(-0.010, 0.0, 0.050)),
+    bridge.visual(
+        Box((0.016, 0.008, 0.0244)),
+        origin=Origin(xyz=(-0.032, 0.0, 0.034)),
+        material=armor_dark,
+        name="focus_tower",
     )
 
-    left_cap = model.part("left_lens_cap")
-    left_cap.visual(
-        Cylinder(radius=0.072, length=0.010),
-        origin=Origin(xyz=(0.020, 0.0, -0.076), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=rubber_black,
-        name="lid",
-    )
-    left_cap.visual(
-        Box((0.016, 0.032, 0.064)),
-        origin=Origin(xyz=(0.010, 0.0, -0.032)),
-        material=rubber_black,
-        name="hinge_strap",
-    )
-    left_cap.visual(
-        Cylinder(radius=0.008, length=0.018),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=rubber_black,
-        name="hinge_sleeve",
-    )
-    left_cap.inertial = Inertial.from_geometry(
-        Box((0.102, 0.086, 0.106)),
-        mass=0.08,
-        origin=Origin(xyz=(0.012, 0.0, -0.040)),
+    left_body = model.part("left_body")
+    _add_half_body_visuals(
+        left_body,
+        side_sign=1.0,
+        shell_mesh_name="left_body_shell.obj",
+        armor=armor,
+        metal=metal,
+        glass=glass,
     )
 
-    right_cap = model.part("right_lens_cap")
-    right_cap.visual(
-        Cylinder(radius=0.072, length=0.010),
-        origin=Origin(xyz=(0.020, 0.0, -0.076), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=rubber_black,
-        name="lid",
+    right_body = model.part("right_body")
+    _add_half_body_visuals(
+        right_body,
+        side_sign=-1.0,
+        shell_mesh_name="right_body_shell.obj",
+        armor=armor,
+        metal=metal,
+        glass=glass,
     )
-    right_cap.visual(
-        Box((0.016, 0.032, 0.064)),
-        origin=Origin(xyz=(0.010, 0.0, -0.032)),
-        material=rubber_black,
-        name="hinge_strap",
+    right_body.visual(
+        Cylinder(radius=0.029, length=0.004),
+        origin=Origin(
+            xyz=(-0.079, -0.072, 0.048),
+            rpy=(0.0, math.pi / 2.0, 0.0),
+        ),
+        material=metal,
+        name="diopter_stop",
     )
-    right_cap.visual(
-        Cylinder(radius=0.008, length=0.018),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=rubber_black,
-        name="hinge_sleeve",
+
+    focus_knob = model.part("focus_knob")
+    focus_knob.visual(
+        Cylinder(radius=0.016, length=0.022),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=armor_dark,
+        name="focus_wheel",
     )
-    right_cap.inertial = Inertial.from_geometry(
-        Box((0.102, 0.086, 0.106)),
-        mass=0.08,
-        origin=Origin(xyz=(0.012, 0.0, -0.040)),
+    focus_knob.visual(
+        Cylinder(radius=0.010, length=0.028),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=metal,
+        name="focus_hub",
+    )
+
+    diopter_ring = model.part("diopter_ring")
+    diopter_ring.visual(
+        _save_mesh("diopter_ring.obj", _diopter_ring_geometry()),
+        material=armor_dark,
+        name="diopter_band",
     )
 
     model.articulation(
-        "tripod_swivel",
-        ArticulationType.CONTINUOUS,
-        parent="tripod",
-        child="swivel_collar",
-        origin=Origin(xyz=(0.0, 0.0, 1.180)),
+        "bridge_to_left_body",
+        ArticulationType.REVOLUTE,
+        parent=bridge,
+        child=left_body,
+        origin=Origin(rpy=(0.0, 0.0, REST_IPD_YAW)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=25.0, velocity=1.6),
+        motion_limits=MotionLimits(effort=6.0, velocity=1.2, lower=-0.10, upper=0.10),
     )
     model.articulation(
-        "collar_to_yoke",
-        ArticulationType.FIXED,
-        parent="swivel_collar",
-        child="cradle_yoke",
-        origin=Origin(xyz=(0.0, 0.0, 0.118)),
-    )
-    model.articulation(
-        "yoke_tilt",
+        "bridge_to_right_body",
         ArticulationType.REVOLUTE,
-        parent="cradle_yoke",
-        child="binocular_body",
-        origin=Origin(xyz=(0.0, 0.0, 0.069)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=20.0, velocity=1.0, lower=0.0, upper=0.45),
+        parent=bridge,
+        child=right_body,
+        origin=Origin(rpy=(0.0, 0.0, -REST_IPD_YAW)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=6.0, velocity=1.2, lower=-0.10, upper=0.10),
     )
     model.articulation(
-        "left_cap_hinge",
+        "bridge_to_focus_knob",
         ArticulationType.REVOLUTE,
-        parent="binocular_body",
-        child="left_lens_cap",
-        origin=Origin(xyz=(0.169, 0.09116, 0.110)),
+        parent=bridge,
+        child=focus_knob,
+        origin=Origin(xyz=(-0.032, 0.0, 0.0622)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=1.0, velocity=2.0, lower=-1.40, upper=0.0),
+        motion_limits=MotionLimits(effort=0.6, velocity=6.0, lower=-1.5, upper=1.5),
     )
     model.articulation(
-        "right_cap_hinge",
+        "right_body_to_diopter_ring",
         ArticulationType.REVOLUTE,
-        parent="binocular_body",
-        child="right_lens_cap",
-        origin=Origin(xyz=(0.169, -0.09116, 0.110)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=1.0, velocity=2.0, lower=-1.40, upper=0.0),
+        parent=right_body,
+        child=diopter_ring,
+        origin=Origin(xyz=(-0.076, -0.072, 0.048)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=0.2, velocity=2.0, lower=-0.4, upper=0.4),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    tripod = object_model.get_part("tripod")
-    collar = object_model.get_part("swivel_collar")
-    yoke = object_model.get_part("cradle_yoke")
-    body = object_model.get_part("binocular_body")
-    left_cap = object_model.get_part("left_lens_cap")
-    right_cap = object_model.get_part("right_lens_cap")
-    swivel = object_model.get_articulation("tripod_swivel")
-    collar_mount = object_model.get_articulation("collar_to_yoke")
-    tilt = object_model.get_articulation("yoke_tilt")
-    left_hinge = object_model.get_articulation("left_cap_hinge")
-    right_hinge = object_model.get_articulation("right_cap_hinge")
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root, seed=0)
+    bridge = object_model.get_part("bridge")
+    left_body = object_model.get_part("left_body")
+    right_body = object_model.get_part("right_body")
+    focus_knob = object_model.get_part("focus_knob")
+    diopter_ring = object_model.get_part("diopter_ring")
 
-    tripod_platform = tripod.get_visual("top_platform")
-    azimuth_ring = collar.get_visual("azimuth_ring")
-    collar_top = collar.get_visual("top_flange")
-    yoke_base = yoke.get_visual("pivot_base")
-    yoke_saddle = yoke.get_visual("saddle")
-    left_yoke_collar = yoke.get_visual("left_pivot_collar")
-    right_yoke_collar = yoke.get_visual("right_pivot_collar")
-    body_mount = body.get_visual("mount_foot")
-    left_trunnion = body.get_visual("left_trunnion")
-    right_trunnion = body.get_visual("right_trunnion")
-    left_tube = body.get_visual("left_objective_tube")
-    right_tube = body.get_visual("right_objective_tube")
-    left_rim = body.get_visual("left_objective_rim")
-    right_rim = body.get_visual("right_objective_rim")
-    left_objective_glass = body.get_visual("left_objective_glass")
-    right_objective_glass = body.get_visual("right_objective_glass")
-    left_pin = body.get_visual("left_cap_pin")
-    right_pin = body.get_visual("right_cap_pin")
-    left_body_tube = body.get_visual("left_objective_tube")
-    left_cap_lid = left_cap.get_visual("lid")
-    right_cap_lid = right_cap.get_visual("lid")
-    left_hinge_strap = left_cap.get_visual("hinge_strap")
-    right_hinge_strap = right_cap.get_visual("hinge_strap")
-    left_hinge_sleeve = left_cap.get_visual("hinge_sleeve")
-    right_hinge_sleeve = right_cap.get_visual("hinge_sleeve")
+    left_hinge = object_model.get_articulation("bridge_to_left_body")
+    right_hinge = object_model.get_articulation("bridge_to_right_body")
+    focus_joint = object_model.get_articulation("bridge_to_focus_knob")
+    diopter_joint = object_model.get_articulation("right_body_to_diopter_ring")
+
+    hinge_spindle = bridge.get_visual("hinge_spindle")
+    focus_tower = bridge.get_visual("focus_tower")
+    left_collar = left_body.get_visual("hinge_lug")
+    right_collar = right_body.get_visual("hinge_lug")
+    left_shell = left_body.get_visual("armor_shell")
+    right_shell = right_body.get_visual("armor_shell")
+    left_objective = left_body.get_visual("objective_armor")
+    right_objective = right_body.get_visual("objective_armor")
+    left_eyecup = left_body.get_visual("eyecup")
+    right_eyecup = right_body.get_visual("eyecup")
+    right_ocular = right_body.get_visual("ocular_housing")
+    focus_wheel = focus_knob.get_visual("focus_wheel")
+    focus_hub = focus_knob.get_visual("focus_hub")
+    diopter_band = diopter_ring.get_visual("diopter_band")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.allow_overlap(
-        left_trunnion,
-        left_yoke_collar,
-        reason="left tilt trunnion is captured by the cradle-side bearing collar",
+    ctx.fail_if_isolated_parts(contact_tol=0.005)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose(overlap_tol=0.0005)
+    ctx.fail_if_parts_overlap_in_sampled_poses(
+        max_pose_samples=48,
+        overlap_tol=0.0005,
+        ignore_adjacent=False,
+        ignore_fixed=True,
     )
-    ctx.allow_overlap(
-        right_trunnion,
-        right_yoke_collar,
-        reason="right tilt trunnion is captured by the cradle-side bearing collar",
-    )
-    ctx.allow_overlap(
-        left_cap,
-        body,
-        reason="left objective cap closes over the glass and its hinge strap wraps the rim-side hinge hardware",
-    )
-    ctx.allow_overlap(
-        right_cap,
-        body,
-        reason="right objective cap closes over the glass and its hinge strap wraps the rim-side hinge hardware",
-    )
-    ctx.allow_overlap(
-        left_pin,
-        left_hinge_sleeve,
-        reason="left cap hinge sleeve rotates around the cap pin",
-    )
-    ctx.allow_overlap(
-        right_pin,
-        right_hinge_sleeve,
-        reason="right cap hinge sleeve rotates around the cap pin",
-    )
-    ctx.allow_overlap(
-        left_pin,
-        left_hinge_strap,
-        reason="left cap hinge strap wraps around the hinge pin root",
-    )
-    ctx.allow_overlap(
-        right_pin,
-        right_hinge_strap,
-        reason="right cap hinge strap wraps around the hinge pin root",
-    )
-    ctx.allow_overlap(
-        left_rim,
-        left_hinge_sleeve,
-        reason="left cap hinge sleeve nests against the objective rim",
-    )
-    ctx.allow_overlap(
-        right_rim,
-        right_hinge_sleeve,
-        reason="right cap hinge sleeve nests against the objective rim",
-    )
-    ctx.allow_overlap(
-        left_rim,
-        left_hinge_strap,
-        reason="left cap hinge strap seats against the objective rim",
-    )
-    ctx.allow_overlap(
-        right_rim,
-        right_hinge_strap,
-        reason="right cap hinge strap seats against the objective rim",
-    )
-    ctx.allow_overlap(
-        left_objective_glass,
-        left_cap_lid,
-        reason="left cap lid closes directly over the objective glass",
-    )
-    ctx.allow_overlap(
-        right_objective_glass,
-        right_cap_lid,
-        reason="right cap lid closes directly over the objective glass",
-    )
-    ctx.allow_overlap(
-        left_objective_glass,
-        left_hinge_strap,
-        reason="left cap hinge strap tucks into the objective surround when closed",
-    )
-    ctx.allow_overlap(
-        right_objective_glass,
-        right_hinge_strap,
-        reason="right cap hinge strap tucks into the objective surround when closed",
-    )
-    ctx.allow_overlap(
-        left_tube,
-        left_hinge_strap,
-        reason="left cap hinge strap hugs the outside of the objective tube",
-    )
-    ctx.allow_overlap(
-        right_tube,
-        right_hinge_strap,
-        reason="right cap hinge strap hugs the outside of the objective tube",
-    )
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
 
     ctx.expect_overlap(
-        collar,
-        tripod,
-        axes="xy",
-        min_overlap=0.015,
-        elem_a=azimuth_ring,
-        elem_b=tripod_platform,
+        left_body,
+        bridge,
+        axes="xz",
+        min_overlap=0.008,
+        elem_a=left_collar,
+        elem_b=hinge_spindle,
+        name="left hinge lug is seated on the spindle",
+    )
+    ctx.expect_overlap(
+        right_body,
+        bridge,
+        axes="xz",
+        min_overlap=0.008,
+        elem_a=right_collar,
+        elem_b=hinge_spindle,
+        name="right hinge lug is seated on the spindle",
     )
     ctx.expect_gap(
-        collar,
-        tripod,
-        axis="z",
-        max_gap=0.001,
+        left_body,
+        right_body,
+        axis="y",
+        min_gap=0.055,
+        positive_elem=left_objective,
+        negative_elem=right_objective,
+        name="objective barrels remain clearly separated",
+    )
+    ctx.expect_gap(
+        left_body,
+        right_body,
+        axis="y",
+        min_gap=0.020,
+        positive_elem=left_eyecup,
+        negative_elem=right_eyecup,
+        name="eyepiece spacing stays binocular-like",
+    )
+    ctx.expect_gap(
+        left_body,
+        right_body,
+        axis="y",
+        max_gap=0.055,
         max_penetration=0.0,
-        positive_elem=azimuth_ring,
-        negative_elem=tripod_platform,
+        positive_elem=left_eyecup,
+        negative_elem=right_eyecup,
+        name="porro eyepieces stay closer together than the objectives",
+    )
+    ctx.expect_contact(
+        focus_knob,
+        bridge,
+        contact_tol=0.0001,
+        elem_a=focus_wheel,
+        elem_b=focus_tower,
+        name="focus knob rests on the bridge tower",
+    )
+    ctx.expect_gap(
+        focus_knob,
+        bridge,
+        axis="z",
+        min_gap=-1e-5,
+        max_gap=0.0006,
+        positive_elem=focus_wheel,
+        negative_elem=focus_tower,
+        name="focus knob rides on the tower pedestal",
     )
     ctx.expect_overlap(
-        yoke,
-        collar,
+        focus_knob,
+        bridge,
         axes="xy",
-        min_overlap=0.010,
-        elem_a=yoke_base,
-        elem_b=collar_top,
+        min_overlap=0.008,
+        elem_a=focus_hub,
+        elem_b=focus_tower,
+        name="focus knob stays centered on the bridge tower",
+    )
+    ctx.expect_overlap(
+        diopter_ring,
+        right_body,
+        axes="yz",
+        min_overlap=0.020,
+        elem_a=diopter_band,
+        elem_b=right_ocular,
+        name="diopter ring aligns with the right eyepiece",
+    )
+    ctx.expect_contact(
+        diopter_ring,
+        right_body,
+        contact_tol=0.0001,
+        elem_a=diopter_band,
+        elem_b=right_eyecup,
+        name="diopter ring seats on the right eyecup",
     )
     ctx.expect_gap(
-        yoke,
-        collar,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=yoke_base,
-        negative_elem=collar_top,
-    )
-    ctx.expect_overlap(
-        body,
-        yoke,
-        axes="yz",
-        min_overlap=0.001,
-        elem_a=left_trunnion,
-        elem_b=left_yoke_collar,
-    )
-    ctx.expect_overlap(
-        body,
-        yoke,
-        axes="yz",
-        min_overlap=0.001,
-        elem_a=right_trunnion,
-        elem_b=right_yoke_collar,
+        left_body,
+        focus_knob,
+        axis="y",
+        min_gap=0.006,
+        positive_elem=left_shell,
+        negative_elem=focus_wheel,
+        name="focus knob clears the left barrel shoulder",
     )
     ctx.expect_gap(
-        body,
-        yoke,
-        axis="z",
-        max_gap=0.003,
-        max_penetration=0.001,
-        positive_elem=body_mount,
-        negative_elem=yoke_saddle,
-    )
-    ctx.expect_gap(
-        left_cap,
-        body,
-        axis="x",
-        max_gap=0.003,
-        max_penetration=0.001,
-        positive_elem=left_cap_lid,
-        negative_elem=left_rim,
-    )
-    ctx.expect_gap(
-        right_cap,
-        body,
-        axis="x",
-        max_gap=0.003,
-        max_penetration=0.001,
-        positive_elem=right_cap_lid,
-        negative_elem=right_rim,
-    )
-    ctx.expect_overlap(
-        left_cap,
-        body,
-        axes="yz",
-        min_overlap=0.010,
-        elem_a=left_cap_lid,
-        elem_b=left_rim,
-    )
-    ctx.expect_overlap(
-        right_cap,
-        body,
-        axes="yz",
-        min_overlap=0.010,
-        elem_a=right_cap_lid,
-        elem_b=right_rim,
-    )
-    ctx.expect_overlap(
-        left_cap,
-        body,
-        axes="yz",
-        min_overlap=0.006,
-        elem_a=left_hinge_sleeve,
-        elem_b=left_pin,
-    )
-    ctx.expect_overlap(
-        right_cap,
-        body,
-        axes="yz",
-        min_overlap=0.006,
-        elem_a=right_hinge_sleeve,
-        elem_b=right_pin,
+        focus_knob,
+        right_body,
+        axis="y",
+        min_gap=0.006,
+        positive_elem=focus_wheel,
+        negative_elem=right_shell,
+        name="focus knob clears the right barrel shoulder",
     )
 
-    with ctx.pose({swivel: 0.85}):
-        ctx.expect_overlap(
-            collar,
-            tripod,
-            axes="xy",
-            min_overlap=0.010,
-            elem_a=azimuth_ring,
-            elem_b=tripod_platform,
-        )
+    with ctx.pose({left_hinge: 0.08, right_hinge: -0.08}):
         ctx.expect_gap(
-            collar,
-            tripod,
-            axis="z",
-            max_gap=0.002,
-            max_penetration=0.0,
-            positive_elem=azimuth_ring,
-            negative_elem=tripod_platform,
-        )
-        ctx.expect_gap(
-            yoke,
-            collar,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=yoke_base,
-            negative_elem=collar_top,
+            left_body,
+            right_body,
+            axis="y",
+            min_gap=0.070,
+            positive_elem=left_objective,
+            negative_elem=right_objective,
+            name="opened hinge widens the objective spacing",
         )
 
-    with ctx.pose({tilt: 0.45}):
+    with ctx.pose({left_hinge: -0.08, right_hinge: 0.08}):
         ctx.expect_gap(
-            body,
-            tripod,
-            axis="z",
-            min_gap=0.030,
-            positive_elem=left_body_tube,
-            negative_elem=tripod_platform,
-        )
-        ctx.expect_overlap(
-            body,
-            yoke,
-            axes="yz",
-            min_overlap=0.001,
-            elem_a=left_trunnion,
-            elem_b=left_yoke_collar,
-        )
-        ctx.expect_overlap(
-            body,
-            yoke,
-            axes="yz",
-            min_overlap=0.001,
-            elem_a=right_trunnion,
-            elem_b=right_yoke_collar,
+            left_body,
+            right_body,
+            axis="y",
+            min_gap=0.010,
+            positive_elem=left_eyecup,
+            negative_elem=right_eyecup,
+            name="closed hinge still keeps the eyecups distinct",
         )
 
-    with ctx.pose({left_hinge: -1.30, right_hinge: -1.30}):
-        ctx.expect_overlap(
-            left_cap,
-            body,
-            axes="yz",
-            min_overlap=0.006,
-            elem_a=left_hinge_sleeve,
-            elem_b=left_pin,
+    with ctx.pose({focus_joint: 1.0, diopter_joint: 0.2}):
+        ctx.expect_contact(
+            focus_knob,
+            bridge,
+            contact_tol=0.0001,
+            elem_a=focus_wheel,
+            elem_b=focus_tower,
+            name="focus wheel stays supported while turned",
         )
         ctx.expect_overlap(
-            right_cap,
-            body,
+            diopter_ring,
+            right_body,
             axes="yz",
-            min_overlap=0.006,
-            elem_a=right_hinge_sleeve,
-            elem_b=right_pin,
-        )
-        ctx.expect_gap(
-            left_cap,
-            tripod,
-            axis="z",
-            min_gap=0.090,
-            positive_elem=left_cap_lid,
-            negative_elem=tripod_platform,
-        )
-        ctx.expect_gap(
-            right_cap,
-            tripod,
-            axis="z",
-            min_gap=0.090,
-            positive_elem=right_cap_lid,
-            negative_elem=tripod_platform,
+            min_overlap=0.020,
+            elem_a=diopter_band,
+            elem_b=right_ocular,
+            name="diopter ring remains concentric while adjusted",
         )
 
+    for articulation in (left_hinge, right_hinge, focus_joint, diopter_joint):
+        limits = articulation.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            continue
+        with ctx.pose({articulation: limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(
+                overlap_tol=0.0005,
+                name=f"{articulation.name}_lower_no_overlap",
+            )
+            ctx.fail_if_isolated_parts(
+                contact_tol=0.005,
+                name=f"{articulation.name}_lower_no_floating",
+            )
+        with ctx.pose({articulation: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(
+                overlap_tol=0.0005,
+                name=f"{articulation.name}_upper_no_overlap",
+            )
+            ctx.fail_if_isolated_parts(
+                contact_tol=0.005,
+                name=f"{articulation.name}_upper_no_floating",
+            )
     return ctx.report()
 
 

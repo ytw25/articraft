@@ -4,737 +4,582 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-import os
-from pathlib import Path
-
-HERE = Path(__file__).parent
-_REAL_GETCWD = os.getcwd
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _REAL_GETCWD()
-    except FileNotFoundError:
-        os.chdir(HERE)
-        return _REAL_GETCWD()
-
-
-os.getcwd = _safe_getcwd
 
 from sdk import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
     Cylinder,
-    Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    section_loft,
 )
 
+ASSETS = AssetContext.from_script(__file__)
 
-BASE_FLANGE = 0.44
-BASE_PLINTH = 0.31
-COLUMN_OUTER = 0.24
-WALL_THICKNESS = 0.022
-COLUMN_BOTTOM_Z = 0.15
-COLUMN_HEIGHT = 0.58
-COLUMN_TOP_Z = COLUMN_BOTTOM_Z + COLUMN_HEIGHT
-PANEL_RECESS_OFFSET = 0.111
-PANEL_FRAME_OFFSET = 0.121
-
-DIAL_RADIUS = 0.052
-DIAL_CENTER_Z = 0.43
-FACE_BOSS_OFFSET = 0.121
-HAND_ORIGIN_OFFSET = 0.122
-SHAFT_RADIUS = 0.006
-SHAFT_LENGTH = COLUMN_OUTER + 0.004
+SCALE = 16.0
 
 
-def _midpoint(
-    a: tuple[float, float, float], b: tuple[float, float, float]
-) -> tuple[float, float, float]:
-    return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5)
+def s(value: float) -> float:
+    return value * SCALE
 
 
-def _distance(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
-    return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2)
+PLINTH_SIZE = s(0.56)
+SHAFT_SIZE = s(0.38)
+SHAFT_HEIGHT = s(0.96)
+STAGE_SIZE = s(0.62)
+STAGE_HEIGHT = s(0.31)
+STAGE_BASE_SIZE = s(0.54)
+STAGE_BASE_HEIGHT = s(0.08)
+UPPER_CORNICE_SIZE = s(0.68)
+UPPER_CORNICE_HEIGHT = s(0.07)
+ROOF_BASE_SIZE = s(0.48)
+ROOF_HEIGHT = s(0.30)
+DIAL_RADIUS = s(0.152)
+BEZEL_RADIUS = s(0.165)
+WINDOW_HEIGHT = s(0.22)
 
 
-def _rpy_for_cylinder(
-    a: tuple[float, float, float], b: tuple[float, float, float]
-) -> tuple[float, float, float]:
-    dx = b[0] - a[0]
-    dy = b[1] - a[1]
-    dz = b[2] - a[2]
-    length_xy = math.hypot(dx, dy)
-    yaw = math.atan2(dy, dx)
-    pitch = math.atan2(length_xy, dz)
-    return (0.0, pitch, yaw)
+def _square_section(size: float, z: float) -> list[tuple[float, float, float]]:
+    half = size * 0.5
+    return [
+        (-half, -half, z),
+        (half, -half, z),
+        (half, half, z),
+        (-half, half, z),
+    ]
 
 
-def _add_strut(part, a, b, radius: float, material, name: str | None = None) -> None:
-    part.visual(
-        Cylinder(radius=radius, length=_distance(a, b)),
-        origin=Origin(xyz=_midpoint(a, b), rpy=_rpy_for_cylinder(a, b)),
-        material=material,
-        name=name,
+def _dial_origin(side: str, outward: float) -> Origin:
+    stage_half = STAGE_SIZE * 0.5
+    dial_z = s(1.34)
+    if side == "front":
+        return Origin(xyz=(0.0, stage_half + outward, dial_z), rpy=(-math.pi / 2.0, 0.0, 0.0))
+    if side == "rear":
+        return Origin(xyz=(0.0, -stage_half - outward, dial_z), rpy=(math.pi / 2.0, 0.0, 0.0))
+    if side == "right":
+        return Origin(xyz=(stage_half + outward, 0.0, dial_z), rpy=(0.0, math.pi / 2.0, 0.0))
+    return Origin(xyz=(-stage_half - outward, 0.0, dial_z), rpy=(0.0, -math.pi / 2.0, 0.0))
+
+
+def _face_center(side: str) -> tuple[float, float, float]:
+    pivot_offset = s(0.344)
+    dial_z = s(1.34)
+    if side == "front":
+        return (0.0, pivot_offset, dial_z)
+    if side == "rear":
+        return (0.0, -pivot_offset, dial_z)
+    if side == "right":
+        return (pivot_offset, 0.0, dial_z)
+    return (-pivot_offset, 0.0, dial_z)
+
+
+def _default_hand_angle(side: str, kind: str) -> float:
+    if kind == "minute":
+        return math.radians(60.0 if side in {"front", "right"} else -60.0)
+    return math.radians(-55.0 if side in {"front", "right"} else 55.0)
+
+
+def _clock_axes(side: str) -> str:
+    return "xz" if side in {"front", "rear"} else "yz"
+
+
+def _add_dial(tower, side: str, stone_trim, clock_face, dark_trim, gold_trim) -> None:
+    tower.visual(
+        Cylinder(radius=BEZEL_RADIUS, length=s(0.022)),
+        origin=_dial_origin(side, s(0.011)),
+        material=dark_trim,
+        name=f"{side}_bezel",
+    )
+    tower.visual(
+        Cylinder(radius=DIAL_RADIUS, length=s(0.010)),
+        origin=_dial_origin(side, s(0.021)),
+        material=clock_face,
+        name=f"{side}_dial_face",
+    )
+    tower.visual(
+        Cylinder(radius=s(0.024), length=s(0.012)),
+        origin=_dial_origin(side, s(0.028)),
+        material=gold_trim,
+        name=f"{side}_pivot_boss",
     )
 
 
-def _face_visual_rpy(face_name: str) -> tuple[float, float, float]:
-    if face_name in {"front", "back"}:
-        return (math.pi * 0.5, 0.0, 0.0)
-    if face_name == "right":
-        return (math.pi * 0.5, 0.0, math.pi * 0.5)
-    return (math.pi * 0.5, 0.0, -math.pi * 0.5)
-
-
-def _axis_cylinder_rpy(axis_name: str) -> tuple[float, float, float]:
-    if axis_name == "y":
-        return (-math.pi * 0.5, 0.0, 0.0)
-    return (0.0, math.pi * 0.5, 0.0)
-
-
-def _face_center(
-    axis_name: str,
-    sign: float,
-    offset: float,
-    z: float,
-    lateral: float = 0.0,
-) -> tuple[float, float, float]:
-    if axis_name == "y":
-        return (lateral, sign * offset, z)
-    return (sign * offset, lateral, z)
-
-
-def _face_box_size(axis_name: str, width: float, thickness: float, height: float) -> tuple[float, float, float]:
-    if axis_name == "y":
-        return (width, thickness, height)
-    return (thickness, width, height)
-
-
-def _add_face_panels(
-    part,
-    *,
-    face_name: str,
-    axis_name: str,
-    sign: float,
-    iron,
-    recess,
-    bezel,
-    dial,
-    tick,
-) -> None:
-    dial_mount = _face_center(axis_name, sign, 0.116, DIAL_CENTER_Z)
-    boss_mount = _face_center(axis_name, sign, FACE_BOSS_OFFSET, DIAL_CENTER_Z)
-    panel_rect_center = _face_center(axis_name, sign, PANEL_RECESS_OFFSET, 0.397)
-    panel_arch_center = _face_center(axis_name, sign, PANEL_RECESS_OFFSET, 0.492)
-    frame_arch_center = _face_center(axis_name, sign, PANEL_FRAME_OFFSET, 0.491)
-    if axis_name == "y":
-        tick_specs = (
-            ((0.0, sign * 0.1185, DIAL_CENTER_Z + 0.038), (0.006, 0.002, 0.014)),
-            ((0.0, sign * 0.1185, DIAL_CENTER_Z - 0.038), (0.006, 0.002, 0.014)),
-            ((0.038, sign * 0.1185, DIAL_CENTER_Z), (0.014, 0.002, 0.006)),
-            ((-0.038, sign * 0.1185, DIAL_CENTER_Z), (0.014, 0.002, 0.006)),
-        )
-        jamb_centers = ((-0.078, sign * 0.121, 0.388), (0.078, sign * 0.121, 0.388))
-        jamb_size = (0.014, 0.012, 0.206)
-        sill_center = (0.0, sign * 0.121, 0.289)
-        sill_size = (0.170, 0.012, 0.014)
-    else:
-        tick_specs = (
-            ((sign * 0.1185, 0.0, DIAL_CENTER_Z + 0.038), (0.002, 0.006, 0.014)),
-            ((sign * 0.1185, 0.0, DIAL_CENTER_Z - 0.038), (0.002, 0.006, 0.014)),
-            ((sign * 0.1185, 0.038, DIAL_CENTER_Z), (0.002, 0.014, 0.006)),
-            ((sign * 0.1185, -0.038, DIAL_CENTER_Z), (0.002, 0.014, 0.006)),
-        )
-        jamb_centers = ((sign * 0.121, -0.078, 0.388), (sign * 0.121, 0.078, 0.388))
-        jamb_size = (0.012, 0.014, 0.206)
-        sill_center = (sign * 0.121, 0.0, 0.289)
-        sill_size = (0.012, 0.170, 0.014)
-
-    part.visual(
-        Box(_face_box_size(axis_name, 0.154, 0.010, 0.190)),
-        origin=Origin(xyz=panel_rect_center),
-        material=recess,
-        name=f"{face_name}_arch_panel",
-    )
-    part.visual(
-        Cylinder(radius=0.077, length=0.010),
-        origin=Origin(xyz=panel_arch_center, rpy=_axis_cylinder_rpy(axis_name)),
-        material=recess,
-        name=f"{face_name}_arch_cap",
-    )
-    part.visual(
-        Cylinder(radius=0.085, length=0.012),
-        origin=Origin(xyz=frame_arch_center, rpy=_axis_cylinder_rpy(axis_name)),
-        material=iron,
-        name=f"{face_name}_arch_frame",
-    )
-    for index, center in enumerate(jamb_centers):
-        part.visual(
-            Box(jamb_size),
-            origin=Origin(xyz=center),
-            material=iron,
-            name=f"{face_name}_arch_jamb_{index}",
-        )
-    part.visual(
-        Box(sill_size),
-        origin=Origin(xyz=sill_center),
-        material=iron,
-        name=f"{face_name}_arch_sill",
-    )
-    part.visual(
-        Cylinder(radius=0.060, length=0.010),
-        origin=Origin(xyz=_face_center(axis_name, sign, 0.1175, DIAL_CENTER_Z), rpy=_axis_cylinder_rpy(axis_name)),
-        material=bezel,
-        name=f"{face_name}_bezel",
-    )
-    part.visual(
-        Cylinder(radius=DIAL_RADIUS, length=0.006),
-        origin=Origin(xyz=dial_mount, rpy=_axis_cylinder_rpy(axis_name)),
-        material=dial,
-        name=f"{face_name}_dial",
-    )
-    part.visual(
-        Cylinder(radius=0.008, length=0.002),
-        origin=Origin(xyz=boss_mount, rpy=_axis_cylinder_rpy(axis_name)),
-        material=bezel,
-        name=f"{face_name}_boss",
-    )
-    for index, (xyz, size) in enumerate(tick_specs):
-        part.visual(
-            Box(size),
-            origin=Origin(xyz=xyz),
-            material=tick,
-            name=f"{face_name}_tick_{index}",
-        )
-
-
-def _add_hand_geometry(
-    part,
-    *,
-    axis_name: str,
-    sign: float,
-    hand_kind: str,
-    material,
-) -> None:
-    if hand_kind == "hour":
-        hub_offset = 0.001
-        arm_offset = 0.0012
-        blade_length = 0.031
-        blade_width = 0.008
-        tail_length = 0.014
-        tail_width = 0.004
-    else:
-        hub_offset = 0.003
-        arm_offset = 0.0032
-        blade_length = 0.044
-        blade_width = 0.005
-        tail_length = 0.018
-        tail_width = 0.003
-
-    thickness = 0.002
-    if axis_name == "y":
-        part.visual(
-            Cylinder(radius=0.008 if hand_kind == "hour" else 0.0065, length=0.002),
-            origin=Origin(
-                xyz=(0.0, sign * hub_offset, 0.0),
-                rpy=_axis_cylinder_rpy(axis_name),
+def _hand_box_origin(side: str, normal_offset: float, center_distance: float, angle: float) -> Origin:
+    if side in {"front", "rear"}:
+        signed_offset = normal_offset if side == "front" else -normal_offset
+        return Origin(
+            xyz=(
+                center_distance * math.sin(angle),
+                signed_offset,
+                center_distance * math.cos(angle),
             ),
-            material=material,
-            name=f"{hand_kind}_hub",
+            rpy=(0.0, angle, 0.0),
         )
-        part.visual(
-            Box((blade_width, thickness, blade_length)),
-            origin=Origin(xyz=(0.0, sign * arm_offset, blade_length * 0.5 - 0.004)),
-            material=material,
-            name=f"{hand_kind}_blade",
-        )
-        part.visual(
-            Box((tail_width, thickness, tail_length)),
-            origin=Origin(xyz=(0.0, sign * arm_offset, -tail_length * 0.5 - 0.004)),
-            material=material,
-            name=f"{hand_kind}_tail",
-        )
-    else:
-        part.visual(
-            Cylinder(radius=0.008 if hand_kind == "hour" else 0.0065, length=0.002),
-            origin=Origin(
-                xyz=(sign * hub_offset, 0.0, 0.0),
-                rpy=_axis_cylinder_rpy(axis_name),
-            ),
-            material=material,
-            name=f"{hand_kind}_hub",
-        )
-        part.visual(
-            Box((thickness, blade_width, blade_length)),
-            origin=Origin(xyz=(sign * arm_offset, 0.0, blade_length * 0.5 - 0.004)),
-            material=material,
-            name=f"{hand_kind}_blade",
-        )
-        part.visual(
-            Box((thickness, tail_width, tail_length)),
-            origin=Origin(xyz=(sign * arm_offset, 0.0, -tail_length * 0.5 - 0.004)),
-            material=material,
-            name=f"{hand_kind}_tail",
-        )
-
-    part.inertial = Inertial.from_geometry(
-        Box((0.016, 0.016, 0.070)),
-        mass=0.025 if hand_kind == "hour" else 0.018,
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+    signed_offset = normal_offset if side == "right" else -normal_offset
+    return Origin(
+        xyz=(
+            signed_offset,
+            -center_distance * math.sin(angle),
+            center_distance * math.cos(angle),
+        ),
+        rpy=(angle, 0.0, 0.0),
     )
 
 
-def _add_hand_part(
-    model: ArticulatedObject,
-    pillar,
-    *,
-    face_name: str,
-    axis_name: str,
-    sign: float,
-    hand_kind: str,
-    material,
-) -> None:
-    part = model.part(f"{face_name}_{hand_kind}_hand")
-    _add_hand_geometry(part, axis_name=axis_name, sign=sign, hand_kind=hand_kind, material=material)
-    axis = (0.0, 1.0, 0.0) if axis_name == "y" else (1.0, 0.0, 0.0)
+def _hub_origin(side: str, offset: float) -> Origin:
+    if side == "front":
+        return Origin(xyz=(0.0, offset, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0))
+    if side == "rear":
+        return Origin(xyz=(0.0, -offset, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0))
+    if side == "right":
+        return Origin(xyz=(offset, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0))
+    return Origin(xyz=(-offset, 0.0, 0.0), rpy=(0.0, -math.pi / 2.0, 0.0))
+
+
+def _add_hand(model: ArticulatedObject, tower, side: str, kind: str, hand_material, hub_material):
+    if kind == "hour":
+        hub_radius = s(0.022)
+        hub_thickness = s(0.004)
+        arm_length = s(0.088)
+        arm_width = s(0.020)
+        tail_length = s(0.030)
+        layer_start = 0.0
+        hand_length = arm_length
+        hand_center_z = arm_length * 0.5 - s(0.010)
+    else:
+        hub_radius = s(0.018)
+        hub_thickness = s(0.003)
+        arm_length = s(0.126)
+        arm_width = s(0.014)
+        tail_length = s(0.040)
+        layer_start = s(0.004)
+        hand_length = arm_length + tail_length
+        hand_center_z = (arm_length - tail_length) * 0.5 - s(0.010)
+
+    hand = model.part(f"{side}_{kind}_hand")
+    thickness_center = layer_start + hub_thickness * 0.5
+    box_size = (
+        (arm_width, hub_thickness, hand_length)
+        if side in {"front", "rear"}
+        else (hub_thickness, arm_width, hand_length)
+    )
+    angle = _default_hand_angle(side, kind)
+
+    hand.visual(
+        Cylinder(radius=hub_radius, length=hub_thickness),
+        origin=_hub_origin(side, thickness_center),
+        material=hub_material,
+        name="hub",
+    )
+    hand.visual(
+        Box(box_size),
+        origin=_hand_box_origin(side, thickness_center, hand_center_z, angle),
+        material=hand_material,
+        name="hand",
+    )
+    if kind == "hour":
+        tail_size = (
+            (arm_width * 0.7, hub_thickness, tail_length)
+            if side in {"front", "rear"}
+            else (hub_thickness, arm_width * 0.7, tail_length)
+        )
+        hand.visual(
+            Box(tail_size),
+            origin=_hand_box_origin(side, thickness_center, -tail_length * 0.5 - s(0.010), angle),
+            material=hand_material,
+            name="counterweight",
+        )
+
+    face_x, face_y, face_z = _face_center(side)
+    axis = {
+        "front": (0.0, 1.0, 0.0),
+        "rear": (0.0, -1.0, 0.0),
+        "right": (1.0, 0.0, 0.0),
+        "left": (-1.0, 0.0, 0.0),
+    }[side]
     model.articulation(
-        f"{face_name}_{hand_kind}_spin",
-        ArticulationType.CONTINUOUS,
-        parent=pillar,
-        child=part,
-        origin=Origin(xyz=_face_center(axis_name, sign, HAND_ORIGIN_OFFSET, DIAL_CENTER_Z)),
+        f"tower_to_{side}_{kind}",
+        ArticulationType.REVOLUTE,
+        parent=tower,
+        child=hand,
+        origin=Origin(xyz=(face_x, face_y, face_z)),
         axis=axis,
-        motion_limits=MotionLimits(effort=0.2, velocity=1.5),
+        motion_limits=MotionLimits(
+            effort=0.2,
+            velocity=2.0,
+            lower=-math.pi,
+            upper=math.pi,
+        ),
     )
+    return hand
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="pillar_clock")
+    model = ArticulatedObject(name="victorian_clock_tower", assets=ASSETS)
 
-    cast_iron = model.material("cast_iron", rgba=(0.20, 0.20, 0.22, 1.0))
-    recess_shadow = model.material("recess_shadow", rgba=(0.14, 0.13, 0.12, 1.0))
-    dial_cream = model.material("dial_cream", rgba=(0.90, 0.86, 0.77, 1.0))
-    bezel_metal = model.material("bezel_metal", rgba=(0.47, 0.39, 0.28, 1.0))
-    tick_dark = model.material("tick_dark", rgba=(0.18, 0.15, 0.12, 1.0))
-    hand_black = model.material("hand_black", rgba=(0.08, 0.07, 0.06, 1.0))
-    lantern_glass = model.material("lantern_glass", rgba=(0.72, 0.80, 0.84, 0.35))
-    lantern_roof = model.material("lantern_roof", rgba=(0.24, 0.23, 0.22, 1.0))
+    weathered_stone = model.material("weathered_stone", rgba=(0.70, 0.68, 0.62, 1.0))
+    light_stone = model.material("light_stone", rgba=(0.78, 0.76, 0.70, 1.0))
+    slate = model.material("slate", rgba=(0.23, 0.25, 0.29, 1.0))
+    clock_face = model.material("clock_face", rgba=(0.93, 0.91, 0.82, 1.0))
+    dark_trim = model.material("dark_trim", rgba=(0.09, 0.09, 0.10, 1.0))
+    brass = model.material("brass", rgba=(0.73, 0.63, 0.27, 1.0))
+    window_dark = model.material("window_dark", rgba=(0.16, 0.15, 0.16, 1.0))
 
-    pillar = model.part("pillar")
-    pillar.visual(
-        Box((BASE_FLANGE, BASE_FLANGE, 0.050)),
-        origin=Origin(xyz=(0.0, 0.0, 0.025)),
-        material=cast_iron,
-        name="base_flange",
+    tower = model.part("tower")
+    tower.visual(
+        Box((PLINTH_SIZE, PLINTH_SIZE, s(0.12))),
+        origin=Origin(xyz=(0.0, 0.0, s(0.06))),
+        material=light_stone,
+        name="plinth",
     )
-    pillar.visual(
-        Box((0.360, 0.360, 0.038)),
-        origin=Origin(xyz=(0.0, 0.0, 0.069)),
-        material=cast_iron,
-        name="base_step",
+    tower.visual(
+        Box((s(0.46), s(0.46), s(0.06))),
+        origin=Origin(xyz=(0.0, 0.0, s(0.15))),
+        material=weathered_stone,
+        name="base_course",
     )
-    pillar.visual(
-        Box((BASE_PLINTH, BASE_PLINTH, 0.054)),
-        origin=Origin(xyz=(0.0, 0.0, 0.115)),
-        material=cast_iron,
-        name="base_plinth",
+    tower.visual(
+        Box((SHAFT_SIZE, SHAFT_SIZE, SHAFT_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, s(0.60))),
+        material=weathered_stone,
+        name="shaft",
     )
-    pillar.visual(
-        Box((0.200, 0.200, 0.028)),
-        origin=Origin(xyz=(0.0, 0.0, COLUMN_BOTTOM_Z - 0.014)),
-        material=cast_iron,
-        name="column_pedestal",
-    )
-    pillar.visual(
-        Box((COLUMN_OUTER, WALL_THICKNESS, COLUMN_HEIGHT)),
-        origin=Origin(xyz=(0.0, COLUMN_OUTER * 0.5 - WALL_THICKNESS * 0.5, COLUMN_BOTTOM_Z + COLUMN_HEIGHT * 0.5)),
-        material=cast_iron,
-        name="front_wall",
-    )
-    pillar.visual(
-        Box((COLUMN_OUTER, WALL_THICKNESS, COLUMN_HEIGHT)),
-        origin=Origin(xyz=(0.0, -COLUMN_OUTER * 0.5 + WALL_THICKNESS * 0.5, COLUMN_BOTTOM_Z + COLUMN_HEIGHT * 0.5)),
-        material=cast_iron,
-        name="back_wall",
-    )
-    pillar.visual(
-        Box((WALL_THICKNESS, COLUMN_OUTER, COLUMN_HEIGHT)),
-        origin=Origin(xyz=(COLUMN_OUTER * 0.5 - WALL_THICKNESS * 0.5, 0.0, COLUMN_BOTTOM_Z + COLUMN_HEIGHT * 0.5)),
-        material=cast_iron,
-        name="right_wall",
-    )
-    pillar.visual(
-        Box((WALL_THICKNESS, COLUMN_OUTER, COLUMN_HEIGHT)),
-        origin=Origin(xyz=(-COLUMN_OUTER * 0.5 + WALL_THICKNESS * 0.5, 0.0, COLUMN_BOTTOM_Z + COLUMN_HEIGHT * 0.5)),
-        material=cast_iron,
-        name="left_wall",
-    )
-    pillar.visual(
-        Box((0.190, 0.190, 0.024)),
-        origin=Origin(xyz=(0.0, 0.0, COLUMN_BOTTOM_Z + 0.012)),
-        material=cast_iron,
-        name="column_lower_tie",
-    )
-    pillar.visual(
-        Box((0.198, 0.198, 0.032)),
-        origin=Origin(xyz=(0.0, 0.0, COLUMN_TOP_Z - 0.015)),
-        material=cast_iron,
-        name="column_upper_tie",
+    tower.visual(
+        Box((s(0.44), s(0.44), s(0.05))),
+        origin=Origin(xyz=(0.0, 0.0, s(1.105))),
+        material=light_stone,
+        name="upper_string_course",
     )
 
-    face_specs = (
-        ("front", "y", 1.0),
-        ("back", "y", -1.0),
-        ("right", "x", 1.0),
-        ("left", "x", -1.0),
-    )
-    for face_name, axis_name, sign in face_specs:
-        _add_face_panels(
-            pillar,
-            face_name=face_name,
-            axis_name=axis_name,
-            sign=sign,
-            iron=cast_iron,
-            recess=recess_shadow,
-            bezel=bezel_metal,
-            dial=dial_cream,
-            tick=tick_dark,
+    for side in ("front", "rear"):
+        sign = 1.0 if side == "front" else -1.0
+        tower.visual(
+            Box((s(0.072), s(0.010), WINDOW_HEIGHT)),
+            origin=Origin(xyz=(0.0, sign * (SHAFT_SIZE * 0.5 + s(0.005)), s(0.63))),
+            material=window_dark,
+            name=f"{side}_shaft_window",
+        )
+    for side in ("right", "left"):
+        sign = 1.0 if side == "right" else -1.0
+        tower.visual(
+            Box((s(0.010), s(0.072), WINDOW_HEIGHT)),
+            origin=Origin(xyz=(sign * (SHAFT_SIZE * 0.5 + s(0.005)), 0.0, s(0.63))),
+            material=window_dark,
+            name=f"{side}_shaft_window",
         )
 
-    pillar.visual(
-        Cylinder(radius=SHAFT_RADIUS, length=SHAFT_LENGTH),
-        origin=Origin(
-            xyz=(0.0, 0.0, DIAL_CENTER_Z),
-            rpy=_axis_cylinder_rpy("y"),
-        ),
-        material=bezel_metal,
-        name="front_back_shaft",
+    corbel_z = s(1.085)
+    tower.visual(
+        Box((s(0.08), s(0.20), s(0.09))),
+        origin=Origin(xyz=(0.0, s(0.17), corbel_z)),
+        material=light_stone,
+        name="north_corbel",
     )
-    pillar.visual(
-        Cylinder(radius=SHAFT_RADIUS, length=SHAFT_LENGTH),
-        origin=Origin(
-            xyz=(0.0, 0.0, DIAL_CENTER_Z),
-            rpy=_axis_cylinder_rpy("x"),
-        ),
-        material=bezel_metal,
-        name="left_right_shaft",
+    tower.visual(
+        Box((s(0.08), s(0.20), s(0.09))),
+        origin=Origin(xyz=(0.0, -s(0.17), corbel_z)),
+        material=light_stone,
+        name="south_corbel",
     )
-    pillar.visual(
-        Box((0.054, 0.054, 0.042)),
-        origin=Origin(xyz=(0.0, 0.0, DIAL_CENTER_Z)),
-        material=cast_iron,
-        name="movement_core",
+    tower.visual(
+        Box((s(0.20), s(0.08), s(0.09))),
+        origin=Origin(xyz=(s(0.17), 0.0, corbel_z)),
+        material=light_stone,
+        name="east_corbel",
     )
-    pillar.visual(
-        Box((0.204, 0.204, 0.048)),
-        origin=Origin(xyz=(0.0, 0.0, 0.753)),
-        material=cast_iron,
-        name="capital_neck",
-    )
-    pillar.visual(
-        Box((0.280, 0.280, 0.056)),
-        origin=Origin(xyz=(0.0, 0.0, 0.805)),
-        material=cast_iron,
-        name="capital_block",
-    )
-    pillar.visual(
-        Box((0.340, 0.340, 0.034)),
-        origin=Origin(xyz=(0.0, 0.0, 0.849)),
-        material=cast_iron,
-        name="capital_cornice",
-    )
-    pillar.visual(
-        Box((0.210, 0.210, 0.020)),
-        origin=Origin(xyz=(0.0, 0.0, 0.875)),
-        material=cast_iron,
-        name="capital_top",
-    )
-    for sign in (-1.0, 1.0):
-        pillar.visual(
-            Box((0.080, 0.028, 0.060)),
-            origin=Origin(xyz=(0.0, sign * 0.127, 0.792)),
-            material=cast_iron,
-            name=f"capital_corbels_y_{int(sign)}",
-        )
-        pillar.visual(
-            Box((0.028, 0.080, 0.060)),
-            origin=Origin(xyz=(sign * 0.127, 0.0, 0.792)),
-            material=cast_iron,
-            name=f"capital_corbels_x_{int(sign)}",
-        )
-    _add_strut(
-        pillar,
-        (0.0, 0.120, 0.850),
-        (0.0, 0.052, 0.885),
-        0.006,
-        cast_iron,
-        name="lantern_bracket_front",
-    )
-    _add_strut(
-        pillar,
-        (0.0, -0.120, 0.850),
-        (0.0, -0.052, 0.885),
-        0.006,
-        cast_iron,
-        name="lantern_bracket_back",
-    )
-    _add_strut(
-        pillar,
-        (0.120, 0.0, 0.850),
-        (0.052, 0.0, 0.885),
-        0.006,
-        cast_iron,
-        name="lantern_bracket_right",
-    )
-    _add_strut(
-        pillar,
-        (-0.120, 0.0, 0.850),
-        (-0.052, 0.0, 0.885),
-        0.006,
-        cast_iron,
-        name="lantern_bracket_left",
-    )
-    pillar.inertial = Inertial.from_geometry(
-        Box((BASE_FLANGE, BASE_FLANGE, 0.90)),
-        mass=28.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.45)),
-    )
-
-    lantern = model.part("lantern")
-    lantern.visual(
-        Box((0.120, 0.120, 0.022)),
-        origin=Origin(xyz=(0.0, 0.0, 0.011)),
-        material=lantern_roof,
-        name="lantern_base",
-    )
-    lantern.visual(
-        Box((0.094, 0.094, 0.014)),
-        origin=Origin(xyz=(0.0, 0.0, 0.028)),
-        material=lantern_roof,
-        name="lantern_floor",
+    tower.visual(
+        Box((s(0.20), s(0.08), s(0.09))),
+        origin=Origin(xyz=(-s(0.17), 0.0, corbel_z)),
+        material=light_stone,
+        name="west_corbel",
     )
     for x_sign in (-1.0, 1.0):
         for y_sign in (-1.0, 1.0):
-            lantern.visual(
-                Box((0.010, 0.010, 0.108)),
-                origin=Origin(xyz=(x_sign * 0.036, y_sign * 0.036, 0.078)),
-                material=lantern_roof,
-                name=f"lantern_post_{int(x_sign)}_{int(y_sign)}",
+            tower.visual(
+                Box((s(0.09), s(0.09), s(0.08))),
+                origin=Origin(xyz=(x_sign * s(0.15), y_sign * s(0.15), s(1.08))),
+                material=light_stone,
+                name=f"corner_corbel_{'e' if x_sign > 0 else 'w'}{'n' if y_sign > 0 else 's'}",
             )
-    lantern.visual(
-        Box((0.070, 0.004, 0.090)),
-        origin=Origin(xyz=(0.0, 0.036, 0.079)),
-        material=lantern_glass,
-        name="lantern_glass_front",
+
+    tower.visual(
+        Box((STAGE_BASE_SIZE, STAGE_BASE_SIZE, STAGE_BASE_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, s(1.17))),
+        material=light_stone,
+        name="clock_stage_base",
     )
-    lantern.visual(
-        Box((0.070, 0.004, 0.090)),
-        origin=Origin(xyz=(0.0, -0.036, 0.079)),
-        material=lantern_glass,
-        name="lantern_glass_back",
+    tower.visual(
+        Box((STAGE_SIZE, STAGE_SIZE, STAGE_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, s(1.34))),
+        material=weathered_stone,
+        name="clock_stage",
     )
-    lantern.visual(
-        Box((0.004, 0.070, 0.090)),
-        origin=Origin(xyz=(0.036, 0.0, 0.079)),
-        material=lantern_glass,
-        name="lantern_glass_right",
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            tower.visual(
+                Box((s(0.06), s(0.06), s(0.24))),
+                origin=Origin(xyz=(x_sign * s(0.25), y_sign * s(0.25), s(1.34))),
+                material=light_stone,
+                name=f"stage_pilaster_{'e' if x_sign > 0 else 'w'}{'n' if y_sign > 0 else 's'}",
+            )
+
+    for side in ("front", "rear", "right", "left"):
+        _add_dial(tower, side, light_stone, clock_face, dark_trim, brass)
+
+    tower.visual(
+        Box((UPPER_CORNICE_SIZE, UPPER_CORNICE_SIZE, UPPER_CORNICE_HEIGHT)),
+        origin=Origin(xyz=(0.0, 0.0, s(1.505))),
+        material=light_stone,
+        name="upper_cornice",
     )
-    lantern.visual(
-        Box((0.004, 0.070, 0.090)),
-        origin=Origin(xyz=(-0.036, 0.0, 0.079)),
-        material=lantern_glass,
-        name="lantern_glass_left",
+    for x_sign in (-1.0, 1.0):
+        for y_sign in (-1.0, 1.0):
+            tower.visual(
+                Box((s(0.08), s(0.08), s(0.10))),
+                origin=Origin(xyz=(x_sign * s(0.25), y_sign * s(0.25), s(1.59))),
+                material=light_stone,
+                name=f"pinnacle_{'e' if x_sign > 0 else 'w'}{'n' if y_sign > 0 else 's'}",
+            )
+    roof_mesh = mesh_from_geometry(
+        section_loft(
+            [
+                _square_section(ROOF_BASE_SIZE, 0.0),
+                _square_section(ROOF_BASE_SIZE * 0.72, ROOF_HEIGHT * 0.45),
+                _square_section(ROOF_BASE_SIZE * 0.24, ROOF_HEIGHT),
+            ]
+        ),
+        ASSETS.mesh_path("victorian_clock_tower_roof.obj"),
     )
-    lantern.visual(
-        Box((0.140, 0.140, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, 0.129)),
-        material=lantern_roof,
-        name="lantern_eave",
+    tower.visual(
+        roof_mesh,
+        origin=Origin(xyz=(0.0, 0.0, s(1.54))),
+        material=slate,
+        name="roof_spire",
     )
-    lantern.visual(
-        Box((0.096, 0.096, 0.026)),
-        origin=Origin(xyz=(0.0, 0.0, 0.1475)),
-        material=lantern_roof,
-        name="lantern_roof_block",
-    )
-    lantern.visual(
-        Box((0.060, 0.060, 0.022)),
-        origin=Origin(xyz=(0.0, 0.0, 0.171)),
-        material=lantern_roof,
-        name="lantern_roof_cap",
-    )
-    lantern.visual(
-        Cylinder(radius=0.008, length=0.032),
-        origin=Origin(xyz=(0.0, 0.0, 0.198)),
-        material=bezel_metal,
-        name="lantern_finial",
-    )
-    lantern.inertial = Inertial.from_geometry(
-        Box((0.140, 0.140, 0.220)),
-        mass=2.2,
-        origin=Origin(xyz=(0.0, 0.0, 0.110)),
-    )
-    model.articulation(
-        "pillar_to_lantern",
-        ArticulationType.FIXED,
-        parent=pillar,
-        child=lantern,
-        origin=Origin(xyz=(0.0, 0.0, 0.885)),
+    tower.visual(
+        Cylinder(radius=s(0.018), length=s(0.14)),
+        origin=Origin(xyz=(0.0, 0.0, s(1.91))),
+        material=brass,
+        name="finial",
     )
 
-    for face_name, axis_name, sign in face_specs:
-        _add_hand_part(
-            model,
-            pillar,
-            face_name=face_name,
-            axis_name=axis_name,
-            sign=sign,
-            hand_kind="hour",
-            material=hand_black,
-        )
-        _add_hand_part(
-            model,
-            pillar,
-            face_name=face_name,
-            axis_name=axis_name,
-            sign=sign,
-            hand_kind="minute",
-            material=hand_black,
-        )
+    for side in ("front", "rear", "right", "left"):
+        _add_hand(model, tower, side, "hour", dark_trim, brass)
+        _add_hand(model, tower, side, "minute", dark_trim, brass)
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE)
-    pillar = object_model.get_part("pillar")
-    lantern = object_model.get_part("lantern")
-
-    front_hour = object_model.get_part("front_hour_hand")
-    front_minute = object_model.get_part("front_minute_hand")
-    back_hour = object_model.get_part("back_hour_hand")
-    back_minute = object_model.get_part("back_minute_hand")
-    right_hour = object_model.get_part("right_hour_hand")
-    right_minute = object_model.get_part("right_minute_hand")
-    left_hour = object_model.get_part("left_hour_hand")
-    left_minute = object_model.get_part("left_minute_hand")
-
-    front_hour_spin = object_model.get_articulation("front_hour_spin")
-    front_minute_spin = object_model.get_articulation("front_minute_spin")
-    back_hour_spin = object_model.get_articulation("back_hour_spin")
-    back_minute_spin = object_model.get_articulation("back_minute_spin")
-    right_hour_spin = object_model.get_articulation("right_hour_spin")
-    right_minute_spin = object_model.get_articulation("right_minute_spin")
-    left_hour_spin = object_model.get_articulation("left_hour_spin")
-    left_minute_spin = object_model.get_articulation("left_minute_spin")
-
-    base_flange = pillar.get_visual("base_flange")
-    front_wall = pillar.get_visual("front_wall")
-    capital_top = pillar.get_visual("capital_top")
-    lantern_base = lantern.get_visual("lantern_base")
-    front_back_shaft = pillar.get_visual("front_back_shaft")
-    left_right_shaft = pillar.get_visual("left_right_shaft")
-
-    front_panel = pillar.get_visual("front_arch_panel")
-    back_panel = pillar.get_visual("back_arch_panel")
-    left_panel = pillar.get_visual("left_arch_panel")
-    right_panel = pillar.get_visual("right_arch_panel")
-    front_dial = pillar.get_visual("front_dial")
-    back_dial = pillar.get_visual("back_dial")
-    left_dial = pillar.get_visual("left_dial")
-    right_dial = pillar.get_visual("right_dial")
-    front_boss = pillar.get_visual("front_boss")
-    back_boss = pillar.get_visual("back_boss")
-    left_boss = pillar.get_visual("left_boss")
-    right_boss = pillar.get_visual("right_boss")
-
-    front_hour_hub = front_hour.get_visual("hour_hub")
-    front_hour_blade = front_hour.get_visual("hour_blade")
-    front_minute_hub = front_minute.get_visual("minute_hub")
-    front_minute_blade = front_minute.get_visual("minute_blade")
-    back_hour_hub = back_hour.get_visual("hour_hub")
-    back_hour_blade = back_hour.get_visual("hour_blade")
-    back_minute_hub = back_minute.get_visual("minute_hub")
-    back_minute_blade = back_minute.get_visual("minute_blade")
-    right_hour_hub = right_hour.get_visual("hour_hub")
-    right_hour_blade = right_hour.get_visual("hour_blade")
-    right_minute_hub = right_minute.get_visual("minute_hub")
-    right_minute_blade = right_minute.get_visual("minute_blade")
-    left_hour_hub = left_hour.get_visual("hour_hub")
-    left_hour_blade = left_hour.get_visual("hour_blade")
-    left_minute_hub = left_minute.get_visual("minute_hub")
-    left_minute_blade = left_minute.get_visual("minute_blade")
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    tower = object_model.get_part("tower")
+    plinth = tower.get_visual("plinth")
+    shaft = tower.get_visual("shaft")
+    clock_stage = tower.get_visual("clock_stage")
+    upper_cornice = tower.get_visual("upper_cornice")
+    roof_spire = tower.get_visual("roof_spire")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=96)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    plinth_aabb = ctx.part_element_world_aabb(tower, elem=plinth)
+    shaft_aabb = ctx.part_element_world_aabb(tower, elem=shaft)
+    clock_stage_aabb = ctx.part_element_world_aabb(tower, elem=clock_stage)
+    upper_cornice_aabb = ctx.part_element_world_aabb(tower, elem=upper_cornice)
+    roof_spire_aabb = ctx.part_element_world_aabb(tower, elem=roof_spire)
 
-    ctx.expect_within(pillar, pillar, axes="xy", inner_elem=front_wall, outer_elem=base_flange)
-    ctx.expect_within(lantern, pillar, axes="xy", inner_elem=lantern_base, outer_elem=capital_top)
-    ctx.expect_contact(lantern, pillar, elem_a=lantern_base, elem_b=capital_top)
-    ctx.expect_origin_distance(lantern, pillar, axes="xy", max_dist=0.005)
-    ctx.expect_contact(pillar, pillar, elem_a=front_back_shaft, elem_b=front_boss)
-    ctx.expect_contact(pillar, pillar, elem_a=front_back_shaft, elem_b=back_boss)
-    ctx.expect_contact(pillar, pillar, elem_a=left_right_shaft, elem_b=left_boss)
-    ctx.expect_contact(pillar, pillar, elem_a=left_right_shaft, elem_b=right_boss)
+    if (
+        plinth_aabb is None
+        or shaft_aabb is None
+        or clock_stage_aabb is None
+        or upper_cornice_aabb is None
+        or roof_spire_aabb is None
+    ):
+        ctx.fail("tower_visual_bounds_available", "Expected tower visual bounds were unavailable.")
+        return ctx.report()
 
-    ctx.expect_within(pillar, pillar, axes="xz", inner_elem=front_dial, outer_elem=front_panel)
-    ctx.expect_within(pillar, pillar, axes="xz", inner_elem=back_dial, outer_elem=back_panel)
-    ctx.expect_within(pillar, pillar, axes="yz", inner_elem=left_dial, outer_elem=left_panel)
-    ctx.expect_within(pillar, pillar, axes="yz", inner_elem=right_dial, outer_elem=right_panel)
+    plinth_width = plinth_aabb[1][0] - plinth_aabb[0][0]
+    shaft_width = shaft_aabb[1][0] - shaft_aabb[0][0]
+    clock_stage_width = clock_stage_aabb[1][0] - clock_stage_aabb[0][0]
+    upper_cornice_width = upper_cornice_aabb[1][0] - upper_cornice_aabb[0][0]
+    roof_width = roof_spire_aabb[1][0] - roof_spire_aabb[0][0]
 
-    ctx.expect_contact(front_hour, pillar, elem_a=front_hour_hub, elem_b=front_boss)
-    ctx.expect_contact(front_minute, front_hour, elem_a=front_minute_hub, elem_b=front_hour_hub)
-    ctx.expect_within(front_hour, pillar, axes="xz", inner_elem=front_hour_blade, outer_elem=front_dial)
-    ctx.expect_within(front_minute, pillar, axes="xz", inner_elem=front_minute_blade, outer_elem=front_dial)
+    ctx.check(
+        "plinth_broader_than_shaft",
+        plinth_width > shaft_width + s(0.12),
+        details=f"plinth_width={plinth_width:.3f}, shaft_width={shaft_width:.3f}",
+    )
+    ctx.check(
+        "clock_stage_broader_than_shaft",
+        clock_stage_width > shaft_width + s(0.20),
+        details=f"clock_stage_width={clock_stage_width:.3f}, shaft_width={shaft_width:.3f}",
+    )
+    ctx.check(
+        "roof_nests_within_cornice",
+        roof_width < upper_cornice_width - s(0.12),
+        details=f"roof_width={roof_width:.3f}, cornice_width={upper_cornice_width:.3f}",
+    )
 
-    ctx.expect_contact(back_hour, pillar, elem_a=back_hour_hub, elem_b=back_boss)
-    ctx.expect_contact(back_minute, back_hour, elem_a=back_minute_hub, elem_b=back_hour_hub)
-    ctx.expect_within(back_hour, pillar, axes="xz", inner_elem=back_hour_blade, outer_elem=back_dial)
-    ctx.expect_within(back_minute, pillar, axes="xz", inner_elem=back_minute_blade, outer_elem=back_dial)
+    ctx.expect_within(
+        tower,
+        tower,
+        inner_elem=shaft,
+        outer_elem=clock_stage,
+        axes="xy",
+        name="shaft_sits_within_clock_stage_footprint",
+    )
+    ctx.expect_within(
+        tower,
+        tower,
+        inner_elem=clock_stage,
+        outer_elem=upper_cornice,
+        axes="xy",
+        name="clock_stage_sits_within_cornice_footprint",
+    )
+    ctx.expect_within(
+        tower,
+        tower,
+        inner_elem=roof_spire,
+        outer_elem=upper_cornice,
+        axes="xy",
+        name="roof_spire_sits_over_cornice",
+    )
 
-    ctx.expect_contact(right_hour, pillar, elem_a=right_hour_hub, elem_b=right_boss)
-    ctx.expect_contact(right_minute, right_hour, elem_a=right_minute_hub, elem_b=right_hour_hub)
-    ctx.expect_within(right_hour, pillar, axes="yz", inner_elem=right_hour_blade, outer_elem=right_dial)
-    ctx.expect_within(right_minute, pillar, axes="yz", inner_elem=right_minute_blade, outer_elem=right_dial)
+    representative_angles = {
+        "front": (math.radians(40.0), math.radians(-125.0)),
+        "rear": (math.radians(-28.0), math.radians(140.0)),
+        "right": (math.radians(55.0), math.radians(-105.0)),
+        "left": (math.radians(-48.0), math.radians(118.0)),
+    }
+    expected_axes = {
+        "front": (0.0, 1.0, 0.0),
+        "rear": (0.0, -1.0, 0.0),
+        "right": (1.0, 0.0, 0.0),
+        "left": (-1.0, 0.0, 0.0),
+    }
 
-    ctx.expect_contact(left_hour, pillar, elem_a=left_hour_hub, elem_b=left_boss)
-    ctx.expect_contact(left_minute, left_hour, elem_a=left_minute_hub, elem_b=left_hour_hub)
-    ctx.expect_within(left_hour, pillar, axes="yz", inner_elem=left_hour_blade, outer_elem=left_dial)
-    ctx.expect_within(left_minute, pillar, axes="yz", inner_elem=left_minute_blade, outer_elem=left_dial)
+    for side in ("front", "rear", "right", "left"):
+        hour = object_model.get_part(f"{side}_hour_hand")
+        minute = object_model.get_part(f"{side}_minute_hand")
+        hour_joint = object_model.get_articulation(f"tower_to_{side}_hour")
+        minute_joint = object_model.get_articulation(f"tower_to_{side}_minute")
+        dial = tower.get_visual(f"{side}_dial_face")
+        boss = tower.get_visual(f"{side}_pivot_boss")
+        hour_hub = hour.get_visual("hub")
+        minute_hub = minute.get_visual("hub")
+        hour_blade = hour.get_visual("hand")
+        minute_blade = minute.get_visual("hand")
+        axes = _clock_axes(side)
 
-    with ctx.pose({front_minute_spin: math.pi * 0.5, front_hour_spin: math.pi / 6.0}):
-        ctx.expect_contact(front_hour, pillar, elem_a=front_hour_hub, elem_b=front_boss)
-        ctx.expect_within(front_hour, pillar, axes="xz", inner_elem=front_hour_blade, outer_elem=front_dial)
-        ctx.expect_within(front_minute, pillar, axes="xz", inner_elem=front_minute_blade, outer_elem=front_dial)
+        ctx.check(
+            f"{side}_hour_joint_axis",
+            tuple(hour_joint.axis) == expected_axes[side],
+            details=f"axis={hour_joint.axis}, expected={expected_axes[side]}",
+        )
+        ctx.check(
+            f"{side}_minute_joint_axis",
+            tuple(minute_joint.axis) == expected_axes[side],
+            details=f"axis={minute_joint.axis}, expected={expected_axes[side]}",
+        )
 
-    with ctx.pose({back_minute_spin: -math.pi * 0.5, back_hour_spin: -math.pi / 6.0}):
-        ctx.expect_contact(back_hour, pillar, elem_a=back_hour_hub, elem_b=back_boss)
-        ctx.expect_within(back_hour, pillar, axes="xz", inner_elem=back_hour_blade, outer_elem=back_dial)
-        ctx.expect_within(back_minute, pillar, axes="xz", inner_elem=back_minute_blade, outer_elem=back_dial)
+        ctx.expect_contact(
+            hour,
+            tower,
+            elem_a=hour_hub,
+            elem_b=boss,
+            name=f"{side}_hour_hand_seated_on_boss",
+        )
+        ctx.expect_contact(
+            minute,
+            hour,
+            elem_a=minute_hub,
+            elem_b=hour_hub,
+            name=f"{side}_minute_hand_stacked_on_hour_hub",
+        )
+        ctx.expect_within(
+            hour,
+            tower,
+            inner_elem=hour_blade,
+            outer_elem=dial,
+            axes=axes,
+            name=f"{side}_hour_hand_within_dial",
+        )
+        ctx.expect_within(
+            minute,
+            tower,
+            inner_elem=minute_blade,
+            outer_elem=dial,
+            axes=axes,
+            name=f"{side}_minute_hand_within_dial",
+        )
 
-    with ctx.pose({right_minute_spin: -math.pi * 0.5, right_hour_spin: -math.pi / 3.0}):
-        ctx.expect_contact(right_hour, pillar, elem_a=right_hour_hub, elem_b=right_boss)
-        ctx.expect_within(right_hour, pillar, axes="yz", inner_elem=right_hour_blade, outer_elem=right_dial)
-        ctx.expect_within(right_minute, pillar, axes="yz", inner_elem=right_minute_blade, outer_elem=right_dial)
+        ctx.expect_within(
+            tower,
+            tower,
+            inner_elem=dial,
+            outer_elem=clock_stage,
+            axes=axes,
+            name=f"{side}_dial_within_clock_stage",
+        )
 
-    with ctx.pose({left_minute_spin: math.pi * 0.5, left_hour_spin: math.pi / 3.0}):
-        ctx.expect_contact(left_hour, pillar, elem_a=left_hour_hub, elem_b=left_boss)
-        ctx.expect_within(left_hour, pillar, axes="yz", inner_elem=left_hour_blade, outer_elem=left_dial)
-        ctx.expect_within(left_minute, pillar, axes="yz", inner_elem=left_minute_blade, outer_elem=left_dial)
+        hour_limits = hour_joint.motion_limits
+        minute_limits = minute_joint.motion_limits
+        if hour_limits is not None and hour_limits.lower is not None and hour_limits.upper is not None:
+            with ctx.pose({hour_joint: hour_limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{side}_hour_lower_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{side}_hour_lower_no_floating")
+            with ctx.pose({hour_joint: hour_limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{side}_hour_upper_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{side}_hour_upper_no_floating")
+        if minute_limits is not None and minute_limits.lower is not None and minute_limits.upper is not None:
+            with ctx.pose({minute_joint: minute_limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{side}_minute_lower_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{side}_minute_lower_no_floating")
+            with ctx.pose({minute_joint: minute_limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{side}_minute_upper_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{side}_minute_upper_no_floating")
+
+        posed_hour, posed_minute = representative_angles[side]
+        with ctx.pose({hour_joint: posed_hour, minute_joint: posed_minute}):
+            ctx.expect_contact(
+                hour,
+                tower,
+                elem_a=hour_hub,
+                elem_b=boss,
+                name=f"{side}_hour_hub_remains_seated_in_pose",
+            )
+            ctx.expect_contact(
+                minute,
+                hour,
+                elem_a=minute_hub,
+                elem_b=hour_hub,
+                name=f"{side}_minute_hub_remains_stacked_in_pose",
+            )
+            ctx.expect_within(
+                hour,
+                tower,
+                inner_elem=hour_blade,
+                outer_elem=dial,
+                axes=axes,
+                name=f"{side}_hour_hand_stays_within_dial_in_pose",
+            )
+            ctx.expect_within(
+                minute,
+                tower,
+                inner_elem=minute_blade,
+                outer_elem=dial,
+                axes=axes,
+                name=f"{side}_minute_hand_stays_within_dial_in_pose",
+            )
 
     return ctx.report()
 

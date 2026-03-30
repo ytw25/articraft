@@ -18,7 +18,6 @@ from sdk import (
     TestContext,
     TestReport,
     mesh_from_geometry,
-    tube_from_spline_points,
 )
 
 ASSETS = AssetContext.from_script(__file__)
@@ -28,213 +27,224 @@ def _save_mesh(name: str, geometry):
     return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
 
 
+def _tube_shell(
+    outer_radius: float,
+    inner_radius: float,
+    length: float,
+    *,
+    segments: int = 56,
+):
+    half_length = 0.5 * length
+    return LatheGeometry.from_shell_profiles(
+        [
+            (outer_radius, -half_length),
+            (outer_radius, half_length),
+        ],
+        [
+            (inner_radius, -half_length),
+            (inner_radius, half_length),
+        ],
+        segments=segments,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _shade_shell():
+    return LatheGeometry.from_shell_profiles(
+        [
+            (0.012, 0.020),
+            (0.026, 0.016),
+            (0.050, 0.002),
+            (0.076, -0.032),
+            (0.097, -0.074),
+            (0.110, -0.112),
+        ],
+        [
+            (0.006, 0.014),
+            (0.018, 0.010),
+            (0.040, -0.002),
+            (0.066, -0.034),
+            (0.086, -0.074),
+            (0.100, -0.106),
+        ],
+        segments=80,
+        start_cap="round",
+        end_cap="flat",
+        lip_samples=8,
+    )
+
+
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="pharmacy_reading_lamp", assets=ASSETS)
+    model = ArticulatedObject(name="pharmacy_floor_lamp", assets=ASSETS)
 
-    warm_brass = model.material("warm_brass", rgba=(0.72, 0.58, 0.31, 1.0))
-    dark_brass = model.material("dark_brass", rgba=(0.43, 0.32, 0.16, 1.0))
-    cream_enamel = model.material("cream_enamel", rgba=(0.92, 0.90, 0.82, 1.0))
-    graphite = model.material("graphite", rgba=(0.20, 0.20, 0.22, 1.0))
+    brushed_steel = model.material("brushed_steel", rgba=(0.71, 0.73, 0.75, 1.0))
+    satin_aluminum = model.material("satin_aluminum", rgba=(0.83, 0.84, 0.86, 1.0))
+    enamel_white = model.material("enamel_white", rgba=(0.94, 0.94, 0.91, 1.0))
+    graphite = model.material("graphite", rgba=(0.20, 0.21, 0.23, 1.0))
+    warm_black = model.material("warm_black", rgba=(0.11, 0.11, 0.12, 1.0))
 
-    stand = model.part("stand")
-    stand.visual(
-        Cylinder(radius=0.115, length=0.024),
-        origin=Origin(xyz=(0.0, 0.0, 0.012)),
-        material=warm_brass,
-        name="base_foot",
-    )
-    stand.visual(
-        Cylinder(radius=0.098, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
+    base = model.part("base")
+    base.visual(
+        Cylinder(radius=0.155, length=0.022),
+        origin=Origin(xyz=(0.0, 0.0, 0.011)),
         material=graphite,
-        name="base_pad",
+        name="base_disc",
     )
-    stand.visual(
-        Cylinder(radius=0.028, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, 0.027)),
-        material=warm_brass,
-        name="socket_flange",
+    base.visual(
+        _save_mesh("base_plinth_ring.obj", _tube_shell(0.055, 0.021, 0.024)),
+        origin=Origin(xyz=(0.0, 0.0, 0.034)),
+        material=warm_black,
+        name="base_plinth",
     )
-    stand.visual(
-        Cylinder(radius=0.017, length=0.016),
-        origin=Origin(xyz=(0.0, 0.0, 0.032)),
-        material=warm_brass,
-        name="pole_socket",
+    base.visual(
+        _save_mesh("lower_receiver_shell.obj", _tube_shell(0.022, 0.0185, 0.900)),
+        origin=Origin(xyz=(0.0, 0.0, 0.475)),
+        material=brushed_steel,
+        name="lower_receiver",
     )
-    stand.visual(
-        Cylinder(radius=0.009, length=0.70),
-        origin=Origin(xyz=(0.0, 0.0, 0.374)),
-        material=warm_brass,
-        name="pole",
+    base.visual(
+        _save_mesh("receiver_collar_shell.obj", _tube_shell(0.031, 0.021, 0.040)),
+        origin=Origin(xyz=(0.0, 0.0, 0.915)),
+        material=satin_aluminum,
+        name="receiver_collar",
     )
-    stand.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.115, length=0.74),
-        mass=4.8,
-        origin=Origin(xyz=(0.0, 0.0, 0.37)),
+    base.visual(
+        Cylinder(radius=0.010, length=0.028),
+        origin=Origin(xyz=(0.043, 0.0, 0.915), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=warm_black,
+        name="collar_knob",
+    )
+    base.visual(
+        Cylinder(radius=0.012, length=0.020),
+        origin=Origin(xyz=(0.030, 0.0, 0.915), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=warm_black,
+        name="collar_boss",
+    )
+    base.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.155, length=0.950),
+        mass=11.5,
+        origin=Origin(xyz=(0.0, 0.0, 0.475)),
     )
 
-    carriage = model.part("carriage")
-    carriage.visual(
-        Box((0.010, 0.031, 0.040)),
-        origin=Origin(xyz=(-0.014, 0.0, 0.0)),
-        material=warm_brass,
-        name="collar_sleeve",
+    upper_stage = model.part("upper_stage")
+    upper_stage.visual(
+        Cylinder(radius=0.0185, length=1.050),
+        origin=Origin(xyz=(0.0, 0.0, 0.525)),
+        material=brushed_steel,
+        name="upper_pole",
     )
-    carriage.visual(
-        Box((0.020, 0.009, 0.040)),
-        origin=Origin(xyz=(-0.001, -0.0135, 0.0)),
-        material=warm_brass,
-        name="collar_left_half",
+    upper_stage.visual(
+        Cylinder(radius=0.022, length=0.022),
+        origin=Origin(xyz=(0.0, 0.0, 0.955)),
+        material=satin_aluminum,
+        name="stop_collar",
     )
-    carriage.visual(
-        Box((0.020, 0.009, 0.040)),
-        origin=Origin(xyz=(-0.001, 0.0135, 0.0)),
-        material=warm_brass,
-        name="collar_right_half",
+    upper_stage.visual(
+        Cylinder(radius=0.024, length=0.050),
+        origin=Origin(xyz=(0.0, 0.0, 0.995)),
+        material=satin_aluminum,
+        name="arm_socket",
     )
-    carriage.visual(
-        Box((0.018, 0.022, 0.028)),
-        origin=Origin(xyz=(0.018, 0.0, 0.003)),
-        material=warm_brass,
-        name="clamp_body",
-    )
-    carriage.visual(
-        Cylinder(radius=0.0032, length=0.030),
-        origin=Origin(xyz=(0.024, 0.0, 0.003), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=dark_brass,
-        name="thumbscrew_shaft",
-    )
-    carriage.visual(
-        Cylinder(radius=0.0062, length=0.006),
-        origin=Origin(xyz=(0.042, 0.0, 0.003), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=dark_brass,
-        name="thumbscrew_head",
-    )
-    carriage.visual(
-        Cylinder(radius=0.0065, length=0.134),
-        origin=Origin(xyz=(0.094, 0.0, 0.010), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=warm_brass,
+    upper_stage.visual(
+        Cylinder(radius=0.010, length=0.230),
+        origin=Origin(xyz=(0.115, 0.0, 0.995), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=brushed_steel,
         name="arm_tube",
     )
-    carriage.visual(
-        Box((0.008, 0.018, 0.012)),
-        origin=Origin(xyz=(0.157, 0.0, 0.010)),
-        material=warm_brass,
-        name="arm_tip_block",
+    upper_stage.visual(
+        Box((0.018, 0.024, 0.028)),
+        origin=Origin(xyz=(0.225, 0.0, 0.995)),
+        material=satin_aluminum,
+        name="hinge_mount",
     )
-    carriage.visual(
-        Box((0.008, 0.007, 0.030)),
-        origin=Origin(xyz=(0.165, -0.011, 0.010)),
-        material=dark_brass,
-        name="left_pivot_cheek",
+    upper_stage.visual(
+        Box((0.020, 0.008, 0.036)),
+        origin=Origin(xyz=(0.233, -0.014, 0.992)),
+        material=warm_black,
+        name="fork_left",
     )
-    carriage.visual(
-        Box((0.008, 0.007, 0.030)),
-        origin=Origin(xyz=(0.165, 0.011, 0.010)),
-        material=dark_brass,
-        name="right_pivot_cheek",
+    upper_stage.visual(
+        Box((0.020, 0.008, 0.036)),
+        origin=Origin(xyz=(0.233, 0.014, 0.992)),
+        material=warm_black,
+        name="fork_right",
     )
-    carriage.inertial = Inertial.from_geometry(
-        Box((0.19, 0.05, 0.05)),
-        mass=0.75,
-        origin=Origin(xyz=(0.095, 0.0, 0.010)),
+    upper_stage.visual(
+        Cylinder(radius=0.0072, length=0.034),
+        origin=Origin(xyz=(0.246, 0.0, 0.992), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=warm_black,
+        name="pivot_pin",
+    )
+    upper_stage.inertial = Inertial.from_geometry(
+        Box((0.310, 0.080, 1.100)),
+        mass=2.3,
+        origin=Origin(xyz=(0.120, 0.0, 0.550)),
     )
 
     shade = model.part("shade")
     shade.visual(
-        Cylinder(radius=0.006, length=0.019),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=dark_brass,
-        name="pivot_barrel",
+        _save_mesh("hinge_barrel_shell.obj", _tube_shell(0.011, 0.007, 0.030)),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=warm_black,
+        name="hinge_barrel",
     )
     shade.visual(
-        Cylinder(radius=0.0075, length=0.018),
-        origin=Origin(xyz=(0.013, 0.0, -0.004), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=warm_brass,
-        name="shade_neck",
+        Cylinder(radius=0.008, length=0.055),
+        origin=Origin(xyz=(0.038, 0.0, 0.004), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=warm_black,
+        name="shade_stem",
     )
     shade.visual(
-        _save_mesh(
-            "pharmacy_shade_shell.obj",
-            LatheGeometry.from_shell_profiles(
-                [
-                    (0.010, -0.008),
-                    (0.020, -0.004),
-                    (0.034, 0.008),
-                    (0.048, 0.021),
-                    (0.058, 0.034),
-                    (0.062, 0.043),
-                ],
-                [
-                    (0.0, -0.007),
-                    (0.009, -0.007),
-                    (0.016, -0.003),
-                    (0.028, 0.008),
-                    (0.042, 0.022),
-                    (0.054, 0.035),
-                    (0.058, 0.040),
-                ],
-                segments=52,
-                start_cap="flat",
-                end_cap="flat",
-            ).rotate_y(math.pi / 2.0),
-        ),
-        origin=Origin(xyz=(0.020, 0.0, -0.019)),
-        material=cream_enamel,
-        name="shade_shell",
+        Cylinder(radius=0.016, length=0.018),
+        origin=Origin(xyz=(0.081, 0.0, 0.012)),
+        material=warm_black,
+        name="crown_cap",
     )
     shade.visual(
-        _save_mesh(
-            "pharmacy_shade_lower_rim.obj",
-            tube_from_spline_points(
-                [
-                    (0.046, -0.038, -0.054),
-                    (0.052, -0.024, -0.059),
-                    (0.055, 0.0, -0.062),
-                    (0.052, 0.024, -0.059),
-                    (0.046, 0.038, -0.054),
-                ],
-                radius=0.0035,
-                samples_per_segment=16,
-                radial_segments=16,
-                cap_ends=True,
-            ),
-        ),
-        material=cream_enamel,
-        name="shade_lower_rim",
+        _save_mesh("shade_shell.obj", _shade_shell()),
+        origin=Origin(xyz=(0.125, 0.0, 0.0)),
+        material=enamel_white,
+        name="dome_shell",
+    )
+    shade.visual(
+        Cylinder(radius=0.014, length=0.050),
+        origin=Origin(xyz=(0.118, 0.0, -0.012)),
+        material=graphite,
+        name="lamp_socket",
     )
     shade.inertial = Inertial.from_geometry(
-        Box((0.10, 0.11, 0.07)),
-        mass=0.32,
-        origin=Origin(xyz=(0.030, 0.0, -0.010)),
+        Box((0.240, 0.220, 0.170)),
+        mass=0.95,
+        origin=Origin(xyz=(0.118, 0.0, -0.040)),
     )
 
     model.articulation(
-        "collar_slide",
+        "pole_extension",
         ArticulationType.PRISMATIC,
-        parent=stand,
-        child=carriage,
-        origin=Origin(xyz=(0.0, 0.0, 0.120)),
+        parent=base,
+        child=upper_stage,
+        origin=Origin(xyz=(0.0, 0.0, 0.025)),
         axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=18.0,
-            velocity=0.18,
+            effort=80.0,
+            velocity=0.35,
             lower=0.0,
-            upper=0.44,
+            upper=0.320,
         ),
     )
     model.articulation(
         "shade_tilt",
         ArticulationType.REVOLUTE,
-        parent=carriage,
+        parent=upper_stage,
         child=shade,
-        origin=Origin(xyz=(0.167, 0.0, 0.010)),
+        origin=Origin(xyz=(0.246, 0.0, 0.992)),
         axis=(0.0, 1.0, 0.0),
         motion_limits=MotionLimits(
-            effort=5.0,
-            velocity=1.4,
-            lower=-0.80,
-            upper=0.60,
+            effort=16.0,
+            velocity=1.8,
+            lower=-0.850,
+            upper=0.550,
         ),
     )
 
@@ -243,168 +253,225 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    stand = object_model.get_part("stand")
-    carriage = object_model.get_part("carriage")
+    base = object_model.get_part("base")
+    upper_stage = object_model.get_part("upper_stage")
     shade = object_model.get_part("shade")
-    collar_slide = object_model.get_articulation("collar_slide")
+    pole_extension = object_model.get_articulation("pole_extension")
     shade_tilt = object_model.get_articulation("shade_tilt")
 
-    base_foot = stand.get_visual("base_foot")
-    pole = stand.get_visual("pole")
-    collar_sleeve = carriage.get_visual("collar_sleeve")
-    thumbscrew_shaft = carriage.get_visual("thumbscrew_shaft")
-    arm_tube = carriage.get_visual("arm_tube")
-    left_pivot_cheek = carriage.get_visual("left_pivot_cheek")
-    right_pivot_cheek = carriage.get_visual("right_pivot_cheek")
-    pivot_barrel = shade.get_visual("pivot_barrel")
-    shade_shell = shade.get_visual("shade_shell")
-    shade_lower_rim = shade.get_visual("shade_lower_rim")
+    base_disc = base.get_visual("base_disc")
+    lower_receiver = base.get_visual("lower_receiver")
+    receiver_collar = base.get_visual("receiver_collar")
+    upper_pole = upper_stage.get_visual("upper_pole")
+    stop_collar = upper_stage.get_visual("stop_collar")
+    arm_tube = upper_stage.get_visual("arm_tube")
+    pivot_pin = upper_stage.get_visual("pivot_pin")
+    dome_shell = shade.get_visual("dome_shell")
+    hinge_barrel = shade.get_visual("hinge_barrel")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts(max_pose_samples=12)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.allow_overlap(
+        base,
+        upper_stage,
+        elem_a=lower_receiver,
+        elem_b=upper_pole,
+        reason="The telescoping lamp uses a nested sliding sleeve, so the upper pole occupies the receiver bore by design.",
+    )
+    ctx.allow_overlap(
+        shade,
+        upper_stage,
+        elem_a=hinge_barrel,
+        elem_b=pivot_pin,
+        reason="The hinge pin is modeled with negligible interference inside the barrel so the shade remains mechanically captured through the full tilt range.",
+    )
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.expect_origin_distance(
-        carriage,
-        stand,
+    ctx.expect_within(
+        upper_stage,
+        base,
         axes="xy",
-        max_dist=0.0015,
-        name="collar_stays_centered_on_pole",
+        inner_elem=upper_pole,
+        outer_elem=lower_receiver,
+        name="upper_pole_stays_concentric_in_receiver",
     )
     ctx.expect_contact(
-        carriage,
-        stand,
-        elem_a=thumbscrew_shaft,
-        elem_b=pole,
-        name="thumbscrew_locks_against_pole",
+        upper_stage,
+        base,
+        elem_a=upper_pole,
+        elem_b=lower_receiver,
+        contact_tol=0.001,
+        name="upper_pole_bears_in_receiver",
     )
     ctx.expect_gap(
-        carriage,
-        stand,
+        shade,
+        upper_stage,
+        axis="x",
+        positive_elem=dome_shell,
+        negative_elem=upper_pole,
+        min_gap=0.040,
+        name="shade_projects_forward_of_pole",
+    )
+    ctx.expect_gap(
+        shade,
+        base,
         axis="z",
-        min_gap=0.07,
-        positive_elem=collar_sleeve,
-        negative_elem=base_foot,
-        name="collar_sits_above_round_base",
+        positive_elem=dome_shell,
+        negative_elem=base_disc,
+        min_gap=0.750,
+        name="shade_hangs_above_disc_base",
     )
     ctx.expect_gap(
-        shade,
-        stand,
-        axis="x",
-        min_gap=0.14,
-        positive_elem=shade_shell,
-        negative_elem=pole,
-        name="shade_projects_forward_from_pole",
-    )
-    ctx.expect_gap(
-        shade,
-        carriage,
-        axis="x",
-        min_gap=0.016,
-        positive_elem=shade_shell,
-        negative_elem=arm_tube,
-        name="shade_shell_starts_beyond_short_horizontal_arm",
+        upper_stage,
+        base,
+        axis="z",
+        positive_elem=stop_collar,
+        negative_elem=receiver_collar,
+        min_gap=0.020,
+        name="upper_stage_trim_collar_stays_above_receiver_clamp",
     )
     ctx.expect_contact(
-        carriage,
         shade,
-        elem_a=left_pivot_cheek,
-        elem_b=pivot_barrel,
-        name="left_cheek_seats_pivot_barrel",
-    )
-    ctx.expect_contact(
-        carriage,
-        shade,
-        elem_a=right_pivot_cheek,
-        elem_b=pivot_barrel,
-        name="right_cheek_seats_pivot_barrel",
+        upper_stage,
+        elem_a=hinge_barrel,
+        elem_b=pivot_pin,
+        contact_tol=0.001,
+        name="shade_hinge_sleeve_contacts_pivot_pin",
     )
 
-    with ctx.pose({collar_slide: 0.40}):
-        ctx.expect_origin_distance(
-            carriage,
-            stand,
+    rest_shade_pos = ctx.part_world_position(shade)
+    rest_dome_aabb = ctx.part_element_world_aabb(shade, elem="dome_shell")
+
+    pole_limits = pole_extension.motion_limits
+    assert pole_limits is not None
+    assert pole_limits.lower is not None
+    assert pole_limits.upper is not None
+
+    with ctx.pose({pole_extension: pole_limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="pole_extension_lower_no_overlap")
+        ctx.fail_if_isolated_parts(name="pole_extension_lower_no_floating")
+        ctx.expect_contact(
+            upper_stage,
+            base,
+            elem_a=upper_pole,
+            elem_b=lower_receiver,
+            contact_tol=0.001,
+            name="pole_extension_lower_contact",
+        )
+
+    with ctx.pose({pole_extension: pole_limits.upper}):
+        extended_shade_pos = ctx.part_world_position(shade)
+        ctx.check(
+            "pole_extension_raises_shade",
+            rest_shade_pos is not None
+            and extended_shade_pos is not None
+            and extended_shade_pos[2] > rest_shade_pos[2] + 0.25,
+            "Prismatic extension should raise the lamp head by roughly the extension travel.",
+        )
+        ctx.fail_if_parts_overlap_in_current_pose(name="pole_extension_upper_no_overlap")
+        ctx.fail_if_isolated_parts(name="pole_extension_upper_no_floating")
+        ctx.expect_within(
+            upper_stage,
+            base,
             axes="xy",
-            max_dist=0.0015,
-            name="raised_collar_stays_centered_on_pole",
+            inner_elem=upper_pole,
+            outer_elem=lower_receiver,
+            name="pole_extension_upper_concentric",
         )
         ctx.expect_contact(
-            carriage,
-            stand,
-            elem_a=thumbscrew_shaft,
-            elem_b=pole,
-            name="raised_thumbscrew_still_contacts_pole",
-        )
-        ctx.expect_gap(
-            carriage,
-            stand,
-            axis="z",
-            min_gap=0.46,
-            positive_elem=collar_sleeve,
-            negative_elem=base_foot,
-            name="collar_can_slide_up_pole",
+            upper_stage,
+            base,
+            elem_a=upper_pole,
+            elem_b=lower_receiver,
+            contact_tol=0.001,
+            name="pole_extension_upper_contact",
         )
         ctx.expect_gap(
             shade,
-            stand,
-            axis="x",
-            min_gap=0.14,
-            positive_elem=shade_shell,
-            negative_elem=pole,
-            name="raised_shade_remains_outboard",
+            base,
+            axis="z",
+            positive_elem=dome_shell,
+            negative_elem=base_disc,
+            min_gap=1.050,
+            name="extended_lamp_lifts_shade_higher",
         )
 
-    with ctx.pose({shade_tilt: 0.50}):
-        ctx.expect_contact(
-            carriage,
-            shade,
-            elem_a=left_pivot_cheek,
-            elem_b=pivot_barrel,
-            name="pivot_stays_seated_while_tilted",
+    tilt_limits = shade_tilt.motion_limits
+    assert tilt_limits is not None
+    assert tilt_limits.lower is not None
+    assert tilt_limits.upper is not None
+
+    with ctx.pose({shade_tilt: tilt_limits.lower}):
+        raised_dome_aabb = ctx.part_element_world_aabb(shade, elem="dome_shell")
+        ctx.check(
+            "shade_tilt_raises_shade_when_retracted",
+            rest_dome_aabb is not None
+            and raised_dome_aabb is not None
+            and raised_dome_aabb[1][2] > rest_dome_aabb[1][2] + 0.04,
+            "One tilt extreme should raise the dome crown above the rest pose.",
         )
+        ctx.fail_if_parts_overlap_in_current_pose(name="shade_tilt_lower_no_overlap")
+        ctx.fail_if_isolated_parts(name="shade_tilt_lower_no_floating")
         ctx.expect_contact(
-            carriage,
             shade,
-            elem_a=right_pivot_cheek,
-            elem_b=pivot_barrel,
-            name="right_pivot_stays_seated_while_tilted",
+            upper_stage,
+            elem_a=hinge_barrel,
+            elem_b=pivot_pin,
+            contact_tol=0.001,
+            name="shade_tilt_lower_hinge_contact",
         )
         ctx.expect_gap(
-            carriage,
             shade,
+            base,
             axis="z",
-            min_gap=0.018,
-            positive_elem=arm_tube,
-            negative_elem=shade_lower_rim,
-            name="shade_can_tilt_below_arm",
-        )
-        ctx.expect_gap(
-            shade,
-            stand,
-            axis="x",
-            min_gap=0.09,
-            positive_elem=shade_shell,
-            negative_elem=pole,
-            name="tilted_shade_stays_forward_of_pole",
+            positive_elem=dome_shell,
+            negative_elem=base_disc,
+            min_gap=0.620,
+            name="tilted_shade_still_clears_disc_base",
         )
 
-    with ctx.pose({collar_slide: 0.30, shade_tilt: 0.50}):
+    with ctx.pose({shade_tilt: tilt_limits.upper}):
+        lowered_dome_aabb = ctx.part_element_world_aabb(shade, elem="dome_shell")
+        ctx.check(
+            "shade_tilt_moves_head_downward",
+            rest_dome_aabb is not None
+            and lowered_dome_aabb is not None
+            and lowered_dome_aabb[0][2] < rest_dome_aabb[0][2] - 0.04,
+            "The opposite tilt extreme should aim the shade downward.",
+        )
+        ctx.fail_if_parts_overlap_in_current_pose(name="shade_tilt_upper_no_overlap")
+        ctx.fail_if_isolated_parts(name="shade_tilt_upper_no_floating")
+        ctx.expect_contact(
+            shade,
+            upper_stage,
+            elem_a=hinge_barrel,
+            elem_b=pivot_pin,
+            contact_tol=0.001,
+            name="shade_tilt_upper_hinge_contact",
+        )
         ctx.expect_gap(
             shade,
-            stand,
+            base,
             axis="z",
-            min_gap=0.14,
-            positive_elem=shade_shell,
-            negative_elem=base_foot,
-            name="raised_shade_clears_base",
+            positive_elem=dome_shell,
+            negative_elem=base_disc,
+            min_gap=0.620,
+            name="down_tilt_keeps_shade_above_base",
+        )
+
+    with ctx.pose({pole_extension: pole_limits.upper, shade_tilt: tilt_limits.lower}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="combined_pose_no_overlap")
+        ctx.fail_if_isolated_parts(name="combined_pose_no_floating")
+        ctx.expect_gap(
+            shade,
+            base,
+            axis="z",
+            positive_elem=dome_shell,
+            negative_elem=base_disc,
+            min_gap=0.900,
+            name="extended_and_tilted_shade_still_clears_base",
         )
 
     return ctx.report()
