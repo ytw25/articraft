@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_shoulderelbowwrist_arm_37803f82fe0b40c2bbdcd8616ab2f1eb",
+  "created_at": "2026-03-31T17:20:51Z",
+  "updated_at": "2026-03-31T18:32:53Z",
+  "rating": 5,
+  "secondary_rating": null,
+  "author": null,
+  "rated_by": null,
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "shoulderelbowwrist_arm",
+  "source": {
+    "run_id": "run_20260331_172028_809973_20260331-sdk-hybrid-fill-to-20-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260331_sdk_hybrid_fill_to_20_gpt54_high",
+    "row_id": "shoulderelbowwrist_arm_to20_detail_high_04",
+    "prompt_index": 195
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Shoulder-elbow-wrist arm Fill to 20 Detail 4",
+    "prompt_preview": "A side-wall shoulder-elbow-wrist module. A grounded side plate supports a shoulder housing, then an upper arm, then a forearm, then a short wrist member. The..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "4693a9a59ff0af8fbc938976e39a4e049998cf25ea0bc0271d2ca8cdf718bc36",
+    "model_py_sha256": "8449859e362eb6a2bf4d072810f06e251ee1933f2ae779eab5a400ca67675d3d"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
