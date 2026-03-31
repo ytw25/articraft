@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_wind_turbine_c4485b86313647b4b4eb5f7bcf1088fd",
+  "created_at": "2026-03-30T17:11:15Z",
+  "updated_at": "2026-03-30T19:34:05Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "wind_turbine",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "wind_turbine_backfill_3",
+    "prompt_index": 315
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Wind turbine Backfill 5",
+    "prompt_preview": "Generate a compact apartment/desktop version of Wind turbine. Keep footprint and envelope efficient while preserving full functional articulation from a towe..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "7aa8f01dc55b42e3ab5cc87c6ebb1dd1dc1d5644008af6b99b1f5d1c9c39af16",
+    "model_py_sha256": "946e33a7a863a9a7d3a30fcb8d6d629d024828fa6036cd592dab38ddf0ac0449"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "rated_by": "shawlyu",
+  "author": "shawlyu"
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_robotic_arms_93f17f5328c645538abd10f2e4f092df",
+  "created_at": "2026-03-30T16:08:09Z",
+  "updated_at": "2026-03-30T20:06:38Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "robotic_arms",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "robotic_arms_backfill_3",
+    "prompt_index": 3
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Robotic Arms Backfill 5",
+    "prompt_preview": "Generate a compact apartment/desktop version of Robotic arms. Keep footprint and envelope efficient while preserving full functional articulation from a base..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "b82647855964fb75ce37e322ce1b2f41ac485960fbf981f5109c506e52df159c",
+    "model_py_sha256": "5e9f3a3721fe055645da3d57fc61f9adfdc295c214e3af1e618ba5117febbfd7"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "rated_by": "shawlyu",
+  "author": "shawlyu"
+}

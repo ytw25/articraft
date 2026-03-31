@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_stove_top_0037",
+  "created_at": "2026-03-26T20:32:26Z",
+  "updated_at": "2026-03-31T12:19:48Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "stove_top",
+  "source": {
+    "run_id": "run_20260326_203226_592146_20260326-stove-top-50-prompts",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260326_stove_top_50_prompts",
+    "row_id": "stove_top_b2_36",
+    "prompt_index": 36
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Stove Four Burner Gas",
+    "prompt_preview": "A freestanding gas stove with four burners on the cooktop and a single oven cavity below. The front control panel carries four evenly spaced rotary burner kn..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "5a3fcbba5241e1b65bbc3f29ae7bc015a4004616f7d7f9501fb5e35462431dd8",
+    "model_py_sha256": "f4d39f6abe1c0cf07908afabb4b12855187b24d0f176c3376f32bb907086cbcb"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "RuiningLi",
+  "rated_by": "RuiningLi"
+}
