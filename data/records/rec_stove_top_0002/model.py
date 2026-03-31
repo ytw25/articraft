@@ -12,456 +12,256 @@ from sdk import (
     Box,
     Cylinder,
     Inertial,
-    LatheGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
-    mesh_from_geometry,
-    section_loft,
 )
 
 ASSETS = AssetContext.from_script(__file__)
 
-BURNER_LAYOUT = {
-    "front_left": {"xy": (-0.145, -0.090), "tray_r": 0.060, "crown_r": 0.045, "cap_r": 0.023},
-    "rear_left": {"xy": (-0.145, 0.090), "tray_r": 0.052, "crown_r": 0.038, "cap_r": 0.020},
-    "front_right": {"xy": (0.145, -0.090), "tray_r": 0.054, "crown_r": 0.040, "cap_r": 0.021},
-    "rear_right": {"xy": (0.145, 0.090), "tray_r": 0.046, "crown_r": 0.033, "cap_r": 0.017},
-}
 
-CONTROL_LAYOUT = (
-    ("rear_left", -0.170, 0.095),
-    ("front_left", -0.090, 0.095),
-    ("front_right", 0.090, 0.095),
-    ("rear_right", 0.170, 0.095),
+COUNTER_WIDTH = 0.92
+COUNTER_DEPTH = 0.64
+COUNTER_THICKNESS = 0.038
+
+COOKTOP_WIDTH = 0.562
+COOKTOP_DEPTH = 0.462
+COOKTOP_PANEL_THICKNESS = 0.006
+COOKTOP_TRAY_WIDTH = 0.550
+COOKTOP_TRAY_DEPTH = 0.450
+COOKTOP_TRAY_THICKNESS = 0.026
+
+BRIDGE_WIDTH = 0.430
+BRIDGE_DEPTH = 0.065
+BRIDGE_THICKNESS = 0.010
+BRIDGE_CENTER_Y = -0.155
+
+KNOB_RADIUS = 0.020
+KNOB_LENGTH = 0.018
+KNOB_SKIRT_RADIUS = 0.013
+KNOB_SKIRT_HEIGHT = 0.010
+KNOB_CAP_RADIUS = 0.017
+KNOB_CAP_HEIGHT = 0.010
+KNOB_CENTER_Z = (
+    (COUNTER_THICKNESS * 0.5)
+    + BRIDGE_THICKNESS
+    + KNOB_RADIUS
 )
+KNOB_XS = (-0.150, -0.050, 0.050, 0.150)
+
+LEFT_BURNER_X = -0.150
+RIGHT_BURNER_X = 0.150
+REAR_BURNER_Y = 0.090
+FRONT_BURNER_Y = -0.020
 
 
-def _save_mesh(name: str, geometry):
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
-
-
-def _knob_mesh():
-    profile = [
-        (0.0, 0.000),
-        (0.010, 0.000),
-        (0.017, 0.002),
-        (0.0225, 0.008),
-        (0.0240, 0.018),
-        (0.0220, 0.026),
-        (0.0160, 0.032),
-        (0.0, 0.032),
-    ]
-    return _save_mesh("utility_knob.obj", LatheGeometry(profile, segments=56))
-
-
-def _rect_loop_xz(width: float, y: float, z0: float, z1: float) -> list[tuple[float, float, float]]:
-    half_width = width * 0.5
-    return [
-        (-half_width, y, z0),
-        (half_width, y, z0),
-        (half_width, y, z1),
-        (-half_width, y, z1),
-    ]
-
-
-def _control_housing_mesh():
-    return _save_mesh(
-        "utility_control_housing.obj",
-        section_loft(
-            [
-                _rect_loop_xz(0.600, -0.220, 0.044, 0.082),
-                _rect_loop_xz(0.612, -0.186, 0.048, 0.092),
-                _rect_loop_xz(0.620, -0.150, 0.054, 0.100),
-            ]
-        ),
-    )
-
-
-def _add_panel_fastener(part, *, x: float, z: float, material, name_prefix: str) -> None:
+def _add_burner(
+    part,
+    *,
+    name: str,
+    x: float,
+    y: float,
+    grate_material,
+    burner_material,
+) -> None:
     part.visual(
-        Cylinder(radius=0.0027, length=0.010),
-        origin=Origin(xyz=(x, -0.215, z), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=material,
-        name=f"{name_prefix}_stem",
+        Cylinder(radius=0.050, length=0.004),
+        origin=Origin(xyz=(x, y, 0.021)),
+        material=burner_material,
+        name=f"{name}_base",
     )
     part.visual(
-        Cylinder(radius=0.0062, length=0.003),
-        origin=Origin(xyz=(x, -0.2215, z), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=material,
-        name=f"{name_prefix}_head",
-    )
-
-
-def _add_plate_fastener(part, *, x: float, y: float, material, name_prefix: str) -> None:
-    part.visual(
-        Cylinder(radius=0.0032, length=0.010),
-        origin=Origin(xyz=(x, y, 0.005)),
-        material=material,
-        name=f"{name_prefix}_stem",
+        Cylinder(radius=0.036, length=0.006),
+        origin=Origin(xyz=(x, y, 0.025)),
+        material=burner_material,
+        name=f"{name}_ring",
     )
     part.visual(
-        Cylinder(radius=0.0066, length=0.003),
-        origin=Origin(xyz=(x, y, 0.0105)),
-        material=material,
-        name=f"{name_prefix}_head",
+        Cylinder(radius=0.021, length=0.008),
+        origin=Origin(xyz=(x, y, 0.032)),
+        material=burner_material,
+        name=f"{name}_cap",
     )
-
-
-def _aabb_center(aabb):
-    return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
+    part.visual(
+        Box((0.098, 0.010, 0.006)),
+        origin=Origin(xyz=(x, y, 0.039)),
+        material=grate_material,
+        name=f"{name}_grate_x",
+    )
+    part.visual(
+        Box((0.010, 0.098, 0.006)),
+        origin=Origin(xyz=(x, y, 0.039)),
+        material=grate_material,
+        name=f"{name}_grate_y",
+    )
+    for dx, dy in ((0.028, 0.028), (0.028, -0.028), (-0.028, 0.028), (-0.028, -0.028)):
+        part.visual(
+            Box((0.010, 0.010, 0.008)),
+            origin=Origin(xyz=(x + dx, y + dy, 0.031)),
+            material=grate_material,
+            name=f"{name}_foot_{'p' if dx > 0 else 'n'}x_{'p' if dy > 0 else 'n'}y",
+        )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="rugged_utility_stovetop", assets=ASSETS)
+    model = ArticulatedObject(name="four_burner_gas_cooktop", assets=ASSETS)
 
-    body_paint = model.material("body_paint", rgba=(0.30, 0.32, 0.34, 1.0))
-    cooktop_finish = model.material("cooktop_finish", rgba=(0.42, 0.45, 0.48, 1.0))
-    cast_iron = model.material("cast_iron", rgba=(0.10, 0.10, 0.11, 1.0))
-    burner_steel = model.material("burner_steel", rgba=(0.28, 0.30, 0.32, 1.0))
-    shaft_metal = model.material("shaft_metal", rgba=(0.56, 0.58, 0.61, 1.0))
-    fastener_zinc = model.material("fastener_zinc", rgba=(0.66, 0.68, 0.71, 1.0))
-    knob_polymer = model.material("knob_polymer", rgba=(0.13, 0.14, 0.15, 1.0))
-    knob_marker = model.material("knob_marker", rgba=(0.78, 0.79, 0.80, 1.0))
+    stone = model.material("stone", rgba=(0.78, 0.78, 0.75, 1.0))
+    glass_black = model.material("glass_black", rgba=(0.08, 0.08, 0.09, 1.0))
+    steel = model.material("steel", rgba=(0.66, 0.67, 0.68, 1.0))
+    dark_metal = model.material("dark_metal", rgba=(0.23, 0.24, 0.26, 1.0))
+    cast_iron = model.material("cast_iron", rgba=(0.16, 0.16, 0.17, 1.0))
+    satin_silver = model.material("satin_silver", rgba=(0.80, 0.82, 0.84, 1.0))
 
-    knob_mesh = _knob_mesh()
-    control_housing_mesh = _control_housing_mesh()
-
-    body = model.part("body")
-    body.visual(
-        Box((0.620, 0.440, 0.100)),
-        origin=Origin(xyz=(0.0, 0.0, 0.050)),
-        material=body_paint,
-        name="lower_shell",
+    countertop = model.part("countertop")
+    countertop.visual(
+        Box((COUNTER_WIDTH, (COUNTER_DEPTH - COOKTOP_DEPTH) * 0.5, COUNTER_THICKNESS)),
+        origin=Origin(xyz=(0.0, -(COOKTOP_DEPTH + COUNTER_DEPTH) * 0.25, 0.0)),
+        material=stone,
+        name="countertop_front",
     )
-    body.visual(control_housing_mesh, material=body_paint, name="control_housing")
-    body.visual(
-        Box((0.050, 0.080, 0.048)),
-        origin=Origin(xyz=(-0.285, -0.145, 0.076)),
-        material=body_paint,
-        name="left_front_gusset",
+    countertop.visual(
+        Box((COUNTER_WIDTH, (COUNTER_DEPTH - COOKTOP_DEPTH) * 0.5, COUNTER_THICKNESS)),
+        origin=Origin(xyz=(0.0, (COOKTOP_DEPTH + COUNTER_DEPTH) * 0.25, 0.0)),
+        material=stone,
+        name="countertop_back",
     )
-    body.visual(
-        Box((0.050, 0.080, 0.048)),
-        origin=Origin(xyz=(0.285, -0.145, 0.076)),
-        material=body_paint,
-        name="right_front_gusset",
+    countertop.visual(
+        Box(((COUNTER_WIDTH - COOKTOP_WIDTH) * 0.5, COOKTOP_DEPTH, COUNTER_THICKNESS)),
+        origin=Origin(xyz=(-(COOKTOP_WIDTH + COUNTER_WIDTH) * 0.25, 0.0, 0.0)),
+        material=stone,
+        name="countertop_left",
     )
-    body.visual(
-        Box((0.580, 0.035, 0.040)),
-        origin=Origin(xyz=(0.0, 0.2025, 0.100)),
-        material=body_paint,
-        name="rear_riser",
+    countertop.visual(
+        Box(((COUNTER_WIDTH - COOKTOP_WIDTH) * 0.5, COOKTOP_DEPTH, COUNTER_THICKNESS)),
+        origin=Origin(xyz=((COOKTOP_WIDTH + COUNTER_WIDTH) * 0.25, 0.0, 0.0)),
+        material=stone,
+        name="countertop_right",
     )
-    body.visual(
-        Box((0.560, 0.025, 0.022)),
-        origin=Origin(xyz=(0.0, -0.104, 0.109)),
-        material=body_paint,
-        name="front_guard_lip",
-    )
-    body.visual(
-        Box((0.020, 0.380, 0.030)),
-        origin=Origin(xyz=(-0.300, 0.010, 0.105)),
-        material=body_paint,
-        name="left_side_rail",
-    )
-    body.visual(
-        Box((0.020, 0.380, 0.030)),
-        origin=Origin(xyz=(0.300, 0.010, 0.105)),
-        material=body_paint,
-        name="right_side_rail",
-    )
-    body.visual(
-        Box((0.560, 0.030, 0.025)),
-        origin=Origin(xyz=(0.0, 0.170, 0.1075)),
-        material=body_paint,
-        name="rear_support_rail",
-    )
-    body.visual(
-        Box((0.560, 0.020, 0.025)),
-        origin=Origin(xyz=(0.0, -0.120, 0.1075)),
-        material=body_paint,
-        name="front_support_rail",
-    )
-    for index, x_pos in enumerate((-0.245, -0.085, 0.085, 0.245)):
-        _add_panel_fastener(
-            body,
-            x=x_pos,
-            z=0.084,
-            material=fastener_zinc,
-            name_prefix=f"panel_fastener_{index}",
-        )
-    body.inertial = Inertial.from_geometry(
-        Box((0.620, 0.440, 0.160)),
+    countertop.inertial = Inertial.from_geometry(
+        Box((COUNTER_WIDTH, COUNTER_DEPTH, COUNTER_THICKNESS)),
         mass=18.0,
-        origin=Origin(xyz=(0.0, 0.0, 0.080)),
     )
 
     cooktop = model.part("cooktop")
     cooktop.visual(
-        Box((0.580, 0.380, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, 0.006)),
-        material=cooktop_finish,
-        name="cooktop_plate",
+        Box((COOKTOP_WIDTH, COOKTOP_DEPTH, COOKTOP_PANEL_THICKNESS)),
+        origin=Origin(
+            xyz=(0.0, 0.0, (COUNTER_THICKNESS * 0.5) - (COOKTOP_PANEL_THICKNESS * 0.5))
+        ),
+        material=glass_black,
+        name="deck_panel",
     )
     cooktop.visual(
-        Box((0.560, 0.030, 0.008)),
-        origin=Origin(xyz=(0.0, -0.175, 0.008)),
-        material=cooktop_finish,
-        name="front_stiffener",
+        Box((COOKTOP_TRAY_WIDTH, COOKTOP_TRAY_DEPTH, COOKTOP_TRAY_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+        material=steel,
+        name="shallow_tray",
     )
     cooktop.visual(
-        Box((0.560, 0.030, 0.008)),
-        origin=Origin(xyz=(0.0, 0.175, 0.008)),
-        material=cooktop_finish,
-        name="rear_stiffener",
+        Box((BRIDGE_WIDTH, BRIDGE_DEPTH, BRIDGE_THICKNESS)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                BRIDGE_CENTER_Y,
+                (COUNTER_THICKNESS * 0.5) + (BRIDGE_THICKNESS * 0.5),
+            )
+        ),
+        material=dark_metal,
+        name="control_bridge",
     )
     cooktop.visual(
-        Box((0.030, 0.340, 0.008)),
-        origin=Origin(xyz=(-0.275, 0.0, 0.008)),
-        material=cooktop_finish,
-        name="left_stiffener",
+        Box((0.515, 0.020, 0.006)),
+        origin=Origin(xyz=(0.0, -0.115, 0.022)),
+        material=steel,
+        name="trim_bar",
     )
-    cooktop.visual(
-        Box((0.030, 0.340, 0.008)),
-        origin=Origin(xyz=(0.275, 0.0, 0.008)),
-        material=cooktop_finish,
-        name="right_stiffener",
+
+    _add_burner(
+        cooktop,
+        name="rear_left_burner",
+        x=LEFT_BURNER_X,
+        y=REAR_BURNER_Y,
+        grate_material=cast_iron,
+        burner_material=dark_metal,
     )
-    for burner_name, burner_spec in BURNER_LAYOUT.items():
-        bx, by = burner_spec["xy"]
-        cooktop.visual(
-            Cylinder(radius=burner_spec["tray_r"] + 0.010, length=0.003),
-            origin=Origin(xyz=(bx, by, 0.0105)),
-            material=cooktop_finish,
-            name=f"{burner_name}_seat_ring",
-        )
-    for index, (x_pos, y_pos) in enumerate(
-        ((-0.245, -0.155), (0.245, -0.155), (-0.245, 0.155), (0.245, 0.155))
-    ):
-        _add_plate_fastener(
-            cooktop,
-            x=x_pos,
-            y=y_pos,
-            material=fastener_zinc,
-            name_prefix=f"plate_fastener_{index}",
-        )
+    _add_burner(
+        cooktop,
+        name="rear_right_burner",
+        x=RIGHT_BURNER_X,
+        y=REAR_BURNER_Y,
+        grate_material=cast_iron,
+        burner_material=dark_metal,
+    )
+    _add_burner(
+        cooktop,
+        name="front_left_burner",
+        x=LEFT_BURNER_X,
+        y=FRONT_BURNER_Y,
+        grate_material=cast_iron,
+        burner_material=dark_metal,
+    )
+    _add_burner(
+        cooktop,
+        name="front_right_burner",
+        x=RIGHT_BURNER_X,
+        y=FRONT_BURNER_Y,
+        grate_material=cast_iron,
+        burner_material=dark_metal,
+    )
     cooktop.inertial = Inertial.from_geometry(
-        Box((0.580, 0.380, 0.016)),
-        mass=4.5,
-        origin=Origin(xyz=(0.0, 0.0, 0.008)),
+        Box((COOKTOP_WIDTH, COOKTOP_DEPTH, 0.060)),
+        mass=8.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.015)),
     )
 
     model.articulation(
-        "body_to_cooktop",
+        "countertop_to_cooktop",
         ArticulationType.FIXED,
-        parent=body,
+        parent=countertop,
         child=cooktop,
-        origin=Origin(xyz=(0.0, 0.0, 0.120)),
+        origin=Origin(),
     )
 
-    for burner_name, burner_spec in BURNER_LAYOUT.items():
-        burner = model.part(f"burner_{burner_name}")
-        tray_r = burner_spec["tray_r"]
-        crown_r = burner_spec["crown_r"]
-        cap_r = burner_spec["cap_r"]
-        burner.visual(
-            Cylinder(radius=tray_r, length=0.006),
-            origin=Origin(xyz=(0.0, 0.0, 0.003)),
-            material=burner_steel,
-            name="burner_tray",
-        )
-        burner.visual(
-            Cylinder(radius=crown_r, length=0.008),
-            origin=Origin(xyz=(0.0, 0.0, 0.010)),
-            material=burner_steel,
-            name="burner_crown",
-        )
-        burner.visual(
-            Cylinder(radius=cap_r, length=0.007),
-            origin=Origin(xyz=(0.0, 0.0, 0.0175)),
-            material=cast_iron,
-            name="burner_cap",
-        )
-        lug_offset = crown_r - 0.006
-        burner.visual(
-            Box((0.012, 0.005, 0.004)),
-            origin=Origin(xyz=(lug_offset, 0.0, 0.014)),
-            material=burner_steel,
-            name="lug_pos_x",
-        )
-        burner.visual(
-            Box((0.012, 0.005, 0.004)),
-            origin=Origin(xyz=(-lug_offset, 0.0, 0.014)),
-            material=burner_steel,
-            name="lug_neg_x",
-        )
-        burner.visual(
-            Box((0.005, 0.012, 0.004)),
-            origin=Origin(xyz=(0.0, lug_offset, 0.014)),
-            material=burner_steel,
-            name="lug_pos_y",
-        )
-        burner.visual(
-            Box((0.005, 0.012, 0.004)),
-            origin=Origin(xyz=(0.0, -lug_offset, 0.014)),
-            material=burner_steel,
-            name="lug_neg_y",
-        )
-        burner.inertial = Inertial.from_geometry(
-            Cylinder(radius=tray_r, length=0.022),
-            mass=0.45,
-            origin=Origin(xyz=(0.0, 0.0, 0.011)),
-        )
-        bx, by = burner_spec["xy"]
-        model.articulation(
-            f"cooktop_to_burner_{burner_name}",
-            ArticulationType.FIXED,
-            parent=cooktop,
-            child=burner,
-            origin=Origin(xyz=(bx, by, 0.012)),
-        )
-
-    grate_specs = {
-        "left": {"x": -0.145, "y": 0.0},
-        "right": {"x": 0.145, "y": 0.0},
-    }
-    for grate_name, grate_spec in grate_specs.items():
-        grate = model.part(f"grate_{grate_name}")
-        for ix in (-0.097, 0.097):
-            for iy in (-0.128, 0.128):
-                grate.visual(
-                    Box((0.016, 0.016, 0.030)),
-                    origin=Origin(xyz=(ix, iy, 0.015)),
-                    material=cast_iron,
-                    name=f"foot_{'p' if ix > 0 else 'n'}x_{'p' if iy > 0 else 'n'}y",
-                )
-        grate.visual(
-            Box((0.018, 0.270, 0.012)),
-            origin=Origin(xyz=(-0.097, 0.0, 0.031)),
-            material=cast_iron,
-            name="left_side_bar",
-        )
-        grate.visual(
-            Box((0.018, 0.270, 0.012)),
-            origin=Origin(xyz=(0.097, 0.0, 0.031)),
-            material=cast_iron,
-            name="right_side_bar",
-        )
-        grate.visual(
-            Box((0.210, 0.018, 0.012)),
-            origin=Origin(xyz=(0.0, -0.128, 0.031)),
-            material=cast_iron,
-            name="front_bar",
-        )
-        grate.visual(
-            Box((0.210, 0.018, 0.012)),
-            origin=Origin(xyz=(0.0, 0.128, 0.031)),
-            material=cast_iron,
-            name="rear_bar",
-        )
-        grate.visual(
-            Box((0.018, 0.220, 0.012)),
-            origin=Origin(xyz=(0.0, 0.0, 0.031)),
-            material=cast_iron,
-            name="center_spine",
-        )
-        grate.visual(
-            Box((0.180, 0.014, 0.010)),
-            origin=Origin(xyz=(0.0, -0.092, 0.031)),
-            material=cast_iron,
-            name="front_bridge",
-        )
-        grate.visual(
-            Box((0.180, 0.014, 0.010)),
-            origin=Origin(xyz=(0.0, 0.092, 0.031)),
-            material=cast_iron,
-            name="rear_bridge",
-        )
-        grate.visual(
-            Box((0.120, 0.016, 0.010)),
-            origin=Origin(xyz=(0.0, 0.0, 0.031)),
-            material=cast_iron,
-            name="service_crossbar",
-        )
-        grate.inertial = Inertial.from_geometry(
-            Box((0.230, 0.300, 0.040)),
-            mass=1.7,
-            origin=Origin(xyz=(0.0, 0.0, 0.020)),
-        )
-        model.articulation(
-            f"cooktop_to_grate_{grate_name}",
-            ArticulationType.FIXED,
-            parent=cooktop,
-            child=grate,
-            origin=Origin(xyz=(grate_spec["x"], grate_spec["y"], 0.012)),
-        )
-
-    for control_name, x_pos, z_pos in CONTROL_LAYOUT:
-        shaft = model.part(f"shaft_{control_name}")
-        shaft.visual(
-            Cylinder(radius=0.0045, length=0.022),
-            origin=Origin(xyz=(0.0, 0.011, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-            material=shaft_metal,
-            name="shaft_stem",
-        )
-        shaft.visual(
-            Cylinder(radius=0.011, length=0.008),
-            origin=Origin(xyz=(0.0, 0.026, 0.0), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-            material=shaft_metal,
-            name="bushing_collar",
-        )
-        shaft.visual(
-            Box((0.024, 0.002, 0.024)),
-            origin=Origin(xyz=(0.0, 0.029, 0.0)),
-            material=fastener_zinc,
-            name="mount_plate",
-        )
-        shaft.inertial = Inertial.from_geometry(
-            Box((0.024, 0.030, 0.024)),
-            mass=0.05,
-            origin=Origin(xyz=(0.0, 0.015, 0.0)),
-        )
-        model.articulation(
-            f"body_to_shaft_{control_name}",
-            ArticulationType.FIXED,
-            parent=body,
-            child=shaft,
-            origin=Origin(xyz=(x_pos, -0.250, z_pos)),
-        )
-
-        knob = model.part(f"knob_{control_name}")
+    for index, knob_x in enumerate(KNOB_XS, start=1):
+        knob = model.part(f"knob_{index}")
         knob.visual(
-            knob_mesh,
+            Cylinder(radius=KNOB_RADIUS, length=KNOB_LENGTH),
             origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
-            material=knob_polymer,
-            name="knob_shell",
+            material=dark_metal,
+            name="knob_body",
         )
         knob.visual(
-            Box((0.004, 0.010, 0.003)),
-            origin=Origin(xyz=(0.0, -0.025, 0.0215)),
-            material=knob_marker,
-            name="pointer_ridge",
+            Cylinder(radius=KNOB_CAP_RADIUS, length=KNOB_LENGTH * 0.86),
+            origin=Origin(xyz=(0.0, 0.0, 0.004), rpy=(math.pi / 2.0, 0.0, 0.0)),
+            material=satin_silver,
+            name="knob_cap",
+        )
+        knob.visual(
+            Cylinder(radius=KNOB_SKIRT_RADIUS, length=KNOB_SKIRT_HEIGHT),
+            origin=Origin(xyz=(0.0, 0.0, -0.015)),
+            material=dark_metal,
+            name="knob_skirt",
+        )
+        knob.visual(
+            Box((0.004, 0.002, 0.010)),
+            origin=Origin(xyz=(0.0, -0.010, 0.010)),
+            material=satin_silver,
+            name="indicator",
         )
         knob.inertial = Inertial.from_geometry(
-            Box((0.048, 0.034, 0.035)),
-            mass=0.09,
-            origin=Origin(xyz=(0.0, -0.017, 0.0175)),
+            Cylinder(radius=KNOB_RADIUS, length=KNOB_LENGTH),
+            mass=0.08,
         )
         model.articulation(
-            f"shaft_{control_name}_to_knob_{control_name}",
-            ArticulationType.REVOLUTE,
-            parent=shaft,
+            f"cooktop_to_knob_{index}",
+            ArticulationType.CONTINUOUS,
+            parent=cooktop,
             child=knob,
-            origin=Origin(),
+            origin=Origin(xyz=(knob_x, BRIDGE_CENTER_Y, KNOB_CENTER_Z)),
             axis=(0.0, 1.0, 0.0),
-            motion_limits=MotionLimits(
-                effort=0.8,
-                velocity=4.5,
-                lower=-2.35,
-                upper=2.35,
-            ),
+            motion_limits=MotionLimits(effort=0.5, velocity=8.0),
         )
 
     return model
@@ -469,23 +269,11 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    body = object_model.get_part("body")
-    cooktop = object_model.get_part("cooktop")
-    grate_left = object_model.get_part("grate_left")
-    grate_right = object_model.get_part("grate_right")
-    burners = {name: object_model.get_part(f"burner_{name}") for name in BURNER_LAYOUT}
-    shafts = {name: object_model.get_part(f"shaft_{name}") for name, _, _ in CONTROL_LAYOUT}
-    knobs = {name: object_model.get_part(f"knob_{name}") for name, _, _ in CONTROL_LAYOUT}
-    knob_joints = {
-        name: object_model.get_articulation(f"shaft_{name}_to_knob_{name}")
-        for name, _, _ in CONTROL_LAYOUT
-    }
-
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
 
     # Preferred default QC stack:
-    # 1) likely-failure broad-part floating check for isolated parts
+    # 1) likely-failure grounded-component floating check for disconnected part groups
     ctx.fail_if_isolated_parts()
     # 2) noisier warning-tier sensor for same-part disconnected geometry islands
     ctx.warn_if_part_contains_disconnected_geometry_islands()
@@ -498,121 +286,153 @@ def run_tests() -> TestReport:
     # `expect_within(...)` checks instead.
     ctx.fail_if_parts_overlap_in_current_pose()
 
-    ctx.expect_contact(cooktop, body, name="cooktop_seats_on_body")
-    ctx.expect_overlap(cooktop, body, axes="xy", min_overlap=0.34, name="cooktop_footprint_covers_body")
-    ctx.expect_gap(
+    countertop = object_model.get_part("countertop")
+    cooktop = object_model.get_part("cooktop")
+    knob_parts = [object_model.get_part(f"knob_{index}") for index in range(1, 5)]
+    knob_joints = [object_model.get_articulation(f"cooktop_to_knob_{index}") for index in range(1, 5)]
+
+    ctx.fail_if_isolated_parts(max_pose_samples=12, name="sampled_knob_support")
+    ctx.fail_if_articulation_overlaps(max_pose_samples=24, name="sampled_knob_clearance")
+
+    ctx.expect_contact(
         cooktop,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=1e-6,
-        name="cooktop_rest_gap",
+        countertop,
+        contact_tol=0.0005,
+        name="cooktop_seated_in_countertop_cutout",
     )
 
-    for burner_name, burner in burners.items():
-        ctx.expect_contact(burner, cooktop, name=f"{burner_name}_contacts_cooktop")
-        ctx.expect_within(
-            burner,
+    for index, knob in enumerate(knob_parts, start=1):
+        ctx.expect_contact(
+            knob,
             cooktop,
-            axes="xy",
-            margin=0.015,
-            name=f"{burner_name}_within_cooktop",
-        )
-        ctx.expect_overlap(
-            burner,
-            cooktop,
-            axes="xy",
-            min_overlap=0.070,
-            name=f"{burner_name}_seat_overlap",
+            contact_tol=0.0005,
+            name=f"knob_{index}_mounted_contact_rest",
         )
 
-    for grate_name, grate, covered in (
-        ("left", grate_left, ("front_left", "rear_left")),
-        ("right", grate_right, ("front_right", "rear_right")),
-    ):
-        ctx.expect_contact(grate, cooktop, name=f"grate_{grate_name}_rests_on_cooktop")
-        for burner_name in covered:
-            ctx.expect_overlap(
-                grate,
-                burners[burner_name],
-                axes="xy",
-                min_overlap=0.070,
-                name=f"grate_{grate_name}_covers_{burner_name}",
+    for joint in knob_joints:
+        limits = joint.motion_limits
+        axis_ok = tuple(round(value, 6) for value in joint.axis) == (0.0, 1.0, 0.0)
+        type_ok = joint.articulation_type == ArticulationType.CONTINUOUS
+        limits_ok = limits is not None and limits.lower is None and limits.upper is None
+        ctx.check(
+            f"{joint.name}_continuous_front_to_back_axis",
+            axis_ok and type_ok and limits_ok,
+            details=(
+                f"type={joint.articulation_type!r} axis={joint.axis!r} "
+                f"limits=({None if limits is None else limits.lower}, "
+                f"{None if limits is None else limits.upper})"
+            ),
+        )
+
+    deck_aabb = ctx.part_element_world_aabb(cooktop, elem="deck_panel")
+    countertop_aabb = ctx.part_world_aabb(countertop)
+    cooktop_aabb = ctx.part_world_aabb(cooktop)
+    assert countertop_aabb is not None
+    assert deck_aabb is not None
+    assert cooktop_aabb is not None
+
+    countertop_top = countertop_aabb[1][2]
+    deck_top = deck_aabb[1][2]
+    countertop_bottom = countertop_aabb[0][2]
+    cooktop_bottom = cooktop_aabb[0][2]
+
+    ctx.check(
+        "cooktop_deck_nearly_flush_with_countertop",
+        abs(deck_top - countertop_top) <= 0.001,
+        details=f"deck_top={deck_top:.4f} countertop_top={countertop_top:.4f}",
+    )
+    ctx.check(
+        "cooktop_has_no_body_below_counter_underside",
+        cooktop_bottom >= countertop_bottom - 0.0005,
+        details=f"cooktop_bottom={cooktop_bottom:.4f} countertop_bottom={countertop_bottom:.4f}",
+    )
+
+    knob_positions = [ctx.part_world_position(knob) for knob in knob_parts]
+    assert all(position is not None for position in knob_positions)
+    knob_positions = [position for position in knob_positions if position is not None]
+    same_row_ok = (
+        max(position[1] for position in knob_positions) - min(position[1] for position in knob_positions)
+        <= 1e-6
+        and max(position[2] for position in knob_positions) - min(position[2] for position in knob_positions)
+        <= 1e-6
+    )
+    spacing = [knob_positions[index + 1][0] - knob_positions[index][0] for index in range(3)]
+    spacing_ok = max(spacing) - min(spacing) <= 0.002 and min(spacing) >= 0.090
+    ctx.check(
+        "knobs_form_straight_even_front_row",
+        same_row_ok and spacing_ok,
+        details=f"positions={knob_positions!r} spacing={spacing!r}",
+    )
+
+    burner_caps = {
+        "front_left": ctx.part_element_world_aabb(cooktop, elem="front_left_burner_cap"),
+        "front_right": ctx.part_element_world_aabb(cooktop, elem="front_right_burner_cap"),
+        "rear_left": ctx.part_element_world_aabb(cooktop, elem="rear_left_burner_cap"),
+        "rear_right": ctx.part_element_world_aabb(cooktop, elem="rear_right_burner_cap"),
+    }
+    assert all(box is not None for box in burner_caps.values())
+
+    def _aabb_center(aabb):
+        return (
+            (aabb[0][0] + aabb[1][0]) * 0.5,
+            (aabb[0][1] + aabb[1][1]) * 0.5,
+            (aabb[0][2] + aabb[1][2]) * 0.5,
+        )
+
+    burner_centers = {name: _aabb_center(box) for name, box in burner_caps.items() if box is not None}
+    burners_ok = (
+        burner_centers["front_left"][0] < 0.0
+        and burner_centers["front_right"][0] > 0.0
+        and burner_centers["rear_left"][1] > burner_centers["front_left"][1] + 0.08
+        and burner_centers["rear_right"][1] > burner_centers["front_right"][1] + 0.08
+        and abs(burner_centers["front_left"][0] + burner_centers["front_right"][0]) <= 0.005
+        and abs(burner_centers["rear_left"][0] + burner_centers["rear_right"][0]) <= 0.005
+    )
+    ctx.check(
+        "four_burners_in_two_by_two_layout",
+        burners_ok,
+        details=f"burner_centers={burner_centers!r}",
+    )
+
+    indicator_rest = ctx.part_element_world_aabb(knob_parts[0], elem="indicator")
+    assert indicator_rest is not None
+    rest_center = _aabb_center(indicator_rest)
+
+    for index, (knob, joint) in enumerate(zip(knob_parts, knob_joints), start=1):
+        with ctx.pose({joint: math.pi / 2.0}):
+            ctx.expect_contact(
+                knob,
+                cooktop,
+                contact_tol=0.0005,
+                name=f"knob_{index}_mounted_contact_quarter_turn",
             )
 
-    ctx.expect_gap(
-        grate_right,
-        grate_left,
-        axis="x",
-        min_gap=0.012,
-        name="service_gap_between_grates",
-    )
-
-    for control_name, _, _ in CONTROL_LAYOUT:
-        shaft = shafts[control_name]
-        knob = knobs[control_name]
-        joint = knob_joints[control_name]
-        pointer = knob.get_visual("pointer_ridge")
-
-        ctx.expect_contact(shaft, body, name=f"{control_name}_shaft_mounts_to_body")
-        ctx.expect_contact(knob, shaft, name=f"{control_name}_knob_contacts_shaft")
-        ctx.expect_origin_distance(
-            knob,
-            shaft,
-            axes="xz",
-            max_dist=1e-6,
-            name=f"{control_name}_knob_axis_alignment",
+    with ctx.pose({knob_joints[0]: math.pi / 2.0}):
+        indicator_quarter_turn = ctx.part_element_world_aabb(knob_parts[0], elem="indicator")
+        assert indicator_quarter_turn is not None
+        turned_center = _aabb_center(indicator_quarter_turn)
+        indicator_motion_ok = (
+            abs(turned_center[0] - rest_center[0]) >= 0.007
+            and abs(turned_center[1] - rest_center[1]) <= 1e-6
+            and abs(turned_center[2] - rest_center[2]) >= 0.007
         )
-
-        rest_aabb = ctx.part_element_world_aabb(knob, elem=pointer)
-        turned_aabb = None
-        with ctx.pose({joint: 1.2}):
-            ctx.expect_contact(knob, shaft, name=f"{control_name}_contact_when_turned")
-            turned_aabb = ctx.part_element_world_aabb(knob, elem=pointer)
-
-        sweep_amount = 0.0
-        if rest_aabb is not None and turned_aabb is not None:
-            rest_center = _aabb_center(rest_aabb)
-            turned_center = _aabb_center(turned_aabb)
-            sweep_amount = abs(rest_center[0] - turned_center[0]) + abs(rest_center[2] - turned_center[2])
         ctx.check(
-            f"{control_name}_pointer_sweeps_with_rotation",
-            sweep_amount > 0.012,
-            details=f"pointer movement was {sweep_amount:.5f} m",
+            "knob_indicator_visibly_rotates_with_joint",
+            indicator_motion_ok,
+            details=f"rest_center={rest_center!r} turned_center={turned_center!r}",
         )
 
-    burner_positions = {name: ctx.part_world_position(part) for name, part in burners.items()}
-    knob_positions = {name: ctx.part_world_position(part) for name, part in knobs.items()}
-
-    left_burner_x = sum(burner_positions[name][0] for name in ("front_left", "rear_left")) / 2.0
-    right_burner_x = sum(burner_positions[name][0] for name in ("front_right", "rear_right")) / 2.0
-    left_knob_x = sum(knob_positions[name][0] for name in ("front_left", "rear_left")) / 2.0
-    right_knob_x = sum(knob_positions[name][0] for name in ("front_right", "rear_right")) / 2.0
-
-    ctx.check(
-        "left_controls_group_under_left_burners",
-        abs(left_knob_x - left_burner_x) < 0.09,
-        details=f"left burner mean x={left_burner_x:.3f}, left knob mean x={left_knob_x:.3f}",
-    )
-    ctx.check(
-        "right_controls_group_under_right_burners",
-        abs(right_knob_x - right_burner_x) < 0.09,
-        details=f"right burner mean x={right_burner_x:.3f}, right knob mean x={right_knob_x:.3f}",
-    )
-    ctx.check(
-        "front_controls_are_below_cooktop",
-        all(knob_positions[name][2] < burner_positions[name][2] - 0.02 for name in BURNER_LAYOUT),
-        details=(
-            "expected every knob shaft line to sit well below its burner module; "
-            f"burner z values={burner_positions}, knob z values={knob_positions}"
-        ),
-    )
-    ctx.check(
-        "burner_rows_read_front_to_back",
-        burner_positions["front_left"][1] < burner_positions["rear_left"][1] - 0.12
-        and burner_positions["front_right"][1] < burner_positions["rear_right"][1] - 0.12,
-        details=f"burner positions={burner_positions}",
-    )
+    # For bounded REVOLUTE/PRISMATIC joints, also check at least the lower/upper
+    # motion-limit poses for both no overlap and no floating. Example:
+    # hinge = object_model.get_articulation("lid_hinge")
+    # limits = hinge.motion_limits
+    # if limits is not None and limits.lower is not None and limits.upper is not None:
+    #     with ctx.pose({hinge: limits.lower}):
+    #         ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_lower_no_overlap")
+    #         ctx.fail_if_isolated_parts(name="lid_hinge_lower_no_floating")
+    #     with ctx.pose({hinge: limits.upper}):
+    #         ctx.fail_if_parts_overlap_in_current_pose(name="lid_hinge_upper_no_overlap")
+    #         ctx.fail_if_isolated_parts(name="lid_hinge_upper_no_floating")
 
     return ctx.report()
 
