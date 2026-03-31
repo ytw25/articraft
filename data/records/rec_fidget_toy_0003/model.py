@@ -8,303 +8,152 @@ import math
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
-    CylinderGeometry,
-    ExtrudeGeometry,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
-    boolean_difference,
-    boolean_union,
-    mesh_from_geometry,
-    rounded_rect_profile,
 )
 
-ASSETS = AssetContext.from_script(__file__)
 
-BODY_THICKNESS = 0.0084
-BODY_HALF = BODY_THICKNESS * 0.5
-LIP_THICKNESS = 0.0007
-BEARING_THICKNESS = BODY_THICKNESS - 2.0 * LIP_THICKNESS
+PLATE_THICKNESS = 0.0070
+PLATE_HALF = PLATE_THICKNESS * 0.5
 
-LOBE_CENTER_RADIUS = 0.034
-LOBE_LENGTH = 0.048
-LOBE_WIDTH = 0.034
-LOBE_CORNER_RADIUS = 0.0062
+AXLE_SHAFT_RADIUS = 0.0042
+AXLE_SHAFT_LENGTH = 0.0096
+BUTTON_RADIUS = 0.0115
+BUTTON_THICKNESS = 0.0022
 
-CENTER_COLLAR_RADIUS = 0.0245
-CENTER_BEARING_OUTER_RADIUS = 0.0187
-CENTER_BEARING_INNER_RADIUS = 0.0074
-CENTER_INNER_RACE_OUTER_RADIUS = 0.0072
-CENTER_CAPTURE_INNER_RADIUS = 0.0170
-CENTER_CAPTURE_OUTER_RADIUS = 0.0218
+HUB_SIDE_CENTER = 0.0115
+HUB_SIDE_LENGTH = 0.0200
+HUB_SIDE_WIDTH = 0.0100
+HUB_CORNER_RADIUS = 0.0064
+HUB_CORNER_CENTER = 0.0130
 
-OUTER_BEARING_OUTER_RADIUS = 0.0113
-OUTER_BEARING_INNER_RADIUS = 0.0064
-OUTER_CAPTURE_INNER_RADIUS = 0.0100
-OUTER_CAPTURE_OUTER_RADIUS = 0.0137
+ARM_BAR_WIDTH = 0.0100
+ARM_BAR_LENGTH = 0.0180
+ARM_BAR_CENTER = 0.0190
+ARM_NECK_RADIUS = 0.0050
+ARM_NECK_CENTER = 0.0270
 
-WEIGHT_RADIUS = 0.0038
-WEIGHT_OFFSET_LOCAL_X = 0.0165
+LOBE_RADIUS = 0.0140
+LOBE_CENTER = 0.0300
+WEIGHT_RADIUS = 0.0095
+WEIGHT_THICKNESS = PLATE_THICKNESS * 0.86
 
-HUB_AXLE_RADIUS = 0.0058
-INNER_RACE_BORE_RADIUS = 0.00572
-HUB_CAP_RADIUS = 0.0134
-HUB_CAP_THICKNESS = 0.0032
-HUB_FACE_CLEARANCE = 0.0006
-
-RADIAL_SEGMENTS = 72
+BRANCH_ANGLES = (
+    0.0,
+    2.0 * math.pi / 3.0,
+    4.0 * math.pi / 3.0,
+)
 
 
-def _lobe_angle(index: int) -> float:
-    return index * (2.0 * math.pi / 3.0)
-
-
-def _polar(radius: float, angle: float) -> tuple[float, float]:
+def _xy(radius: float, angle: float) -> tuple[float, float]:
     return (radius * math.cos(angle), radius * math.sin(angle))
 
 
-def _lobe_center(index: int) -> tuple[float, float]:
-    return _polar(LOBE_CENTER_RADIUS, _lobe_angle(index))
-
-
-def _local_to_world(
-    x_local: float,
-    y_local: float,
-    angle: float,
-    center_xy: tuple[float, float],
-) -> tuple[float, float]:
-    cx, cy = center_xy
-    c = math.cos(angle)
-    s = math.sin(angle)
-    return (
-        cx + c * x_local - s * y_local,
-        cy + s * x_local + c * y_local,
-    )
-
-
-def _weight_center(index: int) -> tuple[float, float]:
-    return _local_to_world(
-        WEIGHT_OFFSET_LOCAL_X,
-        0.0,
-        _lobe_angle(index),
-        _lobe_center(index),
-    )
-
-
-def _save_mesh(name: str, geometry):
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
-
-
-def _ring_geometry(outer_radius: float, inner_radius: float, thickness: float):
-    return boolean_difference(
-        CylinderGeometry(radius=outer_radius, height=thickness, radial_segments=RADIAL_SEGMENTS),
-        CylinderGeometry(radius=inner_radius, height=thickness + 0.002, radial_segments=RADIAL_SEGMENTS),
-    )
-
-
-def _hole_cutter(radius: float, center_xy: tuple[float, float]):
-    return CylinderGeometry(
-        radius=radius,
-        height=BODY_THICKNESS + 0.004,
-        radial_segments=RADIAL_SEGMENTS,
-    ).translate(center_xy[0], center_xy[1], 0.0)
-
-
-def _lobe_plate_geometry(index: int):
-    cx, cy = _lobe_center(index)
-    return ExtrudeGeometry.centered(
-        rounded_rect_profile(
-            LOBE_LENGTH,
-            LOBE_WIDTH,
-            LOBE_CORNER_RADIUS,
-            corner_segments=8,
-        ),
-        BODY_THICKNESS,
-    ).rotate_z(_lobe_angle(index)).translate(cx, cy, 0.0)
-
-
-def _build_spinner_body_geometry():
-    body_geom = CylinderGeometry(
-        radius=CENTER_COLLAR_RADIUS,
-        height=BODY_THICKNESS,
-        radial_segments=RADIAL_SEGMENTS,
-    )
-    for index in range(3):
-        body_geom = boolean_union(body_geom, _lobe_plate_geometry(index))
-
-    body_geom = boolean_difference(body_geom, _hole_cutter(CENTER_BEARING_OUTER_RADIUS, (0.0, 0.0)))
-    for index in range(3):
-        body_geom = boolean_difference(
-            body_geom,
-            _hole_cutter(OUTER_BEARING_OUTER_RADIUS, _lobe_center(index)),
-        )
-        body_geom = boolean_difference(
-            body_geom,
-            _hole_cutter(WEIGHT_RADIUS, _weight_center(index)),
-        )
-    return body_geom
+def _aabb_center(
+    aabb: tuple[tuple[float, float, float], tuple[float, float, float]]
+) -> tuple[float, float, float]:
+    return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="tri_spinner_fidget", assets=ASSETS)
+    model = ArticulatedObject(name="three_lobe_spinner")
 
-    body_polymer = model.material("body_polymer", rgba=(0.17, 0.18, 0.22, 1.0))
-    hub_black = model.material("hub_black", rgba=(0.07, 0.07, 0.08, 1.0))
-    bearing_steel = model.material("bearing_steel", rgba=(0.72, 0.75, 0.78, 1.0))
-    plug_metal = model.material("plug_metal", rgba=(0.80, 0.77, 0.71, 1.0))
+    body_black = model.material("body_black", rgba=(0.11, 0.11, 0.12, 1.0))
+    matte_graphite = model.material("matte_graphite", rgba=(0.20, 0.21, 0.23, 1.0))
+    bearing_steel = model.material("bearing_steel", rgba=(0.72, 0.74, 0.77, 1.0))
+    button_silver = model.material("button_silver", rgba=(0.84, 0.86, 0.89, 1.0))
 
-    spinner_body_mesh = _save_mesh("tri_spinner_body.obj", _build_spinner_body_geometry())
-    center_lip_mesh = _save_mesh(
-        "tri_spinner_center_capture_lip.obj",
-        _ring_geometry(CENTER_CAPTURE_OUTER_RADIUS, CENTER_CAPTURE_INNER_RADIUS, LIP_THICKNESS),
-    )
-    outer_lip_mesh = _save_mesh(
-        "tri_spinner_outer_capture_lip.obj",
-        _ring_geometry(OUTER_CAPTURE_OUTER_RADIUS, OUTER_CAPTURE_INNER_RADIUS, LIP_THICKNESS),
-    )
-    center_bearing_mesh = _save_mesh(
-        "tri_spinner_center_bearing_ring.obj",
-        _ring_geometry(CENTER_BEARING_OUTER_RADIUS, CENTER_BEARING_INNER_RADIUS, BEARING_THICKNESS),
-    )
-    outer_bearing_mesh = _save_mesh(
-        "tri_spinner_outer_bearing_ring.obj",
-        _ring_geometry(OUTER_BEARING_OUTER_RADIUS, OUTER_BEARING_INNER_RADIUS, BEARING_THICKNESS),
-    )
-    center_inner_race_mesh = _save_mesh(
-        "tri_spinner_center_inner_race.obj",
-        _ring_geometry(CENTER_INNER_RACE_OUTER_RADIUS, INNER_RACE_BORE_RADIUS, BEARING_THICKNESS),
-    )
-
-    center_hub = model.part("center_hub")
-    center_hub.visual(
-        Cylinder(radius=HUB_CAP_RADIUS, length=HUB_CAP_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, BODY_HALF + HUB_FACE_CLEARANCE + 0.5 * HUB_CAP_THICKNESS)),
-        material=hub_black,
-        name="top_cap",
-    )
-    center_hub.visual(
-        Cylinder(radius=HUB_CAP_RADIUS, length=HUB_CAP_THICKNESS),
-        origin=Origin(xyz=(0.0, 0.0, -(BODY_HALF + HUB_FACE_CLEARANCE + 0.5 * HUB_CAP_THICKNESS))),
-        material=hub_black,
-        name="bottom_cap",
-    )
-    center_hub.visual(
-        Cylinder(
-            radius=HUB_AXLE_RADIUS,
-            length=BODY_THICKNESS + 2.0 * HUB_FACE_CLEARANCE + 2.0 * HUB_CAP_THICKNESS,
-        ),
-        material=hub_black,
-        name="axle",
-    )
-    center_hub.inertial = Inertial.from_geometry(
-        Cylinder(
-            radius=HUB_CAP_RADIUS,
-            length=BODY_THICKNESS + 2.0 * HUB_FACE_CLEARANCE + 2.0 * HUB_CAP_THICKNESS,
-        ),
-        mass=0.022,
-    )
-
-    spinner_body = model.part("spinner_body")
-    spinner_body.visual(spinner_body_mesh, material=body_polymer, name="body_plate")
-    spinner_body.visual(
-        center_lip_mesh,
-        origin=Origin(xyz=(0.0, 0.0, BODY_HALF - 0.5 * LIP_THICKNESS)),
-        material=body_polymer,
-        name="top_center_lip",
-    )
-    spinner_body.visual(
-        center_bearing_mesh,
+    axle = model.part("axle")
+    axle.visual(
+        Cylinder(radius=AXLE_SHAFT_RADIUS, length=AXLE_SHAFT_LENGTH),
         material=bearing_steel,
-        name="center_bearing_outer_ring",
+        name="shaft",
     )
-    spinner_body.visual(
-        center_lip_mesh,
-        origin=Origin(xyz=(0.0, 0.0, -(BODY_HALF - 0.5 * LIP_THICKNESS))),
-        material=body_polymer,
-        name="bottom_center_lip",
+    axle.visual(
+        Cylinder(radius=BUTTON_RADIUS, length=BUTTON_THICKNESS),
+        origin=Origin(xyz=(0.0, 0.0, PLATE_HALF + BUTTON_THICKNESS * 0.5)),
+        material=button_silver,
+        name="top_button",
     )
-    for index in range(3):
-        cx, cy = _lobe_center(index)
-        spinner_body.visual(
-            outer_lip_mesh,
-            origin=Origin(xyz=(cx, cy, BODY_HALF - 0.5 * LIP_THICKNESS)),
-            material=body_polymer,
-            name=f"top_outer_lip_{index}",
-        )
-        spinner_body.visual(
-            outer_lip_mesh,
-            origin=Origin(xyz=(cx, cy, -(BODY_HALF - 0.5 * LIP_THICKNESS))),
-            material=body_polymer,
-            name=f"bottom_outer_lip_{index}",
-        )
-    spinner_body.inertial = Inertial.from_geometry(
-        Box((0.116, 0.116, BODY_THICKNESS)),
-        mass=0.058,
+    axle.visual(
+        Cylinder(radius=BUTTON_RADIUS, length=BUTTON_THICKNESS),
+        origin=Origin(xyz=(0.0, 0.0, -PLATE_HALF - BUTTON_THICKNESS * 0.5)),
+        material=button_silver,
+        name="bottom_button",
+    )
+    axle.inertial = Inertial.from_geometry(
+        Box((BUTTON_RADIUS * 2.2, BUTTON_RADIUS * 2.2, AXLE_SHAFT_LENGTH)),
+        mass=0.010,
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
     )
 
-    for index in range(3):
-        outer_bearing = model.part(f"outer_bearing_{index}")
-        outer_bearing.visual(outer_bearing_mesh, material=bearing_steel, name="outer_ring")
-        outer_bearing.inertial = Inertial.from_geometry(
-            Cylinder(radius=OUTER_BEARING_OUTER_RADIUS, length=BEARING_THICKNESS),
-            mass=0.004,
-        )
-
-        plug_weight = model.part(f"plug_weight_{index}")
-        plug_weight.visual(
-            Cylinder(radius=WEIGHT_RADIUS, length=BODY_THICKNESS),
-            material=plug_metal,
-            name="plug_weight",
-        )
-        plug_weight.inertial = Inertial.from_geometry(
-            Cylinder(radius=WEIGHT_RADIUS, length=BODY_THICKNESS),
-            mass=0.002,
-        )
-
-    center_inner_race = model.part("center_inner_race")
-    center_inner_race.visual(center_inner_race_mesh, material=bearing_steel, name="inner_race")
-    center_inner_race.inertial = Inertial.from_geometry(
-        Cylinder(radius=CENTER_INNER_RACE_OUTER_RADIUS, length=BEARING_THICKNESS),
-        mass=0.003,
+    spinner = model.part("spinner")
+    spinner.inertial = Inertial.from_geometry(
+        Cylinder(radius=LOBE_CENTER + LOBE_RADIUS, length=PLATE_THICKNESS),
+        mass=0.036,
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
     )
+
+    for index, angle in enumerate(BRANCH_ANGLES, start=1):
+        spinner.visual(
+            Box((HUB_SIDE_LENGTH, HUB_SIDE_WIDTH, PLATE_THICKNESS)),
+            origin=Origin(
+                xyz=(*_xy(HUB_SIDE_CENTER, angle), 0.0),
+                rpy=(0.0, 0.0, angle + math.pi / 2.0),
+            ),
+            material=body_black,
+            name=f"hub_side_{index}",
+        )
+    for index, angle in enumerate((math.pi / 3.0, math.pi, 5.0 * math.pi / 3.0), start=1):
+        spinner.visual(
+            Cylinder(radius=HUB_CORNER_RADIUS, length=PLATE_THICKNESS),
+            origin=Origin(xyz=(*_xy(HUB_CORNER_CENTER, angle), 0.0)),
+            material=matte_graphite,
+            name=f"hub_corner_{index}",
+        )
+
+    for index, angle in enumerate(BRANCH_ANGLES, start=1):
+        spinner.visual(
+            Box((ARM_BAR_LENGTH, ARM_BAR_WIDTH, PLATE_THICKNESS)),
+            origin=Origin(
+                xyz=(*_xy(ARM_BAR_CENTER, angle), 0.0),
+                rpy=(0.0, 0.0, angle),
+            ),
+            material=body_black,
+            name=f"arm_{index}_bar",
+        )
+        spinner.visual(
+            Cylinder(radius=ARM_NECK_RADIUS, length=PLATE_THICKNESS),
+            origin=Origin(xyz=(*_xy(ARM_NECK_CENTER, angle), 0.0)),
+            material=body_black,
+            name=f"arm_{index}_neck",
+        )
+        spinner.visual(
+            Cylinder(radius=LOBE_RADIUS, length=PLATE_THICKNESS),
+            origin=Origin(xyz=(*_xy(LOBE_CENTER, angle), 0.0)),
+            material=matte_graphite,
+            name=f"lobe_{index}_shell",
+        )
+        spinner.visual(
+            Cylinder(radius=WEIGHT_RADIUS, length=WEIGHT_THICKNESS),
+            origin=Origin(xyz=(*_xy(LOBE_CENTER, angle), 0.0)),
+            material=bearing_steel,
+            name=f"lobe_{index}_weight",
+        )
 
     model.articulation(
-        "hub_to_spinner",
+        "axle_spin",
         ArticulationType.CONTINUOUS,
-        parent=center_hub,
-        child=spinner_body,
-        origin=Origin(),
+        parent=axle,
+        child=spinner,
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=0.3, velocity=60.0),
-    )
-    for index in range(3):
-        cx, cy = _lobe_center(index)
-        wx, wy = _weight_center(index)
-        model.articulation(
-            f"spinner_to_outer_bearing_{index}",
-            ArticulationType.FIXED,
-            parent=spinner_body,
-            child=f"outer_bearing_{index}",
-            origin=Origin(xyz=(cx, cy, 0.0)),
-        )
-        model.articulation(
-            f"spinner_to_plug_weight_{index}",
-            ArticulationType.FIXED,
-            parent=spinner_body,
-            child=f"plug_weight_{index}",
-            origin=Origin(xyz=(wx, wy, 0.0)),
-        )
-    model.articulation(
-        "hub_to_center_inner_race",
-        ArticulationType.FIXED,
-        parent=center_hub,
-        child=center_inner_race,
-        origin=Origin(),
+        motion_limits=MotionLimits(effort=0.15, velocity=45.0),
     )
 
     return model
@@ -312,104 +161,79 @@ def build_object_model() -> ArticulatedObject:
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
+    axle = object_model.get_part("axle")
+    spinner = object_model.get_part("spinner")
+    axle_spin = object_model.get_articulation("axle_spin")
 
-    center_hub = object_model.get_part("center_hub")
-    center_inner_race = object_model.get_part("center_inner_race")
-    spinner_body = object_model.get_part("spinner_body")
-    spin = object_model.get_articulation("hub_to_spinner")
-
-    top_cap = center_hub.get_visual("top_cap")
-    bottom_cap = center_hub.get_visual("bottom_cap")
-    axle = center_hub.get_visual("axle")
-    inner_race = center_inner_race.get_visual("inner_race")
-    top_center_lip = spinner_body.get_visual("top_center_lip")
-    bottom_center_lip = spinner_body.get_visual("bottom_center_lip")
-    center_ring = spinner_body.get_visual("center_bearing_outer_ring")
+    top_button = axle.get_visual("top_button")
+    bottom_button = axle.get_visual("bottom_button")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.018)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.001,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.001,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
-    ctx.allow_overlap(center_hub, center_inner_race, reason="press-fit axle seats the stationary inner race")
+    ctx.fail_if_isolated_parts(max_pose_samples=8)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=24)
 
-    ctx.expect_origin_distance(spinner_body, center_hub, axes="xy", max_dist=0.0005)
-    ctx.expect_origin_distance(center_inner_race, center_hub, axes="xy", max_dist=0.0005)
-    ctx.expect_contact(center_hub, center_inner_race, elem_a=axle, elem_b=inner_race)
-    ctx.expect_within(center_inner_race, spinner_body, axes="xy", inner_elem=inner_race, outer_elem=center_ring)
-    ctx.expect_within(center_hub, spinner_body, axes="xy", inner_elem=axle, outer_elem=center_ring)
-    ctx.expect_contact(spinner_body, spinner_body, elem_a=center_ring, elem_b=top_center_lip)
-    ctx.expect_contact(spinner_body, spinner_body, elem_a=center_ring, elem_b=bottom_center_lip)
+    ctx.expect_origin_distance(axle, spinner, axes="xy", max_dist=1e-6)
+    ctx.expect_contact(axle, spinner, elem_a=top_button)
+    ctx.expect_contact(axle, spinner, elem_a=bottom_button)
     ctx.expect_gap(
-        center_hub,
-        spinner_body,
+        axle,
+        spinner,
         axis="z",
-        min_gap=0.0004,
-        max_gap=0.0009,
-        positive_elem=top_cap,
-        negative_elem=top_center_lip,
+        max_gap=0.0002,
+        max_penetration=1e-6,
+        positive_elem=top_button,
     )
     ctx.expect_gap(
-        spinner_body,
-        center_hub,
+        spinner,
+        axle,
         axis="z",
-        min_gap=0.0004,
-        max_gap=0.0009,
-        positive_elem=bottom_center_lip,
-        negative_elem=bottom_cap,
+        max_gap=0.0002,
+        max_penetration=1e-6,
+        negative_elem=bottom_button,
     )
+    ctx.expect_overlap(axle, spinner, axes="xy", min_overlap=0.018)
 
-    for index in range(3):
-        outer_bearing = object_model.get_part(f"outer_bearing_{index}")
-        plug_weight = object_model.get_part(f"plug_weight_{index}")
-        outer_ring = outer_bearing.get_visual("outer_ring")
-        plug_visual = plug_weight.get_visual("plug_weight")
-        top_outer_lip = spinner_body.get_visual(f"top_outer_lip_{index}")
-        bottom_outer_lip = spinner_body.get_visual(f"bottom_outer_lip_{index}")
-
-        ctx.expect_contact(outer_bearing, spinner_body)
-        ctx.expect_within(outer_bearing, spinner_body, axes="xy")
-        ctx.expect_contact(outer_bearing, spinner_body, elem_a=outer_ring, elem_b=top_outer_lip)
-        ctx.expect_contact(outer_bearing, spinner_body, elem_a=outer_ring, elem_b=bottom_outer_lip)
-        ctx.expect_contact(plug_weight, spinner_body, elem_a=plug_visual)
-        ctx.expect_within(plug_weight, spinner_body, axes="xy")
-
-    with ctx.pose({spin: math.pi / 3.0}):
-        ctx.expect_origin_distance(spinner_body, center_hub, axes="xy", max_dist=0.0005)
-        ctx.expect_gap(
-            center_hub,
-            spinner_body,
-            axis="z",
-            min_gap=0.0004,
-            max_gap=0.0009,
-            positive_elem=top_cap,
-            negative_elem=top_center_lip,
+    for index, expected_angle in enumerate(BRANCH_ANGLES, start=1):
+        lobe_aabb = ctx.part_element_world_aabb(spinner, elem=f"lobe_{index}_shell")
+        if lobe_aabb is None:
+            ctx.fail(f"lobe_{index}_aabb_available", "Missing world AABB for spinner lobe.")
+            continue
+        lobe_center = _aabb_center(lobe_aabb)
+        expected_x, expected_y = _xy(LOBE_CENTER, expected_angle)
+        ctx.check(
+            f"lobe_{index}_placement",
+            abs(lobe_center[0] - expected_x) <= 0.001
+            and abs(lobe_center[1] - expected_y) <= 0.001
+            and abs(lobe_center[2]) <= 1e-6,
+            (
+                f"Expected lobe {index} near ({expected_x:.4f}, {expected_y:.4f}, 0.0000) "
+                f"but found ({lobe_center[0]:.4f}, {lobe_center[1]:.4f}, {lobe_center[2]:.4f})."
+            ),
         )
-        ctx.expect_gap(
-            spinner_body,
-            center_hub,
-            axis="z",
-            min_gap=0.0004,
-            max_gap=0.0009,
-            positive_elem=bottom_center_lip,
-            negative_elem=bottom_cap,
-        )
-        for index in range(3):
-            outer_bearing = object_model.get_part(f"outer_bearing_{index}")
-            plug_weight = object_model.get_part(f"plug_weight_{index}")
-            ctx.expect_contact(outer_bearing, spinner_body)
-            ctx.expect_contact(plug_weight, spinner_body)
+
+    with ctx.pose({axle_spin: math.pi * 0.5}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="spinner_quarter_turn_no_overlap")
+        ctx.fail_if_isolated_parts(name="spinner_quarter_turn_no_floating")
+        ctx.expect_contact(axle, spinner, elem_a=top_button, name="top_button_contact_quarter_turn")
+        ctx.expect_contact(axle, spinner, elem_a=bottom_button, name="bottom_button_contact_quarter_turn")
+        ctx.expect_overlap(axle, spinner, axes="xy", min_overlap=0.018, name="axle_overlap_quarter_turn")
+
+        lobe_1_aabb = ctx.part_element_world_aabb(spinner, elem="lobe_1_shell")
+        if lobe_1_aabb is None:
+            ctx.fail("spinner_joint_rotates_lobe_1_about_z", "Missing lobe 1 world AABB at quarter turn.")
+        else:
+            lobe_1_center = _aabb_center(lobe_1_aabb)
+            ctx.check(
+                "spinner_joint_rotates_lobe_1_about_z",
+                abs(lobe_1_center[0]) <= 0.001 and abs(lobe_1_center[1] - LOBE_CENTER) <= 0.001,
+                (
+                    f"Expected quarter-turn lobe 1 center near (0.0000, {LOBE_CENTER:.4f}, 0.0000) "
+                    f"but found ({lobe_1_center[0]:.4f}, {lobe_1_center[1]:.4f}, {lobe_1_center[2]:.4f})."
+                ),
+            )
 
     return ctx.report()
 

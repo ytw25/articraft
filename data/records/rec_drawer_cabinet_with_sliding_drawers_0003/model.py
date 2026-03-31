@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+from math import pi
+
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
-
 from sdk import (
     ArticulatedObject,
     ArticulationType,
@@ -18,835 +18,505 @@ from sdk import (
     TestReport,
 )
 
-CABINET_WIDTH = 0.56
-CABINET_DEPTH = 0.43
-BODY_BOTTOM_Z = 0.13
-BODY_HEIGHT = 0.69
-BODY_TOP_Z = BODY_BOTTOM_Z + BODY_HEIGHT
+DRAWER_COUNT = 5
 
-DRAWER_FACE_WIDTH = 0.494
-DRAWER_BOX_WIDTH = 0.456
-DRAWER_BOX_LENGTH = 0.354
-DRAWER_FACE_THICKNESS = 0.018
+CARCASS_WIDTH = 1.08
+CARCASS_DEPTH = 0.52
+CARCASS_HEIGHT = 1.18
+SIDE_THICKNESS = 0.030
+TOP_THICKNESS = 0.032
+BOTTOM_THICKNESS = 0.032
+BACK_THICKNESS = 0.012
+TOP_OVERHANG_X = 0.010
+TOP_OVERHANG_Y = 0.012
 
+INNER_WIDTH = CARCASS_WIDTH - 2.0 * SIDE_THICKNESS
+DRAWER_REVEAL = 0.012
+DRAWER_FRONT_HEIGHT = 0.208
+DRAWER_FRONT_THICKNESS = 0.024
+DRAWER_FRONT_WIDTH = INNER_WIDTH - 2.0 * DRAWER_REVEAL
 
-def _add_caster_geometry(part, *, fork_material, wheel_material, steel_material) -> None:
-    part.visual(
-        Box((0.068, 0.068, 0.006)),
-        origin=Origin(xyz=(0.0, 0.0, -0.003)),
-        material=steel_material,
-        name="top_plate",
-    )
-    part.visual(
-        Cylinder(radius=0.007, length=0.022),
-        origin=Origin(xyz=(0.0, 0.0, -0.017)),
-        material=steel_material,
-        name="swivel_stem",
-    )
-    part.visual(
-        Cylinder(radius=0.016, length=0.014),
-        origin=Origin(xyz=(0.0, 0.0, -0.035)),
-        material=fork_material,
-        name="swivel_head",
-    )
-    part.visual(
-        Box((0.012, 0.048, 0.040)),
-        origin=Origin(xyz=(0.0, 0.016, -0.058)),
-        material=fork_material,
-        name="fork_left",
-    )
-    part.visual(
-        Box((0.012, 0.048, 0.040)),
-        origin=Origin(xyz=(0.0, -0.016, -0.058)),
-        material=fork_material,
-        name="fork_right",
-    )
-    part.visual(
-        Box((0.010, 0.044, 0.012)),
-        origin=Origin(xyz=(0.0, 0.0, -0.082)),
-        material=fork_material,
-        name="axle_bridge",
-    )
-    part.visual(
-        Cylinder(radius=0.030, length=0.022),
-        origin=Origin(
-            xyz=(0.0, 0.0, -0.076),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=wheel_material,
-        name="wheel",
-    )
-    part.visual(
-        Cylinder(radius=0.006, length=0.030),
-        origin=Origin(
-            xyz=(0.0, 0.0, -0.076),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=steel_material,
-        name="axle",
-    )
+DRAWER_BOX_WIDTH = INNER_WIDTH - 0.060
+DRAWER_BOX_DEPTH = 0.372
+DRAWER_BOX_HEIGHT = 0.176
+DRAWER_SIDE_THICKNESS = 0.014
+DRAWER_BACK_THICKNESS = 0.012
+DRAWER_BOTTOM_THICKNESS = 0.012
+DRAWER_SIDE_HEIGHT = DRAWER_BOX_HEIGHT - DRAWER_BOTTOM_THICKNESS
+
+DRAWER_TRAVEL = 0.214
+DRAWER_FRONT_PROUD = 0.002
+DRAWER_JOINT_Y = (
+    CARCASS_DEPTH * 0.5
+    + DRAWER_FRONT_PROUD
+    - DRAWER_BOX_DEPTH * 0.5
+    - DRAWER_FRONT_THICKNESS
+)
+
+GUIDE_THICKNESS = 0.012
+GUIDE_LENGTH = 0.388
+GUIDE_HEIGHT = 0.018
+GUIDE_Y = -0.034
+GUIDE_X = INNER_WIDTH * 0.5 - GUIDE_THICKNESS * 0.5
+
+RUNNER_THICKNESS = 0.018
+RUNNER_LENGTH = 0.338
+RUNNER_HEIGHT = 0.016
+RUNNER_Y = -0.020
+RUNNER_Z = -0.028
+RUNNER_X = GUIDE_X - GUIDE_THICKNESS * 0.5 - RUNNER_THICKNESS * 0.5
+
+KNOB_RADIUS = 0.018
+KNOB_STEM_RADIUS = 0.006
+KNOB_STEM_LENGTH = 0.050
+KNOB_X_OFFSET = DRAWER_FRONT_WIDTH * 0.24
 
 
-def _add_slide_pack_geometry(part, *, slide_material, bearing_material) -> None:
-    outer_length = 0.362
-    middle_length = 0.340
-    outer_y = 0.253
-    middle_y = 0.247
-    rail_center_x = 0.016
-    slide_levels = {
-        "upper": 0.018,
-        "lower": -0.018,
-    }
-
-    for side_name, sign in (("left", 1.0), ("right", -1.0)):
-        y_outer = sign * outer_y
-        y_middle = sign * middle_y
-        for level_name, z_offset in slide_levels.items():
-            level_prefix = "" if level_name == "upper" else f"{level_name}_"
-            part.visual(
-                Box((outer_length, 0.010, 0.014)),
-                origin=Origin(xyz=(rail_center_x, y_outer, z_offset)),
-                material=slide_material,
-                name=f"{side_name}_{level_prefix}outer_web",
-            )
-            part.visual(
-                Box((outer_length, 0.005, 0.004)),
-                origin=Origin(xyz=(rail_center_x, sign * 0.2495, z_offset + 0.006)),
-                material=slide_material,
-                name=f"{side_name}_{level_prefix}outer_top_flange",
-            )
-            part.visual(
-                Box((outer_length, 0.005, 0.004)),
-                origin=Origin(xyz=(rail_center_x, sign * 0.2495, z_offset - 0.006)),
-                material=slide_material,
-                name=f"{side_name}_{level_prefix}outer_bottom_flange",
-            )
-            part.visual(
-                Box((middle_length, 0.008, 0.010)),
-                origin=Origin(xyz=(0.005, y_middle, z_offset)),
-                material=slide_material,
-                name=f"{side_name}_{level_prefix}middle_slide",
-            )
-            for index, x_pos in enumerate((-0.120, -0.040, 0.040, 0.120), start=1):
-                part.visual(
-                    Sphere(radius=0.0018),
-                    origin=Origin(xyz=(x_pos, sign * 0.2505, z_offset + 0.0035)),
-                    material=bearing_material,
-                    name=f"{side_name}_{level_prefix}bearing_top_{index}",
-                )
-                part.visual(
-                    Sphere(radius=0.0018),
-                    origin=Origin(xyz=(x_pos, sign * 0.2505, z_offset - 0.0035)),
-                    material=bearing_material,
-                    name=f"{side_name}_{level_prefix}bearing_bottom_{index}",
-                )
-
-    part.visual(
-        Box((0.020, 0.508, 0.080)),
-        origin=Origin(xyz=(-0.175, 0.0, 0.0)),
-        material=slide_material,
-        name="rear_tie_bar",
+def _drawer_center_z(index: int) -> float:
+    return (
+        BOTTOM_THICKNESS
+        + DRAWER_REVEAL
+        + DRAWER_FRONT_HEIGHT * 0.5
+        + index * (DRAWER_FRONT_HEIGHT + DRAWER_REVEAL)
     )
-
-
-def _add_drawer_geometry(
-    part,
-    *,
-    face_height: float,
-    face_material,
-    box_material,
-    slide_material,
-) -> tuple[float, float]:
-    box_height = face_height - 0.018
-    face_center_x = 0.206
-    box_center_x = 0.025
-    pocket_width = 0.310
-    pocket_height = min(max(face_height * 0.34, 0.028), 0.055)
-    side_frame_width = (DRAWER_FACE_WIDTH - pocket_width) * 0.5
-    top_frame_height = (face_height - pocket_height) * 0.5
-
-    part.visual(
-        Box((DRAWER_BOX_LENGTH, DRAWER_BOX_WIDTH, 0.008)),
-        origin=Origin(xyz=(box_center_x, 0.0, -box_height * 0.5 + 0.004)),
-        material=box_material,
-        name="drawer_bottom",
-    )
-    part.visual(
-        Box((DRAWER_BOX_LENGTH, 0.010, box_height)),
-        origin=Origin(xyz=(box_center_x, 0.223, 0.0)),
-        material=box_material,
-        name="drawer_left_side",
-    )
-    part.visual(
-        Box((DRAWER_BOX_LENGTH, 0.010, box_height)),
-        origin=Origin(xyz=(box_center_x, -0.223, 0.0)),
-        material=box_material,
-        name="drawer_right_side",
-    )
-    part.visual(
-        Box((0.008, DRAWER_BOX_WIDTH, box_height)),
-        origin=Origin(xyz=(-0.148, 0.0, 0.0)),
-        material=box_material,
-        name="drawer_back",
-    )
-
-    part.visual(
-        Box((DRAWER_FACE_THICKNESS, side_frame_width, face_height)),
-        origin=Origin(xyz=(face_center_x, 0.202, 0.0)),
-        material=face_material,
-        name="face_left_frame",
-    )
-    part.visual(
-        Box((DRAWER_FACE_THICKNESS, side_frame_width, face_height)),
-        origin=Origin(xyz=(face_center_x, -0.202, 0.0)),
-        material=face_material,
-        name="face_right_frame",
-    )
-    part.visual(
-        Box((DRAWER_FACE_THICKNESS, pocket_width, top_frame_height)),
-        origin=Origin(xyz=(face_center_x, 0.0, face_height * 0.5 - top_frame_height * 0.5)),
-        material=face_material,
-        name="face_top_frame",
-    )
-    part.visual(
-        Box((DRAWER_FACE_THICKNESS, pocket_width, top_frame_height)),
-        origin=Origin(xyz=(face_center_x, 0.0, -face_height * 0.5 + top_frame_height * 0.5)),
-        material=face_material,
-        name="face_bottom_frame",
-    )
-
-    part.visual(
-        Box((0.010, pocket_width, pocket_height)),
-        origin=Origin(xyz=(0.165, 0.0, 0.0)),
-        material=box_material,
-        name="pocket_back",
-    )
-    part.visual(
-        Box((0.027, 0.010, pocket_height)),
-        origin=Origin(xyz=(0.1835, pocket_width * 0.5 + 0.005, 0.0)),
-        material=box_material,
-        name="pocket_left_wall",
-    )
-    part.visual(
-        Box((0.027, 0.010, pocket_height)),
-        origin=Origin(xyz=(0.1835, -pocket_width * 0.5 - 0.005, 0.0)),
-        material=box_material,
-        name="pocket_right_wall",
-    )
-    part.visual(
-        Box((0.027, pocket_width + 0.020, 0.006)),
-        origin=Origin(xyz=(0.1835, 0.0, pocket_height * 0.5 + 0.003)),
-        material=box_material,
-        name="pocket_top_wall",
-    )
-    part.visual(
-        Box((0.027, pocket_width + 0.020, 0.006)),
-        origin=Origin(xyz=(0.1835, 0.0, -pocket_height * 0.5 - 0.003)),
-        material=box_material,
-        name="pocket_bottom_wall",
-    )
-
-    part.visual(
-        Box((0.308, 0.016, 0.010)),
-        origin=Origin(xyz=(0.010, 0.248, 0.018)),
-        material=slide_material,
-        name="left_inner_rail",
-    )
-    part.visual(
-        Box((0.308, 0.016, 0.010)),
-        origin=Origin(xyz=(0.010, -0.248, 0.018)),
-        material=slide_material,
-        name="right_inner_rail",
-    )
-    part.visual(
-        Box((0.308, 0.016, 0.010)),
-        origin=Origin(xyz=(0.010, 0.248, -0.018)),
-        material=slide_material,
-        name="left_lower_inner_rail",
-    )
-    part.visual(
-        Box((0.308, 0.016, 0.010)),
-        origin=Origin(xyz=(0.010, -0.248, -0.018)),
-        material=slide_material,
-        name="right_lower_inner_rail",
-    )
-    part.visual(
-        Box((0.308, 0.012, 0.010)),
-        origin=Origin(xyz=(0.010, 0.234, 0.018)),
-        material=slide_material,
-        name="left_upper_mount_strip",
-    )
-    part.visual(
-        Box((0.308, 0.012, 0.010)),
-        origin=Origin(xyz=(0.010, -0.234, 0.018)),
-        material=slide_material,
-        name="right_upper_mount_strip",
-    )
-    part.visual(
-        Box((0.308, 0.012, 0.010)),
-        origin=Origin(xyz=(0.010, 0.234, -0.018)),
-        material=slide_material,
-        name="left_lower_mount_strip",
-    )
-    part.visual(
-        Box((0.308, 0.012, 0.010)),
-        origin=Origin(xyz=(0.010, -0.234, -0.018)),
-        material=slide_material,
-        name="right_lower_mount_strip",
-    )
-    return pocket_width, pocket_height
-
-
-def _add_handle_geometry(
-    part,
-    *,
-    pocket_width: float,
-    handle_material,
-    bracket_material,
-) -> None:
-    bar_length = pocket_width - 0.062
-    bar_offset = bar_length * 0.5 - 0.030
-    part.visual(
-        Cylinder(radius=0.005, length=bar_length),
-        origin=Origin(
-            xyz=(0.176, 0.0, 0.0),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=handle_material,
-        name="handle_bar",
-    )
-    for side_name, sign in (("left", 1.0), ("right", -1.0)):
-        part.visual(
-            Box((0.011, 0.008, 0.014)),
-            origin=Origin(xyz=(0.1755, sign * bar_offset, 0.0)),
-            material=bracket_material,
-            name=f"{side_name}_handle_post",
-        )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="rolling_tool_pedestal")
+    model = ArticulatedObject(name="wooden_dresser")
 
-    cabinet_red = model.material("cabinet_red", rgba=(0.72, 0.08, 0.10, 1.0))
-    drawer_red = model.material("drawer_red", rgba=(0.66, 0.07, 0.09, 1.0))
-    inner_charcoal = model.material("inner_charcoal", rgba=(0.18, 0.19, 0.21, 1.0))
-    tray_black = model.material("tray_black", rgba=(0.11, 0.12, 0.13, 1.0))
-    rubber_mat = model.material("rubber_mat", rgba=(0.09, 0.10, 0.10, 1.0))
-    slide_steel = model.material("slide_steel", rgba=(0.70, 0.72, 0.75, 1.0))
-    bearing_steel = model.material("bearing_steel", rgba=(0.83, 0.84, 0.86, 1.0))
-    frame_black = model.material("frame_black", rgba=(0.13, 0.13, 0.14, 1.0))
-    handle_dark = model.material("handle_dark", rgba=(0.16, 0.17, 0.18, 1.0))
-    fork_dark = model.material("fork_dark", rgba=(0.15, 0.16, 0.17, 1.0))
-    wheel_dark = model.material("wheel_dark", rgba=(0.10, 0.10, 0.11, 1.0))
+    carcass_wood = model.material("carcass_wood", rgba=(0.45, 0.30, 0.18, 1.0))
+    drawer_wood = model.material("drawer_wood", rgba=(0.57, 0.38, 0.22, 1.0))
+    knob_wood = model.material("knob_wood", rgba=(0.29, 0.19, 0.11, 1.0))
+    rail_metal = model.material("rail_metal", rgba=(0.62, 0.64, 0.67, 1.0))
 
-    body = model.part("cabinet_body")
-    body.visual(
-        Box((CABINET_DEPTH, 0.022, BODY_HEIGHT)),
-        origin=Origin(xyz=(0.0, 0.269, BODY_BOTTOM_Z + BODY_HEIGHT * 0.5)),
-        material=cabinet_red,
-        name="left_side_panel",
+    carcass = model.part("carcass")
+    carcass.visual(
+        Box((SIDE_THICKNESS, CARCASS_DEPTH, CARCASS_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                -CARCASS_WIDTH * 0.5 + SIDE_THICKNESS * 0.5,
+                0.0,
+                CARCASS_HEIGHT * 0.5,
+            )
+        ),
+        material=carcass_wood,
+        name="left_side",
     )
-    body.visual(
-        Box((CABINET_DEPTH, 0.022, BODY_HEIGHT)),
-        origin=Origin(xyz=(0.0, -0.269, BODY_BOTTOM_Z + BODY_HEIGHT * 0.5)),
-        material=cabinet_red,
-        name="right_side_panel",
+    carcass.visual(
+        Box((SIDE_THICKNESS, CARCASS_DEPTH, CARCASS_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                CARCASS_WIDTH * 0.5 - SIDE_THICKNESS * 0.5,
+                0.0,
+                CARCASS_HEIGHT * 0.5,
+            )
+        ),
+        material=carcass_wood,
+        name="right_side",
     )
-    body.visual(
-        Box((0.018, 0.516, BODY_HEIGHT)),
-        origin=Origin(xyz=(-0.206, 0.0, BODY_BOTTOM_Z + BODY_HEIGHT * 0.5)),
-        material=cabinet_red,
-        name="back_panel",
+    carcass.visual(
+        Box((CARCASS_WIDTH + 2.0 * TOP_OVERHANG_X, CARCASS_DEPTH + 2.0 * TOP_OVERHANG_Y, TOP_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, CARCASS_HEIGHT - TOP_THICKNESS * 0.5)),
+        material=carcass_wood,
+        name="top_panel",
     )
-    body.visual(
-        Box((0.404, 0.516, 0.018)),
-        origin=Origin(xyz=(0.003, 0.0, 0.139)),
-        material=inner_charcoal,
+    carcass.visual(
+        Box((CARCASS_WIDTH, CARCASS_DEPTH, BOTTOM_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, BOTTOM_THICKNESS * 0.5)),
+        material=carcass_wood,
         name="bottom_panel",
     )
-    body.visual(
-        Box((0.018, 0.516, 0.034)),
-        origin=Origin(xyz=(0.206, 0.0, 0.147)),
-        material=cabinet_red,
-        name="bottom_front_rail",
+    carcass.visual(
+        Box(
+            (
+                CARCASS_WIDTH - 2.0 * SIDE_THICKNESS,
+                BACK_THICKNESS,
+                CARCASS_HEIGHT - TOP_THICKNESS - BOTTOM_THICKNESS,
+            )
+        ),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -CARCASS_DEPTH * 0.5 + BACK_THICKNESS * 0.5,
+                BOTTOM_THICKNESS
+                + (CARCASS_HEIGHT - TOP_THICKNESS - BOTTOM_THICKNESS) * 0.5,
+            )
+        ),
+        material=carcass_wood,
+        name="back_panel",
     )
-    body.visual(
-        Box((0.018, 0.516, 0.032)),
-        origin=Origin(xyz=(0.206, 0.0, 0.781)),
-        material=cabinet_red,
-        name="top_front_header",
-    )
-    body.visual(
-        Box((0.404, 0.516, 0.012)),
-        origin=Origin(xyz=(0.003, 0.0, 0.796)),
-        material=inner_charcoal,
-        name="top_support_panel",
-    )
-    body.inertial = Inertial.from_geometry(
-        Box((CABINET_DEPTH, CABINET_WIDTH, BODY_HEIGHT)),
-        mass=22.0,
-        origin=Origin(xyz=(0.0, 0.0, BODY_BOTTOM_Z + BODY_HEIGHT * 0.5)),
-    )
-
-    top_tray = model.part("top_tray")
-    top_tray.visual(
-        Box((0.402, 0.502, 0.010)),
-        origin=Origin(xyz=(0.0, 0.0, 0.005)),
-        material=tray_black,
-        name="tray_floor",
-    )
-    top_tray.visual(
-        Box((0.014, 0.516, 0.030)),
-        origin=Origin(xyz=(0.208, 0.0, 0.020)),
-        material=tray_black,
-        name="front_lip",
-    )
-    top_tray.visual(
-        Box((0.014, 0.516, 0.030)),
-        origin=Origin(xyz=(-0.208, 0.0, 0.020)),
-        material=tray_black,
-        name="rear_lip",
-    )
-    top_tray.visual(
-        Box((0.416, 0.014, 0.030)),
-        origin=Origin(xyz=(0.0, 0.258, 0.020)),
-        material=tray_black,
-        name="left_lip",
-    )
-    top_tray.visual(
-        Box((0.416, 0.014, 0.030)),
-        origin=Origin(xyz=(0.0, -0.258, 0.020)),
-        material=tray_black,
-        name="right_lip",
-    )
-    top_tray.inertial = Inertial.from_geometry(
-        Box((0.430, 0.530, 0.035)),
-        mass=1.5,
-        origin=Origin(xyz=(0.0, 0.0, 0.0175)),
+    carcass.visual(
+        Box((INNER_WIDTH, 0.020, 0.050)),
+        origin=Origin(
+            xyz=(0.0, -CARCASS_DEPTH * 0.5 + BACK_THICKNESS + 0.010, 0.090)
+        ),
+        material=carcass_wood,
+        name="rear_stretcher",
     )
 
-    tray_mat_part = model.part("tray_mat")
-    tray_mat_part.visual(
-        Box((0.360, 0.452, 0.004)),
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
-        material=rubber_mat,
-        name="rubber_mat",
-    )
-    tray_mat_part.inertial = Inertial.from_geometry(
-        Box((0.360, 0.452, 0.004)),
-        mass=0.15,
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
-    )
-
-    caster_frame = model.part("caster_frame")
-    caster_frame.visual(
-        Box((0.370, 0.032, 0.026)),
-        origin=Origin(xyz=(0.0, 0.240, 0.013)),
-        material=frame_black,
-        name="left_frame_rail",
-    )
-    caster_frame.visual(
-        Box((0.370, 0.032, 0.026)),
-        origin=Origin(xyz=(0.0, -0.240, 0.013)),
-        material=frame_black,
-        name="right_frame_rail",
-    )
-    caster_frame.visual(
-        Box((0.026, 0.472, 0.026)),
-        origin=Origin(xyz=(0.176, 0.0, 0.013)),
-        material=frame_black,
-        name="front_frame_rail",
-    )
-    caster_frame.visual(
-        Box((0.026, 0.472, 0.026)),
-        origin=Origin(xyz=(-0.176, 0.0, 0.013)),
-        material=frame_black,
-        name="rear_frame_rail",
-    )
-    caster_frame.visual(
-        Box((0.040, 0.448, 0.022)),
-        origin=Origin(xyz=(0.0, 0.0, 0.011)),
-        material=frame_black,
-        name="center_crossmember",
-    )
-    caster_mounts = {
-        "front_left": (0.176, 0.240),
-        "front_right": (0.176, -0.240),
-        "rear_left": (-0.176, 0.240),
-        "rear_right": (-0.176, -0.240),
-    }
-    for mount_name, (x_pos, y_pos) in caster_mounts.items():
-        caster_frame.visual(
-            Box((0.072, 0.072, 0.008)),
-            origin=Origin(xyz=(x_pos, y_pos, 0.004)),
-            material=frame_black,
-            name=f"mount_{mount_name}",
+    for index in range(DRAWER_COUNT):
+        z_pos = _drawer_center_z(index) + RUNNER_Z
+        carcass.visual(
+            Box((GUIDE_THICKNESS, GUIDE_LENGTH, GUIDE_HEIGHT)),
+            origin=Origin(xyz=(-GUIDE_X, GUIDE_Y, z_pos)),
+            material=rail_metal,
+            name=f"left_guide_{index + 1}",
         )
-    caster_frame.inertial = Inertial.from_geometry(
-        Box((0.430, 0.560, 0.026)),
-        mass=2.4,
-        origin=Origin(xyz=(0.0, 0.0, 0.013)),
-    )
-
-    model.articulation(
-        "body_to_top_tray",
-        ArticulationType.FIXED,
-        parent=body,
-        child=top_tray,
-        origin=Origin(xyz=(0.0, 0.0, 0.797)),
-    )
-    model.articulation(
-        "top_tray_to_mat",
-        ArticulationType.FIXED,
-        parent=top_tray,
-        child=tray_mat_part,
-        origin=Origin(xyz=(0.0, 0.0, 0.010)),
-    )
-    model.articulation(
-        "body_to_caster_frame",
-        ArticulationType.FIXED,
-        parent=body,
-        child=caster_frame,
-        origin=Origin(xyz=(0.0, 0.0, 0.104)),
-    )
-
-    caster_yaws = {
-        "front_left": math.radians(28.0),
-        "front_right": math.radians(-24.0),
-        "rear_left": math.radians(152.0),
-        "rear_right": math.radians(-140.0),
-    }
-    for mount_name, (x_pos, y_pos) in caster_mounts.items():
-        caster = model.part(f"caster_{mount_name}")
-        _add_caster_geometry(
-            caster,
-            fork_material=fork_dark,
-            wheel_material=wheel_dark,
-            steel_material=slide_steel,
-        )
-        caster.inertial = Inertial.from_geometry(
-            Box((0.080, 0.080, 0.115)),
-            mass=0.7,
-            origin=Origin(xyz=(0.0, 0.0, -0.0575)),
-        )
-        model.articulation(
-            f"caster_frame_to_{mount_name}",
-            ArticulationType.FIXED,
-            parent=caster_frame,
-            child=caster,
-            origin=Origin(xyz=(x_pos, y_pos, 0.0), rpy=(0.0, 0.0, caster_yaws[mount_name])),
+        carcass.visual(
+            Box((GUIDE_THICKNESS, GUIDE_LENGTH, GUIDE_HEIGHT)),
+            origin=Origin(xyz=(GUIDE_X, GUIDE_Y, z_pos)),
+            material=rail_metal,
+            name=f"right_guide_{index + 1}",
         )
 
-    drawer_face_heights = [0.074, 0.084, 0.104, 0.128, 0.168]
-    drawer_top = 0.758
-    drawer_gap = 0.007
-    for index, face_height in enumerate(drawer_face_heights, start=1):
-        drawer_top -= face_height
-        z_center = drawer_top + face_height * 0.5
-        drawer_top -= drawer_gap
+    carcass.inertial = Inertial.from_geometry(
+        Box((CARCASS_WIDTH, CARCASS_DEPTH, CARCASS_HEIGHT)),
+        mass=34.0,
+        origin=Origin(xyz=(0.0, 0.0, CARCASS_HEIGHT * 0.5)),
+    )
 
-        slide_pack = model.part(f"drawer_{index}_slides")
-        _add_slide_pack_geometry(slide_pack, slide_material=slide_steel, bearing_material=bearing_steel)
-        slide_pack.inertial = Inertial.from_geometry(
-            Box((0.372, 0.492, 0.040)),
-            mass=0.55,
-            origin=Origin(xyz=(0.0, 0.0, 0.0)),
+    for index in range(DRAWER_COUNT):
+        drawer = model.part(f"drawer_{index + 1}")
+        front_center_y = DRAWER_BOX_DEPTH * 0.5 + DRAWER_FRONT_THICKNESS * 0.5
+        knob_stem_center_y = (
+            DRAWER_BOX_DEPTH * 0.5 + DRAWER_FRONT_THICKNESS + KNOB_STEM_LENGTH * 0.5
         )
-        model.articulation(
-            f"body_to_drawer_{index}_slides",
-            ArticulationType.FIXED,
-            parent=body,
-            child=slide_pack,
-            origin=Origin(xyz=(0.0, 0.0, z_center)),
+        knob_center_y = (
+            DRAWER_BOX_DEPTH * 0.5
+            + DRAWER_FRONT_THICKNESS
+            + KNOB_STEM_LENGTH
+            + KNOB_RADIUS
         )
 
-        drawer = model.part(f"drawer_{index}")
-        pocket_width, pocket_height = _add_drawer_geometry(
-            drawer,
-            face_height=face_height,
-            face_material=drawer_red,
-            box_material=inner_charcoal,
-            slide_material=slide_steel,
+        drawer.visual(
+            Box((DRAWER_BOX_WIDTH, DRAWER_BOX_DEPTH, DRAWER_BOTTOM_THICKNESS)),
+            origin=Origin(
+                xyz=(0.0, 0.0, -DRAWER_BOX_HEIGHT * 0.5 + DRAWER_BOTTOM_THICKNESS * 0.5)
+            ),
+            material=drawer_wood,
+            name="bottom",
+        )
+        drawer.visual(
+            Box((DRAWER_SIDE_THICKNESS, DRAWER_BOX_DEPTH, DRAWER_SIDE_HEIGHT)),
+            origin=Origin(
+                xyz=(
+                    -DRAWER_BOX_WIDTH * 0.5 + DRAWER_SIDE_THICKNESS * 0.5,
+                    0.0,
+                    DRAWER_BOTTOM_THICKNESS * 0.5,
+                )
+            ),
+            material=drawer_wood,
+            name="left_side",
+        )
+        drawer.visual(
+            Box((DRAWER_SIDE_THICKNESS, DRAWER_BOX_DEPTH, DRAWER_SIDE_HEIGHT)),
+            origin=Origin(
+                xyz=(
+                    DRAWER_BOX_WIDTH * 0.5 - DRAWER_SIDE_THICKNESS * 0.5,
+                    0.0,
+                    DRAWER_BOTTOM_THICKNESS * 0.5,
+                )
+            ),
+            material=drawer_wood,
+            name="right_side",
+        )
+        drawer.visual(
+            Box((DRAWER_BOX_WIDTH, DRAWER_BACK_THICKNESS, DRAWER_SIDE_HEIGHT)),
+            origin=Origin(
+                xyz=(
+                    0.0,
+                    -DRAWER_BOX_DEPTH * 0.5 + DRAWER_BACK_THICKNESS * 0.5,
+                    DRAWER_BOTTOM_THICKNESS * 0.5,
+                )
+            ),
+            material=drawer_wood,
+            name="back",
+        )
+        drawer.visual(
+            Box((DRAWER_FRONT_WIDTH, DRAWER_FRONT_THICKNESS, DRAWER_FRONT_HEIGHT)),
+            origin=Origin(xyz=(0.0, front_center_y, 0.0)),
+            material=drawer_wood,
+            name="front",
+        )
+        drawer.visual(
+            Cylinder(radius=KNOB_STEM_RADIUS, length=KNOB_STEM_LENGTH),
+            origin=Origin(
+                xyz=(-KNOB_X_OFFSET, knob_stem_center_y, 0.0),
+                rpy=(pi * 0.5, 0.0, 0.0),
+            ),
+            material=knob_wood,
+            name="left_knob_stem",
+        )
+        drawer.visual(
+            Sphere(radius=KNOB_RADIUS),
+            origin=Origin(xyz=(-KNOB_X_OFFSET, knob_center_y, 0.0)),
+            material=knob_wood,
+            name="left_knob",
+        )
+        drawer.visual(
+            Cylinder(radius=KNOB_STEM_RADIUS, length=KNOB_STEM_LENGTH),
+            origin=Origin(
+                xyz=(KNOB_X_OFFSET, knob_stem_center_y, 0.0),
+                rpy=(pi * 0.5, 0.0, 0.0),
+            ),
+            material=knob_wood,
+            name="right_knob_stem",
+        )
+        drawer.visual(
+            Sphere(radius=KNOB_RADIUS),
+            origin=Origin(xyz=(KNOB_X_OFFSET, knob_center_y, 0.0)),
+            material=knob_wood,
+            name="right_knob",
+        )
+        drawer.visual(
+            Box((RUNNER_THICKNESS, RUNNER_LENGTH, RUNNER_HEIGHT)),
+            origin=Origin(xyz=(-RUNNER_X, RUNNER_Y, RUNNER_Z)),
+            material=rail_metal,
+            name="left_runner",
+        )
+        drawer.visual(
+            Box((RUNNER_THICKNESS, RUNNER_LENGTH, RUNNER_HEIGHT)),
+            origin=Origin(xyz=(RUNNER_X, RUNNER_Y, RUNNER_Z)),
+            material=rail_metal,
+            name="right_runner",
         )
         drawer.inertial = Inertial.from_geometry(
-            Box((0.372, 0.494, face_height)),
-            mass=1.1 + face_height * 2.0,
-            origin=Origin(xyz=(0.0, 0.0, 0.0)),
+            Box((DRAWER_FRONT_WIDTH, DRAWER_BOX_DEPTH + 0.06, DRAWER_FRONT_HEIGHT)),
+            mass=4.0,
+            origin=Origin(xyz=(0.0, 0.03, 0.0)),
         )
         model.articulation(
-            f"drawer_{index}_travel",
+            f"carcass_to_drawer_{index + 1}",
             ArticulationType.PRISMATIC,
-            parent=slide_pack,
+            parent=carcass,
             child=drawer,
-            origin=Origin(xyz=(0.0, 0.0, 0.0)),
-            axis=(1.0, 0.0, 0.0),
+            origin=Origin(xyz=(0.0, DRAWER_JOINT_Y, _drawer_center_z(index))),
+            axis=(0.0, 1.0, 0.0),
             motion_limits=MotionLimits(
-                effort=90.0,
-                velocity=0.45,
+                effort=20.0,
+                velocity=0.40,
                 lower=0.0,
-                upper=0.285,
+                upper=DRAWER_TRAVEL,
             ),
-        )
-
-        handle = model.part(f"drawer_{index}_handle")
-        _add_handle_geometry(
-            handle,
-            pocket_width=pocket_width,
-            handle_material=handle_dark,
-            bracket_material=slide_steel,
-        )
-        handle.inertial = Inertial.from_geometry(
-            Box((0.020, pocket_width, pocket_height)),
-            mass=0.08,
-            origin=Origin(xyz=(0.176, 0.0, 0.0)),
-        )
-        model.articulation(
-            f"drawer_{index}_to_handle",
-            ArticulationType.FIXED,
-            parent=drawer,
-            child=handle,
-            origin=Origin(xyz=(0.0, 0.0, 0.0)),
         )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root="/")
-
-    body = object_model.get_part("cabinet_body")
-    top_tray = object_model.get_part("top_tray")
-    tray_mat = object_model.get_part("tray_mat")
-    caster_frame = object_model.get_part("caster_frame")
-    for index in range(1, 6):
-        ctx.allow_overlap(
-            object_model.get_part(f"drawer_{index}"),
-            object_model.get_part(f"drawer_{index}_slides"),
-            reason="telescoping ball-bearing side-mount slide members intentionally nest during travel",
-        )
+    ctx = TestContext(object_model, seed=0)
+    carcass = object_model.get_part("carcass")
+    drawers = [object_model.get_part(f"drawer_{index + 1}") for index in range(DRAWER_COUNT)]
+    slides = [
+        object_model.get_articulation(f"carcass_to_drawer_{index + 1}")
+        for index in range(DRAWER_COUNT)
+    ]
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.002,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=96)
 
-    body_top_support = body.get_visual("top_support_panel")
-    tray_floor = top_tray.get_visual("tray_floor")
-    mat_surface = tray_mat.get_visual("rubber_mat")
-    ctx.expect_gap(
-        top_tray,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.006,
-        positive_elem=tray_floor,
-        negative_elem=body_top_support,
-        name="top_tray_seated_on_body",
-    )
-    ctx.expect_within(
-        tray_mat,
-        top_tray,
-        axes="xy",
-        inner_elem=mat_surface,
-        outer_elem=tray_floor,
-    )
-    ctx.expect_gap(
-        tray_mat,
-        top_tray,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=mat_surface,
-        negative_elem=tray_floor,
-        name="rubber_mat_seated_in_tray",
-    )
-
-    for mount_name in ("front_left", "front_right", "rear_left", "rear_right"):
-        caster = object_model.get_part(f"caster_{mount_name}")
-        mount_pad = caster_frame.get_visual(f"mount_{mount_name}")
-        top_plate = caster.get_visual("top_plate")
-        ctx.expect_overlap(
-            caster,
-            caster_frame,
-            axes="xy",
-            min_overlap=0.003,
-            elem_a=top_plate,
-            elem_b=mount_pad,
-            name=f"{mount_name}_caster_plate_over_mount",
+    carcass_aabb = ctx.part_world_aabb(carcass)
+    if carcass_aabb is not None:
+        carcass_min, carcass_max = carcass_aabb
+        carcass_width = carcass_max[0] - carcass_min[0]
+        carcass_depth = carcass_max[1] - carcass_min[1]
+        carcass_height = carcass_max[2] - carcass_min[2]
+        ctx.check(
+            "carcass_realistic_width",
+            0.95 <= carcass_width <= 1.10,
+            f"expected dresser width near 1.0 m, got {carcass_width:.3f} m",
         )
-        ctx.expect_gap(
-            caster_frame,
-            caster,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.001,
-            positive_elem=mount_pad,
-            negative_elem=top_plate,
-            name=f"{mount_name}_caster_seated_to_frame",
+        ctx.check(
+            "carcass_realistic_depth",
+            0.45 <= carcass_depth <= 0.60,
+            f"expected dresser depth near 0.5 m, got {carcass_depth:.3f} m",
+        )
+        ctx.check(
+            "carcass_realistic_height",
+            1.05 <= carcass_height <= 1.30,
+            f"expected dresser height near 1.2 m, got {carcass_height:.3f} m",
+        )
+        ctx.check(
+            "carcass_grounded",
+            abs(carcass_min[2]) <= 1e-6,
+            f"carcass should sit on the floor plane, min z was {carcass_min[2]:.6f}",
         )
 
-    drawer_articulations = {
-        1: object_model.get_articulation("drawer_1_travel"),
-        2: object_model.get_articulation("drawer_2_travel"),
-        3: object_model.get_articulation("drawer_3_travel"),
-        4: object_model.get_articulation("drawer_4_travel"),
-        5: object_model.get_articulation("drawer_5_travel"),
-    }
-    for index in range(1, 6):
-        slide_pack = object_model.get_part(f"drawer_{index}_slides")
-        drawer = object_model.get_part(f"drawer_{index}")
-        handle = object_model.get_part(f"drawer_{index}_handle")
+    for index, drawer in enumerate(drawers):
+        number = index + 1
+        slide = slides[index]
+        limits = slide.motion_limits
+        front = drawer.get_visual("front")
+        left_knob = drawer.get_visual("left_knob")
+        right_knob = drawer.get_visual("right_knob")
+        left_knob_stem = drawer.get_visual("left_knob_stem")
+        right_knob_stem = drawer.get_visual("right_knob_stem")
+        left_runner = drawer.get_visual("left_runner")
+        right_runner = drawer.get_visual("right_runner")
+        left_guide = carcass.get_visual(f"left_guide_{number}")
+        right_guide = carcass.get_visual(f"right_guide_{number}")
 
-        left_outer = slide_pack.get_visual("left_outer_web")
-        right_outer = slide_pack.get_visual("right_outer_web")
-        left_lower_outer = slide_pack.get_visual("left_lower_outer_web")
-        right_lower_outer = slide_pack.get_visual("right_lower_outer_web")
-        left_inner = drawer.get_visual("left_inner_rail")
-        right_inner = drawer.get_visual("right_inner_rail")
-        left_lower_inner = drawer.get_visual("left_lower_inner_rail")
-        right_lower_inner = drawer.get_visual("right_lower_inner_rail")
-        face_left = drawer.get_visual("face_left_frame")
-        handle_bar = handle.get_visual("handle_bar")
-        pocket_back = drawer.get_visual("pocket_back")
-
-        ctx.expect_overlap(
-            drawer,
-            slide_pack,
-            axes="yz",
-            min_overlap=0.0008,
-            elem_a=left_inner,
-            elem_b=left_outer,
-            name=f"drawer_{index}_left_slide_alignment",
+        ctx.check(
+            f"drawer_{number}_uses_prismatic_slide",
+            slide.articulation_type == ArticulationType.PRISMATIC,
+            f"expected prismatic articulation, got {slide.articulation_type}",
         )
-        ctx.expect_overlap(
-            drawer,
-            slide_pack,
-            axes="yz",
-            min_overlap=0.0008,
-            elem_a=right_inner,
-            elem_b=right_outer,
-            name=f"drawer_{index}_right_slide_alignment",
+        ctx.check(
+            f"drawer_{number}_slide_axis_forward",
+            tuple(slide.axis) == (0.0, 1.0, 0.0),
+            f"expected slide axis (0, 1, 0), got {slide.axis}",
         )
-        ctx.expect_overlap(
-            drawer,
-            slide_pack,
-            axes="yz",
-            min_overlap=0.0008,
-            elem_a=left_lower_inner,
-            elem_b=left_lower_outer,
-            name=f"drawer_{index}_left_lower_slide_alignment",
+        ctx.check(
+            f"drawer_{number}_travel_limit_realistic",
+            limits is not None
+            and limits.lower == 0.0
+            and limits.upper is not None
+            and 0.18 <= limits.upper <= 0.25,
+            f"expected 0.18 m to 0.25 m drawer travel, got {limits}",
         )
-        ctx.expect_overlap(
+        ctx.expect_contact(
             drawer,
-            slide_pack,
-            axes="yz",
-            min_overlap=0.0008,
-            elem_a=right_lower_inner,
-            elem_b=right_lower_outer,
-            name=f"drawer_{index}_right_lower_slide_alignment",
-        )
-        ctx.expect_gap(
             drawer,
-            slide_pack,
-            axis="x",
-            max_gap=0.001,
-            max_penetration=0.001,
-            positive_elem=face_left,
-            negative_elem=left_outer,
-            name=f"drawer_{index}_closed_face_stop",
+            elem_a=left_knob_stem,
+            elem_b=front,
+            name=f"drawer_{number}_left_knob_stem_mounted_to_front",
         )
-        ctx.expect_within(
-            handle,
+        ctx.expect_contact(
             drawer,
-            axes="yz",
-            inner_elem=handle_bar,
-            outer_elem=pocket_back,
-            name=f"drawer_{index}_handle_within_recess_band",
-        )
-        ctx.expect_gap(
             drawer,
-            handle,
-            axis="x",
-            min_gap=0.010,
-            positive_elem=face_left,
-            negative_elem=handle_bar,
-            name=f"drawer_{index}_bar_pull_recessed",
+            elem_a=left_knob,
+            elem_b=left_knob_stem,
+            name=f"drawer_{number}_left_knob_attached_to_stem",
         )
-
-    with ctx.pose({drawer_articulations[1]: 0.240, drawer_articulations[5]: 0.265}):
-        for index, min_gap in ((1, 0.18), (5, 0.20)):
-            slide_pack = object_model.get_part(f"drawer_{index}_slides")
-            drawer = object_model.get_part(f"drawer_{index}")
-            left_outer = slide_pack.get_visual("left_outer_web")
-            right_outer = slide_pack.get_visual("right_outer_web")
-            left_lower_outer = slide_pack.get_visual("left_lower_outer_web")
-            right_lower_outer = slide_pack.get_visual("right_lower_outer_web")
-            left_inner = drawer.get_visual("left_inner_rail")
-            right_inner = drawer.get_visual("right_inner_rail")
-            left_lower_inner = drawer.get_visual("left_lower_inner_rail")
-            right_lower_inner = drawer.get_visual("right_lower_inner_rail")
-            face_left = drawer.get_visual("face_left_frame")
+        ctx.expect_contact(
+            drawer,
+            drawer,
+            elem_a=right_knob_stem,
+            elem_b=front,
+            name=f"drawer_{number}_right_knob_stem_mounted_to_front",
+        )
+        ctx.expect_contact(
+            drawer,
+            drawer,
+            elem_a=right_knob,
+            elem_b=right_knob_stem,
+            name=f"drawer_{number}_right_knob_attached_to_stem",
+        )
+        with ctx.pose({slide: 0.0}):
+            ctx.expect_contact(
+                drawer,
+                carcass,
+                elem_a=left_runner,
+                elem_b=left_guide,
+                name=f"drawer_{number}_left_runner_contacts_guide_closed",
+            )
+            ctx.expect_contact(
+                drawer,
+                carcass,
+                elem_a=right_runner,
+                elem_b=right_guide,
+                name=f"drawer_{number}_right_runner_contacts_guide_closed",
+            )
+            ctx.expect_within(
+                drawer,
+                carcass,
+                axes=("x", "z"),
+                inner_elem=front,
+                name=f"drawer_{number}_front_centered_in_opening_closed",
+            )
             ctx.expect_gap(
                 drawer,
-                slide_pack,
-                axis="x",
-                min_gap=min_gap,
-                positive_elem=face_left,
-                negative_elem=left_outer,
-                name=f"drawer_{index}_full_extension_travel",
+                carcass,
+                axis="y",
+                min_gap=0.030,
+                positive_elem=left_knob,
+                name=f"drawer_{number}_left_knob_proud_of_case_closed",
             )
-            ctx.expect_overlap(
+            ctx.expect_gap(
                 drawer,
-                slide_pack,
-                axes="yz",
-                min_overlap=0.0008,
-                elem_a=left_inner,
-                elem_b=left_outer,
-                name=f"drawer_{index}_left_slide_stays_nested_open",
+                carcass,
+                axis="y",
+                min_gap=0.030,
+                positive_elem=right_knob,
+                name=f"drawer_{number}_right_knob_proud_of_case_closed",
             )
-            ctx.expect_overlap(
-                drawer,
-                slide_pack,
-                axes="yz",
-                min_overlap=0.0008,
-                elem_a=right_inner,
-                elem_b=right_outer,
-                name=f"drawer_{index}_right_slide_stays_nested_open",
+            ctx.fail_if_parts_overlap_in_current_pose(
+                name=f"drawer_{number}_closed_pose_no_overlap"
             )
-            ctx.expect_overlap(
-                drawer,
-                slide_pack,
-                axes="yz",
-                min_overlap=0.0008,
-                elem_a=left_lower_inner,
-                elem_b=left_lower_outer,
-                name=f"drawer_{index}_left_lower_slide_stays_nested_open",
-            )
-            ctx.expect_overlap(
-                drawer,
-                slide_pack,
-                axes="yz",
-                min_overlap=0.0008,
-                elem_a=right_lower_inner,
-                elem_b=right_lower_outer,
-                name=f"drawer_{index}_right_lower_slide_stays_nested_open",
-            )
+            ctx.fail_if_isolated_parts(name=f"drawer_{number}_closed_pose_no_floating")
+        if limits is not None and limits.upper is not None:
+            with ctx.pose({slide: limits.upper}):
+                ctx.expect_contact(
+                    drawer,
+                    carcass,
+                    elem_a=left_runner,
+                    elem_b=left_guide,
+                    name=f"drawer_{number}_left_runner_contacts_guide_open",
+                )
+                ctx.expect_contact(
+                    drawer,
+                    carcass,
+                    elem_a=right_runner,
+                    elem_b=right_guide,
+                    name=f"drawer_{number}_right_runner_contacts_guide_open",
+                )
+                ctx.expect_gap(
+                    drawer,
+                    carcass,
+                    axis="y",
+                    min_gap=0.18,
+                    positive_elem=front,
+                    name=f"drawer_{number}_opens_forward",
+                )
+                ctx.expect_within(
+                    drawer,
+                    carcass,
+                    axes="x",
+                    inner_elem=front,
+                    name=f"drawer_{number}_front_stays_centered_when_open",
+                )
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"drawer_{number}_open_pose_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(
+                    name=f"drawer_{number}_open_pose_no_floating"
+                )
+
+    for slide in slides:
+        limits = slide.motion_limits
+        if limits is not None and limits.lower is not None:
+            with ctx.pose({slide: limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"{slide.name}_lower_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(name=f"{slide.name}_lower_no_floating")
+        if limits is not None and limits.upper is not None:
+            with ctx.pose({slide: limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"{slide.name}_upper_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(name=f"{slide.name}_upper_no_floating")
+
+    for index in range(DRAWER_COUNT - 1):
+        lower_front = drawers[index].get_visual("front")
+        upper_front = drawers[index + 1].get_visual("front")
+        ctx.expect_gap(
+            drawers[index + 1],
+            drawers[index],
+            axis="z",
+            min_gap=0.011,
+            max_gap=0.013,
+            positive_elem=upper_front,
+            negative_elem=lower_front,
+            name=f"drawer_reveal_{index + 1}_to_{index + 2}",
+        )
 
     return ctx.report()
 
 
-# >>> USER_CODE_END
-
 object_model = build_object_model()
+# >>> USER_CODE_END

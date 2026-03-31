@@ -3,12 +3,31 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
 import os
+
+_REAL_GETCWD = os.getcwd
+
+
+def _safe_getcwd() -> str:
+    try:
+        return _REAL_GETCWD()
+    except FileNotFoundError:
+        return "/tmp"
+
+
+os.getcwd = _safe_getcwd
+try:
+    os.chdir("/tmp")
+except OSError:
+    pass
+
+import math
+from pathlib import Path
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -18,515 +37,527 @@ from sdk import (
     TestReport,
 )
 
-def _midpoint(
-    a: tuple[float, float, float], b: tuple[float, float, float]
-) -> tuple[float, float, float]:
-    return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5)
-
-
-def _distance(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
-    return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2)
-
-
-def _rpy_for_cylinder(
-    a: tuple[float, float, float], b: tuple[float, float, float]
-) -> tuple[float, float, float]:
-    dx = b[0] - a[0]
-    dy = b[1] - a[1]
-    dz = b[2] - a[2]
-    length_xy = math.hypot(dx, dy)
-    yaw = math.atan2(dy, dx)
-    pitch = math.atan2(length_xy, dz)
-    return (0.0, pitch, yaw)
-
-
-def _add_member(part, a, b, radius: float, material, name: str) -> None:
-    part.visual(
-        Cylinder(radius=radius, length=_distance(a, b)),
-        origin=Origin(xyz=_midpoint(a, b), rpy=_rpy_for_cylinder(a, b)),
-        material=material,
-        name=name,
-    )
-
-
-def _add_wheel_visuals(part, radius: float, width: float, tire_mat, rim_mat, hub_mat) -> None:
-    part.visual(
-        Cylinder(radius=radius, length=width),
-        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=tire_mat,
-        name="tire",
-    )
-    part.visual(
-        Cylinder(radius=radius * 0.58, length=width * 0.55),
-        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=rim_mat,
-        name="rim",
-    )
-    part.visual(
-        Cylinder(radius=radius * 0.20, length=width * 0.90),
-        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=hub_mat,
-        name="hub",
-    )
-    face_offset = width * 0.5
-    part.visual(
-        Cylinder(radius=radius * 0.42, length=0.002),
-        origin=Origin(xyz=(0.0, -face_offset, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=rim_mat,
-        name="face_neg",
-    )
-    part.visual(
-        Cylinder(radius=radius * 0.42, length=0.002),
-        origin=Origin(xyz=(0.0, face_offset, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=rim_mat,
-        name="face_pos",
-    )
+ASSETS = AssetContext(Path("/tmp"))
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="three_wheel_kick_scooter")
+    model = ArticulatedObject(name="folding_three_wheel_scooter", assets=ASSETS)
 
-    deck_blue = model.material("deck_blue", rgba=(0.18, 0.56, 0.84, 1.0))
-    charcoal = model.material("charcoal", rgba=(0.17, 0.18, 0.20, 1.0))
-    silver = model.material("silver", rgba=(0.74, 0.76, 0.79, 1.0))
-    rubber = model.material("rubber", rgba=(0.05, 0.05, 0.06, 1.0))
-    grip_black = model.material("grip_black", rgba=(0.10, 0.11, 0.12, 1.0))
+    frame_silver = model.material("frame_silver", rgba=(0.66, 0.69, 0.73, 1.0))
+    deck_black = model.material("deck_black", rgba=(0.14, 0.15, 0.16, 1.0))
+    tire_black = model.material("tire_black", rgba=(0.08, 0.08, 0.09, 1.0))
+    grip_black = model.material("grip_black", rgba=(0.11, 0.11, 0.12, 1.0))
+    accent_orange = model.material("accent_orange", rgba=(0.93, 0.48, 0.16, 1.0))
+    axle_steel = model.material("axle_steel", rgba=(0.77, 0.79, 0.82, 1.0))
 
-    deck = model.part("deck")
-    deck.visual(
-        Box((0.50, 0.14, 0.020)),
-        origin=Origin(xyz=(0.0, 0.0, 0.083)),
-        material=deck_blue,
-        name="deck_surface",
+    front_assembly = model.part("front_assembly")
+    front_assembly.visual(
+        Cylinder(radius=0.014, length=0.236),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=axle_steel,
+        name="hinge_pin",
     )
-    deck.visual(
-        Box((0.34, 0.09, 0.004)),
-        origin=Origin(xyz=(0.0, 0.0, 0.095)),
-        material=charcoal,
-        name="grip_pad",
+    front_assembly.visual(
+        Box((0.030, 0.012, 0.220)),
+        origin=Origin(xyz=(0.018, 0.055, 0.110)),
+        material=frame_silver,
+        name="left_hinge_cheek",
     )
-    deck.visual(
-        Box((0.46, 0.012, 0.016)),
-        origin=Origin(xyz=(0.0, 0.064, 0.085)),
-        material=charcoal,
-        name="left_rail",
+    front_assembly.visual(
+        Box((0.030, 0.012, 0.220)),
+        origin=Origin(xyz=(0.018, -0.055, 0.110)),
+        material=frame_silver,
+        name="right_hinge_cheek",
     )
-    deck.visual(
-        Box((0.46, 0.012, 0.016)),
-        origin=Origin(xyz=(0.0, -0.064, 0.085)),
-        material=charcoal,
-        name="right_rail",
+    front_assembly.visual(
+        Box((0.018, 0.026, 0.120)),
+        origin=Origin(xyz=(0.058, 0.112, 0.160)),
+        material=frame_silver,
+        name="left_fork_leg",
     )
-    deck.visual(
-        Box((0.084, 0.058, 0.012)),
-        origin=Origin(xyz=(0.215, 0.0, 0.099)),
-        material=charcoal,
-        name="pivot_plinth",
+    front_assembly.visual(
+        Box((0.018, 0.026, 0.120)),
+        origin=Origin(xyz=(0.058, -0.112, 0.160)),
+        material=frame_silver,
+        name="right_fork_leg",
     )
-    deck.visual(
-        Box((0.010, 0.026, 0.026)),
-        origin=Origin(xyz=(0.192, 0.0, 0.118)),
-        material=charcoal,
-        name="pivot_rear_cheek",
+    front_assembly.visual(
+        Box((0.034, 0.080, 0.240)),
+        origin=Origin(xyz=(0.048, 0.0, 0.120)),
+        material=frame_silver,
+        name="center_upright",
     )
-    deck.visual(
-        Box((0.010, 0.026, 0.026)),
-        origin=Origin(xyz=(0.238, 0.0, 0.118)),
-        material=charcoal,
-        name="pivot_front_cheek",
+    front_assembly.visual(
+        Box((0.090, 0.250, 0.030)),
+        origin=Origin(xyz=(0.048, 0.0, 0.225)),
+        material=frame_silver,
+        name="fork_bridge",
     )
-    deck.visual(
-        Box((0.075, 0.016, 0.080)),
-        origin=Origin(xyz=(-0.2875, 0.032, 0.076)),
-        material=charcoal,
-        name="rear_left_dropout",
+    front_assembly.visual(
+        Box((0.045, 0.080, 0.055)),
+        origin=Origin(xyz=(0.055, 0.0, 0.2675)),
+        material=accent_orange,
+        name="stem_gusset",
     )
-    deck.visual(
-        Box((0.075, 0.016, 0.080)),
-        origin=Origin(xyz=(-0.2875, -0.032, 0.076)),
-        material=charcoal,
-        name="rear_right_dropout",
+    front_assembly.visual(
+        Box((0.070, 0.100, 0.070)),
+        origin=Origin(xyz=(0.055, 0.0, 0.305)),
+        material=accent_orange,
+        name="head_block",
     )
-    deck.visual(
-        Cylinder(radius=0.006, length=0.010),
-        origin=Origin(xyz=(-0.315, 0.022, 0.055), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="rear_left_stub",
+    front_assembly.visual(
+        Cylinder(radius=0.028, length=0.360),
+        origin=Origin(xyz=(0.055, 0.0, 0.490)),
+        material=frame_silver,
+        name="outer_sleeve",
     )
-    deck.visual(
-        Cylinder(radius=0.006, length=0.010),
-        origin=Origin(xyz=(-0.315, -0.022, 0.055), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="rear_right_stub",
-    )
-    deck.visual(
-        Cylinder(radius=0.0045, length=0.034),
-        origin=Origin(xyz=(-0.315, 0.0, 0.055), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="rear_axle_tube",
-    )
-    deck.inertial = Inertial.from_geometry(
-        Box((0.58, 0.16, 0.14)),
-        mass=4.8,
-        origin=Origin(xyz=(-0.02, 0.0, 0.085)),
+    front_assembly.inertial = Inertial.from_geometry(
+        Box((0.200, 0.360, 0.680)),
+        mass=3.2,
+        origin=Origin(xyz=(0.045, 0.0, 0.240)),
     )
 
-    steering = model.part("steering_fork")
-    steering.visual(
-        Cylinder(radius=0.0105, length=0.036),
-        origin=Origin(rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=silver,
-        name="pivot_barrel",
-    )
-    steering.visual(
-        Box((0.012, 0.020, 0.032)),
-        origin=Origin(xyz=(0.004, 0.0, 0.016)),
-        material=charcoal,
-        name="pivot_post",
-    )
-    steering.visual(
-        Box((0.018, 0.028, 0.022)),
-        origin=Origin(xyz=(0.012, 0.0, 0.031)),
-        material=charcoal,
-        name="pivot_yoke",
-    )
-    steering.visual(
-        Box((0.022, 0.094, 0.014)),
-        origin=Origin(xyz=(0.050, 0.0, 0.010)),
-        material=charcoal,
-        name="fork_crown",
-    )
-    _add_member(
-        steering,
-        (0.010, 0.0, 0.030),
-        (0.040, 0.0, 0.020),
-        0.0055,
-        silver,
-        "crown_link",
-    )
-    _add_member(
-        steering,
-        (0.015, 0.0, 0.034),
-        (0.098, 0.0, 0.470),
-        0.014,
-        silver,
-        "lower_column",
-    )
-    steering.visual(
-        Cylinder(radius=0.021, length=0.110),
-        origin=Origin(xyz=(0.098, 0.0, 0.485)),
-        material=charcoal,
-        name="clamp_sleeve",
-    )
-    steering.visual(
-        Box((0.018, 0.022, 0.022)),
-        origin=Origin(xyz=(0.112, 0.0, 0.485)),
-        material=charcoal,
-        name="clamp_lug",
-    )
-    _add_member(
-        steering,
-        (0.050, 0.032, 0.010),
-        (0.112, 0.084, -0.056),
-        0.010,
-        silver,
-        "left_fork_arm",
-    )
-    _add_member(
-        steering,
-        (0.050, -0.032, 0.010),
-        (0.112, -0.084, -0.056),
-        0.010,
-        silver,
-        "right_fork_arm",
-    )
-    steering.visual(
-        Box((0.032, 0.024, 0.040)),
-        origin=Origin(xyz=(0.116, 0.084, -0.056)),
-        material=charcoal,
-        name="left_hub_block",
-    )
-    steering.visual(
-        Box((0.032, 0.024, 0.040)),
-        origin=Origin(xyz=(0.116, -0.084, -0.056)),
-        material=charcoal,
-        name="right_hub_block",
-    )
-    steering.visual(
-        Cylinder(radius=0.0055, length=0.164),
-        origin=Origin(xyz=(0.096, 0.0, -0.032), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="fork_spreader",
-    )
-    steering.visual(
-        Cylinder(radius=0.008, length=0.014),
-        origin=Origin(xyz=(0.124, 0.098, -0.064), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="front_left_stub",
-    )
-    steering.visual(
-        Cylinder(radius=0.008, length=0.014),
-        origin=Origin(xyz=(0.124, -0.098, -0.064), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="front_right_stub",
-    )
-    steering.inertial = Inertial.from_geometry(
-        Box((0.28, 0.26, 0.60)),
-        mass=1.6,
-        origin=Origin(xyz=(0.06, 0.0, 0.16)),
-    )
-
-    handlebar = model.part("handlebar_assembly")
+    handlebar = model.part("handlebar")
     handlebar.visual(
-        Cylinder(radius=0.015, length=0.240),
-        origin=Origin(xyz=(0.0, 0.0, 0.120)),
-        material=silver,
-        name="stem_insert",
+        Cylinder(radius=0.023, length=0.390),
+        origin=Origin(xyz=(0.0, 0.0, 0.195)),
+        material=frame_silver,
+        name="lower_post",
     )
     handlebar.visual(
-        Cylinder(radius=0.018, length=0.050),
-        origin=Origin(xyz=(0.0, 0.0, 0.200)),
-        material=charcoal,
-        name="height_adjust_collar",
-    )
-    handlebar.visual(
-        Box((0.050, 0.040, 0.030)),
-        origin=Origin(xyz=(0.0, 0.0, 0.245)),
-        material=charcoal,
+        Box((0.055, 0.070, 0.050)),
+        origin=Origin(xyz=(0.0, 0.0, 0.385)),
+        material=accent_orange,
         name="bar_clamp",
     )
     handlebar.visual(
-        Cylinder(radius=0.013, length=0.320),
-        origin=Origin(xyz=(0.0, 0.0, 0.245), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=silver,
-        name="handlebar_bar",
+        Cylinder(radius=0.015, length=0.420),
+        origin=Origin(xyz=(0.0, 0.0, 0.425), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=frame_silver,
+        name="handlebar_crossbar",
     )
     handlebar.visual(
-        Cylinder(radius=0.017, length=0.080),
-        origin=Origin(xyz=(0.0, 0.185, 0.245), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        Cylinder(radius=0.018, length=0.120),
+        origin=Origin(xyz=(0.0, 0.258, 0.425), rpy=(math.pi / 2.0, 0.0, 0.0)),
         material=grip_black,
         name="left_grip",
     )
     handlebar.visual(
-        Cylinder(radius=0.017, length=0.080),
-        origin=Origin(xyz=(0.0, -0.185, 0.245), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        Cylinder(radius=0.018, length=0.120),
+        origin=Origin(xyz=(0.0, -0.258, 0.425), rpy=(math.pi / 2.0, 0.0, 0.0)),
         material=grip_black,
         name="right_grip",
     )
     handlebar.inertial = Inertial.from_geometry(
-        Box((0.10, 0.42, 0.32)),
+        Box((0.070, 0.540, 0.420)),
         mass=0.9,
-        origin=Origin(xyz=(0.0, 0.0, 0.18)),
+        origin=Origin(xyz=(0.0, 0.0, 0.210)),
     )
 
-    front_left_wheel = model.part("front_left_wheel")
-    _add_wheel_visuals(front_left_wheel, 0.060, 0.032, rubber, silver, charcoal)
-    front_left_wheel.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.060, length=0.032),
-        mass=0.5,
+    deck = model.part("deck")
+    deck.visual(
+        Cylinder(radius=0.024, length=0.096),
         origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=frame_silver,
+        name="hinge_barrel",
+    )
+    deck.visual(
+        Box((0.115, 0.120, 0.055)),
+        origin=Origin(xyz=(-0.060, 0.0, -0.040)),
+        material=accent_orange,
+        name="hinge_neck",
+    )
+    deck.visual(
+        Box((0.500, 0.150, 0.026)),
+        origin=Origin(xyz=(-0.285, 0.0, -0.060)),
+        material=deck_black,
+        name="deck_shell",
+    )
+    deck.visual(
+        Box((0.390, 0.115, 0.003)),
+        origin=Origin(xyz=(-0.295, 0.0, -0.0455)),
+        material=grip_black,
+        name="grip_tape",
+    )
+    deck.visual(
+        Box((0.110, 0.018, 0.090)),
+        origin=Origin(xyz=(-0.585, 0.041, -0.025)),
+        material=frame_silver,
+        name="left_rear_arm",
+    )
+    deck.visual(
+        Box((0.110, 0.018, 0.090)),
+        origin=Origin(xyz=(-0.585, -0.041, -0.025)),
+        material=frame_silver,
+        name="right_rear_arm",
+    )
+    deck.inertial = Inertial.from_geometry(
+        Box((0.660, 0.170, 0.150)),
+        mass=2.3,
+        origin=Origin(xyz=(-0.330, 0.0, -0.030)),
     )
 
-    front_right_wheel = model.part("front_right_wheel")
-    _add_wheel_visuals(front_right_wheel, 0.060, 0.032, rubber, silver, charcoal)
-    front_right_wheel.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.060, length=0.032),
-        mass=0.5,
+    left_front_wheel = model.part("left_front_wheel")
+    left_front_wheel.visual(
+        Cylinder(radius=0.095, length=0.036),
         origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=tire_black,
+        name="tire",
+    )
+    left_front_wheel.visual(
+        Cylinder(radius=0.060, length=0.028),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=frame_silver,
+        name="rim",
+    )
+    left_front_wheel.visual(
+        Cylinder(radius=0.018, length=0.018),
+        origin=Origin(xyz=(0.0, -0.018, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=axle_steel,
+        name="inner_hub",
+    )
+    left_front_wheel.inertial = Inertial.from_geometry(
+        Box((0.190, 0.052, 0.190)),
+        mass=0.6,
+        origin=Origin(),
+    )
+
+    right_front_wheel = model.part("right_front_wheel")
+    right_front_wheel.visual(
+        Cylinder(radius=0.095, length=0.036),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=tire_black,
+        name="tire",
+    )
+    right_front_wheel.visual(
+        Cylinder(radius=0.060, length=0.028),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=frame_silver,
+        name="rim",
+    )
+    right_front_wheel.visual(
+        Cylinder(radius=0.018, length=0.018),
+        origin=Origin(xyz=(0.0, 0.018, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=axle_steel,
+        name="inner_hub",
+    )
+    right_front_wheel.inertial = Inertial.from_geometry(
+        Box((0.190, 0.052, 0.190)),
+        mass=0.6,
+        origin=Origin(),
     )
 
     rear_wheel = model.part("rear_wheel")
-    _add_wheel_visuals(rear_wheel, 0.055, 0.034, rubber, silver, charcoal)
-    rear_wheel.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.055, length=0.034),
-        mass=0.45,
+    rear_wheel.visual(
+        Cylinder(radius=0.075, length=0.040),
         origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=tire_black,
+        name="tire",
+    )
+    rear_wheel.visual(
+        Cylinder(radius=0.046, length=0.030),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=frame_silver,
+        name="rim",
+    )
+    rear_wheel.visual(
+        Cylinder(radius=0.018, length=0.012),
+        origin=Origin(xyz=(0.0, 0.026, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=axle_steel,
+        name="left_hub",
+    )
+    rear_wheel.visual(
+        Cylinder(radius=0.018, length=0.012),
+        origin=Origin(xyz=(0.0, -0.026, 0.0), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=axle_steel,
+        name="right_hub",
+    )
+    rear_wheel.inertial = Inertial.from_geometry(
+        Box((0.150, 0.064, 0.150)),
+        mass=0.55,
+        origin=Origin(),
     )
 
     model.articulation(
-        "steering_tilt",
+        "deck_fold_hinge",
         ArticulationType.REVOLUTE,
-        parent=deck,
-        child=steering,
-        origin=Origin(xyz=(0.215, 0.0, 0.118)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=12.0, velocity=1.8, lower=-0.30, upper=0.30),
+        parent=front_assembly,
+        child=deck,
+        origin=Origin(),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=24.0,
+            velocity=2.2,
+            lower=0.0,
+            upper=1.15,
+        ),
     )
     model.articulation(
-        "handlebar_mount",
-        ArticulationType.FIXED,
-        parent=steering,
+        "handlebar_telescoping",
+        ArticulationType.PRISMATIC,
+        parent=front_assembly,
         child=handlebar,
-        origin=Origin(xyz=(0.098, 0.0, 0.350)),
+        origin=Origin(xyz=(0.055, 0.0, 0.340)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(
+            effort=14.0,
+            velocity=0.50,
+            lower=0.0,
+            upper=0.180,
+        ),
     )
     model.articulation(
-        "front_left_spin",
+        "left_front_wheel_spin",
         ArticulationType.CONTINUOUS,
-        parent=steering,
-        child=front_left_wheel,
-        origin=Origin(xyz=(0.124, 0.118, -0.064)),
+        parent=front_assembly,
+        child=left_front_wheel,
+        origin=Origin(xyz=(0.0, 0.145, 0.0)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=4.0, velocity=25.0),
+        motion_limits=MotionLimits(effort=3.0, velocity=24.0),
     )
     model.articulation(
-        "front_right_spin",
+        "right_front_wheel_spin",
         ArticulationType.CONTINUOUS,
-        parent=steering,
-        child=front_right_wheel,
-        origin=Origin(xyz=(0.124, -0.118, -0.064)),
+        parent=front_assembly,
+        child=right_front_wheel,
+        origin=Origin(xyz=(0.0, -0.145, 0.0)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=4.0, velocity=25.0),
+        motion_limits=MotionLimits(effort=3.0, velocity=24.0),
     )
     model.articulation(
-        "rear_spin",
+        "rear_wheel_spin",
         ArticulationType.CONTINUOUS,
         parent=deck,
         child=rear_wheel,
-        origin=Origin(xyz=(-0.315, 0.0, 0.055)),
+        origin=Origin(xyz=(-0.620, 0.0, -0.020)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=4.0, velocity=25.0),
+        motion_limits=MotionLimits(effort=3.0, velocity=24.0),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    try:
-        os.getcwd()
-    except FileNotFoundError:
-        os.chdir("/")
-
-    ctx = TestContext(object_model)
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    front_assembly = object_model.get_part("front_assembly")
+    handlebar = object_model.get_part("handlebar")
     deck = object_model.get_part("deck")
-    steering = object_model.get_part("steering_fork")
-    handlebar = object_model.get_part("handlebar_assembly")
-    front_left_wheel = object_model.get_part("front_left_wheel")
-    front_right_wheel = object_model.get_part("front_right_wheel")
+    left_front_wheel = object_model.get_part("left_front_wheel")
+    right_front_wheel = object_model.get_part("right_front_wheel")
     rear_wheel = object_model.get_part("rear_wheel")
+    deck_fold_hinge = object_model.get_articulation("deck_fold_hinge")
+    handlebar_telescoping = object_model.get_articulation("handlebar_telescoping")
+    left_front_wheel_spin = object_model.get_articulation("left_front_wheel_spin")
+    right_front_wheel_spin = object_model.get_articulation("right_front_wheel_spin")
+    rear_wheel_spin = object_model.get_articulation("rear_wheel_spin")
 
-    steering_tilt = object_model.get_articulation("steering_tilt")
-
-    deck_surface = deck.get_visual("deck_surface")
-    pivot_front_cheek = deck.get_visual("pivot_front_cheek")
-    pivot_rear_cheek = deck.get_visual("pivot_rear_cheek")
-    rear_left_stub = deck.get_visual("rear_left_stub")
-    rear_right_stub = deck.get_visual("rear_right_stub")
-
-    pivot_barrel = steering.get_visual("pivot_barrel")
-    clamp_sleeve = steering.get_visual("clamp_sleeve")
-    front_left_stub = steering.get_visual("front_left_stub")
-    front_right_stub = steering.get_visual("front_right_stub")
-
-    stem_insert = handlebar.get_visual("stem_insert")
-    handlebar_bar = handlebar.get_visual("handlebar_bar")
-
-    front_left_face_neg = front_left_wheel.get_visual("face_neg")
-    front_right_face_pos = front_right_wheel.get_visual("face_pos")
-    rear_face_pos = rear_wheel.get_visual("face_pos")
-    rear_face_neg = rear_wheel.get_visual("face_neg")
+    outer_sleeve = front_assembly.get_visual("outer_sleeve")
+    hinge_pin = front_assembly.get_visual("hinge_pin")
+    lower_post = handlebar.get_visual("lower_post")
+    handlebar_crossbar = handlebar.get_visual("handlebar_crossbar")
+    hinge_barrel = deck.get_visual("hinge_barrel")
+    left_rear_arm = deck.get_visual("left_rear_arm")
+    right_rear_arm = deck.get_visual("right_rear_arm")
+    left_front_tire = left_front_wheel.get_visual("tire")
+    right_front_tire = right_front_wheel.get_visual("tire")
+    left_front_hub = left_front_wheel.get_visual("inner_hub")
+    right_front_hub = right_front_wheel.get_visual("inner_hub")
+    rear_tire = rear_wheel.get_visual("tire")
+    rear_left_hub = rear_wheel.get_visual("left_hub")
+    rear_right_hub = rear_wheel.get_visual("right_hub")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
     ctx.allow_overlap(
-        front_left_wheel,
-        steering,
-        reason="front left wheel hub sleeves around the left stub axle",
-    )
-    ctx.allow_overlap(
-        front_right_wheel,
-        steering,
-        reason="front right wheel hub sleeves around the right stub axle",
-    )
-    ctx.allow_overlap(
-        rear_wheel,
         deck,
-        reason="rear wheel side faces seat tightly against the fixed rear axle stubs",
+        front_assembly,
+        elem_a=hinge_barrel,
+        elem_b=hinge_pin,
+        reason="the deck hinge barrel rotates around the fixed hinge pin",
     )
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.allow_overlap(
+        handlebar,
+        front_assembly,
+        elem_a=lower_post,
+        elem_b=outer_sleeve,
+        reason="the telescoping lower post remains nested inside the outer sleeve",
+    )
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    ctx.expect_contact(steering, deck, elem_a=pivot_barrel, elem_b=pivot_front_cheek)
-    ctx.expect_contact(steering, deck, elem_a=pivot_barrel, elem_b=pivot_rear_cheek)
-    ctx.expect_contact(handlebar, steering, elem_a=stem_insert, elem_b=clamp_sleeve)
-    ctx.expect_contact(front_left_wheel, steering, elem_a=front_left_face_neg, elem_b=front_left_stub)
-    ctx.expect_contact(front_right_wheel, steering, elem_a=front_right_face_pos, elem_b=front_right_stub)
-    ctx.expect_contact(rear_wheel, deck, elem_a=rear_face_pos, elem_b=rear_left_stub)
-    ctx.expect_contact(rear_wheel, deck, elem_a=rear_face_neg, elem_b=rear_right_stub)
-    ctx.expect_origin_distance(front_left_wheel, front_right_wheel, axes="x", max_dist=0.002)
-    ctx.expect_origin_distance(front_left_wheel, front_right_wheel, axes="z", max_dist=0.002)
-    ctx.expect_origin_distance(rear_wheel, deck, axes="y", max_dist=0.001)
-
+    ctx.check(
+        "deck hinge is a bounded revolute at the front axle",
+        deck_fold_hinge.articulation_type == ArticulationType.REVOLUTE
+        and tuple(deck_fold_hinge.axis) == (0.0, 1.0, 0.0),
+        "The deck should fold about the front axle's lateral axis.",
+    )
+    ctx.check(
+        "handlebar column telescopes vertically",
+        handlebar_telescoping.articulation_type == ArticulationType.PRISMATIC
+        and tuple(handlebar_telescoping.axis) == (0.0, 0.0, 1.0),
+        "The handlebar should slide upward out of the front sleeve.",
+    )
+    ctx.check(
+        "all three wheels spin on continuous axle joints",
+        left_front_wheel_spin.articulation_type == ArticulationType.CONTINUOUS
+        and right_front_wheel_spin.articulation_type == ArticulationType.CONTINUOUS
+        and rear_wheel_spin.articulation_type == ArticulationType.CONTINUOUS
+        and tuple(left_front_wheel_spin.axis) == (0.0, 1.0, 0.0)
+        and tuple(right_front_wheel_spin.axis) == (0.0, 1.0, 0.0)
+        and tuple(rear_wheel_spin.axis) == (0.0, 1.0, 0.0),
+        "Each wheel should rotate freely on its axle.",
+    )
+    ctx.expect_contact(
+        front_assembly,
+        left_front_wheel,
+        elem_a=hinge_pin,
+        elem_b=left_front_hub,
+        contact_tol=0.0005,
+        name="left front wheel mounts to the fork",
+    )
+    ctx.expect_contact(
+        front_assembly,
+        right_front_wheel,
+        elem_a=hinge_pin,
+        elem_b=right_front_hub,
+        contact_tol=0.0005,
+        name="right front wheel mounts to the fork",
+    )
+    ctx.expect_contact(
+        deck,
+        rear_wheel,
+        elem_a=left_rear_arm,
+        elem_b=rear_left_hub,
+        contact_tol=0.0005,
+        name="rear wheel mounts to the left rear arm",
+    )
+    ctx.expect_contact(
+        deck,
+        rear_wheel,
+        elem_a=right_rear_arm,
+        elem_b=rear_right_hub,
+        contact_tol=0.0005,
+        name="rear wheel mounts to the right rear arm",
+    )
+    ctx.expect_gap(
+        left_front_wheel,
+        right_front_wheel,
+        axis="y",
+        positive_elem=left_front_tire,
+        negative_elem=right_front_tire,
+        min_gap=0.250,
+        name="front wheels sit on a wide fork",
+    )
+    ctx.expect_within(
+        handlebar,
+        front_assembly,
+        axes="xy",
+        inner_elem=lower_post,
+        outer_elem=outer_sleeve,
+        name="collapsed handlebar post stays inside the sleeve",
+    )
     ctx.expect_gap(
         handlebar,
-        deck,
+        front_assembly,
         axis="z",
-        min_gap=0.48,
-        positive_elem=handlebar_bar,
-        negative_elem=deck_surface,
+        positive_elem=handlebar_crossbar,
+        negative_elem=outer_sleeve,
+        min_gap=0.035,
+        name="collapsed handlebar still rises above the sleeve",
+    )
+    ctx.expect_overlap(
+        front_assembly,
+        deck,
+        axes="yz",
+        elem_a=hinge_pin,
+        elem_b=hinge_barrel,
+        min_overlap=0.028,
+        name="hinge pin stays aligned with the folding barrel",
     )
     ctx.expect_gap(
-        front_left_wheel,
-        deck,
+        front_assembly,
+        rear_wheel,
         axis="x",
-        min_gap=0.010,
-        negative_elem=deck_surface,
+        positive_elem=hinge_pin,
+        negative_elem=rear_tire,
+        min_gap=0.500,
+        name="rear wheel trails well behind the front axle",
     )
-    ctx.expect_gap(
-        front_right_wheel,
-        deck,
-        axis="x",
-        min_gap=0.010,
-        negative_elem=deck_surface,
-    )
-    ctx.expect_gap(front_left_wheel, deck, axis="y", min_gap=0.020)
-    ctx.expect_gap(deck, front_right_wheel, axis="y", min_gap=0.020)
-    ctx.expect_gap(deck, rear_wheel, axis="x", min_gap=0.005, positive_elem=deck_surface)
-    ctx.expect_gap(front_left_wheel, front_right_wheel, axis="y", min_gap=0.18)
-    ctx.expect_gap(front_left_wheel, rear_wheel, axis="x", min_gap=0.50)
-    ctx.expect_gap(front_right_wheel, rear_wheel, axis="x", min_gap=0.50)
-    ctx.expect_within(rear_wheel, deck, axes="y")
 
-    with ctx.pose({steering_tilt: 0.35}):
-        ctx.expect_contact(steering, deck, elem_a=pivot_barrel, elem_b=pivot_front_cheek)
+    deck_limits = deck_fold_hinge.motion_limits
+    if deck_limits is not None and deck_limits.lower is not None and deck_limits.upper is not None:
+        with ctx.pose({deck_fold_hinge: deck_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="deck_fold_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="deck_fold_lower_no_floating")
+        with ctx.pose({deck_fold_hinge: deck_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="deck_fold_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="deck_fold_upper_no_floating")
+            ctx.expect_overlap(
+                front_assembly,
+                deck,
+                axes="yz",
+                elem_a=hinge_pin,
+                elem_b=hinge_barrel,
+                min_overlap=0.028,
+                name="hinge pin stays aligned while folded",
+            )
+            ctx.expect_gap(
+                rear_wheel,
+                front_assembly,
+                axis="z",
+                positive_elem=rear_tire,
+                negative_elem=hinge_pin,
+                min_gap=0.430,
+                name="folded deck lifts the rear wheel above the front axle",
+            )
+
+    handle_limits = handlebar_telescoping.motion_limits
+    if handle_limits is not None and handle_limits.lower is not None and handle_limits.upper is not None:
+        with ctx.pose({handlebar_telescoping: handle_limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="handlebar_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="handlebar_lower_no_floating")
+        with ctx.pose({handlebar_telescoping: handle_limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="handlebar_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="handlebar_upper_no_floating")
+            ctx.expect_within(
+                handlebar,
+                front_assembly,
+                axes="xy",
+                inner_elem=lower_post,
+                outer_elem=outer_sleeve,
+                name="extended post stays aligned inside the sleeve",
+            )
+            ctx.expect_gap(
+                handlebar,
+                front_assembly,
+                axis="z",
+                positive_elem=handlebar_crossbar,
+                negative_elem=outer_sleeve,
+                min_gap=0.210,
+                name="telescoped handlebar extends clearly upward",
+            )
+
+    with ctx.pose({handlebar_telescoping: 0.180}):
         ctx.expect_gap(
             handlebar,
-            deck,
+            front_assembly,
             axis="z",
-            min_gap=0.44,
-            positive_elem=handlebar_bar,
-            negative_elem=deck_surface,
-        )
-        ctx.expect_gap(
-            front_left_wheel,
-            deck,
-            axis="x",
-            min_gap=0.008,
-            negative_elem=deck_surface,
-        )
-        ctx.expect_gap(
-            front_right_wheel,
-            deck,
-            axis="x",
-            min_gap=0.008,
-            negative_elem=deck_surface,
+            positive_elem=handlebar_crossbar,
+            negative_elem=outer_sleeve,
+            min_gap=0.210,
+            name="full extension raises the bar well above the sleeve",
         )
 
-    with ctx.pose({steering_tilt: -0.35}):
-        ctx.expect_contact(steering, deck, elem_a=pivot_barrel, elem_b=pivot_rear_cheek)
+    with ctx.pose({deck_fold_hinge: 1.050}):
         ctx.expect_gap(
-            handlebar,
-            deck,
+            rear_wheel,
+            front_assembly,
             axis="z",
-            min_gap=0.44,
-            positive_elem=handlebar_bar,
-            negative_elem=deck_surface,
+            positive_elem=rear_tire,
+            negative_elem=hinge_pin,
+            min_gap=0.360,
+            name="folded deck lifts the rear wheel high above the front axle",
         )
 
     return ctx.report()

@@ -1,0 +1,25 @@
+ Task: High-Precision 3D CAD Geometry Generation with Absolute Kinematic Constraints
+
+Mechanical System Logic:
+The assembly is defined as a closed-loop kinematic chain. Every component is linked via specific mechanical joints (Revolute, Prismatic, or Cylindrical) with defined travel limits to ensure zero unconstrained or floating parts in 3D space.
+
+1. Base & Mobility Sub-system:
+- Caster-to-Base Interface: Each swivel caster stem is locked into the 5-star base socket via a C-clip groove constraint, allowing 360-degree rotation around the Z-axis while maintaining zero axial translation.
+- Wheel-to-Yoke assembly: The twin wheels are mounted on a solid horizontal axle, constrained by a Revolute Joint. Lateral movement along the axle is restricted by flush-mated inner yoke walls.
+- Ground Contact: All wheels maintain a Tangential Constraint to the ground plane (Z=0).
+
+2. Structural Support & Lift:
+- Column Fixation: The gas lift outer cylinder is joined to the central base hub using a 1:20 Morse Taper friction-fit, locking all degrees of freedom relative to the base.
+- Vertical Adjustment: The internal piston operates via a Prismatic Joint. Motion range is strictly limited to 0-120mm by internal mechanical shoulders to prevent piston over-extension.
+
+3. Seat & Backrest Kinematics:
+- Synchronous Mechanism: The seat pan and backrest are linked to a central control chassis through a series of pivot pins (Revolute Joints).
+- Angular Range: A physical stop-bracket limits the backrest recline from a 90-degree upright position to a 135-degree maximum tilt.
+- Tension Control: A threaded adjustment bolt is co-axial with a heavy-duty compression spring, ensuring constant contact between the cam mechanism and the follower.
+
+4. Multi-DOF Adjustments:
+- 4D Armrest Logic: Each armrest utilizes a nested Prismatic Joint for vertical travel (0-80mm) and a dual-axis sliding track for depth/width adjustment (+/- 30mm), both featuring end-cap plates to serve as structural hard stops.
+- Lumbar Support: The support block is constrained to a vertical T-track on the backrest spine, limited by physical stoppers at both ends of the rail.
+
+Geometric Integrity:
+All sliding surfaces and rotating axles must maintain a minimum material thickness of 2mm at their respective travel limits. No component remains unanchored; every part is structurally grounded to the main assembly frame.

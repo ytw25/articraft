@@ -4,526 +4,648 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import os
-
-_REAL_GETCWD = os.getcwd
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _REAL_GETCWD()
-    except FileNotFoundError:
-        return "/tmp"
-
-
-os.getcwd = _safe_getcwd
-try:
-    os.chdir("/tmp")
-except OSError:
-    pass
-
-import math
+from math import pi
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,
     Cylinder,
+    Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
 )
 
-ASSET_ROOT = "/tmp"
+try:
+    os.getcwd()
+except FileNotFoundError:
+    os.chdir("/")
 
-TOP_Z = 1.18
-PIN_Y = 0.04
-BASE_SPREAD_ANGLE = math.radians(28.0)
-LADDER_WIDTH = 0.46
-LADDER_HEIGHT = 1.16
-RAIL_THICK = 0.032
-RAIL_DEPTH = 0.024
-TOP_HEAD_DEPTH = 0.050
-TOP_HEAD_HEIGHT = 0.070
-RUNG_LENGTH = LADDER_WIDTH - 2 * RAIL_THICK + 0.012
-RUNG_DEPTH = 0.034
-RUNG_HEIGHT = 0.026
-RUNG_ZS = (-0.22, -0.44, -0.66, -0.88)
-FOOT_WIDTH = 0.070
-FOOT_DEPTH = 0.040
-FOOT_HEIGHT = 0.024
-FOOT_Z = -LADDER_HEIGHT + FOOT_HEIGHT / 2.0
-HOOK_SLOT_DEPTH = 0.052
-HOOK_LEG_THICK = 0.012
-HOOK_LEG_DROP = 0.095
-HOOK_BRIDGE_X = 0.270
-HOOK_BRIDGE_THICK = 0.012
-HOOK_BRIDGE_CLEARANCE = 0.0
-PLANK_LENGTH = 0.58
-PLANK_WIDTH = 0.22
-PLANK_THICK = 0.036
-PLANK_STANDOFF = 0.010
+MODEL_NAME = "two_section_extension_ladder"
+
+STEEL_RGBA = (0.60, 0.63, 0.67, 1.0)
+RUNG_RGBA = (0.74, 0.76, 0.79, 1.0)
+RUBBER_RGBA = (0.14, 0.15, 0.17, 1.0)
+
+CONNECT_EPS = 0.0002
+
+BASE_SECTION_LENGTH = 3.55
+FLY_SECTION_LENGTH = 3.10
+FLY_REST_Z = 1.05
+FLY_TRAVEL = 1.35
+
+BASE_RAIL_CENTER_X = 0.215
+BASE_RAIL_OUTER = (0.055, 0.030, BASE_SECTION_LENGTH)
+BASE_RAIL_WALL = 0.0035
+
+FLY_RAIL_OUTER = (0.028, 0.016, FLY_SECTION_LENGTH)
+FLY_RAIL_WALL = 0.0030
+
+CHANNEL_WEB_THICKNESS = 0.005
+CHANNEL_FLANGE_REACH = 0.034
+CHANNEL_FLANGE_THICKNESS = 0.004
+CHANNEL_DEPTH = 0.026
+CHANNEL_LENGTH = 3.10
+CHANNEL_BOTTOM_Z = 0.27
+
+FOOT_BARREL_RADIUS = 0.011
+FOOT_BARREL_LENGTH = 0.040
+FOOT_BARREL_Z = 0.060
+FOOT_SWIVEL_LIMIT = 0.55
+
+BASE_RAIL_BOTTOM_Z = FOOT_BARREL_Z + FOOT_BARREL_RADIUS
+BASE_RAIL_CENTER_Z = BASE_RAIL_BOTTOM_Z + BASE_SECTION_LENGTH / 2.0
+FLY_RAIL_CENTER_Z = FLY_SECTION_LENGTH / 2.0
+CHANNEL_CENTER_Z = CHANNEL_BOTTOM_Z + CHANNEL_LENGTH / 2.0
+
+FLY_LEFT_OUTER_WALL_X = (
+    -BASE_RAIL_CENTER_X
+    + BASE_RAIL_OUTER[0] / 2.0
+    + CHANNEL_WEB_THICKNESS
+    + 0.002
+    + FLY_RAIL_OUTER[0] / 2.0
+)
+FLY_RIGHT_OUTER_WALL_X = -FLY_LEFT_OUTER_WALL_X
+
+RUNG_PITCH = 0.295
+BASE_RUNG_OUTER = (
+    2.0 * BASE_RAIL_CENTER_X - BASE_RAIL_OUTER[0],
+    0.026,
+    0.024,
+)
+FLY_RUNG_OUTER = (
+    2.0 * abs(FLY_LEFT_OUTER_WALL_X) - FLY_RAIL_OUTER[0],
+    0.020,
+    0.022,
+)
+RUNG_WALL = 0.0025
+BASE_RUNG_ZS = [BASE_RAIL_BOTTOM_Z + 0.30 + i * RUNG_PITCH for i in range(11)]
+FLY_RUNG_LOCAL_ZS = [0.24 + i * RUNG_PITCH for i in range(9)]
+
+FOOT_STEM_SIZE = (0.026, 0.018, 0.032)
+FOOT_STEM_CENTER_Z = -0.020
+FOOT_SHOE_SIZE = (0.090, 0.034, 0.006)
+FOOT_SHOE_CENTER_Z = -0.038
+FOOT_PAD_SIZE = (0.095, 0.040, 0.012)
+FOOT_PAD_CENTER_Z = -0.046
 
 
-def _box(
+def _add_rect_tube(
     part,
-    name: str,
+    *,
+    center: tuple[float, float, float],
     size: tuple[float, float, float],
-    xyz: tuple[float, float, float],
-    rpy: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    material=None,
+    wall: float,
+    material,
+    name_map: dict[str, str] | None = None,
+    cap_z: bool = False,
 ) -> None:
+    cx, cy, cz = center
+    sx, sy, sz = size
+    names = name_map or {}
+    side_depth = max(sy - 2.0 * wall + 2.0 * CONNECT_EPS, wall)
+
     part.visual(
-        Box(size),
-        origin=Origin(xyz=xyz, rpy=rpy),
+        Box((wall, side_depth, sz)),
+        origin=Origin(xyz=(cx - sx / 2.0 + wall / 2.0, cy, cz)),
         material=material,
-        name=name,
+        name=names.get("neg_x"),
     )
-
-
-def _cylinder_x(
-    part,
-    name: str,
-    radius: float,
-    length: float,
-    xyz: tuple[float, float, float],
-    material=None,
-) -> None:
     part.visual(
-        Cylinder(radius=radius, length=length),
-        origin=Origin(xyz=xyz, rpy=(0.0, math.pi / 2.0, 0.0)),
+        Box((wall, side_depth, sz)),
+        origin=Origin(xyz=(cx + sx / 2.0 - wall / 2.0, cy, cz)),
         material=material,
-        name=name,
+        name=names.get("pos_x"),
     )
-
-
-def _build_ladder_section(part, metal, tread, rubber) -> None:
-    rail_x = LADDER_WIDTH / 2.0 - RAIL_THICK / 2.0
-
-    _box(
-        part,
-        "left_rail",
-        (RAIL_THICK, RAIL_DEPTH, LADDER_HEIGHT),
-        (-rail_x, 0.0, -LADDER_HEIGHT / 2.0),
-        material=metal,
+    part.visual(
+        Box((sx, wall, sz)),
+        origin=Origin(xyz=(cx, cy + sy / 2.0 - wall / 2.0, cz)),
+        material=material,
+        name=names.get("pos_y"),
     )
-    _box(
-        part,
-        "right_rail",
-        (RAIL_THICK, RAIL_DEPTH, LADDER_HEIGHT),
-        (rail_x, 0.0, -LADDER_HEIGHT / 2.0),
-        material=metal,
+    part.visual(
+        Box((sx, wall, sz)),
+        origin=Origin(xyz=(cx, cy - sy / 2.0 + wall / 2.0, cz)),
+        material=material,
+        name=names.get("neg_y"),
     )
-    _box(
-        part,
-        "top_head",
-        (LADDER_WIDTH, TOP_HEAD_DEPTH, TOP_HEAD_HEIGHT),
-        (0.0, 0.0, -TOP_HEAD_HEIGHT / 2.0),
-        material=metal,
-    )
-
-    for index, rung_z in enumerate(RUNG_ZS, start=1):
-        _box(
-            part,
-            f"rung_{index}",
-            (RUNG_LENGTH, RUNG_DEPTH, RUNG_HEIGHT),
-            (0.0, 0.0, rung_z),
-            material=tread,
+    if cap_z:
+        part.visual(
+            Box((sx, sy, wall)),
+            origin=Origin(xyz=(cx, cy, cz + sz / 2.0 - wall / 2.0)),
+            material=material,
+            name=names.get("pos_z"),
+        )
+        part.visual(
+            Box((sx, sy, wall)),
+            origin=Origin(xyz=(cx, cy, cz - sz / 2.0 + wall / 2.0)),
+            material=material,
+            name=names.get("neg_z"),
         )
 
-    _box(
-        part,
-        "left_foot",
-        (FOOT_WIDTH, FOOT_DEPTH, FOOT_HEIGHT),
-        (-rail_x, 0.0, FOOT_Z),
-        material=rubber,
-    )
-    _box(
-        part,
-        "right_foot",
-        (FOOT_WIDTH, FOOT_DEPTH, FOOT_HEIGHT),
-        (rail_x, 0.0, FOOT_Z),
-        material=rubber,
-    )
 
-
-def _build_plank(part, board, bracket) -> None:
-    rung_center_y = PIN_Y + abs(RUNG_ZS[0]) * math.sin(BASE_SPREAD_ANGLE)
-    bridge_span_y = HOOK_SLOT_DEPTH + 2.0 * HOOK_LEG_THICK
-    plank_center_z = HOOK_BRIDGE_THICK / 2.0 + PLANK_STANDOFF + PLANK_THICK / 2.0
-    leg_center_z = -HOOK_BRIDGE_THICK / 2.0 - HOOK_LEG_DROP / 2.0
-    leg_offset = HOOK_SLOT_DEPTH / 2.0 + HOOK_LEG_THICK / 2.0
-    mount_center_z = HOOK_BRIDGE_THICK / 2.0 + PLANK_STANDOFF / 2.0
-
-    _box(
-        part,
-        "deck",
-        (PLANK_WIDTH, PLANK_LENGTH, PLANK_THICK),
-        (0.0, -rung_center_y, plank_center_z),
-        material=board,
-    )
-
-    for prefix, hook_y in (("front", 0.0), ("rear", -2.0 * rung_center_y)):
-        _box(
-            part,
-            f"{prefix}_hook_bridge",
-            (HOOK_BRIDGE_X, bridge_span_y, HOOK_BRIDGE_THICK),
-            (0.0, hook_y, 0.0),
-            material=bracket,
-        )
-        _box(
-            part,
-            f"{prefix}_mount_pad",
-            (HOOK_BRIDGE_X, 0.040, PLANK_STANDOFF),
-            (0.0, hook_y, mount_center_z),
-            material=bracket,
-        )
-        _box(
-            part,
-            f"{prefix}_hook_outer_leg",
-            (HOOK_BRIDGE_X, HOOK_LEG_THICK, HOOK_LEG_DROP),
-            (0.0, hook_y + leg_offset, leg_center_z),
-            material=bracket,
-        )
-        _box(
-            part,
-            f"{prefix}_hook_inner_leg",
-            (HOOK_BRIDGE_X, HOOK_LEG_THICK, HOOK_LEG_DROP),
-            (0.0, hook_y - leg_offset, leg_center_z),
-            material=bracket,
-        )
+def _stile_name_map(prefix: str, *, left_side: bool) -> dict[str, str]:
+    if left_side:
+        return {
+            "neg_x": f"{prefix}_outer_wall",
+            "pos_x": f"{prefix}_inner_wall",
+            "pos_y": f"{prefix}_front_wall",
+            "neg_y": f"{prefix}_rear_wall",
+            "pos_z": f"{prefix}_top_cap",
+            "neg_z": f"{prefix}_bottom_cap",
+        }
+    return {
+        "neg_x": f"{prefix}_inner_wall",
+        "pos_x": f"{prefix}_outer_wall",
+        "pos_y": f"{prefix}_front_wall",
+        "neg_y": f"{prefix}_rear_wall",
+        "pos_z": f"{prefix}_top_cap",
+        "neg_z": f"{prefix}_bottom_cap",
+    }
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="platform_stepladder")
+    model = ArticulatedObject(name=MODEL_NAME)
 
-    aluminum = model.material("aluminum", rgba=(0.79, 0.82, 0.85, 1.0))
-    tread = model.material("tread_gray", rgba=(0.60, 0.62, 0.66, 1.0))
-    steel = model.material("steel", rgba=(0.31, 0.33, 0.36, 1.0))
-    wood = model.material("wood", rgba=(0.73, 0.57, 0.39, 1.0))
-    rubber = model.material("rubber", rgba=(0.12, 0.12, 0.12, 1.0))
+    steel = model.material("steel", rgba=STEEL_RGBA)
+    rung_steel = model.material("rung_steel", rgba=RUNG_RGBA)
+    rubber = model.material("rubber", rgba=RUBBER_RGBA)
 
-    bracket = model.part("spreader_bracket")
-    _box(
-        bracket,
-        "top_saddle",
-        (0.30, 0.16, 0.050),
-        (0.0, 0.0, TOP_Z + 0.025),
-        material=steel,
+    base = model.part("base")
+    base.inertial = Inertial.from_geometry(
+        Box((2.0 * BASE_RAIL_CENTER_X + BASE_RAIL_OUTER[0], BASE_RAIL_OUTER[1], BASE_SECTION_LENGTH)),
+        mass=14.5,
+        origin=Origin(xyz=(0.0, 0.0, BASE_RAIL_CENTER_Z)),
     )
-    _box(
-        bracket,
-        "front_hinge_block",
-        (0.28, 0.028, 0.090),
-        (0.0, PIN_Y, TOP_Z - 0.005),
-        material=steel,
+
+    fly = model.part("fly")
+    fly.inertial = Inertial.from_geometry(
+        Box((2.0 * abs(FLY_LEFT_OUTER_WALL_X) + FLY_RAIL_OUTER[0], FLY_RAIL_OUTER[1], FLY_SECTION_LENGTH)),
+        mass=10.5,
+        origin=Origin(xyz=(0.0, 0.0, FLY_RAIL_CENTER_Z)),
     )
-    _box(
-        bracket,
-        "rear_hinge_block",
-        (0.28, 0.028, 0.090),
-        (0.0, -PIN_Y, TOP_Z - 0.005),
-        material=steel,
+
+    left_foot = model.part("left_foot")
+    left_foot.inertial = Inertial.from_geometry(
+        Box((FOOT_PAD_SIZE[0], FOOT_PAD_SIZE[1], 0.071)),
+        mass=0.8,
+        origin=Origin(xyz=(0.0, 0.0, -0.024)),
     )
-    _box(
-        bracket,
-        "center_bracket_fin",
-        (0.13, 0.040, 0.110),
-        (0.0, 0.0, TOP_Z + 0.080),
-        material=steel,
+    right_foot = model.part("right_foot")
+    right_foot.inertial = Inertial.from_geometry(
+        Box((FOOT_PAD_SIZE[0], FOOT_PAD_SIZE[1], 0.071)),
+        mass=0.8,
+        origin=Origin(xyz=(0.0, 0.0, -0.024)),
     )
-    pin_x = LADDER_WIDTH / 2.0 - RAIL_THICK / 2.0
-    cheek_x = (pin_x + 0.14) / 2.0
-    cheek_width = pin_x - 0.14 + 0.032
-    for block_y, prefix in ((PIN_Y, "front"), (-PIN_Y, "rear")):
-        for side_x, side_name in ((-cheek_x, "left"), (cheek_x, "right")):
-            _box(
-                bracket,
-                f"{prefix}_{side_name}_cheek",
-                (cheek_width, 0.032, 0.090),
-                (side_x, block_y, TOP_Z - 0.005),
-                material=steel,
-            )
-    for side_x, side_name in ((-pin_x, "left"), (pin_x, "right")):
-        _cylinder_x(
-            bracket,
-            f"front_{side_name}_pin",
-            radius=0.011,
-            length=0.032,
-            xyz=(side_x, PIN_Y, TOP_Z),
-            material=tread,
+
+    _add_rect_tube(
+        base,
+        center=(-BASE_RAIL_CENTER_X, 0.0, BASE_RAIL_CENTER_Z),
+        size=BASE_RAIL_OUTER,
+        wall=BASE_RAIL_WALL,
+        material=steel,
+        name_map=_stile_name_map("left_base", left_side=True),
+        cap_z=True,
+    )
+    _add_rect_tube(
+        base,
+        center=(BASE_RAIL_CENTER_X, 0.0, BASE_RAIL_CENTER_Z),
+        size=BASE_RAIL_OUTER,
+        wall=BASE_RAIL_WALL,
+        material=steel,
+        name_map=_stile_name_map("right_base", left_side=False),
+        cap_z=True,
+    )
+
+    left_channel_web_center_x = (
+        -BASE_RAIL_CENTER_X + BASE_RAIL_OUTER[0] / 2.0 + CHANNEL_WEB_THICKNESS / 2.0
+    )
+    right_channel_web_center_x = (
+        BASE_RAIL_CENTER_X - BASE_RAIL_OUTER[0] / 2.0 - CHANNEL_WEB_THICKNESS / 2.0
+    )
+    left_channel_flange_center_x = (
+        left_channel_web_center_x + CHANNEL_WEB_THICKNESS / 2.0 + CHANNEL_FLANGE_REACH / 2.0
+    )
+    right_channel_flange_center_x = (
+        right_channel_web_center_x - CHANNEL_WEB_THICKNESS / 2.0 - CHANNEL_FLANGE_REACH / 2.0
+    )
+    flange_center_y = CHANNEL_DEPTH / 2.0 - CHANNEL_FLANGE_THICKNESS / 2.0
+
+    for side, web_x, flange_x in (
+        ("left", left_channel_web_center_x, left_channel_flange_center_x),
+        ("right", right_channel_web_center_x, right_channel_flange_center_x),
+    ):
+        base.visual(
+            Box((CHANNEL_WEB_THICKNESS, CHANNEL_DEPTH, CHANNEL_LENGTH)),
+            origin=Origin(xyz=(web_x, 0.0, CHANNEL_CENTER_Z)),
+            material=steel,
+            name=f"{side}_channel_web",
         )
-        _cylinder_x(
-            bracket,
-            f"rear_{side_name}_pin",
-            radius=0.011,
-            length=0.032,
-            xyz=(side_x, -PIN_Y, TOP_Z),
-            material=tread,
+        base.visual(
+            Box((CHANNEL_FLANGE_REACH, CHANNEL_FLANGE_THICKNESS, CHANNEL_LENGTH)),
+            origin=Origin(xyz=(flange_x, flange_center_y, CHANNEL_CENTER_Z)),
+            material=steel,
+            name=f"{side}_channel_front_flange",
+        )
+        base.visual(
+            Box((CHANNEL_FLANGE_REACH, CHANNEL_FLANGE_THICKNESS, CHANNEL_LENGTH)),
+            origin=Origin(xyz=(flange_x, -flange_center_y, CHANNEL_CENTER_Z)),
+            material=steel,
+            name=f"{side}_channel_rear_flange",
         )
 
-    front_section = model.part("front_section")
-    _build_ladder_section(front_section, aluminum, tread, rubber)
+    for idx, rung_z in enumerate(BASE_RUNG_ZS):
+        _add_rect_tube(
+            base,
+            center=(0.0, 0.0, rung_z),
+            size=BASE_RUNG_OUTER,
+            wall=RUNG_WALL,
+            material=rung_steel,
+            name_map={"pos_y": f"base_rung_{idx}_front_wall"},
+        )
 
-    rear_section = model.part("rear_section")
-    _build_ladder_section(rear_section, aluminum, tread, rubber)
+    _add_rect_tube(
+        fly,
+        center=(FLY_LEFT_OUTER_WALL_X, 0.0, FLY_RAIL_CENTER_Z),
+        size=FLY_RAIL_OUTER,
+        wall=FLY_RAIL_WALL,
+        material=steel,
+        name_map=_stile_name_map("left_fly", left_side=True),
+        cap_z=True,
+    )
+    _add_rect_tube(
+        fly,
+        center=(FLY_RIGHT_OUTER_WALL_X, 0.0, FLY_RAIL_CENTER_Z),
+        size=FLY_RAIL_OUTER,
+        wall=FLY_RAIL_WALL,
+        material=steel,
+        name_map=_stile_name_map("right_fly", left_side=False),
+        cap_z=True,
+    )
 
-    walk_board = model.part("walk_board")
-    _build_plank(walk_board, wood, steel)
+    for idx, rung_z in enumerate(FLY_RUNG_LOCAL_ZS):
+        _add_rect_tube(
+            fly,
+            center=(0.0, 0.0, rung_z),
+            size=FLY_RUNG_OUTER,
+            wall=RUNG_WALL,
+            material=rung_steel,
+            name_map={"pos_y": f"fly_rung_{idx}_front_wall"},
+        )
+
+    for foot_part, side in ((left_foot, "left"), (right_foot, "right")):
+        foot_part.visual(
+            Cylinder(radius=FOOT_BARREL_RADIUS, length=FOOT_BARREL_LENGTH),
+            origin=Origin(rpy=(0.0, pi / 2.0, 0.0)),
+            material=steel,
+            name=f"{side}_foot_barrel",
+        )
+        foot_part.visual(
+            Box(FOOT_STEM_SIZE),
+            origin=Origin(xyz=(0.0, 0.0, FOOT_STEM_CENTER_Z)),
+            material=steel,
+            name=f"{side}_foot_stem",
+        )
+        foot_part.visual(
+            Box(FOOT_SHOE_SIZE),
+            origin=Origin(xyz=(0.0, 0.0, FOOT_SHOE_CENTER_Z)),
+            material=steel,
+            name=f"{side}_foot_shoe",
+        )
+        foot_part.visual(
+            Box(FOOT_PAD_SIZE),
+            origin=Origin(xyz=(0.0, 0.0, FOOT_PAD_CENTER_Z)),
+            material=rubber,
+            name=f"{side}_foot_pad",
+        )
 
     model.articulation(
-        "bracket_to_front_section",
-        ArticulationType.REVOLUTE,
-        parent=bracket,
-        child=front_section,
-        origin=Origin(xyz=(0.0, PIN_Y, TOP_Z), rpy=(BASE_SPREAD_ANGLE, 0.0, 0.0)),
-        axis=(1.0, 0.0, 0.0),
+        "fly_slide",
+        ArticulationType.PRISMATIC,
+        parent=base,
+        child=fly,
+        origin=Origin(xyz=(0.0, 0.0, FLY_REST_Z)),
+        axis=(0.0, 0.0, 1.0),
         motion_limits=MotionLimits(
-            effort=35.0,
-            velocity=1.5,
-            lower=-0.06,
-            upper=0.0,
-        ),
-    )
-    model.articulation(
-        "bracket_to_rear_section",
-        ArticulationType.REVOLUTE,
-        parent=bracket,
-        child=rear_section,
-        origin=Origin(xyz=(0.0, -PIN_Y, TOP_Z), rpy=(-BASE_SPREAD_ANGLE, 0.0, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=35.0,
-            velocity=1.5,
+            effort=300.0,
+            velocity=0.45,
             lower=0.0,
-            upper=0.06,
+            upper=FLY_TRAVEL,
         ),
     )
-    rung_center_y = PIN_Y + abs(RUNG_ZS[0]) * math.sin(BASE_SPREAD_ANGLE)
-    rung_center_z = TOP_Z + RUNG_ZS[0] * math.cos(BASE_SPREAD_ANGLE)
-    rung_top_z = (
-        rung_center_z
-        + (RUNG_DEPTH / 2.0) * math.sin(BASE_SPREAD_ANGLE)
-        + (RUNG_HEIGHT / 2.0) * math.cos(BASE_SPREAD_ANGLE)
-    )
-    front_bridge_world_z = (
-        rung_top_z + HOOK_BRIDGE_THICK / 2.0 + HOOK_BRIDGE_CLEARANCE
-    )
-    rel_y = rung_center_y - PIN_Y
-    rel_z = front_bridge_world_z - TOP_Z
-    cos_a = math.cos(BASE_SPREAD_ANGLE)
-    sin_a = math.sin(BASE_SPREAD_ANGLE)
-    board_mount_y = rel_y * cos_a + rel_z * sin_a
-    board_mount_z = -rel_y * sin_a + rel_z * cos_a
     model.articulation(
-        "front_section_to_walk_board",
-        ArticulationType.FIXED,
-        parent=front_section,
-        child=walk_board,
-        origin=Origin(
-            xyz=(0.0, board_mount_y, board_mount_z),
-            rpy=(-BASE_SPREAD_ANGLE, 0.0, 0.0),
+        "left_foot_swivel",
+        ArticulationType.REVOLUTE,
+        parent=base,
+        child=left_foot,
+        origin=Origin(xyz=(-BASE_RAIL_CENTER_X, 0.0, FOOT_BARREL_Z)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=45.0,
+            velocity=1.2,
+            lower=-FOOT_SWIVEL_LIMIT,
+            upper=FOOT_SWIVEL_LIMIT,
         ),
     )
+    model.articulation(
+        "right_foot_swivel",
+        ArticulationType.REVOLUTE,
+        parent=base,
+        child=right_foot,
+        origin=Origin(xyz=(BASE_RAIL_CENTER_X, 0.0, FOOT_BARREL_Z)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=45.0,
+            velocity=1.2,
+            lower=-FOOT_SWIVEL_LIMIT,
+            upper=FOOT_SWIVEL_LIMIT,
+        ),
+    )
+
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSET_ROOT)
-    bracket = object_model.get_part("spreader_bracket")
-    front_section = object_model.get_part("front_section")
-    rear_section = object_model.get_part("rear_section")
-    walk_board = object_model.get_part("walk_board")
-    front_hinge = object_model.get_articulation("bracket_to_front_section")
-    rear_hinge = object_model.get_articulation("bracket_to_rear_section")
+    ctx = TestContext(object_model)
 
-    front_top_head = front_section.get_visual("top_head")
-    rear_top_head = rear_section.get_visual("top_head")
-    front_upper_rung = front_section.get_visual("rung_1")
-    rear_upper_rung = rear_section.get_visual("rung_1")
-    front_foot = front_section.get_visual("left_foot")
-    rear_foot = rear_section.get_visual("left_foot")
-    front_block = bracket.get_visual("front_hinge_block")
-    rear_block = bracket.get_visual("rear_hinge_block")
-    front_hook_bridge = walk_board.get_visual("front_hook_bridge")
-    rear_hook_bridge = walk_board.get_visual("rear_hook_bridge")
-    front_hook_outer_leg = walk_board.get_visual("front_hook_outer_leg")
-    front_hook_inner_leg = walk_board.get_visual("front_hook_inner_leg")
-    rear_hook_outer_leg = walk_board.get_visual("rear_hook_outer_leg")
-    rear_hook_inner_leg = walk_board.get_visual("rear_hook_inner_leg")
+    base = object_model.get_part("base")
+    fly = object_model.get_part("fly")
+    left_foot = object_model.get_part("left_foot")
+    right_foot = object_model.get_part("right_foot")
+
+    fly_slide = object_model.get_articulation("fly_slide")
+    left_foot_swivel = object_model.get_articulation("left_foot_swivel")
+    right_foot_swivel = object_model.get_articulation("right_foot_swivel")
+
+    left_channel_web = base.get_visual("left_channel_web")
+    left_channel_front_flange = base.get_visual("left_channel_front_flange")
+    left_channel_rear_flange = base.get_visual("left_channel_rear_flange")
+    right_channel_web = base.get_visual("right_channel_web")
+    right_channel_front_flange = base.get_visual("right_channel_front_flange")
+    right_channel_rear_flange = base.get_visual("right_channel_rear_flange")
+    left_base_bottom_cap = base.get_visual("left_base_bottom_cap")
+    right_base_bottom_cap = base.get_visual("right_base_bottom_cap")
+
+    left_fly_outer_wall = fly.get_visual("left_fly_outer_wall")
+    left_fly_front_wall = fly.get_visual("left_fly_front_wall")
+    left_fly_rear_wall = fly.get_visual("left_fly_rear_wall")
+    right_fly_outer_wall = fly.get_visual("right_fly_outer_wall")
+    right_fly_front_wall = fly.get_visual("right_fly_front_wall")
+    right_fly_rear_wall = fly.get_visual("right_fly_rear_wall")
+
+    left_foot_barrel = left_foot.get_visual("left_foot_barrel")
+    right_foot_barrel = right_foot.get_visual("right_foot_barrel")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.allow_overlap(
-        front_section,
-        bracket,
-        reason="front ladder head nests into the front hinge block around the pivot pin",
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=96)
+
+    base_aabb = ctx.part_world_aabb(base)
+    if base_aabb is None:
+        ctx.fail("base_aabb_exists", "Base section did not produce a world-space AABB.")
+    else:
+        base_width = base_aabb[1][0] - base_aabb[0][0]
+        base_height = base_aabb[1][2] - base_aabb[0][2]
+        ctx.check(
+            "base_section_width_realistic",
+            0.45 <= base_width <= 0.50,
+            f"Expected realistic extension-ladder width, got {base_width:.3f} m.",
+        )
+        ctx.check(
+            "base_section_height_realistic",
+            3.45 <= base_height <= 3.70,
+            f"Expected realistic base-section height, got {base_height:.3f} m.",
+        )
+
+    fly_aabb = ctx.part_world_aabb(fly)
+    if fly_aabb is None:
+        ctx.fail("fly_aabb_exists", "Fly section did not produce a world-space AABB.")
+    else:
+        fly_height = fly_aabb[1][2] - fly_aabb[0][2]
+        ctx.check(
+            "fly_section_height_realistic",
+            3.00 <= fly_height <= 3.20,
+            f"Expected realistic fly-section height, got {fly_height:.3f} m.",
+        )
+
+    ctx.check(
+        "fly_slide_axis_vertical",
+        tuple(fly_slide.axis) == (0.0, 0.0, 1.0),
+        f"Fly slide axis should be +Z, got {fly_slide.axis}.",
     )
-    ctx.allow_overlap(
-        rear_section,
-        bracket,
-        reason="rear ladder head nests into the rear hinge block around the pivot pin",
+    ctx.check(
+        "left_foot_swivel_axis_transverse",
+        tuple(left_foot_swivel.axis) == (1.0, 0.0, 0.0),
+        f"Left foot axis should be +X, got {left_foot_swivel.axis}.",
     )
-    ctx.allow_overlap(
-        walk_board,
-        front_section,
-        reason="the front hook bracket intentionally clasps the outer rung with seated bridge contact",
-    )
-    ctx.allow_overlap(
-        walk_board,
-        rear_section,
-        reason="the rear hook bracket intentionally clasps the outer rung in the supported platform stance",
+    ctx.check(
+        "right_foot_swivel_axis_transverse",
+        tuple(right_foot_swivel.axis) == (1.0, 0.0, 0.0),
+        f"Right foot axis should be +X, got {right_foot_swivel.axis}.",
     )
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.expect_overlap(
-        front_section,
-        bracket,
-        axes="xz",
-        elem_a=front_top_head,
-        elem_b=front_block,
-        min_overlap=0.012,
-    )
-    ctx.expect_overlap(
-        rear_section,
-        bracket,
-        axes="xz",
-        elem_a=rear_top_head,
-        elem_b=rear_block,
-        min_overlap=0.012,
-    )
-    ctx.expect_overlap(
-        walk_board,
-        front_section,
-        axes="xy",
-        elem_a=front_hook_bridge,
-        elem_b=front_upper_rung,
-        min_overlap=0.007,
-    )
-    ctx.expect_overlap(
-        walk_board,
-        rear_section,
-        axes="xy",
-        elem_a=rear_hook_bridge,
-        elem_b=rear_upper_rung,
-        min_overlap=0.007,
-    )
     ctx.expect_gap(
-        walk_board,
-        front_section,
-        axis="z",
-        positive_elem=front_hook_bridge,
-        negative_elem=front_upper_rung,
+        fly,
+        base,
+        axis="x",
+        min_gap=0.001,
         max_gap=0.003,
-        max_penetration=0.0,
+        positive_elem=left_fly_outer_wall,
+        negative_elem=left_channel_web,
+        name="left fly stile keeps a narrow running gap to the left channel web",
     )
     ctx.expect_gap(
-        walk_board,
-        rear_section,
-        axis="z",
-        positive_elem=rear_hook_bridge,
-        negative_elem=rear_upper_rung,
-        max_gap=0.007,
-        max_penetration=0.0,
+        base,
+        fly,
+        axis="x",
+        min_gap=0.001,
+        max_gap=0.003,
+        positive_elem=right_channel_web,
+        negative_elem=right_fly_outer_wall,
+        name="right fly stile keeps a narrow running gap to the right channel web",
+    )
+    ctx.expect_gap(
+        base,
+        fly,
+        axis="y",
+        min_gap=0.0005,
+        max_gap=0.002,
+        positive_elem=left_channel_front_flange,
+        negative_elem=left_fly_front_wall,
+        name="left front guide flange clears the fly stile with a slim sliding gap",
+    )
+    ctx.expect_gap(
+        fly,
+        base,
+        axis="y",
+        min_gap=0.0005,
+        max_gap=0.002,
+        positive_elem=left_fly_rear_wall,
+        negative_elem=left_channel_rear_flange,
+        name="left rear guide flange clears the fly stile with a slim sliding gap",
+    )
+    ctx.expect_gap(
+        base,
+        fly,
+        axis="y",
+        min_gap=0.0005,
+        max_gap=0.002,
+        positive_elem=right_channel_front_flange,
+        negative_elem=right_fly_front_wall,
+        name="right front guide flange clears the fly stile with a slim sliding gap",
+    )
+    ctx.expect_gap(
+        fly,
+        base,
+        axis="y",
+        min_gap=0.0005,
+        max_gap=0.002,
+        positive_elem=right_fly_rear_wall,
+        negative_elem=right_channel_rear_flange,
+        name="right rear guide flange clears the fly stile with a slim sliding gap",
+    )
+    ctx.expect_overlap(
+        fly,
+        base,
+        axes="z",
+        min_overlap=2.0,
+        elem_a=left_fly_outer_wall,
+        elem_b=left_channel_web,
+        name="fly section has substantial guide engagement at rest",
     )
     ctx.expect_contact(
-        walk_board,
-        front_section,
-        elem_a=front_hook_bridge,
-        elem_b=front_upper_rung,
+        left_foot,
+        base,
+        elem_a=left_foot_barrel,
+        elem_b=left_base_bottom_cap,
+        name="left swivel foot barrel is mounted under the left rail",
     )
     ctx.expect_contact(
-        walk_board,
-        rear_section,
-        elem_a=rear_hook_bridge,
-        elem_b=rear_upper_rung,
-    )
-    ctx.expect_gap(
-        walk_board,
-        front_section,
-        axis="y",
-        positive_elem=front_hook_outer_leg,
-        negative_elem=front_upper_rung,
-        max_gap=0.008,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(
-        front_section,
-        walk_board,
-        axis="y",
-        positive_elem=front_upper_rung,
-        negative_elem=front_hook_inner_leg,
-        max_gap=0.008,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(
-        walk_board,
-        rear_section,
-        axis="y",
-        positive_elem=rear_hook_outer_leg,
-        negative_elem=rear_upper_rung,
-        max_gap=0.008,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(
-        rear_section,
-        walk_board,
-        axis="y",
-        positive_elem=rear_upper_rung,
-        negative_elem=rear_hook_inner_leg,
-        max_gap=0.008,
-        max_penetration=0.0,
-    )
-    ctx.expect_gap(
-        front_section,
-        rear_section,
-        axis="y",
-        positive_elem=front_foot,
-        negative_elem=rear_foot,
-        min_gap=1.00,
+        right_foot,
+        base,
+        elem_a=right_foot_barrel,
+        elem_b=right_base_bottom_cap,
+        name="right swivel foot barrel is mounted under the right rail",
     )
 
-    with ctx.pose({front_hinge: -0.06, rear_hinge: 0.06}):
+    rest_fly_pos = ctx.part_world_position(fly)
+    rest_left_foot_aabb = ctx.part_world_aabb(left_foot)
+    rest_right_foot_aabb = ctx.part_world_aabb(right_foot)
+
+    limits = fly_slide.motion_limits
+    if limits is not None and limits.lower is not None and limits.upper is not None:
+        with ctx.pose({fly_slide: limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="fly_slide_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name="fly_slide_lower_no_floating")
+        with ctx.pose({fly_slide: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name="fly_slide_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name="fly_slide_upper_no_floating")
+
+    for swivel_joint in (left_foot_swivel, right_foot_swivel):
+        swivel_limits = swivel_joint.motion_limits
+        if swivel_limits is not None and swivel_limits.lower is not None and swivel_limits.upper is not None:
+            with ctx.pose({swivel_joint: swivel_limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"{swivel_joint.name}_lower_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(name=f"{swivel_joint.name}_lower_no_floating")
+            with ctx.pose({swivel_joint: swivel_limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(
+                    name=f"{swivel_joint.name}_upper_no_overlap"
+                )
+                ctx.fail_if_isolated_parts(name=f"{swivel_joint.name}_upper_no_floating")
+
+    with ctx.pose({fly_slide: FLY_TRAVEL}):
         ctx.expect_gap(
-            front_section,
-            rear_section,
-            axis="y",
-            positive_elem=front_foot,
-            negative_elem=rear_foot,
-            min_gap=0.95,
+            fly,
+            base,
+            axis="x",
+            min_gap=0.001,
+            max_gap=0.003,
+            positive_elem=left_fly_outer_wall,
+            negative_elem=left_channel_web,
+            name="left fly stile keeps its web clearance through full extension",
+        )
+        ctx.expect_gap(
+            base,
+            fly,
+            axis="x",
+            min_gap=0.001,
+            max_gap=0.003,
+            positive_elem=right_channel_web,
+            negative_elem=right_fly_outer_wall,
+            name="right fly stile keeps its web clearance through full extension",
         )
         ctx.expect_overlap(
-            front_section,
-            bracket,
-            axes="xz",
-            elem_a=front_top_head,
-            elem_b=front_block,
-            min_overlap=0.010,
+            fly,
+            base,
+            axes="z",
+            min_overlap=0.9,
+            elem_a=left_fly_outer_wall,
+            elem_b=left_channel_web,
+            name="fly section still remains captured in the guide channels when extended",
         )
-        ctx.expect_overlap(
-            rear_section,
-            bracket,
-            axes="xz",
-            elem_a=rear_top_head,
-            elem_b=rear_block,
-            min_overlap=0.010,
+        extended_fly_pos = ctx.part_world_position(fly)
+        extended_base_aabb = ctx.part_world_aabb(base)
+        extended_fly_aabb = ctx.part_world_aabb(fly)
+        if rest_fly_pos is not None and extended_fly_pos is not None:
+            travel = extended_fly_pos[2] - rest_fly_pos[2]
+            ctx.check(
+                "fly_section_prismatic_travel_matches_spec",
+                abs(travel - FLY_TRAVEL) <= 0.002,
+                f"Expected {FLY_TRAVEL:.3f} m fly travel, got {travel:.3f} m.",
+            )
+        if extended_base_aabb is not None and extended_fly_aabb is not None:
+            top_exposure = extended_fly_aabb[1][2] - extended_base_aabb[1][2]
+            ctx.check(
+                "fly_section_extends_well_above_base",
+                top_exposure >= 1.75,
+                f"Expected at least 1.75 m of exposed fly section, got {top_exposure:.3f} m.",
+            )
+
+    with ctx.pose({left_foot_swivel: 0.42, right_foot_swivel: -0.42}):
+        ctx.expect_contact(
+            left_foot,
+            base,
+            elem_a=left_foot_barrel,
+            elem_b=left_base_bottom_cap,
+            name="left foot remains attached while swiveled",
         )
-        ctx.expect_gap(
-            walk_board,
-            rear_section,
-            axis="z",
-            positive_elem=rear_hook_bridge,
-            negative_elem=rear_upper_rung,
-            min_gap=0.012,
+        ctx.expect_contact(
+            right_foot,
+            base,
+            elem_a=right_foot_barrel,
+            elem_b=right_base_bottom_cap,
+            name="right foot remains attached while swiveled",
         )
+        swiveled_left_aabb = ctx.part_world_aabb(left_foot)
+        swiveled_right_aabb = ctx.part_world_aabb(right_foot)
+        if rest_left_foot_aabb is not None and swiveled_left_aabb is not None:
+            left_motion = max(
+                abs(swiveled_left_aabb[0][1] - rest_left_foot_aabb[0][1]),
+                abs(swiveled_left_aabb[1][2] - rest_left_foot_aabb[1][2]),
+            )
+            ctx.check(
+                "left_foot_changes_attitude_when_swiveled",
+                left_motion >= 0.004,
+                f"Expected visible left-foot motion, got {left_motion:.4f} m AABB change.",
+            )
+        if rest_right_foot_aabb is not None and swiveled_right_aabb is not None:
+            right_motion = max(
+                abs(swiveled_right_aabb[1][1] - rest_right_foot_aabb[1][1]),
+                abs(swiveled_right_aabb[1][2] - rest_right_foot_aabb[1][2]),
+            )
+            ctx.check(
+                "right_foot_changes_attitude_when_swiveled",
+                right_motion >= 0.004,
+                f"Expected visible right-foot motion, got {right_motion:.4f} m AABB change.",
+            )
+
     return ctx.report()
 
 

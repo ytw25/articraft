@@ -8,6 +8,7 @@ import math
 from sdk import (
     ArticulatedObject,
     ArticulationType,
+    AssetContext,
     Box,
     Cylinder,
     Inertial,
@@ -17,524 +18,453 @@ from sdk import (
     TestReport,
 )
 
-OUTER_X = 0.98
-OUTER_Y = 0.82
-FLANGE_T = 0.012
-OPENING_X = 0.70
-OPENING_Y = 0.56
-
-SIDE_FLANGE_Y = (OUTER_Y - OPENING_Y) / 2.0
-END_FLANGE_X = (OUTER_X - OPENING_X) / 2.0
-TRACK_Y = OPENING_Y / 2.0 - 0.025
-
-TRACK_X = 0.74
-TRACK_W = 0.050
-TRACK_H = 0.012
-
-GLASS_X = 0.76
-GLASS_Y = 0.62
-GLASS_T = 0.016
-GLASS_SLIDE_TRAVEL = 0.21
-GLASS_TILT_ANGLE = 0.06
-
-HOUSING_X = 0.14
-HOUSING_Y = 0.72
-HOUSING_H = 0.056
-BLIND_WIDTH = 0.53
-BLIND_LENGTH = 0.63
-BLIND_T = 0.0016
-BLIND_TRAVEL = 0.18
+ASSETS = AssetContext.from_script(__file__)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="tilt_slide_glass_blind_cassette")
+    model = ArticulatedObject(name="sunroof_cassette", assets=ASSETS)
 
-    frame_trim = model.material("frame_trim", rgba=(0.30, 0.31, 0.34, 1.0))
-    frame_dark = model.material("frame_dark", rgba=(0.15, 0.16, 0.18, 1.0))
-    guide_dark = model.material("guide_dark", rgba=(0.09, 0.10, 0.11, 1.0))
-    hardware = model.material("hardware", rgba=(0.45, 0.47, 0.49, 1.0))
-    glass_tint = model.material("glass_tint", rgba=(0.47, 0.61, 0.69, 0.35))
-    seal_dark = model.material("seal_dark", rgba=(0.06, 0.06, 0.07, 1.0))
-    blind_fabric = model.material("blind_fabric", rgba=(0.82, 0.82, 0.79, 1.0))
-    blind_bar = model.material("blind_bar", rgba=(0.61, 0.61, 0.59, 1.0))
-    roller_dark = model.material("roller_dark", rgba=(0.08, 0.08, 0.09, 1.0))
+    outer_x = 0.92
+    outer_y = 0.64
+    opening_x = 0.78
+    opening_y = 0.50
+    frame_depth = 0.065
+    side_wall_x = (outer_x - opening_x) / 2.0
+    end_wall_y = (outer_y - opening_y) / 2.0
 
-    roof = model.part("roof_frame")
-    roof.inertial = Inertial.from_geometry(
-        Box((OUTER_X, OUTER_Y, 0.12)),
-        mass=14.0,
-        origin=Origin(xyz=(0.0, 0.0, -0.024)),
+    guide_x = 0.030
+    guide_y = 0.58
+    guide_z = 0.012
+    guide_cx = opening_x / 2.0 - 0.015
+    guide_cz = 0.026
+
+    shoe_x = 0.022
+    shoe_y = 0.18
+    shoe_z = 0.012
+    shoe_cz = guide_cz + (guide_z + shoe_z) / 2.0
+
+    glass_x = 0.766
+    glass_y = 0.492
+    glass_z = 0.006
+    seal_z = 0.004
+
+    slide_travel = 0.24
+    slider_closed_y = 0.126
+    glass_joint_y = 0.116
+    glass_joint_z = 0.045
+    glass_y_shift = 0.001
+
+    aluminum = model.material("aluminum", rgba=(0.72, 0.74, 0.77, 1.0))
+    dark_aluminum = model.material("dark_aluminum", rgba=(0.34, 0.36, 0.39, 1.0))
+    glass_mat = model.material("sunroof_glass", rgba=(0.20, 0.30, 0.36, 0.45))
+    seal_mat = model.material("seal", rgba=(0.06, 0.06, 0.07, 1.0))
+
+    frame = model.part("frame")
+    frame.visual(
+        Box((side_wall_x, outer_y, frame_depth)),
+        origin=Origin(xyz=(+(opening_x / 2.0 + side_wall_x / 2.0), 0.0, frame_depth / 2.0)),
+        material=aluminum,
+        name="left_side_frame",
     )
-    roof.visual(
-        Box((END_FLANGE_X, OUTER_Y, FLANGE_T)),
-        origin=Origin(xyz=(-(OPENING_X + END_FLANGE_X) / 2.0, 0.0, FLANGE_T / 2.0)),
-        material=frame_trim,
-        name="front_flange",
+    frame.visual(
+        Box((side_wall_x, outer_y, frame_depth)),
+        origin=Origin(xyz=(-(opening_x / 2.0 + side_wall_x / 2.0), 0.0, frame_depth / 2.0)),
+        material=aluminum,
+        name="right_side_frame",
     )
-    roof.visual(
-        Box((END_FLANGE_X, OUTER_Y, FLANGE_T)),
-        origin=Origin(xyz=((OPENING_X + END_FLANGE_X) / 2.0, 0.0, FLANGE_T / 2.0)),
-        material=frame_trim,
-        name="rear_flange",
+    frame.visual(
+        Box((opening_x, end_wall_y, frame_depth)),
+        origin=Origin(xyz=(0.0, +(opening_y / 2.0 + end_wall_y / 2.0), frame_depth / 2.0)),
+        material=aluminum,
+        name="front_header",
     )
-    roof.visual(
-        Box((OPENING_X, SIDE_FLANGE_Y, FLANGE_T)),
-        origin=Origin(xyz=(0.0, (OPENING_Y + SIDE_FLANGE_Y) / 2.0, FLANGE_T / 2.0)),
-        material=frame_trim,
-        name="left_flange",
+    frame.visual(
+        Box((side_wall_x, end_wall_y, frame_depth)),
+        origin=Origin(
+            xyz=(
+                +(opening_x / 2.0 + side_wall_x / 2.0),
+                -(opening_y / 2.0 + end_wall_y / 2.0),
+                frame_depth / 2.0,
+            )
+        ),
+        material=aluminum,
+        name="rear_left_cap",
     )
-    roof.visual(
-        Box((OPENING_X, SIDE_FLANGE_Y, FLANGE_T)),
-        origin=Origin(xyz=(0.0, -(OPENING_Y + SIDE_FLANGE_Y) / 2.0, FLANGE_T / 2.0)),
-        material=frame_trim,
-        name="right_flange",
+    frame.visual(
+        Box((side_wall_x, end_wall_y, frame_depth)),
+        origin=Origin(
+            xyz=(
+                -(opening_x / 2.0 + side_wall_x / 2.0),
+                -(opening_y / 2.0 + end_wall_y / 2.0),
+                frame_depth / 2.0,
+            )
+        ),
+        material=aluminum,
+        name="rear_right_cap",
     )
-    roof.visual(
-        Box((0.040, OPENING_Y, 0.020)),
-        origin=Origin(xyz=(-0.390, 0.0, -0.010)),
-        material=frame_dark,
-        name="front_bridge",
+    frame.visual(
+        Box((guide_x, guide_y, guide_z)),
+        origin=Origin(xyz=(+guide_cx, 0.0, guide_cz)),
+        material=dark_aluminum,
+        name="left_guide_rail",
     )
-    roof.visual(
-        Box((0.040, OPENING_Y, 0.020)),
-        origin=Origin(xyz=(0.450, 0.0, -0.010)),
-        material=frame_dark,
-        name="rear_bridge",
+    frame.visual(
+        Box((guide_x, guide_y, guide_z)),
+        origin=Origin(xyz=(-guide_cx, 0.0, guide_cz)),
+        material=dark_aluminum,
+        name="right_guide_rail",
     )
-    roof.visual(
-        Box((TRACK_X, TRACK_W, TRACK_H)),
-        origin=Origin(xyz=(0.060, TRACK_Y, -0.010)),
-        material=guide_dark,
-        name="left_track",
+    frame.visual(
+        Box((opening_x, 0.014, seal_z)),
+        origin=Origin(xyz=(0.0, +(opening_y / 2.0 - 0.003), 0.053)),
+        material=seal_mat,
+        name="front_seat",
     )
-    roof.visual(
-        Box((TRACK_X, TRACK_W, TRACK_H)),
-        origin=Origin(xyz=(0.060, -TRACK_Y, -0.010)),
-        material=guide_dark,
-        name="right_track",
+    frame.visual(
+        Box((opening_x + 0.008, 0.014, seal_z)),
+        origin=Origin(xyz=(0.0, -(opening_y / 2.0 - 0.003), 0.053)),
+        material=seal_mat,
+        name="rear_seat",
     )
-    roof.visual(
-        Box((0.030, 0.080, 0.026)),
-        origin=Origin(xyz=(0.410, TRACK_Y, -0.019)),
-        material=frame_dark,
-        name="left_rear_stop",
+    frame.visual(
+        Box((0.016, opening_y - 0.020, seal_z)),
+        origin=Origin(xyz=(+(opening_x / 2.0 - 0.004), 0.0, 0.053)),
+        material=seal_mat,
+        name="left_seat",
     )
-    roof.visual(
-        Box((0.030, 0.080, 0.026)),
-        origin=Origin(xyz=(0.410, -TRACK_Y, -0.019)),
-        material=frame_dark,
-        name="right_rear_stop",
+    frame.visual(
+        Box((0.016, opening_y - 0.020, seal_z)),
+        origin=Origin(xyz=(-(opening_x / 2.0 - 0.004), 0.0, 0.053)),
+        material=seal_mat,
+        name="right_seat",
+    )
+    frame.visual(
+        Box((opening_x, opening_y - 0.10, 0.006)),
+        origin=Origin(xyz=(0.0, -0.04, 0.003)),
+        material=dark_aluminum,
+        name="cassette_tray",
+    )
+    frame.inertial = Inertial.from_geometry(
+        Box((outer_x, outer_y, frame_depth)),
+        mass=7.5,
+        origin=Origin(xyz=(0.0, 0.0, frame_depth / 2.0)),
     )
 
-    carriage = model.part("glass_carriage")
-    carriage.inertial = Inertial.from_geometry(
-        Box((0.58, 0.56, 0.05)),
-        mass=2.0,
-        origin=Origin(xyz=(0.28, 0.0, -0.008)),
-    )
-    carriage.visual(
-        Box((0.10, 0.038, 0.016)),
-        origin=Origin(xyz=(0.150, TRACK_Y, -0.024)),
-        material=hardware,
+    slider = model.part("slider")
+    slider.visual(
+        Box((shoe_x, shoe_y, shoe_z)),
+        origin=Origin(xyz=(+guide_cx, -0.020, shoe_cz)),
+        material=dark_aluminum,
         name="left_shoe",
     )
-    carriage.visual(
-        Box((0.10, 0.038, 0.016)),
-        origin=Origin(xyz=(0.150, -TRACK_Y, -0.024)),
-        material=hardware,
+    slider.visual(
+        Box((shoe_x, shoe_y, shoe_z)),
+        origin=Origin(xyz=(-guide_cx, -0.020, shoe_cz)),
+        material=dark_aluminum,
         name="right_shoe",
     )
-    carriage.visual(
-        Box((0.020, OPENING_Y - 0.200, 0.012)),
-        origin=Origin(xyz=(0.040, 0.0, -0.025)),
-        material=guide_dark,
-        name="front_crossmember",
+    slider.visual(
+        Box((opening_x - 0.046, 0.050, 0.012)),
+        origin=Origin(xyz=(0.0, -0.020, 0.038)),
+        material=dark_aluminum,
+        name="rear_bridge",
     )
-    carriage.visual(
-        Box((0.110, 0.036, 0.010)),
-        origin=Origin(xyz=(0.095, 0.218, -0.026)),
-        material=hardware,
-        name="left_side_beam",
+    slider.visual(
+        Box((0.060, 0.120, 0.012)),
+        origin=Origin(xyz=(+0.340, 0.040, 0.041)),
+        material=dark_aluminum,
+        name="left_lift_arm",
     )
-    carriage.visual(
-        Box((0.110, 0.036, 0.010)),
-        origin=Origin(xyz=(0.095, -0.218, -0.026)),
-        material=hardware,
-        name="right_side_beam",
+    slider.visual(
+        Box((0.060, 0.120, 0.012)),
+        origin=Origin(xyz=(-0.340, 0.040, 0.041)),
+        material=dark_aluminum,
+        name="right_lift_arm",
     )
-    carriage.visual(
-        Box((0.020, 0.040, 0.040)),
-        origin=Origin(xyz=(0.040, 0.180, -0.005)),
-        material=hardware,
-        name="left_riser",
-    )
-    carriage.visual(
-        Box((0.020, 0.040, 0.040)),
-        origin=Origin(xyz=(0.040, -0.180, -0.005)),
-        material=hardware,
-        name="right_riser",
-    )
-    carriage.visual(
-        Box((0.040, 0.060, 0.006)),
-        origin=Origin(xyz=(0.020, 0.180, 0.015)),
-        material=hardware,
+    slider.visual(
+        Box((0.040, 0.020, 0.006)),
+        origin=Origin(xyz=(+0.320, glass_joint_y - 0.006, 0.032)),
+        material=dark_aluminum,
         name="left_hinge_pad",
     )
-    carriage.visual(
-        Box((0.040, 0.060, 0.006)),
-        origin=Origin(xyz=(0.020, -0.180, 0.015)),
-        material=hardware,
+    slider.visual(
+        Box((0.040, 0.020, 0.006)),
+        origin=Origin(xyz=(-0.320, glass_joint_y - 0.006, 0.032)),
+        material=dark_aluminum,
         name="right_hinge_pad",
     )
-    glass = model.part("glass_panel")
-    glass.inertial = Inertial.from_geometry(
-        Box((GLASS_X, GLASS_Y, 0.04)),
-        mass=7.0,
-        origin=Origin(xyz=(GLASS_X / 2.0, 0.0, 0.020)),
-    )
-    glass.visual(
-        Box((GLASS_X, GLASS_Y, GLASS_T)),
-        origin=Origin(xyz=(GLASS_X / 2.0, 0.0, GLASS_T / 2.0)),
-        material=glass_tint,
-        name="glass_lite",
-    )
-    glass.visual(
-        Box((0.050, GLASS_Y - 0.040, 0.004)),
-        origin=Origin(xyz=(0.025, 0.0, 0.002)),
-        material=seal_dark,
-        name="front_trim",
-    )
-    glass.visual(
-        Box((0.040, GLASS_Y - 0.030, 0.004)),
-        origin=Origin(xyz=(GLASS_X - 0.020, 0.0, 0.002)),
-        material=seal_dark,
-        name="rear_trim",
-    )
-    glass.visual(
-        Box((GLASS_X - 0.090, 0.018, 0.004)),
-        origin=Origin(xyz=(GLASS_X / 2.0, GLASS_Y / 2.0 - 0.009, 0.002)),
-        material=seal_dark,
-        name="left_trim",
-    )
-    glass.visual(
-        Box((GLASS_X - 0.090, 0.018, 0.004)),
-        origin=Origin(xyz=(GLASS_X / 2.0, -(GLASS_Y / 2.0 - 0.009), 0.002)),
-        material=seal_dark,
-        name="right_trim",
-    )
-    glass.visual(
-        Box((0.040, 0.060, 0.004)),
-        origin=Origin(xyz=(0.020, 0.180, 0.002)),
-        material=hardware,
-        name="left_hinge_plate",
-    )
-    glass.visual(
-        Box((0.040, 0.060, 0.004)),
-        origin=Origin(xyz=(0.020, -0.180, 0.002)),
-        material=hardware,
-        name="right_hinge_plate",
-    )
-
-    blind_cassette = model.part("blind_cassette")
-    blind_cassette.inertial = Inertial.from_geometry(
-        Box((HOUSING_X, HOUSING_Y, HOUSING_H)),
-        mass=3.0,
-        origin=Origin(xyz=(-HOUSING_X / 2.0, 0.0, -HOUSING_H / 2.0)),
-    )
-    blind_cassette.visual(
-        Box((HOUSING_X, HOUSING_Y, 0.004)),
-        origin=Origin(xyz=(-HOUSING_X / 2.0, 0.0, -0.002)),
-        material=frame_dark,
-        name="housing_top",
-    )
-    blind_cassette.visual(
-        Box((0.010, HOUSING_Y, HOUSING_H)),
-        origin=Origin(xyz=(-HOUSING_X + 0.005, 0.0, -HOUSING_H / 2.0)),
-        material=frame_dark,
-        name="housing_front_wall",
-    )
-    blind_cassette.visual(
-        Box((HOUSING_X, 0.010, HOUSING_H)),
-        origin=Origin(xyz=(-HOUSING_X / 2.0, HOUSING_Y / 2.0 - 0.005, -HOUSING_H / 2.0)),
-        material=frame_dark,
-        name="housing_left_wall",
-    )
-    blind_cassette.visual(
-        Box((HOUSING_X, 0.010, HOUSING_H)),
-        origin=Origin(xyz=(-HOUSING_X / 2.0, -(HOUSING_Y / 2.0 - 0.005), -HOUSING_H / 2.0)),
-        material=frame_dark,
-        name="housing_right_wall",
-    )
-    blind_cassette.visual(
-        Box((0.010, HOUSING_Y, HOUSING_H)),
-        origin=Origin(xyz=(-0.005, 0.0, -HOUSING_H / 2.0)),
-        material=frame_dark,
-        name="housing_back_wall",
-    )
-    blind_cassette.visual(
-        Box((0.024, 0.620, 0.008)),
-        origin=Origin(xyz=(-0.017, 0.0, -0.0498)),
-        material=frame_dark,
-        name="slot_lip",
-    )
-    blind_cassette.visual(
-        Cylinder(radius=0.024, length=0.700),
-        origin=Origin(xyz=(-0.085, 0.0, -0.030), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=roller_dark,
-        name="spring_dowel",
-    )
-
-    blind = model.part("roller_blind")
-    blind.inertial = Inertial.from_geometry(
-        Box((BLIND_LENGTH + 0.024, BLIND_WIDTH + 0.050, 0.020)),
+    slider.inertial = Inertial.from_geometry(
+        Box((opening_x - 0.050, 0.34, 0.040)),
         mass=1.6,
-        origin=Origin(xyz=((BLIND_LENGTH + 0.024) / 2.0, 0.0, -0.056)),
+        origin=Origin(xyz=(0.0, 0.0, 0.030)),
     )
-    blind.visual(
-        Box((BLIND_LENGTH, BLIND_WIDTH, BLIND_T)),
-        origin=Origin(xyz=(BLIND_LENGTH / 2.0, 0.0, -0.0546)),
-        material=blind_fabric,
-        name="blind_fabric",
+
+    glass = model.part("glass")
+    glass.visual(
+        Box((glass_x, glass_y, glass_z)),
+        origin=Origin(xyz=(0.0, -glass_y / 2.0 + glass_y_shift, 0.017)),
+        material=glass_mat,
+        name="glass_panel",
     )
-    blind.visual(
-        Box((0.024, BLIND_WIDTH + 0.050, 0.018)),
-        origin=Origin(xyz=(BLIND_LENGTH + 0.012, 0.0, -0.060)),
-        material=blind_bar,
-        name="lead_bar",
+    glass.visual(
+        Box((0.040, 0.020, 0.024)),
+        origin=Origin(xyz=(+0.320, 0.000, 0.002)),
+        material=dark_aluminum,
+        name="left_hinge_ear",
     )
-    blind.visual(
-        Box((0.012, 0.140, 0.012)),
-        origin=Origin(xyz=(BLIND_LENGTH + 0.014, 0.0, -0.072)),
-        material=blind_bar,
-        name="pull_tab",
+    glass.visual(
+        Box((0.040, 0.020, 0.024)),
+        origin=Origin(xyz=(-0.320, 0.000, 0.002)),
+        material=dark_aluminum,
+        name="right_hinge_ear",
+    )
+    glass.visual(
+        Box((glass_x - 0.066, 0.006, seal_z)),
+        origin=Origin(xyz=(0.0, -0.003 + glass_y_shift, 0.01242)),
+        material=seal_mat,
+        name="front_seal",
+    )
+    glass.visual(
+        Box((glass_x - 0.066, 0.006, seal_z)),
+        origin=Origin(xyz=(0.0, -(glass_y - 0.003) + glass_y_shift, 0.0124)),
+        material=seal_mat,
+        name="rear_seal",
+    )
+    glass.visual(
+        Box((0.006, glass_y - 0.054, seal_z)),
+        origin=Origin(xyz=(+(glass_x / 2.0 - 0.003), -glass_y / 2.0 + glass_y_shift, 0.0124)),
+        material=seal_mat,
+        name="left_seal",
+    )
+    glass.visual(
+        Box((0.006, glass_y - 0.054, seal_z)),
+        origin=Origin(xyz=(-(glass_x / 2.0 - 0.003), -glass_y / 2.0 + glass_y_shift, 0.0124)),
+        material=seal_mat,
+        name="right_seal",
+    )
+    glass.inertial = Inertial.from_geometry(
+        Box((glass_x, glass_y, glass_z)),
+        mass=5.8,
+        origin=Origin(xyz=(0.0, -glass_y / 2.0 + glass_y_shift, 0.017)),
     )
 
     model.articulation(
-        "glass_slide",
+        "frame_to_slider",
         ArticulationType.PRISMATIC,
-        parent=roof,
-        child=carriage,
-        origin=Origin(xyz=(-0.340, 0.0, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=120.0,
-            velocity=0.35,
-            lower=0.0,
-            upper=GLASS_SLIDE_TRAVEL,
-        ),
-    )
-    model.articulation(
-        "glass_tilt",
-        ArticulationType.REVOLUTE,
-        parent=carriage,
-        child=glass,
-        origin=Origin(xyz=(0.020, 0.0, 0.016)),
+        parent=frame,
+        child=slider,
+        origin=Origin(xyz=(0.0, slider_closed_y, 0.0)),
         axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=35.0,
-            velocity=1.0,
-            lower=0.0,
-            upper=GLASS_TILT_ANGLE,
-        ),
+        motion_limits=MotionLimits(effort=180.0, velocity=0.35, lower=0.0, upper=slide_travel),
     )
     model.articulation(
-        "blind_cassette_mount",
-        ArticulationType.FIXED,
-        parent=roof,
-        child=blind_cassette,
-        origin=Origin(xyz=(-0.350, 0.0, 0.0)),
-    )
-    model.articulation(
-        "blind_pull",
-        ArticulationType.PRISMATIC,
-        parent=blind_cassette,
-        child=blind,
-        origin=Origin(xyz=(0.0, 0.0, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=45.0,
-            velocity=0.45,
-            lower=0.0,
-            upper=BLIND_TRAVEL,
-        ),
+        "slider_to_glass",
+        ArticulationType.REVOLUTE,
+        parent=slider,
+        child=glass,
+        origin=Origin(xyz=(0.0, glass_joint_y, glass_joint_z)),
+        axis=(-1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(effort=80.0, velocity=1.5, lower=0.0, upper=0.20),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    roof = object_model.get_part("roof_frame")
-    carriage = object_model.get_part("glass_carriage")
-    glass = object_model.get_part("glass_panel")
-    blind_cassette = object_model.get_part("blind_cassette")
-    blind = object_model.get_part("roller_blind")
-    glass_slide = object_model.get_articulation("glass_slide")
-    glass_tilt = object_model.get_articulation("glass_tilt")
-    blind_pull = object_model.get_articulation("blind_pull")
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    frame = object_model.get_part("frame")
+    slider = object_model.get_part("slider")
+    glass = object_model.get_part("glass")
+    slide_joint = object_model.get_articulation("frame_to_slider")
+    tilt_joint = object_model.get_articulation("slider_to_glass")
 
-    front_flange = roof.get_visual("front_flange")
-    rear_flange = roof.get_visual("rear_flange")
-    left_track = roof.get_visual("left_track")
-    right_track = roof.get_visual("right_track")
-    front_bridge = roof.get_visual("front_bridge")
-    rear_bridge = roof.get_visual("rear_bridge")
-
-    left_shoe = carriage.get_visual("left_shoe")
-    right_shoe = carriage.get_visual("right_shoe")
-    left_hinge_pad = carriage.get_visual("left_hinge_pad")
-    right_hinge_pad = carriage.get_visual("right_hinge_pad")
-
-    glass_lite = glass.get_visual("glass_lite")
-    rear_trim = glass.get_visual("rear_trim")
-    left_hinge_plate = glass.get_visual("left_hinge_plate")
-    right_hinge_plate = glass.get_visual("right_hinge_plate")
-
-    housing_top = blind_cassette.get_visual("housing_top")
-    slot_lip = blind_cassette.get_visual("slot_lip")
-    spring_dowel = blind_cassette.get_visual("spring_dowel")
-
-    blind_fabric = blind.get_visual("blind_fabric")
-    lead_bar = blind.get_visual("lead_bar")
-    pull_tab = blind.get_visual("pull_tab")
+    left_guide = frame.get_visual("left_guide_rail")
+    right_guide = frame.get_visual("right_guide_rail")
+    front_seat = frame.get_visual("front_seat")
+    rear_seat = frame.get_visual("rear_seat")
+    left_shoe = slider.get_visual("left_shoe")
+    right_shoe = slider.get_visual("right_shoe")
+    left_hinge_pad = slider.get_visual("left_hinge_pad")
+    right_hinge_pad = slider.get_visual("right_hinge_pad")
+    left_hinge_ear = glass.get_visual("left_hinge_ear")
+    right_hinge_ear = glass.get_visual("right_hinge_ear")
+    front_seal = glass.get_visual("front_seal")
+    rear_seal = glass.get_visual("rear_seal")
+    left_seal = glass.get_visual("left_seal")
+    right_seal = glass.get_visual("right_seal")
+    glass_panel = glass.get_visual("glass_panel")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.003,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
+
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_parts_overlap_in_sampled_poses(
+        max_pose_samples=48,
+        ignore_adjacent=False,
         ignore_fixed=True,
     )
 
-    ctx.expect_gap(
-        roof,
-        blind_cassette,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=front_flange,
-        negative_elem=housing_top,
-    )
-    ctx.expect_overlap(
-        blind_cassette,
-        roof,
-        axes="xy",
-        min_overlap=0.08,
-        elem_a=housing_top,
-        elem_b=front_flange,
-    )
-    ctx.expect_within(blind_cassette, roof, axes="y", inner_elem=spring_dowel, outer_elem=front_flange)
+    slide_limits = slide_joint.motion_limits
+    tilt_limits = tilt_joint.motion_limits
 
-    ctx.expect_contact(carriage, roof, elem_a=left_shoe, elem_b=left_track)
-    ctx.expect_contact(carriage, roof, elem_a=right_shoe, elem_b=right_track)
-    ctx.expect_within(carriage, roof, axes="xy", inner_elem=left_shoe, outer_elem=left_track)
-    ctx.expect_within(carriage, roof, axes="xy", inner_elem=right_shoe, outer_elem=right_track)
+    ctx.check(
+        "slide_joint_axis_is_rearward",
+        tuple(slide_joint.axis) == (0.0, -1.0, 0.0),
+        details=f"Expected rearward slide axis, got {slide_joint.axis!r}.",
+    )
+    ctx.check(
+        "tilt_joint_axis_is_transverse",
+        tuple(tilt_joint.axis) == (-1.0, 0.0, 0.0),
+        details=f"Expected left-right hinge axis, got {tilt_joint.axis!r}.",
+    )
+    ctx.check(
+        "slide_joint_limits_match_cassette_travel",
+        slide_limits is not None
+        and slide_limits.lower == 0.0
+        and abs((slide_limits.upper or 0.0) - 0.24) <= 1e-9,
+        details=f"Unexpected slide limits: {slide_limits!r}.",
+    )
+    ctx.check(
+        "tilt_joint_limits_match_vent_angle",
+        tilt_limits is not None
+        and tilt_limits.lower == 0.0
+        and abs((tilt_limits.upper or 0.0) - 0.20) <= 1e-9,
+        details=f"Unexpected tilt limits: {tilt_limits!r}.",
+    )
 
-    ctx.expect_contact(glass, carriage, elem_a=left_hinge_plate, elem_b=left_hinge_pad)
-    ctx.expect_contact(glass, carriage, elem_a=right_hinge_plate, elem_b=right_hinge_pad)
-    ctx.expect_overlap(glass, roof, axes="xy", min_overlap=0.26, elem_a=glass_lite)
+    glass_top_aabb = ctx.part_element_world_aabb(glass, elem=glass_panel)
+    left_frame_top_aabb = ctx.part_element_world_aabb(frame, elem="left_side_frame")
+    ctx.check(
+        "glass_sits_flush_with_frame_top",
+        glass_top_aabb is not None
+        and left_frame_top_aabb is not None
+        and abs(glass_top_aabb[1][2] - left_frame_top_aabb[1][2]) <= 0.001,
+        details=(
+            f"Glass top {glass_top_aabb!r} should be flush with frame top "
+            f"{left_frame_top_aabb!r}."
+        ),
+    )
+
+    rest_glass_pos = ctx.part_world_position(glass)
+    rest_front_aabb = ctx.part_element_world_aabb(glass, elem=front_seal)
+    rest_rear_aabb = ctx.part_element_world_aabb(glass, elem=rear_seal)
+
+    ctx.expect_within(slider, frame, axes="xy", inner_elem=left_shoe, outer_elem=left_guide)
+    ctx.expect_within(slider, frame, axes="xy", inner_elem=right_shoe, outer_elem=right_guide)
+    ctx.expect_contact(slider, frame, elem_a=left_shoe, elem_b=left_guide)
+    ctx.expect_contact(slider, frame, elem_a=right_shoe, elem_b=right_guide)
+    ctx.expect_contact(glass, slider, elem_a=left_hinge_ear, elem_b=left_hinge_pad)
+    ctx.expect_contact(glass, slider, elem_a=right_hinge_ear, elem_b=right_hinge_pad)
     ctx.expect_gap(
         glass,
-        roof,
+        frame,
         axis="z",
-        min_gap=0.003,
-        max_gap=0.028,
-        positive_elem=glass_lite,
-        negative_elem=front_flange,
+        max_gap=0.0005,
+        max_penetration=0.0,
+        positive_elem=front_seal,
+        negative_elem=front_seat,
     )
-
     ctx.expect_gap(
         glass,
-        blind,
+        frame,
         axis="z",
-        min_gap=0.060,
-        max_gap=0.100,
-        positive_elem=glass_lite,
-        negative_elem=blind_fabric,
+        max_gap=0.0005,
+        max_penetration=0.0,
+        positive_elem=rear_seal,
+        negative_elem=rear_seat,
     )
     ctx.expect_gap(
-        blind_cassette,
-        blind,
+        glass,
+        frame,
         axis="z",
-        max_gap=0.002,
+        max_gap=0.0005,
         max_penetration=0.0,
-        positive_elem=slot_lip,
-        negative_elem=blind_fabric,
+        positive_elem=left_seal,
+        negative_elem=frame.get_visual("left_seat"),
     )
-    ctx.expect_within(blind, blind_cassette, axes="y", inner_elem=blind_fabric, outer_elem=slot_lip)
-    ctx.expect_overlap(blind, roof, axes="xy", min_overlap=0.20, elem_a=blind_fabric)
     ctx.expect_gap(
-        roof,
-        blind,
-        axis="x",
-        max_gap=0.060,
+        glass,
+        frame,
+        axis="z",
+        max_gap=0.0005,
         max_penetration=0.0,
-        positive_elem=rear_flange,
-        negative_elem=lead_bar,
+        positive_elem=right_seal,
+        negative_elem=frame.get_visual("right_seat"),
     )
+    ctx.expect_within(glass, frame, axes="xy", inner_elem=glass_panel)
+    ctx.expect_overlap(glass, frame, axes="xy", min_overlap=0.45)
 
-    with ctx.pose({glass_tilt: GLASS_TILT_ANGLE}):
-        ctx.expect_contact(glass, carriage, elem_a=left_hinge_plate, elem_b=left_hinge_pad)
-        ctx.expect_contact(glass, carriage, elem_a=right_hinge_plate, elem_b=right_hinge_pad)
-        ctx.expect_gap(
-            glass,
-            roof,
-            axis="z",
-            min_gap=0.030,
-            max_gap=0.070,
-            positive_elem=rear_trim,
-            negative_elem=rear_bridge,
-        )
+    if tilt_limits is not None and tilt_limits.upper is not None:
+        with ctx.pose({tilt_joint: tilt_limits.upper}):
+            tilted_front_aabb = ctx.part_element_world_aabb(glass, elem=front_seal)
+            tilted_rear_aabb = ctx.part_element_world_aabb(glass, elem=rear_seal)
+            ctx.expect_gap(
+                glass,
+                frame,
+                axis="z",
+                max_gap=0.002,
+                max_penetration=0.0,
+                positive_elem=front_seal,
+                negative_elem=front_seat,
+            )
+            ctx.expect_gap(
+                glass,
+                frame,
+                axis="z",
+                min_gap=0.085,
+                positive_elem=rear_seal,
+                negative_elem=rear_seat,
+            )
+            ctx.check(
+                "rear_edge_lifts_in_vent_pose",
+                rest_rear_aabb is not None
+                and tilted_rear_aabb is not None
+                and tilted_rear_aabb[0][2] > rest_rear_aabb[0][2] + 0.08,
+                details=f"Rear edge should lift in vent pose: {rest_rear_aabb!r} -> {tilted_rear_aabb!r}.",
+            )
+            ctx.check(
+                "front_edge_stays_nearly_seated_in_vent_pose",
+                rest_front_aabb is not None
+                and tilted_front_aabb is not None
+                and abs(tilted_front_aabb[0][2] - rest_front_aabb[0][2]) <= 0.002,
+                details=f"Front edge should stay near the frame seat: {rest_front_aabb!r} -> {tilted_front_aabb!r}.",
+            )
 
-    with ctx.pose({glass_slide: GLASS_SLIDE_TRAVEL}):
-        ctx.expect_contact(carriage, roof, elem_a=left_shoe, elem_b=left_track)
-        ctx.expect_contact(carriage, roof, elem_a=right_shoe, elem_b=right_track)
-        ctx.expect_within(carriage, roof, axes="xy", inner_elem=left_shoe, outer_elem=left_track)
-        ctx.expect_within(carriage, roof, axes="xy", inner_elem=right_shoe, outer_elem=right_track)
-        ctx.expect_gap(
-            glass,
-            roof,
-            axis="x",
-            min_gap=0.18,
-            max_gap=0.26,
-            positive_elem=glass_lite,
-            negative_elem=front_flange,
-        )
-        ctx.expect_overlap(glass, roof, axes="xy", min_overlap=0.10, elem_a=glass_lite)
+    if slide_limits is not None and slide_limits.upper is not None:
+        with ctx.pose({slide_joint: slide_limits.upper}):
+            slid_glass_pos = ctx.part_world_position(glass)
+            ctx.expect_within(slider, frame, axes="xy", inner_elem=left_shoe, outer_elem=left_guide)
+            ctx.expect_within(slider, frame, axes="xy", inner_elem=right_shoe, outer_elem=right_guide)
+            ctx.expect_contact(slider, frame, elem_a=left_shoe, elem_b=left_guide)
+            ctx.expect_contact(slider, frame, elem_a=right_shoe, elem_b=right_guide)
+            ctx.expect_gap(
+                frame,
+                glass,
+                axis="y",
+                min_gap=0.22,
+                positive_elem=front_seat,
+                negative_elem=front_seal,
+            )
+            ctx.check(
+                "glass_panel_slides_rearward",
+                rest_glass_pos is not None
+                and slid_glass_pos is not None
+                and slid_glass_pos[1] < rest_glass_pos[1] - 0.23,
+                details=f"Glass should move rearward: {rest_glass_pos!r} -> {slid_glass_pos!r}.",
+            )
 
-    with ctx.pose({blind_pull: BLIND_TRAVEL}):
-        ctx.expect_gap(
-            blind,
-            roof,
-            axis="x",
-            min_gap=-0.02,
-            max_gap=0.08,
-            max_penetration=0.02,
-            positive_elem=lead_bar,
-            negative_elem=rear_bridge,
-        )
-        ctx.expect_overlap(blind, roof, axes="xy", min_overlap=0.24, elem_a=blind_fabric)
-
-    with ctx.pose({glass_slide: GLASS_SLIDE_TRAVEL, blind_pull: BLIND_TRAVEL}):
-        ctx.expect_gap(
-            glass,
-            blind,
-            axis="z",
-            min_gap=0.060,
-            max_gap=0.100,
-            positive_elem=glass_lite,
-            negative_elem=blind_fabric,
-        )
-        ctx.expect_overlap(glass, blind, axes="xy", min_overlap=0.08, elem_a=glass_lite, elem_b=blind_fabric)
+    for joint, label in ((slide_joint, "slide"), (tilt_joint, "tilt")):
+        limits = joint.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            continue
+        with ctx.pose({joint: limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{label}_lower_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{label}_lower_pose_no_floating")
+        with ctx.pose({joint: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{label}_upper_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{label}_upper_pose_no_floating")
 
     return ctx.report()
 

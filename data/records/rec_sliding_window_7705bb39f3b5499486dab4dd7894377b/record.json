@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_sliding_window_7705bb39f3b5499486dab4dd7894377b",
+  "created_at": "2026-03-30T16:29:53Z",
+  "updated_at": "2026-03-30T20:04:01Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "sliding_window",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "sliding_window_backfill_3",
+    "prompt_index": 131
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Sliding window Backfill 5",
+    "prompt_preview": "Generate a compact apartment/desktop version of Sliding window. Keep footprint and envelope efficient while preserving full functional articulation from a fr..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "a16795b7837dc86c6bb0847162ecbf922cadb541fe26619e51ea93cdfb73e883",
+    "model_py_sha256": "b90859ac26f8d098a3fcb4cedd6ee97fb879ed181fee1883973967956ed1f8c1"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "rated_by": "shawlyu",
+  "author": "shawlyu"
+}

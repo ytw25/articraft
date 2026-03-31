@@ -4,503 +4,605 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-import os
-import tempfile
 
 from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,
     Cylinder,
+    ExtrudeWithHolesGeometry,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    rounded_rect_profile,
 )
 
-ASSET_ROOT = tempfile.gettempdir()
 
-try:
-    os.getcwd()
-except FileNotFoundError:
-    os.chdir(ASSET_ROOT)
+BODY_WIDTH = 0.72
+BODY_DEPTH = 0.34
+BOTTOM_THICKNESS = 0.008
+WALL_THICKNESS = 0.012
+WALL_HEIGHT = 0.032
+TOP_PANEL_THICKNESS = 0.004
+TOP_PANEL_CENTER_Z = BOTTOM_THICKNESS + WALL_HEIGHT + (TOP_PANEL_THICKNESS * 0.5)
+TOP_SURFACE_Z = TOP_PANEL_CENTER_Z + (TOP_PANEL_THICKNESS * 0.5)
+
+INNER_WIDTH = BODY_WIDTH - (2.0 * WALL_THICKNESS)
+INNER_DEPTH = BODY_DEPTH - (2.0 * WALL_THICKNESS)
+
+LEFT_DECK_X = -0.215
+RIGHT_DECK_X = 0.215
+DECK_CENTER_Y = 0.030
+JOG_OPENING_RADIUS = 0.086
+JOG_PLATTER_RADIUS = 0.092
+
+CROSSFADER_Y = -0.110
+CROSSFADER_SLOT_LENGTH = 0.176
+CROSSFADER_SLOT_WIDTH = 0.024
+
+MIXER_ISLAND_WIDTH = 0.168
+MIXER_ISLAND_DEPTH = 0.210
+MIXER_ISLAND_HEIGHT = 0.006
+MIXER_TOP_Z = TOP_SURFACE_Z + MIXER_ISLAND_HEIGHT
+
+
+def _translate_profile(
+    profile: list[tuple[float, float]],
+    dx: float,
+    dy: float,
+) -> list[tuple[float, float]]:
+    return [(x + dx, y + dy) for x, y in profile]
+
+
+def _circle_profile(
+    radius: float,
+    *,
+    center: tuple[float, float] = (0.0, 0.0),
+    segments: int = 48,
+) -> list[tuple[float, float]]:
+    cx, cy = center
+    return [
+        (
+            cx + (radius * math.cos((2.0 * math.pi * index) / segments)),
+            cy + (radius * math.sin((2.0 * math.pi * index) / segments)),
+        )
+        for index in range(segments)
+    ]
+
+
+def _aabb_center(
+    aabb: tuple[tuple[float, float, float], tuple[float, float, float]],
+) -> tuple[float, float, float]:
+    return tuple(
+        (aabb[0][axis] + aabb[1][axis]) * 0.5
+        for axis in range(3)
+    )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="portable_dj_controller")
+    model = ArticulatedObject(name="two_deck_dj_controller")
 
-    body_color = model.material("body_color", rgba=(0.14, 0.15, 0.16, 1.0))
-    deck_color = model.material("deck_color", rgba=(0.20, 0.21, 0.23, 1.0))
-    metal_color = model.material("metal_color", rgba=(0.68, 0.70, 0.73, 1.0))
-    jog_color = model.material("jog_color", rgba=(0.08, 0.08, 0.09, 1.0))
-    accent_color = model.material("accent_color", rgba=(0.80, 0.24, 0.20, 1.0))
-    blue_button = model.material("blue_button", rgba=(0.19, 0.48, 0.90, 1.0))
-    amber_button = model.material("amber_button", rgba=(0.93, 0.63, 0.18, 1.0))
+    chassis_charcoal = model.material("chassis_charcoal", rgba=(0.13, 0.14, 0.15, 1.0))
+    deck_black = model.material("deck_black", rgba=(0.08, 0.09, 0.10, 1.0))
+    mixer_black = model.material("mixer_black", rgba=(0.12, 0.12, 0.13, 1.0))
+    platter_alloy = model.material("platter_alloy", rgba=(0.67, 0.69, 0.72, 1.0))
+    platter_vinyl = model.material("platter_vinyl", rgba=(0.06, 0.06, 0.07, 1.0))
+    knob_rubber = model.material("knob_rubber", rgba=(0.10, 0.10, 0.11, 1.0))
+    rail_grey = model.material("rail_grey", rgba=(0.45, 0.47, 0.50, 1.0))
+    screen_glass = model.material("screen_glass", rgba=(0.17, 0.37, 0.46, 0.70))
+    cue_blue = model.material("cue_blue", rgba=(0.22, 0.52, 0.88, 1.0))
+    play_green = model.material("play_green", rgba=(0.24, 0.78, 0.44, 1.0))
+    marker_red = model.material("marker_red", rgba=(0.90, 0.22, 0.18, 1.0))
+    accent_silver = model.material("accent_silver", rgba=(0.82, 0.84, 0.86, 1.0))
 
-    body_width = 0.238
-    body_depth = 0.138
-    body_height = 0.012
-    top_z = 0.014
-    slot_y = -0.041
-
-    body = model.part("body")
-    body.visual(
-        Box((body_width, body_depth, body_height)),
-        origin=Origin(xyz=(0.0, 0.0, body_height / 2.0)),
-        material=body_color,
-        name="body_shell",
+    chassis = model.part("chassis")
+    chassis.visual(
+        Box((BODY_WIDTH, BODY_DEPTH, BOTTOM_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, BOTTOM_THICKNESS * 0.5)),
+        material=chassis_charcoal,
+        name="bottom_plate",
     )
-    body.visual(
-        Box((0.094, 0.090, 0.002)),
-        origin=Origin(xyz=(-0.072, 0.014, 0.013)),
-        material=deck_color,
-        name="left_deck_pad",
-    )
-    body.visual(
-        Box((0.094, 0.090, 0.002)),
-        origin=Origin(xyz=(0.072, 0.014, 0.013)),
-        material=deck_color,
-        name="right_deck_pad",
-    )
-    body.visual(
-        Box((0.044, 0.104, 0.002)),
-        origin=Origin(xyz=(0.0, 0.006, 0.013)),
-        material=deck_color,
-        name="center_strip",
-    )
-    body.visual(
-        Box((0.090, 0.005, 0.002)),
-        origin=Origin(xyz=(0.0, slot_y + 0.0065, 0.013)),
-        material=metal_color,
-        name="slot_upper_rail",
-    )
-    body.visual(
-        Box((0.090, 0.005, 0.002)),
-        origin=Origin(xyz=(0.0, slot_y - 0.0065, 0.013)),
-        material=metal_color,
-        name="slot_lower_rail",
-    )
-    body.visual(
-        Box((0.004, 0.008, 0.002)),
-        origin=Origin(xyz=(-0.043, slot_y, 0.013)),
-        material=metal_color,
-        name="slot_left_stop",
-    )
-    body.visual(
-        Box((0.004, 0.008, 0.002)),
-        origin=Origin(xyz=(0.043, slot_y, 0.013)),
-        material=metal_color,
-        name="slot_right_stop",
-    )
-    body.visual(
-        Box((0.082, 0.008, 0.001)),
-        origin=Origin(xyz=(0.0, slot_y, 0.0125)),
-        material=body_color,
-        name="slot_floor",
-    )
-    body.visual(
-        Box((0.004, 0.094, 0.006)),
-        origin=Origin(xyz=(-0.117, 0.0, 0.015)),
-        material=body_color,
-        name="left_hinge_seat",
-    )
-    body.visual(
-        Box((0.004, 0.094, 0.006)),
-        origin=Origin(xyz=(0.117, 0.0, 0.015)),
-        material=body_color,
-        name="right_hinge_seat",
-    )
-    body.inertial = Inertial.from_geometry(
-        Box((body_width, body_depth, body_height)),
-        mass=1.1,
-        origin=Origin(xyz=(0.0, 0.0, body_height / 2.0)),
-    )
-
-    def add_jog(
-        part_name: str,
-        center_x: float,
-        center_y: float,
-        joint_name: str,
-    ) -> None:
-        jog = model.part(part_name)
-        jog.visual(
-            Cylinder(radius=0.006, length=0.004),
-            origin=Origin(xyz=(0.0, 0.0, 0.002)),
-            material=metal_color,
-            name="stub_shaft",
-        )
-        jog.visual(
-            Box((0.052, 0.042, 0.003)),
-            origin=Origin(xyz=(0.0, 0.0, 0.0055)),
-            material=jog_color,
-            name="jog_pad",
-        )
-        jog.visual(
-            Box((0.032, 0.022, 0.001)),
-            origin=Origin(xyz=(0.0, 0.0, 0.0075)),
-            material=deck_color,
-            name="jog_inset",
-        )
-        jog.inertial = Inertial.from_geometry(
-            Box((0.052, 0.042, 0.008)),
-            mass=0.09,
-            origin=Origin(xyz=(0.0, 0.0, 0.004)),
-        )
-        model.articulation(
-            joint_name,
-            ArticulationType.CONTINUOUS,
-            parent=body,
-            child=jog,
-            origin=Origin(xyz=(center_x, center_y, top_z)),
-            axis=(0.0, 0.0, 1.0),
-            motion_limits=MotionLimits(effort=2.0, velocity=10.0),
-        )
-
-    add_jog("left_jog", center_x=-0.072, center_y=0.020, joint_name="left_jog_spin")
-    add_jog("right_jog", center_x=0.072, center_y=0.020, joint_name="right_jog_spin")
-
-    crossfader = model.part("crossfader")
-    crossfader.visual(
-        Box((0.010, 0.006, 0.001)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0005)),
-        material=metal_color,
-        name="slider_rider",
-    )
-    crossfader.visual(
-        Box((0.015, 0.020, 0.005)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0035)),
-        material=accent_color,
-        name="slider_cap",
-    )
-    crossfader.inertial = Inertial.from_geometry(
-        Box((0.015, 0.020, 0.006)),
-        mass=0.04,
-        origin=Origin(xyz=(0.0, 0.0, 0.003)),
-    )
-    model.articulation(
-        "crossfader_slide",
-        ArticulationType.PRISMATIC,
-        parent=body,
-        child=crossfader,
-        origin=Origin(xyz=(0.0, slot_y, 0.013)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=1.0,
-            velocity=0.4,
-            lower=-0.028,
-            upper=0.028,
+    chassis.visual(
+        Box((WALL_THICKNESS, BODY_DEPTH, WALL_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                -((BODY_WIDTH * 0.5) - (WALL_THICKNESS * 0.5)),
+                0.0,
+                BOTTOM_THICKNESS + (WALL_HEIGHT * 0.5),
+            )
         ),
+        material=chassis_charcoal,
+        name="left_wall",
+    )
+    chassis.visual(
+        Box((WALL_THICKNESS, BODY_DEPTH, WALL_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                (BODY_WIDTH * 0.5) - (WALL_THICKNESS * 0.5),
+                0.0,
+                BOTTOM_THICKNESS + (WALL_HEIGHT * 0.5),
+            )
+        ),
+        material=chassis_charcoal,
+        name="right_wall",
+    )
+    chassis.visual(
+        Box((INNER_WIDTH, WALL_THICKNESS, WALL_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                -((BODY_DEPTH * 0.5) - (WALL_THICKNESS * 0.5)),
+                BOTTOM_THICKNESS + (WALL_HEIGHT * 0.5),
+            )
+        ),
+        material=chassis_charcoal,
+        name="front_wall",
+    )
+    chassis.visual(
+        Box((INNER_WIDTH, WALL_THICKNESS, WALL_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                (BODY_DEPTH * 0.5) - (WALL_THICKNESS * 0.5),
+                BOTTOM_THICKNESS + (WALL_HEIGHT * 0.5),
+            )
+        ),
+        material=chassis_charcoal,
+        name="rear_wall",
     )
 
-    def add_wing(
-        part_name: str,
-        side: str,
-        joint_name: str,
-        joint_origin_x: float,
-        axis: tuple[float, float, float],
-    ) -> None:
-        sign = -1.0 if side == "left" else 1.0
-        wing = model.part(part_name)
-        wing.visual(
-            Box((0.048, 0.094, 0.004)),
-            origin=Origin(xyz=(sign * 0.024, 0.0, 0.002)),
-            material=deck_color,
-            name="panel",
+    top_panel_mesh = mesh_from_geometry(
+        ExtrudeWithHolesGeometry(
+            rounded_rect_profile(INNER_WIDTH, INNER_DEPTH, 0.020),
+            [
+                _circle_profile(
+                    JOG_OPENING_RADIUS,
+                    center=(LEFT_DECK_X, DECK_CENTER_Y),
+                    segments=56,
+                ),
+                _circle_profile(
+                    JOG_OPENING_RADIUS,
+                    center=(RIGHT_DECK_X, DECK_CENTER_Y),
+                    segments=56,
+                ),
+                _translate_profile(
+                    rounded_rect_profile(
+                        CROSSFADER_SLOT_LENGTH,
+                        CROSSFADER_SLOT_WIDTH,
+                        0.008,
+                    ),
+                    0.0,
+                    CROSSFADER_Y,
+                ),
+            ],
+            TOP_PANEL_THICKNESS,
+            cap=True,
+            center=True,
+        ),
+        "dj_controller_top_panel",
+    )
+    chassis.visual(
+        top_panel_mesh,
+        origin=Origin(xyz=(0.0, 0.0, TOP_PANEL_CENTER_Z)),
+        material=deck_black,
+        name="top_panel",
+    )
+    chassis.visual(
+        Box((MIXER_ISLAND_WIDTH, MIXER_ISLAND_DEPTH, MIXER_ISLAND_HEIGHT)),
+        origin=Origin(
+            xyz=(
+                0.0,
+                0.020,
+                TOP_SURFACE_Z + (MIXER_ISLAND_HEIGHT * 0.5),
+            )
+        ),
+        material=mixer_black,
+        name="mixer_island",
+    )
+    chassis.visual(
+        Box((0.120, 0.058, 0.002)),
+        origin=Origin(xyz=(0.0, 0.148, MIXER_TOP_Z + 0.001)),
+        material=accent_silver,
+        name="display_bezel",
+    )
+    for direction in (-1.0, 1.0):
+        x_center = direction * 0.310
+        chassis.visual(
+            Box((0.012, 0.185, 0.0025)),
+            origin=Origin(xyz=(x_center, 0.010, TOP_SURFACE_Z + 0.00125)),
+            material=rail_grey,
+            name=f"pitch_track_{'left' if direction < 0.0 else 'right'}",
         )
-        wing.visual(
-            Box((0.014, 0.016, 0.004)),
-            origin=Origin(xyz=(sign * 0.028, -0.020, 0.006)),
-            material=blue_button,
-            name="cue_a",
+        for pad_column, pad_x in enumerate((0.228, 0.260)):
+            for pad_row, pad_y in enumerate((-0.055, -0.088)):
+                chassis.visual(
+                    Box((0.024, 0.020, 0.004)),
+                    origin=Origin(
+                        xyz=(
+                            direction * pad_x,
+                            pad_y,
+                            TOP_SURFACE_Z + 0.002,
+                        )
+                    ),
+                    material=deck_black,
+                    name=f"pad_{'left' if direction < 0.0 else 'right'}_{pad_row}_{pad_column}",
+                )
+        chassis.visual(
+            Box((0.026, 0.018, 0.004)),
+            origin=Origin(
+                xyz=(direction * 0.258, -0.132, TOP_SURFACE_Z + 0.002),
+            ),
+            material=cue_blue,
+            name=f"cue_button_{'left' if direction < 0.0 else 'right'}",
         )
-        wing.visual(
-            Box((0.014, 0.016, 0.004)),
-            origin=Origin(xyz=(sign * 0.028, 0.020, 0.006)),
-            material=amber_button,
-            name="cue_b",
+        chassis.visual(
+            Box((0.026, 0.018, 0.004)),
+            origin=Origin(
+                xyz=(direction * 0.222, -0.132, TOP_SURFACE_Z + 0.002),
+            ),
+            material=play_green,
+            name=f"play_button_{'left' if direction < 0.0 else 'right'}",
         )
-        wing.inertial = Inertial.from_geometry(
-            Box((0.048, 0.094, 0.008)),
-            mass=0.07,
-            origin=Origin(xyz=(sign * 0.024, 0.0, 0.004)),
+
+    for strip_index, strip_x in enumerate((-0.036, 0.036)):
+        chassis.visual(
+            Box((0.010, 0.132, 0.002)),
+            origin=Origin(xyz=(strip_x, -0.006, MIXER_TOP_Z + 0.001)),
+            material=rail_grey,
+            name=f"channel_fader_track_{strip_index}",
+        )
+    chassis.visual(
+        Box((0.008, 0.126, 0.003)),
+        origin=Origin(xyz=(0.0, 0.000, MIXER_TOP_Z + 0.0015)),
+        material=accent_silver,
+        name="meter_strip",
+    )
+
+    chassis.inertial = Inertial.from_geometry(
+        Box((BODY_WIDTH, BODY_DEPTH, 0.050)),
+        mass=4.8,
+        origin=Origin(xyz=(0.0, 0.0, 0.025)),
+    )
+
+    for platter_name, platter_x in (
+        ("left_platter", LEFT_DECK_X),
+        ("right_platter", RIGHT_DECK_X),
+    ):
+        platter = model.part(platter_name)
+        platter.visual(
+            Cylinder(radius=JOG_PLATTER_RADIUS, length=0.014),
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
+            material=platter_alloy,
+            name="outer_rim",
+        )
+        platter.visual(
+            Cylinder(radius=0.080, length=0.004),
+            origin=Origin(xyz=(0.0, 0.0, 0.012)),
+            material=platter_vinyl,
+            name="vinyl_surface",
+        )
+        platter.visual(
+            Cylinder(radius=0.020, length=0.003),
+            origin=Origin(xyz=(0.0, 0.0, 0.0155)),
+            material=accent_silver,
+            name="hub_cap",
+        )
+        platter.visual(
+            Box((0.003, 0.024, 0.0012)),
+            origin=Origin(xyz=(0.0, 0.056, 0.0145)),
+            material=marker_red,
+            name="position_marker",
+        )
+        platter.inertial = Inertial.from_geometry(
+            Cylinder(radius=JOG_PLATTER_RADIUS, length=0.014),
+            mass=0.34,
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
         )
         model.articulation(
-            joint_name,
+            f"chassis_to_{platter_name}",
             ArticulationType.REVOLUTE,
-            parent=body,
-            child=wing,
-            origin=Origin(xyz=(joint_origin_x, 0.0, top_z)),
-            axis=axis,
+            parent=chassis,
+            child=platter,
+            origin=Origin(xyz=(platter_x, DECK_CENTER_Y, TOP_SURFACE_Z)),
+            axis=(0.0, 0.0, 1.0),
             motion_limits=MotionLimits(
                 effort=2.0,
-                velocity=2.0,
-                lower=0.0,
-                upper=math.radians(94.0),
+                velocity=18.0,
+                lower=-(4.0 * math.pi),
+                upper=4.0 * math.pi,
             ),
         )
 
-    add_wing(
-        "left_wing",
-        side="left",
-        joint_name="left_wing_fold",
-        joint_origin_x=-0.119,
-        axis=(0.0, 1.0, 0.0),
+    display = model.part("display_module")
+    display.visual(
+        Box((0.110, 0.050, 0.006)),
+        origin=Origin(xyz=(0.0, 0.0, 0.003)),
+        material=deck_black,
+        name="display_housing",
     )
-    add_wing(
-        "right_wing",
-        side="right",
-        joint_name="right_wing_fold",
-        joint_origin_x=0.119,
-        axis=(0.0, -1.0, 0.0),
+    display.visual(
+        Box((0.095, 0.036, 0.0015)),
+        origin=Origin(xyz=(0.0, 0.0, 0.00675)),
+        material=screen_glass,
+        name="screen",
+    )
+    display.inertial = Inertial.from_geometry(
+        Box((0.110, 0.050, 0.008)),
+        mass=0.09,
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
+    )
+    model.articulation(
+        "chassis_to_display_module",
+        ArticulationType.FIXED,
+        parent=chassis,
+        child=display,
+        origin=Origin(xyz=(0.0, 0.148, MIXER_TOP_Z)),
+    )
+
+    knob_positions = [
+        (-0.055, 0.064),
+        (-0.018, 0.064),
+        (0.018, 0.064),
+        (0.055, 0.064),
+        (-0.055, 0.104),
+        (-0.018, 0.104),
+        (0.018, 0.104),
+        (0.055, 0.104),
+    ]
+    for knob_index, (knob_x, knob_y) in enumerate(knob_positions):
+        knob = model.part(f"knob_{knob_index}")
+        knob.visual(
+            Cylinder(radius=0.012, length=0.012),
+            origin=Origin(xyz=(0.0, 0.0, 0.006)),
+            material=knob_rubber,
+            name="knob_body",
+        )
+        knob.visual(
+            Cylinder(radius=0.0095, length=0.003),
+            origin=Origin(xyz=(0.0, 0.0, 0.0135)),
+            material=accent_silver,
+            name="knob_cap",
+        )
+        knob.visual(
+            Box((0.002, 0.010, 0.001)),
+            origin=Origin(xyz=(0.0, 0.0085, 0.0155)),
+            material=marker_red,
+            name="indicator",
+        )
+        knob.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.012, length=0.012),
+            mass=0.018,
+            origin=Origin(xyz=(0.0, 0.0, 0.006)),
+        )
+        model.articulation(
+            f"chassis_to_knob_{knob_index}",
+            ArticulationType.REVOLUTE,
+            parent=chassis,
+            child=knob,
+            origin=Origin(xyz=(knob_x, knob_y, MIXER_TOP_Z)),
+            axis=(0.0, 0.0, 1.0),
+            motion_limits=MotionLimits(
+                effort=0.12,
+                velocity=5.0,
+                lower=-2.6,
+                upper=2.6,
+            ),
+        )
+
+    crossfader_track = model.part("crossfader_track")
+    crossfader_track.visual(
+        Box((0.185, 0.020, 0.004)),
+        origin=Origin(xyz=(0.0, 0.0, 0.002)),
+        material=deck_black,
+        name="track_floor",
+    )
+    crossfader_track.visual(
+        Box((0.185, 0.003, 0.010)),
+        origin=Origin(xyz=(0.0, -0.0095, 0.005)),
+        material=rail_grey,
+        name="left_rail",
+    )
+    crossfader_track.visual(
+        Box((0.185, 0.003, 0.010)),
+        origin=Origin(xyz=(0.0, 0.0095, 0.005)),
+        material=rail_grey,
+        name="right_rail",
+    )
+    crossfader_track.visual(
+        Box((0.004, 0.020, 0.010)),
+        origin=Origin(xyz=(-0.0905, 0.0, 0.005)),
+        material=rail_grey,
+        name="left_stop",
+    )
+    crossfader_track.visual(
+        Box((0.004, 0.020, 0.010)),
+        origin=Origin(xyz=(0.0905, 0.0, 0.005)),
+        material=rail_grey,
+        name="right_stop",
+    )
+    crossfader_track.inertial = Inertial.from_geometry(
+        Box((0.185, 0.020, 0.010)),
+        mass=0.08,
+        origin=Origin(xyz=(0.0, 0.0, 0.005)),
+    )
+    model.articulation(
+        "chassis_to_crossfader_track",
+        ArticulationType.FIXED,
+        parent=chassis,
+        child=crossfader_track,
+        origin=Origin(xyz=(0.0, CROSSFADER_Y, TOP_SURFACE_Z - 0.008)),
+    )
+
+    crossfader_slider = model.part("crossfader_slider")
+    crossfader_slider.visual(
+        Box((0.016, 0.012, 0.004)),
+        origin=Origin(xyz=(0.0, 0.0, 0.002)),
+        material=accent_silver,
+        name="carriage",
+    )
+    crossfader_slider.visual(
+        Box((0.004, 0.004, 0.011)),
+        origin=Origin(xyz=(0.0, 0.0, 0.0055)),
+        material=accent_silver,
+        name="stem",
+    )
+    crossfader_slider.visual(
+        Box((0.012, 0.020, 0.010)),
+        origin=Origin(xyz=(0.0, 0.0, 0.016)),
+        material=accent_silver,
+        name="grip",
+    )
+    crossfader_slider.inertial = Inertial.from_geometry(
+        Box((0.016, 0.020, 0.021)),
+        mass=0.03,
+        origin=Origin(xyz=(0.0, 0.0, 0.0105)),
+    )
+    model.articulation(
+        "crossfader_track_to_crossfader_slider",
+        ArticulationType.PRISMATIC,
+        parent=crossfader_track,
+        child=crossfader_slider,
+        origin=Origin(xyz=(0.0, 0.0, 0.004)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=0.8,
+            velocity=0.40,
+            lower=-0.075,
+            upper=0.075,
+        ),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSET_ROOT)
-    body = object_model.get_part("body")
-    left_jog = object_model.get_part("left_jog")
-    right_jog = object_model.get_part("right_jog")
-    crossfader = object_model.get_part("crossfader")
-    left_wing = object_model.get_part("left_wing")
-    right_wing = object_model.get_part("right_wing")
+    ctx = TestContext(object_model)
+    chassis = object_model.get_part("chassis")
+    left_platter = object_model.get_part("left_platter")
+    right_platter = object_model.get_part("right_platter")
+    display = object_model.get_part("display_module")
+    crossfader_track = object_model.get_part("crossfader_track")
+    crossfader_slider = object_model.get_part("crossfader_slider")
+    knob_parts = [object_model.get_part(f"knob_{index}") for index in range(8)]
 
-    left_jog_spin = object_model.get_articulation("left_jog_spin")
-    right_jog_spin = object_model.get_articulation("right_jog_spin")
-    crossfader_slide = object_model.get_articulation("crossfader_slide")
-    left_wing_fold = object_model.get_articulation("left_wing_fold")
-    right_wing_fold = object_model.get_articulation("right_wing_fold")
-
-    body_shell = body.get_visual("body_shell")
-    left_deck_pad = body.get_visual("left_deck_pad")
-    right_deck_pad = body.get_visual("right_deck_pad")
-    center_strip = body.get_visual("center_strip")
-    slot_upper_rail = body.get_visual("slot_upper_rail")
-    slot_lower_rail = body.get_visual("slot_lower_rail")
-    slot_floor = body.get_visual("slot_floor")
-    left_hinge_seat = body.get_visual("left_hinge_seat")
-    right_hinge_seat = body.get_visual("right_hinge_seat")
-
-    left_shaft = left_jog.get_visual("stub_shaft")
-    right_shaft = right_jog.get_visual("stub_shaft")
-    left_pad = left_jog.get_visual("jog_pad")
-    right_pad = right_jog.get_visual("jog_pad")
-
-    slider_rider = crossfader.get_visual("slider_rider")
-    slider_cap = crossfader.get_visual("slider_cap")
-
-    left_panel = left_wing.get_visual("panel")
-    right_panel = right_wing.get_visual("panel")
-    left_button = left_wing.get_visual("cue_a")
-    left_button_b = left_wing.get_visual("cue_b")
-    right_button = right_wing.get_visual("cue_a")
-    right_button_b = right_wing.get_visual("cue_b")
+    left_platter_joint = object_model.get_articulation("chassis_to_left_platter")
+    right_platter_joint = object_model.get_articulation("chassis_to_right_platter")
+    crossfader_joint = object_model.get_articulation(
+        "crossfader_track_to_crossfader_slider"
+    )
+    first_knob_joint = object_model.get_articulation("chassis_to_knob_0")
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
+    ctx.check_mesh_assets_ready()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.allow_overlap(left_wing, body, reason="folded left wing nests slightly over the hinge seat")
-    ctx.allow_overlap(right_wing, body, reason="folded right wing nests slightly over the hinge seat")
-
-    ctx.expect_gap(
-        left_jog,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=left_shaft,
-        negative_elem=left_deck_pad,
-    )
-    ctx.expect_gap(
-        right_jog,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=right_shaft,
-        negative_elem=right_deck_pad,
+    ctx.expect_contact(left_platter, chassis, name="left platter seated on deck")
+    ctx.expect_contact(right_platter, chassis, name="right platter seated on deck")
+    ctx.expect_contact(display, chassis, name="display mounted on mixer island")
+    ctx.expect_contact(
+        crossfader_track,
+        chassis,
+        name="crossfader rail anchored to chassis",
     )
     ctx.expect_contact(
-        crossfader,
-        body,
-        elem_a=slider_rider,
-        elem_b=slot_floor,
+        crossfader_slider,
+        crossfader_track,
+        name="crossfader slider riding on rail",
     )
-    ctx.expect_within(
-        left_jog,
-        body,
-        axes="xy",
-        inner_elem=left_pad,
-        outer_elem=left_deck_pad,
-    )
-    ctx.expect_within(
-        right_jog,
-        body,
-        axes="xy",
-        inner_elem=right_pad,
-        outer_elem=right_deck_pad,
-    )
-    ctx.expect_within(
-        crossfader,
-        body,
-        axes="xy",
-        inner_elem=slider_rider,
-        outer_elem=slot_floor,
-    )
-    ctx.expect_gap(
-        body,
-        body,
-        axis="y",
-        min_gap=0.0075,
-        max_gap=0.0085,
-        positive_elem=slot_upper_rail,
-        negative_elem=slot_lower_rail,
-    )
-    ctx.expect_contact(
-        body,
-        left_wing,
-        elem_a=left_hinge_seat,
-        elem_b=left_panel,
-    )
-    ctx.expect_contact(
-        right_wing,
-        body,
-        elem_a=right_panel,
-        elem_b=right_hinge_seat,
-    )
-    ctx.expect_gap(
-        body,
-        left_jog,
-        axis="x",
-        min_gap=0.020,
-        positive_elem=center_strip,
-        negative_elem=left_pad,
-    )
-    ctx.expect_gap(
-        right_jog,
-        body,
-        axis="x",
-        min_gap=0.020,
-        positive_elem=right_pad,
-        negative_elem=center_strip,
-    )
-    ctx.expect_overlap(left_jog, body, axes="xy", min_overlap=0.001)
-    ctx.expect_overlap(right_jog, body, axes="xy", min_overlap=0.001)
+    for knob in knob_parts:
+        ctx.expect_contact(knob, chassis, name=f"{knob.name} mounted to mixer")
 
-    with ctx.pose({crossfader_slide: -0.028}):
-        ctx.expect_within(
-            crossfader,
-            body,
-            axes="xy",
-            inner_elem=slider_rider,
-            outer_elem=slot_floor,
-        )
-    with ctx.pose({crossfader_slide: 0.028}):
-        ctx.expect_within(
-            crossfader,
-            body,
-            axes="xy",
-            inner_elem=slider_rider,
-            outer_elem=slot_floor,
-        )
+    ctx.check(
+        "left platter joint configuration",
+        left_platter_joint.articulation_type == ArticulationType.REVOLUTE
+        and tuple(left_platter_joint.axis) == (0.0, 0.0, 1.0),
+        "Left jog platter should rotate about the vertical axis.",
+    )
+    ctx.check(
+        "right platter joint configuration",
+        right_platter_joint.articulation_type == ArticulationType.REVOLUTE
+        and tuple(right_platter_joint.axis) == (0.0, 0.0, 1.0),
+        "Right jog platter should rotate about the vertical axis.",
+    )
+    ctx.check(
+        "crossfader joint configuration",
+        crossfader_joint.articulation_type == ArticulationType.PRISMATIC
+        and tuple(crossfader_joint.axis) == (1.0, 0.0, 0.0),
+        "Crossfader should slide laterally across the mixer section.",
+    )
+    ctx.check(
+        "knob joint configuration",
+        first_knob_joint.articulation_type == ArticulationType.REVOLUTE
+        and tuple(first_knob_joint.axis) == (0.0, 0.0, 1.0),
+        "Rotary knobs should turn around their local vertical axes.",
+    )
 
-    with ctx.pose({left_jog_spin: math.radians(35.0), right_jog_spin: math.radians(-28.0)}):
-        ctx.expect_gap(
-            left_jog,
-            body,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=left_shaft,
-            negative_elem=left_deck_pad,
+    left_marker_rest = ctx.part_element_world_aabb(left_platter, elem="position_marker")
+    left_origin_rest = ctx.part_world_position(left_platter)
+    assert left_marker_rest is not None
+    assert left_origin_rest is not None
+    with ctx.pose({left_platter_joint: -(math.pi * 0.5)}):
+        left_marker_turned = ctx.part_element_world_aabb(left_platter, elem="position_marker")
+        assert left_marker_turned is not None
+        left_marker_turned_center = _aabb_center(left_marker_turned)
+        ctx.check(
+            "left platter visibly rotates",
+            left_marker_turned_center[0] > left_origin_rest[0] + 0.045
+            and abs(left_marker_turned_center[1] - left_origin_rest[1]) < 0.012,
+            "The jog platter marker should swing around the hub when the joint turns.",
         )
-        ctx.expect_gap(
-            right_jog,
-            body,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=right_shaft,
-            negative_elem=right_deck_pad,
-        )
+        ctx.expect_contact(left_platter, chassis, name="left platter remains seated in pose")
 
-    folded_angle = math.radians(88.0)
-    with ctx.pose({left_wing_fold: folded_angle, right_wing_fold: folded_angle}):
-        ctx.expect_gap(
-            left_wing,
-            body,
-            axis="z",
-            min_gap=0.006,
-            positive_elem=left_button,
-            negative_elem=body_shell,
+    slider_rest = ctx.part_world_position(crossfader_slider)
+    assert slider_rest is not None
+    with ctx.pose({crossfader_joint: 0.075}):
+        slider_right = ctx.part_world_position(crossfader_slider)
+        assert slider_right is not None
+        ctx.expect_contact(
+            crossfader_slider,
+            crossfader_track,
+            name="crossfader stays in contact at right stop",
         )
-        ctx.expect_gap(
-            right_wing,
-            body,
-            axis="z",
-            min_gap=0.006,
-            positive_elem=right_button,
-            negative_elem=body_shell,
+    with ctx.pose({crossfader_joint: -0.075}):
+        slider_left = ctx.part_world_position(crossfader_slider)
+        assert slider_left is not None
+        ctx.expect_contact(
+            crossfader_slider,
+            crossfader_track,
+            name="crossfader stays in contact at left stop",
         )
-        ctx.expect_gap(
-            left_wing,
-            body,
-            axis="z",
-            min_gap=0.006,
-            positive_elem=left_button_b,
-            negative_elem=body_shell,
+    ctx.check(
+        "crossfader traverses rail",
+        slider_right[0] > slider_rest[0] + 0.070
+        and slider_left[0] < slider_rest[0] - 0.070
+        and abs(slider_right[1] - slider_rest[1]) < 1e-6
+        and abs(slider_left[1] - slider_rest[1]) < 1e-6
+        and abs(slider_right[2] - slider_rest[2]) < 1e-6
+        and abs(slider_left[2] - slider_rest[2]) < 1e-6,
+        "Crossfader should move sideways only.",
+    )
+
+    knob_origin_rest = ctx.part_world_position(knob_parts[0])
+    knob_indicator_rest = ctx.part_element_world_aabb(knob_parts[0], elem="indicator")
+    assert knob_origin_rest is not None
+    assert knob_indicator_rest is not None
+    with ctx.pose({first_knob_joint: -(math.pi * 0.5)}):
+        knob_indicator_turned = ctx.part_element_world_aabb(knob_parts[0], elem="indicator")
+        assert knob_indicator_turned is not None
+        knob_indicator_center = _aabb_center(knob_indicator_turned)
+        ctx.check(
+            "knob indicator rotates with joint",
+            knob_indicator_center[0] > knob_origin_rest[0] + 0.005
+            and abs(knob_indicator_center[1] - knob_origin_rest[1]) < 0.006,
+            "The knob marker should rotate around the knob stem.",
         )
-        ctx.expect_gap(
-            right_wing,
-            body,
-            axis="z",
-            min_gap=0.006,
-            positive_elem=right_button_b,
-            negative_elem=body_shell,
-        )
-        ctx.expect_overlap(
-            left_wing,
-            body,
-            axes="yz",
-            min_overlap=0.002,
-            elem_a=left_panel,
-            elem_b=left_hinge_seat,
-        )
-        ctx.expect_overlap(
-            right_wing,
-            body,
-            axes="yz",
-            min_overlap=0.002,
-            elem_a=right_panel,
-            elem_b=right_hinge_seat,
-        )
-        ctx.expect_gap(
-            left_jog,
-            left_wing,
-            axis="x",
-            min_gap=0.010,
-            positive_elem=left_pad,
-            negative_elem=left_panel,
-        )
-        ctx.expect_gap(
-            right_wing,
-            right_jog,
-            axis="x",
-            min_gap=0.010,
-            positive_elem=right_panel,
-            negative_elem=right_pad,
-        )
+        ctx.expect_contact(knob_parts[0], chassis, name="knob remains seated while turning")
+
     return ctx.report()
 
 

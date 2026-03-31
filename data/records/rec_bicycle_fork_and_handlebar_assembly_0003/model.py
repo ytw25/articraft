@@ -3,305 +3,543 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import math
+from math import dist, radians
 
 from sdk import (
     ArticulatedObject,
-    AssetContext,
+    ArticulationType,
     Box,
     Cylinder,
+    Inertial,
     LatheGeometry,
+    MotionLimits,
     Origin,
+    Sphere,
     TestContext,
     TestReport,
     mesh_from_geometry,
-    repair_loft,
-    rounded_rect_profile,
     section_loft,
-    tube_from_spline_points,
+    wire_from_points,
 )
 
-ASSETS = AssetContext.from_script(__file__)
+
+def _save_mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, f"road_bike_fork_v10_{name}")
 
 
-def _rounded_section(center: tuple[float, float, float], width: float, depth: float) -> list[tuple[float, float, float]]:
-    cx, cy, cz = center
-    profile = rounded_rect_profile(
-        width,
-        depth,
-        radius=min(width, depth) * 0.24,
-        corner_segments=6,
-    )
-    return [(cx + x, cy + y, cz) for x, y in profile]
-
-
-def _fork_blade_mesh(side: float, mesh_name: str):
-    sections = [
-        _rounded_section((side * 0.026, 0.004, 0.305), 0.023, 0.028),
-        _rounded_section((side * 0.030, 0.010, 0.240), 0.019, 0.024),
-        _rounded_section((side * 0.036, 0.020, 0.170), 0.016, 0.020),
-        _rounded_section((side * 0.043, 0.030, 0.090), 0.013, 0.015),
-        _rounded_section((side * 0.050, 0.039, 0.014), 0.010, 0.010),
+def _rounded_loop_xy(
+    width: float,
+    depth: float,
+    z: float,
+    *,
+    center_x: float = 0.0,
+    center_y: float = 0.0,
+) -> list[tuple[float, float, float]]:
+    half_w = width * 0.5
+    half_d = depth * 0.5
+    chamfer = min(half_w, half_d) * 0.55
+    return [
+        (center_x + half_w - chamfer, center_y + half_d, z),
+        (center_x + half_w, center_y + half_d - chamfer, z),
+        (center_x + half_w, center_y - half_d + chamfer, z),
+        (center_x + half_w - chamfer, center_y - half_d, z),
+        (center_x - half_w + chamfer, center_y - half_d, z),
+        (center_x - half_w, center_y - half_d + chamfer, z),
+        (center_x - half_w, center_y + half_d - chamfer, z),
+        (center_x - half_w + chamfer, center_y + half_d, z),
     ]
-    geom = repair_loft(section_loft(sections))
-    return mesh_from_geometry(geom, ASSETS.mesh_path(mesh_name))
 
 
-def _crown_bridge_mesh():
-    geom = tube_from_spline_points(
+def _rounded_loop_xz(
+    width: float,
+    height: float,
+    y: float,
+    *,
+    center_x: float = 0.0,
+    center_z: float = 0.0,
+) -> list[tuple[float, float, float]]:
+    half_w = width * 0.5
+    half_h = height * 0.5
+    chamfer = min(half_w, half_h) * 0.55
+    return [
+        (center_x + half_w - chamfer, y, center_z + half_h),
+        (center_x + half_w, y, center_z + half_h - chamfer),
+        (center_x + half_w, y, center_z - half_h + chamfer),
+        (center_x + half_w - chamfer, y, center_z - half_h),
+        (center_x - half_w + chamfer, y, center_z - half_h),
+        (center_x - half_w, y, center_z - half_h + chamfer),
+        (center_x - half_w, y, center_z + half_h - chamfer),
+        (center_x - half_w + chamfer, y, center_z + half_h),
+    ]
+
+
+def _build_blade_mesh(side_sign: float):
+    sections = [
+        _rounded_loop_xy(0.024, 0.018, -0.042, center_x=side_sign * 0.040, center_y=0.000),
+        _rounded_loop_xy(0.022, 0.016, -0.105, center_x=side_sign * 0.041, center_y=0.002),
+        _rounded_loop_xy(0.019, 0.013, -0.185, center_x=side_sign * 0.043, center_y=0.009),
+        _rounded_loop_xy(0.015, 0.010, -0.285, center_x=side_sign * 0.046, center_y=0.020),
+        _rounded_loop_xy(0.012, 0.008, -0.360, center_x=side_sign * 0.049, center_y=0.028),
+        _rounded_loop_xy(0.010, 0.006, -0.395, center_x=side_sign * 0.050, center_y=0.032),
+    ]
+    return section_loft(sections)
+
+
+def _build_crown_mesh():
+    return section_loft(
         [
-            (-0.037, 0.013, 0.300),
-            (-0.020, 0.019, 0.308),
-            (0.000, 0.022, 0.312),
-            (0.020, 0.019, 0.308),
-            (0.037, 0.013, 0.300),
-        ],
-        radius=0.0055,
-        samples_per_segment=14,
-        radial_segments=18,
-        cap_ends=True,
+            _rounded_loop_xy(0.122, 0.034, -0.048, center_y=0.001),
+            _rounded_loop_xy(0.102, 0.038, -0.035, center_y=0.002),
+            _rounded_loop_xy(0.072, 0.034, -0.022, center_y=0.001),
+            _rounded_loop_xy(0.044, 0.028, -0.008, center_y=0.000),
+        ]
     )
-    return mesh_from_geometry(geom, ASSETS.mesh_path("crown_bridge.obj"))
 
 
-def _steerer_mesh():
-    geom = LatheGeometry(
+def _build_stem_body_mesh():
+    return section_loft(
         [
-            (0.0, -0.072),
-            (0.019, -0.072),
-            (0.018, -0.040),
-            (0.014, -0.005),
-            (0.014, 0.072),
-            (0.0, 0.072),
+            _rounded_loop_xz(0.052, 0.046, 0.008, center_z=0.199),
+            _rounded_loop_xz(0.044, 0.036, 0.050, center_z=0.197),
+            _rounded_loop_xz(0.042, 0.030, 0.082, center_z=0.197),
+            _rounded_loop_xz(0.050, 0.028, 0.100, center_z=0.198),
+        ]
+    )
+
+
+def _build_head_tube_shell():
+    outer_profile = [
+        (0.030, 0.000),
+        (0.029, 0.016),
+        (0.0275, 0.075),
+        (0.0265, 0.145),
+        (0.026, 0.160),
+    ]
+    inner_profile = [
+        (0.0212, 0.000),
+        (0.0206, 0.016),
+        (0.0192, 0.075),
+        (0.0178, 0.145),
+        (0.0175, 0.160),
+    ]
+    return LatheGeometry.from_shell_profiles(
+        outer_profile,
+        inner_profile,
+        segments=64,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_head_tube_lower_cup():
+    return LatheGeometry.from_shell_profiles(
+        [(0.032, -0.018), (0.031, -0.008), (0.030, 0.000)],
+        [(0.026, -0.018), (0.026, -0.008), (0.026, 0.000)],
+        segments=48,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_head_tube_upper_cup():
+    return LatheGeometry.from_shell_profiles(
+        [(0.026, 0.160), (0.029, 0.170), (0.031, 0.182)],
+        [(0.0225, 0.160), (0.0225, 0.170), (0.0225, 0.182)],
+        segments=48,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_headset_lower_ring():
+    outer_profile = [
+        (0.026, -0.010),
+        (0.027, -0.004),
+        (0.026, 0.000),
+    ]
+    inner_profile = [
+        (0.0190, -0.010),
+        (0.0190, -0.004),
+        (0.0190, 0.000),
+    ]
+    return LatheGeometry.from_shell_profiles(
+        outer_profile,
+        inner_profile,
+        segments=48,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_headset_upper_ring():
+    outer_profile = [
+        (0.0225, 0.160),
+        (0.0235, 0.166),
+        (0.0225, 0.172),
+    ]
+    inner_profile = [
+        (0.0145, 0.160),
+        (0.0145, 0.166),
+        (0.0145, 0.172),
+    ]
+    return LatheGeometry.from_shell_profiles(
+        outer_profile,
+        inner_profile,
+        segments=48,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_steerer_mesh():
+    return LatheGeometry(
+        [
+            (0.0185, -0.030),
+            (0.0185, 0.060),
+            (0.0172, 0.098),
+            (0.0158, 0.140),
+            (0.0142, 0.205),
+            (0.0142, 0.252),
         ],
         segments=56,
     )
-    geom.translate(0.0, 0.0, 0.373)
-    return mesh_from_geometry(geom, ASSETS.mesh_path("steerer.obj"))
 
 
-def _drop_side_mesh(side: float, mesh_name: str):
-    geom = tube_from_spline_points(
+def _build_top_cap_mesh():
+    return LatheGeometry(
         [
-            (side * 0.055, 0.091, 0.425),
-            (side * 0.115, 0.095, 0.435),
-            (side * 0.180, 0.092, 0.420),
-            (side * 0.225, 0.072, 0.360),
-            (side * 0.210, 0.035, 0.295),
-            (side * 0.175, 0.005, 0.265),
+            (0.000, 0.000),
+            (0.010, 0.000),
+            (0.016, 0.002),
+            (0.016, 0.006),
+            (0.013, 0.010),
+            (0.000, 0.011),
         ],
-        radius=0.011,
-        samples_per_segment=16,
-        radial_segments=18,
-        cap_ends=True,
+        segments=48,
     )
-    return mesh_from_geometry(geom, ASSETS.mesh_path(mesh_name))
+
+
+def _build_spacer_ring():
+    return LatheGeometry.from_shell_profiles(
+        [(0.0225, 0.160), (0.0225, 0.252)],
+        [(0.0142, 0.160), (0.0142, 0.252)],
+        segments=48,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_handlebar_mesh():
+    return wire_from_points(
+        [
+            (-0.220, 0.112, 0.070),
+            (-0.215, 0.124, 0.094),
+            (-0.205, 0.133, 0.126),
+            (-0.182, 0.130, 0.160),
+            (-0.152, 0.112, 0.188),
+            (-0.118, 0.095, 0.198),
+            (-0.070, 0.090, 0.198),
+            (0.070, 0.090, 0.198),
+            (0.118, 0.095, 0.198),
+            (0.152, 0.112, 0.188),
+            (0.182, 0.130, 0.160),
+            (0.205, 0.133, 0.126),
+            (0.215, 0.124, 0.094),
+            (0.220, 0.112, 0.070),
+        ],
+        radius=0.012,
+        radial_segments=18,
+        cap_ends=False,
+        corner_mode="fillet",
+        corner_radius=0.020,
+        corner_segments=12,
+    )
+
+
+def _build_crown_bridge_mesh():
+    return wire_from_points(
+        [
+            (-0.042, -0.004, -0.067),
+            (-0.020, -0.015, -0.056),
+            (0.020, -0.015, -0.056),
+            (0.042, -0.004, -0.067),
+        ],
+        radius=0.0055,
+        radial_segments=16,
+        cap_ends=True,
+        corner_mode="fillet",
+        corner_radius=0.012,
+        corner_segments=8,
+    )
+
+
+def _has_visual(part, visual_name: str) -> bool:
+    return any(visual.name == visual_name for visual in part.visuals)
+
+
+def _aabb_center(aabb):
+    return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="road_bike_fork_cockpit", assets=ASSETS)
+    model = ArticulatedObject(name="road_bike_fork_and_cockpit")
 
-    carbon = model.material("carbon", rgba=(0.13, 0.13, 0.14, 1.0))
-    alloy = model.material("alloy", rgba=(0.22, 0.22, 0.24, 1.0))
-    black = model.material("black", rgba=(0.10, 0.10, 0.11, 1.0))
-    steel = model.material("steel", rgba=(0.58, 0.60, 0.63, 1.0))
+    head_tilt = radians(17.0)
 
-    assembly = model.part("assembly")
+    carbon_black = model.material("carbon_black", rgba=(0.09, 0.09, 0.10, 1.0))
+    satin_black = model.material("satin_black", rgba=(0.13, 0.13, 0.14, 1.0))
+    alloy = model.material("alloy", rgba=(0.68, 0.70, 0.73, 1.0))
+    dark_alloy = model.material("dark_alloy", rgba=(0.33, 0.35, 0.38, 1.0))
+    support_grey = model.material("support_grey", rgba=(0.42, 0.44, 0.47, 1.0))
 
-    assembly.visual(_steerer_mesh(), material=carbon, name="steerer")
-    assembly.visual(
-        Box((0.068, 0.032, 0.020)),
-        origin=Origin(xyz=(0.0, 0.002, 0.302)),
-        material=carbon,
-        name="crown",
+    head_tube = model.part("head_tube")
+    head_tube.visual(
+        _save_mesh("head_tube_shell", _build_head_tube_shell()),
+        origin=Origin(rpy=(head_tilt, 0.0, 0.0)),
+        material=support_grey,
+        name="head_tube_shell",
     )
-    assembly.visual(_crown_bridge_mesh(), material=carbon, name="crown_bridge")
-    assembly.visual(_fork_blade_mesh(-1.0, "left_blade.obj"), material=carbon, name="left_blade")
-    assembly.visual(_fork_blade_mesh(1.0, "right_blade.obj"), material=carbon, name="right_blade")
-    assembly.visual(
-        Box((0.018, 0.012, 0.016)),
-        origin=Origin(xyz=(-0.051, 0.039, 0.007)),
+    head_tube.inertial = Inertial.from_geometry(
+        Box((0.060, 0.060, 0.190)),
+        mass=0.65,
+        origin=Origin(xyz=(0.0, -0.004, 0.080), rpy=(head_tilt, 0.0, 0.0)),
+    )
+
+    steering = model.part("steering_assembly")
+    steering.visual(
+        _save_mesh("tapered_steerer", _build_steerer_mesh()),
+        material=dark_alloy,
+        name="tapered_steerer",
+    )
+    steering.visual(
+        _save_mesh("fork_crown", _build_crown_mesh()),
+        material=carbon_black,
+        name="fork_crown",
+    )
+    steering.visual(
+        _save_mesh("left_blade", _build_blade_mesh(-1.0)),
+        material=carbon_black,
+        name="left_blade",
+    )
+    steering.visual(
+        _save_mesh("right_blade", _build_blade_mesh(1.0)),
+        material=carbon_black,
+        name="right_blade",
+    )
+    steering.visual(
+        _save_mesh("crown_bridge", _build_crown_bridge_mesh()),
+        material=carbon_black,
+        name="crown_bridge",
+    )
+    steering.visual(
+        _save_mesh("stem_body", _build_stem_body_mesh()),
+        material=satin_black,
+        name="stem_body",
+    )
+    steering.visual(
+        Box((0.046, 0.036, 0.052)),
+        origin=Origin(xyz=(0.0, 0.010, 0.199)),
+        material=satin_black,
+        name="steerer_clamp",
+    )
+    steering.visual(
+        Cylinder(radius=0.018, length=0.050),
+        origin=Origin(xyz=(0.0, 0.094, 0.198), rpy=(0.0, radians(90.0), 0.0)),
+        material=satin_black,
+        name="bar_clamp",
+    )
+    steering.visual(
+        Box((0.048, 0.014, 0.034)),
+        origin=Origin(xyz=(0.0, 0.110, 0.198)),
+        material=satin_black,
+        name="faceplate",
+    )
+    steering.visual(
+        Cylinder(radius=0.0042, length=0.008),
+        origin=Origin(xyz=(0.0, 0.119, 0.212), rpy=(-radians(90.0), 0.0, 0.0)),
         material=alloy,
-        name="left_dropout",
+        name="faceplate_bolt_upper",
     )
-    assembly.visual(
-        Box((0.018, 0.012, 0.016)),
-        origin=Origin(xyz=(0.051, 0.039, 0.007)),
+    steering.visual(
+        Cylinder(radius=0.0042, length=0.008),
+        origin=Origin(xyz=(0.0, 0.119, 0.184), rpy=(-radians(90.0), 0.0, 0.0)),
         material=alloy,
-        name="right_dropout",
+        name="faceplate_bolt_lower",
     )
-    assembly.visual(
-        Cylinder(radius=0.019, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, 0.444)),
+    steering.visual(
+        _save_mesh("handlebar", _build_handlebar_mesh()),
+        material=satin_black,
+        name="handlebar",
+    )
+    steering.visual(
+        Sphere(radius=0.0115),
+        origin=Origin(xyz=(-0.220, 0.112, 0.070)),
+        material=satin_black,
+        name="left_bar_end",
+    )
+    steering.visual(
+        Sphere(radius=0.0115),
+        origin=Origin(xyz=(0.220, 0.112, 0.070)),
+        material=satin_black,
+        name="right_bar_end",
+    )
+    steering.visual(
+        Cylinder(radius=0.016, length=0.010),
+        origin=Origin(xyz=(0.0, 0.0, 0.257)),
         material=alloy,
         name="top_cap",
     )
-    assembly.visual(
-        Cylinder(radius=0.0045, length=0.003),
-        origin=Origin(xyz=(0.0, 0.0, 0.4485)),
-        material=steel,
+    steering.visual(
+        Cylinder(radius=0.0045, length=0.005),
+        origin=Origin(xyz=(0.0, 0.0, 0.264)),
+        material=dark_alloy,
         name="top_cap_bolt",
     )
-
-    assembly.visual(
-        Cylinder(radius=0.024, length=0.032),
-        origin=Origin(xyz=(0.0, 0.0, 0.425)),
-        material=alloy,
-        name="stem_clamp",
+    steering.visual(
+        Box((0.018, 0.005, 0.032)),
+        origin=Origin(xyz=(-0.050, 0.032, -0.394)),
+        material=dark_alloy,
+        name="left_dropout",
     )
-    assembly.visual(
-        Box((0.038, 0.090, 0.026)),
-        origin=Origin(xyz=(0.0, 0.048, 0.425)),
-        material=alloy,
-        name="stem_body",
+    steering.visual(
+        Box((0.018, 0.005, 0.032)),
+        origin=Origin(xyz=(0.050, 0.032, -0.394)),
+        material=dark_alloy,
+        name="right_dropout",
     )
-    assembly.visual(
-        Cylinder(radius=0.022, length=0.050),
-        origin=Origin(xyz=(0.0, 0.091, 0.425), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=alloy,
-        name="bar_clamp",
-    )
-    assembly.visual(
-        Box((0.018, 0.014, 0.052)),
-        origin=Origin(xyz=(0.0, 0.097, 0.425)),
-        material=alloy,
-        name="faceplate",
-    )
-    assembly.visual(
-        Cylinder(radius=0.004, length=0.008),
-        origin=Origin(xyz=(0.0, 0.108, 0.438), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=steel,
-        name="upper_bolt",
-    )
-    assembly.visual(
-        Cylinder(radius=0.004, length=0.008),
-        origin=Origin(xyz=(0.0, 0.108, 0.412), rpy=(-math.pi / 2.0, 0.0, 0.0)),
-        material=steel,
-        name="lower_bolt",
+    steering.inertial = Inertial.from_geometry(
+        Box((0.46, 0.16, 0.69)),
+        mass=2.20,
+        origin=Origin(xyz=(0.0, 0.085, -0.070)),
     )
 
-    assembly.visual(
-        Box((0.120, 0.016, 0.018)),
-        origin=Origin(xyz=(0.0, 0.091, 0.425)),
-        material=black,
-        name="bar_center",
+    model.articulation(
+        "steering_rotation",
+        ArticulationType.REVOLUTE,
+        parent=head_tube,
+        child=steering,
+        origin=Origin(rpy=(head_tilt, 0.0, 0.0)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(
+            effort=24.0,
+            velocity=3.0,
+            lower=-0.75,
+            upper=0.75,
+        ),
     )
-    assembly.visual(_drop_side_mesh(-1.0, "left_drop.obj"), material=black, name="left_drop")
-    assembly.visual(_drop_side_mesh(1.0, "right_drop.obj"), material=black, name="right_drop")
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    assembly = object_model.get_part("assembly")
-    steerer = assembly.get_visual("steerer")
-    crown_bridge = assembly.get_visual("crown_bridge")
-    left_blade = assembly.get_visual("left_blade")
-    right_blade = assembly.get_visual("right_blade")
-    left_dropout = assembly.get_visual("left_dropout")
-    right_dropout = assembly.get_visual("right_dropout")
-    top_cap = assembly.get_visual("top_cap")
-    top_cap_bolt = assembly.get_visual("top_cap_bolt")
-    stem_clamp = assembly.get_visual("stem_clamp")
-    bar_clamp = assembly.get_visual("bar_clamp")
-    faceplate = assembly.get_visual("faceplate")
-    upper_bolt = assembly.get_visual("upper_bolt")
-    lower_bolt = assembly.get_visual("lower_bolt")
-    bar_center = assembly.get_visual("bar_center")
-    left_drop = assembly.get_visual("left_drop")
-    right_drop = assembly.get_visual("right_drop")
+    ctx = TestContext(object_model)
+    head_tube = object_model.get_part("head_tube")
+    steering = object_model.get_part("steering_assembly")
+    steering_rotation = object_model.get_articulation("steering_rotation")
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
+    ctx.check_mesh_assets_ready()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    # Preferred default QC stack:
+    # 1) likely-failure grounded-component floating check for disconnected part groups
+    ctx.fail_if_isolated_parts(contact_tol=0.0015)
+    # 2) noisier warning-tier sensor for same-part disconnected geometry islands
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    # 3) likely-failure rest-pose part-to-part overlap backstop for real 3D interpenetration
+    # This is not an "inside / nested / footprint overlap" check.
+    # Investigate all three. Warning-tier signals are not free passes.
+    # Use `ctx.allow_overlap(...)` only for true intended penetration.
+    # If parts are nested but should remain clear, prove that with exact
+    # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
+    # `expect_within(...)` checks instead.
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    ctx.expect_overlap(assembly, assembly, axes="xy", min_overlap=0.001, elem_a=stem_clamp, elem_b=steerer)
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="z",
-        max_gap=0.012,
-        max_penetration=0.0,
-        positive_elem=top_cap,
-        negative_elem=stem_clamp,
-    )
-    ctx.expect_contact(assembly, assembly, elem_a=top_cap_bolt, elem_b=top_cap)
+    # Keep pose-specific checks lean.
+    # Do not add blanket lower/upper pose sweeps or
+    # `fail_if_parts_overlap_in_sampled_poses(...)` by default.
+    # Add `ctx.warn_if_articulation_overlaps(...)` only when joint clearance is
+    # genuinely uncertain or mechanically important.
 
-    ctx.expect_within(assembly, assembly, axes="yz", inner_elem=bar_center, outer_elem=bar_clamp)
-    ctx.expect_overlap(assembly, assembly, axes="xz", min_overlap=0.012, elem_a=bar_center, elem_b=faceplate)
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="x",
-        min_gap=0.02,
-        positive_elem=right_drop,
-        negative_elem=faceplate,
+    required_visuals = (
+        "head_tube_shell",
+        "tapered_steerer",
+        "fork_crown",
+        "left_blade",
+        "right_blade",
+        "crown_bridge",
+        "stem_body",
+        "faceplate",
+        "faceplate_bolt_upper",
+        "faceplate_bolt_lower",
+        "handlebar",
+        "left_dropout",
+        "right_dropout",
+        "left_bar_end",
+        "right_bar_end",
+        "top_cap",
     )
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="x",
-        min_gap=0.02,
-        positive_elem=faceplate,
-        negative_elem=left_drop,
+    ctx.check(
+        "prompt visuals present",
+        all(
+            _has_visual(head_tube if visual_name == "head_tube_shell" else steering, visual_name)
+            for visual_name in required_visuals
+        ),
+        details="Expected head tube shell, fork details, cockpit, and visible bolts are missing.",
     )
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="z",
-        min_gap=0.09,
-        positive_elem=bar_center,
-        negative_elem=crown_bridge,
+    ctx.check(
+        "steering joint axis and limits",
+        steering_rotation.axis == (0.0, 0.0, 1.0)
+        and steering_rotation.motion_limits is not None
+        and steering_rotation.motion_limits.lower is not None
+        and steering_rotation.motion_limits.upper is not None
+        and steering_rotation.motion_limits.lower <= -0.70
+        and steering_rotation.motion_limits.upper >= 0.70,
+        details="Steering should revolve smoothly about the steerer axis with realistic left-right range.",
+    )
+    ctx.expect_contact(
+        steering,
+        head_tube,
+        contact_tol=0.0015,
+        name="steering assembly seats on headset faces",
+    )
+    ctx.expect_overlap(
+        steering,
+        head_tube,
+        axes="xy",
+        min_overlap=0.040,
+        name="steering assembly stays centered over head tube",
     )
 
-    ctx.expect_contact(assembly, assembly, elem_a=upper_bolt, elem_b=faceplate)
-    ctx.expect_contact(assembly, assembly, elem_a=lower_bolt, elem_b=faceplate)
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="z",
-        min_gap=0.014,
-        positive_elem=upper_bolt,
-        negative_elem=lower_bolt,
+    left_rest_aabb = ctx.part_element_world_aabb(steering, elem="left_bar_end")
+    right_rest_aabb = ctx.part_element_world_aabb(steering, elem="right_bar_end")
+    left_rest = _aabb_center(left_rest_aabb) if left_rest_aabb is not None else None
+    right_rest = _aabb_center(right_rest_aabb) if right_rest_aabb is not None else None
+    ctx.check(
+        "bar end trackers resolve",
+        left_rest is not None and right_rest is not None,
+        details="Named bar-end visuals must exist so steering motion can be verified.",
     )
+    if left_rest is not None and right_rest is not None:
+        with ctx.pose({steering_rotation: 0.45}):
+            ctx.expect_contact(
+                steering,
+                head_tube,
+                contact_tol=0.0015,
+                name="steering contact retained while turned",
+            )
+            left_turn_aabb = ctx.part_element_world_aabb(steering, elem="left_bar_end")
+            right_turn_aabb = ctx.part_element_world_aabb(steering, elem="right_bar_end")
+            left_turn = _aabb_center(left_turn_aabb) if left_turn_aabb is not None else None
+            right_turn = _aabb_center(right_turn_aabb) if right_turn_aabb is not None else None
+            ctx.check(
+                "handlebar swings with steering articulation",
+                left_turn is not None
+                and right_turn is not None
+                and dist(left_rest, left_turn) > 0.060
+                and dist(right_rest, right_turn) > 0.060,
+                details="Both bar ends should sweep a clear arc when the steering rotates.",
+            )
 
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="x",
-        min_gap=0.08,
-        positive_elem=right_dropout,
-        negative_elem=left_dropout,
-    )
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="z",
-        max_gap=0.008,
-        max_penetration=0.004,
-        positive_elem=left_blade,
-        negative_elem=left_dropout,
-    )
-    ctx.expect_gap(
-        assembly,
-        assembly,
-        axis="z",
-        max_gap=0.008,
-        max_penetration=0.004,
-        positive_elem=right_blade,
-        negative_elem=right_dropout,
-    )
-    ctx.expect_overlap(assembly, assembly, axes="yz", min_overlap=0.004, elem_a=crown_bridge, elem_b=left_blade)
-    ctx.expect_overlap(assembly, assembly, axes="yz", min_overlap=0.004, elem_a=crown_bridge, elem_b=right_blade)
     return ctx.report()
 
 

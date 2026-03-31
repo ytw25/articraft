@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_wind_turbine_6ad7c7431e4c4997ab151936eb6085bb",
+  "created_at": "2026-03-30T17:11:35Z",
+  "updated_at": "2026-03-30T19:32:24Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "wind_turbine",
+  "source": {
+    "run_id": "run_20260330_160753_925388_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "wind_turbine_backfill_4",
+    "prompt_index": 316
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Wind turbine Backfill 6",
+    "prompt_preview": "Model Wind turbine as an industrial safety-first variant for heavy duty cycles. Start from a tower with nacelle, rotor hub, and blade-root interfaces, then a..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "80697c75c02b41f53644f930f6ad279ab6563c4fd4222ebfb520bf436c218ef6",
+    "model_py_sha256": "182ca6600f94fd8b01c759e916e20d555880dc528669b5671f0f2cf1151b0f92"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "rated_by": "shawlyu",
+  "author": "shawlyu"
+}

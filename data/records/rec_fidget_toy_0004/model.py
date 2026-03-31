@@ -16,519 +16,407 @@ from sdk import (
     Sphere,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    rounded_rect_profile,
+    section_loft,
 )
 
-CUBE_SIZE = 0.074
-HALF = CUBE_SIZE / 2.0
-PANEL_SPAN = 0.048
-PANEL_THICK = 0.0025
+
+BODY_SIZE = 0.036
+BODY_HALF = BODY_SIZE * 0.5
+
+
+def _rounded_rect_section(width: float, height: float, radius: float, z: float) -> list[tuple[float, float, float]]:
+    return [(x, y, z) for x, y in rounded_rect_profile(width, height, radius, corner_segments=8)]
+
+
+def _build_cube_shell_mesh():
+    return section_loft(
+        [
+            _rounded_rect_section(0.030, 0.030, 0.0042, -0.018),
+            _rounded_rect_section(0.034, 0.034, 0.0046, -0.013),
+            _rounded_rect_section(0.036, 0.036, 0.0050, 0.000),
+            _rounded_rect_section(0.034, 0.034, 0.0046, 0.013),
+            _rounded_rect_section(0.030, 0.030, 0.0042, 0.018),
+        ]
+    )
+
+
+def _aabb_center(aabb):
+    return tuple((aabb[0][index] + aabb[1][index]) * 0.5 for index in range(3))
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="fidget_cube")
 
-    shell = model.material("shell", rgba=(0.16, 0.17, 0.20, 1.0))
-    panel = model.material("panel", rgba=(0.26, 0.27, 0.31, 1.0))
-    metal = model.material("metal", rgba=(0.74, 0.76, 0.79, 1.0))
-    rubber = model.material("rubber", rgba=(0.10, 0.11, 0.12, 1.0))
-    teal = model.material("teal", rgba=(0.20, 0.60, 0.65, 1.0))
-    amber = model.material("amber", rgba=(0.74, 0.58, 0.24, 1.0))
-    red = model.material("red", rgba=(0.73, 0.20, 0.18, 1.0))
-    ivory = model.material("ivory", rgba=(0.88, 0.86, 0.80, 1.0))
+    shell_white = model.material("shell_white", rgba=(0.93, 0.93, 0.91, 1.0))
+    shell_trim = model.material("shell_trim", rgba=(0.19, 0.20, 0.23, 1.0))
+    control_black = model.material("control_black", rgba=(0.08, 0.09, 0.10, 1.0))
+    accent_red = model.material("accent_red", rgba=(0.82, 0.18, 0.16, 1.0))
+    accent_blue = model.material("accent_blue", rgba=(0.18, 0.42, 0.74, 1.0))
 
-    body = model.part("body")
-    body.visual(Box((CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)), material=shell, name="shell")
+    body = model.part("cube_body")
     body.visual(
-        Box((PANEL_SPAN, PANEL_SPAN, PANEL_THICK)),
-        origin=Origin(xyz=(0.0, 0.0, HALF - PANEL_THICK / 2.0)),
-        material=panel,
-        name="top_panel",
+        mesh_from_geometry(_build_cube_shell_mesh(), "fidget_cube_shell"),
+        material=shell_white,
+        name="body_shell",
     )
     body.visual(
-        Box((PANEL_SPAN, PANEL_SPAN, PANEL_THICK)),
-        origin=Origin(xyz=(0.0, 0.0, -HALF + PANEL_THICK / 2.0)),
-        material=panel,
-        name="bottom_panel",
+        Cylinder(radius=0.0078, length=0.0020),
+        origin=Origin(xyz=(0.0, 0.0, BODY_HALF + 0.0010)),
+        material=shell_trim,
+        name="joystick_base",
     )
     body.visual(
-        Box((PANEL_THICK, PANEL_SPAN, PANEL_SPAN)),
-        origin=Origin(xyz=(HALF - PANEL_THICK / 2.0, 0.0, 0.0)),
-        material=panel,
-        name="right_panel",
+        Box((0.0100, 0.0020, 0.0080)),
+        origin=Origin(xyz=(0.0, -0.0050, BODY_HALF + 0.0040)),
+        material=shell_trim,
+        name="joystick_rear_cheek",
     )
     body.visual(
-        Box((PANEL_THICK, PANEL_SPAN, PANEL_SPAN)),
-        origin=Origin(xyz=(-HALF + PANEL_THICK / 2.0, 0.0, 0.0)),
-        material=panel,
-        name="left_panel",
+        Box((0.0100, 0.0020, 0.0080)),
+        origin=Origin(xyz=(0.0, 0.0050, BODY_HALF + 0.0040)),
+        material=shell_trim,
+        name="joystick_front_cheek",
     )
     body.visual(
-        Box((PANEL_SPAN, PANEL_THICK, PANEL_SPAN)),
-        origin=Origin(xyz=(0.0, HALF - PANEL_THICK / 2.0, 0.0)),
-        material=panel,
-        name="front_panel",
+        Box((0.0030, 0.0040, 0.0060)),
+        origin=Origin(xyz=(BODY_HALF + 0.0005, -0.0110, 0.0000)),
+        material=shell_trim,
+        name="dial_rear_bezel",
     )
     body.visual(
-        Box((PANEL_SPAN, PANEL_THICK, PANEL_SPAN)),
-        origin=Origin(xyz=(0.0, -HALF + PANEL_THICK / 2.0, 0.0)),
-        material=panel,
-        name="rear_panel",
+        Box((0.0030, 0.0040, 0.0060)),
+        origin=Origin(xyz=(BODY_HALF + 0.0005, 0.0110, 0.0000)),
+        material=shell_trim,
+        name="dial_front_bezel",
     )
     body.visual(
-        Cylinder(radius=0.014, length=0.0025),
-        origin=Origin(xyz=(0.0, 0.0, HALF - 0.00125)),
-        material=metal,
-        name="button_seat",
+        Box((0.0030, 0.0140, 0.0040)),
+        origin=Origin(xyz=(BODY_HALF + 0.0005, 0.0000, -0.0110)),
+        material=shell_trim,
+        name="dial_lower_bezel",
     )
     body.visual(
-        Cylinder(radius=0.016, length=0.0025),
-        origin=Origin(xyz=(HALF - 0.00125, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal,
-        name="dial_seat",
+        Box((0.0030, 0.0140, 0.0040)),
+        origin=Origin(xyz=(BODY_HALF + 0.0005, 0.0000, 0.0110)),
+        material=shell_trim,
+        name="dial_upper_bezel",
     )
     body.visual(
-        Cylinder(radius=0.014, length=0.004),
-        origin=Origin(xyz=(-HALF + 0.002, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=rubber,
-        name="joystick_socket",
+        Box((0.0030, 0.0030, 0.0140)),
+        origin=Origin(xyz=(-0.0060, BODY_HALF + 0.0005, 0.0000)),
+        material=shell_trim,
+        name="toggle_left_guard",
     )
     body.visual(
-        Box((0.028, 0.0025, 0.020)),
-        origin=Origin(xyz=(0.0, HALF - 0.00125, 0.0)),
-        material=metal,
-        name="toggle_plate",
+        Box((0.0030, 0.0030, 0.0140)),
+        origin=Origin(xyz=(0.0060, BODY_HALF + 0.0005, 0.0000)),
+        material=shell_trim,
+        name="toggle_right_guard",
     )
     body.visual(
-        Box((0.052, 0.0025, 0.020)),
-        origin=Origin(xyz=(0.0, -HALF + 0.00125, 0.0)),
-        material=metal,
-        name="slider_track",
+        Box((0.0030, 0.0040, 0.0240)),
+        origin=Origin(xyz=(-BODY_HALF - 0.0005, -0.0070, 0.0000)),
+        material=shell_trim,
+        name="slider_lower_rail",
     )
     body.visual(
-        Box((0.0035, 0.004, 0.018)),
-        origin=Origin(xyz=(-0.0185, -HALF + 0.002, 0.0)),
-        material=metal,
-        name="slider_left_rail",
+        Box((0.0030, 0.0040, 0.0240)),
+        origin=Origin(xyz=(-BODY_HALF - 0.0005, 0.0070, 0.0000)),
+        material=shell_trim,
+        name="slider_upper_rail",
     )
     body.visual(
-        Box((0.0035, 0.004, 0.018)),
-        origin=Origin(xyz=(0.0185, -HALF + 0.002, 0.0)),
-        material=metal,
-        name="slider_right_rail",
+        Box((0.0030, 0.0180, 0.0030)),
+        origin=Origin(xyz=(-BODY_HALF - 0.0005, 0.0000, -0.0120)),
+        material=shell_trim,
+        name="slider_bottom_stop",
     )
     body.visual(
-        Cylinder(radius=0.017, length=0.0025),
-        origin=Origin(xyz=(0.0, 0.0, -HALF + 0.00125)),
-        material=metal,
-        name="gear_seat",
+        Box((0.0030, 0.0180, 0.0030)),
+        origin=Origin(xyz=(-BODY_HALF - 0.0005, 0.0000, 0.0120)),
+        material=shell_trim,
+        name="slider_top_stop",
     )
-    body.inertial = Inertial.from_geometry(Box((CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)), mass=0.50)
-
-    button = model.part("button")
-    button.visual(
-        Cylinder(radius=0.0105, length=0.003),
-        origin=Origin(xyz=(0.0, 0.0, 0.001)),
-        material=teal,
-        name="button_plunger",
-    )
-    button.visual(
-        Cylinder(radius=0.0095, length=0.002),
-        origin=Origin(xyz=(0.0, 0.0, 0.0025)),
-        material=teal,
-        name="button_cap",
-    )
-    button.visual(
-        Sphere(radius=0.0068),
-        origin=Origin(xyz=(0.0, 0.0, 0.0058)),
-        material=teal,
-        name="button_dome",
-    )
-    button.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.011, length=0.016),
-        mass=0.025,
-        origin=Origin(xyz=(0.0, 0.0, 0.006)),
+    body.inertial = Inertial.from_geometry(
+        Box((BODY_SIZE, BODY_SIZE, BODY_SIZE)),
+        mass=0.060,
     )
 
-    dial = model.part("dial")
-    dial.visual(
-        Cylinder(radius=0.0130, length=0.003),
-        origin=Origin(xyz=(0.001, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal,
-        name="dial_collar",
-    )
-    dial.visual(
-        Cylinder(radius=0.0108, length=0.007),
-        origin=Origin(xyz=(0.005, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=rubber,
-        name="dial_knob",
-    )
-    dial.visual(
-        Box((0.0016, 0.0025, 0.008)),
-        origin=Origin(xyz=(0.0088, 0.0, 0.0)),
-        material=ivory,
-        name="dial_pointer",
-    )
-    for index in range(8):
-        angle = 2.0 * math.pi * index / 8.0
-        dial.visual(
-            Box((0.003, 0.0016, 0.004)),
-            origin=Origin(
-                xyz=(0.005, 0.0098 * math.cos(angle), 0.0098 * math.sin(angle)),
-                rpy=(angle, 0.0, 0.0),
-            ),
-            material=metal,
-            name=f"dial_ridge_{index}",
-        )
-    dial.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.0135, length=0.015),
-        mass=0.035,
-        origin=Origin(xyz=(0.007, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-    )
-
-    joystick = model.part("joystick")
+    joystick = model.part("joystick_nub")
     joystick.visual(
-        Cylinder(radius=0.0098, length=0.003),
-        origin=Origin(xyz=(-0.0015, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=rubber,
-        name="joystick_skirt",
+        Cylinder(radius=0.0012, length=0.0080),
+        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
+        material=control_black,
+        name="joystick_axle",
     )
     joystick.visual(
-        Sphere(radius=0.004),
-        origin=Origin(xyz=(-0.0015, 0.0, 0.0)),
-        material=metal,
-        name="joystick_gimbal",
-    )
-    joystick.visual(
-        Cylinder(radius=0.0030, length=0.008),
-        origin=Origin(xyz=(-0.0045, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal,
+        Cylinder(radius=0.0013, length=0.0130),
+        origin=Origin(xyz=(0.0, 0.0, 0.0065)),
+        material=control_black,
         name="joystick_stem",
     )
     joystick.visual(
-        Sphere(radius=0.0060),
-        origin=Origin(xyz=(-0.0085, 0.0, 0.0)),
-        material=amber,
+        Sphere(radius=0.0045),
+        origin=Origin(xyz=(0.0, 0.0, 0.0155)),
+        material=accent_red,
         name="joystick_cap",
     )
     joystick.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.0065, length=0.020),
-        mass=0.025,
-        origin=Origin(xyz=(-0.010, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-    )
-
-    toggle = model.part("toggle")
-    toggle.visual(
-        Box((0.012, 0.004, 0.014)),
-        origin=Origin(xyz=(0.0, 0.0015, 0.0)),
-        material=metal,
-        name="toggle_base",
-    )
-    toggle.visual(
-        Cylinder(radius=0.0018, length=0.010),
-        origin=Origin(xyz=(0.0, 0.006, 0.0030), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=metal,
-        name="toggle_stem",
-    )
-    toggle.visual(
-        Box((0.0055, 0.0055, 0.0055)),
-        origin=Origin(xyz=(0.0, 0.0105, 0.0055)),
-        material=red,
-        name="toggle_tip",
-    )
-    toggle.inertial = Inertial.from_geometry(
-        Box((0.012, 0.022, 0.016)),
-        mass=0.020,
-        origin=Origin(xyz=(0.0, 0.011, 0.004)),
-    )
-
-    slider = model.part("slider")
-    slider.visual(
-        Box((0.016, 0.009, 0.012)),
-        origin=Origin(xyz=(0.0, -0.0045, 0.0)),
-        material=ivory,
-        name="slider_thumb",
-    )
-    slider.visual(
-        Box((0.010, 0.003, 0.008)),
-        origin=Origin(xyz=(0.0, -0.0010, 0.0)),
-        material=metal,
-        name="slider_guide",
-    )
-    slider.visual(
-        Box((0.011, 0.0025, 0.003)),
-        origin=Origin(xyz=(0.0, -0.0085, 0.004)),
-        material=metal,
-        name="slider_rib",
-    )
-    slider.inertial = Inertial.from_geometry(
-        Box((0.016, 0.010, 0.012)),
-        mass=0.020,
-        origin=Origin(xyz=(0.0, -0.004, 0.0)),
-    )
-
-    gear = model.part("gear")
-    gear.visual(
-        Cylinder(radius=0.004, length=0.005),
-        origin=Origin(xyz=(0.0, 0.0, -0.001)),
-        material=metal,
-        name="gear_axle",
-    )
-    gear.visual(
-        Cylinder(radius=0.0075, length=0.003),
-        origin=Origin(xyz=(0.0, 0.0, -0.003)),
-        material=metal,
-        name="gear_hub",
-    )
-    gear.visual(
-        Cylinder(radius=0.0145, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, -0.004)),
-        material=amber,
-        name="gear_rim",
-    )
-    for index in range(10):
-        angle = 2.0 * math.pi * index / 10.0
-        gear.visual(
-            Box((0.005, 0.0026, 0.004)),
-            origin=Origin(
-                xyz=(0.0168 * math.cos(angle), 0.0168 * math.sin(angle), -0.004),
-                rpy=(0.0, 0.0, angle),
-            ),
-            material=amber,
-            name=f"gear_tooth_{index}",
-        )
-    gear.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.0165, length=0.007),
-        mass=0.030,
-        origin=Origin(xyz=(0.0, 0.0, -0.004)),
-    )
-
-    model.articulation(
-        "button_press",
-        ArticulationType.PRISMATIC,
-        parent=body,
-        child=button,
-        origin=Origin(xyz=(0.0, 0.0, HALF)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=5.0, velocity=0.2, lower=-0.0025, upper=0.0),
+        Box((0.010, 0.010, 0.024)),
+        mass=0.004,
+        origin=Origin(xyz=(0.0, 0.0, 0.012)),
     )
     model.articulation(
-        "dial_turn",
-        ArticulationType.CONTINUOUS,
-        parent=body,
-        child=dial,
-        origin=Origin(xyz=(HALF, 0.0, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=2.0, velocity=8.0),
-    )
-    model.articulation(
-        "joystick_rock",
+        "body_to_joystick",
         ArticulationType.REVOLUTE,
         parent=body,
         child=joystick,
-        origin=Origin(xyz=(-HALF, 0.0, 0.0)),
+        origin=Origin(xyz=(0.0, 0.0, BODY_HALF + 0.0040)),
         axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(effort=2.0, velocity=4.0, lower=-0.35, upper=0.35),
+        motion_limits=MotionLimits(
+            effort=0.2,
+            velocity=2.0,
+            lower=-0.42,
+            upper=0.42,
+        ),
+    )
+
+    dial = model.part("dial_wheel")
+    dial.visual(
+        Cylinder(radius=0.0090, length=0.0040),
+        origin=Origin(xyz=(0.0020, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=control_black,
+        name="dial_body",
+    )
+    dial.visual(
+        Cylinder(radius=0.0030, length=0.0016),
+        origin=Origin(xyz=(0.0008, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=shell_trim,
+        name="dial_hub",
+    )
+    dial.visual(
+        Box((0.0020, 0.0025, 0.0040)),
+        origin=Origin(xyz=(0.0030, 0.0, 0.0075)),
+        material=accent_blue,
+        name="dial_marker",
+    )
+    dial.inertial = Inertial.from_geometry(
+        Box((0.008, 0.020, 0.020)),
+        mass=0.006,
+        origin=Origin(xyz=(0.002, 0.0, 0.0)),
     )
     model.articulation(
-        "toggle_flip",
+        "body_to_dial",
+        ArticulationType.CONTINUOUS,
+        parent=body,
+        child=dial,
+        origin=Origin(xyz=(BODY_HALF, 0.0, 0.0)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=0.25,
+            velocity=8.0,
+        ),
+    )
+
+    toggle = model.part("toggle_switch")
+    toggle.visual(
+        Cylinder(radius=0.0016, length=0.0100),
+        origin=Origin(xyz=(0.0, 0.0016, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=control_black,
+        name="toggle_hinge",
+    )
+    toggle.visual(
+        Box((0.0032, 0.0060, 0.0100)),
+        origin=Origin(xyz=(0.0, 0.0050, 0.0)),
+        material=control_black,
+        name="toggle_stem",
+    )
+    toggle.visual(
+        Box((0.0050, 0.0040, 0.0070)),
+        origin=Origin(xyz=(0.0, 0.0085, 0.0)),
+        material=accent_red,
+        name="toggle_tip",
+    )
+    toggle.inertial = Inertial.from_geometry(
+        Box((0.010, 0.014, 0.012)),
+        mass=0.003,
+        origin=Origin(xyz=(0.0, 0.0060, 0.0)),
+    )
+    model.articulation(
+        "body_to_toggle",
         ArticulationType.REVOLUTE,
         parent=body,
         child=toggle,
-        origin=Origin(xyz=(0.0, HALF, -0.001)),
+        origin=Origin(xyz=(0.0, BODY_HALF, 0.0)),
         axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=2.0, velocity=3.0, lower=-0.65, upper=0.65),
+        motion_limits=MotionLimits(
+            effort=0.15,
+            velocity=3.0,
+            lower=-0.55,
+            upper=0.55,
+        ),
+    )
+
+    slider = model.part("slider_control")
+    slider.visual(
+        Box((0.0030, 0.0100, 0.0080)),
+        origin=Origin(xyz=(-0.0015, 0.0, 0.0)),
+        material=control_black,
+        name="slider_carriage",
+    )
+    slider.visual(
+        Box((0.0060, 0.0120, 0.0060)),
+        origin=Origin(xyz=(-0.0060, 0.0, 0.0)),
+        material=accent_blue,
+        name="slider_cap",
+    )
+    slider.visual(
+        Box((0.0010, 0.0080, 0.0012)),
+        origin=Origin(xyz=(-0.0090, 0.0, -0.0018)),
+        material=shell_white,
+        name="slider_grip_low",
+    )
+    slider.visual(
+        Box((0.0010, 0.0080, 0.0012)),
+        origin=Origin(xyz=(-0.0090, 0.0, 0.0018)),
+        material=shell_white,
+        name="slider_grip_high",
+    )
+    slider.inertial = Inertial.from_geometry(
+        Box((0.010, 0.014, 0.010)),
+        mass=0.004,
+        origin=Origin(xyz=(-0.005, 0.0, 0.0)),
     )
     model.articulation(
-        "slider_move",
+        "body_to_slider",
         ArticulationType.PRISMATIC,
         parent=body,
         child=slider,
-        origin=Origin(xyz=(0.0, -HALF, 0.0)),
-        axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=2.0, velocity=0.25, lower=-0.011, upper=0.011),
-    )
-    model.articulation(
-        "gear_spin",
-        ArticulationType.CONTINUOUS,
-        parent=body,
-        child=gear,
-        origin=Origin(xyz=(0.0, 0.0, -HALF)),
+        origin=Origin(xyz=(-BODY_HALF, 0.0, 0.0)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=1.5, velocity=10.0),
+        motion_limits=MotionLimits(
+            effort=0.8,
+            velocity=0.05,
+            lower=-0.007,
+            upper=0.007,
+        ),
     )
+
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    body = object_model.get_part("body")
-    button = object_model.get_part("button")
-    dial = object_model.get_part("dial")
-    joystick = object_model.get_part("joystick")
-    toggle = object_model.get_part("toggle")
-    slider = object_model.get_part("slider")
-    gear = object_model.get_part("gear")
+    body = object_model.get_part("cube_body")
+    joystick = object_model.get_part("joystick_nub")
+    dial = object_model.get_part("dial_wheel")
+    toggle = object_model.get_part("toggle_switch")
+    slider = object_model.get_part("slider_control")
 
-    button_press = object_model.get_articulation("button_press")
-    dial_turn = object_model.get_articulation("dial_turn")
-    joystick_rock = object_model.get_articulation("joystick_rock")
-    toggle_flip = object_model.get_articulation("toggle_flip")
-    slider_move = object_model.get_articulation("slider_move")
-    gear_spin = object_model.get_articulation("gear_spin")
-
-    top_panel = body.get_visual("top_panel")
-    bottom_panel = body.get_visual("bottom_panel")
-    right_panel = body.get_visual("right_panel")
-    left_panel = body.get_visual("left_panel")
-    front_panel = body.get_visual("front_panel")
-    rear_panel = body.get_visual("rear_panel")
-    button_seat = body.get_visual("button_seat")
-    dial_seat = body.get_visual("dial_seat")
-    joystick_socket = body.get_visual("joystick_socket")
-    toggle_plate = body.get_visual("toggle_plate")
-    slider_track = body.get_visual("slider_track")
-    gear_seat = body.get_visual("gear_seat")
-
-    button_plunger = button.get_visual("button_plunger")
-    button_cap = button.get_visual("button_cap")
-    button_dome = button.get_visual("button_dome")
-    dial_collar = dial.get_visual("dial_collar")
-    dial_knob = dial.get_visual("dial_knob")
-    joystick_skirt = joystick.get_visual("joystick_skirt")
-    joystick_cap = joystick.get_visual("joystick_cap")
-    toggle_base = toggle.get_visual("toggle_base")
-    toggle_tip = toggle.get_visual("toggle_tip")
-    slider_thumb = slider.get_visual("slider_thumb")
-    slider_guide = slider.get_visual("slider_guide")
-    gear_axle = gear.get_visual("gear_axle")
-    gear_rim = gear.get_visual("gear_rim")
+    joystick_joint = object_model.get_articulation("body_to_joystick")
+    dial_joint = object_model.get_articulation("body_to_dial")
+    toggle_joint = object_model.get_articulation("body_to_toggle")
+    slider_joint = object_model.get_articulation("body_to_slider")
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.allow_overlap(button, body, reason="button plunger nests into the top seat")
-    ctx.allow_overlap(dial, body, reason="dial collar sleeves into the right-side bezel")
-    ctx.allow_overlap(joystick, body, reason="joystick skirt nests into the rubber socket")
-    ctx.allow_overlap(toggle, body, reason="toggle base is seated into the face plate")
-    ctx.allow_overlap(slider, body, reason="slider guide rides inside the rear track")
-    ctx.allow_overlap(gear, body, reason="gear axle seats into the bottom bearing pad")
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.0015,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.0015,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
+    ctx.check_mesh_assets_ready()
 
-    ctx.expect_origin_distance(button, body, axes="xy", max_dist=0.001)
-    ctx.expect_within(button, body, axes="xy", inner_elem=button_cap, outer_elem=top_panel)
-    ctx.expect_gap(
-        button,
-        body,
-        axis="z",
-        positive_elem=button_plunger,
-        negative_elem=button_seat,
-        max_gap=0.001,
-        max_penetration=0.0015,
-    )
-    ctx.expect_overlap(button, body, axes="xy", elem_a=button_dome, elem_b=top_panel, min_overlap=0.0001)
+    # Preferred default QC stack:
+    # 1) likely-failure grounded-component floating check for disconnected part groups
+    ctx.fail_if_isolated_parts()
+    # 2) noisier warning-tier sensor for same-part disconnected geometry islands
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    # 3) likely-failure rest-pose part-to-part overlap backstop for real 3D interpenetration
+    # This is not an "inside / nested / footprint overlap" check.
+    # Investigate all three. Warning-tier signals are not free passes.
+    # Use `ctx.allow_overlap(...)` only for true intended penetration.
+    # If parts are nested but should remain clear, prove that with exact
+    # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
+    # `expect_within(...)` checks instead.
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    ctx.expect_origin_distance(dial, body, axes="yz", max_dist=0.001)
-    ctx.expect_within(dial, body, axes="yz", inner_elem=dial_knob, outer_elem=right_panel)
-    ctx.expect_gap(
-        dial,
-        body,
-        axis="x",
-        positive_elem=dial_collar,
-        negative_elem=dial_seat,
-        max_gap=0.001,
-        max_penetration=0.0015,
+    ctx.check(
+        "joint_types_and_axes",
+        joystick_joint.joint_type == ArticulationType.REVOLUTE
+        and tuple(joystick_joint.axis) == (0.0, 1.0, 0.0)
+        and dial_joint.joint_type == ArticulationType.CONTINUOUS
+        and tuple(dial_joint.axis) == (1.0, 0.0, 0.0)
+        and toggle_joint.joint_type == ArticulationType.REVOLUTE
+        and tuple(toggle_joint.axis) == (1.0, 0.0, 0.0)
+        and slider_joint.joint_type == ArticulationType.PRISMATIC
+        and tuple(slider_joint.axis) == (0.0, 0.0, 1.0),
+        details="Each face control should use its intended articulation axis and joint type.",
     )
 
-    ctx.expect_origin_distance(joystick, body, axes="yz", max_dist=0.001)
-    ctx.expect_within(joystick, body, axes="yz", inner_elem=joystick_cap, outer_elem=left_panel)
-    ctx.expect_gap(
-        body,
-        joystick,
-        axis="x",
-        positive_elem=joystick_socket,
-        negative_elem=joystick_skirt,
-        max_gap=0.001,
-        max_penetration=0.0015,
+    ctx.expect_contact(joystick, body, name="joystick_contacts_body")
+    ctx.expect_contact(dial, body, name="dial_contacts_body")
+    ctx.expect_contact(toggle, body, name="toggle_contacts_body")
+    ctx.expect_contact(slider, body, name="slider_contacts_body")
+
+    joystick_rest_aabb = ctx.part_element_world_aabb(joystick, elem="joystick_cap")
+    dial_rest_aabb = ctx.part_element_world_aabb(dial, elem="dial_marker")
+    toggle_rest_aabb = ctx.part_element_world_aabb(toggle, elem="toggle_tip")
+    slider_rest_pos = ctx.part_world_position(slider)
+
+    ctx.check(
+        "widget_measurements_available",
+        joystick_rest_aabb is not None and dial_rest_aabb is not None and toggle_rest_aabb is not None and slider_rest_pos is not None,
+        details="Named widget visuals should resolve for pose tests.",
     )
 
-    ctx.expect_origin_distance(toggle, body, axes="xz", max_dist=0.001)
-    ctx.expect_within(toggle, body, axes="xz", inner_elem=toggle_tip, outer_elem=front_panel)
-    ctx.expect_gap(
-        toggle,
-        body,
-        axis="y",
-        positive_elem=toggle_base,
-        negative_elem=toggle_plate,
-        max_gap=0.001,
-        max_penetration=0.0015,
-    )
+    if joystick_rest_aabb is not None:
+        joystick_rest_center = _aabb_center(joystick_rest_aabb)
+        with ctx.pose({joystick_joint: 0.35}):
+            ctx.expect_contact(joystick, body, name="joystick_contact_at_tilt")
+            joystick_tilt_aabb = ctx.part_element_world_aabb(joystick, elem="joystick_cap")
+            if joystick_tilt_aabb is not None:
+                joystick_tilt_center = _aabb_center(joystick_tilt_aabb)
+                ctx.check(
+                    "joystick_tilts_sideways",
+                    joystick_tilt_center[0] > joystick_rest_center[0] + 0.004
+                    and joystick_tilt_center[2] < joystick_rest_center[2] - 0.0007,
+                    details="Joystick cap should sweep sideways and slightly downward when tilted.",
+                )
 
-    ctx.expect_origin_distance(slider, body, axes="xz", max_dist=0.001)
-    ctx.expect_within(slider, body, axes="xz", inner_elem=slider_thumb, outer_elem=rear_panel)
-    ctx.expect_gap(
-        body,
-        slider,
-        axis="y",
-        positive_elem=slider_track,
-        negative_elem=slider_guide,
-        max_gap=0.001,
-        max_penetration=0.001,
-    )
+    if dial_rest_aabb is not None:
+        dial_rest_center = _aabb_center(dial_rest_aabb)
+        with ctx.pose({dial_joint: math.pi / 2.0}):
+            ctx.expect_contact(dial, body, name="dial_contact_while_rotating")
+            dial_turn_aabb = ctx.part_element_world_aabb(dial, elem="dial_marker")
+            if dial_turn_aabb is not None:
+                dial_turn_center = _aabb_center(dial_turn_aabb)
+                ctx.check(
+                    "dial_marker_orbits",
+                    abs(dial_turn_center[1] - dial_rest_center[1]) > 0.006
+                    and abs(dial_turn_center[2] - dial_rest_center[2]) > 0.006,
+                    details="The wheel marker should travel around the dial face when rotated.",
+                )
 
-    ctx.expect_origin_distance(gear, body, axes="xy", max_dist=0.001)
-    ctx.expect_within(gear, body, axes="xy", inner_elem=gear_rim, outer_elem=bottom_panel)
-    ctx.expect_gap(
-        body,
-        gear,
-        axis="z",
-        positive_elem=gear_seat,
-        negative_elem=gear_axle,
-        max_gap=0.001,
-        max_penetration=0.002,
-    )
+    if toggle_rest_aabb is not None:
+        toggle_rest_center = _aabb_center(toggle_rest_aabb)
+        with ctx.pose({toggle_joint: 0.45}):
+            ctx.expect_contact(toggle, body, name="toggle_contact_when_flipped")
+            toggle_flip_aabb = ctx.part_element_world_aabb(toggle, elem="toggle_tip")
+            if toggle_flip_aabb is not None:
+                toggle_flip_center = _aabb_center(toggle_flip_aabb)
+                ctx.check(
+                    "toggle_switch_flips_up",
+                    toggle_flip_center[2] > toggle_rest_center[2] + 0.003,
+                    details="The toggle tip should rise when the switch is flipped.",
+                )
 
-    with ctx.pose({button_press: -0.0025}):
-        ctx.expect_within(button, body, axes="xy", inner_elem=button_cap, outer_elem=top_panel)
-        ctx.expect_gap(
-            button,
-            body,
-            axis="z",
-            positive_elem=button_plunger,
-            negative_elem=button_seat,
-            max_gap=0.001,
-            max_penetration=0.004,
-        )
-
-    with ctx.pose({dial_turn: 1.1}):
-        ctx.expect_within(dial, body, axes="yz", inner_elem=dial_knob, outer_elem=right_panel)
-
-    with ctx.pose({joystick_rock: 0.28}):
-        ctx.expect_within(joystick, body, axes="yz", inner_elem=joystick_cap, outer_elem=left_panel)
-
-    with ctx.pose({toggle_flip: 0.55}):
-        ctx.expect_overlap(toggle, body, axes="xz", elem_a=toggle_tip, elem_b=front_panel, min_overlap=0.0001)
-    with ctx.pose({toggle_flip: -0.55}):
-        ctx.expect_overlap(toggle, body, axes="xz", elem_a=toggle_tip, elem_b=front_panel, min_overlap=0.0001)
-
-    with ctx.pose({slider_move: 0.011}):
-        ctx.expect_within(slider, body, axes="xz", inner_elem=slider_thumb, outer_elem=rear_panel)
-    with ctx.pose({slider_move: -0.011}):
-        ctx.expect_within(slider, body, axes="xz", inner_elem=slider_thumb, outer_elem=rear_panel)
-
-    with ctx.pose({gear_spin: 0.8}):
-        ctx.expect_within(gear, body, axes="xy", inner_elem=gear_rim, outer_elem=bottom_panel)
+    if slider_rest_pos is not None:
+        with ctx.pose({slider_joint: 0.007}):
+            ctx.expect_contact(slider, body, name="slider_contact_at_upper_travel")
+            slider_upper_pos = ctx.part_world_position(slider)
+            if slider_upper_pos is not None:
+                ctx.check(
+                    "slider_translates_along_track",
+                    slider_upper_pos[2] > slider_rest_pos[2] + 0.0065,
+                    details="The slider should translate vertically along its guide face.",
+                )
 
     return ctx.report()
 

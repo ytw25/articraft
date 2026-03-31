@@ -4,6 +4,24 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
+import os
+import pathlib
+
+_REAL_GETCWD = os.getcwd
+
+
+def _safe_getcwd() -> str:
+    try:
+        return _REAL_GETCWD()
+    except FileNotFoundError:
+        os.chdir("/")
+        return "/"
+
+
+os.getcwd = _safe_getcwd
+pathlib.Path.cwd = classmethod(lambda cls: cls(os.getcwd()))
+
+os.chdir(os.getcwd())
 
 from sdk import (
     ArticulatedObject,
@@ -13,541 +31,431 @@ from sdk import (
     Inertial,
     MotionLimits,
     Origin,
-    Sphere,
     TestContext,
     TestReport,
 )
 
 
+BODY_LENGTH = 0.24
+BODY_WIDTH = 0.14
+BODY_HEIGHT = 0.038
+PLATE_THICKNESS = 0.0035
+WALL_THICKNESS = 0.0045
+
+HINGE_OUTBOARD = 0.014
+HINGE_BRIDGE_LENGTH = 0.032
+HINGE_BRIDGE_WIDTH = 0.028
+HINGE_BEARING_THICKNESS = 0.004
+
+ARM_STACK_Z = 0.010
+ARM_THICKNESS = 0.016
+HINGE_BARREL_RADIUS = 0.012
+HINGE_YOKE_LENGTH = 0.032
+HINGE_YOKE_WIDTH = 0.030
+ARM_BEAM_LENGTH = 0.120
+ARM_BEAM_WIDTH = 0.022
+ARM_BEAM_CENTER_X = 0.088
+MOTOR_RADIUS = 0.016
+MOTOR_HEIGHT = 0.018
+MOTOR_CENTER_X = 0.150
+
+PROP_HUB_RADIUS = 0.011
+PROP_HUB_THICKNESS = 0.0045
+PROP_BLADE_SPAN = 0.170
+PROP_BLADE_CHORD = 0.018
+PROP_BLADE_THICKNESS = 0.0026
+PROP_BLADE_HALF_LENGTH = 0.078
+PROP_BLADE_OFFSET = 0.044
+
+ARM_FOLD_LIMIT = math.radians(78.0)
+
+
+def _rotate_xy(x: float, y: float, yaw: float) -> tuple[float, float]:
+    cos_yaw = math.cos(yaw)
+    sin_yaw = math.sin(yaw)
+    return (x * cos_yaw - y * sin_yaw, x * sin_yaw + y * cos_yaw)
+
+
+def _arm_specs() -> tuple[dict[str, object], ...]:
+    raw_specs = (
+        ("front_left", 1.0, 1.0, math.radians(45.0), (0.0, 0.0, -1.0), ARM_STACK_Z),
+        ("front_right", 1.0, -1.0, -math.radians(45.0), (0.0, 0.0, 1.0), -ARM_STACK_Z),
+        ("rear_left", -1.0, 1.0, math.radians(135.0), (0.0, 0.0, -1.0), ARM_STACK_Z),
+        ("rear_right", -1.0, -1.0, -math.radians(135.0), (0.0, 0.0, 1.0), -ARM_STACK_Z),
+    )
+    specs: list[dict[str, object]] = []
+    for key, x_sign, y_sign, yaw, axis, z_level in raw_specs:
+        offset_x, offset_y = _rotate_xy(HINGE_OUTBOARD, 0.0, yaw)
+        specs.append(
+            {
+                "key": key,
+                "x_sign": x_sign,
+                "y_sign": y_sign,
+                "yaw": yaw,
+                "axis": axis,
+                "origin": (
+                    x_sign * BODY_LENGTH / 2.0 + offset_x,
+                    y_sign * BODY_WIDTH / 2.0 + offset_y,
+                    z_level,
+                ),
+                "arm_name": f"{key}_arm",
+                "prop_name": f"{key}_propeller",
+                "arm_joint": f"body_to_{key}_arm",
+                "prop_joint": f"{key}_propeller_spin",
+                "bridge_visual": f"{key}_hinge_bridge",
+                "bearing_visual": f"{key}_hinge_bearing",
+            }
+        )
+    return tuple(specs)
+
+
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="hybrid_vtol_drone")
+    model = ArticulatedObject(name="folding_arm_quadrotor")
 
-    composite = model.part("airframe")
-    camera = model.part("nose_camera")
+    body_dark = model.material("body_dark", rgba=(0.11, 0.12, 0.14, 1.0))
+    body_panel = model.material("body_panel", rgba=(0.17, 0.18, 0.21, 1.0))
+    arm_dark = model.material("arm_dark", rgba=(0.16, 0.16, 0.17, 1.0))
+    motor_gray = model.material("motor_gray", rgba=(0.37, 0.38, 0.41, 1.0))
+    prop_black = model.material("prop_black", rgba=(0.05, 0.05, 0.06, 1.0))
 
-    body = model.material("body_gray", rgba=(0.38, 0.41, 0.45, 1.0))
-    wing = model.material("wing_gray", rgba=(0.46, 0.49, 0.53, 1.0))
-    carbon = model.material("carbon_black", rgba=(0.10, 0.11, 0.12, 1.0))
-    prop = model.material("prop_gray", rgba=(0.18, 0.19, 0.20, 1.0))
-    sensor = model.material("sensor_glass", rgba=(0.10, 0.14, 0.18, 0.80))
-    accent = model.material("accent_orange", rgba=(0.86, 0.43, 0.14, 1.0))
-
-    composite.visual(
-        Box((0.42, 0.09, 0.09)),
-        origin=Origin(xyz=(0.0, 0.0, 0.105)),
-        material=body,
-        name="fuselage_shell",
+    body = model.part("body")
+    body.visual(
+        Box((BODY_LENGTH, BODY_WIDTH, PLATE_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, BODY_HEIGHT / 2.0 - PLATE_THICKNESS / 2.0)),
+        material=body_dark,
+        name="top_shell",
     )
-    composite.visual(
-        Box((0.14, 0.06, 0.03)),
-        origin=Origin(xyz=(0.01, 0.0, 0.165)),
-        material=body,
-        name="avionics_hump",
+    body.visual(
+        Box((BODY_LENGTH, BODY_WIDTH, PLATE_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, -BODY_HEIGHT / 2.0 + PLATE_THICKNESS / 2.0)),
+        material=body_dark,
+        name="bottom_shell",
     )
-    composite.visual(
-        Box((0.028, 0.040, 0.020)),
-        origin=Origin(xyz=(0.1965, 0.0, 0.051)),
-        material=carbon,
-        name="nose_mount",
+    body.visual(
+        Box((BODY_LENGTH - 2.0 * WALL_THICKNESS, WALL_THICKNESS, BODY_HEIGHT - 2.0 * PLATE_THICKNESS)),
+        origin=Origin(xyz=(0.0, BODY_WIDTH / 2.0 - WALL_THICKNESS / 2.0, 0.0)),
+        material=body_panel,
+        name="left_wall",
     )
-
-    composite.visual(
-        Box((0.18, 0.26, 0.014)),
-        origin=Origin(xyz=(0.02, 0.0, 0.112)),
-        material=wing,
-        name="center_wing",
+    body.visual(
+        Box((BODY_LENGTH - 2.0 * WALL_THICKNESS, WALL_THICKNESS, BODY_HEIGHT - 2.0 * PLATE_THICKNESS)),
+        origin=Origin(xyz=(0.0, -BODY_WIDTH / 2.0 + WALL_THICKNESS / 2.0, 0.0)),
+        material=body_panel,
+        name="right_wall",
     )
-    composite.visual(
-        Box((0.15, 0.18, 0.010)),
-        origin=Origin(xyz=(0.03, 0.22, 0.110)),
-        material=wing,
-        name="left_wing_tip",
+    body.visual(
+        Box((WALL_THICKNESS, BODY_WIDTH, BODY_HEIGHT - 2.0 * PLATE_THICKNESS)),
+        origin=Origin(xyz=(BODY_LENGTH / 2.0 - WALL_THICKNESS / 2.0, 0.0, 0.0)),
+        material=body_panel,
+        name="front_wall",
     )
-    composite.visual(
-        Box((0.15, 0.18, 0.010)),
-        origin=Origin(xyz=(0.03, -0.22, 0.110)),
-        material=wing,
-        name="right_wing_tip",
+    body.visual(
+        Box((WALL_THICKNESS, BODY_WIDTH, BODY_HEIGHT - 2.0 * PLATE_THICKNESS)),
+        origin=Origin(xyz=(-BODY_LENGTH / 2.0 + WALL_THICKNESS / 2.0, 0.0, 0.0)),
+        material=body_panel,
+        name="rear_wall",
     )
-
-    composite.visual(
-        Box((0.04, 0.64, 0.024)),
-        origin=Origin(xyz=(0.08, 0.0, 0.145)),
-        material=carbon,
-        name="front_crossbar",
-    )
-    composite.visual(
-        Box((0.04, 0.64, 0.024)),
-        origin=Origin(xyz=(-0.05, 0.0, 0.145)),
-        material=carbon,
-        name="rear_crossbar",
+    body.inertial = Inertial.from_geometry(
+        Box((BODY_LENGTH, BODY_WIDTH, BODY_HEIGHT)),
+        mass=0.45,
     )
 
-    motor_specs = (
-        ("front_left", 0.08, 0.32),
-        ("front_right", 0.08, -0.32),
-        ("rear_left", -0.05, 0.32),
-        ("rear_right", -0.05, -0.32),
-    )
-    for name, x_pos, y_pos in motor_specs:
-        composite.visual(
-            Cylinder(radius=0.016, length=0.026),
-            origin=Origin(xyz=(x_pos, y_pos, 0.170)),
-            material=accent,
-            name=f"{name}_hub",
+    for spec in _arm_specs():
+        bridge_offset_x, bridge_offset_y = _rotate_xy(-0.002, 0.0, spec["yaw"])
+        body.visual(
+            Box((HINGE_BRIDGE_LENGTH, HINGE_BRIDGE_WIDTH, HINGE_BEARING_THICKNESS)),
+            origin=Origin(
+                xyz=(
+                    spec["origin"][0] + bridge_offset_x,
+                    spec["origin"][1] + bridge_offset_y,
+                    0.0,
+                ),
+                rpy=(0.0, 0.0, spec["yaw"]),
+            ),
+            material=body_panel,
+            name=spec["bridge_visual"],
         )
-        composite.visual(
-            Cylinder(radius=0.018, length=0.034),
-            origin=Origin(xyz=(x_pos, y_pos, 0.200)),
-            material=carbon,
-            name=f"{name}_motor",
-        )
-        composite.visual(
-            Box((0.15, 0.012, 0.0035)),
-            origin=Origin(xyz=(x_pos, y_pos, 0.21875)),
-            material=prop,
-            name=f"{name}_blade_long",
-        )
-        composite.visual(
-            Box((0.012, 0.15, 0.0035)),
-            origin=Origin(xyz=(x_pos, y_pos, 0.21875)),
-            material=prop,
-            name=f"{name}_blade_cross",
+        body.visual(
+            Cylinder(radius=HINGE_BARREL_RADIUS * 0.92, length=HINGE_BEARING_THICKNESS),
+            origin=Origin(xyz=(spec["origin"][0], spec["origin"][1], 0.0)),
+            material=body_panel,
+            name=spec["bearing_visual"],
         )
 
-    composite.visual(
-        Box((0.12, 0.05, 0.06)),
-        origin=Origin(xyz=(-0.225, 0.0, 0.165)),
-        material=body,
-        name="tail_boom",
-    )
-    composite.visual(
-        Box((0.10, 0.012, 0.12)),
-        origin=Origin(xyz=(-0.235, 0.0, 0.235)),
-        material=wing,
-        name="vertical_fin",
-    )
-    composite.visual(
-        Box((0.09, 0.12, 0.010)),
-        origin=Origin(xyz=(-0.255, 0.05, 0.195)),
-        material=wing,
-        name="left_tailplane",
-    )
-    composite.visual(
-        Box((0.09, 0.12, 0.010)),
-        origin=Origin(xyz=(-0.255, -0.05, 0.195)),
-        material=wing,
-        name="right_tailplane",
-    )
-    composite.visual(
-        Box((0.055, 0.038, 0.038)),
-        origin=Origin(xyz=(-0.308, 0.0, 0.18)),
-        material=carbon,
-        name="pusher_pylon",
-    )
-    composite.visual(
-        Cylinder(radius=0.015, length=0.03),
-        origin=Origin(xyz=(-0.336, 0.0, 0.18), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=accent,
-        name="pusher_hub",
-    )
-    composite.visual(
-        Box((0.006, 0.18, 0.018)),
-        origin=Origin(xyz=(-0.352, 0.0, 0.18)),
-        material=prop,
-        name="pusher_blade_horizontal",
-    )
-    composite.visual(
-        Box((0.006, 0.018, 0.18)),
-        origin=Origin(xyz=(-0.352, 0.0, 0.18)),
-        material=prop,
-        name="pusher_blade_vertical",
-    )
-
-    composite.visual(
-        Cylinder(radius=0.006, length=0.28),
-        origin=Origin(xyz=(0.0, 0.07, 0.012), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=carbon,
-        name="left_skid",
-    )
-    composite.visual(
-        Cylinder(radius=0.006, length=0.28),
-        origin=Origin(xyz=(0.0, -0.07, 0.012), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=carbon,
-        name="right_skid",
-    )
-    composite.visual(
-        Cylinder(radius=0.004, length=0.14),
-        origin=Origin(xyz=(0.075, 0.0, 0.015), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=carbon,
-        name="front_skid_crossbar",
-    )
-    composite.visual(
-        Cylinder(radius=0.004, length=0.14),
-        origin=Origin(xyz=(-0.075, 0.0, 0.015), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=carbon,
-        name="rear_skid_crossbar",
-    )
-    for name, x_pos, y_pos in (
-        ("front_left_strut", 0.075, 0.04),
-        ("front_right_strut", 0.075, -0.04),
-        ("rear_left_strut", -0.075, 0.04),
-        ("rear_right_strut", -0.075, -0.04),
-    ):
-        composite.visual(
-            Box((0.012, 0.02, 0.058)),
-            origin=Origin(xyz=(x_pos, y_pos, 0.047)),
-            material=carbon,
-            name=name,
+        arm = model.part(spec["arm_name"])
+        arm.visual(
+            Cylinder(radius=HINGE_BARREL_RADIUS, length=ARM_THICKNESS),
+            material=arm_dark,
+            name="hinge_barrel",
+        )
+        arm.visual(
+            Box((HINGE_YOKE_LENGTH, HINGE_YOKE_WIDTH, ARM_THICKNESS)),
+            origin=Origin(xyz=(0.014, 0.0, 0.0)),
+            material=arm_dark,
+            name="hinge_yoke",
+        )
+        arm.visual(
+            Box((ARM_BEAM_LENGTH, ARM_BEAM_WIDTH, ARM_THICKNESS)),
+            origin=Origin(xyz=(ARM_BEAM_CENTER_X, 0.0, 0.0)),
+            material=arm_dark,
+            name="beam",
+        )
+        arm.visual(
+            Cylinder(radius=MOTOR_RADIUS, length=MOTOR_HEIGHT),
+            origin=Origin(xyz=(MOTOR_CENTER_X, 0.0, ARM_THICKNESS / 2.0 + MOTOR_HEIGHT / 2.0)),
+            material=motor_gray,
+            name="motor_housing",
+        )
+        arm.inertial = Inertial.from_geometry(
+            Box((0.19, 0.04, 0.035)),
+            mass=0.08,
+            origin=Origin(xyz=(0.09, 0.0, 0.0)),
         )
 
-    composite.inertial = Inertial.from_geometry(
-        Box((0.42, 0.16, 0.18)),
-        mass=2.4,
-        origin=Origin(xyz=(0.0, 0.0, 0.11)),
-    )
+        prop = model.part(spec["prop_name"])
+        prop.visual(
+            Cylinder(radius=PROP_HUB_RADIUS, length=PROP_HUB_THICKNESS),
+            material=motor_gray,
+            name="hub",
+        )
+        prop.visual(
+            Box((PROP_BLADE_HALF_LENGTH, PROP_BLADE_CHORD, PROP_BLADE_THICKNESS)),
+            origin=Origin(xyz=(PROP_BLADE_OFFSET, 0.0, 0.0)),
+            material=prop_black,
+            name="blade_a",
+        )
+        prop.visual(
+            Box((PROP_BLADE_HALF_LENGTH, PROP_BLADE_CHORD, PROP_BLADE_THICKNESS)),
+            origin=Origin(xyz=(-PROP_BLADE_OFFSET, 0.0, 0.0)),
+            material=prop_black,
+            name="blade_b",
+        )
+        prop.inertial = Inertial.from_geometry(
+            Box((PROP_BLADE_SPAN, PROP_BLADE_CHORD, PROP_HUB_THICKNESS)),
+            mass=0.014,
+        )
 
-    camera.visual(
-        Cylinder(radius=0.0048, length=0.030),
-        origin=Origin(rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=carbon,
-        name="pivot_barrel",
-    )
-    camera.visual(
-        Box((0.022, 0.014, 0.012)),
-        origin=Origin(xyz=(0.014, 0.0, -0.002)),
-        material=carbon,
-        name="gimbal_fork",
-    )
-    camera.visual(
-        Box((0.036, 0.012, 0.024)),
-        origin=Origin(xyz=(0.031, 0.0, -0.017)),
-        material=carbon,
-        name="tilt_arm",
-    )
-    camera.visual(
-        Sphere(radius=0.019),
-        origin=Origin(xyz=(0.056, 0.0, -0.032)),
-        material=sensor,
-        name="camera_body",
-    )
-    camera.visual(
-        Cylinder(radius=0.007, length=0.018),
-        origin=Origin(xyz=(0.074, 0.0, -0.032), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=sensor,
-        name="camera_lens",
-    )
-    camera.inertial = Inertial.from_geometry(
-        Box((0.088, 0.05, 0.062)),
-        mass=0.28,
-        origin=Origin(xyz=(0.040, 0.0, -0.024)),
-    )
+        model.articulation(
+            spec["arm_joint"],
+            ArticulationType.REVOLUTE,
+            parent=body,
+            child=arm,
+            origin=Origin(xyz=spec["origin"], rpy=(0.0, 0.0, spec["yaw"])),
+            axis=spec["axis"],
+            motion_limits=MotionLimits(
+                effort=1.0,
+                velocity=2.5,
+                lower=0.0,
+                upper=ARM_FOLD_LIMIT,
+            ),
+        )
+        model.articulation(
+            spec["prop_joint"],
+            ArticulationType.CONTINUOUS,
+            parent=arm,
+            child=prop,
+            origin=Origin(
+                xyz=(
+                    MOTOR_CENTER_X,
+                    0.0,
+                    ARM_THICKNESS / 2.0 + MOTOR_HEIGHT + PROP_HUB_THICKNESS / 2.0,
+                )
+            ),
+            axis=(0.0, 0.0, 1.0),
+            motion_limits=MotionLimits(effort=0.12, velocity=60.0),
+        )
 
-    model.articulation(
-        "camera_tilt_joint",
-        ArticulationType.REVOLUTE,
-        parent=composite,
-        child=camera,
-        origin=Origin(xyz=(0.2150, 0.0, 0.051)),
-        axis=(0.0, 1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=2.5,
-            velocity=2.0,
-            lower=-0.45,
-            upper=0.70,
-        ),
-    )
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    airframe = object_model.get_part("airframe")
-    camera = object_model.get_part("nose_camera")
-    camera_tilt = object_model.get_articulation("camera_tilt_joint")
-
-    fuselage_shell = airframe.get_visual("fuselage_shell")
-    nose_mount = airframe.get_visual("nose_mount")
-    left_wing_tip = airframe.get_visual("left_wing_tip")
-    right_wing_tip = airframe.get_visual("right_wing_tip")
-    center_wing = airframe.get_visual("center_wing")
-    front_crossbar = airframe.get_visual("front_crossbar")
-    rear_crossbar = airframe.get_visual("rear_crossbar")
-    front_left_hub = airframe.get_visual("front_left_hub")
-    front_right_hub = airframe.get_visual("front_right_hub")
-    rear_left_hub = airframe.get_visual("rear_left_hub")
-    rear_right_hub = airframe.get_visual("rear_right_hub")
-    front_left_motor = airframe.get_visual("front_left_motor")
-    front_right_motor = airframe.get_visual("front_right_motor")
-    rear_left_motor = airframe.get_visual("rear_left_motor")
-    rear_right_motor = airframe.get_visual("rear_right_motor")
-    left_tailplane = airframe.get_visual("left_tailplane")
-    pusher_hub = airframe.get_visual("pusher_hub")
-    left_skid = airframe.get_visual("left_skid")
-    right_skid = airframe.get_visual("right_skid")
-    front_left_strut = airframe.get_visual("front_left_strut")
-    pivot_barrel = camera.get_visual("pivot_barrel")
-    camera_body = camera.get_visual("camera_body")
-    camera_lens = camera.get_visual("camera_lens")
+    ctx = TestContext(object_model, seed=0)
+    body = object_model.get_part("body")
+    top_shell = body.get_visual("top_shell")
+    bottom_shell = body.get_visual("bottom_shell")
+    specs = _arm_specs()
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    # Use prompt-specific exact visual checks as the real completion criteria.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - key poses stay believable
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Add prompt-specific exact visual checks below; broad warn_if_* checks are not enough.
-
-    ctx.expect_gap(
-        airframe,
-        airframe,
-        axis="y",
-        positive_elem=left_wing_tip,
-        negative_elem=fuselage_shell,
-        min_gap=0.08,
-        name="left_wing_projects_outboard_of_fuselage",
-    )
-    ctx.expect_gap(
-        airframe,
-        airframe,
-        axis="y",
-        positive_elem=fuselage_shell,
-        negative_elem=right_wing_tip,
-        min_gap=0.08,
-        name="right_wing_projects_outboard_of_fuselage",
-    )
-    ctx.expect_overlap(
-        airframe,
-        airframe,
-        axes="yz",
-        elem_a=front_crossbar,
-        elem_b=fuselage_shell,
-        min_overlap=0.015,
-        name="front_boom_crosses_fuselage",
-    )
-    ctx.expect_overlap(
-        airframe,
-        airframe,
-        axes="yz",
-        elem_a=rear_crossbar,
-        elem_b=fuselage_shell,
-        min_overlap=0.015,
-        name="rear_boom_crosses_fuselage",
-    )
-    ctx.expect_gap(
-        airframe,
-        airframe,
-        axis="x",
-        positive_elem=front_crossbar,
-        negative_elem=rear_crossbar,
-        min_gap=0.08,
-        name="front_and_rear_booms_are_separated_along_fuselage",
-    )
-
-    for hub_name, hub, bar in (
-        ("front_left", front_left_hub, front_crossbar),
-        ("front_right", front_right_hub, front_crossbar),
-        ("rear_left", rear_left_hub, rear_crossbar),
-        ("rear_right", rear_right_hub, rear_crossbar),
-    ):
-        ctx.expect_gap(
-            airframe,
-            airframe,
-            axis="z",
-            positive_elem=hub,
-            negative_elem=bar,
-            max_gap=0.001,
-            max_penetration=0.001,
-            name=f"{hub_name}_hub_sits_on_boom_tip",
-        )
-
-    for motor_name, motor in (
-        ("front_left", front_left_motor),
-        ("rear_left", rear_left_motor),
-    ):
-        ctx.expect_gap(
-            airframe,
-            airframe,
-            axis="y",
-            positive_elem=motor,
-            negative_elem=fuselage_shell,
-            min_gap=0.23,
-            name=f"{motor_name}_motor_is_far_outboard",
-        )
-    for motor_name, motor in (
-        ("front_right", front_right_motor),
-        ("rear_right", rear_right_motor),
-    ):
-        ctx.expect_gap(
-            airframe,
-            airframe,
-            axis="y",
-            positive_elem=fuselage_shell,
-            negative_elem=motor,
-            min_gap=0.23,
-            name=f"{motor_name}_motor_is_far_outboard",
-        )
-
-    ctx.expect_gap(
-        airframe,
-        airframe,
-        axis="x",
-        positive_elem=center_wing,
-        negative_elem=left_tailplane,
-        min_gap=0.11,
-        name="tailplane_sits_behind_main_wing",
-    )
-    ctx.expect_gap(
-        airframe,
-        airframe,
-        axis="x",
-        positive_elem=fuselage_shell,
-        negative_elem=pusher_hub,
-        min_gap=0.09,
-        name="pusher_prop_mount_sits_behind_rear_fuselage",
+    ctx.fail_if_isolated_parts(max_pose_samples=32)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
+    ctx.fail_if_parts_overlap_in_sampled_poses(
+        max_pose_samples=48,
+        ignore_adjacent=False,
+        ignore_fixed=False,
     )
 
     ctx.expect_gap(
-        airframe,
-        airframe,
+        body,
+        body,
         axis="z",
-        positive_elem=fuselage_shell,
-        negative_elem=left_skid,
-        min_gap=0.03,
-        name="left_skid_sits_below_fuselage",
-    )
-    ctx.expect_gap(
-        airframe,
-        airframe,
-        axis="z",
-        positive_elem=fuselage_shell,
-        negative_elem=right_skid,
-        min_gap=0.03,
-        name="right_skid_sits_below_fuselage",
+        min_gap=BODY_HEIGHT - 2.0 * PLATE_THICKNESS - 0.001,
+        max_gap=BODY_HEIGHT - 2.0 * PLATE_THICKNESS + 0.001,
+        positive_elem=top_shell,
+        negative_elem=bottom_shell,
+        name="body_shell_hollow_depth",
     )
     ctx.expect_overlap(
-        airframe,
-        airframe,
+        body,
+        body,
         axes="xy",
-        elem_a=front_left_strut,
-        elem_b=fuselage_shell,
-        min_overlap=0.008,
-        name="landing_gear_strut_attaches_into_fuselage",
+        min_overlap=0.10,
+        elem_a=top_shell,
+        elem_b=bottom_shell,
+        name="body_shell_top_bottom_registration",
     )
 
-    ctx.expect_overlap(
-        camera,
-        airframe,
-        axes="yz",
-        elem_a=pivot_barrel,
-        elem_b=nose_mount,
-        min_overlap=0.008,
-        name="camera_pivot_barrel_aligns_with_nose_mount",
-    )
-    ctx.expect_gap(
-        camera,
-        airframe,
-        axis="x",
-        positive_elem=pivot_barrel,
-        negative_elem=nose_mount,
-        max_gap=0.001,
-        max_penetration=0.001,
-        name="camera_pivot_barrel_seats_on_nose_mount",
-    )
-    ctx.expect_gap(
-        camera,
-        airframe,
-        axis="x",
-        positive_elem=camera_lens,
-        negative_elem=fuselage_shell,
-        min_gap=0.05,
-        name="camera_lens_projects_ahead_of_nose",
-    )
-    ctx.expect_gap(
-        airframe,
-        camera,
-        axis="z",
-        positive_elem=fuselage_shell,
-        negative_elem=camera_body,
-        min_gap=0.02,
-        name="camera_body_hangs_below_fuselage",
-    )
+    body_aabb = ctx.part_world_aabb(body)
+    body_pos = ctx.part_world_position(body)
+    ctx.check("body_aabb_present", body_aabb is not None, "Body AABB unavailable.")
+    ctx.check("body_position_present", body_pos is not None, "Body position unavailable.")
 
-    with ctx.pose({camera_tilt: -0.45}):
-        ctx.expect_gap(
-            camera,
-            airframe,
-            axis="x",
-            positive_elem=pivot_barrel,
-            negative_elem=nose_mount,
-            max_gap=0.001,
-            max_penetration=0.001,
-            name="camera_mount_remains_seated_when_tilted_up",
+    for spec in specs:
+        arm = object_model.get_part(spec["arm_name"])
+        prop = object_model.get_part(spec["prop_name"])
+        arm_joint = object_model.get_articulation(spec["arm_joint"])
+        prop_joint = object_model.get_articulation(spec["prop_joint"])
+
+        hinge_yoke = arm.get_visual("hinge_yoke")
+        hinge_barrel = arm.get_visual("hinge_barrel")
+        motor_housing = arm.get_visual("motor_housing")
+        prop_hub = prop.get_visual("hub")
+        hinge_bridge = body.get_visual(spec["bridge_visual"])
+        hinge_bearing = body.get_visual(spec["bearing_visual"])
+
+        ctx.check(
+            f"{spec['arm_joint']}_is_revolute",
+            arm_joint.joint_type == ArticulationType.REVOLUTE,
+            f"{spec['arm_joint']} should be revolute.",
         )
-        ctx.expect_gap(
-            camera,
-            airframe,
-            axis="x",
-            positive_elem=camera_lens,
-            negative_elem=fuselage_shell,
-            min_gap=0.07,
-            name="tilted_up_camera_still_looks_forward",
+        ctx.check(
+            f"{spec['arm_joint']}_axis",
+            tuple(round(value, 3) for value in arm_joint.axis) == spec["axis"],
+            f"Expected axis {spec['axis']}, got {arm_joint.axis}.",
+        )
+        arm_limits = arm_joint.motion_limits
+        ctx.check(
+            f"{spec['arm_joint']}_limits",
+            arm_limits is not None
+            and arm_limits.lower == 0.0
+            and arm_limits.upper is not None
+            and abs(arm_limits.upper - ARM_FOLD_LIMIT) < 1e-6,
+            f"Unexpected fold limits on {spec['arm_joint']}.",
+        )
+        ctx.check(
+            f"{spec['prop_joint']}_is_continuous",
+            prop_joint.joint_type == ArticulationType.CONTINUOUS,
+            f"{spec['prop_joint']} should be continuous.",
+        )
+        ctx.check(
+            f"{spec['prop_joint']}_axis",
+            tuple(round(value, 3) for value in prop_joint.axis) == (0.0, 0.0, 1.0),
+            f"Expected vertical propeller axis, got {prop_joint.axis}.",
         )
 
-    with ctx.pose({camera_tilt: 0.70}):
-        ctx.expect_gap(
-            camera,
-            airframe,
-            axis="x",
-            positive_elem=pivot_barrel,
-            negative_elem=nose_mount,
-            max_gap=0.001,
-            max_penetration=0.001,
-            name="camera_mount_remains_seated_when_tilted_down",
+        with ctx.pose({arm_joint: 0.0, prop_joint: 0.0}):
+            ctx.expect_contact(
+                arm,
+                body,
+                elem_a=hinge_yoke,
+                elem_b=hinge_bridge,
+                name=f"{spec['key']}_hinge_bridge_contact",
+            )
+            ctx.expect_contact(
+                arm,
+                body,
+                elem_a=hinge_barrel,
+                elem_b=hinge_bearing,
+                name=f"{spec['key']}_hinge_bearing_contact",
+            )
+            ctx.expect_contact(
+                prop,
+                arm,
+                elem_a=prop_hub,
+                elem_b=motor_housing,
+                name=f"{spec['key']}_prop_motor_contact",
+            )
+            ctx.expect_overlap(
+                prop,
+                arm,
+                axes="xy",
+                min_overlap=0.018,
+                elem_a=prop_hub,
+                elem_b=motor_housing,
+                name=f"{spec['key']}_prop_motor_alignment",
+            )
+
+        rest_pos = ctx.part_world_position(prop)
+        ctx.check(
+            f"{spec['key']}_rest_prop_position_present",
+            rest_pos is not None,
+            f"{spec['prop_name']} world position unavailable.",
         )
-        ctx.expect_gap(
-            camera,
-            airframe,
-            axis="x",
-            positive_elem=camera_lens,
-            negative_elem=fuselage_shell,
-            min_gap=0.01,
-            name="tilted_down_camera_stays_ahead_of_nose",
-        )
-        ctx.expect_gap(
-            airframe,
-            camera,
-            axis="z",
-            positive_elem=fuselage_shell,
-            negative_elem=camera_body,
-            min_gap=0.005,
-            name="tilted_down_camera_remains_below_fuselage",
-        )
+        if body_aabb is not None and rest_pos is not None:
+            x_ok = (
+                rest_pos[0] > body_aabb[1][0] + 0.035
+                if spec["x_sign"] > 0.0
+                else rest_pos[0] < body_aabb[0][0] - 0.035
+            )
+            y_ok = (
+                rest_pos[1] > body_aabb[1][1] + 0.035
+                if spec["y_sign"] > 0.0
+                else rest_pos[1] < body_aabb[0][1] - 0.035
+            )
+            ctx.check(
+                f"{spec['key']}_prop_outboard_at_rest",
+                x_ok and y_ok,
+                f"{spec['prop_name']} should sit outside the body corner at rest, got {rest_pos}.",
+            )
+
+        with ctx.pose({arm_joint: ARM_FOLD_LIMIT, prop_joint: 1.1}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{spec['key']}_fold_pose_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{spec['key']}_fold_pose_no_floating")
+            ctx.expect_contact(
+                arm,
+                body,
+                elem_a=hinge_yoke,
+                elem_b=hinge_bridge,
+                name=f"{spec['key']}_hinge_bridge_contact_folded",
+            )
+            ctx.expect_contact(
+                prop,
+                arm,
+                elem_a=prop_hub,
+                elem_b=motor_housing,
+                name=f"{spec['key']}_prop_motor_contact_folded",
+            )
+            folded_pos = ctx.part_world_position(prop)
+            ctx.check(
+                f"{spec['key']}_folded_prop_position_present",
+                folded_pos is not None,
+                f"{spec['prop_name']} folded position unavailable.",
+            )
+            if body_pos is not None and rest_pos is not None and folded_pos is not None:
+                rest_radius = math.hypot(rest_pos[0] - body_pos[0], rest_pos[1] - body_pos[1])
+                folded_radius = math.hypot(folded_pos[0] - body_pos[0], folded_pos[1] - body_pos[1])
+                if spec["x_sign"] > 0.0:
+                    inward_axis_ok = (
+                        abs(folded_pos[1] - body_pos[1]) < BODY_WIDTH * 0.35
+                        and abs(folded_pos[1] - body_pos[1]) < abs(rest_pos[1] - body_pos[1]) - 0.12
+                    )
+                else:
+                    inward_axis_ok = (
+                        abs(folded_pos[0] - body_pos[0]) < BODY_LENGTH * 0.45
+                        and abs(folded_pos[0] - body_pos[0]) < abs(rest_pos[0] - body_pos[0]) - 0.12
+                    )
+                ctx.check(
+                    f"{spec['key']}_folds_inward",
+                    folded_radius < rest_radius - 0.035 and inward_axis_ok,
+                    (
+                        f"{spec['arm_name']} should move inward when folded "
+                        f"(rest {rest_radius:.3f} m, folded {folded_radius:.3f} m; "
+                        f"rest={rest_pos}, folded={folded_pos})."
+                    ),
+                )
+
     return ctx.report()
 
 

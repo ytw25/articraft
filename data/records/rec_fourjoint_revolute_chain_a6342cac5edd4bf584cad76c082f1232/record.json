@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_fourjoint_revolute_chain_a6342cac5edd4bf584cad76c082f1232",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:39:56Z",
+  "rating": 2,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "fourjoint_revolute_chain",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "fourjoint_revolute_chain_to7_high_07",
+    "prompt_index": 22
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Four-joint revolute chain Backfill 7",
+    "prompt_preview": "A compact accordion-like arm with a root bracket, four successive hinge blocks, and five rigid links ending in a narrow fork tab. The chain should pack tight..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "af058f940aa6e5d7a657badffc0f54f4315851c231e7ca903fda30e7e67b3fc9",
+    "model_py_sha256": "89033dfa52fe62245d7093ab5d202f136a6e248e34c642b9821a628873d5c156"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

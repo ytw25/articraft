@@ -3,21 +3,6 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import os
-
-_REAL_GETCWD = os.getcwd
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _REAL_GETCWD()
-    except FileNotFoundError:
-        os.chdir("/")
-        return _REAL_GETCWD()
-
-
-os.getcwd = _safe_getcwd
-
 import math
 
 from sdk import (
@@ -26,460 +11,427 @@ from sdk import (
     AssetContext,
     Box,
     Cylinder,
+    ExtrudeGeometry,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
     mesh_from_geometry,
-    repair_loft,
-    section_loft,
 )
 
 ASSETS = AssetContext.from_script(__file__)
 
+BODY_RADIUS = 0.205
+BODY_APOTHEM = BODY_RADIUS * math.cos(math.pi / 6.0)
+BODY_HEIGHT = 0.048
+TOP_CAP_RADIUS = 0.132
+TOP_CAP_HEIGHT = 0.010
+BATTERY_TRAY_SIZE = (0.108, 0.072, 0.012)
+BATTERY_TRAY_Z = -0.004
+CENTER_SPINE_SIZE = (0.032, 0.032, 0.022)
+PAYLOAD_SIZE = (0.180, 0.120, 0.085)
+PAYLOAD_MOUNT_SIZE = (0.120, 0.080, 0.008)
+PAYLOAD_STRUT_RADIUS = 0.007
+PAYLOAD_STRUT_HEIGHT = 0.060
 
-def _save_mesh(geometry, filename: str):
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(filename))
+ARM_ROOT_LENGTH = 0.052
+ARM_ROOT_WIDTH = 0.050
+ARM_ROOT_HEIGHT = 0.026
+ARM_BEAM_START = 0.030
+ARM_BEAM_LENGTH = 0.182
+ARM_BEAM_RADIUS = 0.012
+ARM_LENGTH = 0.238
+
+MOTOR_MOUNT_LENGTH = 0.050
+MOTOR_MOUNT_WIDTH = 0.046
+MOTOR_MOUNT_HEIGHT = 0.008
+MOTOR_RADIUS = 0.027
+MOTOR_HEIGHT = 0.028
+ROTOR_JOINT_Z = MOTOR_HEIGHT
+
+PROP_SHAFT_RADIUS = 0.006
+PROP_SHAFT_HEIGHT = 0.010
+PROP_HUB_RADIUS = 0.026
+PROP_HUB_HEIGHT = 0.008
+PROP_BLADE_THICKNESS = 0.004
 
 
-def _canopy_loop(
-    rear_width: float,
-    shoulder_width: float,
-    front_width: float,
-    rear_y: float,
-    shoulder_y: float,
-    front_y: float,
-    nose_y: float,
-    z: float,
-) -> list[tuple[float, float, float]]:
+def _polar_xy(radius: float, angle: float) -> tuple[float, float]:
+    return (radius * math.cos(angle), radius * math.sin(angle))
+
+
+def _regular_polygon_profile(radius: float, sides: int, *, start_angle: float = 0.0) -> list[tuple[float, float]]:
     return [
-        (-0.50 * rear_width, rear_y, z),
-        (0.50 * rear_width, rear_y, z),
-        (0.50 * shoulder_width, shoulder_y, z),
-        (0.50 * front_width, front_y, z),
-        (0.22 * front_width, nose_y, z),
-        (0.0, nose_y + 0.003, z),
-        (-0.22 * front_width, nose_y, z),
-        (-0.50 * front_width, front_y, z),
-        (-0.50 * shoulder_width, shoulder_y, z),
+        (
+            radius * math.cos(start_angle + (2.0 * math.pi * index / sides)),
+            radius * math.sin(start_angle + (2.0 * math.pi * index / sides)),
+        )
+        for index in range(sides)
     ]
 
 
-def _build_canopy_mesh():
-    return repair_loft(
-        section_loft(
-            [
-                _canopy_loop(0.036, 0.033, 0.027, -0.018, -0.005, 0.009, 0.015, 0.000),
-                _canopy_loop(0.032, 0.029, 0.022, -0.015, -0.003, 0.008, 0.014, 0.004),
-                _canopy_loop(0.024, 0.021, 0.016, -0.010, -0.001, 0.006, 0.011, 0.008),
-                _canopy_loop(0.015, 0.013, 0.009, -0.004, 0.001, 0.003, 0.006, 0.011),
-            ]
-        )
+def _save_mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+
+
+def _build_propeller_blade_mesh():
+    blade_profile = [
+        (0.012, -0.016),
+        (0.040, -0.014),
+        (0.090, -0.010),
+        (0.130, -0.005),
+        (0.145, -0.0025),
+        (0.145, 0.0025),
+        (0.130, 0.005),
+        (0.090, 0.010),
+        (0.040, 0.014),
+        (0.012, 0.016),
+    ]
+    return _save_mesh(
+        "hex_drone_prop_blade.obj",
+        ExtrudeGeometry.from_z0(blade_profile, PROP_BLADE_THICKNESS, cap=True, closed=True),
     )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="micro_racing_drone", assets=ASSETS)
+    model = ArticulatedObject(name="hexarotor_delivery_drone", assets=ASSETS)
 
-    carbon = model.material("carbon_black", rgba=(0.10, 0.11, 0.12, 1.0))
-    board_green = model.material("board_green", rgba=(0.14, 0.38, 0.20, 1.0))
-    electronics_black = model.material("electronics_black", rgba=(0.07, 0.08, 0.09, 1.0))
-    canopy_smoke = model.material("canopy_smoke", rgba=(0.35, 0.28, 0.20, 0.78))
-    battery_grey = model.material("battery_grey", rgba=(0.33, 0.35, 0.38, 1.0))
-    cell_blue = model.material("cell_blue", rgba=(0.18, 0.29, 0.62, 1.0))
+    shell_white = model.material("shell_white", rgba=(0.90, 0.92, 0.95, 1.0))
+    shell_gray = model.material("shell_gray", rgba=(0.70, 0.73, 0.78, 1.0))
+    carbon = model.material("carbon", rgba=(0.16, 0.17, 0.19, 1.0))
+    motor_black = model.material("motor_black", rgba=(0.10, 0.10, 0.11, 1.0))
+    prop_gray = model.material("prop_gray", rgba=(0.18, 0.19, 0.21, 1.0))
+    sensor_black = model.material("sensor_black", rgba=(0.08, 0.08, 0.09, 1.0))
 
-    frame = model.part("frame")
-    frame.visual(
-        Box((0.026, 0.026, 0.0024)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0012), rpy=(0.0, 0.0, math.pi / 4.0)),
-        material=carbon,
-        name="center_plate",
-    )
-    frame.visual(
-        Box((0.028, 0.028, 0.0016)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0044)),
-        material=board_green,
-        name="electronics_board",
-    )
-    frame.visual(
-        Box((0.012, 0.010, 0.0032)),
-        origin=Origin(xyz=(0.0, 0.002, 0.0068)),
-        material=electronics_black,
-        name="processor_stack",
-    )
-    frame.visual(
-        Box((0.010, 0.006, 0.0020)),
-        origin=Origin(xyz=(0.0, -0.008, 0.0060)),
-        material=electronics_black,
-        name="receiver_block",
-    )
-
-    for post_name, post_xyz in (
-        ("front_left_standoff", (-0.009, 0.009, 0.0030)),
-        ("front_right_standoff", (0.009, 0.009, 0.0030)),
-        ("rear_left_standoff", (-0.009, -0.009, 0.0030)),
-        ("rear_right_standoff", (0.009, -0.009, 0.0030)),
-    ):
-        frame.visual(
-            Cylinder(radius=0.0018, length=0.0040),
-            origin=Origin(xyz=post_xyz),
-            material=electronics_black,
-            name=post_name,
-        )
-
-    arm_specs = [
-        ("front_right_arm", "front_right_boss", (0.0152, 0.0152, 0.0012), (0.0265, 0.0265, 0.0040), math.pi / 4.0),
-        ("front_left_arm", "front_left_boss", (-0.0152, 0.0152, 0.0012), (-0.0265, 0.0265, 0.0040), -math.pi / 4.0),
-        ("rear_left_arm", "rear_left_boss", (-0.0152, -0.0152, 0.0012), (-0.0265, -0.0265, 0.0040), math.pi / 4.0),
-        ("rear_right_arm", "rear_right_boss", (0.0152, -0.0152, 0.0012), (0.0265, -0.0265, 0.0040), -math.pi / 4.0),
-    ]
-    for arm_name, boss_name, arm_xyz, boss_xyz, yaw in arm_specs:
-        frame.visual(
-            Box((0.023, 0.0046, 0.0024)),
-            origin=Origin(xyz=arm_xyz, rpy=(0.0, 0.0, yaw)),
-            material=carbon,
-            name=arm_name,
-        )
-        frame.visual(
-            Cylinder(radius=0.0056, length=0.0032),
-            origin=Origin(xyz=boss_xyz),
-            material=carbon,
-            name=boss_name,
-        )
-        frame.visual(
-            Cylinder(radius=0.0038, length=0.0012),
-            origin=Origin(xyz=(boss_xyz[0], boss_xyz[1], boss_xyz[2] + 0.0022)),
-            material=electronics_black,
-            name=f"{boss_name}_motor_pad",
-        )
-
-    frame.visual(
-        Box((0.0022, 0.026, 0.0022)),
-        origin=Origin(xyz=(-0.0065, -0.0120, 0.0015)),
-        material=carbon,
-        name="left_battery_rail",
-    )
-    frame.visual(
-        Box((0.0022, 0.026, 0.0022)),
-        origin=Origin(xyz=(0.0065, -0.0120, 0.0015)),
-        material=carbon,
-        name="right_battery_rail",
-    )
-    frame.visual(
-        Box((0.014, 0.0020, 0.0016)),
-        origin=Origin(xyz=(0.0, 0.0010, -0.0004)),
-        material=electronics_black,
-        name="battery_stop",
-    )
-
-    tab_specs = [
-        ("front_left_tab", (-0.0135, 0.0100, 0.0078)),
-        ("front_right_tab", (0.0135, 0.0100, 0.0078)),
-        ("rear_left_tab", (-0.0135, -0.0080, 0.0078)),
-        ("rear_right_tab", (0.0135, -0.0080, 0.0078)),
-    ]
-    for tab_name, tab_xyz in tab_specs:
-        frame.visual(
-            Box((0.0024, 0.0030, 0.0052)),
-            origin=Origin(xyz=tab_xyz),
-            material=electronics_black,
-            name=tab_name,
-        )
-
-    frame.inertial = Inertial.from_geometry(
-        Box((0.076, 0.076, 0.014)),
-        mass=0.048,
-        origin=Origin(xyz=(0.0, 0.0, 0.003)),
-    )
-
-    canopy = model.part("canopy")
-    canopy.visual(
-        _save_mesh(_build_canopy_mesh(), "micro_drone_canopy.obj"),
-        origin=Origin(xyz=(0.0, 0.002, 0.0095)),
-        material=canopy_smoke,
-        name="canopy_shell",
-    )
-    canopy.visual(
-        Box((0.011, 0.008, 0.003)),
-        origin=Origin(xyz=(0.0, 0.013, 0.0145), rpy=(0.30, 0.0, 0.0)),
-        material=canopy_smoke,
-        name="camera_nose",
-    )
-    for clip_name, clip_xyz in (
-        ("front_left_clip", (-0.0135, 0.0100, 0.0122)),
-        ("front_right_clip", (0.0135, 0.0100, 0.0122)),
-        ("rear_left_clip", (-0.0135, -0.0080, 0.0122)),
-        ("rear_right_clip", (0.0135, -0.0080, 0.0122)),
-    ):
-        canopy.visual(
-            Box((0.0036, 0.0042, 0.0036)),
-            origin=Origin(xyz=clip_xyz),
-            material=canopy_smoke,
-            name=clip_name,
-        )
-    canopy.inertial = Inertial.from_geometry(
-        Box((0.038, 0.032, 0.022)),
-        mass=0.008,
-        origin=Origin(xyz=(0.0, 0.002, 0.015)),
-    )
-
-    battery_sled = model.part("battery_sled")
-    battery_sled.visual(
-        Box((0.0155, 0.028, 0.0016)),
-        origin=Origin(xyz=(0.0, -0.0150, -0.0010)),
-        material=battery_grey,
-        name="tray_floor",
-    )
-    battery_sled.visual(
-        Box((0.0020, 0.022, 0.0028)),
-        origin=Origin(xyz=(-0.0065, -0.0115, -0.0010)),
-        material=battery_grey,
-        name="left_runner",
-    )
-    battery_sled.visual(
-        Box((0.0020, 0.022, 0.0028)),
-        origin=Origin(xyz=(0.0065, -0.0115, -0.0010)),
-        material=battery_grey,
-        name="right_runner",
-    )
-    battery_sled.visual(
-        Box((0.0130, 0.0185, 0.0062)),
-        origin=Origin(xyz=(0.0, -0.0140, -0.0049)),
-        material=cell_blue,
-        name="battery_cell",
-    )
-    battery_sled.visual(
-        Box((0.011, 0.0020, 0.0016)),
-        origin=Origin(xyz=(0.0, -0.0010, -0.0016)),
-        material=battery_grey,
-        name="front_latch",
-    )
-    battery_sled.visual(
-        Box((0.012, 0.0035, 0.0045)),
-        origin=Origin(xyz=(0.0, -0.0305, -0.0003)),
-        material=electronics_black,
-        name="rear_pull",
-    )
-    battery_sled.inertial = Inertial.from_geometry(
-        Box((0.018, 0.035, 0.010)),
-        mass=0.026,
-        origin=Origin(xyz=(0.0, -0.016, -0.0035)),
-    )
-
-    model.articulation(
-        "frame_to_canopy",
-        ArticulationType.FIXED,
-        parent=frame,
-        child=canopy,
-        origin=Origin(),
-    )
-    model.articulation(
-        "frame_to_battery_sled",
-        ArticulationType.PRISMATIC,
-        parent=frame,
-        child=battery_sled,
-        origin=Origin(),
-        axis=(0.0, -1.0, 0.0),
-        motion_limits=MotionLimits(
-            effort=3.0,
-            velocity=0.12,
-            lower=0.0,
-            upper=0.016,
+    body_shell_mesh = _save_mesh(
+        "hex_drone_body_shell.obj",
+        ExtrudeGeometry(
+            _regular_polygon_profile(BODY_RADIUS, 6, start_angle=math.pi / 6.0),
+            BODY_HEIGHT,
+            cap=True,
+            center=True,
+            closed=True,
         ),
     )
+    top_cap_mesh = _save_mesh(
+        "hex_drone_top_cap.obj",
+        ExtrudeGeometry(
+            _regular_polygon_profile(TOP_CAP_RADIUS, 6, start_angle=math.pi / 6.0),
+            TOP_CAP_HEIGHT,
+            cap=True,
+            center=True,
+            closed=True,
+        ),
+    )
+    prop_blade_mesh = _build_propeller_blade_mesh()
+
+    body = model.part("body")
+    body.visual(body_shell_mesh, material=shell_white, name="body_shell")
+    body.visual(
+        top_cap_mesh,
+        origin=Origin(xyz=(0.0, 0.0, 0.5 * BODY_HEIGHT + 0.5 * TOP_CAP_HEIGHT)),
+        material=shell_gray,
+        name="top_cap",
+    )
+    body.visual(
+        Box(BATTERY_TRAY_SIZE),
+        origin=Origin(xyz=(0.0, 0.0, BATTERY_TRAY_Z)),
+        material=shell_gray,
+        name="battery_tray",
+    )
+    body.visual(
+        Box(CENTER_SPINE_SIZE),
+        origin=Origin(xyz=(0.0, 0.0, 0.013)),
+        material=shell_gray,
+        name="center_spine",
+    )
+    body.visual(
+        Cylinder(radius=0.030, length=0.008),
+        origin=Origin(xyz=(0.0, 0.0, 0.5 * BODY_HEIGHT + TOP_CAP_HEIGHT + 0.004)),
+        material=sensor_black,
+        name="gps_puck",
+    )
+    body.inertial = Inertial.from_geometry(
+        Box((0.46, 0.46, 0.10)),
+        mass=5.2,
+        origin=Origin(xyz=(0.0, 0.0, 0.0)),
+    )
+
+    payload = model.part("payload_pod")
+    payload.visual(
+        Box(PAYLOAD_MOUNT_SIZE),
+        origin=Origin(xyz=(0.0, 0.0, -0.5 * PAYLOAD_MOUNT_SIZE[2])),
+        material=carbon,
+        name="mount_plate",
+    )
+    for x_pos in (-0.058, 0.058):
+        for y_pos in (-0.042, 0.042):
+            payload.visual(
+                Cylinder(radius=PAYLOAD_STRUT_RADIUS, length=PAYLOAD_STRUT_HEIGHT),
+                origin=Origin(xyz=(x_pos, y_pos, -0.5 * PAYLOAD_STRUT_HEIGHT)),
+                material=carbon,
+                name=f"strut_{'p' if x_pos > 0 else 'n'}x_{'p' if y_pos > 0 else 'n'}y",
+            )
+    payload.visual(
+        Box(PAYLOAD_SIZE),
+        origin=Origin(xyz=(0.0, 0.0, -PAYLOAD_STRUT_HEIGHT - 0.5 * PAYLOAD_SIZE[2])),
+        material=shell_gray,
+        name="payload_case",
+    )
+    payload.visual(
+        Box((PAYLOAD_SIZE[0] * 0.94, PAYLOAD_SIZE[1] * 0.86, 0.010)),
+        origin=Origin(xyz=(0.0, 0.0, -PAYLOAD_STRUT_HEIGHT - 0.010)),
+        material=shell_white,
+        name="payload_lid",
+    )
+    payload.visual(
+        Box((0.020, PAYLOAD_SIZE[1] + 0.004, 0.010)),
+        origin=Origin(xyz=(-0.040, 0.0, -PAYLOAD_STRUT_HEIGHT - 0.5 * PAYLOAD_SIZE[2])),
+        material=carbon,
+        name="retention_band_left",
+    )
+    payload.visual(
+        Box((0.020, PAYLOAD_SIZE[1] + 0.004, 0.010)),
+        origin=Origin(xyz=(0.040, 0.0, -PAYLOAD_STRUT_HEIGHT - 0.5 * PAYLOAD_SIZE[2])),
+        material=carbon,
+        name="retention_band_right",
+    )
+    payload.inertial = Inertial.from_geometry(
+        Box((0.22, 0.15, 0.16)),
+        mass=1.6,
+        origin=Origin(xyz=(0.0, 0.0, -0.10)),
+    )
+
+    model.articulation(
+        "body_to_payload_pod",
+        ArticulationType.FIXED,
+        parent=body,
+        child=payload,
+        origin=Origin(xyz=(0.0, 0.0, -0.5 * BODY_HEIGHT)),
+    )
+
+    for index in range(6):
+        angle = 2.0 * math.pi * index / 6.0
+
+        arm = model.part(f"arm_{index}")
+        arm.visual(
+            Box((ARM_ROOT_LENGTH, ARM_ROOT_WIDTH, ARM_ROOT_HEIGHT)),
+            origin=Origin(xyz=(0.5 * ARM_ROOT_LENGTH, 0.0, 0.0)),
+            material=carbon,
+            name="root_fairing",
+        )
+        arm.visual(
+            Cylinder(radius=ARM_BEAM_RADIUS, length=ARM_BEAM_LENGTH),
+            origin=Origin(
+                xyz=(ARM_BEAM_START + 0.5 * ARM_BEAM_LENGTH, 0.0, 0.0),
+                rpy=(0.0, math.pi / 2.0, 0.0),
+            ),
+            material=carbon,
+            name="beam",
+        )
+        arm.visual(
+            Box((MOTOR_MOUNT_LENGTH, MOTOR_MOUNT_WIDTH, MOTOR_MOUNT_HEIGHT)),
+            origin=Origin(xyz=(ARM_LENGTH - 0.5 * MOTOR_MOUNT_LENGTH, 0.0, 0.004)),
+            material=carbon,
+            name="motor_mount",
+        )
+        arm.visual(
+            Cylinder(radius=MOTOR_RADIUS, length=MOTOR_HEIGHT),
+            origin=Origin(xyz=(ARM_LENGTH, 0.0, 0.5 * MOTOR_HEIGHT)),
+            material=motor_black,
+            name="motor_can",
+        )
+        arm.visual(
+            Cylinder(radius=0.014, length=0.004),
+            origin=Origin(xyz=(ARM_LENGTH, 0.0, MOTOR_HEIGHT + 0.002)),
+            material=shell_gray,
+            name="motor_cap",
+        )
+        arm.inertial = Inertial.from_geometry(
+            Box((0.30, 0.06, 0.06)),
+            mass=0.34,
+            origin=Origin(xyz=(0.13, 0.0, 0.015)),
+        )
+
+        model.articulation(
+            f"body_to_arm_{index}",
+            ArticulationType.FIXED,
+            parent=body,
+            child=arm,
+            origin=Origin(
+                xyz=(*_polar_xy(BODY_APOTHEM, angle), 0.0),
+                rpy=(0.0, 0.0, angle),
+            ),
+        )
+
+        prop = model.part(f"propeller_{index}")
+        prop.visual(
+            Cylinder(radius=PROP_SHAFT_RADIUS, length=PROP_SHAFT_HEIGHT),
+            origin=Origin(xyz=(0.0, 0.0, 0.5 * PROP_SHAFT_HEIGHT)),
+            material=motor_black,
+            name="shaft",
+        )
+        prop.visual(
+            Cylinder(radius=PROP_HUB_RADIUS, length=PROP_HUB_HEIGHT),
+            origin=Origin(xyz=(0.0, 0.0, PROP_SHAFT_HEIGHT + 0.5 * PROP_HUB_HEIGHT)),
+            material=motor_black,
+            name="hub",
+        )
+        prop.visual(
+            prop_blade_mesh,
+            origin=Origin(xyz=(0.0, 0.0, PROP_SHAFT_HEIGHT + PROP_HUB_HEIGHT)),
+            material=prop_gray,
+            name="blade_a",
+        )
+        prop.visual(
+            prop_blade_mesh,
+            origin=Origin(xyz=(0.0, 0.0, PROP_SHAFT_HEIGHT + PROP_HUB_HEIGHT), rpy=(0.0, 0.0, math.pi)),
+            material=prop_gray,
+            name="blade_b",
+        )
+        prop.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.15, length=0.024),
+            mass=0.07,
+            origin=Origin(xyz=(0.0, 0.0, 0.012)),
+        )
+
+        model.articulation(
+            f"arm_to_propeller_{index}",
+            ArticulationType.REVOLUTE,
+            parent=arm,
+            child=prop,
+            origin=Origin(xyz=(ARM_LENGTH, 0.0, ROTOR_JOINT_Z)),
+            axis=(0.0, 0.0, 1.0),
+            motion_limits=MotionLimits(
+                effort=0.8,
+                velocity=80.0,
+                lower=-math.pi,
+                upper=math.pi,
+            ),
+        )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
-    frame = object_model.get_part("frame")
-    canopy = object_model.get_part("canopy")
-    battery_sled = object_model.get_part("battery_sled")
-    battery_slide = object_model.get_articulation("frame_to_battery_sled")
-
-    center_plate = frame.get_visual("center_plate")
-    board = frame.get_visual("electronics_board")
-    canopy_shell = canopy.get_visual("canopy_shell")
-    battery_stop = frame.get_visual("battery_stop")
-    left_rail = frame.get_visual("left_battery_rail")
-    right_rail = frame.get_visual("right_battery_rail")
-    left_runner = battery_sled.get_visual("left_runner")
-    right_runner = battery_sled.get_visual("right_runner")
-    tray_floor = battery_sled.get_visual("tray_floor")
-    front_latch = battery_sled.get_visual("front_latch")
-    rear_pull = battery_sled.get_visual("rear_pull")
-
-    front_left_tab = frame.get_visual("front_left_tab")
-    front_right_tab = frame.get_visual("front_right_tab")
-    rear_left_tab = frame.get_visual("rear_left_tab")
-    rear_right_tab = frame.get_visual("rear_right_tab")
-    front_left_clip = canopy.get_visual("front_left_clip")
-    front_right_clip = canopy.get_visual("front_right_clip")
-    rear_left_clip = canopy.get_visual("rear_left_clip")
-    rear_right_clip = canopy.get_visual("rear_right_clip")
-
-    front_left_arm = frame.get_visual("front_left_arm")
-    front_right_arm = frame.get_visual("front_right_arm")
-    rear_left_arm = frame.get_visual("rear_left_arm")
-    rear_right_arm = frame.get_visual("rear_right_arm")
-    front_left_boss = frame.get_visual("front_left_boss")
-    front_right_boss = frame.get_visual("front_right_boss")
-    rear_left_boss = frame.get_visual("rear_left_boss")
-    rear_right_boss = frame.get_visual("rear_right_boss")
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    body = object_model.get_part("body")
+    body_shell = body.get_visual("body_shell")
+    payload = object_model.get_part("payload_pod")
+    payload_mount = payload.get_visual("mount_plate")
+    payload_case = payload.get_visual("payload_case")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.0005,
-        overlap_volume_tol=0.0,
-    )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.0005,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
-    )
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=48)
 
-    ctx.expect_overlap(frame, frame, axes="xy", min_overlap=0.00030, elem_a=board, elem_b=center_plate)
-    ctx.expect_within(frame, canopy, axes="xy", inner_elem=board, outer_elem=canopy_shell)
-    ctx.expect_gap(
-        canopy,
-        frame,
-        axis="z",
-        min_gap=0.0030,
-        max_gap=0.0065,
-        positive_elem=canopy_shell,
-        negative_elem=board,
-    )
-
-    for clip, tab in (
-        (front_left_clip, front_left_tab),
-        (front_right_clip, front_right_tab),
-        (rear_left_clip, rear_left_tab),
-        (rear_right_clip, rear_right_tab),
-    ):
-        ctx.expect_overlap(canopy, frame, axes="xy", min_overlap=0.000006, elem_a=clip, elem_b=tab)
-        ctx.expect_gap(
-            canopy,
-            frame,
-            axis="z",
-            max_gap=0.0002,
-            max_penetration=0.0002,
-            positive_elem=clip,
-            negative_elem=tab,
+    body_shell_aabb = ctx.part_element_world_aabb(body, elem=body_shell)
+    if body_shell_aabb is None:
+        ctx.fail("body_shell_aabb_exists", "Body shell AABB could not be resolved.")
+    else:
+        body_dx = body_shell_aabb[1][0] - body_shell_aabb[0][0]
+        body_dy = body_shell_aabb[1][1] - body_shell_aabb[0][1]
+        body_dz = body_shell_aabb[1][2] - body_shell_aabb[0][2]
+        ctx.check(
+            "body_hex_planform_scale",
+            0.34 <= min(body_dx, body_dy) <= 0.38 and 0.39 <= max(body_dx, body_dy) <= 0.43,
+            details=f"body planform was {(body_dx, body_dy)}",
+        )
+        ctx.check(
+            "body_reads_flat",
+            body_dz <= 0.055,
+            details=f"body height was {body_dz}",
         )
 
-    for arm, boss in (
-        (front_left_arm, front_left_boss),
-        (front_right_arm, front_right_boss),
-        (rear_left_arm, rear_left_boss),
-        (rear_right_arm, rear_right_boss),
-    ):
-        ctx.expect_overlap(frame, frame, axes="xy", min_overlap=0.000015, elem_a=arm, elem_b=boss)
+    propeller_0 = object_model.get_part("propeller_0")
+    propeller_3 = object_model.get_part("propeller_3")
+    ctx.expect_origin_distance(propeller_0, propeller_3, axes="x", min_dist=0.76, max_dist=0.88)
+    ctx.expect_contact(payload, body, elem_a=payload_mount, elem_b=body_shell, name="payload_pod_attached")
+    ctx.expect_gap(
+        body,
+        payload,
+        axis="z",
+        min_gap=0.055,
+        positive_elem=body_shell,
+        negative_elem=payload_case,
+        name="payload_case_hangs_below_body",
+    )
+    ctx.expect_within(payload, body, axes="xy", margin=0.02, name="payload_centered_under_body")
+
+    def _aabb_center(aabb) -> tuple[float, float, float]:
+        return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
+
+    for index in range(6):
+        arm = object_model.get_part(f"arm_{index}")
+        prop = object_model.get_part(f"propeller_{index}")
+        root_fairing = arm.get_visual("root_fairing")
+        motor_can = arm.get_visual("motor_can")
+        shaft = prop.get_visual("shaft")
+        blade_a = prop.get_visual("blade_a")
+        rotor_joint = object_model.get_articulation(f"arm_to_propeller_{index}")
+        limits = rotor_joint.motion_limits
+
+        ctx.expect_contact(
+            arm,
+            body,
+            elem_a=root_fairing,
+            elem_b=body_shell,
+            name=f"arm_{index}_mounted_to_body",
+        )
+        ctx.expect_overlap(prop, arm, axes="xy", min_overlap=0.010, name=f"propeller_{index}_over_motor")
         ctx.expect_gap(
-            frame,
-            frame,
+            prop,
+            arm,
             axis="z",
-            max_gap=0.0010,
+            max_gap=0.0005,
             max_penetration=0.0,
-            positive_elem=boss,
-            negative_elem=arm,
+            positive_elem=shaft,
+            negative_elem=motor_can,
+            name=f"propeller_{index}_shaft_seated_on_motor",
         )
 
-    ctx.expect_contact(battery_sled, frame, elem_a=front_latch, elem_b=battery_stop)
-    ctx.expect_overlap(
-        battery_sled,
-        frame,
-        axes="xy",
-        min_overlap=0.000020,
-        elem_a=left_runner,
-        elem_b=left_rail,
-    )
-    ctx.expect_overlap(
-        battery_sled,
-        frame,
-        axes="xy",
-        min_overlap=0.000020,
-        elem_a=right_runner,
-        elem_b=right_rail,
-    )
-    ctx.expect_gap(
-        frame,
-        battery_sled,
-        axis="z",
-        max_gap=0.0004,
-        max_penetration=0.0002,
-        positive_elem=left_rail,
-        negative_elem=left_runner,
-    )
-    ctx.expect_gap(
-        frame,
-        battery_sled,
-        axis="z",
-        max_gap=0.0004,
-        max_penetration=0.0002,
-        positive_elem=right_rail,
-        negative_elem=right_runner,
-    )
-    ctx.expect_gap(
-        frame,
-        battery_sled,
-        axis="y",
-        min_gap=0.010,
-        positive_elem=board,
-        negative_elem=rear_pull,
-    )
-    ctx.expect_overlap(frame, battery_sled, axes="xy", min_overlap=0.00018, elem_a=board, elem_b=tray_floor)
+        blade_rest_aabb = ctx.part_element_world_aabb(prop, elem=blade_a)
+        if blade_rest_aabb is None:
+            ctx.fail(f"propeller_{index}_blade_rest_aabb", "Blade AABB could not be resolved in rest pose.")
+        else:
+            blade_rest_center = _aabb_center(blade_rest_aabb)
+            with ctx.pose({rotor_joint: math.pi / 2.0}):
+                ctx.expect_gap(
+                    prop,
+                    arm,
+                    axis="z",
+                    max_gap=0.0005,
+                    max_penetration=0.0,
+                    positive_elem=shaft,
+                    negative_elem=motor_can,
+                    name=f"propeller_{index}_shaft_seated_in_spin_pose",
+                )
+                blade_spin_aabb = ctx.part_element_world_aabb(prop, elem=blade_a)
+                if blade_spin_aabb is None:
+                    ctx.fail(
+                        f"propeller_{index}_blade_spin_aabb",
+                        "Blade AABB could not be resolved in spin pose.",
+                    )
+                else:
+                    blade_spin_center = _aabb_center(blade_spin_aabb)
+                    center_shift = math.dist(blade_rest_center, blade_spin_center)
+                    ctx.check(
+                        f"propeller_{index}_articulates",
+                        center_shift >= 0.090,
+                        details=f"blade center shift was {center_shift}",
+                    )
 
-    with ctx.pose({battery_slide: 0.012}):
-        ctx.expect_overlap(
-            battery_sled,
-            frame,
-            axes="xy",
-            min_overlap=0.000008,
-            elem_a=left_runner,
-            elem_b=left_rail,
-        )
-        ctx.expect_overlap(
-            battery_sled,
-            frame,
-            axes="xy",
-            min_overlap=0.000008,
-            elem_a=right_runner,
-            elem_b=right_rail,
-        )
-        ctx.expect_gap(
-            frame,
-            battery_sled,
-            axis="z",
-            max_gap=0.0004,
-            max_penetration=0.0002,
-            positive_elem=left_rail,
-            negative_elem=left_runner,
-        )
-        ctx.expect_gap(
-            frame,
-            battery_sled,
-            axis="z",
-            max_gap=0.0004,
-            max_penetration=0.0002,
-            positive_elem=right_rail,
-            negative_elem=right_runner,
-        )
-        ctx.expect_gap(
-            frame,
-            battery_sled,
-            axis="y",
-            min_gap=0.020,
-            positive_elem=board,
-            negative_elem=rear_pull,
-        )
+        if limits is not None and limits.lower is not None and limits.upper is not None:
+            with ctx.pose({rotor_joint: limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"arm_to_propeller_{index}_lower_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"arm_to_propeller_{index}_lower_no_floating")
+            with ctx.pose({rotor_joint: limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"arm_to_propeller_{index}_upper_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"arm_to_propeller_{index}_upper_no_floating")
 
     return ctx.report()
 

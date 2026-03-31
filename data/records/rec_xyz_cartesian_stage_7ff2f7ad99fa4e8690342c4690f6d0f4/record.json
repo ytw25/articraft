@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_xyz_cartesian_stage_7ff2f7ad99fa4e8690342c4690f6d0f4",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:40:05Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "xyz_cartesian_stage",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "xyz_cartesian_stage_to7_high_07",
+    "prompt_index": 112
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "XYZ Cartesian stage Backfill 7",
+    "prompt_preview": "A laboratory automation stage with a base rail pair, a traveling bridge saddle, and a descending Z ram carrying a compact mounting flange. The frame should f..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "b21d727c99e75411970627b18499566695623ee19744d9af7a664caee9ab54aa",
+    "model_py_sha256": "61d084c692ee39ef7725e340b4a6584341caa6ab8fdaa6e0b96d01db269c2584"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

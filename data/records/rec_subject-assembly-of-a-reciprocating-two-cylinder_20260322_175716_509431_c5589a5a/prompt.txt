@@ -1,0 +1,27 @@
+ Subject: Assembly of a Reciprocating Two-Cylinder Internal Combustion Engine Core (Parallel-Twin Configuration)
+
+Structural Components:
+
+Crankshaft: A single-piece crankshaft featuring two offset crankpins (journals) positioned with a 180-degree phase shift. Includes main journals for axial support and counterweights for rotational balance.
+
+Connecting Rods (x2): Each rod consists of a big-end (connected to the crankpin via a revolute joint) and a small-end (connected to the piston pin).
+
+Pistons (x2): Cylindrical bodies with integrated grooves for piston rings and a transverse hole for the gudgeon pin (wrist pin).
+
+Cylinder Block: A rigid housing containing two parallel vertical bores with a specified center-to-center distance, providing the linear guide for the pistons.
+
+Kinematics & Constraints:
+
+Crankshaft Rotation: Constrained to 1 Degree of Freedom (DOF), rotating 360 degrees around its longitudinal X-axis relative to the cylinder block.
+
+Crank-Slider Chain: The big-end of the connecting rod maintains a revolute relationship with the crankpin. The small-end maintains a revolute relationship with the piston pin.
+
+Reciprocating Motion: Each piston is constrained to a 1-DOF prismatic joint, translating linearly along the Z-axis within the cylinder bore.
+
+Phase Logic: Piston A reaches Top Dead Center (TDC) while Piston B reaches Bottom Dead Center (BDC), dictated by the 180-degree crankpin offset.
+
+Functional Geometry:
+
+Define the Stroke (twice the crank radius) and Bore (piston diameter) ratio.
+
+Ensure zero-interference clearance between the counterweights and the bottom of the piston skirts at BDC. 

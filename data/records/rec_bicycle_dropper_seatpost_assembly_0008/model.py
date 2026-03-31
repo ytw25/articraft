@@ -8,485 +8,439 @@ import math
 from sdk import (
     ArticulatedObject,
     ArticulationType,
-    AssetContext,
     Box,
     Cylinder,
-    CylinderGeometry,
     Inertial,
+    LatheGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
+    repair_loft,
+    rounded_rect_profile,
+    section_loft,
+    tube_from_spline_points,
 )
 
-ASSETS = AssetContext.from_script(__file__)
 
-TRAVEL = 0.060
+def _save_mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, name)
 
-SLEEVE_OUTER_RADIUS = 0.0158
-SLEEVE_INNER_RADIUS = 0.0143
-SLEEVE_LENGTH = 0.220
 
-INNER_TUBE_RADIUS = 0.0136
-INNER_TUBE_LENGTH = 0.185
-INNER_TUBE_CENTER_Z = -0.0675
-INNER_TUBE_TOP_Z = INNER_TUBE_CENTER_Z + (INNER_TUBE_LENGTH / 2.0)
+def _distance(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
+    return math.sqrt((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 + (b[2] - a[2]) ** 2)
 
-SEAL_HEAD_OUTER_RADIUS = 0.0168
-SEAL_HEAD_INNER_RADIUS = 0.0152
-SEAL_HEAD_LENGTH = 0.012
 
-GUIDE_PAD_THICKNESS = 0.0020
-GUIDE_PAD_WIDTH = 0.0060
-GUIDE_PAD_HEIGHT = 0.0080
-GUIDE_PAD_CENTER_RADIUS = INNER_TUBE_RADIUS + (GUIDE_PAD_THICKNESS / 2.0)
-GUIDE_PAD_CENTER_Z = SLEEVE_LENGTH + (SEAL_HEAD_LENGTH / 2.0)
+def _midpoint(
+    a: tuple[float, float, float], b: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5)
 
-CLAMP_BASE_SIZE = (0.026, 0.040, 0.010)
-RAIL_SADDLE_RADIUS = 0.0032
-RAIL_SADDLE_LENGTH = 0.032
-RAIL_SADDLE_OFFSET_Y = 0.014
-UPPER_CLAMP_SIZE = (0.010, 0.044, 0.006)
-UPPER_CLAMP_OFFSET_X = 0.0125
-UPPER_CLAMP_CENTER_Z = 0.0162
-CLAMP_BOLT_RADIUS = 0.0030
-CLAMP_BOLT_LENGTH = 0.052
-CLAMP_BOLT_CENTER_Z = -0.005
-CLAMP_BOLT_HEAD_RADIUS = 0.0045
-CLAMP_BOLT_HEAD_LENGTH = 0.004
-CLAMP_BOLT_HEAD_Y = 0.026
+
+def _rpy_for_cylinder(
+    a: tuple[float, float, float], b: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    dx = b[0] - a[0]
+    dy = b[1] - a[1]
+    dz = b[2] - a[2]
+    length_xy = math.hypot(dx, dy)
+    yaw = math.atan2(dy, dx)
+    pitch = math.atan2(length_xy, dz)
+    return (0.0, pitch, yaw)
+
+
+def _add_member(
+    part,
+    a: tuple[float, float, float],
+    b: tuple[float, float, float],
+    *,
+    radius: float,
+    material,
+    name: str | None = None,
+) -> None:
+    part.visual(
+        Cylinder(radius=radius, length=_distance(a, b)),
+        origin=Origin(xyz=_midpoint(a, b), rpy=_rpy_for_cylinder(a, b)),
+        material=material,
+        name=name,
+    )
 
 
 def _tube_shell_mesh(
-    name: str,
-    *,
     outer_radius: float,
     inner_radius: float,
-    length: float,
+    z0: float,
+    z1: float,
+    name: str,
+    *,
+    segments: int = 72,
 ):
-    outer = CylinderGeometry(radius=outer_radius, height=length, radial_segments=56)
-    inner = CylinderGeometry(
-        radius=inner_radius,
-        height=length + 0.004,
-        radial_segments=56,
+    return _save_mesh(
+        name,
+        LatheGeometry.from_shell_profiles(
+            [(outer_radius, z0), (outer_radius, z1)],
+            [(inner_radius, z0), (inner_radius, z1)],
+            segments=segments,
+            start_cap="flat",
+            end_cap="flat",
+        ),
     )
-    geom = boolean_difference(outer, inner).translate(0.0, 0.0, length / 2.0)
-    return mesh_from_geometry(geom, ASSETS.mesh_path(f"{name}.obj"))
+
+
+def _yz_section(x_pos: float, width: float, thickness: float, z_offset: float):
+    corner_radius = max(0.0015, min(width * 0.22, thickness * 0.42))
+    profile = rounded_rect_profile(width, thickness, corner_radius, corner_segments=8)
+    return [(x_pos, y, z + z_offset) for y, z in profile]
+
+
+def _build_saddle_body_mesh(
+    name: str,
+    *,
+    width_delta: float = 0.0,
+    thickness_scale: float = 1.0,
+    z_shift: float = 0.0,
+):
+    section_specs = [
+        (-0.138, 0.090, 0.018, 0.040),
+        (-0.102, 0.145, 0.040, 0.034),
+        (-0.050, 0.138, 0.042, 0.028),
+        (0.005, 0.098, 0.033, 0.022),
+        (0.060, 0.058, 0.024, 0.018),
+        (0.108, 0.032, 0.015, 0.016),
+        (0.135, 0.018, 0.010, 0.015),
+    ]
+    sections = [
+        _yz_section(
+            x_pos,
+            max(0.012, width + width_delta),
+            max(0.007, thickness * thickness_scale),
+            z_pos + z_shift,
+        )
+        for x_pos, width, thickness, z_pos in section_specs
+    ]
+    return _save_mesh(name, repair_loft(section_loft(sections)))
+
+
+def _mirror_y(points: list[tuple[float, float, float]]) -> list[tuple[float, float, float]]:
+    return [(x, -y, z) for x, y, z in points]
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="short_travel_dropper_seatpost", assets=ASSETS)
+    model = ArticulatedObject(name="dropper_seatpost")
 
-    black = model.material("black_anodized", rgba=(0.11, 0.11, 0.12, 1.0))
-    dark_metal = model.material("dark_metal", rgba=(0.19, 0.20, 0.22, 1.0))
-    hardware = model.material("hardware_silver", rgba=(0.74, 0.76, 0.78, 1.0))
+    post_black = model.material("post_black", rgba=(0.10, 0.11, 0.12, 1.0))
+    seal_black = model.material("seal_black", rgba=(0.06, 0.06, 0.07, 1.0))
+    hard_anodized = model.material("hard_anodized", rgba=(0.18, 0.19, 0.20, 1.0))
+    clamp_black = model.material("clamp_black", rgba=(0.14, 0.14, 0.15, 1.0))
+    saddle_cover = model.material("saddle_cover", rgba=(0.08, 0.08, 0.09, 1.0))
+    saddle_shell = model.material("saddle_shell", rgba=(0.17, 0.18, 0.19, 1.0))
+    rail_steel = model.material("rail_steel", rgba=(0.70, 0.71, 0.74, 1.0))
+    bolt_steel = model.material("bolt_steel", rgba=(0.62, 0.63, 0.66, 1.0))
 
     outer_sleeve = model.part("outer_sleeve")
     outer_sleeve.visual(
-        _tube_shell_mesh(
-            "outer_sleeve_body",
-            outer_radius=SLEEVE_OUTER_RADIUS,
-            inner_radius=SLEEVE_INNER_RADIUS,
-            length=SLEEVE_LENGTH,
-        ),
-        material=black,
-        name="sleeve_body",
+        _tube_shell_mesh(0.0160, 0.0143, 0.0, 0.278, "outer_sleeve_shell"),
+        material=post_black,
+        name="outer_sleeve_shell",
     )
     outer_sleeve.visual(
-        _tube_shell_mesh(
-            "outer_sleeve_head",
-            outer_radius=SEAL_HEAD_OUTER_RADIUS,
-            inner_radius=SEAL_HEAD_INNER_RADIUS,
-            length=SEAL_HEAD_LENGTH,
-        ),
-        origin=Origin(xyz=(0.0, 0.0, SLEEVE_LENGTH)),
-        material=dark_metal,
-        name="seal_head",
+        _tube_shell_mesh(0.0168, 0.0133, 0.278, 0.292, "outer_sleeve_bushing_v2"),
+        material=seal_black,
+        name="guide_bushing",
     )
     outer_sleeve.visual(
-        Box((GUIDE_PAD_THICKNESS, GUIDE_PAD_WIDTH, GUIDE_PAD_HEIGHT)),
-        origin=Origin(xyz=(GUIDE_PAD_CENTER_RADIUS, 0.0, GUIDE_PAD_CENTER_Z)),
-        material=dark_metal,
-        name="guide_pad_right",
-    )
-    outer_sleeve.visual(
-        Box((GUIDE_PAD_THICKNESS, GUIDE_PAD_WIDTH, GUIDE_PAD_HEIGHT)),
-        origin=Origin(xyz=(-GUIDE_PAD_CENTER_RADIUS, 0.0, GUIDE_PAD_CENTER_Z)),
-        material=dark_metal,
-        name="guide_pad_left",
-    )
-    outer_sleeve.visual(
-        Box((GUIDE_PAD_WIDTH, GUIDE_PAD_THICKNESS, GUIDE_PAD_HEIGHT)),
-        origin=Origin(xyz=(0.0, GUIDE_PAD_CENTER_RADIUS, GUIDE_PAD_CENTER_Z)),
-        material=dark_metal,
-        name="guide_pad_front",
-    )
-    outer_sleeve.visual(
-        Box((GUIDE_PAD_WIDTH, GUIDE_PAD_THICKNESS, GUIDE_PAD_HEIGHT)),
-        origin=Origin(xyz=(0.0, -GUIDE_PAD_CENTER_RADIUS, GUIDE_PAD_CENTER_Z)),
-        material=dark_metal,
-        name="guide_pad_rear",
+        _tube_shell_mesh(0.0170, 0.0148, 0.000, 0.026, "outer_sleeve_lower_collar"),
+        material=hard_anodized,
+        name="lower_collar",
     )
     outer_sleeve.inertial = Inertial.from_geometry(
-        Cylinder(radius=SEAL_HEAD_OUTER_RADIUS, length=SLEEVE_LENGTH + SEAL_HEAD_LENGTH),
-        mass=0.55,
-        origin=Origin(xyz=(0.0, 0.0, (SLEEVE_LENGTH + SEAL_HEAD_LENGTH) / 2.0)),
+        Cylinder(radius=0.0168, length=0.292),
+        mass=0.42,
+        origin=Origin(xyz=(0.0, 0.0, 0.146)),
     )
 
-    inner_post = model.part("inner_post")
-    inner_post.visual(
-        Cylinder(radius=INNER_TUBE_RADIUS, length=INNER_TUBE_LENGTH),
-        origin=Origin(xyz=(0.0, 0.0, INNER_TUBE_CENTER_Z)),
-        material=dark_metal,
-        name="inner_tube",
+    inner_tube = model.part("inner_tube")
+    inner_tube.visual(
+        _tube_shell_mesh(0.0127, 0.0108, 0.0, 0.228, "inner_tube_shell"),
+        material=hard_anodized,
+        name="inner_tube_shell",
     )
-    inner_post.inertial = Inertial.from_geometry(
-        Cylinder(radius=INNER_TUBE_RADIUS, length=INNER_TUBE_LENGTH),
-        mass=0.32,
-        origin=Origin(xyz=(0.0, 0.0, INNER_TUBE_CENTER_Z)),
+    inner_tube.visual(
+        Cylinder(radius=0.0152, length=0.008),
+        origin=Origin(xyz=(0.0, 0.0, 0.156)),
+        material=hard_anodized,
+        name="travel_collar",
     )
-
-    model.articulation(
-        "outer_to_inner",
-        ArticulationType.PRISMATIC,
-        parent=outer_sleeve,
-        child=inner_post,
-        origin=Origin(xyz=(0.0, 0.0, SLEEVE_LENGTH + SEAL_HEAD_LENGTH)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(
-            effort=600.0,
-            velocity=0.25,
-            lower=0.0,
-            upper=TRAVEL,
-        ),
+    inner_tube.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.0127, length=0.228),
+        mass=0.26,
+        origin=Origin(xyz=(0.0, 0.0, 0.114)),
     )
 
-    lower_clamp = model.part("lower_clamp")
-    lower_clamp.visual(
-        Box(CLAMP_BASE_SIZE),
-        origin=Origin(xyz=(0.0, 0.0, CLAMP_BASE_SIZE[2] / 2.0)),
-        material=black,
+    saddle_clamp = model.part("saddle_clamp")
+    saddle_clamp.visual(
+        Cylinder(radius=0.011, length=0.016),
+        origin=Origin(xyz=(0.0, 0.0, 0.008)),
+        material=clamp_black,
+        name="head_pivot",
+    )
+    saddle_clamp.visual(
+        Box((0.032, 0.018, 0.010)),
+        origin=Origin(xyz=(0.0, 0.0, 0.013)),
+        material=clamp_black,
         name="clamp_base",
     )
-    lower_clamp.visual(
-        Cylinder(radius=RAIL_SADDLE_RADIUS, length=RAIL_SADDLE_LENGTH),
-        origin=Origin(
-            xyz=(0.0, RAIL_SADDLE_OFFSET_Y, CLAMP_BASE_SIZE[2]),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=black,
-        name="left_rail_saddle",
+    saddle_clamp.visual(
+        Box((0.010, 0.012, 0.032)),
+        origin=Origin(xyz=(0.014, 0.0, 0.026)),
+        material=clamp_black,
+        name="front_tower",
     )
-    lower_clamp.visual(
-        Cylinder(radius=RAIL_SADDLE_RADIUS, length=RAIL_SADDLE_LENGTH),
-        origin=Origin(
-            xyz=(0.0, -RAIL_SADDLE_OFFSET_Y, CLAMP_BASE_SIZE[2]),
-            rpy=(0.0, math.pi / 2.0, 0.0),
-        ),
-        material=black,
-        name="right_rail_saddle",
+    saddle_clamp.visual(
+        Box((0.010, 0.012, 0.032)),
+        origin=Origin(xyz=(-0.014, 0.0, 0.026)),
+        material=clamp_black,
+        name="rear_tower",
     )
-    lower_clamp.inertial = Inertial.from_geometry(
-        Box((0.030, 0.044, 0.014)),
-        mass=0.14,
-        origin=Origin(xyz=(0.0, 0.0, 0.007)),
+    saddle_clamp.visual(
+        Box((0.010, 0.060, 0.004)),
+        origin=Origin(xyz=(0.014, 0.0, 0.0185)),
+        material=clamp_black,
+        name="front_lower_bar",
+    )
+    saddle_clamp.visual(
+        Box((0.010, 0.070, 0.004)),
+        origin=Origin(xyz=(-0.014, 0.0, 0.0185)),
+        material=clamp_black,
+        name="rear_lower_bar",
+    )
+    for x_pos, bolt_name in ((0.014, "front"), (-0.014, "rear")):
+        saddle_clamp.visual(
+            Cylinder(radius=0.0032, length=0.028),
+            origin=Origin(xyz=(x_pos, 0.0, 0.030)),
+            material=bolt_steel,
+            name=f"{bolt_name}_bolt",
+        )
+        saddle_clamp.visual(
+            Box((0.010, 0.010, 0.004)),
+            origin=Origin(xyz=(x_pos, 0.0, 0.046)),
+            material=bolt_steel,
+            name=f"{bolt_name}_nut",
+        )
+    saddle_clamp.inertial = Inertial.from_geometry(
+        Box((0.050, 0.052, 0.040)),
+        mass=0.08,
+        origin=Origin(xyz=(0.0, 0.0, 0.020)),
+    )
+
+    saddle = model.part("saddle")
+    saddle.visual(
+        _build_saddle_body_mesh("saddle_pad_v2"),
+        origin=Origin(xyz=(0.0, 0.0, 0.034)),
+        material=saddle_cover,
+        name="saddle_pad",
+    )
+    saddle.visual(
+        _build_saddle_body_mesh(
+            "saddle_base_shell_v2",
+            width_delta=-0.018,
+            thickness_scale=0.55,
+            z_shift=-0.011,
+        ),
+        origin=Origin(xyz=(0.0, 0.0, 0.030)),
+        material=saddle_shell,
+        name="saddle_base",
+    )
+    for idx, xyz in enumerate(
+        [
+            (-0.096, 0.032, 0.039),
+            (-0.096, -0.032, 0.039),
+            (0.082, 0.022, 0.041),
+            (0.082, -0.022, 0.041),
+        ]
+    ):
+        saddle.visual(
+            Box((0.014, 0.010, 0.010)),
+            origin=Origin(xyz=xyz),
+            material=saddle_shell,
+            name=f"rail_receiver_{idx}",
+        )
+    left_rail_points = [
+        (-0.104, 0.026, 0.010),
+        (-0.088, 0.024, 0.004),
+        (-0.058, 0.022, 0.000),
+        (-0.010, 0.022, 0.000),
+        (0.040, 0.021, 0.001),
+        (0.078, 0.017, 0.008),
+        (0.100, 0.010, 0.018),
+    ]
+    saddle.visual(
+        _save_mesh(
+            "left_saddle_rail_v3",
+            tube_from_spline_points(
+                left_rail_points,
+                radius=0.003,
+                samples_per_segment=14,
+                radial_segments=16,
+                cap_ends=True,
+            ),
+        ),
+        material=rail_steel,
+        name="left_rail",
+    )
+    saddle.visual(
+        _save_mesh(
+            "right_saddle_rail_v3",
+            tube_from_spline_points(
+                _mirror_y(left_rail_points),
+                radius=0.003,
+                samples_per_segment=14,
+                radial_segments=16,
+                cap_ends=True,
+            ),
+        ),
+        material=rail_steel,
+        name="right_rail",
+    )
+    for idx, (a, b) in enumerate(
+        [
+            ((-0.096, 0.026, 0.010), (-0.096, 0.032, 0.034)),
+            ((-0.096, -0.026, 0.010), (-0.096, -0.032, 0.034)),
+            ((0.082, 0.015, 0.010), (0.082, 0.022, 0.036)),
+            ((0.082, -0.015, 0.010), (0.082, -0.022, 0.036)),
+        ]
+    ):
+        _add_member(
+            saddle,
+            a,
+            b,
+            radius=0.0034,
+            material=saddle_shell,
+            name=f"rail_mount_{idx}",
+        )
+    saddle.inertial = Inertial.from_geometry(
+        Box((0.276, 0.150, 0.060)),
+        mass=0.31,
+        origin=Origin(xyz=(0.0, 0.0, 0.028)),
     )
 
     model.articulation(
-        "inner_to_lower_clamp",
-        ArticulationType.FIXED,
-        parent=inner_post,
-        child=lower_clamp,
-        origin=Origin(xyz=(0.0, 0.0, INNER_TUBE_TOP_Z)),
+        "dropper_travel",
+        ArticulationType.PRISMATIC,
+        parent=outer_sleeve,
+        child=inner_tube,
+        origin=Origin(xyz=(0.0, 0.0, 0.140)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=8.0, velocity=0.20, lower=0.0, upper=0.060),
     )
-
-    front_clamp = model.part("front_clamp")
-    front_clamp.visual(
-        Box(UPPER_CLAMP_SIZE),
-        material=black,
-        name="front_upper_plate",
-    )
-    front_clamp.visual(
-        Cylinder(radius=CLAMP_BOLT_RADIUS, length=CLAMP_BOLT_LENGTH),
-        origin=Origin(
-            xyz=(0.0, 0.0, CLAMP_BOLT_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware,
-        name="front_bolt",
-    )
-    front_clamp.visual(
-        Cylinder(radius=CLAMP_BOLT_HEAD_RADIUS, length=CLAMP_BOLT_HEAD_LENGTH),
-        origin=Origin(
-            xyz=(0.0, CLAMP_BOLT_HEAD_Y, CLAMP_BOLT_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware,
-        name="front_bolt_head_right",
-    )
-    front_clamp.visual(
-        Cylinder(radius=CLAMP_BOLT_HEAD_RADIUS, length=CLAMP_BOLT_HEAD_LENGTH),
-        origin=Origin(
-            xyz=(0.0, -CLAMP_BOLT_HEAD_Y, CLAMP_BOLT_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware,
-        name="front_bolt_head_left",
-    )
-    front_clamp.inertial = Inertial.from_geometry(
-        Box((0.012, 0.056, 0.012)),
-        mass=0.05,
-        origin=Origin(),
-    )
-
     model.articulation(
-        "lower_to_front_clamp",
+        "clamp_mount",
         ArticulationType.FIXED,
-        parent=lower_clamp,
-        child=front_clamp,
-        origin=Origin(xyz=(-UPPER_CLAMP_OFFSET_X, 0.0, UPPER_CLAMP_CENTER_Z)),
+        parent=inner_tube,
+        child=saddle_clamp,
+        origin=Origin(xyz=(0.0, 0.0, 0.228)),
     )
-
-    rear_clamp = model.part("rear_clamp")
-    rear_clamp.visual(
-        Box(UPPER_CLAMP_SIZE),
-        material=black,
-        name="rear_upper_plate",
-    )
-    rear_clamp.visual(
-        Cylinder(radius=CLAMP_BOLT_RADIUS, length=CLAMP_BOLT_LENGTH),
-        origin=Origin(
-            xyz=(0.0, 0.0, CLAMP_BOLT_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware,
-        name="rear_bolt",
-    )
-    rear_clamp.visual(
-        Cylinder(radius=CLAMP_BOLT_HEAD_RADIUS, length=CLAMP_BOLT_HEAD_LENGTH),
-        origin=Origin(
-            xyz=(0.0, CLAMP_BOLT_HEAD_Y, CLAMP_BOLT_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware,
-        name="rear_bolt_head_right",
-    )
-    rear_clamp.visual(
-        Cylinder(radius=CLAMP_BOLT_HEAD_RADIUS, length=CLAMP_BOLT_HEAD_LENGTH),
-        origin=Origin(
-            xyz=(0.0, -CLAMP_BOLT_HEAD_Y, CLAMP_BOLT_CENTER_Z),
-            rpy=(math.pi / 2.0, 0.0, 0.0),
-        ),
-        material=hardware,
-        name="rear_bolt_head_left",
-    )
-    rear_clamp.inertial = Inertial.from_geometry(
-        Box((0.012, 0.056, 0.012)),
-        mass=0.05,
-        origin=Origin(),
-    )
-
     model.articulation(
-        "lower_to_rear_clamp",
+        "saddle_mount",
         ArticulationType.FIXED,
-        parent=lower_clamp,
-        child=rear_clamp,
-        origin=Origin(xyz=(UPPER_CLAMP_OFFSET_X, 0.0, UPPER_CLAMP_CENTER_Z)),
+        parent=saddle_clamp,
+        child=saddle,
+        origin=Origin(xyz=(0.0, 0.0, 0.0235)),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    ctx = TestContext(object_model)
     outer_sleeve = object_model.get_part("outer_sleeve")
-    inner_post = object_model.get_part("inner_post")
-    lower_clamp = object_model.get_part("lower_clamp")
-    front_clamp = object_model.get_part("front_clamp")
-    rear_clamp = object_model.get_part("rear_clamp")
-
-    outer_to_inner = object_model.get_articulation("outer_to_inner")
-
-    sleeve_body = outer_sleeve.get_visual("sleeve_body")
-    guide_pad_right = outer_sleeve.get_visual("guide_pad_right")
-    seal_head = outer_sleeve.get_visual("seal_head")
-    inner_tube = inner_post.get_visual("inner_tube")
-    clamp_base = lower_clamp.get_visual("clamp_base")
-    left_rail_saddle = lower_clamp.get_visual("left_rail_saddle")
-    right_rail_saddle = lower_clamp.get_visual("right_rail_saddle")
-    front_upper_plate = front_clamp.get_visual("front_upper_plate")
-    rear_upper_plate = rear_clamp.get_visual("rear_upper_plate")
+    inner_tube = object_model.get_part("inner_tube")
+    saddle_clamp = object_model.get_part("saddle_clamp")
+    saddle = object_model.get_part("saddle")
+    dropper = object_model.get_articulation("dropper_travel")
 
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
+    ctx.check_mesh_assets_ready()
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    # Preferred default QC stack:
+    # 1) likely-failure grounded-component floating check for disconnected part groups
+    ctx.fail_if_isolated_parts()
+    # 2) noisier warning-tier sensor for same-part disconnected geometry islands
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    # 3) likely-failure rest-pose part-to-part overlap backstop for real 3D interpenetration
+    # This is not an "inside / nested / footprint overlap" check.
+    # Investigate all three. Warning-tier signals are not free passes.
+    # Use `ctx.allow_overlap(...)` only for true intended penetration.
+    # If parts are nested but should remain clear, prove that with exact
+    # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
+    # `expect_within(...)` checks instead.
+    ctx.fail_if_parts_overlap_in_current_pose()
 
-    # Use prompt-specific exact visual checks as the real completion criteria.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - key poses stay believable
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Add prompt-specific exact visual checks below; broad warn_if_* checks are not enough.
+    ctx.check(
+        "dropper_joint_axis_is_vertical",
+        tuple(dropper.axis) == (0.0, 0.0, 1.0),
+        f"axis={dropper.axis}",
+    )
+    limits = dropper.motion_limits
+    ctx.check(
+        "dropper_joint_limits_are_60mm",
+        limits is not None
+        and limits.lower is not None
+        and limits.upper is not None
+        and abs(limits.lower - 0.0) < 1e-9
+        and abs(limits.upper - 0.060) < 1e-9,
+        f"limits={limits}",
+    )
+
     ctx.expect_within(
-        inner_post,
+        inner_tube,
         outer_sleeve,
         axes="xy",
-        inner_elem=inner_tube,
-        outer_elem=sleeve_body,
+        margin=0.0,
+        inner_elem="inner_tube_shell",
+        outer_elem="outer_sleeve_shell",
     )
-    ctx.expect_contact(
-        inner_post,
+    ctx.expect_overlap(
+        inner_tube,
         outer_sleeve,
-        elem_a=inner_tube,
-        elem_b=guide_pad_right,
-    )
-    ctx.expect_gap(
-        lower_clamp,
-        inner_post,
-        axis="z",
-        positive_elem=clamp_base,
-        negative_elem=inner_tube,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_overlap(
-        lower_clamp,
-        inner_post,
         axes="xy",
-        min_overlap=0.0003,
-        elem_a=clamp_base,
-        elem_b=inner_tube,
+        min_overlap=0.024,
+        elem_a="inner_tube_shell",
+        elem_b="outer_sleeve_shell",
     )
-    ctx.expect_gap(
-        front_clamp,
-        lower_clamp,
-        axis="z",
-        positive_elem=front_upper_plate,
-        negative_elem=left_rail_saddle,
-        max_gap=0.001,
-        max_penetration=0.0,
+    ctx.expect_contact(saddle_clamp, inner_tube)
+    ctx.expect_contact(saddle, saddle_clamp)
+
+    saddle_aabb = ctx.part_world_aabb(saddle)
+    assert saddle_aabb is not None
+    saddle_len = saddle_aabb[1][0] - saddle_aabb[0][0]
+    saddle_width = saddle_aabb[1][1] - saddle_aabb[0][1]
+    ctx.check(
+        "saddle_has_standard_scale",
+        saddle_len > 0.25 and saddle_width > 0.13,
+        f"length={saddle_len:.4f}, width={saddle_width:.4f}",
     )
-    ctx.expect_gap(
-        rear_clamp,
-        lower_clamp,
-        axis="z",
-        positive_elem=rear_upper_plate,
-        negative_elem=right_rail_saddle,
-        max_gap=0.001,
-        max_penetration=0.0,
-    )
-    ctx.expect_overlap(
-        front_clamp,
-        lower_clamp,
-        axes="xy",
-        min_overlap=0.0001,
-        elem_a=front_upper_plate,
-        elem_b=clamp_base,
-    )
-    ctx.expect_overlap(
-        rear_clamp,
-        lower_clamp,
-        axes="xy",
-        min_overlap=0.0001,
-        elem_a=rear_upper_plate,
-        elem_b=clamp_base,
-    )
-    ctx.expect_overlap(
-        front_clamp,
-        lower_clamp,
-        axes="xy",
-        min_overlap=0.006,
-        elem_a=front_upper_plate,
-        elem_b=left_rail_saddle,
-    )
-    ctx.expect_overlap(
-        front_clamp,
-        lower_clamp,
-        axes="xy",
-        min_overlap=0.006,
-        elem_a=front_upper_plate,
-        elem_b=right_rail_saddle,
-    )
-    ctx.expect_overlap(
-        rear_clamp,
-        lower_clamp,
-        axes="xy",
-        min_overlap=0.006,
-        elem_a=rear_upper_plate,
-        elem_b=left_rail_saddle,
-    )
-    ctx.expect_overlap(
-        rear_clamp,
-        lower_clamp,
-        axes="xy",
-        min_overlap=0.006,
-        elem_a=rear_upper_plate,
-        elem_b=right_rail_saddle,
-    )
-    ctx.expect_origin_distance(front_clamp, rear_clamp, axes="yz", max_dist=0.002)
-    ctx.expect_gap(
-        rear_clamp,
-        front_clamp,
-        axis="x",
-        min_gap=0.014,
-        max_gap=0.016,
-    )
-    ctx.expect_gap(
-        lower_clamp,
-        outer_sleeve,
-        axis="z",
-        positive_elem=clamp_base,
-        negative_elem=seal_head,
-        min_gap=0.024,
-        max_gap=0.026,
-    )
-    with ctx.pose({outer_to_inner: TRAVEL}):
+
+    saddle_rest = ctx.part_world_position(saddle)
+    assert saddle_rest is not None
+    with ctx.pose({dropper: 0.060}):
+        saddle_extended = ctx.part_world_position(saddle)
+        assert saddle_extended is not None
         ctx.expect_within(
-            inner_post,
+            inner_tube,
             outer_sleeve,
             axes="xy",
-            inner_elem=inner_tube,
-            outer_elem=sleeve_body,
+            margin=0.0,
+            inner_elem="inner_tube_shell",
+            outer_elem="outer_sleeve_shell",
         )
-        ctx.expect_contact(
-            inner_post,
-            outer_sleeve,
-            elem_a=inner_tube,
-            elem_b=guide_pad_right,
+        ctx.check(
+            "saddle_rises_by_60mm",
+            abs((saddle_extended[2] - saddle_rest[2]) - 0.060) < 0.002,
+            f"travel={saddle_extended[2] - saddle_rest[2]:.4f}",
         )
-        ctx.expect_gap(
-            lower_clamp,
-            outer_sleeve,
-            axis="z",
-            positive_elem=clamp_base,
-            negative_elem=seal_head,
-            min_gap=0.084,
-            max_gap=0.086,
-        )
+
     return ctx.report()
 
 

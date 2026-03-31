@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_ceiling_fan_0006",
+  "created_at": "2026-03-27T12:15:39Z",
+  "updated_at": "2026-03-27T17:13:44Z",
+  "rating": 4,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "ceiling_fan",
+  "source": {
+    "run_id": "run_20260326_115111_793307_base-sdk-categories-part1-20260326",
+    "prompt_batch_id": null,
+    "batch_spec_id": "base_sdk_categories_part1_20260326",
+    "row_id": "row_0090",
+    "prompt_index": 90
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Ceiling fan \u2014 dual-rotor counter-rotating",
+    "prompt_preview": "A dual-rotor ceiling fan with two counter-rotating four-blade assemblies each on a revolute axle, mounted on a single downrod."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "f8df06938a07fa3183c6fafdc33406f05edd31e85344446639957810e6215839",
+    "model_py_sha256": "896ba70bbb5023c197acfeb544e50b5bf898f3f2d873cbb61364a079661a99d0"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "Zhaomou Song",
+  "rated_by": "Zhaomou Song",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

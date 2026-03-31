@@ -4,6 +4,7 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
+import os
 
 from sdk import (
     ArticulatedObject,
@@ -11,516 +12,659 @@ from sdk import (
     AssetContext,
     Box,
     Cylinder,
+    ExtrudeWithHolesGeometry,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
+    mesh_from_geometry,
+    rounded_rect_profile,
 )
 
-ASSETS = AssetContext.from_script("/tmp/model.py")
+try:
+    os.getcwd()
+except FileNotFoundError:
+    os.chdir("/tmp")
 
-BODY_SIZE = (0.320, 0.220, 0.048)
-BODY_WIDTH = BODY_SIZE[0]
-BODY_DEPTH = BODY_SIZE[1]
-BODY_HALF_WIDTH = BODY_WIDTH * 0.5
-BODY_HALF_DEPTH = BODY_DEPTH * 0.5
-BODY_FRONT_Y = -BODY_HALF_DEPTH
+ASSETS = AssetContext.from_script(__file__)
 
-FLOOR_Z = 0.008
-FLOOR_TOP_Z = 0.016
-MID_WALL_TOP_Z = 0.044
-BODY_TOP_Z = 0.056
-TOP_LAYER_CENTER_Z = 0.050
+BODY_WIDTH = 0.292
+BODY_DEPTH = 0.192
+BODY_HEIGHT = 0.034
+WALL_THICKNESS = 0.008
+BOTTOM_THICKNESS = 0.004
+TOP_PLATE_THICKNESS = 0.0035
+TOP_SURFACE_Z = BODY_HEIGHT
 
-JOG_CENTER_X = -0.072
-JOG_CENTER_Y = 0.020
-JOG_RECESS_RADIUS = 0.068
-JOG_WELL_RING_RADIUS = 0.066
-JOG_RECESS_FLOOR_Z = 0.046
-JOG_PLATTER_RADIUS = 0.060
 
-LCD_CENTER_X = 0.082
-LCD_CENTER_Y = 0.040
-LCD_FLOOR_SIZE = (0.102, 0.072, 0.004)
-LCD_FRAME_SIZE = (0.096, 0.066, 0.004)
-LCD_RECESS_FLOOR_Z = 0.046
+def _translated_profile(
+    profile: list[tuple[float, float]],
+    dx: float,
+    dy: float,
+) -> list[tuple[float, float]]:
+    return [(x + dx, y + dy) for x, y in profile]
 
-BUTTON_BANK_Y = -0.077
-SLOT_OPENING_Z = 0.031
+
+def _build_top_panel_mesh():
+    outer_profile = rounded_rect_profile(
+        BODY_WIDTH - 2.0 * WALL_THICKNESS,
+        BODY_DEPTH - 2.0 * WALL_THICKNESS,
+        0.008,
+    )
+    hole_profiles = [
+        _translated_profile(rounded_rect_profile(0.012, 0.084, 0.003), -0.072, -0.024),
+        _translated_profile(rounded_rect_profile(0.012, 0.084, 0.003), 0.072, -0.024),
+        _translated_profile(rounded_rect_profile(0.142, 0.010, 0.0025), 0.000, -0.074),
+    ]
+    return mesh_from_geometry(
+        ExtrudeWithHolesGeometry(
+            outer_profile,
+            hole_profiles,
+            TOP_PLATE_THICKNESS,
+            center=True,
+            cap=True,
+            closed=True,
+        ),
+        ASSETS.mesh_path("dj_mixer_top_panel.obj"),
+    )
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="cdj_media_player", assets=ASSETS)
+    model = ArticulatedObject(name="dj_mixer", assets=ASSETS)
 
-    body_black = model.material("body_black", rgba=(0.12, 0.13, 0.14, 1.0))
-    satin_black = model.material("satin_black", rgba=(0.16, 0.17, 0.18, 1.0))
-    charcoal = model.material("charcoal", rgba=(0.20, 0.21, 0.23, 1.0))
-    rubber = model.material("rubber", rgba=(0.08, 0.08, 0.09, 1.0))
-    gunmetal = model.material("gunmetal", rgba=(0.46, 0.48, 0.50, 1.0))
-    screen_glass = model.material("screen_glass", rgba=(0.19, 0.34, 0.38, 0.38))
-    marker_white = model.material("marker_white", rgba=(0.88, 0.89, 0.90, 1.0))
-    slot_dark = model.material("slot_dark", rgba=(0.03, 0.03, 0.04, 1.0))
+    shell = model.material("shell", rgba=(0.11, 0.11, 0.12, 1.0))
+    panel = model.material("panel", rgba=(0.15, 0.15, 0.17, 1.0))
+    strip = model.material("strip", rgba=(0.07, 0.07, 0.08, 1.0))
+    metal = model.material("metal", rgba=(0.72, 0.74, 0.76, 1.0))
+    knob_dark = model.material("knob_dark", rgba=(0.18, 0.18, 0.19, 1.0))
+    accent = model.material("accent", rgba=(0.90, 0.58, 0.14, 1.0))
+    cue_red = model.material("cue_red", rgba=(0.80, 0.18, 0.16, 1.0))
 
     body = model.part("body")
+    side_height = BODY_HEIGHT - BOTTOM_THICKNESS - TOP_PLATE_THICKNESS
+    side_z = BOTTOM_THICKNESS + side_height * 0.5
+
     body.visual(
-        Box((BODY_WIDTH, BODY_DEPTH, 0.008)),
-        origin=Origin(xyz=(0.0, 0.0, 0.012)),
-        material=body_black,
-        name="floor_plate",
+        Box((BODY_WIDTH, BODY_DEPTH, BOTTOM_THICKNESS)),
+        origin=Origin(xyz=(0.0, 0.0, BOTTOM_THICKNESS * 0.5)),
+        material=shell,
+        name="bottom_plate",
     )
     body.visual(
-        Box((0.012, BODY_DEPTH, 0.028)),
-        origin=Origin(xyz=(-0.154, 0.0, 0.030)),
-        material=body_black,
+        Box((WALL_THICKNESS, BODY_DEPTH, side_height)),
+        origin=Origin(xyz=(-(BODY_WIDTH - WALL_THICKNESS) * 0.5, 0.0, side_z)),
+        material=shell,
         name="left_wall",
     )
     body.visual(
-        Box((0.012, BODY_DEPTH, 0.028)),
-        origin=Origin(xyz=(0.154, 0.0, 0.030)),
-        material=body_black,
+        Box((WALL_THICKNESS, BODY_DEPTH, side_height)),
+        origin=Origin(xyz=((BODY_WIDTH - WALL_THICKNESS) * 0.5, 0.0, side_z)),
+        material=shell,
         name="right_wall",
     )
     body.visual(
-        Box((0.296, 0.012, 0.028)),
-        origin=Origin(xyz=(0.0, 0.104, 0.030)),
-        material=body_black,
+        Box((BODY_WIDTH - 2.0 * WALL_THICKNESS, WALL_THICKNESS, side_height)),
+        origin=Origin(xyz=(0.0, -(BODY_DEPTH - WALL_THICKNESS) * 0.5, side_z)),
+        material=shell,
+        name="front_wall",
+    )
+    body.visual(
+        Box((BODY_WIDTH - 2.0 * WALL_THICKNESS, WALL_THICKNESS, side_height)),
+        origin=Origin(xyz=(0.0, (BODY_DEPTH - WALL_THICKNESS) * 0.5, side_z)),
+        material=shell,
         name="rear_wall",
     )
     body.visual(
-        Box((0.080, 0.012, 0.028)),
-        origin=Origin(xyz=(-0.108, -0.104, 0.030)),
-        material=body_black,
-        name="front_left_face",
+        _build_top_panel_mesh(),
+        origin=Origin(xyz=(0.0, 0.0, BODY_HEIGHT - TOP_PLATE_THICKNESS * 0.5)),
+        material=panel,
+        name="top_panel",
     )
     body.visual(
-        Box((0.080, 0.012, 0.028)),
-        origin=Origin(xyz=(0.108, -0.104, 0.030)),
-        material=body_black,
-        name="front_right_face",
+        Box((0.064, 0.116, 0.0008)),
+        origin=Origin(xyz=(-0.072, 0.020, TOP_SURFACE_Z + 0.0004)),
+        material=strip,
+        name="left_channel_strip",
     )
     body.visual(
-        Box((0.136, 0.012, 0.013)),
-        origin=Origin(xyz=(0.0, -0.104, 0.0225)),
-        material=charcoal,
-        name="slot_lower_lip",
+        Box((0.064, 0.116, 0.0008)),
+        origin=Origin(xyz=(0.072, 0.020, TOP_SURFACE_Z + 0.0004)),
+        material=strip,
+        name="right_channel_strip",
     )
     body.visual(
-        Box((0.136, 0.012, 0.011)),
-        origin=Origin(xyz=(0.0, -0.104, 0.0385)),
-        material=charcoal,
-        name="slot_upper_lip",
+        Box((0.046, 0.056, 0.0008)),
+        origin=Origin(xyz=(0.108, 0.052, TOP_SURFACE_Z + 0.0004)),
+        material=strip,
+        name="cue_section_plate",
     )
     body.visual(
-        Box((0.296, 0.044, 0.012)),
-        origin=Origin(xyz=(0.0, -0.088, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="front_deck",
+        Box((0.022, 0.020, 0.007)),
+        origin=Origin(xyz=(0.112, 0.056, TOP_SURFACE_Z + 0.0035)),
+        material=metal,
+        name="cue_pedestal",
     )
     body.visual(
-        Box((0.296, 0.028, 0.012)),
-        origin=Origin(xyz=(0.0, 0.096, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="rear_deck",
+        Box((0.150, 0.022, 0.0008)),
+        origin=Origin(xyz=(0.0, -0.074, TOP_SURFACE_Z + 0.0004)),
+        material=strip,
+        name="crossfader_plate",
     )
     body.visual(
-        Box((0.020, 0.148, 0.012)),
-        origin=Origin(xyz=(-0.150, 0.014, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="left_top_strip",
+        Box((0.064, 0.088, 0.0008)),
+        origin=Origin(xyz=(-0.072, -0.004, TOP_SURFACE_Z + 0.0004)),
+        material=strip,
+        name="left_fader_gate",
     )
     body.visual(
-        Box((0.036, 0.148, 0.012)),
-        origin=Origin(xyz=(0.014, 0.014, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="center_top_strip",
+        Box((0.064, 0.088, 0.0008)),
+        origin=Origin(xyz=(0.072, -0.004, TOP_SURFACE_Z + 0.0004)),
+        material=strip,
+        name="right_fader_gate",
     )
-    body.visual(
-        Box((0.028, 0.148, 0.012)),
-        origin=Origin(xyz=(0.146, 0.014, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="right_top_strip",
-    )
-    body.visual(
-        Box((0.100, 0.016, 0.012)),
-        origin=Origin(xyz=(LCD_CENTER_X, -0.003, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="display_front_bezel",
-    )
-    body.visual(
-        Box((0.100, 0.035, 0.012)),
-        origin=Origin(xyz=(LCD_CENTER_X, 0.0925, TOP_LAYER_CENTER_Z)),
-        material=body_black,
-        name="display_rear_bezel",
-    )
-    body.visual(
-        Box(LCD_FLOOR_SIZE),
-        origin=Origin(xyz=(LCD_CENTER_X, LCD_CENTER_Y, LCD_RECESS_FLOOR_Z)),
-        material=satin_black,
-        name="display_floor",
-    )
-    body.visual(
-        Cylinder(radius=JOG_RECESS_RADIUS, length=0.002),
-        origin=Origin(xyz=(JOG_CENTER_X, JOG_CENTER_Y, 0.043)),
-        material=satin_black,
-        name="jog_well_floor",
-    )
-    body.visual(
-        Cylinder(radius=0.016, length=0.004),
-        origin=Origin(xyz=(JOG_CENTER_X, JOG_CENTER_Y, JOG_RECESS_FLOOR_Z)),
-        material=charcoal,
-        name="bearing_pedestal",
-    )
-    body.visual(
-        Box((0.096, 0.003, 0.0008)),
-        origin=Origin(xyz=(LCD_CENTER_X, LCD_CENTER_Y + 0.039, BODY_TOP_Z + 0.0004)),
-        material=charcoal,
-        name="lcd_top_lip",
-    )
-    body.visual(
-        Box((0.020, 0.012, 0.0008)),
-        origin=Origin(xyz=(JOG_CENTER_X, JOG_CENTER_Y + 0.061, BODY_TOP_Z + 0.0004)),
-        material=body_black,
-        name="jog_north_pad",
-    )
-    body.visual(
-        Box((0.014, 0.020, 0.0008)),
-        origin=Origin(xyz=(JOG_CENTER_X + 0.061, JOG_CENTER_Y, BODY_TOP_Z + 0.0004)),
-        material=body_black,
-        name="jog_east_pad",
-    )
-    body.visual(
-        Box((0.012, 0.004, 0.0008)),
-        origin=Origin(xyz=(JOG_CENTER_X, JOG_CENTER_Y + 0.055, BODY_TOP_Z + 0.0004)),
-        material=marker_white,
-        name="jog_north_tick",
-    )
-    body.visual(
-        Box((0.004, 0.012, 0.0008)),
-        origin=Origin(xyz=(JOG_CENTER_X + 0.055, JOG_CENTER_Y, BODY_TOP_Z + 0.0004)),
-        material=marker_white,
-        name="jog_east_tick",
-    )
-    body.visual(
-        Box((0.138, 0.0012, 0.014)),
-        origin=Origin(xyz=(0.0, BODY_FRONT_Y - 0.0006, SLOT_OPENING_Z)),
-        material=charcoal,
-        name="slot_front_lip",
-    )
-    for foot_index, (foot_x, foot_y) in enumerate(
-        (
-            (-0.128, -0.085),
-            (0.128, -0.085),
-            (-0.128, 0.085),
-            (0.128, 0.085),
-        )
-    ):
-        body.visual(
-            Cylinder(radius=0.0155, length=0.008),
-            origin=Origin(xyz=(foot_x, foot_y, 0.004)),
-            material=rubber,
-            name=f"foot_{foot_index + 1}",
-        )
     body.inertial = Inertial.from_geometry(
-        Box((BODY_WIDTH, BODY_DEPTH, BODY_TOP_Z - FLOOR_Z)),
-        mass=2.9,
-        origin=Origin(xyz=(0.0, 0.0, 0.032)),
+        Box((BODY_WIDTH, BODY_DEPTH, BODY_HEIGHT)),
+        mass=2.8,
+        origin=Origin(xyz=(0.0, 0.0, BODY_HEIGHT * 0.5)),
     )
 
-    display = model.part("display_panel")
-    display.visual(
-        Box(LCD_FRAME_SIZE),
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
-        material=satin_black,
-        name="lcd_frame",
-    )
-    display.visual(
-        Box((0.084, 0.054, 0.0012)),
-        origin=Origin(xyz=(0.0, 0.0, 0.0034)),
-        material=screen_glass,
-        name="lcd_glass",
-    )
-    display.inertial = Inertial.from_geometry(
-        Box(LCD_FRAME_SIZE),
-        mass=0.08,
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
-    )
-
-    buttons = model.part("button_bank")
-    buttons.visual(
-        Box((0.218, 0.048, 0.002)),
-        origin=Origin(xyz=(0.0, 0.0, 0.001)),
-        material=satin_black,
-        name="button_panel",
-    )
-    for button_index, button_x in enumerate((-0.080, -0.048, -0.016, 0.016, 0.048, 0.080)):
-        buttons.visual(
-            Box((0.024, 0.014, 0.0032)),
-            origin=Origin(xyz=(button_x, 0.0, 0.0036)),
-            material=charcoal,
-            name=f"button_{button_index + 1}",
+    def add_channel_knob(
+        part_name: str,
+        joint_name: str,
+        position: tuple[float, float, float],
+    ):
+        knob = model.part(part_name)
+        knob.visual(
+            Cylinder(radius=0.009, length=0.010),
+            origin=Origin(xyz=(0.0, 0.0, 0.005)),
+            material=knob_dark,
+            name="knob_skirt",
         )
-    buttons.inertial = Inertial.from_geometry(
-        Box((0.218, 0.048, 0.0052)),
-        mass=0.09,
-        origin=Origin(xyz=(0.0, 0.0, 0.0026)),
+        knob.visual(
+            Cylinder(radius=0.0065, length=0.006),
+            origin=Origin(xyz=(0.0, 0.0, 0.013)),
+            material=metal,
+            name="knob_cap",
+        )
+        knob.visual(
+            Box((0.0025, 0.010, 0.0015)),
+            origin=Origin(xyz=(0.0, 0.0045, 0.01525)),
+            material=accent,
+            name="indicator",
+        )
+        knob.inertial = Inertial.from_geometry(
+            Box((0.020, 0.020, 0.019)),
+            mass=0.04,
+            origin=Origin(xyz=(0.0, 0.0, 0.0095)),
+        )
+        articulation = model.articulation(
+            joint_name,
+            ArticulationType.REVOLUTE,
+            parent=body,
+            child=knob,
+            origin=Origin(xyz=position),
+            axis=(0.0, 0.0, 1.0),
+            motion_limits=MotionLimits(
+                effort=0.4,
+                velocity=5.0,
+                lower=-2.5,
+                upper=2.5,
+            ),
+        )
+        return knob, articulation
+
+    for part_name, joint_name, position in [
+        ("left_trim_knob", "left_trim_turn", (-0.072, 0.076, TOP_SURFACE_Z)),
+        ("left_hi_knob", "left_hi_turn", (-0.072, 0.050, TOP_SURFACE_Z)),
+        ("left_low_knob", "left_low_turn", (-0.072, 0.026, TOP_SURFACE_Z)),
+        ("right_trim_knob", "right_trim_turn", (0.072, 0.076, TOP_SURFACE_Z)),
+        ("right_hi_knob", "right_hi_turn", (0.072, 0.050, TOP_SURFACE_Z)),
+        ("right_low_knob", "right_low_turn", (0.072, 0.026, TOP_SURFACE_Z)),
+    ]:
+        add_channel_knob(part_name, joint_name, position)
+
+    def add_channel_fader(
+        part_name: str,
+        joint_name: str,
+        x_pos: float,
+    ):
+        fader = model.part(part_name)
+        fader.visual(
+            Box((0.014, 0.022, 0.010)),
+            origin=Origin(xyz=(0.0, 0.0, 0.005)),
+            material=metal,
+            name="fader_cap",
+        )
+        fader.visual(
+            Box((0.0045, 0.010, 0.022)),
+            origin=Origin(xyz=(0.0, 0.0, -0.011)),
+            material=accent,
+            name="fader_stem",
+        )
+        fader.visual(
+            Box((0.010, 0.012, 0.003)),
+            origin=Origin(xyz=(0.0, 0.0, 0.0115)),
+            material=knob_dark,
+            name="fader_grip",
+        )
+        fader.inertial = Inertial.from_geometry(
+            Box((0.016, 0.024, 0.034)),
+            mass=0.035,
+            origin=Origin(xyz=(0.0, 0.0, -0.001)),
+        )
+        articulation = model.articulation(
+            joint_name,
+            ArticulationType.PRISMATIC,
+            parent=body,
+            child=fader,
+            origin=Origin(xyz=(x_pos, -0.024, TOP_SURFACE_Z)),
+            axis=(0.0, 1.0, 0.0),
+            motion_limits=MotionLimits(
+                effort=1.0,
+                velocity=0.18,
+                lower=-0.026,
+                upper=0.024,
+            ),
+        )
+        return fader, articulation
+
+    add_channel_fader("left_channel_fader", "left_channel_slide", -0.072)
+    add_channel_fader("right_channel_fader", "right_channel_slide", 0.072)
+
+    crossfader = model.part("crossfader")
+    crossfader.visual(
+        Box((0.020, 0.034, 0.012)),
+        origin=Origin(xyz=(0.0, 0.0, 0.006)),
+        material=metal,
+        name="fader_cap",
+    )
+    crossfader.visual(
+        Box((0.006, 0.010, 0.022)),
+        origin=Origin(xyz=(0.0, 0.0, -0.011)),
+        material=accent,
+        name="fader_stem",
+    )
+    crossfader.visual(
+        Box((0.012, 0.016, 0.003)),
+        origin=Origin(xyz=(0.0, 0.0, 0.0135)),
+        material=knob_dark,
+        name="fader_grip",
+    )
+    crossfader.inertial = Inertial.from_geometry(
+        Box((0.022, 0.036, 0.036)),
+        mass=0.05,
+        origin=Origin(xyz=(0.0, 0.0, -0.002)),
+    )
+    model.articulation(
+        "crossfader_slide",
+        ArticulationType.PRISMATIC,
+        parent=body,
+        child=crossfader,
+        origin=Origin(xyz=(0.0, -0.074, TOP_SURFACE_Z)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=1.4,
+            velocity=0.24,
+            lower=-0.058,
+            upper=0.058,
+        ),
     )
 
-    media_slot = model.part("media_slot")
-    media_slot.visual(
-        Box((0.116, 0.010, 0.004)),
-        origin=Origin(xyz=(0.0, 0.005, 0.002)),
-        material=slot_dark,
-        name="slot_shadow",
+    cue_lever = model.part("cue_lever")
+    cue_lever.visual(
+        Cylinder(radius=0.004, length=0.018),
+        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=metal,
+        name="pivot_barrel",
     )
-    media_slot.inertial = Inertial.from_geometry(
-        Box((0.116, 0.010, 0.004)),
-        mass=0.01,
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
+    cue_lever.visual(
+        Box((0.006, 0.026, 0.010)),
+        origin=Origin(xyz=(0.0, 0.012, 0.007)),
+        material=metal,
+        name="cue_arm",
+    )
+    cue_lever.visual(
+        Box((0.012, 0.016, 0.010)),
+        origin=Origin(xyz=(0.0, 0.028, 0.015)),
+        material=cue_red,
+        name="cue_tip",
+    )
+    cue_lever.inertial = Inertial.from_geometry(
+        Box((0.018, 0.046, 0.024)),
+        mass=0.03,
+        origin=Origin(xyz=(0.0, 0.018, 0.010)),
+    )
+    model.articulation(
+        "cue_lever_hinge",
+        ArticulationType.REVOLUTE,
+        parent=body,
+        child=cue_lever,
+        origin=Origin(xyz=(0.112, 0.056, TOP_SURFACE_Z + 0.011)),
+        axis=(1.0, 0.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=0.6,
+            velocity=2.0,
+            lower=-0.25,
+            upper=0.95,
+        ),
     )
 
-    jog_wheel = model.part("jog_wheel")
-    jog_wheel.visual(
-        Cylinder(radius=JOG_PLATTER_RADIUS, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, 0.005)),
-        material=gunmetal,
-        name="platter",
-    )
-    jog_wheel.visual(
-        Cylinder(radius=0.064, length=0.002),
-        origin=Origin(xyz=(0.0, 0.0, 0.007)),
-        material=rubber,
-        name="grip_ring",
-    )
-    jog_wheel.visual(
-        Cylinder(radius=0.020, length=0.003),
-        origin=Origin(xyz=(0.0, 0.0, 0.0035)),
-        material=satin_black,
-        name="center_hub",
-    )
-    jog_wheel.visual(
-        Box((0.008, 0.004, 0.0012)),
-        origin=Origin(xyz=(0.0, 0.053, 0.0084)),
-        material=marker_white,
-        name="marker",
-    )
-    jog_wheel.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.063, length=0.013),
-        mass=0.28,
-        origin=Origin(xyz=(0.0, 0.0, 0.0055)),
-    )
-
-    model.articulation(
-        "body_to_display_panel",
-        ArticulationType.FIXED,
-        parent=body,
-        child=display,
-        origin=Origin(xyz=(LCD_CENTER_X, LCD_CENTER_Y, 0.048)),
-    )
-    model.articulation(
-        "body_to_button_bank",
-        ArticulationType.FIXED,
-        parent=body,
-        child=buttons,
-        origin=Origin(xyz=(0.0, BUTTON_BANK_Y, BODY_TOP_Z)),
-    )
-    model.articulation(
-        "body_to_media_slot",
-        ArticulationType.FIXED,
-        parent=body,
-        child=media_slot,
-        origin=Origin(xyz=(0.0, -0.110, SLOT_OPENING_Z - 0.002)),
-    )
-    model.articulation(
-        "body_to_jog_wheel",
-        ArticulationType.CONTINUOUS,
-        parent=body,
-        child=jog_wheel,
-        origin=Origin(xyz=(JOG_CENTER_X, JOG_CENTER_Y, 0.046)),
-        axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=0.5, velocity=8.0),
-    )
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root, seed=0)
     body = object_model.get_part("body")
-    display = object_model.get_part("display_panel")
-    buttons = object_model.get_part("button_bank")
-    media_slot = object_model.get_part("media_slot")
-    jog_wheel = object_model.get_part("jog_wheel")
-    jog_joint = object_model.get_articulation("body_to_jog_wheel")
+    top_panel = body.get_visual("top_panel")
+    cue_pedestal = body.get_visual("cue_pedestal")
 
-    floor_plate = body.get_visual("floor_plate")
-    front_deck = body.get_visual("front_deck")
-    display_floor = body.get_visual("display_floor")
-    display_front_bezel = body.get_visual("display_front_bezel")
-    lcd_top_lip = body.get_visual("lcd_top_lip")
-    jog_north_tick = body.get_visual("jog_north_tick")
-    jog_east_tick = body.get_visual("jog_east_tick")
-    slot_front_lip = body.get_visual("slot_front_lip")
-    slot_lower_lip = body.get_visual("slot_lower_lip")
-    slot_upper_lip = body.get_visual("slot_upper_lip")
-    bearing_pedestal = body.get_visual("bearing_pedestal")
-    foot_1 = body.get_visual("foot_1")
-    foot_2 = body.get_visual("foot_2")
-    foot_3 = body.get_visual("foot_3")
-    foot_4 = body.get_visual("foot_4")
+    left_channel_fader = object_model.get_part("left_channel_fader")
+    right_channel_fader = object_model.get_part("right_channel_fader")
+    crossfader = object_model.get_part("crossfader")
+    cue_lever = object_model.get_part("cue_lever")
 
-    lcd_frame = display.get_visual("lcd_frame")
-    button_panel = buttons.get_visual("button_panel")
-    slot_shadow = media_slot.get_visual("slot_shadow")
-    wheel_platter = jog_wheel.get_visual("platter")
-    wheel_marker = jog_wheel.get_visual("marker")
-    center_hub = jog_wheel.get_visual("center_hub")
+    left_channel_slide = object_model.get_articulation("left_channel_slide")
+    right_channel_slide = object_model.get_articulation("right_channel_slide")
+    crossfader_slide = object_model.get_articulation("crossfader_slide")
+    cue_lever_hinge = object_model.get_articulation("cue_lever_hinge")
+
+    knob_data = [
+        (object_model.get_part("left_trim_knob"), object_model.get_articulation("left_trim_turn")),
+        (object_model.get_part("left_hi_knob"), object_model.get_articulation("left_hi_turn")),
+        (object_model.get_part("left_low_knob"), object_model.get_articulation("left_low_turn")),
+        (object_model.get_part("right_trim_knob"), object_model.get_articulation("right_trim_turn")),
+        (object_model.get_part("right_hi_knob"), object_model.get_articulation("right_hi_turn")),
+        (object_model.get_part("right_low_knob"), object_model.get_articulation("right_low_turn")),
+    ]
+
+    left_fader_cap = left_channel_fader.get_visual("fader_cap")
+    right_fader_cap = right_channel_fader.get_visual("fader_cap")
+    crossfader_cap = crossfader.get_visual("fader_cap")
+    cue_barrel = cue_lever.get_visual("pivot_barrel")
+    cue_tip = cue_lever.get_visual("cue_tip")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-    ctx.expect_within(display, body, axes="xy", inner_elem=lcd_frame, outer_elem=display_floor)
-    ctx.expect_gap(
-        display,
-        jog_wheel,
-        axis="x",
-        min_gap=0.035,
-        positive_elem=lcd_frame,
-        negative_elem=wheel_platter,
+    def _aabb_center(aabb):
+        return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
+
+    body_aabb = ctx.part_world_aabb(body)
+    if body_aabb is None:
+        ctx.fail("body_present", "Body AABB could not be resolved.")
+    else:
+        body_size = tuple(body_aabb[1][axis] - body_aabb[0][axis] for axis in range(3))
+        ctx.check(
+            "mixer_body_realistic_size",
+            0.26 <= body_size[0] <= 0.32 and 0.18 <= body_size[1] <= 0.22 and 0.03 <= body_size[2] <= 0.05,
+            f"Unexpected body dimensions {body_size!r}.",
+        )
+
+    ctx.check(
+        "channel_knob_count",
+        len(knob_data) == 6,
+        f"Expected 6 rotary channel knobs, found {len(knob_data)}.",
     )
-    ctx.expect_gap(
-        body,
-        display,
-        axis="z",
-        min_gap=0.002,
-        max_gap=0.006,
-        positive_elem=lcd_top_lip,
-        negative_elem=lcd_frame,
-    )
-    ctx.expect_gap(
-        buttons,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=button_panel,
-        negative_elem=front_deck,
-    )
-    ctx.expect_gap(
-        jog_wheel,
-        buttons,
-        axis="y",
-        min_gap=0.010,
-        positive_elem=wheel_platter,
-        negative_elem=button_panel,
-    )
-    ctx.expect_gap(
-        media_slot,
-        body,
-        axis="y",
-        max_gap=0.001,
-        positive_elem=slot_shadow,
-        negative_elem=slot_front_lip,
-    )
-    ctx.expect_gap(
-        body,
-        body,
-        axis="z",
-        min_gap=0.003,
-        max_gap=0.006,
-        positive_elem=slot_upper_lip,
-        negative_elem=slot_lower_lip,
-    )
-    ctx.expect_gap(
-        body,
-        jog_wheel,
-        axis="z",
-        min_gap=0.002,
-        max_gap=0.007,
-        positive_elem=jog_north_tick,
-        negative_elem=wheel_platter,
-    )
-    ctx.expect_overlap(
-        jog_wheel,
-        body,
-        axes="xy",
-        min_overlap=0.030,
-        elem_a=center_hub,
-        elem_b=bearing_pedestal,
-    )
-    ctx.expect_gap(
-        jog_wheel,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=center_hub,
-        negative_elem=bearing_pedestal,
-    )
-    ctx.expect_overlap(
-        jog_wheel,
-        body,
-        axes="xy",
-        min_overlap=0.00001,
-        elem_a=wheel_marker,
-        elem_b=jog_north_tick,
-    )
-    ctx.expect_within(body, body, axes="xy", inner_elem=foot_1, outer_elem=floor_plate)
-    ctx.expect_within(body, body, axes="xy", inner_elem=foot_2, outer_elem=floor_plate)
-    ctx.expect_within(body, body, axes="xy", inner_elem=foot_3, outer_elem=floor_plate)
-    ctx.expect_within(body, body, axes="xy", inner_elem=foot_4, outer_elem=floor_plate)
-    ctx.expect_gap(
-        body,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=floor_plate,
-        negative_elem=foot_1,
-    )
-    ctx.expect_gap(
-        body,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=floor_plate,
-        negative_elem=foot_2,
-    )
-    ctx.expect_gap(
-        body,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=floor_plate,
-        negative_elem=foot_3,
-    )
-    ctx.expect_gap(
-        body,
-        body,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=floor_plate,
-        negative_elem=foot_4,
-    )
-    with ctx.pose({jog_joint: -math.pi / 2.0}):
-        ctx.expect_overlap(
-            jog_wheel,
+
+    for knob_part, knob_joint in knob_data:
+        knob_skirt = knob_part.get_visual("knob_skirt")
+        ctx.check(
+            f"{knob_joint.name}_joint_type",
+            knob_joint.joint_type == ArticulationType.REVOLUTE,
+            f"{knob_joint.name} should be revolute.",
+        )
+        ctx.check(
+            f"{knob_joint.name}_joint_axis",
+            tuple(knob_joint.axis) == (0.0, 0.0, 1.0),
+            f"{knob_joint.name} axis should be +Z, got {knob_joint.axis!r}.",
+        )
+        ctx.expect_gap(
+            knob_part,
+            body,
+            axis="z",
+            max_gap=0.0005,
+            max_penetration=0.0,
+            positive_elem=knob_skirt,
+            negative_elem=top_panel,
+            name=f"{knob_part.name}_seated_on_panel",
+        )
+        ctx.expect_within(
+            knob_part,
             body,
             axes="xy",
-            min_overlap=0.00001,
-            elem_a=wheel_marker,
-            elem_b=jog_east_tick,
+            margin=0.002,
+            name=f"{knob_part.name}_within_mixer_footprint",
         )
+
+    for knob_part, knob_joint in knob_data:
+        indicator = knob_part.get_visual("indicator")
+        indicator_rest_aabb = ctx.part_element_world_aabb(knob_part, elem=indicator)
+        if indicator_rest_aabb is None:
+            ctx.fail(f"{knob_joint.name}_indicator_rest", "Indicator AABB missing at rest pose.")
+            continue
+        limits = knob_joint.motion_limits
+        if limits is None or limits.upper is None:
+            ctx.fail(f"{knob_joint.name}_limits", "Knob joint limits are missing.")
+            continue
+        with ctx.pose({knob_joint: limits.upper * 0.5}):
+            indicator_turned_aabb = ctx.part_element_world_aabb(knob_part, elem=indicator)
+            if indicator_turned_aabb is None:
+                ctx.fail(f"{knob_joint.name}_indicator_turned", "Indicator AABB missing in turned pose.")
+                continue
+            rest_center = _aabb_center(indicator_rest_aabb)
+            turned_center = _aabb_center(indicator_turned_aabb)
+            dx = turned_center[0] - rest_center[0]
+            dy = turned_center[1] - rest_center[1]
+            ctx.check(
+                f"{knob_joint.name}_rotates_indicator",
+                math.hypot(dx, dy) >= 0.003,
+                f"{knob_joint.name} indicator moved only {(dx, dy)!r}.",
+            )
+            ctx.expect_gap(
+                knob_part,
+                body,
+                axis="z",
+                max_gap=0.0005,
+                max_penetration=0.0,
+                positive_elem=knob_part.get_visual("knob_skirt"),
+                negative_elem=top_panel,
+                name=f"{knob_joint.name}_turned_pose_stays_seated",
+            )
+
+    for fader_part, fader_joint, cap_visual in [
+        (left_channel_fader, left_channel_slide, left_fader_cap),
+        (right_channel_fader, right_channel_slide, right_fader_cap),
+    ]:
+        ctx.check(
+            f"{fader_joint.name}_joint_type",
+            fader_joint.joint_type == ArticulationType.PRISMATIC,
+            f"{fader_joint.name} should be prismatic.",
+        )
+        ctx.check(
+            f"{fader_joint.name}_joint_axis",
+            tuple(fader_joint.axis) == (0.0, 1.0, 0.0),
+            f"{fader_joint.name} axis should be +Y, got {fader_joint.axis!r}.",
+        )
+        ctx.expect_gap(
+            fader_part,
+            body,
+            axis="z",
+            max_gap=0.0005,
+            max_penetration=0.0,
+            positive_elem=cap_visual,
+            negative_elem=top_panel,
+            name=f"{fader_part.name}_cap_seated",
+        )
+        rest_position = ctx.part_world_position(fader_part)
+        limits = fader_joint.motion_limits
+        if rest_position is None or limits is None or limits.lower is None or limits.upper is None:
+            ctx.fail(f"{fader_joint.name}_pose_data", "Fader pose data missing.")
+            continue
+        with ctx.pose({fader_joint: limits.lower}):
+            low_position = ctx.part_world_position(fader_part)
+            ctx.expect_gap(
+                fader_part,
+                body,
+                axis="z",
+                max_gap=0.0005,
+                max_penetration=0.0,
+                positive_elem=cap_visual,
+                negative_elem=top_panel,
+                name=f"{fader_joint.name}_lower_seated",
+            )
+        with ctx.pose({fader_joint: limits.upper}):
+            high_position = ctx.part_world_position(fader_part)
+            ctx.expect_gap(
+                fader_part,
+                body,
+                axis="z",
+                max_gap=0.0005,
+                max_penetration=0.0,
+                positive_elem=cap_visual,
+                negative_elem=top_panel,
+                name=f"{fader_joint.name}_upper_seated",
+            )
+        if low_position is None or high_position is None:
+            ctx.fail(f"{fader_joint.name}_positions", "Could not resolve fader positions at limits.")
+            continue
+        ctx.check(
+            f"{fader_joint.name}_slides_along_y",
+            abs(high_position[1] - low_position[1]) >= 0.05
+            and abs(high_position[0] - rest_position[0]) <= 1e-6
+            and abs(high_position[2] - rest_position[2]) <= 1e-6,
+            f"{fader_joint.name} positions were rest={rest_position!r}, low={low_position!r}, high={high_position!r}.",
+        )
+
+    ctx.check(
+        "crossfader_joint_type",
+        crossfader_slide.joint_type == ArticulationType.PRISMATIC,
+        "Crossfader should slide on a prismatic joint.",
+    )
+    ctx.check(
+        "crossfader_joint_axis",
+        tuple(crossfader_slide.axis) == (1.0, 0.0, 0.0),
+        f"Crossfader axis should be +X, got {crossfader_slide.axis!r}.",
+    )
+    ctx.expect_gap(
+        crossfader,
+        body,
+        axis="z",
+        max_gap=0.0005,
+        max_penetration=0.0,
+        positive_elem=crossfader_cap,
+        negative_elem=top_panel,
+        name="crossfader_cap_seated",
+    )
+    crossfader_rest = ctx.part_world_position(crossfader)
+    cross_limits = crossfader_slide.motion_limits
+    if crossfader_rest is None or cross_limits is None or cross_limits.lower is None or cross_limits.upper is None:
+        ctx.fail("crossfader_pose_data", "Crossfader pose data missing.")
+    else:
+        with ctx.pose({crossfader_slide: cross_limits.lower}):
+            crossfader_left = ctx.part_world_position(crossfader)
+            ctx.expect_gap(
+                crossfader,
+                body,
+                axis="z",
+                max_gap=0.0005,
+                max_penetration=0.0,
+                positive_elem=crossfader_cap,
+                negative_elem=top_panel,
+                name="crossfader_left_limit_seated",
+            )
+        with ctx.pose({crossfader_slide: cross_limits.upper}):
+            crossfader_right = ctx.part_world_position(crossfader)
+            ctx.expect_gap(
+                crossfader,
+                body,
+                axis="z",
+                max_gap=0.0005,
+                max_penetration=0.0,
+                positive_elem=crossfader_cap,
+                negative_elem=top_panel,
+                name="crossfader_right_limit_seated",
+            )
+        if crossfader_left is None or crossfader_right is None:
+            ctx.fail("crossfader_positions", "Could not resolve crossfader limit positions.")
+        else:
+            ctx.check(
+                "crossfader_moves_horizontally",
+                abs(crossfader_right[0] - crossfader_left[0]) >= 0.10
+                and abs(crossfader_right[1] - crossfader_rest[1]) <= 1e-6
+                and abs(crossfader_right[2] - crossfader_rest[2]) <= 1e-6,
+                f"Crossfader positions were rest={crossfader_rest!r}, left={crossfader_left!r}, right={crossfader_right!r}.",
+            )
+
+    ctx.check(
+        "cue_lever_joint_type",
+        cue_lever_hinge.joint_type == ArticulationType.REVOLUTE,
+        "Cue lever should be revolute.",
+    )
+    ctx.check(
+        "cue_lever_joint_axis",
+        tuple(cue_lever_hinge.axis) == (1.0, 0.0, 0.0),
+        f"Cue lever axis should be +X, got {cue_lever_hinge.axis!r}.",
+    )
+    ctx.expect_gap(
+        cue_lever,
+        body,
+        axis="z",
+        max_gap=0.0005,
+        max_penetration=1e-5,
+        positive_elem=cue_barrel,
+        negative_elem=cue_pedestal,
+        name="cue_barrel_seated_on_pedestal",
+    )
+    cue_tip_rest_aabb = ctx.part_element_world_aabb(cue_lever, elem=cue_tip)
+    cue_limits = cue_lever_hinge.motion_limits
+    if cue_tip_rest_aabb is None or cue_limits is None or cue_limits.upper is None:
+        ctx.fail("cue_lever_pose_data", "Cue lever pose data missing.")
+    else:
+        with ctx.pose({cue_lever_hinge: cue_limits.upper}):
+            cue_tip_up_aabb = ctx.part_element_world_aabb(cue_lever, elem=cue_tip)
+            ctx.expect_gap(
+                cue_lever,
+                body,
+                axis="z",
+                min_gap=0.014,
+                positive_elem=cue_tip,
+                negative_elem=top_panel,
+                name="cue_tip_lifts_clear_of_panel",
+            )
+        if cue_tip_up_aabb is None:
+            ctx.fail("cue_tip_up_pose", "Cue tip AABB missing at raised pose.")
+        else:
+            rest_center = _aabb_center(cue_tip_rest_aabb)
+            up_center = _aabb_center(cue_tip_up_aabb)
+            ctx.check(
+                "cue_lever_raises_tip",
+                up_center[2] >= rest_center[2] + 0.010,
+                f"Cue tip centers were rest={rest_center!r}, raised={up_center!r}.",
+            )
+
+    bounded_joints = [joint for _, joint in knob_data] + [
+        left_channel_slide,
+        right_channel_slide,
+        crossfader_slide,
+        cue_lever_hinge,
+    ]
+    for articulated_joint in bounded_joints:
+        limits = articulated_joint.motion_limits
+        if limits is None or limits.lower is None or limits.upper is None:
+            ctx.fail(f"{articulated_joint.name}_bounded_limits", "Expected finite articulation limits.")
+            continue
+        with ctx.pose({articulated_joint: limits.lower}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{articulated_joint.name}_lower_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{articulated_joint.name}_lower_no_floating")
+        with ctx.pose({articulated_joint: limits.upper}):
+            ctx.fail_if_parts_overlap_in_current_pose(name=f"{articulated_joint.name}_upper_no_overlap")
+            ctx.fail_if_isolated_parts(name=f"{articulated_joint.name}_upper_no_floating")
+
     return ctx.report()
 
 

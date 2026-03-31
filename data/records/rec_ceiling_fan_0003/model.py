@@ -6,342 +6,449 @@ from __future__ import annotations
 import math
 
 from sdk import (
-    AssetContext,
     ArticulatedObject,
     ArticulationType,
-    Box,
     Cylinder,
     CylinderGeometry,
     Inertial,
+    LatheGeometry,
+    MeshGeometry,
     MotionLimits,
     Origin,
-    Sphere,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
+    repair_loft,
+    rounded_rect_profile,
+    section_loft,
 )
 
-ASSETS = AssetContext.from_script(__file__)
+
+def _mesh(name: str, geometry: MeshGeometry):
+    return mesh_from_geometry(geometry, name)
 
 
-def _save_mesh(name: str, geometry):
-    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+def _merge_geometries(geometries: list[MeshGeometry]) -> MeshGeometry:
+    merged = MeshGeometry()
+    for geometry in geometries:
+        merged.merge(geometry)
+    return merged
 
 
-def _ring_mesh(name: str, outer_radius: float, inner_radius: float, height: float):
-    outer = CylinderGeometry(radius=outer_radius, height=height, radial_segments=56)
-    inner = CylinderGeometry(radius=inner_radius, height=height + 0.002, radial_segments=56)
-    return _save_mesh(name, boolean_difference(outer, inner))
+def _radial_pattern(base_geometry: MeshGeometry, count: int, *, angle_offset: float = 0.0) -> MeshGeometry:
+    patterned = MeshGeometry()
+    for index in range(count):
+        patterned.merge(base_geometry.copy().rotate_z(angle_offset + (index * math.tau / count)))
+    return patterned
+
+
+def _section_from_profile(
+    x_pos: float,
+    profile: list[tuple[float, float]],
+    *,
+    pitch: float = 0.0,
+    y_offset: float = 0.0,
+    z_offset: float = 0.0,
+) -> list[tuple[float, float, float]]:
+    cos_pitch = math.cos(pitch)
+    sin_pitch = math.sin(pitch)
+    section: list[tuple[float, float, float]] = []
+    for y_local, z_local in profile:
+        y_rot = (y_local * cos_pitch) - (z_local * sin_pitch)
+        z_rot = (y_local * sin_pitch) + (z_local * cos_pitch)
+        section.append((x_pos, y_offset + y_rot, z_offset + z_rot))
+    return section
+
+
+def _loft_from_sections(sections: list[list[tuple[float, float, float]]]) -> MeshGeometry:
+    return repair_loft(section_loft(sections))
+
+
+def _build_canopy_shell() -> MeshGeometry:
+    return LatheGeometry.from_shell_profiles(
+        [
+            (0.098, 0.865),
+            (0.094, 0.882),
+            (0.082, 0.904),
+            (0.064, 0.926),
+            (0.044, 0.950),
+        ],
+        [
+            (0.092, 0.869),
+            (0.088, 0.885),
+            (0.076, 0.905),
+            (0.058, 0.925),
+            (0.019, 0.944),
+        ],
+        segments=56,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _build_motor_shell() -> MeshGeometry:
+    return LatheGeometry.from_shell_profiles(
+        [
+            (0.108, 0.000),
+            (0.132, 0.010),
+            (0.140, 0.030),
+            (0.142, 0.182),
+            (0.132, 0.204),
+            (0.058, 0.224),
+            (0.032, 0.236),
+        ],
+        [
+            (0.102, 0.004),
+            (0.126, 0.016),
+            (0.134, 0.034),
+            (0.136, 0.178),
+            (0.126, 0.198),
+            (0.050, 0.216),
+            (0.018, 0.228),
+        ],
+        segments=72,
+        start_cap="flat",
+        end_cap="flat",
+    )
+
+
+def _blade_section(
+    x_pos: float,
+    *,
+    chord: float,
+    thickness: float,
+    pitch_deg: float,
+    z_offset: float,
+) -> list[tuple[float, float, float]]:
+    profile = rounded_rect_profile(
+        chord,
+        thickness,
+        radius=min(thickness * 0.45, chord * 0.06),
+        corner_segments=4,
+    )
+    return _section_from_profile(
+        x_pos,
+        profile,
+        pitch=math.radians(pitch_deg),
+        z_offset=z_offset,
+    )
+
+
+def _bar_section(
+    x_pos: float,
+    *,
+    width: float,
+    thickness: float,
+    pitch_deg: float,
+    y_offset: float,
+    z_offset: float,
+) -> list[tuple[float, float, float]]:
+    profile = rounded_rect_profile(
+        width,
+        thickness,
+        radius=min(thickness * 0.45, width * 0.10),
+        corner_segments=3,
+    )
+    return _section_from_profile(
+        x_pos,
+        profile,
+        pitch=math.radians(pitch_deg),
+        y_offset=y_offset,
+        z_offset=z_offset,
+    )
+
+
+def _build_single_blade() -> MeshGeometry:
+    return _loft_from_sections(
+        [
+            _blade_section(0.220, chord=0.158, thickness=0.0026, pitch_deg=14.0, z_offset=-0.076),
+            _blade_section(0.390, chord=0.148, thickness=0.0025, pitch_deg=13.5, z_offset=-0.081),
+            _blade_section(0.560, chord=0.132, thickness=0.0023, pitch_deg=12.5, z_offset=-0.087),
+            _blade_section(0.690, chord=0.098, thickness=0.0020, pitch_deg=11.5, z_offset=-0.093),
+            _blade_section(0.735, chord=0.030, thickness=0.0014, pitch_deg=10.0, z_offset=-0.095),
+        ]
+    )
+
+
+def _build_single_bracket() -> MeshGeometry:
+    bar_width = 0.020
+    bar_thickness = 0.0045
+    leading_bar = _loft_from_sections(
+        [
+            _bar_section(
+                0.070,
+                width=bar_width,
+                thickness=bar_thickness,
+                pitch_deg=3.0,
+                y_offset=-0.030,
+                z_offset=-0.036,
+            ),
+            _bar_section(
+                0.150,
+                width=bar_width,
+                thickness=bar_thickness,
+                pitch_deg=8.0,
+                y_offset=-0.040,
+                z_offset=-0.052,
+            ),
+            _bar_section(
+                0.245,
+                width=bar_width,
+                thickness=bar_thickness,
+                pitch_deg=14.0,
+                y_offset=-0.048,
+                z_offset=-0.073,
+            ),
+        ]
+    )
+    trailing_bar = _loft_from_sections(
+        [
+            _bar_section(
+                0.070,
+                width=bar_width,
+                thickness=bar_thickness,
+                pitch_deg=3.0,
+                y_offset=0.030,
+                z_offset=-0.036,
+            ),
+            _bar_section(
+                0.150,
+                width=bar_width,
+                thickness=bar_thickness,
+                pitch_deg=8.0,
+                y_offset=0.040,
+                z_offset=-0.052,
+            ),
+            _bar_section(
+                0.245,
+                width=bar_width,
+                thickness=bar_thickness,
+                pitch_deg=14.0,
+                y_offset=0.048,
+                z_offset=-0.073,
+            ),
+        ]
+    )
+    return _merge_geometries([leading_bar, trailing_bar])
+
+
+def _build_brackets() -> MeshGeometry:
+    return _radial_pattern(_build_single_bracket(), 4)
+
+
+def _build_blades() -> MeshGeometry:
+    return _radial_pattern(_build_single_blade(), 4)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="compact_flush_mount_ceiling_fan", assets=ASSETS)
+    model = ArticulatedObject(name="industrial_ceiling_fan")
 
-    canopy_white = model.material("canopy_white", rgba=(0.95, 0.95, 0.94, 1.0))
-    warm_white = model.material("warm_white", rgba=(0.92, 0.92, 0.89, 1.0))
-    brushed_nickel = model.material("brushed_nickel", rgba=(0.67, 0.70, 0.73, 1.0))
-    bowl_glass = model.material("bowl_glass", rgba=(0.94, 0.93, 0.88, 0.62))
-    walnut = model.material("walnut", rgba=(0.43, 0.29, 0.19, 1.0))
-    maple = model.material("maple", rgba=(0.73, 0.61, 0.43, 1.0))
+    dark_enamel = model.material("dark_enamel", rgba=(0.17, 0.18, 0.20, 1.0))
+    iron_bracket = model.material("iron_bracket", rgba=(0.24, 0.25, 0.27, 1.0))
+    galvanized_steel = model.material("galvanized_steel", rgba=(0.72, 0.74, 0.76, 1.0))
 
-    ceiling_mount = model.part("ceiling_mount")
-    ceiling_mount.visual(
-        Cylinder(radius=0.090, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, -0.002)),
-        material=canopy_white,
-        name="canopy_plate",
+    support = model.part("support_assembly")
+    support.visual(
+        Cylinder(radius=0.045, length=0.014),
+        origin=Origin(xyz=(0.0, 0.0, 0.956)),
+        material=dark_enamel,
+        name="ceiling_plate",
     )
-    ceiling_mount.visual(
-        Cylinder(radius=0.066, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, -0.004)),
-        material=canopy_white,
-        name="canopy_step",
+    support.visual(
+        _mesh("canopy_shell", _build_canopy_shell()),
+        material=dark_enamel,
+        name="canopy_shell",
     )
-    ceiling_mount.visual(
-        Cylinder(radius=0.050, length=0.008),
-        origin=Origin(xyz=(0.0, 0.0, -0.008)),
-        material=canopy_white,
-        name="canopy_collar",
+    support.visual(
+        Cylinder(radius=0.015, length=0.699),
+        origin=Origin(xyz=(0.0, 0.0, 0.6035)),
+        material=dark_enamel,
+        name="downrod",
     )
-    ceiling_mount.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.090, length=0.012),
-        mass=0.8,
+    support.visual(
+        Cylinder(radius=0.032, length=0.080),
+        origin=Origin(xyz=(0.0, 0.0, 0.232)),
+        material=dark_enamel,
+        name="downrod_coupler",
+    )
+    support.visual(
+        Cylinder(radius=0.016, length=0.204),
+        origin=Origin(xyz=(0.0, 0.0, 0.102)),
+        material=iron_bracket,
+        name="motor_spindle",
+    )
+    support.visual(
+        _mesh("motor_shell", _build_motor_shell()),
+        material=dark_enamel,
+        name="motor_shell",
+    )
+    support.visual(
+        Cylinder(radius=0.058, length=0.012),
         origin=Origin(xyz=(0.0, 0.0, -0.006)),
+        material=iron_bracket,
+        name="stator_bearing",
+    )
+    support.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.145, length=0.970),
+        mass=18.0,
+        origin=Origin(xyz=(0.0, 0.0, 0.470)),
     )
 
-    motor_housing = model.part("motor_housing")
-    motor_housing.visual(
-        Cylinder(radius=0.050, length=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.003)),
-        material=warm_white,
-        name="top_mount_pad",
+    rotor = model.part("rotor_assembly")
+    rotor.visual(
+        Cylinder(radius=0.058, length=0.012),
+        origin=Origin(xyz=(0.0, 0.0, -0.018)),
+        material=iron_bracket,
+        name="rotor_bearing",
     )
-    motor_housing.visual(
-        Cylinder(radius=0.106, length=0.012),
-        origin=Origin(xyz=(0.0, 0.0, -0.010)),
-        material=warm_white,
-        name="upper_shoulder",
-    )
-    motor_housing.visual(
-        Cylinder(radius=0.176, length=0.026),
-        origin=Origin(xyz=(0.0, 0.0, -0.026)),
-        material=warm_white,
-        name="housing_disc",
-    )
-    motor_housing.visual(
-        Cylinder(radius=0.092, length=0.008),
-        origin=Origin(xyz=(0.0, 0.0, -0.043)),
-        material=warm_white,
-        name="lower_skirt",
-    )
-    motor_housing.visual(
-        Cylinder(radius=0.104, length=0.004),
+    rotor.visual(
+        Cylinder(radius=0.078, length=0.050),
         origin=Origin(xyz=(0.0, 0.0, -0.049)),
-        material=brushed_nickel,
-        name="rotor_seat",
+        material=iron_bracket,
+        name="hub_barrel",
     )
-    motor_housing.visual(
-        Cylinder(radius=0.060, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, -0.043)),
-        material=brushed_nickel,
-        name="light_seat",
+    rotor.visual(
+        Cylinder(radius=0.060, length=0.028),
+        origin=Origin(xyz=(0.0, 0.0, -0.088)),
+        material=iron_bracket,
+        name="hub_cap",
     )
-    motor_housing.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.176, length=0.053),
-        mass=5.8,
-        origin=Origin(xyz=(0.0, 0.0, -0.0265)),
+    rotor.visual(
+        _mesh("iron_brackets", _build_brackets()),
+        origin=Origin(xyz=(0.0, 0.0, -0.008)),
+        material=iron_bracket,
+        name="iron_brackets",
     )
-
-    light_bowl = model.part("light_bowl")
-    light_bowl.visual(
-        Cylinder(radius=0.056, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, -0.002)),
-        material=brushed_nickel,
-        name="bowl_rim",
+    rotor.visual(
+        _mesh("metal_blades", _build_blades()),
+        origin=Origin(xyz=(0.0, 0.0, -0.008)),
+        material=galvanized_steel,
+        name="metal_blades",
     )
-    light_bowl.visual(
-        Sphere(radius=0.011),
-        origin=Origin(xyz=(0.0, 0.0, -0.013)),
-        material=bowl_glass,
-        name="bowl_glass",
-    )
-    light_bowl.visual(
-        Sphere(radius=0.006),
-        origin=Origin(xyz=(0.0, 0.0, -0.015)),
-        material=bowl_glass,
-        name="bowl_lens",
-    )
-    light_bowl.inertial = Inertial.from_geometry(
-        Sphere(radius=0.011),
-        mass=0.35,
-        origin=Origin(xyz=(0.0, 0.0, -0.013)),
+    rotor.inertial = Inertial.from_geometry(
+        Cylinder(radius=0.740, length=0.120),
+        mass=11.0,
+        origin=Origin(xyz=(0.0, 0.0, -0.070)),
     )
 
-    rotor_assembly = model.part("rotor_assembly")
-    rotor_assembly.visual(
-        _ring_mesh("rotor_ring.obj", outer_radius=0.108, inner_radius=0.046, height=0.004),
-        origin=Origin(xyz=(0.0, 0.0, 0.002)),
-        material=brushed_nickel,
-        name="rotor_ring",
-    )
-    rotor_assembly.visual(
-        Cylinder(radius=0.050, length=0.004),
-        origin=Origin(xyz=(0.0, 0.0, 0.004)),
-        material=brushed_nickel,
-        name="hub_plate",
-    )
-    for index in range(5):
-        angle = index * (2.0 * math.pi / 5.0)
-        blade_pitch = -0.06
-        rotor_assembly.visual(
-            Box((0.136, 0.016, 0.005)),
-            origin=Origin(xyz=(0.148, 0.0, 0.004), rpy=(0.0, blade_pitch, angle)),
-            material=brushed_nickel,
-            name=f"blade_iron_{index}",
-        )
-        rotor_assembly.visual(
-            Box((0.184, 0.054, 0.008)),
-            origin=Origin(xyz=(0.262, 0.0, 0.014), rpy=(0.0, blade_pitch, angle)),
-            material=walnut,
-            name=f"blade_{index}",
-        )
-        rotor_assembly.visual(
-            Box((0.164, 0.040, 0.002)),
-            origin=Origin(xyz=(0.262, 0.0, 0.009), rpy=(0.0, blade_pitch, angle)),
-            material=maple,
-            name=f"reversible_face_{index}",
-        )
-    rotor_assembly.inertial = Inertial.from_geometry(
-        Cylinder(radius=0.350, length=0.018),
-        mass=1.8,
-        origin=Origin(xyz=(0.0, 0.0, -0.006)),
-    )
-
-    model.articulation(
-        "mount_to_housing",
-        ArticulationType.FIXED,
-        parent=ceiling_mount,
-        child=motor_housing,
-        origin=Origin(xyz=(0.0, 0.0, -0.012)),
-    )
-    model.articulation(
-        "housing_to_light",
-        ArticulationType.FIXED,
-        parent=motor_housing,
-        child=light_bowl,
-        origin=Origin(xyz=(0.0, 0.0, -0.045)),
-    )
     model.articulation(
         "rotor_spin",
         ArticulationType.CONTINUOUS,
-        parent=motor_housing,
-        child=rotor_assembly,
-        origin=Origin(xyz=(0.0, 0.0, -0.055)),
+        parent=support,
+        child=rotor,
+        origin=Origin(),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=8.0, velocity=18.0),
+        motion_limits=MotionLimits(effort=14.0, velocity=22.0),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
-    ceiling_mount = object_model.get_part("ceiling_mount")
-    motor_housing = object_model.get_part("motor_housing")
-    light_bowl = object_model.get_part("light_bowl")
-    rotor_assembly = object_model.get_part("rotor_assembly")
+    ctx = TestContext(object_model)
+    support = object_model.get_part("support_assembly")
+    rotor = object_model.get_part("rotor_assembly")
     rotor_spin = object_model.get_articulation("rotor_spin")
 
-    canopy_plate = ceiling_mount.get_visual("canopy_plate")
-    canopy_step = ceiling_mount.get_visual("canopy_step")
-    canopy_collar = ceiling_mount.get_visual("canopy_collar")
-    top_mount_pad = motor_housing.get_visual("top_mount_pad")
-    housing_disc = motor_housing.get_visual("housing_disc")
-    lower_skirt = motor_housing.get_visual("lower_skirt")
-    rotor_seat = motor_housing.get_visual("rotor_seat")
-    light_seat = motor_housing.get_visual("light_seat")
-    bowl_rim = light_bowl.get_visual("bowl_rim")
-    bowl_glass = light_bowl.get_visual("bowl_glass")
-    bowl_lens = light_bowl.get_visual("bowl_lens")
-    rotor_ring = rotor_assembly.get_visual("rotor_ring")
-    blade_iron_0 = rotor_assembly.get_visual("blade_iron_0")
-    blade_0 = rotor_assembly.get_visual("blade_0")
-    reversible_face_0 = rotor_assembly.get_visual("reversible_face_0")
-
     ctx.check_model_valid()
-    ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.005,
-        overlap_volume_tol=0.0,
+    ctx.check_mesh_assets_ready()
+
+    # Preferred default QC stack:
+    # 1) likely-failure grounded-component floating check for disconnected part groups
+    ctx.fail_if_isolated_parts()
+    # 2) noisier warning-tier sensor for same-part disconnected geometry islands
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    # 3) likely-failure rest-pose part-to-part overlap backstop for real 3D interpenetration
+    # This is not an "inside / nested / footprint overlap" check.
+    # Investigate all three. Warning-tier signals are not free passes.
+    # Use `ctx.allow_overlap(...)` only for true intended penetration.
+    # If parts are nested but should remain clear, prove that with exact
+    # `expect_contact(...)`, `expect_gap(...)`, `expect_overlap(...)`, or
+    # `expect_within(...)` checks instead.
+    ctx.fail_if_parts_overlap_in_current_pose()
+
+    axis = rotor_spin.axis
+    axis_is_vertical = (
+        axis is not None
+        and abs(axis[0]) <= 1e-6
+        and abs(axis[1]) <= 1e-6
+        and abs(axis[2] - 1.0) <= 1e-6
     )
-    ctx.warn_if_overlaps(
-        max_pose_samples=128,
-        overlap_tol=0.005,
-        overlap_volume_tol=0.0,
-        ignore_adjacent=True,
-        ignore_fixed=True,
+    ctx.check(
+        "rotor_axis_vertical",
+        axis_is_vertical,
+        details=f"Expected vertical spin axis, got {axis!r}",
+    )
+    ctx.check(
+        "rotor_joint_is_continuous",
+        rotor_spin.articulation_type == ArticulationType.CONTINUOUS,
+        details=f"Expected continuous rotor articulation, got {rotor_spin.articulation_type!r}",
     )
 
-    ctx.expect_overlap(
-        ceiling_mount,
-        motor_housing,
-        axes="xy",
-        min_overlap=0.02,
-        elem_a=canopy_plate,
-        elem_b=housing_disc,
-    )
-    ctx.expect_within(
-        ceiling_mount,
-        motor_housing,
-        axes="xy",
-        inner_elem=canopy_step,
-        outer_elem=housing_disc,
-        name="canopy trim remains inside the motor housing footprint",
-    )
     ctx.expect_origin_distance(
-        ceiling_mount,
-        motor_housing,
+        support,
+        rotor,
         axes="xy",
         max_dist=0.001,
+        name="rotor_centered_under_downrod",
     )
-    ctx.expect_gap(
-        ceiling_mount,
-        motor_housing,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=canopy_collar,
-        negative_elem=top_mount_pad,
-        name="canopy plate mounts flat with no downrod gap",
-    )
-    ctx.expect_gap(
-        motor_housing,
-        light_bowl,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=light_seat,
-        negative_elem=bowl_rim,
-        name="light bowl is recessed into the housing bottom face",
-    )
-    ctx.expect_within(
-        light_bowl,
-        motor_housing,
-        axes="xy",
-        inner_elem=bowl_glass,
-        outer_elem=lower_skirt,
-        name="light bowl stays recessed within the housing underside footprint",
-    )
-    ctx.expect_gap(
-        motor_housing,
-        rotor_assembly,
-        axis="z",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=rotor_seat,
-        negative_elem=rotor_ring,
-        name="rotor ring seats directly against the low-profile motor housing",
+    ctx.expect_contact(
+        rotor,
+        support,
+        elem_a="rotor_bearing",
+        elem_b="stator_bearing",
+        name="bearing_faces_touch",
     )
     ctx.expect_overlap(
-        rotor_assembly,
-        motor_housing,
+        rotor,
+        support,
         axes="xy",
-        min_overlap=0.012,
-        elem_a=blade_iron_0,
-        elem_b=housing_disc,
-        name="blade irons emerge at the housing perimeter",
+        elem_a="rotor_bearing",
+        elem_b="stator_bearing",
+        min_overlap=0.100,
+        name="bearing_faces_coaxial",
     )
-    ctx.expect_within(
-        rotor_assembly,
-        rotor_assembly,
-        axes="xy",
-        inner_elem=reversible_face_0,
-        outer_elem=blade_0,
-        name="reversible blade face stays within the main blade footprint",
+    ctx.expect_gap(
+        positive_link=support,
+        negative_link=rotor,
+        axis="z",
+        positive_elem="motor_shell",
+        negative_elem="metal_blades",
+        min_gap=0.060,
+        name="blades_clear_motor_housing",
     )
-    with ctx.pose({rotor_spin: math.pi / 5.0}):
+
+    with ctx.pose({rotor_spin: math.pi / 4.0}):
         ctx.expect_gap(
-            rotor_assembly,
-            light_bowl,
+            positive_link=support,
+            negative_link=rotor,
             axis="z",
-            min_gap=0.003,
-            positive_elem=blade_0,
-            negative_elem=bowl_lens,
-            name="rotating blades remain above the recessed light bowl",
+            positive_elem="motor_shell",
+            negative_elem="metal_blades",
+            min_gap=0.060,
+            name="blades_clear_motor_housing_at_quarter_turn",
         )
-        ctx.expect_gap(
-            motor_housing,
-            rotor_assembly,
-            axis="z",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=rotor_seat,
-            negative_elem=rotor_ring,
+
+    rotor_aabb = ctx.part_world_aabb(rotor)
+    if rotor_aabb is not None:
+        rotor_span_x = rotor_aabb[1][0] - rotor_aabb[0][0]
+        rotor_span_y = rotor_aabb[1][1] - rotor_aabb[0][1]
+        rotor_diameter = max(rotor_span_x, rotor_span_y)
+        ctx.check(
+            "fan_diameter_realistic",
+            1.35 <= rotor_diameter <= 1.60,
+            details=f"Expected realistic industrial fan diameter, got {rotor_diameter:.3f} m",
         )
+
+    downrod_aabb = ctx.part_element_world_aabb(support, elem="downrod")
+    if downrod_aabb is not None:
+        downrod_length = downrod_aabb[1][2] - downrod_aabb[0][2]
+        ctx.check(
+            "downrod_is_long",
+            downrod_length >= 0.65,
+            details=f"Expected long downrod, got {downrod_length:.3f} m",
+        )
+
     return ctx.report()
 
 

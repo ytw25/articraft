@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_dualcolumn_lift_carriage_5c84c21d06714e92b6c9f49ea19de1bf",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:42:19Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "dualcolumn_lift_carriage",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "dualcolumn_lift_carriage_to7_high_06",
+    "prompt_index": 12
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Dual-column lift carriage Backfill 6",
+    "prompt_preview": "A heavy lift carriage module with two rectangular guide columns, a welded base frame, an upper tie beam, and a broad carriage plate that wraps the columns wi..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "f88da60ab29c38b0d47b3e9b2efaf2e72ba938a23047ac4948e129ebea160e84",
+    "model_py_sha256": "992fcd55ddff052493e96507085c573168c1922925138ffbdab15648199c756c"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_threejoint_revolute_chain_85fb958e4e69447f9cc50408d313f8ee",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:42:27Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "threejoint_revolute_chain",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "threejoint_revolute_chain_to7_high_05",
+    "prompt_index": 96
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Three-joint revolute chain Backfill 5",
+    "prompt_preview": "A wall-mounted inspection arm with a grounded base plate, three rigid links, and a small square pad at the end. The link lengths should vary enough to give t..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "17ad067889cac6ae26deb8c97419079f6c960ed386cc53646faf3c0ad4bea8a8",
+    "model_py_sha256": "266cc6bb5cb7294cf9d13d9a9aec9a6432d950cf43cff45ca55e2edfbdaa947f"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

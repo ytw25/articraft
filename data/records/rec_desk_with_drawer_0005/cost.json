@@ -2,17 +2,17 @@
   "model_id": "gpt-5.4",
   "total": {
     "tokens": {
-      "prompt_tokens": 1296816,
-      "cached_tokens": 1164928,
-      "uncached_prompt_tokens": 131888,
-      "candidates_tokens": 31975,
-      "total_tokens": 1328791
+      "prompt_tokens": 660407,
+      "cached_tokens": 591744,
+      "uncached_prompt_tokens": 68663,
+      "candidates_tokens": 42270,
+      "total_tokens": 702677
     },
     "costs_usd": {
-      "input_uncached": 0.32972,
-      "input_cached": 0.291232,
-      "output": 0.479625,
-      "total": 1.100577
+      "input_uncached": 0.1716575,
+      "input_cached": 0.147936,
+      "output": 0.63405,
+      "total": 0.9536435
     }
   },
   "pricing": {
@@ -27,422 +27,242 @@
   "turns": [
     {
       "tokens": {
-        "prompt_tokens": 19765,
-        "cached_tokens": 19584,
-        "uncached_prompt_tokens": 181,
-        "candidates_tokens": 57,
-        "total_tokens": 19822
-      },
-      "costs_usd": {
-        "input_uncached": 0.0004525,
-        "input_cached": 0.004896,
-        "output": 0.000855,
-        "total": 0.0062035
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 23926,
-        "cached_tokens": 19712,
-        "uncached_prompt_tokens": 4214,
-        "candidates_tokens": 32,
-        "total_tokens": 23958
-      },
-      "costs_usd": {
-        "input_uncached": 0.010535,
-        "input_cached": 0.004928,
-        "output": 0.00048,
-        "total": 0.015943
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 27607,
-        "cached_tokens": 23808,
-        "uncached_prompt_tokens": 3799,
-        "candidates_tokens": 22,
-        "total_tokens": 27629
-      },
-      "costs_usd": {
-        "input_uncached": 0.0094975,
-        "input_cached": 0.005952,
-        "output": 0.00033,
-        "total": 0.0157795
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 29309,
-        "cached_tokens": 27520,
-        "uncached_prompt_tokens": 1789,
-        "candidates_tokens": 666,
-        "total_tokens": 29975
-      },
-      "costs_usd": {
-        "input_uncached": 0.0044725,
-        "input_cached": 0.00688,
-        "output": 0.00999,
-        "total": 0.0213425
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 31721,
-        "cached_tokens": 19584,
-        "uncached_prompt_tokens": 12137,
-        "candidates_tokens": 574,
-        "total_tokens": 32295
-      },
-      "costs_usd": {
-        "input_uncached": 0.0303425,
-        "input_cached": 0.004896,
-        "output": 0.00861,
-        "total": 0.0438485
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 33099,
-        "cached_tokens": 29824,
-        "uncached_prompt_tokens": 3275,
-        "candidates_tokens": 447,
-        "total_tokens": 33546
-      },
-      "costs_usd": {
-        "input_uncached": 0.0081875,
-        "input_cached": 0.007456,
-        "output": 0.006705,
-        "total": 0.0223485
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 35660,
-        "cached_tokens": 33408,
-        "uncached_prompt_tokens": 2252,
-        "candidates_tokens": 603,
-        "total_tokens": 36263
-      },
-      "costs_usd": {
-        "input_uncached": 0.00563,
-        "input_cached": 0.008352,
-        "output": 0.009045,
-        "total": 0.023027
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 36276,
-        "cached_tokens": 35584,
-        "uncached_prompt_tokens": 692,
-        "candidates_tokens": 41,
-        "total_tokens": 36317
-      },
-      "costs_usd": {
-        "input_uncached": 0.00173,
-        "input_cached": 0.008896,
-        "output": 0.000615,
-        "total": 0.011241
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 36332,
-        "cached_tokens": 32128,
-        "uncached_prompt_tokens": 4204,
-        "candidates_tokens": 60,
-        "total_tokens": 36392
-      },
-      "costs_usd": {
-        "input_uncached": 0.01051,
-        "input_cached": 0.008032,
-        "output": 0.0009,
-        "total": 0.019442
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 36564,
-        "cached_tokens": 36224,
-        "uncached_prompt_tokens": 340,
-        "candidates_tokens": 199,
-        "total_tokens": 36763
-      },
-      "costs_usd": {
-        "input_uncached": 0.00085,
-        "input_cached": 0.009056,
-        "output": 0.002985,
-        "total": 0.012891
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 37258,
-        "cached_tokens": 36224,
-        "uncached_prompt_tokens": 1034,
-        "candidates_tokens": 2768,
-        "total_tokens": 40026
-      },
-      "costs_usd": {
-        "input_uncached": 0.002585,
-        "input_cached": 0.009056,
-        "output": 0.04152,
-        "total": 0.053161
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 43436,
-        "cached_tokens": 39936,
-        "uncached_prompt_tokens": 3500,
-        "candidates_tokens": 675,
-        "total_tokens": 44111
-      },
-      "costs_usd": {
-        "input_uncached": 0.00875,
-        "input_cached": 0.009984,
-        "output": 0.010125,
-        "total": 0.028859
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 45842,
-        "cached_tokens": 43520,
-        "uncached_prompt_tokens": 2322,
-        "candidates_tokens": 320,
-        "total_tokens": 46162
-      },
-      "costs_usd": {
-        "input_uncached": 0.005805,
-        "input_cached": 0.01088,
-        "output": 0.0048,
-        "total": 0.021485
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 46768,
-        "cached_tokens": 46080,
-        "uncached_prompt_tokens": 688,
-        "candidates_tokens": 9401,
-        "total_tokens": 56169
-      },
-      "costs_usd": {
-        "input_uncached": 0.00172,
-        "input_cached": 0.01152,
-        "output": 0.141015,
-        "total": 0.154255
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 45558,
+        "prompt_tokens": 19261,
         "cached_tokens": 18944,
-        "uncached_prompt_tokens": 26614,
-        "candidates_tokens": 117,
-        "total_tokens": 45675
+        "uncached_prompt_tokens": 317,
+        "candidates_tokens": 40,
+        "total_tokens": 19301
       },
       "costs_usd": {
-        "input_uncached": 0.066535,
+        "input_uncached": 0.0007925,
         "input_cached": 0.004736,
-        "output": 0.001755,
-        "total": 0.073026
+        "output": 0.0006,
+        "total": 0.0061285
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 52178,
-        "cached_tokens": 45568,
-        "uncached_prompt_tokens": 6610,
+        "prompt_tokens": 22822,
+        "cached_tokens": 19072,
+        "uncached_prompt_tokens": 3750,
         "candidates_tokens": 22,
-        "total_tokens": 52200
+        "total_tokens": 22844
       },
       "costs_usd": {
-        "input_uncached": 0.016525,
-        "input_cached": 0.011392,
+        "input_uncached": 0.009375,
+        "input_cached": 0.004768,
         "output": 0.00033,
-        "total": 0.028247
+        "total": 0.014473
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 52730,
-        "cached_tokens": 52096,
-        "uncached_prompt_tokens": 634,
-        "candidates_tokens": 1657,
-        "total_tokens": 54387
+        "prompt_tokens": 24843,
+        "cached_tokens": 22656,
+        "uncached_prompt_tokens": 2187,
+        "candidates_tokens": 383,
+        "total_tokens": 25226
       },
       "costs_usd": {
-        "input_uncached": 0.001585,
-        "input_cached": 0.013024,
-        "output": 0.024855,
-        "total": 0.039464
+        "input_uncached": 0.0054675,
+        "input_cached": 0.005664,
+        "output": 0.005745,
+        "total": 0.0168765
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 55770,
-        "cached_tokens": 54272,
-        "uncached_prompt_tokens": 1498,
-        "candidates_tokens": 7306,
-        "total_tokens": 63076
+        "prompt_tokens": 26407,
+        "cached_tokens": 24704,
+        "uncached_prompt_tokens": 1703,
+        "candidates_tokens": 558,
+        "total_tokens": 26965
       },
       "costs_usd": {
-        "input_uncached": 0.003745,
-        "input_cached": 0.013568,
-        "output": 0.10959,
-        "total": 0.126903
+        "input_uncached": 0.0042575,
+        "input_cached": 0.006176,
+        "output": 0.00837,
+        "total": 0.0188035
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 55137,
-        "cached_tokens": 45440,
-        "uncached_prompt_tokens": 9697,
-        "candidates_tokens": 2289,
-        "total_tokens": 57426
+        "prompt_tokens": 28635,
+        "cached_tokens": 26880,
+        "uncached_prompt_tokens": 1755,
+        "candidates_tokens": 1378,
+        "total_tokens": 30013
       },
       "costs_usd": {
-        "input_uncached": 0.0242425,
-        "input_cached": 0.01136,
-        "output": 0.034335,
-        "total": 0.0699375
+        "input_uncached": 0.0043875,
+        "input_cached": 0.00672,
+        "output": 0.02067,
+        "total": 0.0317775
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 56014,
-        "cached_tokens": 19584,
-        "uncached_prompt_tokens": 36430,
-        "candidates_tokens": 883,
-        "total_tokens": 56897
+        "prompt_tokens": 30551,
+        "cached_tokens": 29824,
+        "uncached_prompt_tokens": 727,
+        "candidates_tokens": 186,
+        "total_tokens": 30737
       },
       "costs_usd": {
-        "input_uncached": 0.091075,
-        "input_cached": 0.004896,
-        "output": 0.013245,
-        "total": 0.109216
+        "input_uncached": 0.0018175,
+        "input_cached": 0.007456,
+        "output": 0.00279,
+        "total": 0.0120635
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 58387,
-        "cached_tokens": 56832,
-        "uncached_prompt_tokens": 1555,
-        "candidates_tokens": 999,
-        "total_tokens": 59386
+        "prompt_tokens": 30973,
+        "cached_tokens": 30592,
+        "uncached_prompt_tokens": 381,
+        "candidates_tokens": 24401,
+        "total_tokens": 55374
       },
       "costs_usd": {
-        "input_uncached": 0.0038875,
-        "input_cached": 0.014208,
-        "output": 0.014985,
-        "total": 0.0330805
+        "input_uncached": 0.0009525,
+        "input_cached": 0.007648,
+        "output": 0.366015,
+        "total": 0.3746155
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 59547,
+        "prompt_tokens": 40046,
+        "cached_tokens": 18944,
+        "uncached_prompt_tokens": 21102,
+        "candidates_tokens": 1238,
+        "total_tokens": 41284
+      },
+      "costs_usd": {
+        "input_uncached": 0.052755,
+        "input_cached": 0.004736,
+        "output": 0.01857,
+        "total": 0.076061
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 45375,
+        "cached_tokens": 40448,
+        "uncached_prompt_tokens": 4927,
+        "candidates_tokens": 2461,
+        "total_tokens": 47836
+      },
+      "costs_usd": {
+        "input_uncached": 0.0123175,
+        "input_cached": 0.010112,
+        "output": 0.036915,
+        "total": 0.0593445
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 51093,
+        "cached_tokens": 47744,
+        "uncached_prompt_tokens": 3349,
+        "candidates_tokens": 22,
+        "total_tokens": 51115
+      },
+      "costs_usd": {
+        "input_uncached": 0.0083725,
+        "input_cached": 0.011936,
+        "output": 0.00033,
+        "total": 0.0206385
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 53354,
+        "cached_tokens": 50944,
+        "uncached_prompt_tokens": 2410,
+        "candidates_tokens": 22,
+        "total_tokens": 53376
+      },
+      "costs_usd": {
+        "input_uncached": 0.006025,
+        "input_cached": 0.012736,
+        "output": 0.00033,
+        "total": 0.019091
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 55142,
+        "cached_tokens": 53248,
+        "uncached_prompt_tokens": 1894,
+        "candidates_tokens": 22,
+        "total_tokens": 55164
+      },
+      "costs_usd": {
+        "input_uncached": 0.004735,
+        "input_cached": 0.013312,
+        "output": 0.00033,
+        "total": 0.018377
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 56020,
         "cached_tokens": 55040,
-        "uncached_prompt_tokens": 4507,
-        "candidates_tokens": 154,
-        "total_tokens": 59701
+        "uncached_prompt_tokens": 980,
+        "candidates_tokens": 6431,
+        "total_tokens": 62451
       },
       "costs_usd": {
-        "input_uncached": 0.0112675,
+        "input_uncached": 0.00245,
         "input_cached": 0.01376,
-        "output": 0.00231,
-        "total": 0.0273375
+        "output": 0.096465,
+        "total": 0.112675
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 59992,
-        "cached_tokens": 59520,
-        "uncached_prompt_tokens": 472,
-        "candidates_tokens": 493,
-        "total_tokens": 60485
+        "prompt_tokens": 55781,
+        "cached_tokens": 39936,
+        "uncached_prompt_tokens": 15845,
+        "candidates_tokens": 1432,
+        "total_tokens": 57213
       },
       "costs_usd": {
-        "input_uncached": 0.00118,
-        "input_cached": 0.01488,
-        "output": 0.007395,
-        "total": 0.023455
+        "input_uncached": 0.0396125,
+        "input_cached": 0.009984,
+        "output": 0.02148,
+        "total": 0.0710765
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 61676,
-        "cached_tokens": 60416,
-        "uncached_prompt_tokens": 1260,
-        "candidates_tokens": 997,
-        "total_tokens": 62673
+        "prompt_tokens": 60002,
+        "cached_tokens": 57088,
+        "uncached_prompt_tokens": 2914,
+        "candidates_tokens": 3080,
+        "total_tokens": 63082
       },
       "costs_usd": {
-        "input_uncached": 0.00315,
-        "input_cached": 0.015104,
-        "output": 0.014955,
-        "total": 0.033209
+        "input_uncached": 0.007285,
+        "input_cached": 0.014272,
+        "output": 0.0462,
+        "total": 0.067757
       }
     },
     {
       "tokens": {
-        "prompt_tokens": 62711,
-        "cached_tokens": 62592,
-        "uncached_prompt_tokens": 119,
-        "candidates_tokens": 521,
-        "total_tokens": 63232
+        "prompt_tokens": 60102,
+        "cached_tokens": 55680,
+        "uncached_prompt_tokens": 4422,
+        "candidates_tokens": 594,
+        "total_tokens": 60696
       },
       "costs_usd": {
-        "input_uncached": 0.0002975,
-        "input_cached": 0.015648,
-        "output": 0.007815,
-        "total": 0.0237605
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 63270,
-        "cached_tokens": 63104,
-        "uncached_prompt_tokens": 166,
-        "candidates_tokens": 305,
-        "total_tokens": 63575
-      },
-      "costs_usd": {
-        "input_uncached": 0.000415,
-        "input_cached": 0.015776,
-        "output": 0.004575,
-        "total": 0.020766
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 64819,
-        "cached_tokens": 63488,
-        "uncached_prompt_tokens": 1331,
-        "candidates_tokens": 202,
-        "total_tokens": 65021
-      },
-      "costs_usd": {
-        "input_uncached": 0.0033275,
-        "input_cached": 0.015872,
-        "output": 0.00303,
-        "total": 0.0222295
-      }
-    },
-    {
-      "tokens": {
-        "prompt_tokens": 65464,
-        "cached_tokens": 64896,
-        "uncached_prompt_tokens": 568,
-        "candidates_tokens": 165,
-        "total_tokens": 65629
-      },
-      "costs_usd": {
-        "input_uncached": 0.00142,
-        "input_cached": 0.016224,
-        "output": 0.002475,
-        "total": 0.020119
+        "input_uncached": 0.011055,
+        "input_cached": 0.01392,
+        "output": 0.00891,
+        "total": 0.033885
       }
     }
   ]

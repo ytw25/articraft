@@ -3,650 +3,613 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-import os
-from pathlib import Path
-
-_REAL_GETCWD = os.getcwd
-
-
-def _safe_getcwd() -> str:
-    try:
-        return _REAL_GETCWD()
-    except FileNotFoundError:
-        os.chdir("/tmp")
-        return "/tmp"
-
-
-os.getcwd = _safe_getcwd
-
-
-def _ensure_runtime_cwd() -> None:
-    _safe_getcwd()
-
-
-try:
-    os.getcwd()
-except FileNotFoundError:
-    _ensure_runtime_cwd()
-
 from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,
     Box,
     Cylinder,
-    Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
 )
 
-CASE_W = 0.28
-CASE_D = 0.56
-CASE_H = 0.62
-TOP_PANEL_W = 0.22
-TOP_PANEL_D = 0.40
-TOP_PANEL_T = 0.004
-TOP_PANEL_LOCAL_OFFSET = (0.095, -0.175, 0.007)
-ASSET_ROOT = Path("/tmp")
-ASSETS = AssetContext(ASSET_ROOT)
+ASSETS = AssetContext.from_script(__file__)
+
+
+CASE_W = 0.24
+CASE_D = 0.52
+CASE_H = 0.56
+BOTTOM_T = 0.016
+TOP_T = 0.014
+WALL_T = 0.014
+FRONT_T = 0.012
+
+DOOR_T = 0.010
+DOOR_FRAME = 0.012
+DOOR_Y0 = -CASE_D / 2.0 + 0.018
+DOOR_D = CASE_D - 0.036
+DOOR_Z0 = 0.055
+DOOR_H = 0.470
+LEFT_REAR_SPINE_D = 0.030
+LEFT_FRONT_SPINE_D = 0.030
+LEFT_FRAME_RUN_D = CASE_D - LEFT_REAR_SPINE_D - LEFT_FRONT_SPINE_D
+HINGE_BARREL_R = 0.005
+HINGE_BARREL_L = 0.085
+
+BAY_W = 0.170
+BAY_FACE_W = 0.164
+BAY_FACE_H = 0.020
+TRAY_BODY_W = 0.158
+TRAY_BODY_H = 0.018
+TRAY_BODY_D = 0.340
+TRAY_FACE_T = 0.006
+TRAY_TRAVEL = 0.130
+UPPER_BAY_Z = 0.472
+LOWER_BAY_Z = 0.438
+
+
+def _box_visual(part, size, xyz, material, name):
+    part.visual(Box(size), origin=Origin(xyz=xyz), material=material, name=name)
+
+
+def _axis_matches(actual, expected, tol=1e-9):
+    return all(abs(a - b) <= tol for a, b in zip(actual, expected))
 
 
 def build_object_model() -> ArticulatedObject:
-    _ensure_runtime_cwd()
-    model = ArticulatedObject(name="gaming_tower_case", assets=ASSETS)
+    model = ArticulatedObject(name="full_tower_gaming_pc", assets=ASSETS)
 
-    body_dark = model.material("body_dark", rgba=(0.10, 0.11, 0.12, 1.0))
-    panel_dark = model.material("panel_dark", rgba=(0.15, 0.16, 0.18, 1.0))
-    steel = model.material("steel", rgba=(0.45, 0.47, 0.50, 1.0))
-    hinge_steel = model.material("hinge_steel", rgba=(0.62, 0.64, 0.67, 1.0))
-    glass = model.material("tempered_glass", rgba=(0.52, 0.62, 0.68, 0.25))
-    mesh_dark = model.material("mesh_dark", rgba=(0.18, 0.19, 0.20, 1.0))
-    latch_dark = model.material("latch_dark", rgba=(0.20, 0.20, 0.22, 1.0))
-    drive_dark = model.material("drive_dark", rgba=(0.22, 0.23, 0.25, 1.0))
-    tray_dark = model.material("tray_dark", rgba=(0.30, 0.31, 0.33, 1.0))
+    matte_black = model.material("matte_black", rgba=(0.10, 0.11, 0.12, 1.0))
+    dark_metal = model.material("dark_metal", rgba=(0.18, 0.19, 0.22, 1.0))
+    smoked_glass = model.material("smoked_glass", rgba=(0.34, 0.42, 0.48, 0.22))
+    tray_black = model.material("tray_black", rgba=(0.08, 0.08, 0.09, 1.0))
+    accent_cyan = model.material("accent_cyan", rgba=(0.12, 0.72, 0.95, 1.0))
 
     chassis = model.part("chassis")
-    chassis.visual(
-        Box((CASE_W, CASE_D, 0.03)),
-        origin=Origin(xyz=(0.0, 0.0, 0.015)),
-        material=body_dark,
-        name="floor",
+
+    # Main tower shell with an open left side for the glass door.
+    _box_visual(
+        chassis,
+        (CASE_W, CASE_D, BOTTOM_T),
+        (0.0, 0.0, BOTTOM_T / 2.0),
+        dark_metal,
+        "bottom_panel",
+    )
+    _box_visual(
+        chassis,
+        (CASE_W, CASE_D, TOP_T),
+        (0.0, 0.0, CASE_H - TOP_T / 2.0),
+        dark_metal,
+        "top_panel",
+    )
+    _box_visual(
+        chassis,
+        (WALL_T, CASE_D, CASE_H - BOTTOM_T - TOP_T),
+        (CASE_W / 2.0 - WALL_T / 2.0, 0.0, (CASE_H + BOTTOM_T - TOP_T) / 2.0),
+        dark_metal,
+        "right_wall",
+    )
+    _box_visual(
+        chassis,
+        (CASE_W, WALL_T, CASE_H - BOTTOM_T - TOP_T),
+        (0.0, -CASE_D / 2.0 + WALL_T / 2.0, (CASE_H + BOTTOM_T - TOP_T) / 2.0),
+        matte_black,
+        "rear_wall",
+    )
+
+    # Left-side perimeter structure around the glass opening.
+    _box_visual(
+        chassis,
+        (DOOR_FRAME, LEFT_REAR_SPINE_D, CASE_H - BOTTOM_T - TOP_T),
+        (
+            -CASE_W / 2.0 + DOOR_FRAME / 2.0,
+            -CASE_D / 2.0 + LEFT_REAR_SPINE_D / 2.0,
+            (CASE_H + BOTTOM_T - TOP_T) / 2.0,
+        ),
+        dark_metal,
+        "left_rear_spine",
+    )
+    _box_visual(
+        chassis,
+        (DOOR_FRAME, LEFT_FRONT_SPINE_D, CASE_H - BOTTOM_T - TOP_T),
+        (
+            -CASE_W / 2.0 + DOOR_FRAME / 2.0,
+            CASE_D / 2.0 - LEFT_FRONT_SPINE_D / 2.0,
+            (CASE_H + BOTTOM_T - TOP_T) / 2.0,
+        ),
+        dark_metal,
+        "left_front_spine",
+    )
+    _box_visual(
+        chassis,
+        (DOOR_FRAME, LEFT_FRAME_RUN_D, DOOR_FRAME),
+        (
+            -CASE_W / 2.0 + DOOR_FRAME / 2.0,
+            0.0,
+            DOOR_Z0 + DOOR_H - DOOR_FRAME / 2.0,
+        ),
+        dark_metal,
+        "left_top_rail",
+    )
+    _box_visual(
+        chassis,
+        (DOOR_FRAME, LEFT_FRAME_RUN_D, DOOR_FRAME),
+        (-CASE_W / 2.0 + DOOR_FRAME / 2.0, 0.0, DOOR_Z0 + DOOR_FRAME / 2.0),
+        dark_metal,
+        "left_bottom_rail",
+    )
+    _box_visual(
+        chassis,
+        (DOOR_FRAME, LEFT_FRONT_SPINE_D, CASE_H - BOTTOM_T - TOP_T),
+        (
+            -CASE_W / 2.0 + DOOR_FRAME / 2.0,
+            CASE_D / 2.0 - LEFT_FRONT_SPINE_D / 2.0,
+            (CASE_H + BOTTOM_T - TOP_T) / 2.0,
+        ),
+        dark_metal,
+        "left_front_rail",
+    )
+
+    # Front fascia with two optical drive openings.
+    side_strip_w = (CASE_W - BAY_W) / 2.0
+    _box_visual(
+        chassis,
+        (side_strip_w, FRONT_T, CASE_H - BOTTOM_T),
+        (-CASE_W / 2.0 + side_strip_w / 2.0, CASE_D / 2.0 - FRONT_T / 2.0, (CASE_H + BOTTOM_T) / 2.0),
+        matte_black,
+        "front_left_strip",
+    )
+    _box_visual(
+        chassis,
+        (side_strip_w, FRONT_T, CASE_H - BOTTOM_T),
+        (CASE_W / 2.0 - side_strip_w / 2.0, CASE_D / 2.0 - FRONT_T / 2.0, (CASE_H + BOTTOM_T) / 2.0),
+        matte_black,
+        "front_right_strip",
+    )
+    _box_visual(
+        chassis,
+        (BAY_W, FRONT_T, 0.030),
+        (0.0, CASE_D / 2.0 - FRONT_T / 2.0, 0.512),
+        matte_black,
+        "front_top_strip",
+    )
+    _box_visual(
+        chassis,
+        (BAY_W, FRONT_T, 0.012),
+        (0.0, CASE_D / 2.0 - FRONT_T / 2.0, 0.455),
+        matte_black,
+        "front_bay_divider",
+    )
+    _box_visual(
+        chassis,
+        (BAY_W, FRONT_T, 0.400),
+        (0.0, CASE_D / 2.0 - FRONT_T / 2.0, 0.213),
+        matte_black,
+        "front_lower_panel",
+    )
+
+    # Gaming-style front accents.
+    _box_visual(
+        chassis,
+        (0.008, 0.004, 0.240),
+        (-0.088, CASE_D / 2.0 + 0.002, 0.180),
+        accent_cyan,
+        "front_rgb_left",
+    )
+    _box_visual(
+        chassis,
+        (0.008, 0.004, 0.240),
+        (0.088, CASE_D / 2.0 + 0.002, 0.180),
+        accent_cyan,
+        "front_rgb_right",
+    )
+
+    # Internal tray guides and a visible PSU shroud floor to help the tower read through glass.
+    guide_z_offset = TRAY_BODY_H / 2.0 + 0.0015
+    _box_visual(
+        chassis,
+        (TRAY_BODY_W, TRAY_BODY_D, 0.003),
+        (0.0, CASE_D / 2.0 - TRAY_BODY_D / 2.0, UPPER_BAY_Z - guide_z_offset),
+        dark_metal,
+        "upper_bay_floor",
+    )
+    _box_visual(
+        chassis,
+        (TRAY_BODY_W, TRAY_BODY_D, 0.003),
+        (0.0, CASE_D / 2.0 - TRAY_BODY_D / 2.0, LOWER_BAY_Z - guide_z_offset),
+        dark_metal,
+        "lower_bay_floor",
+    )
+    bay_cage_x = TRAY_BODY_W / 2.0 + 0.002
+    bay_cage_h = (UPPER_BAY_Z - guide_z_offset - 0.0015) - (LOWER_BAY_Z - guide_z_offset + 0.0015)
+    bay_cage_z = ((UPPER_BAY_Z - guide_z_offset - 0.0015) + (LOWER_BAY_Z - guide_z_offset + 0.0015)) / 2.0
+    _box_visual(
+        chassis,
+        (0.004, TRAY_BODY_D, bay_cage_h),
+        (bay_cage_x, CASE_D / 2.0 - TRAY_BODY_D / 2.0, bay_cage_z),
+        dark_metal,
+        "bay_cage_right",
+    )
+    _box_visual(
+        chassis,
+        (0.004, TRAY_BODY_D, bay_cage_h),
+        (-bay_cage_x, CASE_D / 2.0 - TRAY_BODY_D / 2.0, bay_cage_z),
+        dark_metal,
+        "bay_cage_left",
+    )
+    _box_visual(
+        chassis,
+        (CASE_W - WALL_T, CASE_D - 0.090, 0.090),
+        (0.0, -0.010, 0.061),
+        dark_metal,
+        "psu_shroud",
+    )
+    _box_visual(
+        chassis,
+        (0.150, 0.018, 0.295),
+        (-0.010, -CASE_D / 2.0 + WALL_T + 0.009, 0.282),
+        matte_black,
+        "motherboard_tray",
+    )
+    _box_visual(
+        chassis,
+        (0.080, 0.020, 0.080),
+        (-0.012, -CASE_D / 2.0 + WALL_T + 0.028, 0.330),
+        dark_metal,
+        "cpu_cooler",
+    )
+    _box_visual(
+        chassis,
+        (0.145, 0.278, 0.034),
+        (0.008, -0.089, 0.292),
+        matte_black,
+        "gpu_card",
+    )
+    _box_visual(
+        chassis,
+        (0.140, 0.006, 0.020),
+        (0.010, 0.053, 0.300),
+        accent_cyan,
+        "gpu_accent_bar",
+    )
+    _box_visual(
+        chassis,
+        (0.090, 0.036, 0.010),
+        (0.020, 0.130, CASE_H - TOP_T - 0.005),
+        dark_metal,
+        "top_io_cluster",
     )
     chassis.visual(
-        Box((CASE_W, 0.03, CASE_H)),
-        origin=Origin(xyz=(0.0, 0.265, CASE_H * 0.5)),
-        material=body_dark,
-        name="rear_wall",
+        Cylinder(radius=0.009, length=0.004),
+        origin=Origin(xyz=(-0.050, 0.135, CASE_H + 0.002)),
+        material=accent_cyan,
+        name="power_button",
     )
-    chassis.visual(
-        Box((0.03, 0.03, CASE_H)),
-        origin=Origin(xyz=(-0.125, -0.265, CASE_H * 0.5)),
-        material=body_dark,
-        name="front_left_pillar",
-    )
-    chassis.visual(
-        Box((0.03, 0.03, CASE_H)),
-        origin=Origin(xyz=(0.125, -0.265, CASE_H * 0.5)),
-        material=body_dark,
-        name="front_right_pillar",
-    )
-    chassis.visual(
-        Box((0.03, 0.50, 0.05)),
-        origin=Origin(xyz=(-0.125, 0.0, 0.055)),
-        material=panel_dark,
-        name="left_bottom_rail",
-    )
-    chassis.visual(
-        Box((0.03, 0.50, 0.05)),
-        origin=Origin(xyz=(-0.125, 0.0, 0.565)),
-        material=panel_dark,
-        name="left_top_rail",
-    )
-    chassis.visual(
-        Box((0.03, 0.06, 0.52)),
-        origin=Origin(xyz=(-0.125, 0.25, 0.31)),
-        material=panel_dark,
-        name="left_rear_post",
-    )
-    chassis.visual(
-        Box((0.03, CASE_D, 0.03)),
-        origin=Origin(xyz=(-0.125, 0.0, 0.605)),
-        material=body_dark,
-        name="top_left_rail",
-    )
-    chassis.visual(
-        Box((0.03, CASE_D, 0.03)),
-        origin=Origin(xyz=(0.125, 0.0, 0.605)),
-        material=body_dark,
-        name="top_right_rail",
-    )
-    chassis.visual(
-        Box((CASE_W - 0.06, 0.03, 0.03)),
-        origin=Origin(xyz=(0.0, -0.265, 0.605)),
-        material=body_dark,
-        name="top_front_rail",
-    )
-    chassis.visual(
-        Box((CASE_W - 0.06, 0.03, 0.03)),
-        origin=Origin(xyz=(0.0, 0.265, 0.605)),
-        material=body_dark,
-        name="top_rear_rail",
-    )
-    chassis.visual(
-        Box((0.006, 0.50, 0.54)),
-        origin=Origin(xyz=(0.137, 0.0, 0.31)),
-        material=panel_dark,
-        name="right_side_panel",
-    )
-    chassis.visual(
-        Box((0.01, 0.48, 0.46)),
-        origin=Origin(xyz=(0.060, 0.0, 0.32)),
-        material=steel,
-        name="motherboard_tray",
-    )
-    chassis.visual(
-        Box((0.22, 0.38, 0.11)),
-        origin=Origin(xyz=(0.0, 0.070, 0.085)),
-        material=panel_dark,
-        name="psu_shroud",
-    )
-    chassis.visual(
-        Box((0.22, 0.03, 0.04)),
-        origin=Origin(xyz=(0.0, -0.265, 0.58)),
-        material=panel_dark,
-        name="front_header",
-    )
-    chassis.visual(
-        Box((0.008, 0.18, 0.36)),
-        origin=Origin(xyz=(-0.060, -0.140, 0.21)),
-        material=drive_dark,
-        name="drive_bay_left_wall",
-    )
-    chassis.visual(
-        Box((0.008, 0.18, 0.36)),
-        origin=Origin(xyz=(0.060, -0.140, 0.21)),
-        material=drive_dark,
-        name="drive_bay_right_wall",
-    )
-    chassis.visual(
-        Box((0.12, 0.008, 0.36)),
-        origin=Origin(xyz=(0.0, -0.054, 0.21)),
-        material=drive_dark,
-        name="drive_bay_back",
-    )
-    for index, z in enumerate((0.10, 0.18, 0.26, 0.34)):
-        chassis.visual(
-            Box((0.12, 0.16, 0.01)),
-            origin=Origin(xyz=(0.0, -0.140, z)),
-            material=drive_dark,
-            name=f"drive_shelf_{index}",
-        )
-    for index, z in enumerate((0.11, 0.19, 0.27, 0.35)):
-        chassis.visual(
-            Box((0.106, 0.012, 0.05)),
-            origin=Origin(xyz=(0.0, -0.226, z)),
-            material=tray_dark,
-            name=f"tray_front_{index}",
-        )
-    chassis.visual(
-        Box((0.12, 0.012, 0.34)),
-        origin=Origin(xyz=(0.0, -0.226, 0.24)),
-        material=tray_dark,
-        name="drive_bay_face",
-    )
-    chassis.visual(
-        Box((0.014, 0.008, 0.05)),
-        origin=Origin(xyz=(0.122, -0.276, 0.32)),
-        material=hinge_steel,
-        name="door_strike",
-    )
-    chassis.visual(
-        Box((0.010, 0.030, 0.06)),
-        origin=Origin(xyz=(-0.138, -0.245, 0.32)),
-        material=hinge_steel,
-        name="side_cam_strike",
-    )
-    chassis.visual(
-        Box((0.004, 0.014, 0.52)),
-        origin=Origin(xyz=(-0.141, 0.243, 0.31)),
-        material=hinge_steel,
-        name="side_hinge_leaf",
-    )
-    chassis.visual(
-        Cylinder(radius=0.005, length=0.54),
-        origin=Origin(xyz=(-0.136, 0.256, 0.31)),
-        material=hinge_steel,
-        name="side_hinge_barrel",
-    )
-    chassis.visual(
-        Box((0.012, 0.010, 0.52)),
-        origin=Origin(xyz=(-0.130, -0.275, 0.31)),
-        material=hinge_steel,
-        name="front_hinge_leaf",
-    )
-    for name, z in (("front_hinge_top", 0.49), ("front_hinge_mid", 0.31), ("front_hinge_bottom", 0.13)):
-        chassis.visual(
-            Cylinder(radius=0.0035, length=0.05),
-            origin=Origin(xyz=(-0.136, -0.276, z)),
-            material=hinge_steel,
-            name=name,
-        )
-    for suffix, x, y in (
-        ("nw", -0.095, 0.175),
-        ("ne", 0.095, 0.175),
-        ("sw", -0.095, -0.175),
-        ("se", 0.095, -0.175),
+
+    # Feet.
+    foot_xy = 0.028
+    foot_h = 0.012
+    for index, (x, y) in enumerate(
+        (
+            (-0.085, -0.200),
+            (0.085, -0.200),
+            (-0.085, 0.200),
+            (0.085, 0.200),
+        ),
+        start=1,
     ):
-        chassis.visual(
-            Box((0.024, 0.016, 0.014)),
-            origin=Origin(xyz=(-0.104 if x < 0.0 else 0.104, y, 0.607)),
-            material=panel_dark,
-            name=f"socket_pad_{suffix}",
+        _box_visual(
+            chassis,
+            (foot_xy, foot_xy, foot_h),
+            (x, y, foot_h / 2.0),
+            matte_black,
+            f"foot_{index}",
         )
-        chassis.visual(
-            Cylinder(radius=0.004, length=0.010),
-            origin=Origin(xyz=(x, y, 0.615)),
-            material=hinge_steel,
-            name=f"socket_{suffix}",
-        )
-    chassis.inertial = Inertial.from_geometry(
-        Box((CASE_W, CASE_D, CASE_H)),
-        mass=18.0,
-        origin=Origin(xyz=(0.0, 0.0, CASE_H * 0.5)),
-    )
 
     side_panel = model.part("side_panel")
-    side_panel.visual(
-        Box((0.004, 0.50, 0.52)),
-        origin=Origin(xyz=(-0.004, -0.25, 0.0)),
-        material=glass,
-        name="glass",
+    door_z_center = DOOR_Z0 + DOOR_H / 2.0
+    _box_visual(
+        side_panel,
+        (DOOR_T, DOOR_D, DOOR_FRAME),
+        (0.0, DOOR_D / 2.0, DOOR_H / 2.0 - DOOR_FRAME / 2.0),
+        matte_black,
+        "door_top_frame",
+    )
+    _box_visual(
+        side_panel,
+        (DOOR_T, DOOR_D, DOOR_FRAME),
+        (0.0, DOOR_D / 2.0, -DOOR_H / 2.0 + DOOR_FRAME / 2.0),
+        matte_black,
+        "door_bottom_frame",
+    )
+    _box_visual(
+        side_panel,
+        (DOOR_T, DOOR_FRAME, DOOR_H),
+        (0.0, DOOR_FRAME / 2.0, 0.0),
+        matte_black,
+        "door_rear_frame",
+    )
+    _box_visual(
+        side_panel,
+        (DOOR_T, DOOR_FRAME, DOOR_H),
+        (0.0, DOOR_D - DOOR_FRAME / 2.0, 0.0),
+        matte_black,
+        "door_front_frame",
+    )
+    _box_visual(
+        side_panel,
+        (0.005, DOOR_D - 2.0 * DOOR_FRAME, DOOR_H - 2.0 * DOOR_FRAME),
+        (0.0, DOOR_D / 2.0, 0.0),
+        smoked_glass,
+        "door_glass",
+    )
+    _box_visual(
+        side_panel,
+        (0.012, 0.090, 0.010),
+        (-0.003, DOOR_D - 0.026, 0.0),
+        matte_black,
+        "door_handle",
     )
     side_panel.visual(
-        Box((0.008, 0.50, 0.018)),
-        origin=Origin(xyz=(-0.004, -0.25, 0.251)),
-        material=panel_dark,
-        name="frame_top",
+        Cylinder(radius=HINGE_BARREL_R, length=HINGE_BARREL_L),
+        origin=Origin(xyz=(0.0, DOOR_FRAME / 2.0, DOOR_H / 2.0 - 0.070)),
+        material=dark_metal,
+        name="upper_hinge_barrel",
     )
     side_panel.visual(
-        Box((0.008, 0.50, 0.018)),
-        origin=Origin(xyz=(-0.004, -0.25, -0.251)),
-        material=panel_dark,
-        name="frame_bottom",
-    )
-    side_panel.visual(
-        Box((0.008, 0.018, 0.46)),
-        origin=Origin(xyz=(-0.004, -0.491, 0.0)),
-        material=panel_dark,
-        name="frame_front",
-    )
-    side_panel.visual(
-        Box((0.003, 0.014, 0.52)),
-        origin=Origin(xyz=(-0.0015, -0.007, 0.0)),
-        material=hinge_steel,
-        name="hinge_strip",
-    )
-    side_panel.visual(
-        Box((0.010, 0.022, 0.052)),
-        origin=Origin(xyz=(-0.005, -0.489, 0.02)),
-        material=latch_dark,
-        name="cam_latch",
-    )
-    side_panel.visual(
-        Box((0.008, 0.016, 0.078)),
-        origin=Origin(xyz=(-0.012, -0.489, 0.02)),
-        material=hinge_steel,
-        name="cam_handle",
-    )
-    side_panel.inertial = Inertial.from_geometry(
-        Box((0.02, 0.50, 0.52)),
-        mass=4.2,
-        origin=Origin(xyz=(-0.010, -0.25, 0.0)),
+        Cylinder(radius=HINGE_BARREL_R, length=HINGE_BARREL_L),
+        origin=Origin(xyz=(0.0, DOOR_FRAME / 2.0, -DOOR_H / 2.0 + 0.070)),
+        material=dark_metal,
+        name="lower_hinge_barrel",
     )
 
-    front_door = model.part("front_door")
-    front_door.visual(
-        Box((0.246, 0.018, 0.54)),
-        origin=Origin(xyz=(0.133, -0.009, 0.0)),
-        material=panel_dark,
-        name="door_outer",
+    upper_tray = model.part("upper_optical_tray")
+    _box_visual(
+        upper_tray,
+        (BAY_FACE_W, TRAY_FACE_T, BAY_FACE_H),
+        (0.0, TRAY_FACE_T / 2.0, 0.0),
+        tray_black,
+        "upper_faceplate",
     )
-    front_door.visual(
-        Box((0.206, 0.010, 0.48)),
-        origin=Origin(xyz=(0.133, -0.005, 0.0)),
-        material=body_dark,
-        name="door_inner_recess",
+    _box_visual(
+        upper_tray,
+        (TRAY_BODY_W, TRAY_BODY_D, TRAY_BODY_H),
+        (0.0, -TRAY_BODY_D / 2.0, 0.0),
+        dark_metal,
+        "upper_body",
     )
-    front_door.visual(
-        Box((0.018, 0.008, 0.05)),
-        origin=Origin(xyz=(0.246, -0.004, 0.02)),
-        material=hinge_steel,
-        name="magnet_latch",
-    )
-    front_door.inertial = Inertial.from_geometry(
-        Box((0.258, 0.02, 0.54)),
-        mass=3.2,
-        origin=Origin(xyz=(0.129, -0.010, 0.0)),
+    _box_visual(
+        upper_tray,
+        (0.014, 0.003, 0.004),
+        (BAY_FACE_W / 2.0 - 0.012, TRAY_FACE_T + 0.0015, -BAY_FACE_H / 2.0 + 0.004),
+        tray_black,
+        "upper_eject_button",
     )
 
-    top_panel = model.part("top_panel")
-    top_panel.visual(
-        Box((TOP_PANEL_W, 0.014, TOP_PANEL_T)),
-        origin=Origin(
-            xyz=(
-                TOP_PANEL_LOCAL_OFFSET[0],
-                TOP_PANEL_LOCAL_OFFSET[1] + TOP_PANEL_D * 0.5 - 0.007,
-                TOP_PANEL_LOCAL_OFFSET[2],
-            )
-        ),
-        material=panel_dark,
-        name="frame_rear",
+    lower_tray = model.part("lower_optical_tray")
+    _box_visual(
+        lower_tray,
+        (BAY_FACE_W, TRAY_FACE_T, BAY_FACE_H),
+        (0.0, TRAY_FACE_T / 2.0, 0.0),
+        tray_black,
+        "lower_faceplate",
     )
-    top_panel.visual(
-        Box((TOP_PANEL_W, 0.014, TOP_PANEL_T)),
-        origin=Origin(
-            xyz=(
-                TOP_PANEL_LOCAL_OFFSET[0],
-                TOP_PANEL_LOCAL_OFFSET[1] - TOP_PANEL_D * 0.5 + 0.007,
-                TOP_PANEL_LOCAL_OFFSET[2],
-            )
-        ),
-        material=panel_dark,
-        name="frame_front",
+    _box_visual(
+        lower_tray,
+        (TRAY_BODY_W, TRAY_BODY_D, TRAY_BODY_H),
+        (0.0, -TRAY_BODY_D / 2.0, 0.0),
+        dark_metal,
+        "lower_body",
     )
-    top_panel.visual(
-        Box((0.014, TOP_PANEL_D, TOP_PANEL_T)),
-        origin=Origin(
-            xyz=(
-                TOP_PANEL_LOCAL_OFFSET[0] - TOP_PANEL_W * 0.5 + 0.007,
-                TOP_PANEL_LOCAL_OFFSET[1],
-                TOP_PANEL_LOCAL_OFFSET[2],
-            )
-        ),
-        material=panel_dark,
-        name="frame_left",
-    )
-    top_panel.visual(
-        Box((0.014, TOP_PANEL_D, TOP_PANEL_T)),
-        origin=Origin(
-            xyz=(
-                TOP_PANEL_LOCAL_OFFSET[0] + TOP_PANEL_W * 0.5 - 0.007,
-                TOP_PANEL_LOCAL_OFFSET[1],
-                TOP_PANEL_LOCAL_OFFSET[2],
-            )
-        ),
-        material=panel_dark,
-        name="frame_right",
-    )
-    for index, x in enumerate((-0.078, -0.052, -0.026, 0.0, 0.026, 0.052, 0.078)):
-        top_panel.visual(
-            Box((0.008, 0.372, TOP_PANEL_T)),
-            origin=Origin(
-                xyz=(
-                    TOP_PANEL_LOCAL_OFFSET[0] + x,
-                    TOP_PANEL_LOCAL_OFFSET[1],
-                    TOP_PANEL_LOCAL_OFFSET[2],
-                )
-            ),
-            material=mesh_dark,
-            name=f"mesh_bar_{index}",
-        )
-    for index, y in enumerate((-0.120, -0.060, 0.0, 0.060, 0.120)):
-        top_panel.visual(
-            Box((0.194, 0.004, TOP_PANEL_T)),
-            origin=Origin(
-                xyz=(
-                    TOP_PANEL_LOCAL_OFFSET[0],
-                    TOP_PANEL_LOCAL_OFFSET[1] + y,
-                    TOP_PANEL_LOCAL_OFFSET[2] + 0.0005,
-                )
-            ),
-            material=mesh_dark,
-            name=f"mesh_cross_{index}",
-        )
-    for suffix, x, y in (
-        ("nw", -0.095, 0.175),
-        ("ne", 0.095, 0.175),
-        ("sw", -0.095, -0.175),
-        ("se", 0.095, -0.175),
-    ):
-        top_panel.visual(
-            Cylinder(radius=0.006, length=0.004),
-            origin=Origin(
-                xyz=(
-                    TOP_PANEL_LOCAL_OFFSET[0] + x,
-                    TOP_PANEL_LOCAL_OFFSET[1] + y,
-                    TOP_PANEL_LOCAL_OFFSET[2] + 0.004,
-                )
-            ),
-            material=hinge_steel,
-            name=f"pin_{suffix}",
-        )
-        top_panel.visual(
-            Cylinder(radius=0.003, length=0.010),
-            origin=Origin(
-                xyz=(
-                    TOP_PANEL_LOCAL_OFFSET[0] + x,
-                    TOP_PANEL_LOCAL_OFFSET[1] + y,
-                    TOP_PANEL_LOCAL_OFFSET[2] - 0.007,
-                )
-            ),
-            material=hinge_steel,
-            name=f"pin_{suffix}_shaft",
-        )
-    top_panel.inertial = Inertial.from_geometry(
-        Box((TOP_PANEL_W, TOP_PANEL_D, 0.02)),
-        mass=0.9,
-        origin=Origin(xyz=TOP_PANEL_LOCAL_OFFSET),
+    _box_visual(
+        lower_tray,
+        (0.014, 0.003, 0.004),
+        (BAY_FACE_W / 2.0 - 0.012, TRAY_FACE_T + 0.0015, -BAY_FACE_H / 2.0 + 0.004),
+        tray_black,
+        "lower_eject_button",
     )
 
     model.articulation(
-        "side_glass_hinge",
+        "side_panel_hinge",
         ArticulationType.REVOLUTE,
         parent=chassis,
         child=side_panel,
-        origin=Origin(xyz=(-0.143, 0.250, 0.31)),
-        axis=(0.0, 0.0, -1.0),
-        motion_limits=MotionLimits(
-            effort=20.0,
-            velocity=1.5,
-            lower=0.0,
-            upper=1.30,
-        ),
+        origin=Origin(xyz=(-CASE_W / 2.0 - DOOR_T / 2.0, DOOR_Y0, door_z_center)),
+        axis=(0.0, 0.0, 1.0),
+        motion_limits=MotionLimits(effort=20.0, velocity=1.8, lower=0.0, upper=1.30),
     )
     model.articulation(
-        "front_door_hinge",
-        ArticulationType.REVOLUTE,
+        "upper_tray_slide",
+        ArticulationType.PRISMATIC,
         parent=chassis,
-        child=front_door,
-        origin=Origin(xyz=(-0.129, -0.280, 0.31)),
-        axis=(0.0, 0.0, -1.0),
-        motion_limits=MotionLimits(
-            effort=18.0,
-            velocity=1.6,
-            lower=0.0,
-            upper=1.45,
-        ),
+        child=upper_tray,
+        origin=Origin(xyz=(0.0, CASE_D / 2.0, UPPER_BAY_Z)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=12.0, velocity=0.30, lower=0.0, upper=TRAY_TRAVEL),
     )
     model.articulation(
-        "top_panel_mount",
-        ArticulationType.FIXED,
+        "lower_tray_slide",
+        ArticulationType.PRISMATIC,
         parent=chassis,
-        child=top_panel,
-        origin=Origin(xyz=(-0.095, 0.175, 0.615)),
+        child=lower_tray,
+        origin=Origin(xyz=(0.0, CASE_D / 2.0, LOWER_BAY_Z)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(effort=12.0, velocity=0.30, lower=0.0, upper=TRAY_TRAVEL),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    _ensure_runtime_cwd()
-    ctx = TestContext(object_model)
+    ctx = TestContext(object_model, asset_root=ASSETS.asset_root)
     chassis = object_model.get_part("chassis")
     side_panel = object_model.get_part("side_panel")
-    front_door = object_model.get_part("front_door")
-    top_panel = object_model.get_part("top_panel")
-    side_glass_hinge = object_model.get_articulation("side_glass_hinge")
-    front_door_hinge = object_model.get_articulation("front_door_hinge")
+    upper_tray = object_model.get_part("upper_optical_tray")
+    lower_tray = object_model.get_part("lower_optical_tray")
 
-    side_hinge_strip = side_panel.get_visual("hinge_strip")
-    cam_latch = side_panel.get_visual("cam_latch")
-    side_glass = side_panel.get_visual("glass")
-    door_outer = front_door.get_visual("door_outer")
-    door_magnet = front_door.get_visual("magnet_latch")
-    top_mesh = top_panel.get_visual("mesh_bar_3")
+    side_panel_hinge = object_model.get_articulation("side_panel_hinge")
+    upper_tray_slide = object_model.get_articulation("upper_tray_slide")
+    lower_tray_slide = object_model.get_articulation("lower_tray_slide")
 
-    side_hinge_leaf = chassis.get_visual("side_hinge_leaf")
-    side_cam_strike = chassis.get_visual("side_cam_strike")
-    front_left_pillar = chassis.get_visual("front_left_pillar")
-    front_right_pillar = chassis.get_visual("front_right_pillar")
-    door_strike = chassis.get_visual("door_strike")
-    drive_bay_face = chassis.get_visual("drive_bay_face")
-    motherboard_tray = chassis.get_visual("motherboard_tray")
+    left_rear_spine = chassis.get_visual("left_rear_spine")
+    left_top_rail = chassis.get_visual("left_top_rail")
     left_bottom_rail = chassis.get_visual("left_bottom_rail")
-    top_left_rail = chassis.get_visual("top_left_rail")
+    front_top_strip = chassis.get_visual("front_top_strip")
+    front_bay_divider = chassis.get_visual("front_bay_divider")
+    upper_bay_floor = chassis.get_visual("upper_bay_floor")
+    lower_bay_floor = chassis.get_visual("lower_bay_floor")
+    bay_cage_right = chassis.get_visual("bay_cage_right")
+    bay_cage_left = chassis.get_visual("bay_cage_left")
+
+    door_top_frame = side_panel.get_visual("door_top_frame")
+    door_bottom_frame = side_panel.get_visual("door_bottom_frame")
+    door_glass = side_panel.get_visual("door_glass")
+    door_handle = side_panel.get_visual("door_handle")
+    upper_hinge_barrel = side_panel.get_visual("upper_hinge_barrel")
+    lower_hinge_barrel = side_panel.get_visual("lower_hinge_barrel")
+
+    upper_faceplate = upper_tray.get_visual("upper_faceplate")
+    upper_body = upper_tray.get_visual("upper_body")
+    lower_faceplate = lower_tray.get_visual("lower_faceplate")
+    lower_body = lower_tray.get_visual("lower_body")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    ctx.warn_if_part_geometry_disconnected()
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
+    ctx.fail_if_isolated_parts()
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64, overlap_tol=0.0005, overlap_volume_tol=0.0)
 
-    ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.20)
-    ctx.expect_gap(
-        chassis,
-        side_panel,
-        axis="x",
-        max_gap=0.006,
-        max_penetration=0.0,
-        positive_elem=left_bottom_rail,
-        negative_elem=side_glass,
+    ctx.check(
+        "side_panel_hinge_axis_is_vertical",
+        _axis_matches(side_panel_hinge.axis, (0.0, 0.0, 1.0)),
+        details=f"Expected vertical hinge axis, got {side_panel_hinge.axis!r}",
     )
-    ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.010, elem_a=side_hinge_strip, elem_b=side_hinge_leaf)
-    ctx.expect_gap(
-        chassis,
-        side_panel,
-        axis="x",
-        max_gap=0.003,
-        max_penetration=0.0,
-        positive_elem=side_hinge_leaf,
-        negative_elem=side_hinge_strip,
+    ctx.check(
+        "upper_tray_slide_axis_is_forward",
+        _axis_matches(upper_tray_slide.axis, (0.0, 1.0, 0.0)),
+        details=f"Expected +Y tray slide axis, got {upper_tray_slide.axis!r}",
     )
-    ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.015, elem_a=cam_latch, elem_b=side_cam_strike)
-    ctx.expect_gap(
-        chassis,
-        side_panel,
-        axis="x",
-        max_gap=0.003,
-        max_penetration=0.001,
-        positive_elem=side_cam_strike,
-        negative_elem=cam_latch,
+    ctx.check(
+        "lower_tray_slide_axis_is_forward",
+        _axis_matches(lower_tray_slide.axis, (0.0, 1.0, 0.0)),
+        details=f"Expected +Y tray slide axis, got {lower_tray_slide.axis!r}",
     )
 
-    ctx.expect_overlap(front_door, chassis, axes="xz", min_overlap=0.20)
-    ctx.expect_gap(
-        chassis,
-        front_door,
-        axis="y",
-        max_gap=0.006,
-        max_penetration=0.0,
-        positive_elem=front_left_pillar,
-        negative_elem=door_outer,
+    side_limits = side_panel_hinge.motion_limits
+    upper_limits = upper_tray_slide.motion_limits
+    lower_limits = lower_tray_slide.motion_limits
+    ctx.check(
+        "side_panel_hinge_range_is_realistic",
+        side_limits is not None
+        and side_limits.lower == 0.0
+        and side_limits.upper is not None
+        and 1.10 <= side_limits.upper <= 1.35,
+        details=f"Unexpected side-panel limits: {side_limits!r}",
     )
-    ctx.expect_gap(
-        chassis,
-        front_door,
-        axis="y",
-        max_gap=0.006,
-        max_penetration=0.0,
-        positive_elem=front_right_pillar,
-        negative_elem=door_outer,
+    ctx.check(
+        "upper_tray_travel_is_realistic",
+        upper_limits is not None and upper_limits.lower == 0.0 and upper_limits.upper == TRAY_TRAVEL,
+        details=f"Unexpected upper-tray limits: {upper_limits!r}",
     )
-    ctx.expect_overlap(front_door, chassis, axes="xz", min_overlap=0.008, elem_a=door_outer, elem_b=front_left_pillar)
-    ctx.expect_overlap(front_door, chassis, axes="xz", min_overlap=0.010, elem_a=door_magnet, elem_b=door_strike)
-    ctx.expect_gap(
-        chassis,
-        front_door,
-        axis="y",
-        max_gap=0.003,
-        max_penetration=0.0,
-        positive_elem=door_strike,
-        negative_elem=door_magnet,
-    )
-    ctx.expect_overlap(chassis, front_door, axes="xz", min_overlap=0.10, elem_a=drive_bay_face, elem_b=door_outer)
-    ctx.expect_gap(
-        chassis,
-        front_door,
-        axis="y",
-        min_gap=0.03,
-        max_gap=0.08,
-        positive_elem=drive_bay_face,
-        negative_elem=door_outer,
+    ctx.check(
+        "lower_tray_travel_is_realistic",
+        lower_limits is not None and lower_limits.lower == 0.0 and lower_limits.upper == TRAY_TRAVEL,
+        details=f"Unexpected lower-tray limits: {lower_limits!r}",
     )
 
-    ctx.expect_overlap(top_panel, chassis, axes="xy", min_overlap=0.15)
+    # Full-tower envelope and dominant side opening.
+    ctx.expect_overlap(side_panel, chassis, axes="yz", min_overlap=0.18)
+    ctx.expect_contact(side_panel, chassis, elem_a=door_top_frame, elem_b=left_top_rail)
+    ctx.expect_contact(side_panel, chassis, elem_a=door_bottom_frame, elem_b=left_bottom_rail)
+    ctx.expect_contact(side_panel, chassis, elem_a=door_top_frame, elem_b=left_rear_spine)
+    ctx.expect_contact(side_panel, chassis, elem_a=upper_hinge_barrel, elem_b=left_rear_spine)
+    ctx.expect_contact(side_panel, chassis, elem_a=lower_hinge_barrel, elem_b=left_rear_spine)
+
+    # Both optical trays are mounted in the upper-front drive stack.
+    ctx.expect_within(upper_tray, chassis, axes="xz")
+    ctx.expect_within(lower_tray, chassis, axes="xz")
+    ctx.expect_contact(upper_tray, chassis, elem_a=upper_body, elem_b=upper_bay_floor)
+    ctx.expect_contact(lower_tray, chassis, elem_a=lower_body, elem_b=lower_bay_floor)
+    ctx.expect_contact(chassis, chassis, elem_a=lower_bay_floor, elem_b=bay_cage_right)
+    ctx.expect_contact(chassis, chassis, elem_a=lower_bay_floor, elem_b=bay_cage_left)
+    ctx.expect_contact(chassis, chassis, elem_a=upper_bay_floor, elem_b=bay_cage_right)
+    ctx.expect_contact(chassis, chassis, elem_a=upper_bay_floor, elem_b=bay_cage_left)
     ctx.expect_gap(
-        top_panel,
+        upper_tray,
         chassis,
+        axis="y",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=upper_faceplate,
+        negative_elem=front_top_strip,
+    )
+    ctx.expect_gap(
+        lower_tray,
+        chassis,
+        axis="y",
+        max_gap=0.001,
+        max_penetration=0.0,
+        positive_elem=lower_faceplate,
+        negative_elem=front_bay_divider,
+    )
+    ctx.expect_gap(
+        upper_tray,
+        lower_tray,
         axis="z",
-        max_gap=0.003,
-        max_penetration=0.0,
-        positive_elem=top_mesh,
-        negative_elem=top_left_rail,
+        min_gap=0.010,
+        positive_elem=upper_faceplate,
+        negative_elem=lower_faceplate,
     )
-    for suffix in ("nw", "ne", "sw", "se"):
-        ctx.expect_overlap(
-            top_panel,
-            chassis,
-            axes="xy",
-            min_overlap=0.004,
-            elem_a=top_panel.get_visual(f"pin_{suffix}_shaft"),
-            elem_b=chassis.get_visual(f"socket_{suffix}"),
-        )
 
-    with ctx.pose({side_glass_hinge: 1.20}):
+    # Key articulated poses: hinged glass swings outward and both optical trays eject forward.
+    with ctx.pose({side_panel_hinge: side_limits.upper}):
         ctx.expect_gap(
             chassis,
             side_panel,
             axis="x",
-            min_gap=0.15,
-            positive_elem=motherboard_tray,
-            negative_elem=side_glass,
+            min_gap=0.180,
+            negative_elem=door_handle,
         )
+        ctx.expect_overlap(side_panel, chassis, axes="z", min_overlap=0.40, elem_a=door_glass)
+    with ctx.pose({upper_tray_slide: upper_limits.upper}):
         ctx.expect_gap(
+            upper_tray,
             chassis,
-            side_panel,
-            axis="x",
-            min_gap=0.10,
-            positive_elem=side_cam_strike,
-            negative_elem=cam_latch,
+            axis="y",
+            min_gap=TRAY_TRAVEL - 0.010,
+            positive_elem=upper_faceplate,
+            negative_elem=front_top_strip,
         )
+        ctx.expect_contact(upper_tray, chassis, elem_a=upper_body, elem_b=upper_bay_floor)
+        ctx.expect_within(upper_tray, chassis, axes="xz", margin=0.001)
+    with ctx.pose({lower_tray_slide: lower_limits.upper}):
+        ctx.expect_gap(
+            lower_tray,
+            chassis,
+            axis="y",
+            min_gap=TRAY_TRAVEL - 0.010,
+            positive_elem=lower_faceplate,
+            negative_elem=front_bay_divider,
+        )
+        ctx.expect_contact(lower_tray, chassis, elem_a=lower_body, elem_b=lower_bay_floor)
+        ctx.expect_within(lower_tray, chassis, axes="xz", margin=0.001)
 
-    with ctx.pose({front_door_hinge: 1.35}):
-        ctx.expect_gap(
-            chassis,
-            front_door,
-            axis="y",
-            min_gap=0.12,
-            positive_elem=door_strike,
-            negative_elem=door_magnet,
-        )
-        ctx.expect_gap(
-            chassis,
-            front_door,
-            axis="y",
-            min_gap=0.05,
-            positive_elem=drive_bay_face,
-            negative_elem=door_outer,
-        )
+    for articulation in (side_panel_hinge, upper_tray_slide, lower_tray_slide):
+        limits = articulation.motion_limits
+        if limits is not None and limits.lower is not None and limits.upper is not None:
+            with ctx.pose({articulation: limits.lower}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{articulation.name}_lower_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{articulation.name}_lower_no_floating")
+            with ctx.pose({articulation: limits.upper}):
+                ctx.fail_if_parts_overlap_in_current_pose(name=f"{articulation.name}_upper_no_overlap")
+                ctx.fail_if_isolated_parts(name=f"{articulation.name}_upper_no_floating")
 
     return ctx.report()
 
 
 # >>> USER_CODE_END
 
-_ensure_runtime_cwd()
 object_model = build_object_model()

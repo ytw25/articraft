@@ -4,29 +4,6 @@ from __future__ import annotations
 # hidden scaffold imports.
 # >>> USER_CODE_START
 import math
-import os
-import pathlib
-import posixpath
-
-if not os.path.isabs(__file__):
-    __file__ = posixpath.join("/", __file__.lstrip("/"))
-
-_ORIG_PATH_ABSOLUTE = pathlib.Path.absolute
-
-
-def _safe_path_absolute(self):
-    if self.is_absolute():
-        return self
-    try:
-        return _ORIG_PATH_ABSOLUTE(self)
-    except FileNotFoundError:
-        return self.__class__(posixpath.join("/", str(self).lstrip("/")))
-
-
-pathlib.Path.absolute = _safe_path_absolute
-
-THIS_FILE = __file__
-HERE = os.path.dirname(THIS_FILE) or "/"
 
 from sdk import (
     ArticulatedObject,
@@ -39,462 +16,482 @@ from sdk import (
     TestContext,
     TestReport,
 )
-PIVOT_Z = 1.72
-PIVOT_Y = -0.02
-
-
-def _add_wing_nut(part, *, x: float, y: float, z: float, prefix: str, material) -> None:
-    part.visual(
-        Cylinder(radius=0.012, length=0.018),
-        origin=Origin(xyz=(x, y, z), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=material,
-        name=f"{prefix}_hub",
-    )
-    part.visual(
-        Box((0.042, 0.006, 0.014)),
-        origin=Origin(xyz=(x, y, z)),
-        material=material,
-        name=f"{prefix}_wing_x",
-    )
-    part.visual(
-        Box((0.016, 0.006, 0.034)),
-        origin=Origin(xyz=(x, y, z)),
-        material=material,
-        name=f"{prefix}_wing_z",
-    )
 
 
 def build_object_model() -> ArticulatedObject:
     model = ArticulatedObject(name="studio_a_frame_easel")
 
-    wood = model.material("oak", rgba=(0.66, 0.50, 0.32, 1.0))
-    wood_dark = model.material("walnut", rgba=(0.43, 0.29, 0.18, 1.0))
-    metal = model.material("steel", rgba=(0.62, 0.63, 0.66, 1.0))
-    rubber = model.material("rubber", rgba=(0.14, 0.14, 0.14, 1.0))
+    oak = model.material("oak", rgba=(0.71, 0.57, 0.37, 1.0))
+    walnut = model.material("walnut", rgba=(0.47, 0.33, 0.19, 1.0))
+    steel = model.material("steel", rgba=(0.24, 0.25, 0.27, 1.0))
+    rubber = model.material("rubber", rgba=(0.18, 0.17, 0.16, 1.0))
 
-    frame = model.part("front_frame")
-
-    front_leg_len = 1.71
-    front_leg_roll = 0.045
-    front_leg_pitch = 0.198
-    left_leg_center = (-0.168, 0.018, 0.885)
-    right_leg_center = (0.168, 0.018, 0.885)
-
-    frame.visual(
-        Box((0.038, 0.026, front_leg_len)),
-        origin=Origin(xyz=left_leg_center, rpy=(front_leg_roll, front_leg_pitch, 0.0)),
-        material=wood,
+    front_frame = model.part("front_frame")
+    front_frame.visual(
+        Box((0.110, 0.060, 0.050)),
+        origin=Origin(xyz=(-0.290, 0.000, 0.025)),
+        material=oak,
+        name="left_front_foot",
+    )
+    front_frame.visual(
+        Box((0.110, 0.060, 0.050)),
+        origin=Origin(xyz=(0.290, 0.000, 0.025)),
+        material=oak,
+        name="right_front_foot",
+    )
+    front_frame.visual(
+        Box((0.055, 0.032, 1.490)),
+        origin=Origin(xyz=(-0.185, 0.000, 0.790), rpy=(0.0, 0.140, 0.0)),
+        material=oak,
         name="left_front_leg",
     )
-    frame.visual(
-        Box((0.038, 0.026, front_leg_len)),
-        origin=Origin(xyz=right_leg_center, rpy=(front_leg_roll, -front_leg_pitch, 0.0)),
-        material=wood,
+    front_frame.visual(
+        Box((0.055, 0.032, 1.490)),
+        origin=Origin(xyz=(0.185, 0.000, 0.790), rpy=(0.0, -0.140, 0.0)),
+        material=oak,
         name="right_front_leg",
     )
-    frame.visual(
-        Box((0.66, 0.042, 0.032)),
-        origin=Origin(xyz=(0.0, 0.034, 0.235)),
-        material=wood_dark,
+    front_frame.visual(
+        Box((0.260, 0.060, 0.080)),
+        origin=Origin(xyz=(0.000, -0.006, 1.580)),
+        material=walnut,
+        name="head_block",
+    )
+    front_frame.visual(
+        Box((0.600, 0.034, 0.050)),
+        origin=Origin(xyz=(0.000, 0.000, 0.330)),
+        material=walnut,
         name="lower_stretcher",
     )
-    frame.visual(
-        Box((0.37, 0.038, 0.028)),
-        origin=Origin(xyz=(0.0, 0.014, 0.93)),
-        material=wood_dark,
+    front_frame.visual(
+        Box((0.390, 0.030, 0.042)),
+        origin=Origin(xyz=(0.000, 0.000, 0.950)),
+        material=walnut,
         name="upper_stretcher",
     )
-    frame.visual(
-        Box((0.058, 0.030, 1.42)),
-        origin=Origin(xyz=(0.0, 0.000, 0.950)),
-        material=wood_dark,
-        name="center_rail",
+    front_frame.visual(
+        Box((0.082, 0.022, 1.420)),
+        origin=Origin(xyz=(0.000, -0.006, 0.870)),
+        material=oak,
+        name="mast_back",
     )
-    for index, tooth_z in enumerate((0.38, 0.50, 0.62, 0.74, 0.86, 0.98, 1.10, 1.22)):
-        frame.visual(
-            Box((0.012, 0.010, 0.024)),
-            origin=Origin(xyz=(0.037, -0.023, tooth_z)),
-            material=wood,
-            name=f"rail_tooth_{index}",
-        )
-        frame.visual(
-            Box((0.004, 0.006, 0.024)),
-            origin=Origin(xyz=(0.031, -0.015, tooth_z)),
-            material=wood,
-            name=f"rail_tooth_mount_{index}",
-        )
-    frame.visual(
-        Box((0.16, 0.060, 0.050)),
-        origin=Origin(xyz=(0.0, PIVOT_Y, PIVOT_Z)),
-        material=wood_dark,
-        name="top_head",
+    front_frame.visual(
+        Box((0.016, 0.022, 1.180)),
+        origin=Origin(xyz=(-0.031, 0.016, 0.890)),
+        material=walnut,
+        name="slot_rail_left",
     )
-    frame.visual(
-        Cylinder(radius=0.023, length=0.160),
-        origin=Origin(xyz=(0.0, PIVOT_Y, PIVOT_Z), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal,
-        name="top_hinge_barrel",
+    front_frame.visual(
+        Box((0.016, 0.022, 1.180)),
+        origin=Origin(xyz=(0.031, 0.016, 0.890)),
+        material=walnut,
+        name="slot_rail_right",
     )
-    frame.visual(
-        Box((0.070, 0.018, 0.020)),
-        origin=Origin(xyz=(-0.332, 0.060, 0.044)),
-        material=rubber,
-        name="left_foot",
+    front_frame.visual(
+        Box((0.240, 0.026, 0.034)),
+        origin=Origin(xyz=(0.000, -0.029, 1.595)),
+        material=steel,
+        name="front_hinge_cleat",
     )
-    frame.visual(
-        Box((0.070, 0.018, 0.020)),
-        origin=Origin(xyz=(0.332, 0.060, 0.044)),
-        material=rubber,
-        name="right_foot",
-    )
-    frame.inertial = Inertial.from_geometry(
-        Box((0.72, 0.24, 1.78)),
-        mass=8.5,
-        origin=Origin(xyz=(0.0, -0.02, 0.89)),
+    front_frame.inertial = Inertial.from_geometry(
+        Box((0.700, 0.120, 1.640)),
+        mass=8.2,
+        origin=Origin(xyz=(0.000, 0.000, 0.820)),
     )
 
-    rear_brace = model.part("rear_brace")
-    rear_brace.visual(
-        Cylinder(radius=0.030, length=0.110),
-        origin=Origin(xyz=(0.0, 0.0, 0.0), rpy=(0.0, math.pi / 2.0, 0.0)),
-        material=metal,
-        name="brace_hinge_sleeve",
+    rear_leg = model.part("rear_leg")
+    rear_leg.visual(
+        Cylinder(radius=0.013, length=0.220),
+        origin=Origin(xyz=(0.000, 0.000, 0.000), rpy=(0.0, math.pi / 2.0, 0.0)),
+        material=steel,
+        name="rear_hinge_sleeve",
     )
-    rear_brace.visual(
-        Box((0.034, 0.024, 1.63)),
-        origin=Origin(xyz=(0.0, -0.030, -0.815)),
-        material=wood,
-        name="rear_leg_beam",
+    rear_leg.visual(
+        Box((0.095, 0.034, 0.090)),
+        origin=Origin(xyz=(0.000, -0.030, -0.042)),
+        material=oak,
+        name="rear_head_block",
     )
-    rear_brace.visual(
-        Box((0.080, 0.020, 0.020)),
-        origin=Origin(xyz=(0.0, -0.030, -1.626)),
+    rear_leg.visual(
+        Box((0.040, 0.028, 1.680)),
+        origin=Origin(xyz=(0.000, -0.380, -0.764), rpy=(-0.430, 0.0, 0.0)),
+        material=oak,
+        name="rear_strut",
+    )
+    rear_leg.visual(
+        Box((0.110, 0.120, 0.074)),
+        origin=Origin(xyz=(0.000, -0.720, -1.558)),
         material=rubber,
         name="rear_foot",
     )
-    rear_brace.inertial = Inertial.from_geometry(
-        Box((0.08, 0.06, 1.66)),
-        mass=2.5,
-        origin=Origin(xyz=(0.0, -0.05, -0.83)),
+    rear_leg.inertial = Inertial.from_geometry(
+        Box((0.160, 0.860, 1.720)),
+        mass=2.9,
+        origin=Origin(xyz=(0.000, -0.360, -0.800)),
     )
 
-    shelf = model.part("shelf_tray")
-    shelf.visual(
-        Box((0.58, 0.12, 0.030)),
-        origin=Origin(xyz=(0.0, 0.112, 0.0)),
-        material=wood,
-        name="tray_board",
+    support_ledge = model.part("support_ledge")
+    support_ledge.visual(
+        Box((0.034, 0.016, 0.140)),
+        origin=Origin(xyz=(0.000, 0.013, 0.065)),
+        material=steel,
+        name="ledge_slider",
     )
-    shelf.visual(
-        Box((0.58, 0.022, 0.045)),
-        origin=Origin(xyz=(0.0, 0.172, 0.008)),
-        material=wood_dark,
-        name="tray_lip",
+    support_ledge.visual(
+        Box((0.032, 0.032, 0.100)),
+        origin=Origin(xyz=(0.000, 0.037, 0.050)),
+        material=oak,
+        name="ledge_web",
     )
-    shelf.visual(
-        Box((0.110, 0.016, 0.200)),
-        origin=Origin(xyz=(0.0, 0.023, 0.0)),
-        material=wood_dark,
-        name="tray_front_guide",
+    support_ledge.visual(
+        Box((0.540, 0.060, 0.022)),
+        origin=Origin(xyz=(0.000, 0.083, 0.011)),
+        material=oak,
+        name="ledge_shelf",
     )
-    shelf.visual(
-        Box((0.020, 0.038, 0.200)),
-        origin=Origin(xyz=(-0.040, 0.017, 0.0)),
-        material=wood_dark,
-        name="tray_left_cheek",
+    support_ledge.visual(
+        Box((0.540, 0.018, 0.038)),
+        origin=Origin(xyz=(0.000, 0.122, 0.030)),
+        material=walnut,
+        name="ledge_lip",
     )
-    shelf.visual(
-        Box((0.020, 0.038, 0.200)),
-        origin=Origin(xyz=(0.040, 0.017, 0.0)),
-        material=wood_dark,
-        name="tray_right_cheek",
-    )
-    shelf.visual(
-        Box((0.150, 0.050, 0.110)),
-        origin=Origin(xyz=(0.0, 0.060, -0.040)),
-        material=wood_dark,
-        name="tray_support_block",
-    )
-    _add_wing_nut(shelf, x=-0.070, y=0.014, z=0.000, prefix="left_wingnut", material=metal)
-    _add_wing_nut(shelf, x=0.070, y=0.014, z=0.000, prefix="right_wingnut", material=metal)
-    shelf.inertial = Inertial.from_geometry(
-        Box((0.60, 0.20, 0.24)),
-        mass=2.2,
-        origin=Origin(xyz=(0.0, 0.085, 0.0)),
+    support_ledge.inertial = Inertial.from_geometry(
+        Box((0.560, 0.120, 0.190)),
+        mass=1.4,
+        origin=Origin(xyz=(0.000, 0.060, 0.060)),
     )
 
-    clamp = model.part("top_clamp")
-    clamp.visual(
-        Box((0.090, 0.016, 0.140)),
-        origin=Origin(xyz=(0.0, 0.023, 0.0)),
-        material=wood_dark,
-        name="clamp_front_guide",
+    top_clamp = model.part("top_clamp")
+    top_clamp.visual(
+        Box((0.034, 0.016, 0.160)),
+        origin=Origin(xyz=(0.000, 0.013, 0.080)),
+        material=steel,
+        name="clamp_slider",
     )
-    clamp.visual(
-        Box((0.012, 0.030, 0.140)),
-        origin=Origin(xyz=(-0.026, 0.030, 0.0)),
-        material=wood_dark,
-        name="clamp_left_cheek",
+    top_clamp.visual(
+        Box((0.032, 0.028, 0.075)),
+        origin=Origin(xyz=(0.000, 0.035, 0.018)),
+        material=oak,
+        name="clamp_body",
     )
-    clamp.visual(
-        Box((0.012, 0.030, 0.140)),
-        origin=Origin(xyz=(0.026, 0.030, 0.0)),
-        material=wood_dark,
-        name="clamp_right_cheek",
+    top_clamp.visual(
+        Box((0.220, 0.034, 0.022)),
+        origin=Origin(xyz=(0.000, 0.061, -0.004)),
+        material=walnut,
+        name="clamp_bar",
     )
-    clamp.visual(
-        Box((0.230, 0.050, 0.030)),
-        origin=Origin(xyz=(0.0, 0.060, 0.0)),
-        material=wood,
-        name="clamp_cross_bar",
+    top_clamp.visual(
+        Box((0.068, 0.020, 0.058)),
+        origin=Origin(xyz=(0.000, 0.051, -0.044)),
+        material=oak,
+        name="clamp_pad",
     )
-    clamp.visual(
-        Box((0.120, 0.028, 0.090)),
-        origin=Origin(xyz=(0.0, 0.090, -0.030)),
-        material=wood_dark,
-        name="clamp_pressure_pad",
-    )
-    clamp.visual(
-        Cylinder(radius=0.014, length=0.026),
-        origin=Origin(xyz=(0.0, 0.102, 0.020), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=metal,
-        name="clamp_thumb_screw",
-    )
-    clamp.inertial = Inertial.from_geometry(
-        Box((0.24, 0.14, 0.20)),
-        mass=1.2,
-        origin=Origin(xyz=(0.0, 0.060, -0.010)),
+    top_clamp.inertial = Inertial.from_geometry(
+        Box((0.240, 0.100, 0.240)),
+        mass=0.9,
+        origin=Origin(xyz=(0.000, 0.042, 0.010)),
     )
 
     model.articulation(
-        "rear_brace_hinge",
+        "rear_hinge",
         ArticulationType.REVOLUTE,
-        parent=frame,
-        child=rear_brace,
-        origin=Origin(xyz=(0.0, PIVOT_Y, PIVOT_Z), rpy=(-0.30, 0.0, 0.0)),
+        parent=front_frame,
+        child=rear_leg,
+        origin=Origin(xyz=(0.000, -0.055, 1.595)),
         axis=(1.0, 0.0, 0.0),
-        motion_limits=MotionLimits(effort=18.0, velocity=1.2, lower=-0.14, upper=0.20),
+        motion_limits=MotionLimits(
+            effort=20.0,
+            velocity=1.0,
+            lower=-0.300,
+            upper=0.180,
+        ),
     )
     model.articulation(
-        "shelf_slide",
+        "ledge_slide",
         ArticulationType.PRISMATIC,
-        parent=frame,
-        child=shelf,
-        origin=Origin(xyz=(0.0, 0.0, 0.58)),
+        parent=front_frame,
+        child=support_ledge,
+        origin=Origin(xyz=(0.000, 0.000, 0.360)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=12.0, velocity=0.25, lower=0.0, upper=0.22),
+        motion_limits=MotionLimits(
+            effort=15.0,
+            velocity=0.20,
+            lower=0.0,
+            upper=0.380,
+        ),
     )
     model.articulation(
         "clamp_slide",
         ArticulationType.PRISMATIC,
-        parent=frame,
-        child=clamp,
-        origin=Origin(xyz=(0.0, 0.0, 1.08)),
+        parent=front_frame,
+        child=top_clamp,
+        origin=Origin(xyz=(0.000, 0.000, 1.050)),
         axis=(0.0, 0.0, 1.0),
-        motion_limits=MotionLimits(effort=10.0, velocity=0.20, lower=0.0, upper=0.42),
+        motion_limits=MotionLimits(
+            effort=10.0,
+            velocity=0.16,
+            lower=0.0,
+            upper=0.300,
+        ),
     )
 
     return model
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model, asset_root=HERE)
+    ctx = TestContext(object_model, seed=0)
     front_frame = object_model.get_part("front_frame")
-    rear_brace = object_model.get_part("rear_brace")
-    shelf_tray = object_model.get_part("shelf_tray")
+    rear_leg = object_model.get_part("rear_leg")
+    support_ledge = object_model.get_part("support_ledge")
     top_clamp = object_model.get_part("top_clamp")
 
-    rear_brace_hinge = object_model.get_articulation("rear_brace_hinge")
-    shelf_slide = object_model.get_articulation("shelf_slide")
+    rear_hinge = object_model.get_articulation("rear_hinge")
+    ledge_slide = object_model.get_articulation("ledge_slide")
     clamp_slide = object_model.get_articulation("clamp_slide")
 
-    left_leg = front_frame.get_visual("left_front_leg")
-    right_leg = front_frame.get_visual("right_front_leg")
-    center_rail = front_frame.get_visual("center_rail")
     lower_stretcher = front_frame.get_visual("lower_stretcher")
-    top_hinge_barrel = front_frame.get_visual("top_hinge_barrel")
-    left_foot = front_frame.get_visual("left_foot")
-    right_foot = front_frame.get_visual("right_foot")
-    low_tooth = front_frame.get_visual("rail_tooth_0")
-    high_tooth = front_frame.get_visual("rail_tooth_7")
-    brace_hinge_sleeve = rear_brace.get_visual("brace_hinge_sleeve")
-    brace_leg_beam = rear_brace.get_visual("rear_leg_beam")
-    tray_board = shelf_tray.get_visual("tray_board")
-    tray_front_guide = shelf_tray.get_visual("tray_front_guide")
-    left_wingnut_hub = shelf_tray.get_visual("left_wingnut_hub")
-    right_wingnut_hub = shelf_tray.get_visual("right_wingnut_hub")
-    clamp_cross_bar = top_clamp.get_visual("clamp_cross_bar")
-    clamp_front_guide = top_clamp.get_visual("clamp_front_guide")
+    head_block = front_frame.get_visual("head_block")
+    mast_back = front_frame.get_visual("mast_back")
+    slot_rail_left = front_frame.get_visual("slot_rail_left")
+    slot_rail_right = front_frame.get_visual("slot_rail_right")
+    front_hinge_cleat = front_frame.get_visual("front_hinge_cleat")
+    rear_hinge_sleeve = rear_leg.get_visual("rear_hinge_sleeve")
+    rear_strut = rear_leg.get_visual("rear_strut")
+    rear_foot = rear_leg.get_visual("rear_foot")
+    ledge_slider = support_ledge.get_visual("ledge_slider")
+    ledge_shelf = support_ledge.get_visual("ledge_shelf")
+    clamp_slider = top_clamp.get_visual("clamp_slider")
+    clamp_pad = top_clamp.get_visual("clamp_pad")
 
     ctx.check_model_valid()
     ctx.check_mesh_files_exist()
-    ctx.allow_overlap(
-        rear_brace,
-        front_frame,
-        reason="rear brace hinge sleeve intentionally nests around the metal top pivot barrel",
+    ctx.fail_if_isolated_parts(max_pose_samples=24)
+    ctx.warn_if_part_contains_disconnected_geometry_islands()
+    ctx.fail_if_parts_overlap_in_current_pose()
+    ctx.fail_if_articulation_overlaps(max_pose_samples=64)
+
+    ctx.check(
+        "rear_hinge_is_revolute",
+        rear_hinge.articulation_type == ArticulationType.REVOLUTE,
+        details="Rear leg should swing on a top revolute hinge.",
+    )
+    ctx.check(
+        "ledge_slide_is_prismatic",
+        ledge_slide.articulation_type == ArticulationType.PRISMATIC,
+        details="Canvas support should move on a vertical prismatic slot.",
+    )
+    ctx.check(
+        "clamp_slide_is_prismatic",
+        clamp_slide.articulation_type == ArticulationType.PRISMATIC,
+        details="Top clamp should adjust vertically along the mast.",
+    )
+    ctx.check(
+        "rear_hinge_axis_runs_across_width",
+        tuple(rear_hinge.axis) == (1.0, 0.0, 0.0),
+        details=f"Expected rear hinge axis (1, 0, 0), got {rear_hinge.axis!r}.",
+    )
+    ctx.check(
+        "slot_axes_vertical",
+        tuple(ledge_slide.axis) == (0.0, 0.0, 1.0)
+        and tuple(clamp_slide.axis) == (0.0, 0.0, 1.0),
+        details="Both mast-mounted carriages should travel vertically.",
     )
 
-    # Default exact visual sensor for joint mounting; keep unless scale makes it irrelevant.
-    ctx.warn_if_articulation_origin_near_geometry(tol=0.015)
-    # Default exact visual sensor for floating/disconnected subassemblies inside one part.
-    ctx.warn_if_part_geometry_disconnected()
-    # Default articulated-joint clearance gate; adapt only if the model is not articulated.
-    ctx.check_articulation_overlaps(max_pose_samples=128)
-    # Default broad overlap warning backstop; conservative and non-blocking by default.
-    ctx.warn_if_overlaps(max_pose_samples=128, ignore_adjacent=True, ignore_fixed=True)
-
-    ctx.expect_contact(rear_brace, front_frame, elem_a=brace_hinge_sleeve, elem_b=top_hinge_barrel)
-    ctx.expect_gap(
-        shelf_tray,
+    ctx.expect_contact(
         front_frame,
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=tray_front_guide,
-        negative_elem=center_rail,
-        name="shelf_carriage_stays_seated_on_inner_rail",
+        rear_leg,
+        elem_a=front_hinge_cleat,
+        elem_b=rear_hinge_sleeve,
+        name="rear_hinge_cleat_seated",
+    )
+    ctx.expect_contact(
+        support_ledge,
+        front_frame,
+        elem_a=ledge_slider,
+        elem_b=mast_back,
+        name="ledge_slider_contacts_mast",
+    )
+    ctx.expect_contact(
+        top_clamp,
+        front_frame,
+        elem_a=clamp_slider,
+        elem_b=mast_back,
+        name="clamp_slider_contacts_mast",
+    )
+    ctx.expect_within(
+        support_ledge,
+        front_frame,
+        axes="x",
+        inner_elem=ledge_slider,
+        outer_elem=mast_back,
+        name="ledge_slider_within_mast_width",
+    )
+    ctx.expect_within(
+        top_clamp,
+        front_frame,
+        axes="x",
+        inner_elem=clamp_slider,
+        outer_elem=mast_back,
+        name="clamp_slider_within_mast_width",
+    )
+    ctx.expect_overlap(
+        support_ledge,
+        front_frame,
+        axes="z",
+        elem_a=ledge_slider,
+        elem_b=slot_rail_left,
+        min_overlap=0.100,
+        name="ledge_slider_engages_slot_height",
+    )
+    ctx.expect_overlap(
+        top_clamp,
+        front_frame,
+        axes="z",
+        elem_a=clamp_slider,
+        elem_b=slot_rail_right,
+        min_overlap=0.100,
+        name="clamp_slider_engages_slot_height",
+    )
+    ctx.expect_gap(
+        support_ledge,
+        front_frame,
+        axis="z",
+        min_gap=0.003,
+        max_gap=0.020,
+        positive_elem=ledge_shelf,
+        negative_elem=lower_stretcher,
+        name="ledge_resting_just_above_lower_stretcher",
     )
     ctx.expect_gap(
         top_clamp,
-        front_frame,
-        axis="y",
-        max_gap=0.001,
-        max_penetration=0.0,
-        positive_elem=clamp_front_guide,
-        negative_elem=center_rail,
-        name="top_clamp_stays_seated_on_front_rail",
-    )
-    ctx.expect_origin_distance(shelf_tray, front_frame, axes="x", max_dist=0.02)
-    ctx.expect_origin_distance(top_clamp, front_frame, axes="x", max_dist=0.02)
-    ctx.expect_gap(
-        front_frame,
-        front_frame,
-        axis="x",
-        min_gap=0.58,
-        positive_elem=right_foot,
-        negative_elem=left_foot,
-        name="front_feet_form_a_wide_a_frame_stance",
-    )
-    ctx.expect_gap(
-        front_frame,
-        front_frame,
-        axis="y",
-        min_gap=0.002,
-        positive_elem=center_rail,
-        negative_elem=low_tooth,
-        name="notched_positions_step_behind_the_inner_rail",
-    )
-    ctx.expect_gap(
-        front_frame,
-        front_frame,
+        support_ledge,
         axis="z",
-        min_gap=0.78,
-        positive_elem=high_tooth,
-        negative_elem=low_tooth,
-        name="inner_rail_carries_multiple_notch_levels",
-    )
-    ctx.expect_gap(
-        front_frame,
-        rear_brace,
-        axis="y",
-        min_gap=0.02,
-        positive_elem=center_rail,
-        negative_elem=brace_leg_beam,
-        name="rear_brace_leg_sits_behind_the_front_frame",
-    )
-    ctx.expect_gap(
-        top_clamp,
-        shelf_tray,
-        axis="z",
-        min_gap=0.35,
-        positive_elem=clamp_cross_bar,
-        negative_elem=tray_board,
-        name="top_clamp_starts_well_above_the_shelf",
-    )
-    ctx.expect_gap(
-        shelf_tray,
-        shelf_tray,
-        axis="x",
-        min_gap=0.10,
-        positive_elem=right_wingnut_hub,
-        negative_elem=left_wingnut_hub,
-        name="dual_wingnut_fasteners_flank_the_notched_rail",
+        min_gap=0.550,
+        positive_elem=clamp_pad,
+        negative_elem=ledge_shelf,
+        name="canvas_opening_between_ledge_and_clamp",
     )
 
-    with ctx.pose({shelf_slide: 0.20}):
-        ctx.expect_gap(
-            shelf_tray,
+    rear_limits = rear_hinge.motion_limits
+    ledge_limits = ledge_slide.motion_limits
+    clamp_limits = clamp_slide.motion_limits
+    assert rear_limits is not None
+    assert ledge_limits is not None
+    assert clamp_limits is not None
+    assert rear_limits.lower is not None and rear_limits.upper is not None
+    assert ledge_limits.lower is not None and ledge_limits.upper is not None
+    assert clamp_limits.lower is not None and clamp_limits.upper is not None
+
+    rear_foot_rest = ctx.part_element_world_aabb(rear_leg, elem=rear_foot)
+    ledge_rest = ctx.part_world_aabb(support_ledge)
+    clamp_rest = ctx.part_element_world_aabb(top_clamp, elem=clamp_pad)
+    assert rear_foot_rest is not None
+    assert ledge_rest is not None
+    assert clamp_rest is not None
+
+    with ctx.pose({rear_hinge: rear_limits.lower}):
+        rear_foot_open = ctx.part_element_world_aabb(rear_leg, elem=rear_foot)
+        assert rear_foot_open is not None
+        ctx.fail_if_parts_overlap_in_current_pose(name="rear_hinge_open_no_overlap")
+        ctx.fail_if_isolated_parts(name="rear_hinge_open_no_floating")
+        ctx.expect_contact(
             front_frame,
-            axis="y",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=tray_front_guide,
-            negative_elem=center_rail,
-            name="raised_shelf_remains_on_the_inner_rail",
+            rear_leg,
+            elem_a=front_hinge_cleat,
+            elem_b=rear_hinge_sleeve,
+            name="rear_hinge_open_contact",
+        )
+        ctx.check(
+            "rear_leg_swings_farther_back_when_opened",
+            rear_foot_open[0][1] < rear_foot_rest[0][1] - 0.180,
+            details="Opening the easel should move the rear foot farther behind the front frame.",
+        )
+
+    with ctx.pose({rear_hinge: rear_limits.upper}):
+        rear_foot_folded = ctx.part_element_world_aabb(rear_leg, elem=rear_foot)
+        assert rear_foot_folded is not None
+        ctx.fail_if_parts_overlap_in_current_pose(name="rear_hinge_folded_no_overlap")
+        ctx.fail_if_isolated_parts(name="rear_hinge_folded_no_floating")
+        ctx.expect_contact(
+            front_frame,
+            rear_leg,
+            elem_a=front_hinge_cleat,
+            elem_b=rear_hinge_sleeve,
+            name="rear_hinge_folded_contact",
+        )
+        ctx.check(
+            "rear_leg_folds_forward_from_open_pose",
+            rear_foot_folded[0][1] > rear_foot_rest[0][1] + 0.100,
+            details="Folding should bring the rear foot closer to the front frame.",
+        )
+
+    with ctx.pose({ledge_slide: ledge_limits.upper}):
+        ledge_high = ctx.part_world_aabb(support_ledge)
+        assert ledge_high is not None
+        ctx.fail_if_parts_overlap_in_current_pose(name="ledge_high_no_overlap")
+        ctx.fail_if_isolated_parts(name="ledge_high_no_floating")
+        ctx.expect_contact(
+            support_ledge,
+            front_frame,
+            elem_a=ledge_slider,
+            elem_b=mast_back,
+            name="ledge_high_contact",
         )
         ctx.expect_gap(
             top_clamp,
-            shelf_tray,
+            support_ledge,
             axis="z",
-            min_gap=0.10,
-            positive_elem=clamp_cross_bar,
-            negative_elem=tray_board,
-            name="raised_shelf_stays_below_the_top_clamp",
+            min_gap=0.080,
+            positive_elem=clamp_pad,
+            negative_elem=ledge_shelf,
+            name="ledge_high_still_below_clamp",
+        )
+        ctx.check(
+            "ledge_rises_substantially",
+            ledge_high[0][2] > ledge_rest[0][2] + 0.340,
+            details="The canvas support ledge should travel most of the mast height.",
         )
 
-    with ctx.pose({clamp_slide: 0.30}):
-        ctx.expect_gap(
+    with ctx.pose({clamp_slide: clamp_limits.upper}):
+        clamp_high = ctx.part_element_world_aabb(top_clamp, elem=clamp_pad)
+        assert clamp_high is not None
+        ctx.fail_if_parts_overlap_in_current_pose(name="clamp_high_no_overlap")
+        ctx.fail_if_isolated_parts(name="clamp_high_no_floating")
+        ctx.expect_contact(
             top_clamp,
             front_frame,
-            axis="y",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=clamp_front_guide,
-            negative_elem=center_rail,
-            name="lowered_top_clamp_still_tracks_the_front_rail",
+            elem_a=clamp_slider,
+            elem_b=mast_back,
+            name="clamp_high_contact",
         )
         ctx.expect_gap(
+            front_frame,
             top_clamp,
-            shelf_tray,
             axis="z",
-            min_gap=0.08,
-            positive_elem=clamp_cross_bar,
-            negative_elem=tray_board,
-            name="lowered_top_clamp_remains_above_the_shelf",
+            min_gap=0.010,
+            positive_elem=head_block,
+            negative_elem=clamp_slider,
+            name="clamp_clears_head_block_at_top",
+        )
+        ctx.check(
+            "clamp_rises_substantially",
+            clamp_high[0][2] > clamp_rest[0][2] + 0.250,
+            details="The top clamp should slide enough to grip canvases of different heights.",
         )
 
-    with ctx.pose({clamp_slide: 0.42}):
+    with ctx.pose({ledge_slide: ledge_limits.upper, clamp_slide: clamp_limits.upper}):
+        ctx.fail_if_parts_overlap_in_current_pose(name="both_sliders_high_no_overlap")
+        ctx.fail_if_isolated_parts(name="both_sliders_high_no_floating")
         ctx.expect_gap(
             top_clamp,
-            front_frame,
-            axis="y",
-            max_gap=0.001,
-            max_penetration=0.0,
-            positive_elem=clamp_front_guide,
-            negative_elem=center_rail,
-            name="fully_raised_top_clamp_still_tracks_the_front_rail",
-        )
-        ctx.expect_gap(
-            top_clamp,
-            shelf_tray,
+            support_ledge,
             axis="z",
-            min_gap=0.45,
-            positive_elem=clamp_cross_bar,
-            negative_elem=tray_board,
-            name="fully_raised_top_clamp_clears_canvas_space_above_the_shelf",
+            min_gap=0.140,
+            positive_elem=clamp_pad,
+            negative_elem=ledge_shelf,
+            name="tall_canvas_clearance",
         )
 
-    with ctx.pose({rear_brace_hinge: 0.18}):
-        ctx.expect_contact(rear_brace, front_frame, elem_a=brace_hinge_sleeve, elem_b=top_hinge_barrel)
-        ctx.expect_gap(
-            front_frame,
-            rear_brace,
-            axis="y",
-            min_gap=0.02,
-            positive_elem=center_rail,
-            negative_elem=brace_leg_beam,
-            name="rear_brace_can_fold_without_crossing_the_front_frame",
-        )
     return ctx.report()
 
 

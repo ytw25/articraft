@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_shoulderelbowwrist_arm_2ba93d060b7e419689548798b2ff202e",
+  "created_at": "2026-03-29T15:31:29Z",
+  "updated_at": "2026-03-29T20:18:29Z",
+  "rating": 3,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "shoulderelbowwrist_arm",
+  "source": {
+    "run_id": "run_20260329_153123_999887_20260329-sdk-hybrid-realism-backfill-to-10-gpt54",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260329_sdk_hybrid_realism_backfill_to_10_gpt54_high",
+    "row_id": "shoulderelbowwrist_arm_to10_realism_high_09",
+    "prompt_index": 107
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Shoulder-elbow-wrist arm Realism Backfill 9",
+    "prompt_preview": "A service manipulator with a square base column, a lifted upper link, a short forearm, and a wrist hinge block at the nose. The geometry should feel compact..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "1109a0482b7e4d0d6d569e9c8b6f4445d3a628c4741cf3ffe44e4cef2403aae3",
+    "model_py_sha256": "84f9107c8c9e199a7035f39ade7ed01963f0ecaaf48f0b5f980f3b8834fb721e"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

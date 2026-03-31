@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_wheelchair_0003",
+  "created_at": "2026-03-28T04:11:11Z",
+  "updated_at": "2026-03-28T16:01:04Z",
+  "rating": 5,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "wheelchair",
+  "source": {
+    "run_id": "run_20260325_223731_504956_20260325-backfill-part3-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260325_backfill_part3_gpt54_high",
+    "row_id": "wheelchair_backfill_1",
+    "prompt_index": 77
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Wheelchair Backfill 1",
+    "prompt_preview": "A realistic, highly detailed Wheelchair in a rugged utility variant, with a rigid or foldable chair frame, large rear drive wheels, front casters, and footre..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "4c0454bf997d975e928d3a47de11851c15e7c072263262d7fab1b9775fc2a109",
+    "model_py_sha256": "4466c06e8777ba806b9160530218e3c3db689f958eb6f6813a4c07267614a8fc"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "shawlyu",
+  "rated_by": "shawlyu",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}

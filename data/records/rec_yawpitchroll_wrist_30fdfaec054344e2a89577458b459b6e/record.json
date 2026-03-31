@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_yawpitchroll_wrist_30fdfaec054344e2a89577458b459b6e",
+  "created_at": "2026-03-29T04:00:44Z",
+  "updated_at": "2026-03-29T14:37:29Z",
+  "rating": 3,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "yawpitchroll_wrist",
+  "source": {
+    "run_id": "run_20260329_040041_508364_20260328-sdk-hybrid-backfill-to-7-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260328_sdk_hybrid_backfill_to_7_gpt54_high",
+    "row_id": "yawpitchroll_wrist_to7_high_07",
+    "prompt_index": 116
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Yaw-pitch-roll wrist Backfill 7",
+    "prompt_preview": "An offset robotic wrist with a small base pedestal, a side-supported pitch frame, and a cylindrical roll nose mounted inside the pitch frame. The assembly sh..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "fb03b4c76d76aeb28749af75ec4a17d04e756dafe3deb5467240778cc33cba31",
+    "model_py_sha256": "50d75a6ffc25815983e497f4800867f4016a1329e8c58ac863e23221a23dce9e"
+  },
+  "collections": [
+    "dataset"
+  ],
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rating": null,
+  "secondary_rated_by": null
+}
