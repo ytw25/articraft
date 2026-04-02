@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_yawpitchroll_wrist_cda9252beea5420e991a35a9be873242",
+  "created_at": "2026-04-02T16:32:45Z",
+  "updated_at": "2026-04-02T16:42:11Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "yawpitchroll_wrist",
+  "source": {
+    "run_id": "run_20260402_163237_674254_20260331-sdk-hybrid-weighted-easy-100-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260331_sdk_hybrid_weighted_easy_100_gpt54_high",
+    "row_id": "yawpitchroll_wrist_weighted_easy_high_03",
+    "prompt_index": 93
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Yaw-pitch-roll wrist Weighted Easy 3",
+    "prompt_preview": "An under-slung three-axis wrist assembly. A top support carries a yaw stage below it, then a pitch cradle, then a short roll output. The mechanism uses three..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "a6e24e42f4461ab2413baa78aed507161fee568daa4382ed66bc757119ef8315",
+    "model_py_sha256": "c24c3b504b316fd170cd3a42ac1e8b97c30899c7040eddecf43028f2e4099404"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

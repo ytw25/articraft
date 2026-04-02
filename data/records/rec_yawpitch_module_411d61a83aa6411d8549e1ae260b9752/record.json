@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_yawpitch_module_411d61a83aa6411d8549e1ae260b9752",
+  "created_at": "2026-04-02T16:32:45Z",
+  "updated_at": "2026-04-02T16:40:11Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "yawpitch_module",
+  "source": {
+    "run_id": "run_20260402_163237_674254_20260331-sdk-hybrid-weighted-easy-100-gpt54-high",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260331_sdk_hybrid_weighted_easy_100_gpt54_high",
+    "row_id": "yawpitch_module_weighted_easy_high_05",
+    "prompt_index": 79
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Yaw-pitch module Weighted Easy 5",
+    "prompt_preview": "A compact service yaw-pitch head. A broad grounded body supports a compact rotary lower stage and a small trunnion cradle above it. The lower stage is a yaw..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "0b81689a89018c60109db547e497cfb25d5c72820ac096dbf9b46cf1305714d0",
+    "model_py_sha256": "e05d36c5bf3a7fdee2c66000c343d144c03b87e17a460a421ab0c91b0051f764"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
