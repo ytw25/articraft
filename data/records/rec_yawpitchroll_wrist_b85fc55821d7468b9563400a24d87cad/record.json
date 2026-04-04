@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_yawpitchroll_wrist_b85fc55821d7468b9563400a24d87cad",
+  "created_at": "2026-04-03T21:46:47Z",
+  "updated_at": "2026-04-03T21:59:32Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "yawpitchroll_wrist",
+  "source": {
+    "run_id": "run_20260403_214622_729694_20260403-sdk-hybrid-rebalanced-to-1500-gpt54-hig",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260403_sdk_hybrid_rebalanced_to_1500_gpt54_high",
+    "row_id": "yawpitchroll_wrist_to1500_rebalanced_high_04",
+    "prompt_index": 266
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Yaw-pitch-roll wrist Rebalanced to 1500 4",
+    "prompt_preview": "A tower wrist with roll cartridge. A fixed support tower carries a yaw stage, a compact pitch cradle, and a short roll cartridge nested inside the cradle. Ya..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "94fe93f2d85103d6f5715028da44e2906e9b914e6b0e950049468f3b0d4a8b65",
+    "model_py_sha256": "042aecc95bbdcdfe111895043c4d4c491cc2f9f18839646f6c22ce12eb202b18"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

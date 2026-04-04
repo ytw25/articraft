@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_orthogonal_xy_stage_6fbd80ab6518492b8d978a68b347a8fc",
+  "created_at": "2026-04-03T21:46:47Z",
+  "updated_at": "2026-04-03T21:59:09Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "orthogonal_xy_stage",
+  "source": {
+    "run_id": "run_20260403_214622_729694_20260403-sdk-hybrid-rebalanced-to-1500-gpt54-hig",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260403_sdk_hybrid_rebalanced_to_1500_gpt54_high",
+    "row_id": "orthogonal_xy_stage_to1500_rebalanced_high_03",
+    "prompt_index": 91
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Orthogonal XY stage Rebalanced to 1500 3",
+    "prompt_preview": "A machine-table XY stage. A fixed base rail set carries a long X carriage, and the X carriage carries a shorter Y slide with a plain tooling face. The two su..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "0df132bd2cfe90c11e2f3af7c64fdc730729fc0778dda26b399703731e2a473a",
+    "model_py_sha256": "85fd6babceb6fb9de2a93a5b032df1f9bdec2a25a7bfa8931040a9e6d7777ad8"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_cantilever_articulated_arm_24c67e93e3fa4c3990061124f78ec3a3",
+  "created_at": "2026-04-03T21:46:47Z",
+  "updated_at": "2026-04-03T22:01:20Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "cantilever_articulated_arm",
+  "source": {
+    "run_id": "run_20260403_214622_729694_20260403-sdk-hybrid-rebalanced-to-1500-gpt54-hig",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260403_sdk_hybrid_rebalanced_to_1500_gpt54_high",
+    "row_id": "cantilever_articulated_arm_to1500_rebalanced_high_04",
+    "prompt_index": 12
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "Cantilever articulated arm Rebalanced to 1500 4",
+    "prompt_preview": "A pedestal cantilever inspection arm. A pedestal base supports a serial arm chain with a deep shoulder link, a slimmer forelink, and a compact wrist block at..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "c62476cc89b570d23694a2993aa0e14a61c6ba21ef41f877c1782d15aec5a9ab",
+    "model_py_sha256": "8bd5ac257199158998364f0d46185f8c330638779248261dddd7a5859ec8e253"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

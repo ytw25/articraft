@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_xyz_cartesian_stage_2f597340e2e548c69e6d6c7bad4be38f",
+  "created_at": "2026-04-03T21:46:47Z",
+  "updated_at": "2026-04-03T22:01:16Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "xyz_cartesian_stage",
+  "source": {
+    "run_id": "run_20260403_214622_729694_20260403-sdk-hybrid-rebalanced-to-1500-gpt54-hig",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260403_sdk_hybrid_rebalanced_to_1500_gpt54_high",
+    "row_id": "xyz_cartesian_stage_to1500_rebalanced_high_03",
+    "prompt_index": 254
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "XYZ Cartesian stage Rebalanced to 1500 3",
+    "prompt_preview": "A machine-table XYZ slide stack. A grounded lower X guide carries a broad carriage, the carriage carries a Y slide, and the Y slide carries a vertical Z stag..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "b7694f2c14f91a30f00ea8016c59d63355de2d975e2f3e0fe975e477f1f0bf34",
+    "model_py_sha256": "479cc551ef4728870d3916ee586beacf7c22204ab039a176ff872e523d54ebb8"
+  },
+  "collections": [
+    "dataset"
+  ]
+}

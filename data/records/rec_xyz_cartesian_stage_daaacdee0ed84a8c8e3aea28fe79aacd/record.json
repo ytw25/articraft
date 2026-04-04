@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_xyz_cartesian_stage_daaacdee0ed84a8c8e3aea28fe79aacd",
+  "created_at": "2026-04-03T21:46:47Z",
+  "updated_at": "2026-04-03T21:59:03Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "mattzh72",
+  "rated_by": "mattzh72",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "xyz_cartesian_stage",
+  "source": {
+    "run_id": "run_20260403_214622_729694_20260403-sdk-hybrid-rebalanced-to-1500-gpt54-hig",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260403_sdk_hybrid_rebalanced_to_1500_gpt54_high",
+    "row_id": "xyz_cartesian_stage_to1500_rebalanced_high_04",
+    "prompt_index": 255
+  },
+  "sdk_package": "sdk_hybrid",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "XYZ Cartesian stage Rebalanced to 1500 4",
+    "prompt_preview": "A inspection XYZ gantry-lite stage. A fixed base carries a long X slide, the X slide carries a transverse Y runner, and the Y runner carries a compact vertic..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "873079f1f4c3e417bcf8b9b44a71a62d3aefee5777b195a6b18eb40af8f6f6fc",
+    "model_py_sha256": "677f88358ee0fe076e5e064f1713b8c0b9c30769dcbb22d31300a1c773b8f536"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
