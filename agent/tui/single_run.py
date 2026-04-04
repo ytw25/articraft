@@ -1,5 +1,6 @@
 """Single run display - minimal log lines, no panels or live widgets."""
 
+import logging
 import threading
 import time
 from typing import Any, Optional
@@ -15,6 +16,30 @@ from agent.tui.formatters import (
     format_tool_args,
     truncate_text,
 )
+
+_ACTIVE_WAIT_DISPLAY: "SingleRunDisplay | None" = None
+_ACTIVE_WAIT_DISPLAY_LOCK = threading.Lock()
+
+
+class LLMWaitAwareStreamHandler(logging.StreamHandler):
+    """Clears any active live wait line before emitting a log record."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        display = _active_wait_display()
+        if display is not None:
+            display.prepare_for_external_output()
+        super().emit(record)
+
+
+def _active_wait_display() -> "SingleRunDisplay | None":
+    with _ACTIVE_WAIT_DISPLAY_LOCK:
+        return _ACTIVE_WAIT_DISPLAY
+
+
+def _set_active_wait_display(display: "SingleRunDisplay | None") -> None:
+    global _ACTIVE_WAIT_DISPLAY
+    with _ACTIVE_WAIT_DISPLAY_LOCK:
+        _ACTIVE_WAIT_DISPLAY = display
 
 
 class SingleRunDisplay:
@@ -59,6 +84,7 @@ class SingleRunDisplay:
         self._llm_wait_stop_event: Optional[threading.Event] = None
         self._llm_wait_thread: Optional[threading.Thread] = None
         self._llm_wait_line_len = 0
+        self._llm_wait_lock = threading.Lock()
 
     def _print_indented_block(self, text: str, *, style: str) -> None:
         """Print a multi-line block with consistent indentation."""
@@ -149,19 +175,26 @@ class SingleRunDisplay:
         if stream is None:
             return
         text = f"  llm     {frame} waiting {format_timestamp(elapsed_seconds)}"
-        self._llm_wait_line_len = max(self._llm_wait_line_len, len(text))
-        stream.write("\r" + text)
-        stream.flush()
+        with self._llm_wait_lock:
+            self._llm_wait_line_len = max(self._llm_wait_line_len, len(text))
+            stream.write("\r" + text)
+            stream.flush()
 
-    def _clear_llm_wait_line(self) -> None:
+    def _clear_llm_wait_line(self, *, reset_length: bool = True) -> None:
         stream = getattr(self.console, "file", None)
         if stream is None:
             return
-        if self._llm_wait_line_len <= 0:
-            return
-        stream.write("\r" + (" " * self._llm_wait_line_len) + "\r")
-        stream.flush()
-        self._llm_wait_line_len = 0
+        with self._llm_wait_lock:
+            if self._llm_wait_line_len <= 0:
+                return
+            stream.write("\r" + (" " * self._llm_wait_line_len) + "\r")
+            stream.flush()
+            if reset_length:
+                self._llm_wait_line_len = 0
+
+    def prepare_for_external_output(self) -> None:
+        """Clear the live wait line so external output starts on a fresh row."""
+        self._clear_llm_wait_line(reset_length=False)
 
     def start_llm_wait(self) -> None:
         if not self.enabled:
@@ -173,6 +206,7 @@ class SingleRunDisplay:
         stop_event = threading.Event()
         self._llm_wait_stop_event = stop_event
         start = time.monotonic()
+        _set_active_wait_display(self)
 
         def _run() -> None:
             frames = ("|", "/", "-", "\\")
@@ -194,6 +228,8 @@ class SingleRunDisplay:
             stop_event.set()
         if worker is not None and worker.is_alive():
             worker.join(timeout=0.5)
+        if _active_wait_display() is self:
+            _set_active_wait_display(None)
         self._clear_llm_wait_line()
 
     # ── lifecycle ──────────────────────────────────────────────

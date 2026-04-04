@@ -57,6 +57,7 @@ from agent.tools import (
 from agent.tools import (
     resolve_image_path as _resolve_image_path,
 )
+from agent.tui.single_run import LLMWaitAwareStreamHandler
 from sdk._profiles import DEFAULT_SCAFFOLD_MODE, LEGACY_SCAFFOLD_MODE, normalize_scaffold_mode
 from storage.collections import CollectionStore
 from storage.dataset_workflow import (
@@ -2056,7 +2057,11 @@ def _build_prompt_with_qc(prompt: str, qc_blurb_text: Optional[str]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(levelname)s: %(message)s",
+        handlers=[LLMWaitAwareStreamHandler()],
+    )
     load_dotenv()
 
     parser = argparse.ArgumentParser(

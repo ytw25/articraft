@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import logging
+import time
 from io import StringIO
 
 from rich.console import Console
 
-from agent.tui.single_run import SingleRunDisplay
+from agent.tui.single_run import LLMWaitAwareStreamHandler, SingleRunDisplay
 
 
 def _make_display() -> tuple[SingleRunDisplay, StringIO]:
@@ -225,3 +227,39 @@ def test_add_maintenance_event_shows_cache_lifecycle_line() -> None:
     output = buffer.getvalue()
     assert "maint   cache create" in output
     assert "cachedContents/cache_1" in output
+
+
+class _TTYBuffer(StringIO):
+    def isatty(self) -> bool:
+        return True
+
+
+def test_logging_clears_live_wait_line_before_emitting() -> None:
+    buffer = _TTYBuffer()
+    console = Console(file=buffer, force_terminal=False, color_system=None, width=160)
+    display = SingleRunDisplay(
+        console=console,
+        model_id="gpt-5.4",
+        thinking_level="high",
+        max_turns=30,
+        scaffold_mode="lite",
+        enabled=True,
+    )
+    logger = logging.getLogger("tests.single_run_display.wait_line")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    handler = LLMWaitAwareStreamHandler(stream=buffer)
+    handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    logger.handlers = [handler]
+    try:
+        display.start_llm_wait()
+        time.sleep(0.05)
+        logger.info("external log")
+        time.sleep(0.05)
+        display.stop_llm_wait()
+    finally:
+        logger.handlers = []
+
+    output = buffer.getvalue()
+    assert "INFO: external log" in output
+    assert "\r" in output

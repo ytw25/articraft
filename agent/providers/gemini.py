@@ -705,41 +705,13 @@ class GeminiLLM:
         tools: list[dict],
         messages: list[dict[str, Any]],
     ) -> int:
-        if not self._clients:
-            raise RuntimeError("Gemini token counting requires a real API client")
-        from google.genai import types  # type: ignore
-
-        tool_declarations = self._convert_tools(tools)
-        config = types.CountTokensConfig(
-            system_instruction=system_prompt,
-            tools=[types.Tool(function_declarations=tool_declarations)]
-            if tool_declarations
-            else None,
-        )
-
-        async def _call() -> Any:
-            client = self._next_client()
-            return await client.aio.models.count_tokens(
-                model=self.model_id,
-                contents=self._convert_messages(messages),
-                config=config,
-            )
-
-        response = await _async_retry(
-            _call,
-            max_attempts=1 + max(0, self.max_retries),
-            should_retry=_should_retry_gemini_exception,
-            base_delay=self.retry_base_seconds,
-            max_delay=self.retry_max_seconds,
-            logger=_logger,
+        return await self._count_generate_request_tokens(
+            system_prompt=system_prompt,
+            tools=tools,
+            messages=messages,
+            cached_content_name=None,
             context=f"gemini.count_tokens(model={self.model_id})",
         )
-        total_tokens = getattr(response, "total_tokens", None) or getattr(
-            response, "total_token_count", None
-        )
-        if not isinstance(total_tokens, int):
-            raise RuntimeError("Gemini count_tokens response did not include total_tokens")
-        return total_tokens
 
     async def _count_cached_request_tokens(
         self,
@@ -749,16 +721,33 @@ class GeminiLLM:
         messages: list[dict[str, Any]],
         cached_content_name: str,
     ) -> int:
+        return await self._count_generate_request_tokens(
+            system_prompt=system_prompt,
+            tools=tools,
+            messages=messages,
+            cached_content_name=cached_content_name,
+            context=f"gemini.count_tokens_cached(model={self.model_id})",
+        )
+
+    async def _count_generate_request_tokens(
+        self,
+        *,
+        system_prompt: str,
+        tools: list[dict],
+        messages: list[dict[str, Any]],
+        cached_content_name: str | None,
+        context: str,
+    ) -> int:
         if not self._clients:
             raise RuntimeError("Gemini token counting requires a real API client")
         from google.genai import _common, types  # type: ignore
         from google.genai import models as genai_models
 
         client = self._next_client()
-        config = types.GenerateContentConfig(
-            cached_content=cached_content_name,
-            temperature=0.7,
-            thinking_config=self._build_thinking_config(),
+        config = self._build_generate_config(
+            system_prompt=system_prompt,
+            tools=tools,
+            cached_content_name=cached_content_name,
         )
         parameter_model = types._GenerateContentParameters(
             model=self.model_id,
@@ -790,19 +779,15 @@ class GeminiLLM:
         request_dict = _common.encode_unserializable_types(request_dict)
 
         async def _call() -> int:
-            http_response = await client._api_client.async_request(
-                "post",
-                path,
-                request_dict,
-            )
+            http_response = await client._api_client.async_request("post", path, request_dict)
             body = getattr(http_response, "body", None)
             if isinstance(body, str):
                 body = json.loads(body)
             if not isinstance(body, dict):
-                raise RuntimeError("Gemini cached countTokens response did not include a JSON body")
+                raise RuntimeError("Gemini countTokens response did not include a JSON body")
             total_tokens = body.get("totalTokens") or body.get("total_tokens")
             if not isinstance(total_tokens, int):
-                raise RuntimeError("Gemini cached countTokens response did not include totalTokens")
+                raise RuntimeError("Gemini countTokens response did not include totalTokens")
             return total_tokens
 
         return await _async_retry(
@@ -812,7 +797,7 @@ class GeminiLLM:
             base_delay=self.retry_base_seconds,
             max_delay=self.retry_max_seconds,
             logger=_logger,
-            context=f"gemini.count_tokens_cached(model={self.model_id})",
+            context=context,
         )
 
     async def _compact_messages(
@@ -1597,6 +1582,7 @@ def _should_retry_gemini_exception(exc: BaseException) -> bool:
     if any(
         needle in message
         for needle in (
+            "not supported in gemini api",
             "api key",
             "unauthorized",
             "permission denied",

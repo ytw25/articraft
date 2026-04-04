@@ -3,7 +3,11 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timezone
 
-from agent.providers.gemini import GeminiLLM, _gemini_compaction_prompt_text
+from agent.providers.gemini import (
+    GeminiLLM,
+    _gemini_compaction_prompt_text,
+    _should_retry_gemini_exception,
+)
 
 
 def test_prepare_next_request_creates_prefix_cache_event() -> None:
@@ -50,7 +54,7 @@ def test_prepare_next_request_compacts_for_hard_pressure_and_preserves_raw_tail(
     provider = GeminiLLM(dry_run=True)
     provider._last_usage = {"prompt_tokens": 700_000}
     provider._cached_content_name = "cachedContents/cache_1"
-    provider._cached_content_expire_time = datetime(2026, 4, 4, 12, 0, tzinfo=timezone.utc)
+    provider._cached_content_expire_time = datetime(2099, 4, 4, 12, 0, tzinfo=timezone.utc)
 
     async def fake_ensure_prefix_cache(
         *, system_prompt: str, tools: list[dict], trace_events: list
@@ -279,3 +283,8 @@ def test_close_emits_cache_delete_event() -> None:
             "accounting_status": "not_billed_v1",
         }
     ]
+
+
+def test_unsupported_gemini_api_value_error_is_not_retried() -> None:
+    exc = ValueError("system_instruction parameter is not supported in Gemini API.")
+    assert _should_retry_gemini_exception(exc) is False
