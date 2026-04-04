@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from collections import defaultdict, deque
 from math import pi
 from pathlib import Path
 
@@ -23,6 +24,31 @@ def _bounds(
 
 def _managed_mesh_suffix(geometry: sdk.MeshGeometry) -> str:
     return hashlib.sha256(geometry.to_obj().encode("utf-8")).hexdigest()[:12]
+
+
+def _component_count(geom: sdk.MeshGeometry) -> int:
+    adjacency: dict[int, set[int]] = defaultdict(set)
+    for a, b, c in geom.faces:
+        adjacency[a].update((b, c))
+        adjacency[b].update((a, c))
+        adjacency[c].update((a, b))
+
+    seen: set[int] = set()
+    count = 0
+    for start in range(len(geom.vertices)):
+        if start in seen:
+            continue
+        count += 1
+        queue: deque[int] = deque([start])
+        seen.add(start)
+        while queue:
+            current = queue.popleft()
+            for neighbor in adjacency[current]:
+                if neighbor in seen:
+                    continue
+                seen.add(neighbor)
+                queue.append(neighbor)
+    return count
 
 
 def test_dome_geometry_builds_closed_hemisphere() -> None:
@@ -416,6 +442,56 @@ def test_sweep_profile_along_spline_supports_cubic_bezier_alias() -> None:
     assert mins[0] <= 0.001
     assert maxs[0] >= 0.199
     assert maxs[2] >= 0.05
+
+
+def test_extrude_with_holes_geometry_builds_manifold_panel() -> None:
+    geom = sdk.ExtrudeWithHolesGeometry(
+        sdk.rounded_rect_profile(0.12, 0.08, radius=0.006),
+        [sdk.rounded_rect_profile(0.095, 0.0108, radius=0.002)],
+        0.01,
+    )
+
+    mesh_module._manifold_from_geometry(geom, name="panel_with_hole")
+
+    assert len(geom.vertices) > 0
+    assert len(geom.faces) > 0
+
+
+def test_louver_panel_geometry_builds_closed_panel_with_expected_bounds() -> None:
+    geom = sdk.LouverPanelGeometry(
+        (0.12, 0.08),
+        0.01,
+        frame=0.01,
+        slat_pitch=0.02,
+        slat_width=0.008,
+        slat_angle_deg=30.0,
+        corner_radius=0.006,
+    )
+
+    mesh_module._manifold_from_geometry(geom, name="louver_panel")
+
+    assert len(geom.vertices) > 0
+    assert len(geom.faces) > 0
+    assert _component_count(geom) == 1
+
+    mins, maxs = _bounds(geom)
+    assert mins[0] == pytest.approx(-0.06, abs=1e-6)
+    assert maxs[0] == pytest.approx(0.06, abs=1e-6)
+    assert mins[1] == pytest.approx(-0.04, abs=1e-6)
+    assert maxs[1] == pytest.approx(0.04, abs=1e-6)
+    assert mins[2] == pytest.approx(-0.005, abs=1e-6)
+    assert maxs[2] == pytest.approx(0.005, abs=1e-6)
+
+
+def test_louver_panel_geometry_requires_at_least_one_slat_row() -> None:
+    with pytest.raises(ValueError, match="No louver rows fit panel"):
+        sdk.LouverPanelGeometry(
+            (0.12, 0.03),
+            0.01,
+            frame=0.01,
+            slat_pitch=0.02,
+            slat_width=0.008,
+        )
 
 
 def test_closed_bezier_spline_requires_closed_curve() -> None:

@@ -21,6 +21,7 @@ from sdk import (
     LoftGeometry,
     ExtrudeGeometry,
     ExtrudeWithHolesGeometry,
+    LouverPanelGeometry,
     SweepGeometry,
     rounded_rect_profile,
     superellipse_profile,
@@ -40,7 +41,7 @@ from sdk import (
 - primitive builders: `BoxGeometry`, `CylinderGeometry`, `ConeGeometry`,
   `SphereGeometry`, `DomeGeometry`, `CapsuleGeometry`, `TorusGeometry`
 - loft/extrude/sweep builders: `LatheGeometry`, `ExtrudeGeometry`,
-  `ExtrudeWithHolesGeometry`, `SweepGeometry`
+  `ExtrudeWithHolesGeometry`, `LouverPanelGeometry`, `SweepGeometry`
 - profile helpers: `rounded_rect_profile`, `superellipse_profile`
 - shell helpers: `superellipse_side_loft`, `split_superellipse_side_loft`,
   `resample_side_sections`
@@ -159,6 +160,32 @@ ExtrudeWithHolesGeometry(
 
 - `outer_profile`: outer 2D loop.
 - `hole_profiles`: zero or more through-cut loops inside the outer profile.
+
+### `LouverPanelGeometry`
+
+```python
+LouverPanelGeometry(
+    panel_size,
+    thickness,
+    *,
+    frame: float = 0.008,
+    slat_pitch: float = 0.024,
+    slat_width: float = 0.010,
+    slat_angle_deg: float = 32.0,
+    corner_radius: float = 0.004,
+    center: bool = True,
+    fin_thickness: float | None = None,
+)
+```
+
+- Builds a rectangular panel in local `XY`, extruded along `Z`, with repeated
+  through-slots and fused angled louver fins.
+- `panel_size`: `(width, height)` of the overall panel.
+- `frame`: solid border width around the slotted interior field.
+- `slat_pitch` must be greater than `slat_width`.
+- `slat_angle_deg` uses degrees for the fin tilt.
+- `center=False` places the panel in `z in [0, thickness]`; the default
+  `center=True` keeps it centered on the profile plane.
 
 ### `SweepGeometry`
 
@@ -342,6 +369,19 @@ lip = LatheGeometry.from_shell_profiles(
 )
 ```
 
+```python
+vent = LouverPanelGeometry(
+    (0.18, 0.10),
+    0.01,
+    frame=0.012,
+    slat_pitch=0.022,
+    slat_width=0.009,
+    slat_angle_deg=28.0,
+    corner_radius=0.006,
+)
+mesh = mesh_from_geometry(vent, "vent_panel")
+```
+
 ## See Also
 
 - `45_wires.md` for rails, loops, tubes, and frames
@@ -351,6 +391,8 @@ lip = LatheGeometry.from_shell_profiles(
 ## Clarifications for agent usage
 
 - Angle arguments are radians and use the right-hand rule.
+- `LouverPanelGeometry.slat_angle_deg` is the exception on this page; it uses
+  degrees because it is a shape parameter, not a transform helper.
 - `LoftGeometry` validates profiles through their XY projection. End caps only behave as expected when the first and last profiles are planar at constant `z`.
 - `ExtrudeGeometry(..., center=True)` produces a solid centered on the profile plane, spanning `z in [-height/2, +height/2]`. Use the `from_z0(...)` form when the intended span is `z in [0, height]`.
 - `rounded_rect_profile(...)` and `superellipse_profile(...)` return centered counter-clockwise XY loops.

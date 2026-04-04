@@ -2107,31 +2107,49 @@ class ExtrudeWithHolesGeometry(MeshGeometry):
         z1 = z0 + height
 
         # Exterior side walls.
-        self.merge(
-            LoftGeometry(
-                [[(x, y, z0) for (x, y) in outer], [(x, y, z1) for (x, y) in outer]],
+        outer_loft = LoftGeometry(
+            [[(x, y, z0) for (x, y) in outer], [(x, y, z1) for (x, y) in outer]],
+            cap=False,
+            closed=closed,
+        )
+        outer_offset = len(self.vertices)
+        self.merge(outer_loft)
+        bottom_cap_indices = [outer_offset + i for i in range(len(outer))]
+        top_cap_indices = [outer_offset + len(outer) + i for i in range(len(outer))]
+
+        # Interior side walls for each hole.
+        holes_cw: List[List[Vec2]] = []
+        for hole in holes:
+            hole_cw = list(reversed(hole))
+            hole_loft = LoftGeometry(
+                [[(x, y, z0) for (x, y) in hole_cw], [(x, y, z1) for (x, y) in hole_cw]],
                 cap=False,
                 closed=closed,
             )
-        )
-
-        # Interior side walls for each hole.
-        for hole in holes:
-            hole_cw = list(reversed(hole))
-            self.merge(
-                LoftGeometry(
-                    [[(x, y, z0) for (x, y) in hole_cw], [(x, y, z1) for (x, y) in hole_cw]],
-                    cap=False,
-                    closed=closed,
-                )
-            )
+            hole_offset = len(self.vertices)
+            self.merge(hole_loft)
+            bottom_cap_indices.extend(hole_offset + i for i in range(len(hole_cw)))
+            top_cap_indices.extend(hole_offset + len(hole_cw) + i for i in range(len(hole_cw)))
+            holes_cw.append(hole_cw)
 
         if not (cap and closed):
             return
 
         cap_ring, cap_triangles = _triangulate_polygon_with_holes(outer, holes)
-        bottom_idx = [self.add_vertex(x, y, z0) for (x, y) in cap_ring]
-        top_idx = [self.add_vertex(x, y, z1) for (x, y) in cap_ring]
+        expected_cap_ring = list(outer)
+        for hole_cw in holes_cw:
+            expected_cap_ring.extend(hole_cw)
+
+        reuse_sidewall_rims = len(cap_ring) == len(expected_cap_ring) and all(
+            _points_match_2d(actual, expected)
+            for actual, expected in zip(cap_ring, expected_cap_ring)
+        )
+        if reuse_sidewall_rims:
+            bottom_idx = bottom_cap_indices
+            top_idx = top_cap_indices
+        else:
+            bottom_idx = [self.add_vertex(x, y, z0) for (x, y) in cap_ring]
+            top_idx = [self.add_vertex(x, y, z1) for (x, y) in cap_ring]
 
         for a, b, c in cap_triangles:
             # Bottom points downward, top points upward.
@@ -2145,7 +2163,7 @@ def _translated_profile(profile: List[Vec2], dx: float, dy: float) -> List[Vec2]
 
 class LouverPanelGeometry(MeshGeometry):
     """
-    Build a rectangular panel with slot cutouts and angled louver fins.
+    Build a rectangular panel with slot cutouts and fused louver fins.
 
     The panel lies in XY and is extruded along Z.
     """
@@ -2220,21 +2238,28 @@ class LouverPanelGeometry(MeshGeometry):
             center=center,
             closed=True,
         )
-        self.merge(panel)
 
         fin_t = float(fin_thickness) if fin_thickness is not None else t * 0.35
         fin_t = max(1e-4, fin_t)
-        fin_len = inner_w * 0.90
-        fin_depth = min(max(1e-4, slat_w * 0.70), inner_h)
+        # Extend each fin slightly into the slot side walls so the manifold
+        # boolean union produces a single connected vent body instead of
+        # floating slat islands.
+        fin_len = min(inner_w, slot_w + inner_w * 0.04)
+        fin_depth = min(inner_h, slot_h)
         z_center = 0.0 if center else (t * 0.5)
-        z_offset = z_center - t * 0.12
+        z_offset = z_center - t * 0.05
+        fin_y_offset = slot_h * 0.20
+
+        solids: List[MeshGeometry] = [panel]
 
         for hole in hole_profiles:
             _, y_center = _polygon_centroid(hole)
             fin = BoxGeometry((fin_len, fin_depth, fin_t))
             fin.rotate_x(angle)
-            fin.translate(0.0, y_center, z_offset)
-            self.merge(fin)
+            fin.translate(0.0, y_center + fin_y_offset, z_offset)
+            solids.append(fin)
+
+        self.merge(_boolean_union_many(solids))
 
 
 class SweepGeometry(MeshGeometry):
