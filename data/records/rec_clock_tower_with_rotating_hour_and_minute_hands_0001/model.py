@@ -14,7 +14,6 @@ from sdk import (
     ConeGeometry,
     Cylinder,
     Inertial,
-    LouverPanelGeometry,
     Material,
     MotionLimits,
     Origin,
@@ -22,10 +21,38 @@ from sdk import (
     TestContext,
     TestReport,
     mesh_from_geometry,
+    VentGrilleGeometry,
 )
 
 ASSETS = AssetContext.from_script(__file__)
 HERE = ASSETS.asset_root
+
+
+def _grille_panel_geometry(
+    panel_size,
+    thickness,
+    *,
+    frame,
+    slat_pitch,
+    slat_width,
+    slat_angle_deg,
+    corner_radius,
+    center=True,
+):
+    geom = VentGrilleGeometry(
+        panel_size,
+        frame=frame,
+        face_thickness=thickness,
+        duct_depth=max(0.0015, thickness * 0.75),
+        duct_wall=max(0.001, min(frame * 0.45, thickness * 0.75)),
+        slat_pitch=slat_pitch,
+        slat_width=slat_width,
+        slat_angle_deg=slat_angle_deg,
+        corner_radius=corner_radius,
+    )
+    if not center:
+        geom.translate(0.0, 0.0, thickness * 0.5)
+    return geom
 
 STONE = Material(name="stone", rgba=(0.74, 0.72, 0.67, 1.0))
 STONE_TRIM = Material(name="stone_trim", rgba=(0.64, 0.62, 0.57, 1.0))
@@ -201,7 +228,7 @@ def build_object_model() -> ArticulatedObject:
         ASSETS.mesh_path("clock_tower_spire.obj"),
     )
     louver_mesh = mesh_from_geometry(
-        LouverPanelGeometry(
+        _grille_panel_geometry(
             panel_size=(0.120, 0.150),
             thickness=0.016,
             frame=0.010,

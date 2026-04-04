@@ -19,13 +19,13 @@ from sdk import (
     Inertial,
     LatheGeometry,
     LoftGeometry,
-    LouverPanelGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
     mesh_from_geometry,
     rounded_rect_profile,
+    VentGrilleGeometry,
 )
 
 
@@ -34,6 +34,33 @@ HERE = ASSETS.asset_root
 BODY_HEIGHT = 0.56
 BODY_WIDTH = 0.32
 BODY_DEPTH = 0.218
+
+
+def _grille_panel_geometry(
+    panel_size,
+    thickness,
+    *,
+    frame,
+    slat_pitch,
+    slat_width,
+    slat_angle_deg,
+    corner_radius,
+    center=True,
+):
+    geom = VentGrilleGeometry(
+        panel_size,
+        frame=frame,
+        face_thickness=thickness,
+        duct_depth=max(0.0015, thickness * 0.75),
+        duct_wall=max(0.001, min(frame * 0.45, thickness * 0.75)),
+        slat_pitch=slat_pitch,
+        slat_width=slat_width,
+        slat_angle_deg=slat_angle_deg,
+        corner_radius=corner_radius,
+    )
+    if not center:
+        geom.translate(0.0, 0.0, thickness * 0.5)
+    return geom
 
 
 def _profile_section(width: float, depth: float, radius: float, z: float) -> list[tuple[float, float, float]]:
@@ -68,7 +95,7 @@ def build_object_model() -> ArticulatedObject:
     )
     body_shell = _mesh(body_shell_geom, "body_shell.obj")
 
-    front_intake_geom = LouverPanelGeometry(
+    front_intake_geom = _grille_panel_geometry(
         panel_size=(0.226, 0.300),
         thickness=0.006,
         frame=0.010,
@@ -80,7 +107,7 @@ def build_object_model() -> ArticulatedObject:
     )
     front_intake_mesh = _mesh(front_intake_geom, "front_intake.obj")
 
-    top_grille_geom = LouverPanelGeometry(
+    top_grille_geom = _grille_panel_geometry(
         panel_size=(0.148, 0.074),
         thickness=0.008,
         frame=0.007,
@@ -109,7 +136,7 @@ def build_object_model() -> ArticulatedObject:
     filter_door_geom.rotate_x(math.pi / 2.0)
     filter_door_mesh = _mesh(filter_door_geom, "filter_door.obj")
 
-    filter_insert_geom = LouverPanelGeometry(
+    filter_insert_geom = _grille_panel_geometry(
         panel_size=(0.176, 0.216),
         thickness=0.004,
         frame=0.008,

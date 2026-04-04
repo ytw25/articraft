@@ -12,13 +12,13 @@ from sdk import (
     Box,
     ExtrudeWithHolesGeometry,
     Inertial,
-    LouverPanelGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
     mesh_from_geometry,
     rounded_rect_profile,
+    VentGrilleGeometry,
 )
 
 ASSETS = AssetContext.from_script(__file__)
@@ -53,6 +53,33 @@ BUTTON_STEM_WIDTH = 0.020
 BUTTON_STEM_HEIGHT = 0.010
 BUTTON_STEM_DEPTH = 0.012
 BUTTON_RETAINER_WIDTH = 0.044
+
+
+def _grille_panel_geometry(
+    panel_size,
+    thickness,
+    *,
+    frame,
+    slat_pitch,
+    slat_width,
+    slat_angle_deg,
+    corner_radius,
+    center=True,
+):
+    geom = VentGrilleGeometry(
+        panel_size,
+        frame=frame,
+        face_thickness=thickness,
+        duct_depth=max(0.0015, thickness * 0.75),
+        duct_wall=max(0.001, min(frame * 0.45, thickness * 0.75)),
+        slat_pitch=slat_pitch,
+        slat_width=slat_width,
+        slat_angle_deg=slat_angle_deg,
+        corner_radius=corner_radius,
+    )
+    if not center:
+        geom.translate(0.0, 0.0, thickness * 0.5)
+    return geom
 BUTTON_RETAINER_HEIGHT = 0.024
 BUTTON_RETAINER_DEPTH = 0.004
 BUTTON_TRAVEL = 0.004
@@ -90,7 +117,7 @@ def _control_panel_mesh():
 
 def _filter_panel_mesh():
     return mesh_from_geometry(
-        LouverPanelGeometry(
+        _grille_panel_geometry(
             panel_size=(FILTER_PANEL_WIDTH, FILTER_PANEL_DEPTH),
             thickness=FILTER_PANEL_THICKNESS,
             frame=0.010,

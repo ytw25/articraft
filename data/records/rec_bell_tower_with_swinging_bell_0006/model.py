@@ -13,7 +13,6 @@ from sdk import (
     Cylinder,
     Inertial,
     LatheGeometry,
-    LouverPanelGeometry,
     MeshGeometry,
     MotionLimits,
     Origin,
@@ -21,9 +20,37 @@ from sdk import (
     TestContext,
     TestReport,
     mesh_from_geometry,
+    VentGrilleGeometry,
 )
 
 ASSETS = AssetContext.from_script(__file__)
+
+
+def _grille_panel_geometry(
+    panel_size,
+    thickness,
+    *,
+    frame,
+    slat_pitch,
+    slat_width,
+    slat_angle_deg,
+    corner_radius,
+    center=True,
+):
+    geom = VentGrilleGeometry(
+        panel_size,
+        frame=frame,
+        face_thickness=thickness,
+        duct_depth=max(0.0015, thickness * 0.75),
+        duct_wall=max(0.001, min(frame * 0.45, thickness * 0.75)),
+        slat_pitch=slat_pitch,
+        slat_width=slat_width,
+        slat_angle_deg=slat_angle_deg,
+        corner_radius=corner_radius,
+    )
+    if not center:
+        geom.translate(0.0, 0.0, thickness * 0.5)
+    return geom
 
 
 def _save_mesh(name: str, geometry):
@@ -66,7 +93,7 @@ def build_object_model() -> ArticulatedObject:
 
     front_louver_mesh = _save_mesh(
         "campanile_front_louver.obj",
-        LouverPanelGeometry(
+        _grille_panel_geometry(
             panel_size=(0.200, 0.130),
             thickness=0.012,
             frame=0.012,
@@ -78,7 +105,7 @@ def build_object_model() -> ArticulatedObject:
     )
     side_louver_mesh = _save_mesh(
         "campanile_side_louver.obj",
-        LouverPanelGeometry(
+        _grille_panel_geometry(
             panel_size=(0.200, 0.130),
             thickness=0.012,
             frame=0.012,

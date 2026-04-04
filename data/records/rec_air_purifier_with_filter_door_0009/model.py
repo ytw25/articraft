@@ -10,21 +10,19 @@ from sdk import (
     ArticulationType,
     AssetContext,
     Box,
-    BoxGeometry,
     Cylinder,
     ExtrudeGeometry,
     ExtrudeWithHolesGeometry,
     Inertial,
-    LouverPanelGeometry,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
     repair_loft,
     rounded_rect_profile,
     section_loft,
+    VentGrilleGeometry,
 )
 
 ASSETS = AssetContext.from_script(__file__)
@@ -33,6 +31,32 @@ ASSETS = AssetContext.from_script(__file__)
 def build_object_model() -> ArticulatedObject:
     def save_mesh(name: str, geometry):
         return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+
+    def grille_panel_geometry(
+        panel_size,
+        thickness,
+        *,
+        frame,
+        slat_pitch,
+        slat_width,
+        slat_angle_deg,
+        corner_radius,
+        center=True,
+    ):
+        geom = VentGrilleGeometry(
+            panel_size,
+            frame=frame,
+            face_thickness=thickness,
+            duct_depth=max(0.0015, thickness * 0.75),
+            duct_wall=max(0.001, min(frame * 0.45, thickness * 0.75)),
+            slat_pitch=slat_pitch,
+            slat_width=slat_width,
+            slat_angle_deg=slat_angle_deg,
+            corner_radius=corner_radius,
+        )
+        if not center:
+            geom.translate(0.0, 0.0, thickness * 0.5)
+        return geom
 
     def rect_loop(width: float, depth: float, z: float, radius: float):
         profile = rounded_rect_profile(width, depth, radius, corner_segments=8)
@@ -77,9 +101,8 @@ def build_object_model() -> ArticulatedObject:
             ]
         )
     )
-    front_opening_cut = BoxGeometry((0.186, 0.17, 0.74)).translate(0.0, 0.095, 0.54)
     tower.visual(
-        save_mesh("tower_body_shell.obj", boolean_difference(body_shell, front_opening_cut)),
+        save_mesh("tower_body_shell.obj", body_shell),
         material=shell_powder,
         name="body_shell",
     )
@@ -143,7 +166,7 @@ def build_object_model() -> ArticulatedObject:
     tower.visual(
         save_mesh(
             "tower_exhaust_grille.obj",
-            LouverPanelGeometry(
+            grille_panel_geometry(
                 panel_size=(0.146, 0.086),
                 thickness=0.010,
                 frame=0.010,
@@ -237,7 +260,7 @@ def build_object_model() -> ArticulatedObject:
     door.visual(
         save_mesh(
             "tower_intake_door_grille.obj",
-            LouverPanelGeometry(
+            grille_panel_geometry(
                 panel_size=(0.162, 0.680),
                 thickness=0.009,
                 frame=0.008,

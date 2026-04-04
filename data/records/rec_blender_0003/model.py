@@ -13,7 +13,6 @@ from sdk import (
     Cylinder,
     Inertial,
     LatheGeometry,
-    LouverPanelGeometry,
     MotionLimits,
     Origin,
     TestContext,
@@ -23,9 +22,37 @@ from sdk import (
     rounded_rect_profile,
     section_loft,
     tube_from_spline_points,
+    VentGrilleGeometry,
 )
 
 ASSETS = AssetContext.from_script(__file__)
+
+
+def _grille_panel_geometry(
+    panel_size,
+    thickness,
+    *,
+    frame,
+    slat_pitch,
+    slat_width,
+    slat_angle_deg,
+    corner_radius,
+    center=True,
+):
+    geom = VentGrilleGeometry(
+        panel_size,
+        frame=frame,
+        face_thickness=thickness,
+        duct_depth=max(0.0015, thickness * 0.75),
+        duct_wall=max(0.001, min(frame * 0.45, thickness * 0.75)),
+        slat_pitch=slat_pitch,
+        slat_width=slat_width,
+        slat_angle_deg=slat_angle_deg,
+        corner_radius=corner_radius,
+    )
+    if not center:
+        geom.translate(0.0, 0.0, thickness * 0.5)
+    return geom
 
 
 def _mesh(geometry, filename: str):
@@ -173,7 +200,7 @@ def build_object_model() -> ArticulatedObject:
     )
     base.visual(
         _mesh(
-            LouverPanelGeometry(
+            _grille_panel_geometry(
                 panel_size=(0.116, 0.074),
                 thickness=0.006,
                 frame=0.008,
