@@ -13,6 +13,7 @@ from agent.tools.base import (
     ToolParamsModel,
     ToolResult,
     make_tool_schema,
+    validate_tool_params,
 )
 from agent.tools.probe_model.description import PROBE_MODEL_DESCRIPTION
 
@@ -190,7 +191,7 @@ class ProbeModelTool(BaseDeclarativeTool):
         super().__init__("probe_model", schema)
 
     async def build(self, params: dict) -> ProbeModelInvocation:
-        validated = ProbeModelParams(**params)
+        validated = validate_tool_params(ProbeModelParams, params)
         return ProbeModelInvocation(
             validated,
             sdk_package=self.sdk_package,

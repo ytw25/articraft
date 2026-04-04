@@ -10,6 +10,7 @@ from agent.tools.base import (
     ToolParamsModel,
     ToolResult,
     make_tool_schema,
+    validate_tool_params,
 )
 
 
@@ -54,5 +55,5 @@ class CompileModelTool(BaseDeclarativeTool):
         super().__init__("compile_model", schema)
 
     async def build(self, params: dict) -> CompileModelInvocation:
-        validated = CompileModelParams(**params)
+        validated = validate_tool_params(CompileModelParams, params)
         return CompileModelInvocation(validated)

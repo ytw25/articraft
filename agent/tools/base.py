@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 
 TParams = TypeVar("TParams")
 TResult = TypeVar("TResult")
+TToolParamsModel = TypeVar("TToolParamsModel", bound=BaseModel)
 
 
 # Type alias for OpenAI-style tool schema
@@ -85,6 +86,16 @@ class ToolParamsModel(BaseModel):
     """Strict parameter model for public tool-call arguments."""
 
     model_config = ConfigDict(extra="forbid")
+
+
+def validate_tool_params(
+    model_cls: type[TToolParamsModel],
+    params: dict[str, Any],
+) -> TToolParamsModel:
+    """Validate tool params, treating explicit nulls as omitted defaults."""
+
+    normalized_params = {key: value for key, value in params.items() if value is not None}
+    return model_cls(**normalized_params)
 
 
 class BaseToolInvocation(ABC, Generic[TParams, TResult]):

@@ -14,6 +14,7 @@ from agent.providers.openai import (
     openai_api_key_from_env,
     openai_api_keys_from_env,
 )
+from agent.tools import build_tool_registry
 
 
 class _FakeOpenAIError(RuntimeError):
@@ -178,6 +179,37 @@ def test_openai_default_compaction_model_is_mini() -> None:
 
     assert DEFAULT_OPENAI_COMPACTION_MODEL == "gpt-5.4-mini"
     assert provider.compaction_model_id == "gpt-5.4-mini"
+
+
+def test_convert_tools_normalizes_function_schemas_for_responses_strict_mode() -> None:
+    provider = OpenAILLM(dry_run=True)
+    registry = build_tool_registry("openai", sdk_package="sdk")
+
+    converted = provider._convert_tools(registry.get_tool_schemas())
+
+    read_file = next(tool for tool in converted if tool.get("name") == "read_file")
+    assert read_file["strict"] is True
+    assert read_file["parameters"]["required"] == ["offset", "limit"]
+    assert read_file["parameters"]["properties"]["offset"]["type"] == ["integer", "null"]
+    assert read_file["parameters"]["properties"]["limit"]["type"] == ["integer", "null"]
+    assert read_file["parameters"]["additionalProperties"] is False
+
+    probe_model = next(tool for tool in converted if tool.get("name") == "probe_model")
+    assert probe_model["parameters"]["required"] == ["code", "timeout_ms", "include_stdout"]
+    assert probe_model["parameters"]["properties"]["code"]["type"] == "string"
+    assert probe_model["parameters"]["properties"]["timeout_ms"]["type"] == ["integer", "null"]
+    assert probe_model["parameters"]["properties"]["include_stdout"]["type"] == [
+        "boolean",
+        "null",
+    ]
+
+    compile_model = next(tool for tool in converted if tool.get("name") == "compile_model")
+    assert compile_model["parameters"] == {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
 
 
 def test_openai_sync_client_disables_sdk_retries_and_uses_request_timeout(

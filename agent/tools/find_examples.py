@@ -9,6 +9,7 @@ from agent.tools.base import (
     ToolParamsModel,
     ToolResult,
     make_tool_schema,
+    validate_tool_params,
 )
 
 
@@ -96,5 +97,5 @@ class FindExamplesTool(BaseDeclarativeTool):
         super().__init__("find_examples", schema)
 
     async def build(self, params: dict) -> FindExamplesInvocation:
-        validated = FindExamplesParams(**params)
+        validated = validate_tool_params(FindExamplesParams, params)
         return FindExamplesInvocation(validated, sdk_package=self.sdk_package)

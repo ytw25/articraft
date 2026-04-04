@@ -112,3 +112,28 @@ def test_tool_registry_rejects_hidden_file_path_parameter() -> None:
                 {"file_path": "/tmp/model.py"},
             )
         )
+
+
+def test_openai_tool_registry_treats_null_optional_args_as_defaults() -> None:
+    openai_registry = build_tool_registry("openai", sdk_package="sdk")
+
+    read_file = asyncio.run(
+        openai_registry.build_invocation(
+            "read_file",
+            {"offset": None, "limit": None},
+        )
+    )
+    assert read_file is not None
+    assert read_file.params.offset == 1
+    assert read_file.params.limit == 200
+
+    probe_model = asyncio.run(
+        openai_registry.build_invocation(
+            "probe_model",
+            {"code": "emit(1)", "timeout_ms": None, "include_stdout": None},
+        )
+    )
+    assert probe_model is not None
+    assert probe_model.params.code == "emit(1)"
+    assert probe_model.params.timeout_ms == 10_000
+    assert probe_model.params.include_stdout is False

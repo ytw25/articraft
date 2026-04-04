@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import copy
 import json
 import logging
 import mimetypes
@@ -66,6 +67,83 @@ def openai_api_keys_from_env(env: dict[str, str] | None = None) -> list[str]:
 def openai_api_key_from_env(env: dict[str, str] | None = None) -> str | None:
     keys = openai_api_keys_from_env(env)
     return random.choice(keys) if keys else None
+
+
+def _make_json_schema_nullable(schema: dict[str, Any]) -> dict[str, Any]:
+    normalized = copy.deepcopy(schema)
+    schema_type = normalized.get("type")
+    if isinstance(schema_type, str):
+        if schema_type != "null":
+            normalized["type"] = [schema_type, "null"]
+        return normalized
+    if isinstance(schema_type, list):
+        if "null" not in schema_type:
+            normalized["type"] = [*schema_type, "null"]
+        return normalized
+
+    any_of = normalized.get("anyOf")
+    if isinstance(any_of, list) and not any(
+        isinstance(option, dict) and option.get("type") == "null" for option in any_of
+    ):
+        normalized["anyOf"] = [*any_of, {"type": "null"}]
+        return normalized
+
+    one_of = normalized.get("oneOf")
+    if isinstance(one_of, list) and not any(
+        isinstance(option, dict) and option.get("type") == "null" for option in one_of
+    ):
+        normalized["oneOf"] = [*one_of, {"type": "null"}]
+    return normalized
+
+
+def _normalize_tool_json_schema_for_responses(
+    schema: dict[str, Any] | None,
+    *,
+    nullable: bool = False,
+) -> dict[str, Any]:
+    """Normalize a JSON Schema node to OpenAI Responses strict-mode requirements."""
+
+    normalized: dict[str, Any] = copy.deepcopy(schema) if isinstance(schema, dict) else {}
+    properties = normalized.get("properties")
+    if isinstance(properties, dict):
+        original_required = normalized.get("required")
+        required_names = set(original_required) if isinstance(original_required, list) else set()
+        normalized_properties: dict[str, Any] = {}
+        for name, child_schema in properties.items():
+            normalized_properties[name] = _normalize_tool_json_schema_for_responses(
+                child_schema,
+                nullable=name not in required_names,
+            )
+        normalized["properties"] = normalized_properties
+        normalized["required"] = list(normalized_properties.keys())
+        normalized["additionalProperties"] = False
+
+    items = normalized.get("items")
+    if isinstance(items, dict):
+        normalized["items"] = _normalize_tool_json_schema_for_responses(items)
+    elif isinstance(items, list):
+        normalized["items"] = [
+            _normalize_tool_json_schema_for_responses(item) if isinstance(item, dict) else item
+            for item in items
+        ]
+
+    if nullable:
+        normalized = _make_json_schema_nullable(normalized)
+    return normalized
+
+
+def _normalize_function_parameters_for_responses(
+    parameters: dict[str, Any] | None,
+) -> dict[str, Any]:
+    normalized = _normalize_tool_json_schema_for_responses(parameters or {"type": "object"})
+    properties = normalized.get("properties")
+    if not isinstance(properties, dict):
+        properties = {}
+        normalized["properties"] = properties
+    normalized["type"] = "object"
+    normalized["required"] = list(properties.keys())
+    normalized["additionalProperties"] = False
+    return normalized
 
 
 class OpenAILLM:
@@ -920,8 +998,11 @@ class OpenAILLM:
                         "type": "function",
                         "name": func.get("name", ""),
                         "description": func.get("description", ""),
-                        "parameters": func.get("parameters")
-                        or {"type": "object", "properties": {}},
+                        "parameters": _normalize_function_parameters_for_responses(
+                            func.get("parameters")
+                            if isinstance(func.get("parameters"), dict)
+                            else {"type": "object", "properties": {}}
+                        ),
                         "strict": True,
                     }
                 )

@@ -12,6 +12,7 @@ from agent.tools.base import (
     ToolParamsModel,
     ToolResult,
     make_tool_schema,
+    validate_tool_params,
 )
 
 
@@ -85,5 +86,5 @@ class ReadFileTool(BaseDeclarativeTool):
         super().__init__("read_file", schema)
 
     async def build(self, params: dict) -> ReadFileInvocation:
-        validated = ReadFileParams(**params)
+        validated = validate_tool_params(ReadFileParams, params)
         return ReadFileInvocation(validated)
