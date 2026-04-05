@@ -204,16 +204,36 @@ def build_object_model() -> ArticulatedObject:
         name="pedal_box",
     )
     cabinet.visual(
-        Box((0.03, 0.08, 0.16)),
-        origin=Origin(xyz=(0.50, 0.09, 0.22), rpy=(0.0, -0.48, 0.0)),
-        material=wheel_metal,
-        name="left_pedal",
+        Cylinder(radius=0.012, length=0.34),
+        origin=Origin(xyz=(0.46, 0.0, 0.10), rpy=(pi / 2.0, 0.0, 0.0)),
+        material=column_gray,
+        name="pedal_pivot_bar",
     )
-    cabinet.visual(
+
+    left_pedal = model.part("left_pedal")
+    left_pedal.visual(
         Box((0.03, 0.08, 0.16)),
-        origin=Origin(xyz=(0.50, -0.09, 0.22), rpy=(0.0, -0.38, 0.0)),
+        origin=Origin(xyz=(0.04, 0.0, 0.12), rpy=(0.0, -0.48, 0.0)),
         material=wheel_metal,
-        name="right_pedal",
+        name="pedal_face",
+    )
+    left_pedal.inertial = Inertial.from_geometry(
+        Box((0.05, 0.08, 0.20)),
+        mass=0.18,
+        origin=Origin(xyz=(0.04, 0.0, 0.12)),
+    )
+
+    right_pedal = model.part("right_pedal")
+    right_pedal.visual(
+        Box((0.03, 0.08, 0.16)),
+        origin=Origin(xyz=(0.04, 0.0, 0.12), rpy=(0.0, -0.38, 0.0)),
+        material=wheel_metal,
+        name="pedal_face",
+    )
+    right_pedal.inertial = Inertial.from_geometry(
+        Box((0.05, 0.08, 0.20)),
+        mass=0.18,
+        origin=Origin(xyz=(0.04, 0.0, 0.12)),
     )
 
     steering_wheel = model.part("steering_wheel")
@@ -277,6 +297,34 @@ def build_object_model() -> ArticulatedObject:
         axis=(1.0, 0.0, 0.0),
         motion_limits=MotionLimits(effort=20.0, velocity=8.0),
     )
+    model.articulation(
+        "left_pedal_hinge",
+        ArticulationType.REVOLUTE,
+        parent=cabinet,
+        child=left_pedal,
+        origin=Origin(xyz=(0.46, 0.09, 0.10)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=3.0,
+            velocity=2.0,
+            lower=0.0,
+            upper=0.30,
+        ),
+    )
+    model.articulation(
+        "right_pedal_hinge",
+        ArticulationType.REVOLUTE,
+        parent=cabinet,
+        child=right_pedal,
+        origin=Origin(xyz=(0.46, -0.09, 0.10)),
+        axis=(0.0, 1.0, 0.0),
+        motion_limits=MotionLimits(
+            effort=3.0,
+            velocity=2.0,
+            lower=0.0,
+            upper=0.30,
+        ),
+    )
 
     return model
 
@@ -284,7 +332,11 @@ def build_object_model() -> ArticulatedObject:
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
     cabinet = object_model.get_part("cabinet")
+    left_pedal = object_model.get_part("left_pedal")
+    right_pedal = object_model.get_part("right_pedal")
     steering_wheel = object_model.get_part("steering_wheel")
+    left_pedal_hinge = object_model.get_articulation("left_pedal_hinge")
+    right_pedal_hinge = object_model.get_articulation("right_pedal_hinge")
     steering_spin = object_model.get_articulation("steering_spin")
 
     ctx.check_model_valid()
@@ -310,6 +362,11 @@ def run_tests() -> TestReport:
         elem_a="hub_barrel",
         elem_b="wheel_spindle",
         name="steering wheel is mounted on the steering spindle",
+    )
+    ctx.check(
+        "pedals hinge on transverse y axes",
+        left_pedal_hinge.axis == (0.0, 1.0, 0.0) and right_pedal_hinge.axis == (0.0, 1.0, 0.0),
+        details=f"left={left_pedal_hinge.axis}, right={right_pedal_hinge.axis}",
     )
 
     cabinet_aabb = ctx.part_world_aabb(cabinet)
@@ -352,6 +409,48 @@ def run_tests() -> TestReport:
         ctx.fail(
             "driving layout measurable",
             f"seat_aabb={seat_aabb}, screen_aabb={screen_aabb}, wheel_rest_pos={wheel_rest_pos}",
+        )
+
+    left_pedal_rest = ctx.part_element_world_aabb(left_pedal, elem="pedal_face")
+    right_pedal_rest = ctx.part_element_world_aabb(right_pedal, elem="pedal_face")
+    with ctx.pose(
+        {
+            left_pedal_hinge: left_pedal_hinge.motion_limits.upper,
+            right_pedal_hinge: right_pedal_hinge.motion_limits.upper,
+        }
+    ):
+        left_pedal_pressed = ctx.part_element_world_aabb(left_pedal, elem="pedal_face")
+        right_pedal_pressed = ctx.part_element_world_aabb(right_pedal, elem="pedal_face")
+
+    if (
+        left_pedal_rest is not None
+        and left_pedal_pressed is not None
+        and right_pedal_rest is not None
+        and right_pedal_pressed is not None
+    ):
+        left_rest_center = _aabb_center(left_pedal_rest)
+        left_pressed_center = _aabb_center(left_pedal_pressed)
+        right_rest_center = _aabb_center(right_pedal_rest)
+        right_pressed_center = _aabb_center(right_pedal_pressed)
+        ctx.check(
+            "left pedal rotates downward when pressed",
+            left_pressed_center[0] > left_rest_center[0] + 0.01
+            and left_pressed_center[2] < left_rest_center[2] - 0.01,
+            details=f"rest={left_rest_center}, pressed={left_pressed_center}",
+        )
+        ctx.check(
+            "right pedal rotates downward when pressed",
+            right_pressed_center[0] > right_rest_center[0] + 0.01
+            and right_pressed_center[2] < right_rest_center[2] - 0.01,
+            details=f"rest={right_rest_center}, pressed={right_pressed_center}",
+        )
+    else:
+        ctx.fail(
+            "pedal travel measurable",
+            (
+                f"left_rest={left_pedal_rest}, left_pressed={left_pedal_pressed}, "
+                f"right_rest={right_pedal_rest}, right_pressed={right_pedal_pressed}"
+            ),
         )
 
     marker_rest_aabb = ctx.part_element_world_aabb(steering_wheel, elem="wheel_marker")

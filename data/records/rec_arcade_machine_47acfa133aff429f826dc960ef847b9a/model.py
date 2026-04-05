@@ -97,6 +97,8 @@ def build_object_model() -> ArticulatedObject:
     screen_center_y = -0.142
     screen_center_z = 1.285
     screen_roll = -0.17
+    joystick_specs: list[tuple[str, tuple[float, float, float]]] = []
+    action_button_specs: list[tuple[str, tuple[float, float, float], object, str]] = []
 
     cabinet = model.part("cabinet")
     cabinet.visual(
@@ -237,53 +239,64 @@ def build_object_model() -> ArticulatedObject:
 
     for side_index, x_sign in enumerate((-1.0, 1.0)):
         joy_x = 0.230 * x_sign
-        joy_center = _rolled_point(
+        joy_joint_xyz = _rolled_point(
             joy_x,
             deck_center_y,
             deck_center_z,
             -0.030,
-            deck_top_local_z + 0.020,
+            deck_top_local_z,
+            deck_roll,
+        )
+        joy_collar_xyz = _rolled_point(
+            joy_x,
+            deck_center_y,
+            deck_center_z,
+            -0.030,
+            deck_top_local_z + 0.003,
             deck_roll,
         )
         cabinet.visual(
-            Cylinder(radius=0.010, length=0.048),
-            origin=Origin(xyz=joy_center, rpy=(deck_roll, 0.0, 0.0)),
+            Cylinder(radius=0.018, length=0.006),
+            origin=Origin(xyz=joy_collar_xyz, rpy=(deck_roll, 0.0, 0.0)),
             material=slot_black,
-            name=f"joystick_shaft_{side_index}",
+            name=f"joystick_collar_{side_index}",
         )
-        ball_center = _rolled_point(
-            joy_x,
-            deck_center_y,
-            deck_center_z,
-            -0.030,
-            deck_top_local_z + 0.050,
-            deck_roll,
-        )
-        cabinet.visual(
-            Cylinder(radius=0.024, length=0.018),
-            origin=Origin(xyz=ball_center, rpy=(deck_roll, 0.0, 0.0)),
-            material=joystick_red,
-            name=f"joystick_ball_{side_index}",
-        )
+        joystick_specs.append((f"player_{side_index}_joystick", joy_joint_xyz))
         action_materials = (action_orange, action_yellow, action_green)
         action_offsets_x = (0.135 * x_sign, 0.180 * x_sign, 0.225 * x_sign)
         action_offsets_y = (0.018, 0.043, 0.008)
         for button_index, (button_x, button_y, button_material) in enumerate(
             zip(action_offsets_x, action_offsets_y, action_materials, strict=True)
         ):
-            action_center = _rolled_point(
+            action_joint_xyz = _rolled_point(
                 button_x,
                 deck_center_y,
                 deck_center_z,
                 button_y,
-                deck_top_local_z + 0.008,
+                deck_top_local_z,
+                deck_roll,
+            )
+            action_guide_xyz = _rolled_point(
+                button_x,
+                deck_center_y,
+                deck_center_z,
+                button_y,
+                deck_top_local_z + 0.002,
                 deck_roll,
             )
             cabinet.visual(
-                Cylinder(radius=0.018, length=0.016),
-                origin=Origin(xyz=action_center, rpy=(deck_roll, 0.0, 0.0)),
-                material=button_material,
-                name=f"action_button_{side_index}_{button_index}",
+                Cylinder(radius=0.020, length=0.004),
+                origin=Origin(xyz=action_guide_xyz, rpy=(deck_roll, 0.0, 0.0)),
+                material=sleeve_black,
+                name=f"action_button_guide_{side_index}_{button_index}",
+            )
+            action_button_specs.append(
+                (
+                    f"action_button_{side_index}_{button_index}",
+                    action_joint_xyz,
+                    button_material,
+                    f"action_button_guide_{side_index}_{button_index}",
+                )
             )
 
     left_button_joint_xyz = _rolled_point(
@@ -354,6 +367,68 @@ def build_object_model() -> ArticulatedObject:
         mass=4.2,
         origin=Origin(xyz=(0.0, 0.009, 0.125)),
     )
+
+    for part_name, origin_xyz in joystick_specs:
+        joystick = model.part(part_name)
+        joystick.visual(
+            Cylinder(radius=0.010, length=0.050),
+            origin=Origin(xyz=(0.0, 0.0, 0.031)),
+            material=slot_black,
+            name="joystick_shaft",
+        )
+        joystick.visual(
+            Cylinder(radius=0.024, length=0.018),
+            origin=Origin(xyz=(0.0, 0.0, 0.066)),
+            material=joystick_red,
+            name="joystick_ball",
+        )
+        joystick.inertial = Inertial.from_geometry(
+            Box((0.050, 0.050, 0.090)),
+            mass=0.10,
+            origin=Origin(xyz=(0.0, 0.0, 0.045)),
+        )
+        model.articulation(
+            f"cabinet_to_{part_name}",
+            ArticulationType.REVOLUTE,
+            parent=cabinet,
+            child=joystick,
+            origin=Origin(xyz=origin_xyz, rpy=(deck_roll, 0.0, 0.0)),
+            axis=(1.0, 0.0, 0.0),
+            motion_limits=MotionLimits(
+                effort=0.8,
+                velocity=2.5,
+                lower=-0.35,
+                upper=0.35,
+            ),
+        )
+
+    for part_name, origin_xyz, button_material, _guide_name in action_button_specs:
+        action_button = model.part(part_name)
+        action_button.visual(
+            Cylinder(radius=0.018, length=0.010),
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
+            material=button_material,
+            name="button_cap",
+        )
+        action_button.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.018, length=0.010),
+            mass=0.04,
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
+        )
+        model.articulation(
+            f"cabinet_to_{part_name}",
+            ArticulationType.PRISMATIC,
+            parent=cabinet,
+            child=action_button,
+            origin=Origin(xyz=origin_xyz, rpy=(deck_roll, 0.0, 0.0)),
+            axis=(0.0, 0.0, -1.0),
+            motion_limits=MotionLimits(
+                effort=0.8,
+                velocity=0.12,
+                lower=0.0,
+                upper=0.003,
+            ),
+        )
 
     left_start_button = model.part("left_start_button")
     left_start_button.visual(
@@ -453,11 +528,32 @@ def run_tests() -> TestReport:
 
     cabinet = object_model.get_part("cabinet")
     service_hatch = object_model.get_part("service_hatch")
+    player_0_joystick = object_model.get_part("player_0_joystick")
+    player_1_joystick = object_model.get_part("player_1_joystick")
+    action_button_0_0 = object_model.get_part("action_button_0_0")
+    action_button_0_1 = object_model.get_part("action_button_0_1")
+    action_button_0_2 = object_model.get_part("action_button_0_2")
+    action_button_1_0 = object_model.get_part("action_button_1_0")
+    action_button_1_1 = object_model.get_part("action_button_1_1")
+    action_button_1_2 = object_model.get_part("action_button_1_2")
     left_start_button = object_model.get_part("left_start_button")
     right_start_button = object_model.get_part("right_start_button")
     hatch_joint = object_model.get_articulation("cabinet_to_service_hatch")
+    player_0_joystick_joint = object_model.get_articulation("cabinet_to_player_0_joystick")
+    player_1_joystick_joint = object_model.get_articulation("cabinet_to_player_1_joystick")
+    action_button_0_0_joint = object_model.get_articulation("cabinet_to_action_button_0_0")
+    action_button_0_1_joint = object_model.get_articulation("cabinet_to_action_button_0_1")
+    action_button_0_2_joint = object_model.get_articulation("cabinet_to_action_button_0_2")
+    action_button_1_0_joint = object_model.get_articulation("cabinet_to_action_button_1_0")
+    action_button_1_1_joint = object_model.get_articulation("cabinet_to_action_button_1_1")
+    action_button_1_2_joint = object_model.get_articulation("cabinet_to_action_button_1_2")
     left_button_joint = object_model.get_articulation("cabinet_to_left_start_button")
     right_button_joint = object_model.get_articulation("cabinet_to_right_start_button")
+
+    def aabb_center(aabb):
+        if aabb is None:
+            return None
+        return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
 
     ctx.allow_overlap(
         cabinet,
@@ -484,6 +580,35 @@ def run_tests() -> TestReport:
         left_button_joint.axis == (0.0, 0.0, -1.0)
         and right_button_joint.axis == (0.0, 0.0, -1.0),
         details=f"left={left_button_joint.axis}, right={right_button_joint.axis}",
+    )
+    ctx.check(
+        "player joysticks tilt independently from the control deck",
+        player_0_joystick_joint.articulation_type == ArticulationType.REVOLUTE
+        and player_1_joystick_joint.articulation_type == ArticulationType.REVOLUTE
+        and player_0_joystick_joint.axis == (1.0, 0.0, 0.0)
+        and player_1_joystick_joint.axis == (1.0, 0.0, 0.0),
+        details=(
+            f"left={player_0_joystick_joint.axis}/{player_0_joystick_joint.articulation_type}, "
+            f"right={player_1_joystick_joint.axis}/{player_1_joystick_joint.articulation_type}"
+        ),
+    )
+    ctx.check(
+        "action buttons use independent downward prismatic axes",
+        all(
+            joint.articulation_type == ArticulationType.PRISMATIC and joint.axis == (0.0, 0.0, -1.0)
+            for joint in (
+                action_button_0_0_joint,
+                action_button_0_1_joint,
+                action_button_0_2_joint,
+                action_button_1_0_joint,
+                action_button_1_1_joint,
+                action_button_1_2_joint,
+            )
+        ),
+        details=(
+            f"left={[action_button_0_0_joint.axis, action_button_0_1_joint.axis, action_button_0_2_joint.axis]}, "
+            f"right={[action_button_1_0_joint.axis, action_button_1_1_joint.axis, action_button_1_2_joint.axis]}"
+        ),
     )
     ctx.expect_contact(
         service_hatch,
@@ -528,6 +653,23 @@ def run_tests() -> TestReport:
         min_overlap=0.015,
         name="right plunger stays captured inside its sleeve at rest",
     )
+    for button, guide_name, label in (
+        (action_button_0_0, "action_button_guide_0_0", "left outer"),
+        (action_button_0_1, "action_button_guide_0_1", "left middle"),
+        (action_button_0_2, "action_button_guide_0_2", "left inner"),
+        (action_button_1_0, "action_button_guide_1_0", "right outer"),
+        (action_button_1_1, "action_button_guide_1_1", "right middle"),
+        (action_button_1_2, "action_button_guide_1_2", "right inner"),
+    ):
+        ctx.expect_overlap(
+            button,
+            cabinet,
+            axes="xy",
+            elem_a="button_cap",
+            elem_b=guide_name,
+            min_overlap=0.025,
+            name=f"{label} action button stays centered in its guide",
+        )
     ctx.expect_origin_gap(
         right_start_button,
         left_start_button,
@@ -566,6 +708,23 @@ def run_tests() -> TestReport:
         details=f"closed={closed_hatch}, opened={opened_hatch}",
     )
 
+    for joystick, joint, label in (
+        (player_0_joystick, player_0_joystick_joint, "left"),
+        (player_1_joystick, player_1_joystick_joint, "right"),
+    ):
+        rest_ball = aabb_center(ctx.part_element_world_aabb(joystick, elem="joystick_ball"))
+        with ctx.pose({joint: 0.25}):
+            tilted_ball = aabb_center(ctx.part_element_world_aabb(joystick, elem="joystick_ball"))
+        ctx.check(
+            f"{label} joystick visibly tilts from center",
+            rest_ball is not None
+            and tilted_ball is not None
+            and abs(tilted_ball[0] - rest_ball[0]) < 1e-6
+            and abs(tilted_ball[1] - rest_ball[1]) > 0.01
+            and abs(tilted_ball[2] - rest_ball[2]) > 0.004,
+            details=f"rest={rest_ball}, tilted={tilted_ball}",
+        )
+
     left_pressed = None
     right_pressed = None
     with ctx.pose({left_button_joint: 0.004}):
@@ -600,6 +759,23 @@ def run_tests() -> TestReport:
         right_rest is not None and right_pressed is not None and right_pressed[2] < right_rest[2] - 0.002,
         details=f"rest={right_rest}, pressed={right_pressed}",
     )
+
+    for button, joint, label in (
+        (action_button_0_0, action_button_0_0_joint, "left outer"),
+        (action_button_0_1, action_button_0_1_joint, "left middle"),
+        (action_button_0_2, action_button_0_2_joint, "left inner"),
+        (action_button_1_0, action_button_1_0_joint, "right outer"),
+        (action_button_1_1, action_button_1_1_joint, "right middle"),
+        (action_button_1_2, action_button_1_2_joint, "right inner"),
+    ):
+        rest_pos = ctx.part_world_position(button)
+        with ctx.pose({joint: joint.motion_limits.upper}):
+            pressed_pos = ctx.part_world_position(button)
+        ctx.check(
+            f"{label} action button depresses downward",
+            rest_pos is not None and pressed_pos is not None and pressed_pos[2] < rest_pos[2] - 0.001,
+            details=f"rest={rest_pos}, pressed={pressed_pos}",
+        )
 
     return ctx.report()
 

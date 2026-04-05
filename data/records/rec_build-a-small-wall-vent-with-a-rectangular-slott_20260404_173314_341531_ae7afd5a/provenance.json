@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_build-a-small-wall-vent-with-a-rectangular-slott_20260404_173314_341531_ae7afd5a",
+  "generation": {
+    "provider": "gemini",
+    "model_id": "gemini-3-flash-preview",
+    "thinking_level": "high",
+    "openai_transport": null,
+    "openai_reasoning_summary": null,
+    "max_turns": 50,
+    "max_cost_usd": null
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt_gemini.txt",
+    "system_prompt_sha256": "f9808ff4d5b5ad60b3365f404ce18dd77f5cee9def41f483e2c55bd1237e932d",
+    "sdk_docs_mode": "full",
+    "post_success_design_audit": true,
+    "scaffold_mode": "lite"
+  },
+  "sdk": {
+    "sdk_package": "sdk",
+    "sdk_version": "workspace",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "darwin-arm64",
+    "git_commit": "dca9d63761080080ddd0b323621735816c4e8f52",
+    "uv_lock_sha256": "609c6cb5ce8a26122aaeab4bd2bdcc6e45bacfa426781165809f517f6b02bb83"
+  },
+  "run_summary": {
+    "turn_count": 42,
+    "tool_call_count": 37,
+    "compile_attempt_count": 3,
+    "final_status": "success"
+  }
+}

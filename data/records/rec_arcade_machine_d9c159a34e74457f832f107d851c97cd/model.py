@@ -295,17 +295,46 @@ def build_object_model() -> ArticulatedObject:
         motion_limits=MotionLimits(effort=0.3, velocity=12.0),
     )
 
-    for x_pos, color_name, material in (
-        (-0.060, "red", button_red),
-        (-0.018, "yellow", button_yellow),
-        (0.024, "blue", button_blue),
-    ):
-        button_center_y, button_center_z = _offset_along_local_z(deck_y, deck_z, deck_angle, 0.010)
+    button_surface_y, button_surface_z = _offset_along_local_z(deck_y, deck_z, deck_angle, side_thickness * 0.5)
+    button_guide_y, button_guide_z = _offset_along_local_z(deck_y, deck_z, deck_angle, side_thickness * 0.5 + 0.002)
+    button_specs = (
+        ("red_button", "red", -0.060, button_red),
+        ("yellow_button", "yellow", -0.018, button_yellow),
+        ("blue_button", "blue", 0.024, button_blue),
+    )
+    for part_name, color_name, x_pos, material in button_specs:
         cabinet.visual(
-            Cylinder(radius=0.013, length=0.008),
-            origin=Origin(xyz=(x_pos, button_center_y, button_center_z), rpy=(deck_angle, 0.0, 0.0)),
+            Cylinder(radius=0.016, length=0.004),
+            origin=Origin(xyz=(x_pos, button_guide_y, button_guide_z), rpy=(deck_angle, 0.0, 0.0)),
+            material=trim_black,
+            name=f"{color_name}_button_guide",
+        )
+
+        button = model.part(part_name)
+        button.visual(
+            Cylinder(radius=0.013, length=0.006),
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
             material=material,
-            name=f"{color_name}_button_cap",
+            name="button_cap",
+        )
+        button.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.013, length=0.006),
+            mass=0.03,
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
+        )
+        model.articulation(
+            f"cabinet_to_{part_name}",
+            ArticulationType.PRISMATIC,
+            parent=cabinet,
+            child=button,
+            origin=Origin(xyz=(x_pos, button_surface_y, button_surface_z), rpy=(deck_angle, 0.0, 0.0)),
+            axis=(0.0, 0.0, -1.0),
+            motion_limits=MotionLimits(
+                effort=0.4,
+                velocity=0.10,
+                lower=0.0,
+                upper=0.003,
+            ),
         )
 
     acceptor = model.part("coin_acceptor")
@@ -391,15 +420,24 @@ def run_tests() -> TestReport:
     cabinet = object_model.get_part("cabinet")
     screen = object_model.get_part("screen")
     knob = object_model.get_part("control_knob")
+    red_button = object_model.get_part("red_button")
+    yellow_button = object_model.get_part("yellow_button")
+    blue_button = object_model.get_part("blue_button")
     acceptor = object_model.get_part("coin_acceptor")
     coin_flap = object_model.get_part("coin_return_flap")
 
     knob_joint = object_model.get_articulation("cabinet_to_control_knob")
+    red_button_joint = object_model.get_articulation("cabinet_to_red_button")
+    yellow_button_joint = object_model.get_articulation("cabinet_to_yellow_button")
+    blue_button_joint = object_model.get_articulation("cabinet_to_blue_button")
     flap_joint = object_model.get_articulation("coin_acceptor_to_return_flap")
 
     ctx.check("cabinet part exists", cabinet is not None)
     ctx.check("screen part exists", screen is not None)
     ctx.check("control knob part exists", knob is not None)
+    ctx.check("red button part exists", red_button is not None)
+    ctx.check("yellow button part exists", yellow_button is not None)
+    ctx.check("blue button part exists", blue_button is not None)
     ctx.check("coin acceptor part exists", acceptor is not None)
     ctx.check("coin flap part exists", coin_flap is not None)
 
@@ -407,6 +445,18 @@ def run_tests() -> TestReport:
         "control knob uses continuous vertical rotation",
         knob_joint.articulation_type == ArticulationType.CONTINUOUS and knob_joint.axis == (0.0, 0.0, 1.0),
         details=f"type={knob_joint.articulation_type}, axis={knob_joint.axis}",
+    )
+    ctx.check(
+        "control deck buttons use downward prismatic motion",
+        all(
+            joint.articulation_type == ArticulationType.PRISMATIC and joint.axis == (0.0, 0.0, -1.0)
+            for joint in (red_button_joint, yellow_button_joint, blue_button_joint)
+        ),
+        details=(
+            f"red={red_button_joint.axis}/{red_button_joint.articulation_type}, "
+            f"yellow={yellow_button_joint.axis}/{yellow_button_joint.articulation_type}, "
+            f"blue={blue_button_joint.axis}/{blue_button_joint.articulation_type}"
+        ),
     )
     ctx.check(
         "coin return flap uses horizontal revolute hinge",
@@ -428,6 +478,20 @@ def run_tests() -> TestReport:
         elem_b="top_panel",
         name="knob sits on top panel",
     )
+    for button, guide_name, label in (
+        (red_button, "red_button_guide", "red"),
+        (yellow_button, "yellow_button_guide", "yellow"),
+        (blue_button, "blue_button_guide", "blue"),
+    ):
+        ctx.expect_overlap(
+            button,
+            cabinet,
+            axes="xy",
+            elem_a="button_cap",
+            elem_b=guide_name,
+            min_overlap=0.020,
+            name=f"{label} button stays centered over its guide",
+        )
 
     with ctx.pose({flap_joint: 0.0}):
         ctx.expect_contact(
@@ -451,6 +515,20 @@ def run_tests() -> TestReport:
         and open_aabb[1][0] > closed_aabb[1][0] + 0.008,
         details=f"closed={closed_aabb}, open={open_aabb}",
     )
+
+    for button, joint, label in (
+        (red_button, red_button_joint, "red"),
+        (yellow_button, yellow_button_joint, "yellow"),
+        (blue_button, blue_button_joint, "blue"),
+    ):
+        rest_pos = ctx.part_world_position(button)
+        with ctx.pose({joint: joint.motion_limits.upper}):
+            pressed_pos = ctx.part_world_position(button)
+        ctx.check(
+            f"{label} button depresses into the control deck",
+            rest_pos is not None and pressed_pos is not None and pressed_pos[2] < rest_pos[2] - 0.001,
+            details=f"rest={rest_pos}, pressed={pressed_pos}",
+        )
 
     return ctx.report()
 

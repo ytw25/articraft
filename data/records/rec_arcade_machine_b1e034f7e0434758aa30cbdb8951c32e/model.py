@@ -31,8 +31,11 @@ def build_object_model() -> ArticulatedObject:
     button_blue = model.material("button_blue", rgba=(0.20, 0.45, 0.83, 1.0))
     joystick_black = model.material("joystick_black", rgba=(0.09, 0.09, 0.10, 1.0))
     knob_black = model.material("knob_black", rgba=(0.11, 0.11, 0.12, 1.0))
+    button_guide = model.material("button_guide", rgba=(0.18, 0.18, 0.19, 1.0))
 
     cabinet = model.part("cabinet")
+    joystick_specs: list[tuple[str, tuple[float, float, float], object]] = []
+    button_specs: list[tuple[str, tuple[float, float, float], object, str]] = []
 
     cabinet.visual(
         Box((0.90, 0.60, 0.07)),
@@ -200,31 +203,34 @@ def build_object_model() -> ArticulatedObject:
 
         cabinet.visual(
             Cylinder(radius=0.020, length=0.012),
-            origin=Origin(xyz=(-0.18, panel_label_y, 0.629), rpy=(0.0, 0.0, 0.0)),
+            origin=Origin(xyz=(-0.18, panel_label_y, 0.629)),
             material=joystick_black,
-            name=f"{prefix}_joystick_base",
+            name=f"{prefix}_joystick_collar",
         )
-        cabinet.visual(
-            Cylinder(radius=0.005, length=0.058),
-            origin=Origin(xyz=(-0.18, panel_label_y, 0.652)),
-            material=joystick_black,
-            name=f"{prefix}_joystick_shaft",
-        )
-        cabinet.visual(
-            Sphere(radius=0.015),
-            origin=Origin(xyz=(-0.18, panel_label_y, 0.689)),
-            material=button_red if side_sign > 0.0 else button_blue,
-            name=f"{prefix}_joystick_ball",
+        joystick_specs.append(
+            (
+                f"{prefix}_joystick",
+                (-0.18, panel_label_y, 0.624),
+                button_red if side_sign > 0.0 else button_blue,
+            )
         )
 
         button_xs = (-0.04, 0.02, 0.08)
         button_materials = (button_red, button_yellow, button_blue)
         for index, (button_x, button_material) in enumerate(zip(button_xs, button_materials)):
             cabinet.visual(
-                Cylinder(radius=0.015, length=0.010),
-                origin=Origin(xyz=(button_x, panel_label_y, 0.629)),
-                material=button_material,
-                name=f"{prefix}_button_{index}",
+                Cylinder(radius=0.017, length=0.004),
+                origin=Origin(xyz=(button_x, panel_label_y, 0.626)),
+                material=button_guide,
+                name=f"{prefix}_button_guide_{index}",
+            )
+            button_specs.append(
+                (
+                    f"{prefix}_button_{index}",
+                    (button_x, panel_label_y, 0.624),
+                    button_material,
+                    f"{prefix}_button_guide_{index}",
+                )
             )
 
     add_player_controls(1.0, "player_one")
@@ -278,6 +284,68 @@ def build_object_model() -> ArticulatedObject:
         child=screen_module,
         origin=Origin(xyz=(0.0, 0.0, 0.557)),
     )
+
+    for part_name, origin_xyz, ball_material in joystick_specs:
+        joystick = model.part(part_name)
+        joystick.visual(
+            Cylinder(radius=0.005, length=0.050),
+            origin=Origin(xyz=(0.0, 0.0, 0.035)),
+            material=joystick_black,
+            name="joystick_shaft",
+        )
+        joystick.visual(
+            Sphere(radius=0.015),
+            origin=Origin(xyz=(0.0, 0.0, 0.073)),
+            material=ball_material,
+            name="joystick_ball",
+        )
+        joystick.inertial = Inertial.from_geometry(
+            Box((0.030, 0.030, 0.090)),
+            mass=0.08,
+            origin=Origin(xyz=(0.0, 0.0, 0.045)),
+        )
+        model.articulation(
+            f"cabinet_to_{part_name}",
+            ArticulationType.REVOLUTE,
+            parent=cabinet,
+            child=joystick,
+            origin=Origin(xyz=origin_xyz),
+            axis=(1.0, 0.0, 0.0),
+            motion_limits=MotionLimits(
+                effort=0.6,
+                velocity=2.5,
+                lower=-0.35,
+                upper=0.35,
+            ),
+        )
+
+    for part_name, origin_xyz, button_material, _guide_name in button_specs:
+        button = model.part(part_name)
+        button.visual(
+            Cylinder(radius=0.015, length=0.006),
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
+            material=button_material,
+            name="button_cap",
+        )
+        button.inertial = Inertial.from_geometry(
+            Cylinder(radius=0.015, length=0.006),
+            mass=0.03,
+            origin=Origin(xyz=(0.0, 0.0, 0.007)),
+        )
+        model.articulation(
+            f"cabinet_to_{part_name}",
+            ArticulationType.PRISMATIC,
+            parent=cabinet,
+            child=button,
+            origin=Origin(xyz=origin_xyz),
+            axis=(0.0, 0.0, -1.0),
+            motion_limits=MotionLimits(
+                effort=0.5,
+                velocity=0.10,
+                lower=0.0,
+                upper=0.003,
+            ),
+        )
 
     coin_door = model.part("coin_door")
     coin_door.visual(
@@ -379,10 +447,31 @@ def run_tests() -> TestReport:
     cabinet = object_model.get_part("cabinet")
     glass_top = object_model.get_part("glass_top")
     screen_module = object_model.get_part("screen_module")
+    player_one_joystick = object_model.get_part("player_one_joystick")
+    player_two_joystick = object_model.get_part("player_two_joystick")
+    player_one_button_0 = object_model.get_part("player_one_button_0")
+    player_one_button_1 = object_model.get_part("player_one_button_1")
+    player_one_button_2 = object_model.get_part("player_one_button_2")
+    player_two_button_0 = object_model.get_part("player_two_button_0")
+    player_two_button_1 = object_model.get_part("player_two_button_1")
+    player_two_button_2 = object_model.get_part("player_two_button_2")
     coin_door = object_model.get_part("coin_door")
     selector_knob = object_model.get_part("selector_knob")
+    player_one_joystick_joint = object_model.get_articulation("cabinet_to_player_one_joystick")
+    player_two_joystick_joint = object_model.get_articulation("cabinet_to_player_two_joystick")
+    player_one_button_0_joint = object_model.get_articulation("cabinet_to_player_one_button_0")
+    player_one_button_1_joint = object_model.get_articulation("cabinet_to_player_one_button_1")
+    player_one_button_2_joint = object_model.get_articulation("cabinet_to_player_one_button_2")
+    player_two_button_0_joint = object_model.get_articulation("cabinet_to_player_two_button_0")
+    player_two_button_1_joint = object_model.get_articulation("cabinet_to_player_two_button_1")
+    player_two_button_2_joint = object_model.get_articulation("cabinet_to_player_two_button_2")
     coin_hinge = object_model.get_articulation("cabinet_to_coin_door")
     knob_joint = object_model.get_articulation("cabinet_to_selector_knob")
+
+    def aabb_center(aabb):
+        if aabb is None:
+            return None
+        return tuple((aabb[0][axis] + aabb[1][axis]) * 0.5 for axis in range(3))
 
     cabinet_visual_names = {visual.name for visual in cabinet.visuals if visual.name is not None}
     ctx.check(
@@ -414,6 +503,35 @@ def run_tests() -> TestReport:
         and knob_joint.origin.xyz[1] > 0.12,
         details=f"axis={knob_joint.axis}, origin={knob_joint.origin.xyz}, limits={knob_joint.motion_limits}",
     )
+    ctx.check(
+        "both joysticks tilt on single transverse hinges",
+        player_one_joystick_joint.articulation_type == ArticulationType.REVOLUTE
+        and player_two_joystick_joint.articulation_type == ArticulationType.REVOLUTE
+        and player_one_joystick_joint.axis == (1.0, 0.0, 0.0)
+        and player_two_joystick_joint.axis == (1.0, 0.0, 0.0),
+        details=(
+            f"p1={player_one_joystick_joint.axis}/{player_one_joystick_joint.articulation_type}, "
+            f"p2={player_two_joystick_joint.axis}/{player_two_joystick_joint.articulation_type}"
+        ),
+    )
+    ctx.check(
+        "all six player buttons press downward",
+        all(
+            joint.articulation_type == ArticulationType.PRISMATIC and joint.axis == (0.0, 0.0, -1.0)
+            for joint in (
+                player_one_button_0_joint,
+                player_one_button_1_joint,
+                player_one_button_2_joint,
+                player_two_button_0_joint,
+                player_two_button_1_joint,
+                player_two_button_2_joint,
+            )
+        ),
+        details=(
+            f"p1={[player_one_button_0_joint.axis, player_one_button_1_joint.axis, player_one_button_2_joint.axis]}, "
+            f"p2={[player_two_button_0_joint.axis, player_two_button_1_joint.axis, player_two_button_2_joint.axis]}"
+        ),
+    )
 
     with ctx.pose({coin_hinge: 0.0}):
         ctx.expect_contact(
@@ -441,6 +559,23 @@ def run_tests() -> TestReport:
             cabinet,
             name="selector knob is mounted to the player panel",
         )
+        for button, guide_name, label in (
+            (player_one_button_0, "player_one_button_guide_0", "player one red"),
+            (player_one_button_1, "player_one_button_guide_1", "player one yellow"),
+            (player_one_button_2, "player_one_button_guide_2", "player one blue"),
+            (player_two_button_0, "player_two_button_guide_0", "player two red"),
+            (player_two_button_1, "player_two_button_guide_1", "player two yellow"),
+            (player_two_button_2, "player_two_button_guide_2", "player two blue"),
+        ):
+            ctx.expect_overlap(
+                button,
+                cabinet,
+                axes="xy",
+                elem_a="button_cap",
+                elem_b=guide_name,
+                min_overlap=0.022,
+                name=f"{label} button stays centered over its guide",
+            )
         closed_door_aabb = ctx.part_world_aabb(coin_door)
 
     with ctx.pose({coin_hinge: 1.2, knob_joint: 1.7}):
@@ -465,6 +600,40 @@ def run_tests() -> TestReport:
         ),
         details=f"rest={rest_knob_position}, spun={spun_knob_position}",
     )
+
+    for joystick, joint, label in (
+        (player_one_joystick, player_one_joystick_joint, "player one"),
+        (player_two_joystick, player_two_joystick_joint, "player two"),
+    ):
+        rest_ball = aabb_center(ctx.part_element_world_aabb(joystick, elem="joystick_ball"))
+        with ctx.pose({joint: 0.25}):
+            tilted_ball = aabb_center(ctx.part_element_world_aabb(joystick, elem="joystick_ball"))
+        ctx.check(
+            f"{label} joystick visibly tilts from center",
+            rest_ball is not None
+            and tilted_ball is not None
+            and abs(tilted_ball[0] - rest_ball[0]) < 1e-6
+            and abs(tilted_ball[1] - rest_ball[1]) > 0.01
+            and abs(tilted_ball[2] - rest_ball[2]) > 0.004,
+            details=f"rest={rest_ball}, tilted={tilted_ball}",
+        )
+
+    for button, joint, label in (
+        (player_one_button_0, player_one_button_0_joint, "player one red"),
+        (player_one_button_1, player_one_button_1_joint, "player one yellow"),
+        (player_one_button_2, player_one_button_2_joint, "player one blue"),
+        (player_two_button_0, player_two_button_0_joint, "player two red"),
+        (player_two_button_1, player_two_button_1_joint, "player two yellow"),
+        (player_two_button_2, player_two_button_2_joint, "player two blue"),
+    ):
+        rest_pos = ctx.part_world_position(button)
+        with ctx.pose({joint: joint.motion_limits.upper}):
+            pressed_pos = ctx.part_world_position(button)
+        ctx.check(
+            f"{label} button depresses downward",
+            rest_pos is not None and pressed_pos is not None and pressed_pos[2] < rest_pos[2] - 0.001,
+            details=f"rest={rest_pos}, pressed={pressed_pos}",
+        )
 
     return ctx.report()
 
