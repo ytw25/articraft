@@ -1,52 +1,79 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    BlowerWheelGeometry,
+    Box,
+    Inertial,
+    TestContext,
+    TestReport,
+    mesh_from_geometry,
+)
 
-from sdk import ArticulatedObject, TestContext, TestReport
+OUTER_RADIUS = 0.080
+WIDTH = 0.050
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="blower_wheel_demo")
+    finish = model.material("blower_gray", rgba=(0.62, 0.65, 0.69, 1.0))
+
+    blower_wheel = model.part("blower_wheel")
+    blower_wheel.visual(
+        mesh_from_geometry(
+            BlowerWheelGeometry(
+                OUTER_RADIUS,
+                0.040,
+                WIDTH,
+                18,
+                blade_thickness=0.004,
+                blade_sweep_deg=25.0,
+            ),
+            "blower_wheel",
+        ),
+        material=finish,
+        name="blower_wheel",
+    )
+    blower_wheel.inertial = Inertial.from_geometry(Box((0.16, 0.16, WIDTH)), mass=0.22)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
+    blower_wheel = object_model.get_part("blower_wheel")
+    ctx.check("blower_wheel_part_present", blower_wheel is not None, "Expected a single blower_wheel part.")
+    if blower_wheel is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check(
+        "blower_wheel_visual_present",
+        blower_wheel.get_visual("blower_wheel") is not None,
+        "Expected a mesh-backed blower_wheel visual.",
+    )
+    aabb = ctx.part_world_aabb(blower_wheel)
+    ctx.check("blower_wheel_aabb_present", aabb is not None, "Expected a world AABB for the blower wheel.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    center = tuple(float((maxs[i] + mins[i]) * 0.5) for i in range(3))
+    diameter = max(size[0], size[1])
+    ctx.check(
+        "blower_wheel_overall_diameter",
+        abs(diameter - OUTER_RADIUS * 2.0) <= 0.008,
+        f"size={size!r}",
+    )
+    ctx.check(
+        "blower_wheel_width",
+        abs(size[2] - WIDTH) <= 0.004,
+        f"size={size!r}",
+    )
+    ctx.check(
+        "blower_wheel_centered",
+        max(abs(value) for value in center) <= 0.003,
+        f"center={center!r}",
+    )
     return ctx.report()
 
 

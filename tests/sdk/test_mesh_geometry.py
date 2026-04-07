@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 import sdk
+import sdk.v0 as sdk_v0
 from sdk._core.v0 import mesh as mesh_module
 from sdk._core.v0.assets import AssetSession, activate_asset_session
 
@@ -49,6 +50,115 @@ def _component_count(geom: sdk.MeshGeometry) -> int:
                 seen.add(neighbor)
                 queue.append(neighbor)
     return count
+
+
+def _load_exported_mesh(mesh_path: str | Path):
+    import trimesh
+
+    return trimesh.load_mesh(mesh_path, force="mesh")
+
+
+def _assert_clean_export(
+    tmp_path: Path,
+    geometry: sdk.MeshGeometry,
+    logical_name: str,
+):
+    session = AssetSession(tmp_path)
+    with activate_asset_session(session):
+        mesh = sdk.mesh_from_geometry(geometry, logical_name)
+
+    exported = _load_exported_mesh(mesh.materialized_path)
+    assert exported.is_watertight
+    assert exported.body_count == 1
+    assert len(exported.split(only_watertight=False)) == 1
+    return exported
+
+
+def _build_perforated_panel_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.PerforatedPanelGeometry(
+        (0.16, 0.10),
+        0.004,
+        hole_diameter=0.006,
+        pitch=(0.012, 0.012),
+        frame=0.010,
+        corner_radius=0.004,
+        stagger=True,
+        center=center,
+    )
+
+
+def _build_slot_pattern_panel_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.SlotPatternPanelGeometry(
+        (0.18, 0.09),
+        0.004,
+        slot_size=(0.024, 0.006),
+        pitch=(0.032, 0.016),
+        frame=0.010,
+        corner_radius=0.004,
+        slot_angle_deg=18.0,
+        stagger=True,
+        center=center,
+    )
+
+
+def _build_clevis_bracket_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.ClevisBracketGeometry(
+        (0.08, 0.04, 0.06),
+        gap_width=0.032,
+        bore_diameter=0.012,
+        bore_center_z=0.038,
+        base_thickness=0.012,
+        corner_radius=0.003,
+        center=center,
+    )
+
+
+def _build_pivot_fork_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.PivotForkGeometry(
+        (0.08, 0.05, 0.05),
+        gap_width=0.034,
+        bore_diameter=0.010,
+        bore_center_z=0.028,
+        bridge_thickness=0.012,
+        corner_radius=0.002,
+        center=center,
+    )
+
+
+def _build_trunnion_yoke_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.TrunnionYokeGeometry(
+        (0.12, 0.05, 0.08),
+        span_width=0.060,
+        trunnion_diameter=0.016,
+        trunnion_center_z=0.050,
+        base_thickness=0.014,
+        corner_radius=0.003,
+        center=center,
+    )
+
+
+def _build_fan_rotor_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.FanRotorGeometry(
+        0.070,
+        0.020,
+        5,
+        thickness=0.010,
+        blade_pitch_deg=24.0,
+        blade_sweep_deg=14.0,
+        center=center,
+    )
+
+
+def _build_blower_wheel_geometry(*, center: bool = True) -> sdk.MeshGeometry:
+    return sdk.BlowerWheelGeometry(
+        0.080,
+        0.040,
+        0.050,
+        18,
+        blade_thickness=0.004,
+        blade_sweep_deg=25.0,
+        center=center,
+    )
 
 
 def test_dome_geometry_builds_closed_hemisphere() -> None:
@@ -625,6 +735,351 @@ def test_vent_grille_geometry_requires_at_least_one_slat_row() -> None:
             slat_pitch=0.018,
             slat_width=0.009,
         )
+
+
+@pytest.mark.parametrize(
+    ("builder", "logical_name", "expected_mins", "expected_maxs", "tol"),
+    [
+        pytest.param(
+            _build_perforated_panel_geometry,
+            "perforated_panel",
+            (-0.080, -0.050, -0.002),
+            (0.080, 0.050, 0.002),
+            1e-3,
+            id="perforated-panel",
+        ),
+        pytest.param(
+            _build_slot_pattern_panel_geometry,
+            "slot_pattern_panel",
+            (-0.090, -0.045, -0.002),
+            (0.090, 0.045, 0.002),
+            1e-3,
+            id="slot-pattern-panel",
+        ),
+        pytest.param(
+            _build_clevis_bracket_geometry,
+            "clevis_bracket",
+            (-0.040, -0.020, -0.030),
+            (0.040, 0.020, 0.030),
+            1e-3,
+            id="clevis-bracket",
+        ),
+        pytest.param(
+            _build_pivot_fork_geometry,
+            "pivot_fork",
+            (-0.040, -0.025, -0.025),
+            (0.040, 0.025, 0.025),
+            1e-3,
+            id="pivot-fork",
+        ),
+        pytest.param(
+            _build_trunnion_yoke_geometry,
+            "trunnion_yoke",
+            (-0.060, -0.025, -0.040),
+            (0.060, 0.025, 0.040),
+            1e-3,
+            id="trunnion-yoke",
+        ),
+        pytest.param(
+            _build_fan_rotor_geometry,
+            "fan_rotor",
+            (-0.060, -0.065, -0.0038),
+            (0.067, 0.067, 0.0050),
+            2.5e-3,
+            id="fan-rotor",
+        ),
+        pytest.param(
+            _build_blower_wheel_geometry,
+            "blower_wheel",
+            (-0.080, -0.080, -0.025),
+            (0.080, 0.080, 0.025),
+            1.5e-3,
+            id="blower-wheel",
+        ),
+    ],
+)
+def test_new_mesh_geometry_helpers_export_clean_single_body_meshes(
+    tmp_path: Path,
+    builder,
+    logical_name: str,
+    expected_mins: tuple[float, float, float],
+    expected_maxs: tuple[float, float, float],
+    tol: float,
+) -> None:
+    geometry = builder()
+
+    mesh_module._manifold_from_geometry(geometry, name=logical_name)
+    exported = _assert_clean_export(tmp_path, geometry, logical_name)
+
+    mins, maxs = exported.bounds
+    for axis, expected in enumerate(expected_mins):
+        assert mins[axis] == pytest.approx(expected, abs=tol)
+    for axis, expected in enumerate(expected_maxs):
+        assert maxs[axis] == pytest.approx(expected, abs=tol)
+
+
+@pytest.mark.parametrize(
+    ("builder", "name"),
+    [
+        pytest.param(
+            _build_perforated_panel_geometry, "PerforatedPanelGeometry", id="perforated-panel"
+        ),
+        pytest.param(
+            _build_slot_pattern_panel_geometry, "SlotPatternPanelGeometry", id="slot-pattern-panel"
+        ),
+        pytest.param(_build_clevis_bracket_geometry, "ClevisBracketGeometry", id="clevis-bracket"),
+        pytest.param(_build_pivot_fork_geometry, "PivotForkGeometry", id="pivot-fork"),
+        pytest.param(_build_trunnion_yoke_geometry, "TrunnionYokeGeometry", id="trunnion-yoke"),
+        pytest.param(_build_fan_rotor_geometry, "FanRotorGeometry", id="fan-rotor"),
+        pytest.param(_build_blower_wheel_geometry, "BlowerWheelGeometry", id="blower-wheel"),
+    ],
+)
+def test_new_mesh_geometry_helpers_support_center_false_z0_mount_frames(builder, name: str) -> None:
+    geometry = builder(center=False)
+    mins, _maxs = _bounds(geometry)
+    assert mins[2] == pytest.approx(0.0, abs=1e-6), name
+
+
+@pytest.mark.parametrize(
+    ("builder", "message"),
+    [
+        pytest.param(
+            lambda: sdk.PerforatedPanelGeometry(
+                (0.12, 0.08),
+                0.004,
+                hole_diameter=0.008,
+                pitch=0.012,
+                frame=0.05,
+            ),
+            "frame",
+            id="perforated-frame-too-large",
+        ),
+        pytest.param(
+            lambda: sdk.PerforatedPanelGeometry(
+                (0.12, 0.08),
+                0.004,
+                hole_diameter=0.008,
+                pitch=0.008,
+                frame=0.01,
+            ),
+            "pitch must be greater than hole_diameter",
+            id="perforated-pitch-too-small",
+        ),
+        pytest.param(
+            lambda: sdk.PerforatedPanelGeometry(
+                (0.12, 0.08),
+                0.004,
+                hole_diameter=0.050,
+                pitch=(0.060, 0.060),
+                frame=0.020,
+            ),
+            "leave no usable perforation area",
+            id="perforated-no-rows",
+        ),
+        pytest.param(
+            lambda: sdk.SlotPatternPanelGeometry(
+                (0.14, 0.08),
+                0.004,
+                slot_size=(0.005, 0.006),
+                pitch=0.015,
+            ),
+            "slot_size\\[0\\] must be greater than or equal",
+            id="slot-invalid-size",
+        ),
+        pytest.param(
+            lambda: sdk.SlotPatternPanelGeometry(
+                (0.14, 0.08),
+                0.004,
+                slot_size=(0.020, 0.006),
+                pitch=(0.020, 0.012),
+            ),
+            "rotated slot envelope",
+            id="slot-pitch-too-small",
+        ),
+        pytest.param(
+            lambda: sdk.SlotPatternPanelGeometry(
+                (0.14, 0.05),
+                0.004,
+                slot_size=(0.040, 0.032),
+                pitch=(0.050, 0.050),
+                frame=0.01,
+            ),
+            "leave no usable slot area",
+            id="slot-no-rows",
+        ),
+    ],
+)
+def test_new_panel_geometry_helpers_validate_invalid_inputs(builder, message: str) -> None:
+    with pytest.raises(ValueError, match=message):
+        builder()
+
+
+@pytest.mark.parametrize(
+    ("builder", "message"),
+    [
+        pytest.param(
+            lambda: sdk.ClevisBracketGeometry(
+                (0.08, 0.04, 0.06),
+                gap_width=0.08,
+                bore_diameter=0.012,
+                bore_center_z=0.038,
+                base_thickness=0.012,
+            ),
+            "gap_width",
+            id="clevis-invalid-gap",
+        ),
+        pytest.param(
+            lambda: sdk.ClevisBracketGeometry(
+                (0.08, 0.04, 0.06),
+                gap_width=0.032,
+                bore_diameter=0.050,
+                bore_center_z=0.038,
+                base_thickness=0.012,
+            ),
+            "bore_diameter",
+            id="clevis-invalid-bore",
+        ),
+        pytest.param(
+            lambda: sdk.ClevisBracketGeometry(
+                (0.08, 0.04, 0.06),
+                gap_width=0.032,
+                bore_diameter=0.012,
+                bore_center_z=0.014,
+                base_thickness=0.012,
+            ),
+            "bore_center_z",
+            id="clevis-invalid-bore-center",
+        ),
+        pytest.param(
+            lambda: sdk.PivotForkGeometry(
+                (0.08, 0.05, 0.05),
+                gap_width=0.08,
+                bore_diameter=0.01,
+                bore_center_z=0.028,
+                bridge_thickness=0.012,
+            ),
+            "gap_width",
+            id="pivot-fork-invalid-gap",
+        ),
+        pytest.param(
+            lambda: sdk.PivotForkGeometry(
+                (0.08, 0.05, 0.05),
+                gap_width=0.034,
+                bore_diameter=0.050,
+                bore_center_z=0.028,
+                bridge_thickness=0.012,
+            ),
+            "bore_diameter",
+            id="pivot-fork-invalid-bore",
+        ),
+        pytest.param(
+            lambda: sdk.PivotForkGeometry(
+                (0.08, 0.05, 0.05),
+                gap_width=0.034,
+                bore_diameter=0.01,
+                bore_center_z=0.004,
+                bridge_thickness=0.012,
+            ),
+            "bore_center_z",
+            id="pivot-fork-invalid-bore-center",
+        ),
+        pytest.param(
+            lambda: sdk.TrunnionYokeGeometry(
+                (0.12, 0.05, 0.08),
+                span_width=0.12,
+                trunnion_diameter=0.016,
+                trunnion_center_z=0.05,
+                base_thickness=0.014,
+            ),
+            "span_width",
+            id="trunnion-yoke-invalid-span",
+        ),
+        pytest.param(
+            lambda: sdk.TrunnionYokeGeometry(
+                (0.12, 0.05, 0.08),
+                span_width=0.060,
+                trunnion_diameter=0.050,
+                trunnion_center_z=0.05,
+                base_thickness=0.014,
+            ),
+            "trunnion_diameter",
+            id="trunnion-yoke-invalid-diameter",
+        ),
+        pytest.param(
+            lambda: sdk.TrunnionYokeGeometry(
+                (0.12, 0.05, 0.08),
+                span_width=0.060,
+                trunnion_diameter=0.016,
+                trunnion_center_z=0.018,
+                base_thickness=0.014,
+            ),
+            "trunnion_center_z",
+            id="trunnion-yoke-invalid-center",
+        ),
+    ],
+)
+def test_new_bracket_geometry_helpers_validate_invalid_inputs(builder, message: str) -> None:
+    with pytest.raises(ValueError, match=message):
+        builder()
+
+
+@pytest.mark.parametrize(
+    ("builder", "message"),
+    [
+        pytest.param(
+            lambda: sdk.FanRotorGeometry(0.07, 0.02, 1, thickness=0.01),
+            "blade_count",
+            id="fan-invalid-blade-count",
+        ),
+        pytest.param(
+            lambda: sdk.FanRotorGeometry(0.07, 0.07, 5, thickness=0.01),
+            "hub_radius",
+            id="fan-invalid-hub-radius",
+        ),
+        pytest.param(
+            lambda: sdk.FanRotorGeometry(0.07, 0.02, 5, thickness=0.01, blade_root_chord=0.20),
+            "blade chords",
+            id="fan-invalid-chord",
+        ),
+        pytest.param(
+            lambda: sdk.BlowerWheelGeometry(0.08, 0.04, 0.05, 1, blade_thickness=0.004),
+            "blade_count",
+            id="blower-invalid-blade-count",
+        ),
+        pytest.param(
+            lambda: sdk.BlowerWheelGeometry(0.08, 0.08, 0.05, 18, blade_thickness=0.004),
+            "inner_radius",
+            id="blower-invalid-inner-radius",
+        ),
+        pytest.param(
+            lambda: sdk.BlowerWheelGeometry(0.08, 0.04, 0.05, 18, blade_thickness=0.050),
+            "blade_thickness",
+            id="blower-invalid-blade-thickness",
+        ),
+    ],
+)
+def test_new_fan_geometry_helpers_validate_invalid_inputs(builder, message: str) -> None:
+    with pytest.raises(ValueError, match=message):
+        builder()
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "PerforatedPanelGeometry",
+        "SlotPatternPanelGeometry",
+        "ClevisBracketGeometry",
+        "PivotForkGeometry",
+        "TrunnionYokeGeometry",
+        "FanRotorGeometry",
+        "BlowerWheelGeometry",
+    ],
+)
+def test_sdk_and_v0_expose_new_mesh_geometry_helpers(name: str) -> None:
+    assert name in sdk.__all__
+    assert name in sdk_v0.__all__
+    assert getattr(sdk, name) is not None
+    assert getattr(sdk_v0, name) is not None
 
 
 def test_closed_bezier_spline_requires_closed_curve() -> None:

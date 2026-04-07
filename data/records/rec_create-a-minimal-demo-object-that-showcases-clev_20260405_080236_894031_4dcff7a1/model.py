@@ -1,52 +1,74 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    Box,
+    ClevisBracketGeometry,
+    Inertial,
+    TestContext,
+    TestReport,
+    mesh_from_geometry,
+)
 
-from sdk import ArticulatedObject, TestContext, TestReport
+OVERALL_SIZE = (0.08, 0.04, 0.06)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="clevis_bracket_demo")
+    finish = model.material("clevis_steel", rgba=(0.70, 0.72, 0.75, 1.0))
+
+    clevis_bracket = model.part("clevis_bracket")
+    clevis_bracket.visual(
+        mesh_from_geometry(
+            ClevisBracketGeometry(
+                OVERALL_SIZE,
+                gap_width=0.032,
+                bore_diameter=0.012,
+                bore_center_z=0.038,
+                base_thickness=0.012,
+                corner_radius=0.003,
+            ),
+            "clevis_bracket",
+        ),
+        material=finish,
+        name="clevis_bracket",
+    )
+    clevis_bracket.inertial = Inertial.from_geometry(Box(OVERALL_SIZE), mass=0.28)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
+    clevis_bracket = object_model.get_part("clevis_bracket")
+    ctx.check("clevis_bracket_part_present", clevis_bracket is not None, "Expected a single clevis_bracket part.")
+    if clevis_bracket is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check(
+        "clevis_bracket_visual_present",
+        clevis_bracket.get_visual("clevis_bracket") is not None,
+        "Expected a mesh-backed clevis_bracket visual.",
+    )
+    aabb = ctx.part_world_aabb(clevis_bracket)
+    ctx.check("clevis_bracket_aabb_present", aabb is not None, "Expected a world AABB for the clevis bracket.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    center = tuple(float((maxs[i] + mins[i]) * 0.5) for i in range(3))
+    ctx.check(
+        "clevis_bracket_overall_size",
+        abs(size[0] - OVERALL_SIZE[0]) <= 0.004
+        and abs(size[1] - OVERALL_SIZE[1]) <= 0.004
+        and abs(size[2] - OVERALL_SIZE[2]) <= 0.004,
+        f"size={size!r}",
+    )
+    ctx.check(
+        "clevis_bracket_centered",
+        max(abs(value) for value in center) <= 0.002,
+        f"center={center!r}",
+    )
     return ctx.report()
 
 

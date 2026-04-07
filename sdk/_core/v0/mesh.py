@@ -2185,6 +2185,61 @@ def _translated_profile(profile: List[Vec2], dx: float, dy: float) -> List[Vec2]
     return [(x + dx, y + dy) for (x, y) in profile]
 
 
+def _mesh_bounds(geometry: "MeshGeometry") -> tuple[Vec3, Vec3]:
+    if not geometry.vertices:
+        raise ValueError("MeshGeometry has no vertices")
+    xs = [vertex[0] for vertex in geometry.vertices]
+    ys = [vertex[1] for vertex in geometry.vertices]
+    zs = [vertex[2] for vertex in geometry.vertices]
+    return (
+        (min(xs), min(ys), min(zs)),
+        (max(xs), max(ys), max(zs)),
+    )
+
+
+def _normalize_pitch_2d(
+    pitch: Union[float, Sequence[float]],
+    *,
+    name: str = "pitch",
+) -> tuple[float, float]:
+    if isinstance(pitch, Sequence) and not isinstance(pitch, (str, bytes)):
+        values = list(pitch)
+        if len(values) != 2:
+            raise ValueError(f"{name} must be a positive scalar or a 2-tuple")
+        pitch_x = float(values[0])
+        pitch_y = float(values[1])
+    else:
+        pitch_x = float(pitch)
+        pitch_y = float(pitch)
+    if pitch_x <= 0.0 or pitch_y <= 0.0:
+        raise ValueError(f"{name} values must be positive")
+    return (pitch_x, pitch_y)
+
+
+def _centered_axis_positions(limit: float, pitch: float) -> list[float]:
+    if limit < -1e-9:
+        return []
+    if limit <= 1e-9:
+        return [0.0]
+    count = int((2.0 * limit) / pitch) + 1
+    if count <= 0:
+        return []
+    return [((index - (count - 1) * 0.5) * pitch) for index in range(count)]
+
+
+def _mesh_geometry_shifted_to_z0(geometry: "MeshGeometry") -> "MeshGeometry":
+    shifted = geometry.copy()
+    mins, _maxs = _mesh_bounds(shifted)
+    shifted.translate(0.0, 0.0, -mins[2])
+    return shifted
+
+
+def _adopt_mesh_geometry(target: "MeshGeometry", geometry: "MeshGeometry") -> None:
+    target.vertices = [tuple(vertex) for vertex in geometry.vertices]
+    target.faces = [tuple(face) for face in geometry.faces]
+    _copy_manifold_provenance(geometry, target)
+
+
 def _mesh_geometry_from_cadquery_model(
     model: object,
     *,
@@ -2418,6 +2473,845 @@ class VentGrilleGeometry(MeshGeometry):
         self.vertices = [tuple(vertex) for vertex in geom.vertices]
         self.faces = [tuple(face) for face in geom.faces]
         _copy_manifold_provenance(geom, self)
+
+
+class PerforatedPanelGeometry(MeshGeometry):
+    """
+    Build a rectangular plate with a grid of round through-holes.
+
+    The panel lies in XY and is extruded along Z.
+    """
+
+    def __init__(
+        self,
+        panel_size: Sequence[float],
+        thickness: float,
+        *,
+        hole_diameter: float,
+        pitch: Union[float, Sequence[float]],
+        frame: float = 0.008,
+        corner_radius: float = 0.0,
+        stagger: bool = False,
+        center: bool = True,
+    ):
+        super().__init__()
+        panel_w = float(panel_size[0])
+        panel_h = float(panel_size[1])
+        thickness = float(thickness)
+        hole_diameter = float(hole_diameter)
+        frame = float(frame)
+        corner_radius = max(0.0, float(corner_radius))
+        pitch_x, pitch_y = _normalize_pitch_2d(pitch)
+
+        if panel_w <= 0.0 or panel_h <= 0.0 or thickness <= 0.0:
+            raise ValueError("panel_size and thickness must be positive")
+        if hole_diameter <= 0.0:
+            raise ValueError("hole_diameter must be positive")
+        if frame < 0.0 or frame >= min(panel_w, panel_h) * 0.5:
+            raise ValueError("frame must be >= 0 and less than half of min(panel_size)")
+        if pitch_x <= hole_diameter or pitch_y <= hole_diameter:
+            raise ValueError("pitch must be greater than hole_diameter on both axes")
+
+        hole_radius = hole_diameter * 0.5
+        x_limit = panel_w * 0.5 - frame - hole_radius
+        y_limit = panel_h * 0.5 - frame - hole_radius
+        if x_limit < -1e-9 or y_limit < -1e-9:
+            raise ValueError("frame/hole_diameter leave no usable perforation area")
+
+        y_positions = _centered_axis_positions(y_limit, pitch_y)
+        if not y_positions:
+            raise ValueError("No perforation rows fit panel; increase panel size or reduce pitch")
+
+        point_rows: list[list[tuple[float, float]]] = []
+        for row_index, y in enumerate(y_positions):
+            x_offset = pitch_x * 0.5 if stagger and row_index % 2 == 1 else 0.0
+            row_limit = x_limit - abs(x_offset)
+            if row_limit < -1e-9:
+                continue
+            x_positions = _centered_axis_positions(row_limit, pitch_x)
+            row_points = [(x + x_offset, y) for x in x_positions]
+            if row_points:
+                point_rows.append(row_points)
+        if not point_rows:
+            raise ValueError(
+                "No perforation columns fit panel; increase panel size or reduce pitch"
+            )
+
+        cq = require_cadquery(feature="PerforatedPanelGeometry")
+        shape = cq.Workplane("XY").box(panel_w, panel_h, thickness)
+        if corner_radius > 0.0:
+            shape = shape.edges("|Z").fillet(
+                min(corner_radius, panel_w * 0.5 - 1e-4, panel_h * 0.5 - 1e-4)
+            )
+
+        cut_depth = thickness + max(0.002, thickness * 0.5)
+        cut_shape = None
+        for row_points in point_rows:
+            row_cut = (
+                cq.Workplane("XY")
+                .pushPoints(row_points)
+                .circle(hole_radius)
+                .extrude(
+                    cut_depth,
+                    both=True,
+                )
+            )
+            cut_shape = row_cut if cut_shape is None else cut_shape.union(row_cut)
+        if cut_shape is not None:
+            shape = shape.cut(cut_shape)
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
+
+
+class SlotPatternPanelGeometry(MeshGeometry):
+    """
+    Build a rectangular plate with a grid of rounded through-slots.
+
+    The panel lies in XY and is extruded along Z.
+    """
+
+    def __init__(
+        self,
+        panel_size: Sequence[float],
+        thickness: float,
+        *,
+        slot_size: Sequence[float],
+        pitch: Union[float, Sequence[float]],
+        frame: float = 0.008,
+        corner_radius: float = 0.0,
+        slot_angle_deg: float = 0.0,
+        stagger: bool = False,
+        center: bool = True,
+    ):
+        super().__init__()
+        panel_w = float(panel_size[0])
+        panel_h = float(panel_size[1])
+        thickness = float(thickness)
+        slot_length = float(slot_size[0])
+        slot_width = float(slot_size[1])
+        frame = float(frame)
+        corner_radius = max(0.0, float(corner_radius))
+        slot_angle_deg = float(slot_angle_deg)
+        pitch_x, pitch_y = _normalize_pitch_2d(pitch)
+
+        if panel_w <= 0.0 or panel_h <= 0.0 or thickness <= 0.0:
+            raise ValueError("panel_size and thickness must be positive")
+        if slot_length <= 0.0 or slot_width <= 0.0:
+            raise ValueError("slot_size values must be positive")
+        if slot_length < slot_width:
+            raise ValueError("slot_size[0] must be greater than or equal to slot_size[1]")
+        if frame < 0.0 or frame >= min(panel_w, panel_h) * 0.5:
+            raise ValueError("frame must be >= 0 and less than half of min(panel_size)")
+        if abs(slot_angle_deg) >= 90.0:
+            raise ValueError("abs(slot_angle_deg) must be < 90")
+
+        slot_angle_rad = slot_angle_deg * pi / 180.0
+        slot_half_x = 0.5 * (
+            abs(slot_length * cos(slot_angle_rad)) + abs(slot_width * sin(slot_angle_rad))
+        )
+        slot_half_y = 0.5 * (
+            abs(slot_length * sin(slot_angle_rad)) + abs(slot_width * cos(slot_angle_rad))
+        )
+        if pitch_x <= 2.0 * slot_half_x or pitch_y <= 2.0 * slot_half_y:
+            raise ValueError("pitch must be greater than the rotated slot envelope on both axes")
+
+        x_limit = panel_w * 0.5 - frame - slot_half_x
+        y_limit = panel_h * 0.5 - frame - slot_half_y
+        if x_limit < -1e-9 or y_limit < -1e-9:
+            raise ValueError("frame/slot_size leave no usable slot area")
+
+        y_positions = _centered_axis_positions(y_limit, pitch_y)
+        if not y_positions:
+            raise ValueError("No slot rows fit panel; increase panel size or reduce pitch")
+
+        point_rows: list[list[tuple[float, float]]] = []
+        for row_index, y in enumerate(y_positions):
+            x_offset = pitch_x * 0.5 if stagger and row_index % 2 == 1 else 0.0
+            row_limit = x_limit - abs(x_offset)
+            if row_limit < -1e-9:
+                continue
+            x_positions = _centered_axis_positions(row_limit, pitch_x)
+            row_points = [(x + x_offset, y) for x in x_positions]
+            if row_points:
+                point_rows.append(row_points)
+        if not point_rows:
+            raise ValueError("No slot columns fit panel; increase panel size or reduce pitch")
+
+        cq = require_cadquery(feature="SlotPatternPanelGeometry")
+        shape = cq.Workplane("XY").box(panel_w, panel_h, thickness)
+        if corner_radius > 0.0:
+            shape = shape.edges("|Z").fillet(
+                min(corner_radius, panel_w * 0.5 - 1e-4, panel_h * 0.5 - 1e-4)
+            )
+
+        cut_depth = thickness + max(0.002, thickness * 0.5)
+        slot_core_length = max(slot_length - slot_width, 0.0)
+
+        def build_slot_cut(center_xy: tuple[float, float]):
+            slot_cut = None
+            if slot_core_length > 1e-6:
+                slot_cut = cq.Workplane("XY").box(slot_core_length, slot_width, cut_depth)
+            cap_radius = slot_width * 0.5
+            cap_offset = slot_core_length * 0.5
+            left_cap = (
+                cq.Workplane("XY")
+                .circle(cap_radius)
+                .extrude(cut_depth, both=True)
+                .translate((-cap_offset, 0.0, 0.0))
+            )
+            right_cap = (
+                cq.Workplane("XY")
+                .circle(cap_radius)
+                .extrude(
+                    cut_depth,
+                    both=True,
+                )
+                .translate((cap_offset, 0.0, 0.0))
+            )
+            slot_cut = (
+                left_cap.union(right_cap)
+                if slot_cut is None
+                else slot_cut.union(left_cap).union(right_cap)
+            )
+            slot_cut = slot_cut.rotate((0.0, 0.0, 0.0), (0.0, 0.0, 1.0), slot_angle_deg)
+            return slot_cut.translate((center_xy[0], center_xy[1], 0.0))
+
+        cut_shape = None
+        for row_points in point_rows:
+            for point in row_points:
+                slot_cut = build_slot_cut(point)
+                cut_shape = slot_cut if cut_shape is None else cut_shape.union(slot_cut)
+        if cut_shape is not None:
+            shape = shape.cut(cut_shape)
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
+
+
+class ClevisBracketGeometry(MeshGeometry):
+    """
+    Build a U-shaped clevis bracket with a bottom base and a transverse pin bore.
+    """
+
+    def __init__(
+        self,
+        overall_size: Sequence[float],
+        *,
+        gap_width: float,
+        bore_diameter: float,
+        bore_center_z: float,
+        base_thickness: float,
+        corner_radius: float = 0.0,
+        center: bool = True,
+    ):
+        super().__init__()
+        width = float(overall_size[0])
+        depth = float(overall_size[1])
+        height = float(overall_size[2])
+        gap_width = float(gap_width)
+        bore_diameter = float(bore_diameter)
+        bore_center_z = float(bore_center_z)
+        base_thickness = float(base_thickness)
+        corner_radius = max(0.0, float(corner_radius))
+
+        if width <= 0.0 or depth <= 0.0 or height <= 0.0:
+            raise ValueError("overall_size values must be positive")
+        if gap_width <= 0.0 or gap_width >= width:
+            raise ValueError("gap_width must be positive and less than overall_size[0]")
+        cheek_thickness = 0.5 * (width - gap_width)
+        if cheek_thickness <= 1e-6:
+            raise ValueError("gap_width leaves no side wall material")
+        if bore_diameter <= 0.0 or bore_diameter >= min(cheek_thickness * 2.0, depth, height):
+            raise ValueError("bore_diameter is too large for the clevis envelope")
+        if base_thickness <= 0.0 or base_thickness >= height:
+            raise ValueError("base_thickness must be positive and less than overall_size[2]")
+        bore_radius = bore_diameter * 0.5
+        if bore_center_z - bore_radius <= base_thickness or bore_center_z + bore_radius >= height:
+            raise ValueError(
+                "bore_center_z must leave material above the base and below the top edge"
+            )
+
+        cq = require_cadquery(feature="ClevisBracketGeometry")
+        shape = cq.Workplane("XY").box(width, depth, height)
+        slot_cut = (
+            cq.Workplane("XY")
+            .box(gap_width, depth + 0.004, height - base_thickness)
+            .translate((0.0, 0.0, base_thickness * 0.5))
+        )
+        shape = shape.cut(slot_cut)
+        if corner_radius > 0.0:
+            shape = shape.edges("|Z").fillet(
+                min(corner_radius, cheek_thickness * 0.6, depth * 0.25, height * 0.25)
+            )
+
+        bore_z = -height * 0.5 + bore_center_z
+        bore = (
+            cq.Workplane("YZ")
+            .circle(bore_radius)
+            .extrude(width + 0.01, both=True)
+            .translate((0.0, 0.0, bore_z))
+        )
+        shape = shape.cut(bore)
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
+
+
+class PivotForkGeometry(MeshGeometry):
+    """
+    Build an open-front pivot fork with a rear bridge and a transverse pin bore.
+    """
+
+    def __init__(
+        self,
+        overall_size: Sequence[float],
+        *,
+        gap_width: float,
+        bore_diameter: float,
+        bore_center_z: float,
+        bridge_thickness: float,
+        corner_radius: float = 0.0,
+        center: bool = True,
+    ):
+        super().__init__()
+        width = float(overall_size[0])
+        depth = float(overall_size[1])
+        height = float(overall_size[2])
+        gap_width = float(gap_width)
+        bore_diameter = float(bore_diameter)
+        bore_center_z = float(bore_center_z)
+        bridge_thickness = float(bridge_thickness)
+        corner_radius = max(0.0, float(corner_radius))
+
+        if width <= 0.0 or depth <= 0.0 or height <= 0.0:
+            raise ValueError("overall_size values must be positive")
+        if gap_width <= 0.0 or gap_width >= width:
+            raise ValueError("gap_width must be positive and less than overall_size[0]")
+        cheek_thickness = 0.5 * (width - gap_width)
+        if cheek_thickness <= 1e-6:
+            raise ValueError("gap_width leaves no side wall material")
+        if bridge_thickness <= 0.0 or bridge_thickness >= depth:
+            raise ValueError("bridge_thickness must be positive and less than overall_size[1]")
+        if bore_diameter <= 0.0 or bore_diameter >= min(cheek_thickness * 2.0, depth, height):
+            raise ValueError("bore_diameter is too large for the pivot fork envelope")
+        bore_radius = bore_diameter * 0.5
+        if bore_center_z - bore_radius <= 0.0 or bore_center_z + bore_radius >= height:
+            raise ValueError("bore_center_z must keep the bore inside the fork cheeks")
+
+        cq = require_cadquery(feature="PivotForkGeometry")
+        tine_depth = depth
+        left_tine = (
+            cq.Workplane("XY")
+            .box(cheek_thickness, tine_depth, height)
+            .translate((-(gap_width * 0.5 + cheek_thickness * 0.5), 0.0, 0.0))
+        )
+        right_tine = (
+            cq.Workplane("XY")
+            .box(cheek_thickness, tine_depth, height)
+            .translate(((gap_width * 0.5 + cheek_thickness * 0.5), 0.0, 0.0))
+        )
+        rear_bridge = (
+            cq.Workplane("XY")
+            .box(width, bridge_thickness, height)
+            .translate((0.0, -depth * 0.5 + bridge_thickness * 0.5, 0.0))
+        )
+        shape = left_tine.union(right_tine).union(rear_bridge)
+        if corner_radius > 0.0:
+            shape = shape.edges("|Z").fillet(
+                min(corner_radius, cheek_thickness * 0.6, bridge_thickness * 0.6, height * 0.25)
+            )
+
+        bore_z = -height * 0.5 + bore_center_z
+        bore = (
+            cq.Workplane("YZ")
+            .circle(bore_radius)
+            .extrude(width + 0.01, both=True)
+            .translate((0.0, 0.0, bore_z))
+        )
+        shape = shape.cut(bore)
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
+
+
+class TrunnionYokeGeometry(MeshGeometry):
+    """
+    Build a trunnion support yoke with a bottom base and cheek-mounted trunnion bores.
+    """
+
+    def __init__(
+        self,
+        overall_size: Sequence[float],
+        *,
+        span_width: float,
+        trunnion_diameter: float,
+        trunnion_center_z: float,
+        base_thickness: float,
+        corner_radius: float = 0.0,
+        center: bool = True,
+    ):
+        super().__init__()
+        width = float(overall_size[0])
+        depth = float(overall_size[1])
+        height = float(overall_size[2])
+        span_width = float(span_width)
+        trunnion_diameter = float(trunnion_diameter)
+        trunnion_center_z = float(trunnion_center_z)
+        base_thickness = float(base_thickness)
+        corner_radius = max(0.0, float(corner_radius))
+
+        if width <= 0.0 or depth <= 0.0 or height <= 0.0:
+            raise ValueError("overall_size values must be positive")
+        if span_width <= 0.0 or span_width >= width:
+            raise ValueError("span_width must be positive and less than overall_size[0]")
+        cheek_thickness = 0.5 * (width - span_width)
+        if cheek_thickness <= 1e-6:
+            raise ValueError("span_width leaves no side wall material")
+        if base_thickness <= 0.0 or base_thickness >= height:
+            raise ValueError("base_thickness must be positive and less than overall_size[2]")
+        if trunnion_diameter <= 0.0 or trunnion_diameter >= min(
+            cheek_thickness * 2.0, depth, height
+        ):
+            raise ValueError("trunnion_diameter is too large for the yoke envelope")
+        trunnion_radius = trunnion_diameter * 0.5
+        if (
+            trunnion_center_z - trunnion_radius <= base_thickness
+            or trunnion_center_z + trunnion_radius >= height
+        ):
+            raise ValueError(
+                "trunnion_center_z must leave material above the base and below the top edge"
+            )
+
+        cq = require_cadquery(feature="TrunnionYokeGeometry")
+        base = (
+            cq.Workplane("XY")
+            .box(width, depth, base_thickness)
+            .translate((0.0, 0.0, -height * 0.5 + base_thickness * 0.5))
+        )
+        cheek_height = height - base_thickness
+        cheek_z = -height * 0.5 + base_thickness + cheek_height * 0.5
+        left_cheek = (
+            cq.Workplane("XY")
+            .box(cheek_thickness, depth, cheek_height)
+            .translate((-(span_width * 0.5 + cheek_thickness * 0.5), 0.0, cheek_z))
+        )
+        right_cheek = (
+            cq.Workplane("XY")
+            .box(cheek_thickness, depth, cheek_height)
+            .translate(((span_width * 0.5 + cheek_thickness * 0.5), 0.0, cheek_z))
+        )
+        boss_radius = max(trunnion_radius * 1.4, cheek_thickness * 0.55)
+        boss_length = min(cheek_thickness * 0.75, depth * 0.35)
+        boss_z = -height * 0.5 + trunnion_center_z
+        left_boss = (
+            cq.Workplane("YZ")
+            .circle(boss_radius)
+            .extrude(boss_length, both=False)
+            .translate((-(span_width * 0.5 + cheek_thickness), 0.0, boss_z))
+        )
+        right_boss = (
+            cq.Workplane("YZ")
+            .circle(boss_radius)
+            .extrude(-boss_length, both=False)
+            .translate(((span_width * 0.5 + cheek_thickness), 0.0, boss_z))
+        )
+        shape = base.union(left_cheek).union(right_cheek).union(left_boss).union(right_boss)
+        if corner_radius > 0.0:
+            shape = shape.edges("|Z").fillet(
+                min(corner_radius, cheek_thickness * 0.5, depth * 0.2, height * 0.2)
+            )
+
+        trunnion_bore = (
+            cq.Workplane("YZ")
+            .circle(trunnion_radius)
+            .extrude(
+                width + boss_length * 2.0 + 0.01,
+                both=True,
+            )
+            .translate((0.0, 0.0, boss_z))
+        )
+        shape = shape.cut(trunnion_bore)
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
+
+
+class FanRotorGeometry(MeshGeometry):
+    """
+    Build an axial fan rotor with a central hub and pitched blades.
+    """
+
+    def __init__(
+        self,
+        outer_radius: float,
+        hub_radius: float,
+        blade_count: int,
+        *,
+        thickness: float,
+        blade_pitch_deg: float = 28.0,
+        blade_sweep_deg: float = 20.0,
+        blade_root_chord: Optional[float] = None,
+        blade_tip_chord: Optional[float] = None,
+        center: bool = True,
+    ):
+        super().__init__()
+        outer_radius = float(outer_radius)
+        hub_radius = float(hub_radius)
+        thickness = float(thickness)
+        blade_pitch_deg = float(blade_pitch_deg)
+        blade_sweep_deg = float(blade_sweep_deg)
+        blade_count = int(blade_count)
+
+        if outer_radius <= 0.0 or hub_radius <= 0.0 or thickness <= 0.0:
+            raise ValueError("outer_radius, hub_radius, and thickness must be positive")
+        if blade_count < 2:
+            raise ValueError("blade_count must be at least 2")
+        if hub_radius >= outer_radius:
+            raise ValueError("hub_radius must be less than outer_radius")
+        if abs(blade_pitch_deg) >= 85.0:
+            raise ValueError("abs(blade_pitch_deg) must be < 85")
+        if abs(blade_sweep_deg) >= 85.0:
+            raise ValueError("abs(blade_sweep_deg) must be < 85")
+
+        radial_span = outer_radius - hub_radius
+        root_chord = (
+            float(blade_root_chord)
+            if blade_root_chord is not None
+            else max(radial_span * 0.32, thickness * 1.5)
+        )
+        tip_chord = (
+            float(blade_tip_chord)
+            if blade_tip_chord is not None
+            else max(radial_span * 0.20, thickness * 1.2)
+        )
+        if root_chord <= 0.0 or tip_chord <= 0.0:
+            raise ValueError("blade_root_chord and blade_tip_chord must be positive")
+        if max(root_chord, tip_chord) >= outer_radius * 1.6:
+            raise ValueError("blade chords are too large for the rotor envelope")
+
+        cq = require_cadquery(feature="FanRotorGeometry")
+
+        def rotate_section_points(
+            points: list[tuple[float, float]],
+            angle_rad: float,
+        ) -> list[tuple[float, float]]:
+            c = cos(angle_rad)
+            s = sin(angle_rad)
+            return [(y * c - z * s, y * s + z * c) for (y, z) in points]
+
+        def blade_section_points(
+            chord: float,
+            section_thickness: float,
+            pitch_deg: float,
+            sweep_y: float,
+        ) -> list[tuple[float, float]]:
+            half_t = max(section_thickness * 0.5, chord * 0.012)
+            raw = [
+                (-0.50 * chord, 0.00 * half_t),
+                (-0.28 * chord, 0.56 * half_t),
+                (-0.05 * chord, 0.76 * half_t),
+                (0.22 * chord, 0.54 * half_t),
+                (0.52 * chord, 0.10 * half_t),
+                (0.46 * chord, -0.24 * half_t),
+                (0.10 * chord, -0.58 * half_t),
+                (-0.24 * chord, -0.42 * half_t),
+            ]
+            rotated = rotate_section_points(raw, pitch_deg * pi / 180.0)
+            return [(sweep_y + y, z) for (y, z) in rotated]
+
+        hub_body_height = thickness * 0.36
+        rear_collar_height = thickness * 0.18
+        rear_collar_radius = hub_radius * 0.78
+        hub = cq.Workplane("XY").circle(hub_radius).extrude(hub_body_height * 0.5, both=True)
+        rear_collar = (
+            cq.Workplane("XY")
+            .circle(rear_collar_radius)
+            .extrude(rear_collar_height * 0.5, both=True)
+            .translate((0.0, 0.0, -thickness * 0.24))
+        )
+        front_cap = (
+            cq.Workplane("XY")
+            .workplane(offset=thickness * 0.08)
+            .circle(hub_radius * 0.90)
+            .workplane(offset=thickness * 0.42)
+            .circle(max(hub_radius * 0.28, 1.0e-4))
+            .loft(combine=True, ruled=False)
+        )
+
+        root_radius = hub_radius * 0.82
+        tip_radius = outer_radius * 0.96
+        stations = [
+            root_radius,
+            root_radius + radial_span * 0.22,
+            root_radius + radial_span * 0.52,
+            tip_radius,
+        ]
+        section_chords = [
+            root_chord,
+            root_chord + (tip_chord - root_chord) * 0.28,
+            root_chord + (tip_chord - root_chord) * 0.70,
+            tip_chord,
+        ]
+        section_pitches = [
+            blade_pitch_deg * 1.18,
+            blade_pitch_deg,
+            blade_pitch_deg * 0.78,
+            blade_pitch_deg * 0.56,
+        ]
+        section_thicknesses = [
+            max(thickness * 0.16, root_chord * 0.080),
+            max(thickness * 0.13, root_chord * 0.066),
+            max(thickness * 0.10, tip_chord * 0.060),
+            max(thickness * 0.08, tip_chord * 0.050),
+        ]
+        sweep_amount = radial_span * sin(blade_sweep_deg * pi / 180.0) * 0.32
+        section_sweeps = [
+            0.0,
+            sweep_amount * 0.26,
+            sweep_amount * 0.62,
+            sweep_amount,
+        ]
+
+        blade_wp = None
+        previous_station = 0.0
+        for station, chord, section_t, pitch_deg, sweep_y in zip(
+            stations,
+            section_chords,
+            section_thicknesses,
+            section_pitches,
+            section_sweeps,
+        ):
+            section = blade_section_points(chord, section_t, pitch_deg, sweep_y)
+            if blade_wp is None:
+                blade_wp = cq.Workplane("YZ").workplane(offset=station).polyline(section).close()
+            else:
+                blade_wp = (
+                    blade_wp.workplane(offset=station - previous_station).polyline(section).close()
+                )
+            previous_station = station
+        assert blade_wp is not None
+        blade = blade_wp.loft(combine=True, ruled=False)
+
+        shape = hub.union(rear_collar).union(front_cap)
+        angle_step = 360.0 / float(blade_count)
+        for blade_index in range(blade_count):
+            shape = shape.union(
+                blade.rotate(
+                    (0.0, 0.0, 0.0),
+                    (0.0, 0.0, 1.0),
+                    angle_step * float(blade_index),
+                )
+            )
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
+
+
+class BlowerWheelGeometry(MeshGeometry):
+    """
+    Build a squirrel-cage blower wheel around a central drum.
+    """
+
+    def __init__(
+        self,
+        outer_radius: float,
+        inner_radius: float,
+        width: float,
+        blade_count: int,
+        *,
+        blade_thickness: float,
+        blade_sweep_deg: float = 35.0,
+        backplate: bool = True,
+        shroud: bool = True,
+        center: bool = True,
+    ):
+        super().__init__()
+        outer_radius = float(outer_radius)
+        inner_radius = float(inner_radius)
+        width = float(width)
+        blade_count = int(blade_count)
+        blade_thickness = float(blade_thickness)
+        blade_sweep_deg = float(blade_sweep_deg)
+
+        if outer_radius <= 0.0 or inner_radius <= 0.0 or width <= 0.0:
+            raise ValueError("outer_radius, inner_radius, and width must be positive")
+        if inner_radius >= outer_radius:
+            raise ValueError("inner_radius must be less than outer_radius")
+        if blade_count < 2:
+            raise ValueError("blade_count must be at least 2")
+        if blade_thickness <= 0.0:
+            raise ValueError("blade_thickness must be positive")
+        if abs(blade_sweep_deg) >= 85.0:
+            raise ValueError("abs(blade_sweep_deg) must be < 85")
+
+        radial_span = outer_radius - inner_radius
+        if blade_thickness >= radial_span * 0.9:
+            raise ValueError("blade_thickness is too large for the blower annulus")
+
+        cq = require_cadquery(feature="BlowerWheelGeometry")
+        drum_wall = min(max(blade_thickness * 1.8, radial_span * 0.10), inner_radius * 0.55)
+        if drum_wall <= 1e-6 or inner_radius - drum_wall <= 1e-6:
+            raise ValueError("inner_radius is too small for the blower drum wall")
+        drum = (
+            cq.Workplane("XY")
+            .circle(inner_radius)
+            .circle(inner_radius - drum_wall)
+            .extrude(width * 0.5, both=True)
+        )
+
+        shape = drum
+        side_plate_thickness = min(max(blade_thickness * 1.1, width * 0.06), width * 0.16)
+        side_plate_inner_radius = max(inner_radius - drum_wall * 0.40, 1.0e-4)
+        if backplate:
+            rear_plate = (
+                cq.Workplane("XY")
+                .circle(outer_radius)
+                .circle(side_plate_inner_radius)
+                .extrude(side_plate_thickness, both=False)
+                .translate((0.0, 0.0, -width * 0.5))
+            )
+            shape = shape.union(rear_plate)
+        if shroud:
+            front_plate = (
+                cq.Workplane("XY")
+                .circle(outer_radius)
+                .circle(side_plate_inner_radius)
+                .extrude(side_plate_thickness, both=False)
+                .translate((0.0, 0.0, width * 0.5 - side_plate_thickness))
+            )
+            shape = shape.union(front_plate)
+
+        sweep_rad = blade_sweep_deg * pi / 180.0
+        inner_attach_radius = max(inner_radius - drum_wall * 0.08, 1.0e-4)
+        outer_attach_radius = outer_radius - blade_thickness * 0.35
+        rear_clear = side_plate_thickness * 0.95 if backplate else blade_thickness * 0.50
+        front_clear = side_plate_thickness * 0.95 if shroud else blade_thickness * 0.50
+        blade_length = width - rear_clear - front_clear
+        if blade_length <= blade_thickness * 1.5:
+            raise ValueError("width is too small for the blower blade depth")
+        blade_center_z = (rear_clear - front_clear) * 0.5
+
+        def annulus_point(radius: float, angle_rad: float) -> tuple[float, float]:
+            return (radius * cos(angle_rad), radius * sin(angle_rad))
+
+        def thicken_centerline(
+            centerline: list[tuple[float, float]],
+            strip_thickness: float,
+        ) -> list[tuple[float, float]]:
+            half_t = strip_thickness * 0.5
+            positive: list[tuple[float, float]] = []
+            negative: list[tuple[float, float]] = []
+            count = len(centerline)
+            for index, point in enumerate(centerline):
+                if index == 0:
+                    tangent = (
+                        centerline[1][0] - point[0],
+                        centerline[1][1] - point[1],
+                    )
+                elif index == count - 1:
+                    tangent = (
+                        point[0] - centerline[index - 1][0],
+                        point[1] - centerline[index - 1][1],
+                    )
+                else:
+                    tangent = (
+                        centerline[index + 1][0] - centerline[index - 1][0],
+                        centerline[index + 1][1] - centerline[index - 1][1],
+                    )
+                tangent_norm = sqrt(tangent[0] * tangent[0] + tangent[1] * tangent[1])
+                if tangent_norm <= _EPS:
+                    normal = (0.0, 1.0)
+                else:
+                    normal = (-tangent[1] / tangent_norm, tangent[0] / tangent_norm)
+                positive.append((point[0] + normal[0] * half_t, point[1] + normal[1] * half_t))
+                negative.append((point[0] - normal[0] * half_t, point[1] - normal[1] * half_t))
+            return positive + list(reversed(negative))
+
+        def annular_sector_polygon(
+            inner_r: float,
+            outer_r: float,
+            start_angle: float,
+            end_angle: float,
+            *,
+            segments: int = 8,
+        ) -> list[tuple[float, float]]:
+            outer_points = [
+                annulus_point(
+                    outer_r,
+                    start_angle + (end_angle - start_angle) * (index / float(segments)),
+                )
+                for index in range(segments + 1)
+            ]
+            inner_points = [
+                annulus_point(
+                    inner_r,
+                    end_angle - (end_angle - start_angle) * (index / float(segments)),
+                )
+                for index in range(segments + 1)
+            ]
+            return outer_points + inner_points
+
+        angle_step = 2.0 * pi / float(blade_count)
+        drum_window_inner_radius = max(inner_radius - drum_wall - 1.0e-4, 1.0e-4)
+        drum_window_outer_radius = inner_radius + 1.0e-4
+        drum_window_span = angle_step * 0.34
+        drum_window_length = width - 2.0 * max(side_plate_thickness * 1.15, blade_thickness * 0.8)
+        if drum_window_length > blade_thickness:
+            for window_index in range(blade_count):
+                passage_center = window_index * angle_step + angle_step * 0.5 - sweep_rad * 0.18
+                window_profile = annular_sector_polygon(
+                    drum_window_inner_radius,
+                    drum_window_outer_radius,
+                    passage_center - drum_window_span * 0.5,
+                    passage_center + drum_window_span * 0.5,
+                )
+                drum_window = (
+                    cq.Workplane("XY")
+                    .polyline(window_profile)
+                    .close()
+                    .extrude(drum_window_length * 0.5, both=True)
+                )
+                shape = shape.cut(drum_window)
+
+        for blade_index in range(blade_count):
+            base_angle = blade_index * angle_step
+            centerline = [
+                annulus_point(inner_attach_radius, base_angle - sweep_rad * 0.18),
+                annulus_point(
+                    inner_attach_radius + radial_span * 0.34, base_angle + sweep_rad * 0.10
+                ),
+                annulus_point(
+                    inner_attach_radius + radial_span * 0.68, base_angle + sweep_rad * 0.42
+                ),
+                annulus_point(outer_attach_radius, base_angle + sweep_rad * 0.72),
+            ]
+            blade_profile = thicken_centerline(centerline, blade_thickness)
+            blade = (
+                cq.Workplane("XY")
+                .polyline(blade_profile)
+                .close()
+                .extrude(blade_length * 0.5, both=True)
+                .translate((0.0, 0.0, blade_center_z))
+            )
+            shape = shape.union(blade)
+
+        geom = _mesh_geometry_from_cadquery_model(shape)
+        if not center:
+            geom = _mesh_geometry_shifted_to_z0(geom)
+        _adopt_mesh_geometry(self, geom)
 
 
 class SweepGeometry(MeshGeometry):

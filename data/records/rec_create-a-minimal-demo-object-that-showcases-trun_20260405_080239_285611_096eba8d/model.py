@@ -1,52 +1,74 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    Box,
+    Inertial,
+    TestContext,
+    TestReport,
+    TrunnionYokeGeometry,
+    mesh_from_geometry,
+)
 
-from sdk import ArticulatedObject, TestContext, TestReport
+OVERALL_SIZE = (0.12, 0.05, 0.08)
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="trunnion_yoke_demo")
+    finish = model.material("yoke_blue_gray", rgba=(0.39, 0.49, 0.60, 1.0))
+
+    trunnion_yoke = model.part("trunnion_yoke")
+    trunnion_yoke.visual(
+        mesh_from_geometry(
+            TrunnionYokeGeometry(
+                OVERALL_SIZE,
+                span_width=0.060,
+                trunnion_diameter=0.016,
+                trunnion_center_z=0.050,
+                base_thickness=0.014,
+                corner_radius=0.003,
+            ),
+            "trunnion_yoke",
+        ),
+        material=finish,
+        name="trunnion_yoke",
+    )
+    trunnion_yoke.inertial = Inertial.from_geometry(Box(OVERALL_SIZE), mass=0.34)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
+    trunnion_yoke = object_model.get_part("trunnion_yoke")
+    ctx.check("trunnion_yoke_part_present", trunnion_yoke is not None, "Expected a single trunnion_yoke part.")
+    if trunnion_yoke is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check(
+        "trunnion_yoke_visual_present",
+        trunnion_yoke.get_visual("trunnion_yoke") is not None,
+        "Expected a mesh-backed trunnion_yoke visual.",
+    )
+    aabb = ctx.part_world_aabb(trunnion_yoke)
+    ctx.check("trunnion_yoke_aabb_present", aabb is not None, "Expected a world AABB for the trunnion yoke.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    center = tuple(float((maxs[i] + mins[i]) * 0.5) for i in range(3))
+    ctx.check(
+        "trunnion_yoke_overall_size",
+        abs(size[0] - OVERALL_SIZE[0]) <= 0.004
+        and abs(size[1] - OVERALL_SIZE[1]) <= 0.004
+        and abs(size[2] - OVERALL_SIZE[2]) <= 0.004,
+        f"size={size!r}",
+    )
+    ctx.check(
+        "trunnion_yoke_centered",
+        max(abs(value) for value in center) <= 0.002,
+        f"center={center!r}",
+    )
     return ctx.report()
 
 
