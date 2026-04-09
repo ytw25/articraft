@@ -10,17 +10,14 @@ from sdk import (
     ArticulationType,
     Box,
     Cylinder,
-    ExtrudeWithHolesGeometry,
     FanRotorGeometry,
     Inertial,
     LatheGeometry,
     MotionLimits,
     Origin,
-    SlotPatternPanelGeometry,
     TestContext,
     TestReport,
     mesh_from_geometry,
-    rounded_rect_profile,
     tube_from_spline_points,
 )
 
@@ -29,11 +26,17 @@ HOUSING_SIZE = 0.34
 HOUSING_DEPTH = 0.14
 HOUSING_CENTER_Z = HOUSING_SIZE * 0.5
 INNER_APERTURE = 0.282
+FRAME_THICKNESS = (HOUSING_SIZE - INNER_APERTURE) * 0.5
 FRONT_Y = HOUSING_DEPTH * 0.5
 BACK_Y = -HOUSING_DEPTH * 0.5
 RIGHT_X = HOUSING_SIZE * 0.5
 TOP_Z = HOUSING_SIZE
 BLADE_RADIUS = 0.108
+GRILLE_WIDTH = 0.300
+GRILLE_HEIGHT = 0.300
+GRILLE_DEPTH = 0.008
+GRILLE_FRAME = 0.014
+GRILLE_BAR_RADIUS = 0.003
 
 
 def _mesh(name: str, geometry):
@@ -59,18 +62,23 @@ def build_object_model() -> ArticulatedObject:
         origin=Origin(xyz=(0.0, 0.0, HOUSING_CENTER_Z)),
     )
 
-    shell = ExtrudeWithHolesGeometry(
-        rounded_rect_profile(HOUSING_SIZE, HOUSING_SIZE, 0.028, corner_segments=8),
-        [rounded_rect_profile(INNER_APERTURE, INNER_APERTURE, 0.020, corner_segments=8)],
-        HOUSING_DEPTH,
-        center=True,
-    ).rotate_x(pi / 2.0)
-    housing.visual(
-        _mesh("housing_shell", shell),
-        origin=Origin(xyz=(0.0, 0.0, HOUSING_CENTER_Z)),
-        material=plastic,
-        name="housing_shell",
-    )
+    side_frame_x = INNER_APERTURE * 0.5 + FRAME_THICKNESS * 0.5
+    top_frame_z = HOUSING_SIZE - FRAME_THICKNESS * 0.5
+    bottom_frame_z = FRAME_THICKNESS * 0.5
+    for x_pos, name in ((-side_frame_x, "housing_frame_left"), (side_frame_x, "housing_frame_right")):
+        housing.visual(
+            Box((FRAME_THICKNESS, HOUSING_DEPTH, HOUSING_SIZE)),
+            origin=Origin(xyz=(x_pos, 0.0, HOUSING_CENTER_Z)),
+            material=plastic,
+            name=name,
+        )
+    for z_pos, name in ((bottom_frame_z, "housing_frame_bottom"), (top_frame_z, "housing_frame_top")):
+        housing.visual(
+            Box((INNER_APERTURE, HOUSING_DEPTH, FRAME_THICKNESS)),
+            origin=Origin(xyz=(0.0, 0.0, z_pos)),
+            material=plastic,
+            name=name,
+        )
 
     for x_pos in (-0.145, 0.145):
         housing.visual(
@@ -199,24 +207,68 @@ def build_object_model() -> ArticulatedObject:
 
     front_grille = model.part("front_grille")
     front_grille.inertial = Inertial.from_geometry(
-        Box((0.300, 0.012, 0.300)),
+        Box((GRILLE_WIDTH, 0.012, GRILLE_HEIGHT)),
         mass=0.34,
-        origin=Origin(xyz=(-0.150, 0.0, 0.0)),
+        origin=Origin(xyz=(-GRILLE_WIDTH * 0.5, 0.0, 0.0)),
     )
-    grille_panel = SlotPatternPanelGeometry(
-        (0.300, 0.300),
-        0.005,
-        slot_size=(0.236, 0.007),
-        pitch=(0.300, 0.018),
-        frame=0.013,
-        corner_radius=0.018,
-        center=True,
-    ).rotate_x(pi / 2.0)
+    inner_grille_width = GRILLE_WIDTH - 2.0 * GRILLE_FRAME
+    inner_grille_height = GRILLE_HEIGHT - 2.0 * GRILLE_FRAME
+    left_frame_x = -GRILLE_WIDTH + GRILLE_FRAME * 0.5
+    right_frame_x = -GRILLE_FRAME * 0.5
+    frame_center_x = -GRILLE_WIDTH * 0.5
+    top_frame_z = GRILLE_HEIGHT * 0.5 - GRILLE_FRAME * 0.5
+    bottom_frame_z = -GRILLE_HEIGHT * 0.5 + GRILLE_FRAME * 0.5
+
     front_grille.visual(
-        _mesh("front_grille_panel", grille_panel),
-        origin=Origin(xyz=(-0.150, 0.0, 0.0)),
+        Box((GRILLE_FRAME, GRILLE_DEPTH, GRILLE_HEIGHT)),
+        origin=Origin(xyz=(left_frame_x, 0.0, 0.0)),
         material=plastic,
-        name="grille_panel",
+        name="grille_left_frame",
+    )
+    front_grille.visual(
+        Box((GRILLE_FRAME, GRILLE_DEPTH, GRILLE_HEIGHT)),
+        origin=Origin(xyz=(right_frame_x, 0.0, 0.0)),
+        material=plastic,
+        name="grille_right_frame",
+    )
+    front_grille.visual(
+        Box((inner_grille_width, GRILLE_DEPTH, GRILLE_FRAME)),
+        origin=Origin(xyz=(frame_center_x, 0.0, top_frame_z)),
+        material=plastic,
+        name="grille_top_frame",
+    )
+    front_grille.visual(
+        Box((inner_grille_width, GRILLE_DEPTH, GRILLE_FRAME)),
+        origin=Origin(xyz=(frame_center_x, 0.0, bottom_frame_z)),
+        material=plastic,
+        name="grille_bottom_frame",
+    )
+
+    vertical_bar_count = 6
+    for index in range(vertical_bar_count):
+        x_pos = -GRILLE_WIDTH + GRILLE_FRAME + (index + 1) * inner_grille_width / (vertical_bar_count + 1)
+        front_grille.visual(
+            Cylinder(radius=GRILLE_BAR_RADIUS, length=inner_grille_height),
+            origin=Origin(xyz=(x_pos, 0.0, 0.0)),
+            material=plastic,
+            name=f"grille_vertical_bar_{index + 1}",
+        )
+
+    horizontal_bar_count = 6
+    for index in range(horizontal_bar_count):
+        z_pos = -inner_grille_height * 0.5 + (index + 1) * inner_grille_height / (horizontal_bar_count + 1)
+        front_grille.visual(
+            Cylinder(radius=GRILLE_BAR_RADIUS, length=inner_grille_width),
+            origin=Origin(xyz=(frame_center_x, 0.0, z_pos), rpy=(0.0, pi / 2.0, 0.0)),
+            material=plastic,
+            name=f"grille_horizontal_bar_{index + 1}",
+        )
+
+    front_grille.visual(
+        Cylinder(radius=0.020, length=0.010),
+        origin=Origin(xyz=(frame_center_x, 0.001, 0.0), rpy=(pi / 2.0, 0.0, 0.0)),
+        material=dark_plastic,
+        name="grille_center_badge",
     )
     hinge_barrel = LatheGeometry.from_shell_profiles(
         [(0.009, -0.020), (0.009, 0.020)],
@@ -352,11 +404,44 @@ def run_tests() -> TestReport:
     handle_hinge = object_model.get_articulation("handle_hinge")
     control_knob_turn = object_model.get_articulation("control_knob_turn")
 
+    housing_shell_aabb = ctx.part_element_world_aabb(housing, elem="housing_shell")
+    housing_frame_aabbs = [
+        ctx.part_element_world_aabb(housing, elem="housing_frame_left"),
+        ctx.part_element_world_aabb(housing, elem="housing_frame_right"),
+        ctx.part_element_world_aabb(housing, elem="housing_frame_bottom"),
+        ctx.part_element_world_aabb(housing, elem="housing_frame_top"),
+    ]
+    ctx.check(
+        "housing keeps a true pass-through frame opening",
+        housing_shell_aabb is None and all(aabb is not None for aabb in housing_frame_aabbs),
+        details=(
+            f"housing_shell={housing_shell_aabb}, "
+            f"housing_frame_aabbs={housing_frame_aabbs}"
+        ),
+    )
+    grille_panel_aabb = ctx.part_element_world_aabb(front_grille, elem="grille_panel")
+    grille_structure_aabbs = [
+        ctx.part_element_world_aabb(front_grille, elem="grille_left_frame"),
+        ctx.part_element_world_aabb(front_grille, elem="grille_right_frame"),
+        ctx.part_element_world_aabb(front_grille, elem="grille_top_frame"),
+        ctx.part_element_world_aabb(front_grille, elem="grille_bottom_frame"),
+        ctx.part_element_world_aabb(front_grille, elem="grille_vertical_bar_3"),
+        ctx.part_element_world_aabb(front_grille, elem="grille_horizontal_bar_3"),
+        ctx.part_element_world_aabb(front_grille, elem="grille_center_badge"),
+    ]
+    ctx.check(
+        "front grille uses explicit framed-bar construction",
+        grille_panel_aabb is None and all(aabb is not None for aabb in grille_structure_aabbs),
+        details=(
+            f"grille_panel={grille_panel_aabb}, "
+            f"grille_structure_aabbs={grille_structure_aabbs}"
+        ),
+    )
     ctx.expect_gap(
         front_grille,
         housing,
         axis="y",
-        positive_elem="grille_panel",
+        positive_elem="grille_center_badge",
         max_gap=0.014,
         max_penetration=0.0,
         name="front grille sits just ahead of the housing",
@@ -365,7 +450,6 @@ def run_tests() -> TestReport:
         front_grille,
         housing,
         axes="xz",
-        elem_a="grille_panel",
         min_overlap=0.27,
         name="front grille covers the square front opening",
     )
@@ -373,7 +457,7 @@ def run_tests() -> TestReport:
         front_grille,
         blade_assembly,
         axis="y",
-        positive_elem="grille_panel",
+        positive_elem="grille_center_badge",
         negative_elem="rotor",
         min_gap=0.020,
         name="front grille clears the rotor at rest",

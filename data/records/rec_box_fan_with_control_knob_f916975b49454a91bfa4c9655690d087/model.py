@@ -6,63 +6,115 @@ from __future__ import annotations
 import math
 
 from sdk import (
+    AssetContext,
     ArticulatedObject,
     ArticulationType,
     Box,
     Cylinder,
-    ExtrudeWithHolesGeometry,
+    CylinderGeometry,
+    ExtrudeGeometry,
     FanRotorGeometry,
     Inertial,
     MotionLimits,
     Origin,
     TestContext,
     TestReport,
+    boolean_difference,
     mesh_from_geometry,
     rounded_rect_profile,
 )
 
 
-def _circle_profile(
-    radius: float,
+ASSETS = AssetContext.from_script(__file__)
+HERE = ASSETS.asset_root
+
+
+def _mesh(name: str, geometry):
+    return mesh_from_geometry(geometry, ASSETS.mesh_path(name))
+
+
+def _build_housing_shell_geometry(
     *,
-    center: tuple[float, float] = (0.0, 0.0),
-    segments: int = 40,
-) -> list[tuple[float, float]]:
-    cx, cy = center
-    return [
-        (
-            cx + radius * math.cos((2.0 * math.pi * index) / segments),
-            cy + radius * math.sin((2.0 * math.pi * index) / segments),
+    width: float,
+    depth: float,
+    height: float,
+    wall: float,
+    face_thickness: float,
+    corner_radius: float,
+    opening_radius: float,
+    fan_center_x: float,
+    fan_center_z: float,
+):
+    outer = ExtrudeGeometry.centered(
+        rounded_rect_profile(width, height, corner_radius, corner_segments=8),
+        depth,
+    )
+    outer.rotate((1.0, 0.0, 0.0), math.pi / 2.0).translate(0.0, 0.0, height * 0.5)
+
+    inner_corner_radius = max(min(corner_radius - wall * 0.5, corner_radius), 0.004)
+    inner = ExtrudeGeometry.centered(
+        rounded_rect_profile(
+            width - 2.0 * wall,
+            height - 2.0 * wall,
+            inner_corner_radius,
+            corner_segments=8,
+        ),
+        depth - 2.0 * face_thickness,
+    )
+    inner.rotate((1.0, 0.0, 0.0), math.pi / 2.0).translate(0.0, 0.0, height * 0.5)
+
+    shell = boolean_difference(outer, inner)
+    for side_sign in (-1.0, 1.0):
+        cutter = CylinderGeometry(opening_radius, depth + 0.040, radial_segments=48)
+        cutter.rotate((1.0, 0.0, 0.0), math.pi / 2.0).translate(
+            side_sign * fan_center_x,
+            0.0,
+            fan_center_z,
         )
-        for index in range(segments)
-    ]
+        shell = boolean_difference(shell, cutter)
+    return shell
 
 
-def _face_with_two_round_openings(
+def _build_front_grille_panel_mesh(
     *,
     width: float,
     height: float,
     thickness: float,
     corner_radius: float,
+    fan_center_x: float,
+    fan_center_y: float,
     opening_radius: float,
-    opening_center_x: float,
-    opening_center_z: float,
-    z_center: float,
+    slot_width: float,
+    slot_pitch: float,
+    aperture_margin: float,
+    name: str,
 ):
-    outer = rounded_rect_profile(width, height, corner_radius, corner_segments=8)
-    holes = [
-        _circle_profile(
-            opening_radius,
-            center=(-opening_center_x, opening_center_z - z_center),
-            segments=40,
-        ),
-        _circle_profile(
-            opening_radius,
-            center=(opening_center_x, opening_center_z - z_center),
-            segments=40,
-        ),
-    ]
-    return ExtrudeWithHolesGeometry(outer, holes, thickness, cap=True, center=True, closed=True)
+    panel = ExtrudeGeometry.centered(
+        rounded_rect_profile(width, height, corner_radius, corner_segments=8),
+        thickness,
+    )
+    cut_radius = max(opening_radius - aperture_margin, slot_width * 1.5)
+    usable_half_span = cut_radius * 0.78
+    slot_count = max(int((2.0 * usable_half_span) / slot_pitch) + 1, 4)
+    for side_sign in (-1.0, 1.0):
+        center_x = side_sign * fan_center_x
+        if slot_count == 1:
+            offsets = [0.0]
+        else:
+            offsets = [
+                -usable_half_span + (2.0 * usable_half_span * index) / (slot_count - 1)
+                for index in range(slot_count)
+            ]
+        for offset in offsets:
+            half_height = math.sqrt(max(cut_radius * cut_radius - offset * offset, 0.0))
+            slot_height = max(2.0 * (half_height - slot_width * 0.7), slot_width * 2.2)
+            cutter = ExtrudeGeometry.centered(
+                rounded_rect_profile(slot_width, slot_height, slot_width * 0.48, corner_segments=6),
+                thickness + 0.006,
+            )
+            cutter.translate(center_x + offset, fan_center_y, 0.0)
+            panel = boolean_difference(panel, cutter)
+    return _mesh(name, panel)
 
 
 def _add_vertical_grille_bars(
@@ -141,7 +193,6 @@ def build_object_model() -> ArticulatedObject:
     center_divider = 0.026
     fan_center_x = opening_radius + center_divider * 0.5
     fan_center_z = 0.172
-    front_bezel_y = -depth * 0.5 + bezel_thickness * 0.5
     rear_bezel_y = depth * 0.5 - bezel_thickness * 0.5
     door_bottom_z = 0.020
     door_top_z = height - top_band_height
@@ -159,33 +210,22 @@ def build_object_model() -> ArticulatedObject:
     motor_gray = model.material("motor_gray", rgba=(0.33, 0.35, 0.38, 1.0))
     blade_blue = model.material("blade_blue", rgba=(0.58, 0.78, 0.92, 0.88))
 
-    full_face_mesh = mesh_from_geometry(
-        _face_with_two_round_openings(
+    housing_shell_mesh = _mesh(
+        "box_fan_housing_shell.obj",
+        _build_housing_shell_geometry(
             width=width,
+            depth=depth,
             height=height,
-            thickness=bezel_thickness,
+            wall=wall,
+            face_thickness=bezel_thickness,
             corner_radius=0.020,
             opening_radius=opening_radius,
-            opening_center_x=fan_center_x,
-            opening_center_z=fan_center_z,
-            z_center=height * 0.5,
+            fan_center_x=fan_center_x,
+            fan_center_z=fan_center_z,
         ),
-        "box_fan_full_face",
     )
-    door_frame_mesh = mesh_from_geometry(
-        _face_with_two_round_openings(
-            width=width - 0.018,
-            height=door_height,
-            thickness=door_thickness,
-            corner_radius=0.016,
-            opening_radius=opening_radius,
-            opening_center_x=fan_center_x,
-            opening_center_z=fan_center_z,
-            z_center=door_bottom_z + door_height * 0.5,
-        ),
-        "box_fan_door_frame",
-    )
-    rotor_mesh = mesh_from_geometry(
+    rotor_mesh = _mesh(
+        "box_fan_rotor.obj",
         FanRotorGeometry(
             opening_radius * 0.90,
             0.026,
@@ -195,48 +235,17 @@ def build_object_model() -> ArticulatedObject:
             blade_sweep_deg=16.0,
             center=True,
         ),
-        "box_fan_rotor",
     )
 
     housing = model.part("housing")
     housing.visual(
-        full_face_mesh,
-        origin=Origin(xyz=(0.0, front_bezel_y, height * 0.5), rpy=(math.pi / 2.0, 0.0, 0.0)),
+        housing_shell_mesh,
+        origin=Origin(),
         material=housing_white,
-        name="front_face",
+        name="housing_shell",
     )
     housing.visual(
-        full_face_mesh,
-        origin=Origin(xyz=(0.0, rear_bezel_y, height * 0.5), rpy=(math.pi / 2.0, 0.0, 0.0)),
-        material=housing_white,
-        name="rear_face",
-    )
-    housing.visual(
-        Box((wall, depth, height)),
-        origin=Origin(xyz=(-width * 0.5 + wall * 0.5, 0.0, height * 0.5)),
-        material=housing_white,
-        name="left_side_shell",
-    )
-    housing.visual(
-        Box((wall, depth, height)),
-        origin=Origin(xyz=(width * 0.5 - wall * 0.5, 0.0, height * 0.5)),
-        material=housing_white,
-        name="right_side_shell",
-    )
-    housing.visual(
-        Box((width - 2.0 * wall, depth, wall)),
-        origin=Origin(xyz=(0.0, 0.0, wall * 0.5)),
-        material=housing_white,
-        name="bottom_shell",
-    )
-    housing.visual(
-        Box((width - 2.0 * wall, depth, wall)),
-        origin=Origin(xyz=(0.0, 0.0, height - wall * 0.5)),
-        material=housing_white,
-        name="top_shell",
-    )
-    housing.visual(
-        Box((center_divider, depth, height - 2.0 * wall)),
+        Box((center_divider, depth - 2.0 * bezel_thickness, height - 2.0 * wall)),
         origin=Origin(xyz=(0.0, 0.0, height * 0.5)),
         material=housing_white,
         name="center_divider_shell",
@@ -336,71 +345,39 @@ def build_object_model() -> ArticulatedObject:
     )
 
     front_grille = model.part("front_grille")
+    door_width = width - 0.018
+    fan_local_z = fan_center_z - door_top_z
+    grille_panel_mesh = _build_front_grille_panel_mesh(
+        width=door_width,
+        height=door_height,
+        thickness=door_thickness,
+        corner_radius=0.016,
+        fan_center_x=fan_center_x,
+        fan_center_y=fan_local_z + door_height * 0.5,
+        opening_radius=opening_radius,
+        slot_width=0.016,
+        slot_pitch=0.028,
+        aperture_margin=0.014,
+        name="box_fan_front_grille_panel.obj",
+    )
+
     front_grille.visual(
-        door_frame_mesh,
+        grille_panel_mesh,
         origin=Origin(
             xyz=(0.0, 0.0, -door_height * 0.5),
             rpy=(math.pi / 2.0, 0.0, 0.0),
         ),
         material=grille_gray,
-        name="grille_frame",
-    )
-    _add_vertical_grille_bars(
-        front_grille,
-        prefix="left_front_bar",
-        fan_center_x=-fan_center_x,
-        fan_center_z=fan_center_z - door_top_z,
-        opening_radius=opening_radius,
-        bar_depth=door_thickness,
-        bar_width=0.006,
-        count=8,
-        material=grille_gray,
-        local_y=0.0,
-    )
-    _add_horizontal_grille_bars(
-        front_grille,
-        prefix="left_front_crossbar",
-        fan_center_x=-fan_center_x,
-        fan_center_z=fan_center_z - door_top_z,
-        opening_radius=opening_radius,
-        bar_depth=door_thickness,
-        bar_height=0.006,
-        count=5,
-        material=grille_gray,
-        local_y=0.0,
-    )
-    _add_vertical_grille_bars(
-        front_grille,
-        prefix="right_front_bar",
-        fan_center_x=fan_center_x,
-        fan_center_z=fan_center_z - door_top_z,
-        opening_radius=opening_radius,
-        bar_depth=door_thickness,
-        bar_width=0.006,
-        count=8,
-        material=grille_gray,
-        local_y=0.0,
-    )
-    _add_horizontal_grille_bars(
-        front_grille,
-        prefix="right_front_crossbar",
-        fan_center_x=fan_center_x,
-        fan_center_z=fan_center_z - door_top_z,
-        opening_radius=opening_radius,
-        bar_depth=door_thickness,
-        bar_height=0.006,
-        count=5,
-        material=grille_gray,
-        local_y=0.0,
+        name="grille_panel",
     )
     front_grille.visual(
         Box((0.100, door_thickness, 0.014)),
-        origin=Origin(xyz=(0.0, 0.0, -0.020)),
+        origin=Origin(xyz=(0.0, 0.0, -door_height + 0.030)),
         material=trim_gray,
         name="grille_pull",
     )
     front_grille.inertial = Inertial.from_geometry(
-        Box((width - 0.018, door_thickness, door_height)),
+        Box((door_width, door_thickness, door_height)),
         mass=0.65,
         origin=Origin(xyz=(0.0, 0.0, -door_height * 0.5)),
     )
@@ -486,7 +463,7 @@ def build_object_model() -> ArticulatedObject:
 
 
 def run_tests() -> TestReport:
-    ctx = TestContext(object_model)
+    ctx = TestContext(object_model, asset_root=HERE)
 
     housing = object_model.get_part("housing")
     front_grille = object_model.get_part("front_grille")

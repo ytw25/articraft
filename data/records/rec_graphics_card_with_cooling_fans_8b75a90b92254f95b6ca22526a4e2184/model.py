@@ -52,13 +52,24 @@ def build_object_model() -> ArticulatedObject:
         return points
 
     def build_shroud_face() -> MeshGeometry:
+        fan_opening_radius = 0.032
         outer = rounded_rect_profile(0.166, 0.102, 0.006, corner_segments=6)
-        left_hole = circle_profile(0.029, center=(-0.040, 0.0), clockwise=True)
-        right_hole = circle_profile(0.029, center=(0.040, 0.0), clockwise=True)
+        left_hole = circle_profile(fan_opening_radius, center=(-0.040, 0.0), clockwise=True)
+        right_hole = circle_profile(fan_opening_radius, center=(0.040, 0.0), clockwise=True)
         return ExtrudeWithHolesGeometry(
             outer,
             [left_hole, right_hole],
             0.004,
+            cap=True,
+            center=True,
+            closed=True,
+        )
+
+    def build_fan_frame(center_x: float) -> MeshGeometry:
+        return ExtrudeWithHolesGeometry(
+            circle_profile(0.0355, center=(center_x, 0.0), segments=40),
+            [circle_profile(0.0305, center=(center_x, 0.0), segments=40, clockwise=True)],
+            0.002,
             cap=True,
             center=True,
             closed=True,
@@ -110,6 +121,18 @@ def build_object_model() -> ArticulatedObject:
         name="shroud_face",
     )
     card_body.visual(
+        mesh_from_geometry(build_fan_frame(-0.040), "left_fan_frame"),
+        origin=Origin(xyz=(0.003, 0.0, 0.039)),
+        material=dark_io,
+        name="left_fan_frame",
+    )
+    card_body.visual(
+        mesh_from_geometry(build_fan_frame(0.040), "right_fan_frame"),
+        origin=Origin(xyz=(0.003, 0.0, 0.039)),
+        material=dark_io,
+        name="right_fan_frame",
+    )
+    card_body.visual(
         Box((0.166, 0.006, 0.016)),
         origin=Origin(xyz=(0.003, 0.048, 0.032)),
         material=shroud_black,
@@ -122,20 +145,20 @@ def build_object_model() -> ArticulatedObject:
         name="lower_side_rail",
     )
     card_body.visual(
-        Box((0.010, 0.090, 0.016)),
+        Box((0.006, 0.090, 0.016)),
         origin=Origin(xyz=(0.003, 0.0, 0.032)),
         material=shroud_black,
         name="center_bridge",
     )
     card_body.visual(
-        Box((0.010, 0.090, 0.016)),
-        origin=Origin(xyz=(-0.074, 0.0, 0.032)),
+        Box((0.006, 0.090, 0.016)),
+        origin=Origin(xyz=(-0.077, 0.0, 0.032)),
         material=shroud_black,
         name="rear_bridge",
     )
     card_body.visual(
-        Box((0.012, 0.090, 0.016)),
-        origin=Origin(xyz=(0.080, 0.0, 0.032)),
+        Box((0.006, 0.090, 0.016)),
+        origin=Origin(xyz=(0.083, 0.0, 0.032)),
         material=shroud_black,
         name="nose_bridge",
     )
