@@ -118,7 +118,7 @@ def test_add_tool_call_shows_read_file_path_before_slice_args() -> None:
 
     display.add_tool_call(
         tool_name="read_file",
-        args={"offset": 10, "limit": 20, "path": "docs/sdk/references/quickstart.md"},
+        args={"path": "docs/sdk/references/geometry/mesh-geometry.md", "offset": 1, "limit": 200},
         success=True,
         duration=0.02,
         result='{"result":"L10: runtime"}',
@@ -126,8 +126,10 @@ def test_add_tool_call_shows_read_file_path_before_slice_args() -> None:
 
     output = buffer.getvalue()
     assert "tool    read_file ✓" in output
-    assert "path: docs/sdk/references/quickstart.md" in output
-    assert "offset: 10" in output
+    assert "path: docs/sdk/references/geometry/mesh-geometry.md" in output
+    assert "offset: 1" in output
+    assert "limit: 200" in output
+    assert "... (1 more)" not in output
 
 
 def test_add_tool_call_renders_compile_model_as_compile_event() -> None:

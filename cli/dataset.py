@@ -701,7 +701,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_single.add_argument(
         "--sdk-package",
         default="sdk",
-        help="SDK package to use for prompt selection, scaffolding, and compilation.",
+        help=argparse.SUPPRESS,
     )
     run_single.add_argument(
         "--scaffold-mode",

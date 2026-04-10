@@ -106,12 +106,12 @@ def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
     return text[: max_length - len(suffix)] + suffix
 
 
-def format_tool_args(args, max_items: int = 3) -> list[str]:
+def format_tool_args(args, max_items: int | None = None) -> list[str]:
     """Format tool arguments for display.
 
     Args:
         args: Tool arguments dictionary or string
-        max_items: Maximum number of items to show
+        max_items: Maximum number of items to show, or None for all
 
     Returns:
         List of formatted argument strings like ["file: foo.py", "line: 42"]
@@ -135,7 +135,7 @@ def format_tool_args(args, max_items: int = 3) -> list[str]:
 
     formatted = []
     for i, (key, value) in enumerate(ordered_items):
-        if i >= max_items:
+        if max_items is not None and i >= max_items:
             formatted.append(f"... ({len(args) - max_items} more)")
             break
 

@@ -18,7 +18,6 @@ def test_runner_help_text(capsys: pytest.CaptureFixture[str]) -> None:
     assert "--provider {gemini,openai}" in help_text
     assert "--design-audit" in help_text
     assert "--openai-transport {http,websocket}" in help_text
-    assert "--sdk-package SDK_PACKAGE" in help_text
     assert "--scaffold-mode {lite,strict}" in help_text
     assert "--collection {workbench,dataset}" in help_text
     assert "--dataset-id DATASET_ID" in help_text
@@ -53,8 +52,6 @@ def test_runner_dump_provider_payload_supports_sdk(
             "--prompt",
             "test prompt",
             "--dump-provider-payload",
-            "--sdk-package",
-            "sdk",
         ]
     )
 

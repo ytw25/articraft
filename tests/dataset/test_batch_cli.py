@@ -369,6 +369,49 @@ def test_build_batch_config_resolves_auto_concurrency_to_logical_cpu_count(
     assert config.concurrency == 6
 
 
+def test_build_batch_config_defaults_missing_sdk_package_to_sdk(tmp_path: Path) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+    CategoryStore(repo).save(
+        CategoryRecord(schema_version=1, slug="hinge", title="Hinge", description="")
+    )
+
+    spec_path = tmp_path / "source_specs" / "default_sdk_batch.csv"
+    _write_csv(
+        spec_path,
+        [
+            {
+                "row_id": "row_1",
+                "category_slug": "hinge",
+                "category_title": "Hinge",
+                "prompt": "make hinge 1",
+                "provider": "openai",
+                "model_id": "gpt-5.4",
+                "thinking_level": "high",
+                "max_turns": "10",
+            }
+        ],
+    )
+
+    config = batch_runner.build_batch_config(
+        repo_root=tmp_path,
+        spec_arg=str(spec_path),
+        concurrency=1,
+        system_prompt_path="designer_system_prompt.txt",
+        sdk_docs_mode="full",
+        qc_blurb_path=None,
+        resume=False,
+        resume_policy="failed_or_pending",
+        keep_awake=False,
+        pause_file=None,
+        pause_poll_seconds=1.0,
+        keyboard_pause_enabled=False,
+    )
+
+    assert len(config.rows) == 1
+    assert config.rows[0].sdk_package == "sdk"
+
+
 def test_build_batch_config_supports_design_audit_default_and_row_overrides(
     tmp_path: Path,
 ) -> None:

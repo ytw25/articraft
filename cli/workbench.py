@@ -106,7 +106,7 @@ def _build_parser() -> argparse.ArgumentParser:
     init_record.add_argument(
         "--sdk-package",
         default="sdk",
-        help="SDK package metadata to attach to the draft record.",
+        help=argparse.SUPPRESS,
     )
     init_record.add_argument(
         "--scaffold-mode",
@@ -165,7 +165,7 @@ def _build_parser() -> argparse.ArgumentParser:
     rerun.add_argument(
         "--sdk-package",
         default=None,
-        help="Optional SDK package override for this rerun.",
+        help=argparse.SUPPRESS,
     )
     rerun.add_argument(
         "--scaffold-mode",

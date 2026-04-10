@@ -84,7 +84,6 @@ _REQUIRED_HEADERS = {
     "model_id",
     "thinking_level",
     "max_turns",
-    "sdk_package",
 }
 
 
@@ -683,7 +682,7 @@ def _parse_batch_row(
     thinking_level = raw_row.get("thinking_level", "").lower()
     max_turns_text = raw_row.get("max_turns", "")
     max_cost_usd = _parse_optional_max_cost_usd(raw_row.get("max_cost_usd"), row_index=row_index)
-    sdk_package = raw_row.get("sdk_package", "")
+    sdk_package = raw_row.get("sdk_package", "sdk")
     scaffold_mode = _parse_optional_scaffold_mode(raw_row.get("scaffold_mode"), row_index=row_index)
     scaffold_mode_explicit = scaffold_mode is not None
     category_title = raw_row.get("category_title") or None

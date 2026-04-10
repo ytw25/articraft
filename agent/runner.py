@@ -2186,7 +2186,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--sdk-package",
         default="sdk",
-        help="SDK package to use for prompt selection, scaffolding, and compilation.",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--scaffold-mode",
