@@ -12,14 +12,12 @@ def test_load_sdk_docs_bundle_mounts_router_and_default_refs() -> None:
 
     bundle = load_sdk_docs_bundle(repo_root, sdk_package="sdk")
 
-    assert bundle.router.virtual_path == "docs/sdk/README.md"
+    assert bundle.router.virtual_path == "docs/sdk/references/quickstart.md"
     assert bundle.default_read_virtual_paths() == (
-        "docs/sdk/references/runtime.md",
         "docs/sdk/references/quickstart.md",
         "docs/sdk/references/probe-tooling.md",
         "docs/sdk/references/testing.md",
     )
-    assert "docs/sdk/references/native-vs-cadquery.md" in bundle.files_by_path
     assert "docs/sdk/references/geometry/mesh-geometry.md" in bundle.files_by_path
     assert "docs/sdk/references/cadquery/overview.md" in bundle.files_by_path
 
@@ -36,11 +34,11 @@ def test_virtual_workspace_resolves_model_and_docs_paths(tmp_path: Path) -> None
     )
 
     model_file = workspace.resolve("model.py")
-    docs_file = workspace.resolve("docs/sdk/README.md")
+    docs_file = workspace.resolve("docs/sdk/references/quickstart.md")
 
     assert model_file.disk_path == model_path
     assert docs_file.disk_path is not None
-    assert docs_file.disk_path.name == "README.md"
+    assert docs_file.disk_path.name == "00_quickstart.md"
 
 
 def test_read_file_tool_reads_virtual_model_and_docs_paths(tmp_path: Path) -> None:
@@ -62,7 +60,7 @@ def test_read_file_tool_reads_virtual_model_and_docs_paths(tmp_path: Path) -> No
         assert model_result.error is None
 
         docs_invocation = await tool.build(
-            {"path": "docs/sdk/references/runtime.md", "offset": 1, "limit": 20}
+            {"path": "docs/sdk/references/quickstart.md", "offset": 1, "limit": 40}
         )
         docs_invocation.bind_virtual_workspace(workspace)
         docs_result = await docs_invocation.execute()
@@ -73,8 +71,8 @@ def test_read_file_tool_reads_virtual_model_and_docs_paths(tmp_path: Path) -> No
     model_output, docs_output = asyncio.run(_run())
 
     assert model_output == "L2: beta\nL3: gamma"
-    assert "sdk_hybrid" in docs_output
-    assert "section_loft" in docs_output
+    assert "Virtual Workspace" in docs_output
+    assert "legacy hybrid runs use `sdk_hybrid`" in docs_output
 
 
 def test_read_file_tool_rejects_unknown_virtual_path(tmp_path: Path) -> None:

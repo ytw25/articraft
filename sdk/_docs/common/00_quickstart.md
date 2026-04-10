@@ -3,9 +3,50 @@
 ## Purpose
 
 Use this page to start a new `sdk` script. It defines the required script
-contract, the canonical import pattern, and one minimal end-to-end example.
-Detailed type, assembly, placement, probe, and testing APIs live in the
-specialized docs referenced at the end.
+contract, the authoring workspace rules, and one minimal end-to-end example.
+Detailed APIs live in the mounted `docs/sdk/references/...` files listed below.
+
+## Virtual Workspace
+
+You are editing a virtual authoring workspace.
+
+- `model.py` is the only writable file.
+- `docs/sdk/references/quickstart.md` is this always-loaded entrypoint.
+- Everything under `docs/` is read-only SDK guidance.
+- Preserve the existing import root already present in `model.py`.
+  Canonical runs use `sdk`; legacy hybrid runs use `sdk_hybrid`.
+- Use `read_file(path=...)` to load exact reference text only when needed.
+
+## Mounted Reference Layout
+
+Always available in `docs/sdk/references/`:
+
+- `quickstart.md`: script contract, workspace rules, minimal example, workflow, and the
+  full reference inventory.
+- `errors.md`: common compile and authoring failures, plus how to interpret them.
+- `core-types.md`: geometry, material, inertial, articulation, and test-related core
+  types.
+- `articulated-object.md`: object, part, and articulation authoring helpers and lookup
+  patterns.
+- `placement.md`: placement helpers for mounting, offsets, wrapping, and alignment.
+- `probe-tooling.md`: `probe_model` helper catalog and inspection workflow.
+- `testing.md`: `TestContext`, `expect_*` assertions, and test authoring patterns.
+- `cadquery/overview.md`: when and why to use CadQuery-style geometry in Articraft.
+- `cadquery/primer.md`: CadQuery mental model and core shape-building workflow.
+- `cadquery/workplane.md`: workplane-based modeling patterns and common operations.
+- `cadquery/sketch.md`: sketch-driven 2D profiles and profile construction tools.
+- `cadquery/assembly.md`: CadQuery assembly helpers and composition patterns.
+- `cadquery/free-functions.md`: free-function geometry helpers and utility builders.
+- `cadquery/api-ref.md`: compact CadQuery API reference and signatures.
+
+Available in `sdk` runs:
+
+- `geometry/mesh-geometry.md`: mesh generation flow, managed meshes, and mesh-based
+  geometry helpers.
+- `geometry/wires.md`: wire and path construction helpers.
+- `geometry/section-lofts.md`: section lofts, repairs, and section-driven geometry.
+
+Read the exact document you need. Do not guess helper names or signatures from memory.
 
 ## Script Contract
 
@@ -37,6 +78,9 @@ from sdk import (
     TestReport,
 )
 ```
+
+For legacy `sdk_hybrid` runs, keep the scaffold's `from sdk_hybrid import ...` import
+root instead of changing it.
 
 ## Managed Mesh Pattern
 
@@ -162,10 +206,16 @@ makes positive angles open upward.
 - Use restrained real-world materials and colors rather than placeholder
   defaults.
 
-## See Also
+## Reference Routing
 
-- `20_core_types.md` for geometry, material, inertial, and motion types
-- `30_articulated_object.md` for model authoring and lookup helpers
-- `50_placement.md` for mounting and wrapping helpers
-- `70_probe_tooling.md` for inspection helpers
-- `80_testing.md` for the full testing API
+- If you need type or helper signatures, read `docs/sdk/references/core-types.md`.
+- If you need part/object construction patterns, read
+  `docs/sdk/references/articulated-object.md`.
+- If you need placement logic, read `docs/sdk/references/placement.md`.
+- If you need compile/debug interpretation, read `docs/sdk/references/errors.md`.
+- If you need probe helper details, read `docs/sdk/references/probe-tooling.md`.
+- If you need testing details, read `docs/sdk/references/testing.md`.
+- If you need lower-level CadQuery geometry, read the relevant
+  `docs/sdk/references/cadquery/*.md` document.
+- If you are in an `sdk` run and need mesh, wire, or loft helpers, read the relevant
+  `docs/sdk/references/geometry/*.md` document.

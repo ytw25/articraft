@@ -35,7 +35,7 @@ def _assert_shared_contract(text: str) -> None:
     assert "REALISTIC GEOMETRY" in text
 
     # Shared process stub stays compact
-    assert "Read `model.py` and the preloaded SDK router doc before editing." in text
+    assert "Read `model.py` and the preloaded SDK quickstart before editing." in text
     assert (
         "Use `read_file(path=...)` to load additional `docs/` references only when needed." in text
     )

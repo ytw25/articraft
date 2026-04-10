@@ -55,7 +55,7 @@ _FIRST_TURN_RUNTIME_GUIDANCE_BY_PROVIDER: dict[str, str] = {
         "<runtime_task_guidance>\n"
         "- Start with a small coherent backbone or subassembly, then expand incrementally.\n"
         '- Read the exact current code with `read_file(path="model.py")` before editing.\n'
-        '- The SDK router doc is preloaded. Read additional docs with `read_file(path="docs/...")` when needed.\n'
+        '- The SDK quickstart is preloaded. Read additional docs with `read_file(path="docs/...")` when needed.\n'
         "- For unfamiliar geometry or mechanisms, use `find_examples` before improvising.\n"
         "- Prefer multiple small `apply_patch` edits over one giant patch.\n"
         "- After each coherent chunk, run `compile_model` before moving on.\n"
@@ -68,7 +68,7 @@ _FIRST_TURN_RUNTIME_GUIDANCE_BY_PROVIDER: dict[str, str] = {
         "<runtime_task_guidance>\n"
         "- Start with a small coherent backbone or subassembly, then expand incrementally.\n"
         '- Read the exact current code with `read_file(path="model.py")` before editing.\n'
-        '- The SDK router doc is preloaded. Read additional docs with `read_file(path="docs/...")` when needed.\n'
+        '- The SDK quickstart is preloaded. Read additional docs with `read_file(path="docs/...")` when needed.\n'
         "- For unfamiliar geometry or mechanisms, use `find_examples` before improvising.\n"
         "- Prefer small exact `edit_code` replacements over broad rewrites.\n"
         "- If `edit_code` fails, reread the exact current text before retrying.\n"

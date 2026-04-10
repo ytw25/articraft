@@ -25,7 +25,7 @@ def test_compiled_openai_prompt_keeps_compact_contract_and_visual_test_gate() ->
         assert "REALISTIC GEOMETRY" in text
 
         # Compact shared workflow stub
-        assert "Read `model.py` and the preloaded SDK router doc before editing." in text
+        assert "Read `model.py` and the preloaded SDK quickstart before editing." in text
         assert "Start with the smallest coherent backbone or subassembly" in text
         assert "Expand one coherent region at a time" in text
         assert "Always run `compile_model` on the latest revision before concluding." in text

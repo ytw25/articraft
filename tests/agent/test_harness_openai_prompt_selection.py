@@ -94,7 +94,7 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
     assert "REALISTIC GEOMETRY" in instructions
 
     # Compact workflow + moved SDK guidance
-    assert "Read `model.py` and the preloaded SDK router doc before editing." in instructions
+    assert "Read `model.py` and the preloaded SDK quickstart before editing." in instructions
     assert (
         "Use `read_file(path=...)` to load additional `docs/` references only when needed."
         in instructions
@@ -126,13 +126,11 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
     assert payload["prompt_cache_retention"] == "24h"
 
     # SDK docs router bundle is injected
-    assert "## docs/sdk/README.md" in docs_message
-    assert "## docs/sdk/references/runtime.md" in docs_message
     assert "## docs/sdk/references/quickstart.md" in docs_message
     assert "## docs/sdk/references/probe-tooling.md" in docs_message
     assert "## docs/sdk/references/testing.md" in docs_message
-    assert "virtual authoring workspace" in docs_message
-    assert "Import from `sdk` in `model.py`." in docs_message
+    assert "Virtual Workspace" in docs_message
+    assert "Preserve the existing import root already present in `model.py`." in docs_message
     assert "Use `place_on_surface(...)` by default" in docs_message
     assert "Once `run_tests()` references a visual by exact `elem_*` name" in docs_message
 
@@ -142,21 +140,14 @@ def test_openai_hybrid_payload_preview_includes_hybrid_docs() -> None:
         sdk_package="sdk_hybrid",
         sdk_docs_mode="full",
     )["input"][0]["content"][0]["text"]
-    assert "## docs/sdk/README.md" in hybrid_docs_message
-    assert "## docs/sdk/references/runtime.md" in hybrid_docs_message
     assert "## docs/sdk/references/quickstart.md" in hybrid_docs_message
-    assert "Import from `sdk_hybrid` in `model.py`." in hybrid_docs_message
-    assert (
-        "`section_loft(...)`, `repair_loft(...)`, and `partition_shell(...)` are unavailable"
-        in hybrid_docs_message
-    )
+    assert "legacy hybrid runs use `sdk_hybrid`" in hybrid_docs_message
 
 
 def test_openai_core_payload_preview_keeps_router_bundle() -> None:
     docs_message = _build_openai_preview(sdk_package="sdk", sdk_docs_mode="core")["input"][0][
         "content"
     ][0]["text"]
-    assert "## docs/sdk/README.md" in docs_message
     assert "## docs/sdk/references/quickstart.md" in docs_message
     assert "## docs/sdk/references/probe-tooling.md" in docs_message
     assert "## docs/sdk/references/testing.md" in docs_message
@@ -166,10 +157,8 @@ def test_openai_hybrid_core_payload_preview_keeps_router_bundle() -> None:
     docs_message = _build_openai_preview(sdk_package="sdk_hybrid", sdk_docs_mode="core")["input"][
         0
     ]["content"][0]["text"]
-    assert "## docs/sdk/README.md" in docs_message
-    assert "## docs/sdk/references/runtime.md" in docs_message
     assert "## docs/sdk/references/quickstart.md" in docs_message
-    assert "Import from `sdk_hybrid` in `model.py`." in docs_message
+    assert "legacy hybrid runs use `sdk_hybrid`" in docs_message
 
 
 def test_openai_hybrid_payload_preview_includes_find_examples_tool() -> None:
@@ -366,7 +355,7 @@ def test_gemini_prompt_resolution_and_payload_preview() -> None:
     assert "REALISTIC GEOMETRY" in gemini_instructions
 
     # Compact workflow
-    assert "Read `model.py` and the preloaded SDK router doc before editing." in gemini_instructions
+    assert "Read `model.py` and the preloaded SDK quickstart before editing." in gemini_instructions
     assert (
         "Use `read_file(path=...)` to load additional `docs/` references only when needed."
         in gemini_instructions
@@ -392,9 +381,9 @@ def test_gemini_prompt_resolution_and_payload_preview() -> None:
     assert 'read_file(path="docs/...")' in gemini_task_message
     assert gemini_task_message.endswith("</runtime_task_guidance>")
 
-    assert "## docs/sdk/README.md" in gemini_docs_message
+    assert "## docs/sdk/references/quickstart.md" in gemini_docs_message
     assert "## docs/sdk/references/probe-tooling.md" in gemini_docs_message
-    assert "Prefer object-first snippets" in gemini_docs_message
+    assert "Mounted Reference Layout" in gemini_docs_message
     assert "Once `run_tests()` references a visual by exact `elem_*` name" in gemini_docs_message
 
 

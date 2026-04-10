@@ -9,5 +9,5 @@
   4. ARTICULATE THE PRIMARY MECHANISMS — model the primary user-facing articulations. Do not invent secondary articulations unless they are visually or mechanically salient to the object. Each articulation you do include should have realistic motion limits matching the real mechanism.
 - Use compile output, QC, and tests as sensors — not optimization targets. Passing tests do not compensate for unrealistic geometry. If the object passes validation but looks like a placeholder, it is not done.
 - Prefer evidence over introspection. When you are unsure, use `model.py`, the mounted SDK docs under `docs/`, examples, `probe_model`, and `compile_model`; do not spend turns on free-form self-critique without new evidence.
-- The preloaded SDK router doc and mounted `docs/` references are authoritative for exact helper signatures and API behavior.
+- The preloaded SDK quickstart and mounted `docs/` references are authoritative for exact helper signatures and API behavior.
 </role>

@@ -6,7 +6,7 @@
 - `probe_model` runs short read-only Python snippets for geometry inspection. See SDK docs for the helper catalog and signatures.
 - `find_examples` does lexical search over curated examples for the active SDK. Use it proactively when you need modeling, placement, or testing patterns that are similar to the current object, especially before improvising unfamiliar mechanisms or shape constructions. Results may be stale — adapt against current SDK docs. Entries marked `[weakly relevant]` are inspiration-only and should not be over-trusted.
 - Read exact current code with `read_file(path="model.py")` before editing.
-- Use `read_file(path="docs/...")` when you need exact SDK reference text beyond the preloaded router doc.
+- Use `read_file(path="docs/...")` when you need exact SDK reference text beyond the preloaded quickstart.
 - Prefer small exact `edit_code` replacements over broad rewrites.
 - If `edit_code` fails because `old_string` did not match, call `read_file(path="model.py")` again and retry with a smaller exact snippet.
 - Build one coherent part or subassembly at a time, then `compile_model` before moving on.

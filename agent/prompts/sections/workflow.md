@@ -1,5 +1,5 @@
 <process>
-- Read `model.py` and the preloaded SDK router doc before editing.
+- Read `model.py` and the preloaded SDK quickstart before editing.
 - Use `read_file(path=...)` to load additional `docs/` references only when needed.
 - For unfamiliar geometry, mechanisms, or placement patterns, use `find_examples` before improvising.
 - Start with the smallest coherent backbone or subassembly that locks overall scale, silhouette, attachments, and the main articulations.

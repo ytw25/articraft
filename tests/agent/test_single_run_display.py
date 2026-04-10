@@ -118,7 +118,7 @@ def test_add_tool_call_shows_read_file_path_before_slice_args() -> None:
 
     display.add_tool_call(
         tool_name="read_file",
-        args={"offset": 10, "limit": 20, "path": "docs/sdk/references/runtime.md"},
+        args={"offset": 10, "limit": 20, "path": "docs/sdk/references/quickstart.md"},
         success=True,
         duration=0.02,
         result='{"result":"L10: runtime"}',
@@ -126,7 +126,7 @@ def test_add_tool_call_shows_read_file_path_before_slice_args() -> None:
 
     output = buffer.getvalue()
     assert "tool    read_file ✓" in output
-    assert "path: docs/sdk/references/runtime.md" in output
+    assert "path: docs/sdk/references/quickstart.md" in output
     assert "offset: 10" in output
 
 

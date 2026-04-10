@@ -5,11 +5,10 @@ from pathlib import Path
 
 from sdk._profiles import get_sdk_profile
 
-_SDK_ROUTER_SOURCE = Path("agent/docs/sdk/README.md")
-_SDK_ROUTER_VIRTUAL_PATH = "docs/sdk/README.md"
+_SDK_ROUTER_SOURCE = Path("sdk/_docs/common/00_quickstart.md")
+_SDK_ROUTER_VIRTUAL_PATH = "docs/sdk/references/quickstart.md"
 _MODEL_VIRTUAL_PATH = "model.py"
 _DEFAULT_PRELOAD_PATHS = (
-    "docs/sdk/references/runtime.md",
     "docs/sdk/references/quickstart.md",
     "docs/sdk/references/probe-tooling.md",
     "docs/sdk/references/testing.md",
@@ -100,12 +99,13 @@ def load_sdk_docs_reference(
     # regardless of the legacy docs_mode setting.
     del docs_mode
     bundle = load_sdk_docs_bundle(repo_root, sdk_package=sdk_package)
-    preload_paths = (_SDK_ROUTER_VIRTUAL_PATH, *bundle.default_read_virtual_paths())
+    preload_paths = bundle.default_read_virtual_paths()
 
     parts = [
         "\n\n# Workspace Documentation (read-only)\n",
         "The virtual workspace exposes `model.py` as the editable artifact script and `docs/` "
         "as read-only SDK guidance.\n",
+        "`docs/sdk/references/quickstart.md` is the preloaded SDK entrypoint and reference index.\n",
         "Use `read_file(path=...)` with these virtual paths when you need exact text.\n",
     ]
     for virtual_path in preload_paths:
@@ -133,7 +133,7 @@ class _LoadedRouter:
 def _load_router_document(repo_root: Path) -> _LoadedRouter:
     path = repo_root / _SDK_ROUTER_SOURCE
     if not path.exists():
-        raise FileNotFoundError(f"SDK router document not found: {path}")
+        raise FileNotFoundError(f"SDK quickstart document not found: {path}")
     return _LoadedRouter(
         router=VirtualWorkspaceFile(
             virtual_path=_SDK_ROUTER_VIRTUAL_PATH,
@@ -148,20 +148,7 @@ def _build_sdk_reference_files(
     sdk_package: str,
 ) -> dict[str, VirtualWorkspaceFile]:
     profile = get_sdk_profile(sdk_package)
-    runtime_source = "runtime_hybrid.md" if sdk_package == "sdk_hybrid" else "runtime.md"
-    abstraction_source = (
-        "native-vs-cadquery_hybrid.md" if sdk_package == "sdk_hybrid" else "native-vs-cadquery.md"
-    )
-    files: dict[str, VirtualWorkspaceFile] = {
-        "docs/sdk/references/runtime.md": VirtualWorkspaceFile(
-            virtual_path="docs/sdk/references/runtime.md",
-            disk_path=repo_root / "agent" / "docs" / "sdk" / "references" / runtime_source,
-        ),
-        "docs/sdk/references/native-vs-cadquery.md": VirtualWorkspaceFile(
-            virtual_path="docs/sdk/references/native-vs-cadquery.md",
-            disk_path=repo_root / "agent" / "docs" / "sdk" / "references" / abstraction_source,
-        ),
-    }
+    files: dict[str, VirtualWorkspaceFile] = {}
 
     for rel_path in profile.docs_full:
         rel_str = rel_path.as_posix()
