@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the actual nested-axis layout from the 5-star wrist record: base shell, yaw collar, pitch yoke, and a separate roll spindle.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     MotionLimits,

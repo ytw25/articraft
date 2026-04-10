@@ -14,7 +14,7 @@ tags:
 This is the actual mixed topology from the 5-star linear-dual-rotary module record: translate first, then pivot twice off the moving carriage.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

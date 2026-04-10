@@ -113,11 +113,11 @@ To change either setting, pass overrides on the same command:
 # Use a different model (same SDK)
 just model=gemini-3-flash-preview wb "Create a compact desk fan with adjustable tilt."
 
-# Use the hybrid SDK (same model)
-just sdk=hybrid wb "Create a compact desk fan with adjustable tilt."
+# Use the canonical SDK explicitly
+just sdk=sdk wb "Create a compact desk fan with adjustable tilt."
 
 # Change both model and SDK together
-just model=gpt-5.4 sdk=hybrid wb "Create a compact desk fan with adjustable tilt."
+just model=gpt-5.4 sdk=sdk wb "Create a compact desk fan with adjustable tilt."
 ```
 
 To stop a run after it exceeds a USD budget, pass `max_cost_usd=...`:
@@ -126,7 +126,7 @@ To stop a run after it exceeds a USD budget, pass `max_cost_usd=...`:
 just max_cost_usd=1.5 wb "Create a compact desk fan with adjustable tilt."
 ```
 
-For `wb` and `wb-init`, leaving `sdk` blank uses the standard pipeline. Use `sdk=sdk` for an explicit standard override and `sdk=hybrid` for the hybrid rendering path. Record-based commands like `compile`, `compile-strict`, `compile-unsafe`, and `rerun` use the record's saved `sdk_package` unless you override them with `sdk=...`.
+For `wb` and `wb-init`, leaving `sdk` blank uses the canonical pipeline. Use `sdk=sdk` for an explicit override. Record-based commands like `compile`, `compile-strict`, `compile-unsafe`, and `rerun` use the record's saved `sdk_package` unless you override them with `sdk=...`.
 
 To run a single prompt directly into a dataset category instead of the workbench, use:
 
@@ -196,7 +196,7 @@ Each row is one dataset generation job.
 | `thinking_level` | Yes | Must be `low`, `med`, or `high`. |
 | `max_turns` | Yes | Positive integer turn cap for the row. |
 | `max_cost_usd` | No | Optional positive per-row USD budget. If blank, the row inherits the batch CLI flag or `ARTICRAFT_MAX_COST_USD`. |
-| `sdk_package` | Yes | Usually `sdk` or `sdk_hybrid`. |
+| `sdk_package` | Yes | Use `sdk`. |
 | `scaffold_mode` | No | Optional `lite` or `strict`. If blank, the row inherits the batch CLI default. |
 | `label` | No | Optional free-form label for your own tracking. |
 | `design_audit` | No | `true` or `false`. If blank, the row inherits the CLI default for the batch. |
@@ -212,7 +212,7 @@ Example:
 ```csv
 row_id,category_slug,category_title,prompt,provider,model_id,thinking_level,max_turns,max_cost_usd,sdk_package,scaffold_mode,label,design_audit
 hinge_01,hinge,Hinge,"Create a steel door hinge with two rectangular leaves and a center pin.",openai,gpt-5.4,high,12,1.5,sdk,lite,baseline,true
-hinge_02,hinge,Hinge,"Create a compact cabinet hinge with offset leaves and a short pin.",gemini,gemini-3-flash-preview,med,10,,sdk_hybrid,strict,hybrid,false
+hinge_02,hinge,Hinge,"Create a compact cabinet hinge with offset leaves and a short pin.",gemini,gemini-3-flash-preview,med,10,,sdk,strict,compact,false
 ```
 
 ### 6.3 Run the first pass
@@ -367,7 +367,7 @@ Recompile one saved record:
 just compile data/records/<record-id>
 just compile-strict data/records/<record-id>
 just compile-unsafe data/records/<record-id>
-just sdk=hybrid compile-unsafe data/records/<record-id>
+just sdk=sdk compile-unsafe data/records/<record-id>
 ```
 
 Bulk compile variants:

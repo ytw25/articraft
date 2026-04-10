@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the exact left and right finger decomposition from the 5-star dual-finger record. It is a good pattern for branching but still symmetric kinematics.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

@@ -14,7 +14,7 @@ tags:
 The 5-star XYZ stage record is a good reference when you want a compact but still believable three-axis stack without a heavy mesh-export layer.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

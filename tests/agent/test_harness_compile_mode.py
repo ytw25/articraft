@@ -61,7 +61,7 @@ def test_compile_async_uses_timeout_wrapper(
 ) -> None:
     agent = ArticraftAgent.__new__(ArticraftAgent)
     agent.file_path = str(tmp_path / "model.py")
-    agent.sdk_package = "sdk_hybrid"
+    agent.sdk_package = "sdk"
     agent.runtime_limits = None
 
     report = CompileReport(
@@ -89,7 +89,7 @@ def test_compile_async_uses_timeout_wrapper(
     assert result is report
     assert captured == {
         "script_path": tmp_path / "model.py",
-        "sdk_package": "sdk_hybrid",
+        "sdk_package": "sdk",
         "rewrite_visual_glb": False,
     }
 

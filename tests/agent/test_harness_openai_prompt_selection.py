@@ -84,13 +84,11 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
     assert "REALISTIC GEOMETRY" in instructions
 
     # Compact workflow + moved SDK guidance
-    assert "Start with a short evidence-gathering pass before the first edit:" in instructions
+    assert "Start with a short context pass:" in instructions
     assert "preloaded SDK quickstart/router" in instructions
-    assert "load only the specific `docs/` references needed for that next change" in instructions
-    assert (
-        "Gather context for the next coherent edit, not for the whole object up front."
-        in instructions
-    )
+    assert "only for the specific `docs/` references needed for that next change" in instructions
+    assert "read the full file once, not a small slice" in instructions
+    assert "Do not re-read it if it is already in context." in instructions
     assert "Start with the smallest coherent backbone or subassembly" in instructions
     assert "Always run `compile_model` on the latest revision before concluding." in instructions
     assert "PHASE 1" not in instructions
@@ -99,12 +97,15 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
     assert "inspection-only" in instructions
     assert "lexical search over curated examples for the active SDK" in instructions
     assert "<compile_signals>" in instructions
-    assert "Read mounted SDK docs as needed" in instructions
-    assert "Prefer Articraft-native primitives and placement helpers" in instructions
     assert (
-        "Use CadQuery-backed geometry only for the specific parts that need lower-level control"
+        "Read mounted SDK docs as needed for placement, probe patterns, exact signatures, and testing guidance."
         in instructions
     )
+    assert (
+        "Prefer Articraft-native primitives and placement helpers when they represent the form credibly."
+        in instructions
+    )
+    assert "Use CadQuery only for the parts that need lower-level shape control" in instructions
     assert "Do not provide `file_path`" not in instructions
     assert "missing exact geometry" not in instructions
     assert "means a gap, not an overlap" not in instructions
@@ -115,8 +116,12 @@ def test_openai_prompt_resolution_and_payload_preview() -> None:
         'Read the exact current code with `read_file(path="model.py")` before editing.'
         in task_message
     )
-    assert "Start with a short context pass: decide the next coherent edit" in task_message
-    assert "do not front-load unrelated references" in task_message
+    assert (
+        "Start with a short context pass: decide the next coherent edit, then read only the docs/examples needed for it."
+        in task_message
+    )
+    assert 'read the full file with `read_file(path="docs/...")`' in task_message
+    assert "do not re-read a reference file that is already in context" in task_message
     assert task_message.endswith("</runtime_task_guidance>")
 
     # Cache key
@@ -327,18 +332,14 @@ def test_gemini_prompt_resolution_and_payload_preview() -> None:
     assert "REALISTIC GEOMETRY" in gemini_instructions
 
     # Compact workflow
-    assert (
-        "Start with a short evidence-gathering pass before the first edit:" in gemini_instructions
-    )
+    assert "Start with a short context pass:" in gemini_instructions
     assert "preloaded SDK quickstart/router" in gemini_instructions
     assert (
-        "load only the specific `docs/` references needed for that next change"
+        "only for the specific `docs/` references needed for that next change"
         in gemini_instructions
     )
-    assert (
-        "Gather context for the next coherent edit, not for the whole object up front."
-        in gemini_instructions
-    )
+    assert "read the full file once, not a small slice" in gemini_instructions
+    assert "Do not re-read it if it is already in context." in gemini_instructions
     assert "Start with the smallest coherent backbone or subassembly" in gemini_instructions
     assert (
         "Always run `compile_model` on the latest revision before concluding."
@@ -349,11 +350,16 @@ def test_gemini_prompt_resolution_and_payload_preview() -> None:
     # Provider/system guidance
     assert "inspection-only" in gemini_instructions
     assert "lexical search over curated examples for the active SDK" in gemini_instructions
-    assert "Read mounted SDK docs as needed" in gemini_instructions
-    assert "Prefer Articraft-native primitives and placement helpers" in gemini_instructions
     assert (
-        "Use CadQuery-backed geometry only for the specific parts that need lower-level control"
+        "Read mounted SDK docs as needed for placement, probe patterns, exact signatures, and testing guidance."
         in gemini_instructions
+    )
+    assert (
+        "Prefer Articraft-native primitives and placement helpers when they represent the form credibly."
+        in gemini_instructions
+    )
+    assert (
+        "Use CadQuery only for the parts that need lower-level shape control" in gemini_instructions
     )
 
     # Runtime first-turn task guidance
@@ -362,8 +368,12 @@ def test_gemini_prompt_resolution_and_payload_preview() -> None:
         'Read the exact current code with `read_file(path="model.py")` before editing.'
         in gemini_task_message
     )
-    assert "Start with a short context pass: decide the next coherent edit" in gemini_task_message
+    assert (
+        "Start with a short context pass: decide the next coherent edit, then read only the docs/examples needed for it."
+        in gemini_task_message
+    )
     assert 'read_file(path="docs/...")' in gemini_task_message
+    assert "do not re-read a reference file that is already in context" in gemini_task_message
     assert gemini_task_message.endswith("</runtime_task_guidance>")
 
     assert "## docs/sdk/references/quickstart.md" in gemini_docs_message

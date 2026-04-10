@@ -243,9 +243,9 @@ def __getattr__(name: str):
         globals()[name] = value
         return value
     if name in _GEAR_EXPORTS:
-        from sdk_hybrid import v0 as _hybrid_v0
+        from . import gears as _gears
 
-        value = getattr(_hybrid_v0, name)
+        value = getattr(_gears, name)
         globals()[name] = value
         return value
     if name == "AssetContext":

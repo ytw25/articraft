@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the actual two-axis machine-module layout from the 5-star rotary-lift record: one revolute base and one vertical prismatic stage above it.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

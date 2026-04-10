@@ -14,7 +14,7 @@ tags:
 The 5-star pan example is slightly richer than a bare rotating puck: it uses a revolute turntable plus a fixed pedestal to stage the payload above the axis.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

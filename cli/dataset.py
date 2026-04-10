@@ -762,7 +762,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     upsert_category.add_argument(
         "--target-sdk-version",
-        choices=("base", "hybrid_cad"),
+        choices=("base",),
         help="Optional target SDK version override.",
     )
     subparsers.add_parser(

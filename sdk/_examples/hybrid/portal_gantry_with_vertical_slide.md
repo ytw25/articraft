@@ -16,7 +16,7 @@ This excerpt keeps the real three-part split from the 5-star gantry record: rigi
 ```python
 from math import pi
 
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Cylinder, Inertial, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, Box, Cylinder, Inertial, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

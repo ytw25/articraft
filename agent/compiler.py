@@ -20,7 +20,6 @@ from agent.models import CompileReport, CompileSignalBundle
 from agent.mp_utils import get_mp_context
 from agent.prompts import normalize_sdk_package
 from sdk._core.v0.assets import activate_asset_session, asset_session_for_script
-from sdk._dependencies import ensure_sdk_hybrid_dependencies
 
 logger = logging.getLogger(__name__)
 
@@ -47,9 +46,6 @@ _GEOMETRY_QC_MARKERS = (
     "expect_joint_motion_axis",
     "urdf tests failed:",
 )
-_HYBRID_BASE_SDK_IMPORT_RE = re.compile(
-    r"^\s*(?:from\s+sdk\s+import\b|import\s+sdk\b)", re.MULTILINE
-)
 _AUTOMATED_BASELINE_WARNING_CHECK_NAME = (
     "warn_if_part_contains_disconnected_geometry_islands(tol=1e-06)"
 )
@@ -63,25 +59,6 @@ _AUTOMATED_BASELINE_DEFAULT_CHECK_NAMES = frozenset(
         "fail_if_parts_overlap_in_current_pose()",
     }
 )
-
-
-def _validate_hybrid_script_imports(script_path: Path) -> None:
-    try:
-        source = script_path.read_text(encoding="utf-8")
-    except OSError:
-        return
-
-    match = _HYBRID_BASE_SDK_IMPORT_RE.search(source)
-    if match is None:
-        return
-
-    line_no = source.count("\n", 0, match.start()) + 1
-    line = source.splitlines()[line_no - 1].strip()
-    raise RuntimeError(
-        "Hybrid SDK runs must import from `sdk_hybrid`, not `sdk`. "
-        "`section_loft(...)`, `repair_loft(...)`, and `partition_shell(...)` are unavailable "
-        f"in `sdk_hybrid`.\nLocation: {script_path.name}:{line_no}\nCode: {line}"
-    )
 
 
 def _import_sdk_module(sdk_package: str, module_suffix: str = "") -> Any:
@@ -377,7 +354,7 @@ def _should_rewrite_visual_meshes_to_glb(
 ) -> bool:
     if rewrite_visual_glb is not None:
         return rewrite_visual_glb
-    return sdk_package != "sdk_hybrid"
+    return True
 
 
 def load_model_globals(
@@ -386,10 +363,7 @@ def load_model_globals(
     sdk_package: str = "sdk",
 ) -> dict[str, Any]:
     """Execute a model script and return its globals."""
-    normalized_sdk_package = normalize_sdk_package(sdk_package)
-    if normalized_sdk_package == "sdk_hybrid":
-        ensure_sdk_hybrid_dependencies()
-        _validate_hybrid_script_imports(script_path.resolve())
+    normalize_sdk_package(sdk_package)
     repo_root = Path(__file__).resolve().parents[1]
     script_path = script_path.resolve()
     prev_cwd = Path.cwd()

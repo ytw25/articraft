@@ -14,7 +14,7 @@ tags:
 This is the core `build_object_model()` excerpt from the 5-star linear-stage record. It keeps the real carriage details instead of collapsing the example down to bare boxes.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

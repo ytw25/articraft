@@ -16,7 +16,7 @@ The three-branch 5-star record is useful because it shows how to scale a branchi
 ```python
 from math import cos, sin
 
-from sdk_hybrid import ArticulatedObject, ArticulationType, Cylinder, Inertial, Origin, mesh_from_cadquery
+from sdk import ArticulatedObject, ArticulationType, Cylinder, Inertial, Origin, mesh_from_cadquery
 
 
 def build_object_model() -> ArticulatedObject:

@@ -80,11 +80,8 @@ wb prompt:
       ""|sdk|base)
         sdk_package="sdk"
         ;;
-      hybrid|sdk_hybrid)
-        sdk_package="sdk_hybrid"
-        ;;
       *)
-        echo "Unsupported sdk '$sdk'. Supported values: sdk or hybrid. Aliases: base, sdk_hybrid." >&2
+        echo "Unsupported sdk '$sdk'. Supported value: sdk. Alias: base." >&2
         exit 1
         ;;
     esac
@@ -145,11 +142,8 @@ wb-init prompt:
       ""|sdk|base)
         sdk_package="sdk"
         ;;
-      hybrid|sdk_hybrid)
-        sdk_package="sdk_hybrid"
-        ;;
       *)
-        echo "Unsupported sdk '$sdk'. Supported values: sdk or hybrid. Aliases: base, sdk_hybrid." >&2
+        echo "Unsupported sdk '$sdk'. Supported value: sdk. Alias: base." >&2
         exit 1
         ;;
     esac
@@ -217,11 +211,8 @@ wb-category prompt:
       ""|sdk|base)
         sdk_package="sdk"
         ;;
-      hybrid|sdk_hybrid)
-        sdk_package="sdk_hybrid"
-        ;;
       *)
-        echo "Unsupported sdk '$sdk'. Supported values: sdk or hybrid. Aliases: base, sdk_hybrid." >&2
+        echo "Unsupported sdk '$sdk'. Supported value: sdk. Alias: base." >&2
         exit 1
         ;;
     esac
@@ -508,11 +499,8 @@ rerun record:
       sdk|base)
         sdk_package="sdk"
         ;;
-      hybrid|sdk_hybrid)
-        sdk_package="sdk_hybrid"
-        ;;
       *)
-        echo "Unsupported sdk '$sdk'. Supported values: sdk or hybrid. Aliases: base, sdk_hybrid." >&2
+        echo "Unsupported sdk '$sdk'. Supported value: sdk. Alias: base." >&2
         exit 1
         ;;
     esac
@@ -686,11 +674,8 @@ compile-unsafe record_dir:
       sdk|base)
         sdk_override="sdk"
         ;;
-      hybrid|sdk_hybrid)
-        sdk_override="sdk_hybrid"
-        ;;
       *)
-        echo "Unsupported sdk '$sdk'. Supported values: sdk or hybrid. Aliases: base, sdk_hybrid." >&2
+        echo "Unsupported sdk '$sdk'. Supported value: sdk. Alias: base." >&2
         exit 1
         ;;
     esac

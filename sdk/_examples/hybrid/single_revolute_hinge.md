@@ -18,7 +18,7 @@ from the hinge line, so `axis=(0, 0, 1)` makes positive joint values swing the
 free edge toward local/front `+Y` instead of into the carcass.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

@@ -1,6 +1,6 @@
 ---
 title: 'Bevel Gears'
-description: 'Create a standalone bevel gear and a meshing bevel pair from the vendored `sdk_hybrid` gear classes.'
+description: 'Create a standalone bevel gear and a meshing bevel pair from the vendored `sdk` gear classes.'
 tags:
   - cadquery
   - examples
@@ -9,12 +9,12 @@ tags:
 ---
 # Bevel Gears
 
-Bevel gears and meshing bevel pairs build as regular CadQuery solids and compounds, so they can be dropped into the same authoring flow as the rest of `sdk_hybrid`. The values below are authored directly in meters.
+Bevel gears and meshing bevel pairs build as regular CadQuery solids and compounds, so they can be dropped into the same authoring flow as the rest of `sdk`. The values below are authored directly in meters.
 
 ```python
 import cadquery as cq
 
-from sdk_hybrid import BevelGear, BevelGearPair, mesh_from_cadquery
+from sdk import BevelGear, BevelGearPair, mesh_from_cadquery
 
 single = BevelGear(module=0.001, teeth_number=18, cone_angle=45.0, face_width=0.004)
 pair = BevelGearPair(

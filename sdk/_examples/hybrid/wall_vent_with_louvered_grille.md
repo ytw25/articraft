@@ -15,7 +15,7 @@ This trimmed hybrid example is useful when a vent or grille needs to read as a c
 ```python
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     Box,
     Cylinder,

@@ -14,7 +14,7 @@ tags:
 Unlike the coaxial stack, this 5-star example offsets each rotary stage in space while keeping the serial relationship explicit.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

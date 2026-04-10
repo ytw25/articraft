@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the real stand-and-cradle split from the 5-star tilt record. The helper mesh builders are omitted, but the pitch-joint placement is the same.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

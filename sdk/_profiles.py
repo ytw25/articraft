@@ -5,9 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 OPENAI_DESIGNER_PROMPT_NAME = "designer_system_prompt_openai.txt"
-HYBRID_OPENAI_DESIGNER_PROMPT_NAME = "designer_system_prompt_openai_hybrid.txt"
 GEMINI_DESIGNER_PROMPT_NAME = "designer_system_prompt_gemini.txt"
-HYBRID_GEMINI_DESIGNER_PROMPT_NAME = "designer_system_prompt_gemini_hybrid.txt"
 ScaffoldMode = Literal["lite", "strict"]
 DEFAULT_SCAFFOLD_MODE: ScaffoldMode = "lite"
 LEGACY_SCAFFOLD_MODE: ScaffoldMode = "strict"
@@ -72,6 +70,13 @@ _CADQUERY_DOCS = (
     Path("sdk/_docs/cadquery/39c_cadquery_api_ref.md"),
 )
 
+_SDK_PACKAGE_ALIASES = {
+    "": "sdk",
+    "base": "sdk",
+    "sdk": "sdk",
+    "sdk_hybrid": "sdk",
+}
+
 
 SDK_PROFILES: dict[str, SdkProfile] = {
     "sdk": SdkProfile(
@@ -89,22 +94,6 @@ SDK_PROFILES: dict[str, SdkProfile] = {
         ),
         openai_prompt_name=OPENAI_DESIGNER_PROMPT_NAME,
         gemini_prompt_name=GEMINI_DESIGNER_PROMPT_NAME,
-    ),
-    "sdk_hybrid": SdkProfile(
-        package_name="sdk_hybrid",
-        scaffold_paths={
-            "lite": Path("scaffold_hybrid_lite.py"),
-            "strict": Path("scaffold_hybrid.py"),
-        },
-        docs_full=_COMMON_DOCS[:4] + _CADQUERY_DOCS + _COMMON_DOCS[4:],
-        docs_core=(
-            Path("sdk/_docs/common/00_quickstart.md"),
-            Path("sdk/_docs/cadquery/35_cadquery.md"),
-            Path("sdk/_docs/common/70_probe_tooling.md"),
-            Path("sdk/_docs/common/80_testing.md"),
-        ),
-        openai_prompt_name=HYBRID_OPENAI_DESIGNER_PROMPT_NAME,
-        gemini_prompt_name=HYBRID_GEMINI_DESIGNER_PROMPT_NAME,
     ),
 }
 
@@ -124,8 +113,14 @@ def normalize_scaffold_mode(scaffold_mode: str) -> ScaffoldMode:
 
 
 def get_sdk_profile(package_name: str) -> SdkProfile:
+    normalized = _SDK_PACKAGE_ALIASES.get(str(package_name or "").strip().lower())
+    if normalized is None:
+        raise ValueError(
+            f"Unsupported SDK package: {package_name!r}. "
+            f"Expected one of {sorted(SUPPORTED_SDK_PACKAGES)!r}."
+        )
     try:
-        return SDK_PROFILES[package_name]
+        return SDK_PROFILES[normalized]
     except KeyError as exc:
         raise ValueError(
             f"Unsupported SDK package: {package_name!r}. "

@@ -1,6 +1,6 @@
 ---
 title: 'Crossed and Hyperbolic Gears'
-description: 'Build crossed-helical and hyperbolic gear pairs using the vendored `sdk_hybrid` port.'
+description: 'Build crossed-helical and hyperbolic gear pairs using the vendored `sdk` port.'
 tags:
   - cadquery
   - examples
@@ -10,12 +10,12 @@ tags:
 ---
 # Crossed and Hyperbolic Gears
 
-The crossed-helical and hyperbolic pair helpers are available directly in `sdk_hybrid`, which makes it straightforward to compare two skew-axis gear families in one scene.
+The crossed-helical and hyperbolic pair helpers are available directly in `sdk`, which makes it straightforward to compare two skew-axis gear families in one scene.
 
 ```python
 import cadquery as cq
 
-from sdk_hybrid import CrossedGearPair, HyperbolicGearPair
+from sdk import CrossedGearPair, HyperbolicGearPair
 
 crossed = CrossedGearPair(
     module=1.0,

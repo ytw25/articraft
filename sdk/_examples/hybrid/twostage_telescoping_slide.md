@@ -18,7 +18,7 @@ full travel. Size each moving rail for the extended pose, then set the travel
 limit so the stage stops before it fully exits its sleeve.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:
@@ -52,7 +52,7 @@ def build_object_model() -> ArticulatedObject:
 A matching retained-insertion test pattern looks like this:
 
 ```python
-from sdk_hybrid import TestContext, TestReport
+from sdk import TestContext, TestReport
 
 
 def run_tests() -> TestReport:

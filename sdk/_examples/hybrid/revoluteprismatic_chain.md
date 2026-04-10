@@ -16,7 +16,7 @@ This is a trimmed excerpt from the 5-star inspection-arm record. It keeps the ac
 ```python
 from math import pi
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

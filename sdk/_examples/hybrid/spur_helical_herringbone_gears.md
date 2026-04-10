@@ -11,12 +11,12 @@ tags:
 ---
 # Spur, Helical, and Herringbone Gears
 
-This example uses the vendored `sdk_hybrid` gear classes while keeping the familiar `cq_gears` plugin pattern on `cadquery.Workplane`. The values below are authored directly in meters, so the exported mesh is already on the base SDK coordinate/unit contract.
+This example uses the vendored `sdk` gear classes while keeping the familiar `cq_gears` plugin pattern on `cadquery.Workplane`. The values below are authored directly in meters, so the exported mesh is already on the base SDK coordinate/unit contract.
 
 ```python
 import cadquery as cq
 
-from sdk_hybrid import HerringboneGear, SpurGear, mesh_from_cadquery
+from sdk import HerringboneGear, SpurGear, mesh_from_cadquery
 
 spur = SpurGear(module=0.001, teeth_number=19, width=0.005, bore_d=0.005)
 helical = SpurGear(

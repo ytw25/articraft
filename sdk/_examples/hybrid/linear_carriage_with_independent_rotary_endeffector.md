@@ -16,7 +16,7 @@ This excerpt keeps the real split from the 5-star rail-mounted spindle record: t
 ```python
 from math import pi
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

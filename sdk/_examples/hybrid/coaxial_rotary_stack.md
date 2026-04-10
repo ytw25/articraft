@@ -14,7 +14,7 @@ tags:
 This is the core layout from the 5-star nested-turntable record: grounded pedestal, slew carrier, and top platter, all rotating about the same vertical axis.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Cylinder,

@@ -2,8 +2,9 @@
 
 ## Purpose
 
-Use this page to start a new `sdk` script. It defines the required script
-contract, the authoring workspace rules, and one minimal end-to-end example.
+Use this page to start a new Articraft SDK script. It defines the required
+script contract, the authoring workspace rules, and one minimal end-to-end
+example.
 Detailed APIs live in the mounted `docs/sdk/references/...` files listed below.
 
 ## Virtual Workspace
@@ -13,8 +14,7 @@ You are editing a virtual authoring workspace.
 - `model.py` is the only writable file.
 - `docs/sdk/references/quickstart.md` is this always-loaded entrypoint.
 - Everything under `docs/` is read-only SDK guidance.
-- Preserve the existing import root already present in `model.py`.
-  Canonical runs use `sdk`; legacy hybrid runs use `sdk_hybrid`.
+- Import from `sdk` in `model.py`.
 - Use `read_file(path=...)` to load exact reference text only when needed.
 
 ## Mounted Reference Layout
@@ -39,7 +39,7 @@ Always available in `docs/sdk/references/`:
 - `cadquery/free-functions.md`: free-function geometry helpers and utility builders.
 - `cadquery/api-ref.md`: compact CadQuery API reference and signatures.
 
-Available in `sdk` runs:
+Additional geometry references:
 
 - `geometry/mesh-geometry.md`: mesh generation flow, managed meshes, and mesh-based
   geometry helpers.
@@ -56,8 +56,8 @@ Every generated script should define:
 - `run_tests() -> TestReport`
 - `object_model = build_object_model()`
 
-The harness compiles `object_model`, derives exact collisions from visuals, runs
-tests, and exports the result. Do not emit URDF XML directly.
+`compile_model` compiles `object_model`, derives exact collisions from visuals,
+runs tests, and exports the result. Do not emit URDF XML directly.
 
 `compile_model` also owns the baseline sanity/QC pass. It automatically checks
 model validity, exactly one root part, mesh assets, floating disconnected part
@@ -79,12 +79,9 @@ from sdk import (
 )
 ```
 
-For legacy `sdk_hybrid` runs, keep the scaffold's `from sdk_hybrid import ...` import
-root instead of changing it.
-
 ## Managed Mesh Pattern
 
-Use logical mesh names. The runtime decides where OBJ files live.
+Use logical mesh names. Articraft manages the materialized OBJ asset paths.
 
 - Generate procedural meshes with `mesh_from_geometry(..., "part_name")`.
 - Import existing OBJ inputs with `mesh_from_input("mesh_name")`.
@@ -217,5 +214,5 @@ makes positive angles open upward.
 - If you need testing details, read `docs/sdk/references/testing.md`.
 - If you need lower-level CadQuery geometry, read the relevant
   `docs/sdk/references/cadquery/*.md` document.
-- If you are in an `sdk` run and need mesh, wire, or loft helpers, read the relevant
+- If you need mesh, wire, or loft helpers, read the relevant
   `docs/sdk/references/geometry/*.md` document.

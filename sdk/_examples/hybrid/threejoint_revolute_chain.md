@@ -16,7 +16,7 @@ The 5-star microphone-boom record is a good reference for a realistic 3R chain b
 ```python
 from math import pi
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

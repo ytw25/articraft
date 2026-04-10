@@ -1,6 +1,6 @@
 ---
 title: 'Ring Gears and Planetary Gearsets'
-description: 'Build an internal ring gear and a planetary gearset with the vendored `sdk_hybrid` gear API.'
+description: 'Build an internal ring gear and a planetary gearset with the vendored `sdk` gear API.'
 tags:
   - cadquery
   - examples
@@ -10,12 +10,12 @@ tags:
 ---
 # Ring Gears and Planetary Gearsets
 
-The ring gear classes and planetary helpers port directly into `sdk_hybrid`, so you can compose fixed internal gears and full assemblies without depending on the upstream package.
+The ring gear classes and planetary helpers port directly into `sdk`, so you can compose fixed internal gears and full assemblies without depending on the upstream package.
 
 ```python
 import cadquery as cq
 
-from sdk_hybrid import PlanetaryGearset, RingGear
+from sdk import PlanetaryGearset, RingGear
 
 ring = RingGear(module=1.0, teeth_number=42, width=6.0, rim_width=3.0)
 planetary = PlanetaryGearset(

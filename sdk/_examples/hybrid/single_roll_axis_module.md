@@ -16,7 +16,7 @@ The 5-star roll example is more than a cylinder between two plates: it carries a
 ```python
 from math import pi
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

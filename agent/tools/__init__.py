@@ -55,8 +55,9 @@ _FIRST_TURN_RUNTIME_GUIDANCE_BY_PROVIDER: dict[str, str] = {
         "<runtime_task_guidance>\n"
         "- Start with a small coherent backbone or subassembly, then expand incrementally.\n"
         '- Read the exact current code with `read_file(path="model.py")` before editing.\n'
-        "- Start with a short context pass: decide the next coherent edit, then read only the docs/examples needed for that edit.\n"
-        '- The SDK quickstart/router is preloaded. Read specific docs with `read_file(path="docs/...")` when needed; do not front-load unrelated references.\n'
+        "- Start with a short context pass: decide the next coherent edit, then read only the docs/examples needed for it.\n"
+        '- The SDK quickstart/router is preloaded. If a `docs/sdk/references/...` file is relevant, read the full file with `read_file(path="docs/...")`.\n'
+        "- Do not front-load unrelated docs, and do not re-read a reference file that is already in context.\n"
         "- Use `find_examples` for unfamiliar geometry, mechanisms, placement patterns, or testing structure, and adapt examples against current SDK docs.\n"
         "- Prefer multiple small `apply_patch` edits over one giant patch.\n"
         "- After each coherent chunk, run `compile_model` before moving on.\n"
@@ -69,8 +70,9 @@ _FIRST_TURN_RUNTIME_GUIDANCE_BY_PROVIDER: dict[str, str] = {
         "<runtime_task_guidance>\n"
         "- Start with a small coherent backbone or subassembly, then expand incrementally.\n"
         '- Read the exact current code with `read_file(path="model.py")` before editing.\n'
-        "- Start with a short context pass: decide the next coherent edit, then read only the docs/examples needed for that edit.\n"
-        '- The SDK quickstart/router is preloaded. Read specific docs with `read_file(path="docs/...")` when needed; do not front-load unrelated references.\n'
+        "- Start with a short context pass: decide the next coherent edit, then read only the docs/examples needed for it.\n"
+        '- The SDK quickstart/router is preloaded. If a `docs/sdk/references/...` file is relevant, read the full file with `read_file(path="docs/...")`.\n'
+        "- Do not front-load unrelated docs, and do not re-read a reference file that is already in context.\n"
         "- Use `find_examples` for unfamiliar geometry, mechanisms, placement patterns, or testing structure, and adapt examples against current SDK docs.\n"
         "- Prefer small exact `edit_code` replacements over broad rewrites.\n"
         "- If `edit_code` fails, reread the exact current text before retrying.\n"

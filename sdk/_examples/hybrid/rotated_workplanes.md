@@ -14,7 +14,7 @@ You can create a rotated work plane by specifying angles of rotation relative to
 ```python
 import cadquery as cq
 
-from sdk_hybrid import mesh_from_cadquery
+from sdk import mesh_from_cadquery
 
 result = (
     cq.Workplane("front")

@@ -17,7 +17,7 @@ Both arm links extend along local `+X` from their pivots, so the pitch joints
 use `axis=(0, -1, 0)` to make positive joint values raise the arms upward.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

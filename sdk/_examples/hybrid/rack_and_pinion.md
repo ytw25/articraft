@@ -15,7 +15,7 @@ Rack gears build directly, while the mating pinion can still use the vendored `W
 ```python
 import cadquery as cq
 
-from sdk_hybrid import RackGear, SpurGear
+from sdk import RackGear, SpurGear
 
 pinion = SpurGear(module=1.0, teeth_number=18, width=6.0, bore_d=5.0)
 rack = RackGear(module=1.0, length=35.0, width=6.0, height=4.0)

@@ -49,7 +49,7 @@ def test_read_file_tool_reads_virtual_model_and_docs_paths(tmp_path: Path) -> No
         workspace = build_virtual_workspace(
             repo_root,
             model_file_path=model_path,
-            sdk_package="sdk_hybrid",
+            sdk_package="sdk",
         )
 
         tool = ReadFileTool()
@@ -72,7 +72,7 @@ def test_read_file_tool_reads_virtual_model_and_docs_paths(tmp_path: Path) -> No
 
     assert model_output == "L2: beta\nL3: gamma"
     assert "Virtual Workspace" in docs_output
-    assert "legacy hybrid runs use `sdk_hybrid`" in docs_output
+    assert "Import from `sdk` in `model.py`." in docs_output
 
 
 def test_read_file_tool_rejects_unknown_virtual_path(tmp_path: Path) -> None:

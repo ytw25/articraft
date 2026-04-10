@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the column, carriage, and wrist split from the 5-star Z-axis wrist record. It is a good pattern for lift-and-tilt toolheads.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

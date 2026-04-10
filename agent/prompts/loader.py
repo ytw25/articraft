@@ -9,9 +9,7 @@ from sdk._profiles import get_sdk_profile
 LEGACY_DESIGNER_PROMPT_NAME = "system_prompt.txt"
 DESIGNER_PROMPT_NAME = "designer_system_prompt.txt"
 OPENAI_DESIGNER_PROMPT_NAME = "designer_system_prompt_openai.txt"
-HYBRID_OPENAI_DESIGNER_PROMPT_NAME = "designer_system_prompt_openai_hybrid.txt"
 GEMINI_DESIGNER_PROMPT_NAME = "designer_system_prompt_gemini.txt"
-HYBRID_GEMINI_DESIGNER_PROMPT_NAME = "designer_system_prompt_gemini_hybrid.txt"
 
 SUPPORTED_SDK_DOCS_MODES = {"full", "core", "none"}
 LEGACY_SDK_DOCS_MODE_ALIASES = {
@@ -25,9 +23,8 @@ PROMPTING_ROOT = PROMPTS_ROOT
 
 
 def normalize_sdk_package(sdk_package: str) -> str:
-    candidate = (sdk_package or "sdk").strip()
-    get_sdk_profile(candidate)
-    return candidate
+    candidate = str(sdk_package or "sdk").strip().lower()
+    return get_sdk_profile(candidate).package_name
 
 
 def normalize_sdk_docs_mode(docs_mode: str) -> str:
@@ -47,7 +44,7 @@ def resolve_sdk_package_flags(
     default_sdk_package: str = "sdk",
 ) -> str:
     if hybrid_sdk:
-        return "sdk_hybrid"
+        return "sdk"
     return normalize_sdk_package(default_sdk_package)
 
 
@@ -77,9 +74,7 @@ def resolve_system_prompt_path(
         LEGACY_DESIGNER_PROMPT_NAME,
         DESIGNER_PROMPT_NAME,
         OPENAI_DESIGNER_PROMPT_NAME,
-        HYBRID_OPENAI_DESIGNER_PROMPT_NAME,
         GEMINI_DESIGNER_PROMPT_NAME,
-        HYBRID_GEMINI_DESIGNER_PROMPT_NAME,
     }
     profile_prompt_name = profile.prompt_name_for_provider(provider_norm)
     if path.name in default_names and profile_prompt_name is not None:

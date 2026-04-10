@@ -1082,7 +1082,7 @@ def test_run_batch_persists_records_and_batch_metadata(
                 "model_id": "gemini-3-flash-preview",
                 "thinking_level": "low",
                 "max_turns": "8",
-                "sdk_package": "sdk_hybrid",
+                "sdk_package": "sdk",
             },
         ],
     )
@@ -1114,7 +1114,7 @@ def test_run_batch_persists_records_and_batch_metadata(
     assert run_payload["run_mode"] == "dataset_batch"
     assert run_payload["provider"] == "mixed"
     assert run_payload["model_id"] == "mixed"
-    assert run_payload["sdk_package"] == "mixed"
+    assert run_payload["sdk_package"] == "sdk"
     assert run_payload["batch_spec_id"] == "mixed_batch"
     assert sorted(run_payload["category_slugs"]) == ["fan", "hinge"]
     assert run_payload["status"] == "success"
@@ -1135,7 +1135,7 @@ def test_run_batch_persists_records_and_batch_metadata(
     assert hinge_record["source"]["row_id"] == "hinge_row"
     assert hinge_record["source"]["prompt_index"] == 1
     assert fan_record["source"]["row_id"] == "fan_row"
-    assert fan_record["sdk_package"] == "sdk_hybrid"
+    assert fan_record["sdk_package"] == "sdk"
     hinge_provenance = repo.read_json(repo.layout.record_dir("rec_hinge_0001") / "provenance.json")
     fan_provenance = repo.read_json(repo.layout.record_dir("rec_fan_0001") / "provenance.json")
     assert hinge_provenance["prompting"]["scaffold_mode"] == "lite"
@@ -1234,7 +1234,7 @@ def test_run_batch_resume_reuses_allocations_and_only_reruns_failed_rows(
                 "model_id": "gemini-3-flash-preview",
                 "thinking_level": "low",
                 "max_turns": "8",
-                "sdk_package": "sdk_hybrid",
+                "sdk_package": "sdk",
             },
         ],
     )

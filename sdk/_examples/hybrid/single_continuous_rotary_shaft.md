@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the actual three-part split from the 5-star pottery-wheel record: grounded base, continuous shaft, and a fixed wheelhead carried by that shaft.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

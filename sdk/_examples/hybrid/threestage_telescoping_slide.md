@@ -14,7 +14,7 @@ tags:
 Compared with the two-stage version, the 5-star three-stage record adds explicit stop features and separate outer, middle, and inner rail bodies.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

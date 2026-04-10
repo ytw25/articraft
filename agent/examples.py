@@ -170,8 +170,6 @@ def examples_root() -> Path:
 
 
 def example_dirs_for_sdk(sdk_package: str) -> tuple[Path, ...]:
-    if sdk_package == "sdk_hybrid":
-        return (examples_root() / "hybrid",)
     if sdk_package == "sdk":
         return (
             examples_root() / "base",

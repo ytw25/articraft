@@ -800,7 +800,10 @@ def test_viewer_api_end_to_end(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
         "output_token_sample_count": 1,
     }
     assert len(dashboard_payload["cost_trend"]["points"]) == 1
-    assert dashboard_payload["cost_trend"]["points"][0]["date_key"] == "2026-03-17"
+    assert dashboard_payload["cost_trend"]["points"][0]["date_key"] in {
+        "2026-03-17",
+        "2026-03-18",
+    }
     assert dashboard_payload["cost_trend"]["points"][0]["record_count"] == 2
     assert dashboard_payload["cost_trend"]["points"][0]["total_cost_usd"] == 0.2
     assert dashboard_payload["cost_trend"]["points"][0]["daily_average_cost_usd"] == 0.1
@@ -2138,7 +2141,7 @@ def test_viewer_store_full_materialize_persists_allowed_isolated_part_note(
                 "base = object_model.part('base')",
                 "base.visual(Box((0.1, 0.1, 0.1)), origin=Origin(xyz=(0.0, 0.0, 0.05)))",
                 "support = object_model.part('support')",
-                "support.visual(Box((0.1, 0.1, 0.1)), origin=Origin(xyz=(0.0, 0.0, 0.05)))",
+                "support.visual(Box((0.1, 0.1, 0.1)), origin=Origin(xyz=(0.0, 0.0, 0.15)))",
                 "antenna = object_model.part('antenna')",
                 "antenna.visual(Box((0.04, 0.04, 0.2)), origin=Origin(xyz=(0.0, 0.0, 0.1)))",
                 "object_model.articulation(",

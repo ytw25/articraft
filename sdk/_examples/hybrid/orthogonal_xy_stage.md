@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the real split from the 5-star XY stage record: grounded base, X carriage with its own rails, and a separate Y stage on top.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin
 
 
 def build_object_model() -> ArticulatedObject:

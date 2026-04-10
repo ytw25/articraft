@@ -14,7 +14,7 @@ tags:
 This 5-star gripper record is a good reference for mirrored kinematics: the body carries two jaws with equal travel but opposite articulation axes.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, mesh_from_cadquery
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, mesh_from_cadquery
 
 
 def build_object_model() -> ArticulatedObject:

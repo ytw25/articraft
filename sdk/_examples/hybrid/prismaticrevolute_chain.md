@@ -14,7 +14,7 @@ tags:
 The 5-star inspection-fixture record is a good template for this topology because it separates the guided base motion from the distal flap motion cleanly.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

@@ -25,8 +25,9 @@ def test_compiled_openai_prompt_keeps_compact_contract_and_visual_test_gate() ->
         assert "REALISTIC GEOMETRY" in text
 
         # Compact shared workflow stub
-        assert "Start with a short evidence-gathering pass before the first edit:" in text
+        assert "Start with a short context pass:" in text
         assert "preloaded SDK quickstart/router" in text
+        assert "read the full file once, not a small slice" in text
         assert "Start with the smallest coherent backbone or subassembly" in text
         assert "Expand one coherent region at a time" in text
         assert "Always run `compile_model` on the latest revision before concluding." in text
@@ -44,12 +45,15 @@ def test_compiled_openai_prompt_keeps_compact_contract_and_visual_test_gate() ->
         assert "Treat `compile_model` as the full validation pass." in text
 
         # Modeling section stays as SDK-specific deltas
-        assert "Read mounted SDK docs as needed" in text
-        assert "Prefer Articraft-native primitives and placement helpers" in text
         assert (
-            "Use CadQuery-backed geometry only for the specific parts that need lower-level control"
+            "Read mounted SDK docs as needed for placement, probe patterns, exact signatures, and testing guidance."
             in text
         )
+        assert (
+            "Prefer Articraft-native primitives and placement helpers when they represent the form credibly."
+            in text
+        )
+        assert "Use CadQuery only for the parts that need lower-level shape control" in text
         assert "Author visual geometry only; do not author collision geometry in `sdk`." in text
 
         # No disallowed fragments

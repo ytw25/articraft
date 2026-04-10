@@ -2122,9 +2122,7 @@ class ViewerStore:
                 if isinstance(category_payload, dict)
                 else ""
             )
-            if target_sdk_version == "hybrid_cad":
-                category_sdk_packages[category] = "sdk_hybrid"
-            elif target_sdk_version == "base":
+            if target_sdk_version in {"hybrid_cad", "base"}:
                 category_sdk_packages[category] = "sdk"
             else:
                 record_sdk_packages = category_record_sdk_packages.get(category) or set()

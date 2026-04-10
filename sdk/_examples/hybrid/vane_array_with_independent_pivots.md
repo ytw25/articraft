@@ -14,7 +14,7 @@ tags:
 The 5-star vane-array record is useful because it shows how to author repeated independent articulations against a single grounded frame.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, mesh_from_cadquery
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, mesh_from_cadquery
 
 
 def build_object_model() -> ArticulatedObject:

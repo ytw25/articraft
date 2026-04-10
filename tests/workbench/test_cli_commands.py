@@ -209,7 +209,7 @@ def test_workbench_rerun_record_command_accepts_sdk_override(
             thinking_level="high",
             max_turns=30,
             system_prompt_path="designer_system_prompt.txt",
-            sdk_package="sdk_hybrid",
+            sdk_package="sdk",
             sdk_docs_mode="full",
             label="boom arm rerun",
             tags=["boom"],

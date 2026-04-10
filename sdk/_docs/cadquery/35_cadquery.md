@@ -1,8 +1,8 @@
-# CadQuery Hybrid Helpers
+# CadQuery Helpers
 
 ## Purpose
 
-`sdk_hybrid` keeps the articulated-object, testing, and export stack from the
+`sdk` keeps the articulated-object, testing, and export stack from the
 base SDK, but uses CadQuery to author visible mesh geometry.
 
 Use this when:
@@ -16,7 +16,7 @@ Use this when:
 ```python
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,
@@ -39,7 +39,7 @@ from sdk_hybrid import (
 
 ## Units
 
-CadQuery is unitless. In `sdk_hybrid`, authored geometry must land in meters.
+CadQuery is unitless. In `sdk`, authored geometry must land in meters.
 
 - If the CadQuery model is already authored in meters, keep `unit_scale=1.0`.
 - If it is authored in millimeters, either convert the literals to meters or
@@ -167,6 +167,6 @@ def build_object_model() -> ArticulatedObject:
 
 - `mesh_from_cadquery(...)` and `export_cadquery_mesh(...)` accept CadQuery `Shape`, `Workplane`, and `Assembly` inputs. Workplanes are exported from their resolved solid values; assemblies export each component at its current CadQuery location.
 - Constrained CadQuery assemblies must be solved before export. The SDK does not call `solve()` for you.
-- Choose one unit story per authored CadQuery model: either author the shape and assembly locations directly in meters, or keep them in source units and pass the matching `unit_scale` when exporting to `sdk_hybrid`.
+- Choose one unit story per authored CadQuery model: either author the shape and assembly locations directly in meters, or keep them in source units and pass the matching `unit_scale` when exporting to `sdk`.
 - Export preserves the CadQuery local frame of the authored shape/component. The SDK does not recenter meshes, infer hinge pivots, or move geometry to an articulation axis automatically.
 - If an articulation pivot should be at a hinge, either model the CadQuery shape in that local frame or attach the mesh with `visual(origin=Origin(...))` so the mesh frame and joint frame line up explicitly.

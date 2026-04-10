@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the real three-stage motion stack from the 5-star service-manipulator record. The helper shapes are omitted, but the part layout and joint origins are the same.
 
 ```python
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

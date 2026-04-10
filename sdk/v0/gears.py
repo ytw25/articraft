@@ -1,4 +1,4 @@
-from .v0.gears import (  # noqa: F401
+from sdk_hybrid.v0.gears import (  # noqa: F401
     BevelGear,
     BevelGearPair,
     CrossedGearPair,

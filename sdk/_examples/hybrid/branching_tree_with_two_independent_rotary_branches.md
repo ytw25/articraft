@@ -14,7 +14,7 @@ tags:
 This excerpt keeps the real trunk-plus-two-branches split from the 5-star Y-tree record. It is the simplest clean example of a non-serial articulation graph.
 
 ```python
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, mesh_from_cadquery
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, mesh_from_cadquery
 
 
 def build_object_model() -> ArticulatedObject:
