@@ -17,6 +17,21 @@ You are editing a virtual authoring workspace.
 - Import from `sdk` in `model.py`.
 - Use `read_file(path=...)` to load exact reference text only when needed.
 
+## Import Contract
+
+Authoring helpers are exposed as top-level public imports from `sdk`.
+The mounted docs are grouped by topic for reading convenience; those filenames
+do not imply matching Python submodules.
+
+```python
+# Correct
+from sdk import ArticulatedObject, MotionLimits, place_on_face
+
+# Wrong
+from sdk.placement import place_on_face
+from sdk.core_types import MotionLimits
+```
+
 ## Mounted Reference Layout
 
 Always available in `docs/sdk/references/`:

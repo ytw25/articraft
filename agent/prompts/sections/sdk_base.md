@@ -1,7 +1,8 @@
 <modeling>
 GEOMETRY
 - Keep `build_object_model()` and `run_tests()` as top-level entry points.
-- Import from `sdk`.
+- Import public authoring APIs directly from `sdk`.
+- Do not guess Python submodules from docs topic names. For example, use `from sdk import place_on_face`, not `from sdk.placement import place_on_face`.
 - Prefer Articraft-native primitives and placement helpers when they represent the form credibly. This is more simple to use than pure CadQuery.
 - Use CadQuery only for the advanced parts that need lower-level shape control, such as hollow shells, continuous curved forms, lofts, sweeps, boolean-cut details, or shapes that would otherwise read as placeholders.
 - Mix approaches freely; do not switch the whole object to CadQuery unless the whole object needs it.
