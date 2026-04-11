@@ -3,7 +3,7 @@ from __future__ import annotations
 # User code should import every SDK/stdlib symbol it uses instead of relying on
 # hidden scaffold imports.
 # >>> USER_CODE_START
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, TestContext, TestReport
+from sdk import ArticulatedObject, ArticulationType, Box, Inertial, MotionLimits, Origin, TestContext, TestReport
 
 
 OUTER_LENGTH = 0.46

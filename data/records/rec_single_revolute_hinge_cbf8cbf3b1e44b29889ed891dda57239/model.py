@@ -5,7 +5,7 @@ from __future__ import annotations
 # >>> USER_CODE_START
 import math
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

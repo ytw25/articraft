@@ -7,7 +7,7 @@ from math import pi
 # >>> USER_CODE_START
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

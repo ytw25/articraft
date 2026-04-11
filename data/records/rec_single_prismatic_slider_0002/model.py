@@ -4,7 +4,7 @@ from contextlib import nullcontext
 from math import pi
 from pathlib import Path
 
-from sdk_hybrid import (
+from sdk import (
     AssetContext,
     ArticulatedObject,
     ArticulationType,

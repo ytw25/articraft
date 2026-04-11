@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,
@@ -23,7 +23,7 @@ from math import pi
 
 import cadquery as cq
 
-from sdk_hybrid import Cylinder
+from sdk import Cylinder
 
 
 def _origin_x(xyz: tuple[float, float, float]) -> Origin:

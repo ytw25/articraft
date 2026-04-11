@@ -7,7 +7,7 @@ from math import cos, pi, sin
 
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     BevelGearPair,

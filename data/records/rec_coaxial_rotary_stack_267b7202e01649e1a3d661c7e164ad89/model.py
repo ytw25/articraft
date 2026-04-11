@@ -7,7 +7,7 @@ from math import cos, hypot, radians, sin
 
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Cylinder,

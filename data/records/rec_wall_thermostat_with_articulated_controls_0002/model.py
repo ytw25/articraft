@@ -4,7 +4,7 @@ from math import pi
 
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,

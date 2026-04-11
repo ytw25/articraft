@@ -7,7 +7,7 @@ import cadquery as cq
 
 from math import cos, sin, tau
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

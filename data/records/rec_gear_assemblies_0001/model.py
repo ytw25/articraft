@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,
@@ -23,7 +23,7 @@ import math
 
 import cadquery as cq
 
-from sdk_hybrid import Cylinder
+from sdk import Cylinder
 
 BED_THICKNESS = 0.014
 PAD_HEIGHT = 0.006

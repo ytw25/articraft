@@ -7,7 +7,7 @@ from math import pi
 
 from math import pi
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

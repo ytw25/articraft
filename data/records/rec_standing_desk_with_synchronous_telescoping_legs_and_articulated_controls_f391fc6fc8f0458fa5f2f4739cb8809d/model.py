@@ -7,7 +7,7 @@ from math import isclose
 
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     MotionLimits,

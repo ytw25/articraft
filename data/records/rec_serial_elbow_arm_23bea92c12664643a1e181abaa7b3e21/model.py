@@ -5,7 +5,7 @@ from __future__ import annotations
 # >>> USER_CODE_START
 from math import isclose, pi
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

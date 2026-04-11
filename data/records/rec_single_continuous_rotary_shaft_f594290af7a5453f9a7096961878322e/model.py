@@ -7,7 +7,7 @@ import cadquery as cq
 
 import math
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Cylinder,

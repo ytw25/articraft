@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 from pathlib import Path
 
-from sdk_hybrid import (
+from sdk import (
     AssetContext,
     ArticulatedObject,
     ArticulationType,

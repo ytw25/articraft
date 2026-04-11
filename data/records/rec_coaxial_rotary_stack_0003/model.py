@@ -8,7 +8,7 @@ import math
 
 import cadquery as cq
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,

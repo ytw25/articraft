@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,

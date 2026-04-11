@@ -5,7 +5,7 @@ from __future__ import annotations
 # hidden scaffold imports. If the model needs mesh assets, create an
 # `AssetContext` inside the editable section.
 # >>> USER_CODE_START
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,

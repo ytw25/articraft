@@ -5,7 +5,7 @@ from __future__ import annotations
 # >>> USER_CODE_START
 from math import pi
 
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Cylinder, MotionLimits, Origin, TestContext, TestReport
+from sdk import ArticulatedObject, ArticulationType, Box, Cylinder, MotionLimits, Origin, TestContext, TestReport
 
 
 OUTER_STAGE_OUTER = 0.120

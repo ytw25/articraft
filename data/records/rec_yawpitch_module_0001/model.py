@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,
@@ -21,7 +21,7 @@ MESH_DIR = ASSETS.ensure_mesh_dir()
 # >>> USER_CODE_START
 import cadquery as cq
 
-from sdk_hybrid import Cylinder
+from sdk import Cylinder
 
 
 def _mesh(shape: cq.Workplane, filename: str):

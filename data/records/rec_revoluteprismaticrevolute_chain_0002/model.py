@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     AssetContext,

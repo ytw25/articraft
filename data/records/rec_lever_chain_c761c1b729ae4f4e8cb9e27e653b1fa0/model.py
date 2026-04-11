@@ -5,7 +5,7 @@ from __future__ import annotations
 # >>> USER_CODE_START
 import cadquery as cq
 
-from sdk_hybrid import ArticulatedObject, ArticulationType, Box, Cylinder, Inertial, MotionLimits, Origin, TestContext, TestReport
+from sdk import ArticulatedObject, ArticulationType, Box, Cylinder, Inertial, MotionLimits, Origin, TestContext, TestReport
 
 
 PLATE_LENGTH = 0.145
