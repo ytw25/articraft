@@ -1,56 +1,67 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    BarrelHingeGeometry,
+    Box,
+    HingeHolePattern,
+    Inertial,
+    TestContext,
+    TestReport,
+    mesh_from_geometry,
+)
 
-import cadquery as cq
-from sdk import ArticulatedObject, TestContext, TestReport, mesh_from_cadquery
+LENGTH = 0.090
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="barrel_hinge_demo")
+    finish = model.material("hinge_silver", rgba=(0.74, 0.76, 0.78, 1.0))
+
+    hinge = model.part("barrel_hinge")
+    hinge.visual(
+        mesh_from_geometry(
+            BarrelHingeGeometry(
+                LENGTH,
+                leaf_width_a=0.024,
+                leaf_width_b=0.020,
+                leaf_thickness=0.0024,
+                pin_diameter=0.003,
+                knuckle_count=5,
+                holes_a=HingeHolePattern(style="round", count=3, diameter=0.0032, edge_margin=0.010),
+                holes_b=HingeHolePattern(style="slotted", count=2, slot_size=(0.007, 0.003), edge_margin=0.012),
+            ),
+            "barrel_hinge",
+        ),
+        material=finish,
+        name="barrel_hinge",
+    )
+    hinge.inertial = Inertial.from_geometry(Box((0.052, 0.008, LENGTH)), mass=0.09)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
-    # If overlap QC reports an intersection, classify it first: intentional
-    # embeddings or nested fits should get a scoped allowance; unintended
-    # collisions should be fixed in geometry, support, mount, or pose.
+    hinge = object_model.get_part("barrel_hinge")
+    ctx.check("barrel_hinge_part_present", hinge is not None, "Expected a barrel_hinge part.")
+    if hinge is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check(
+        "barrel_hinge_visual_present",
+        hinge.get_visual("barrel_hinge") is not None,
+        "Expected a mesh-backed barrel_hinge visual.",
+    )
+    aabb = ctx.part_world_aabb(hinge)
+    ctx.check("barrel_hinge_aabb_present", aabb is not None, "Expected a world AABB for the hinge.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    ctx.check("barrel_hinge_length", 0.088 <= size[2] <= 0.092, f"size={size!r}")
+    ctx.check("barrel_hinge_span", 0.045 <= size[0] <= 0.052, f"size={size!r}")
+    ctx.check("barrel_hinge_thickness", 0.004 <= size[1] <= 0.008, f"size={size!r}")
     return ctx.report()
 
 

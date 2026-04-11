@@ -1,56 +1,76 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    BezelCutout,
+    BezelEdgeFeature,
+    BezelGeometry,
+    BezelMounts,
+    Box,
+    Inertial,
+    TestContext,
+    TestReport,
+    mesh_from_geometry,
+)
 
-import cadquery as cq
-from sdk import ArticulatedObject, TestContext, TestReport, mesh_from_cadquery
+OUTER_SIZE = (0.112, 0.082)
+DEPTH = 0.012
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="asym_panel_bezel_demo")
+    finish = model.material("panel_bezel_blue", rgba=(0.20, 0.28, 0.36, 1.0))
+
+    bezel = model.part("asym_panel_bezel")
+    bezel.visual(
+        mesh_from_geometry(
+            BezelGeometry(
+                (0.070, 0.044),
+                OUTER_SIZE,
+                DEPTH,
+                outer_corner_radius=0.008,
+                wall=(0.012, 0.020, 0.010, 0.014),
+                mounts=BezelMounts(
+                    style="bosses",
+                    hole_count=4,
+                    hole_diameter=0.003,
+                    boss_diameter=0.007,
+                    setback=0.004,
+                ),
+                cutouts=(BezelCutout(edge="right", width=0.016, depth=0.004),),
+                edge_features=(BezelEdgeFeature(style="notch", edge="bottom", size=0.004, extent=0.016),),
+            ),
+            "asym_panel_bezel",
+        ),
+        material=finish,
+        name="asym_panel_bezel",
+    )
+    bezel.inertial = Inertial.from_geometry(Box((OUTER_SIZE[0], OUTER_SIZE[1], 0.016)), mass=0.12)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
-    # If overlap QC reports an intersection, classify it first: intentional
-    # embeddings or nested fits should get a scoped allowance; unintended
-    # collisions should be fixed in geometry, support, mount, or pose.
+    bezel = object_model.get_part("asym_panel_bezel")
+    ctx.check("asym_panel_bezel_part_present", bezel is not None, "Expected an asym_panel_bezel part.")
+    if bezel is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check(
+        "asym_panel_bezel_visual_present",
+        bezel.get_visual("asym_panel_bezel") is not None,
+        "Expected a mesh-backed asym_panel_bezel visual.",
+    )
+    aabb = ctx.part_world_aabb(bezel)
+    ctx.check("asym_panel_bezel_aabb_present", aabb is not None, "Expected a world AABB for the bezel.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    ctx.check("asym_panel_bezel_width", 0.108 <= size[0] <= 0.118, f"size={size!r}")
+    ctx.check("asym_panel_bezel_height", 0.078 <= size[1] <= 0.086, f"size={size!r}")
+    ctx.check("asym_panel_bezel_depth", 0.010 <= size[2] <= 0.018, f"size={size!r}")
     return ctx.report()
 
 

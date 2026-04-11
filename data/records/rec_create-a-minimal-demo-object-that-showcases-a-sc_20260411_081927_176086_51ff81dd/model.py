@@ -1,56 +1,96 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    BoltPattern,
+    Box,
+    Inertial,
+    TestContext,
+    TestReport,
+    TireGeometry,
+    TireGroove,
+    TireSidewall,
+    TireTread,
+    WheelBore,
+    WheelFace,
+    WheelGeometry,
+    WheelHub,
+    WheelRim,
+    WheelSpokes,
+    mesh_from_geometry,
+)
 
-import cadquery as cq
-from sdk import ArticulatedObject, TestContext, TestReport, mesh_from_cadquery
+TIRE_OUTER_RADIUS = 0.108
+TIRE_WIDTH = 0.044
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="scooter_wheel_demo")
+    wheel_finish = model.material("scooter_wheel_silver", rgba=(0.78, 0.80, 0.82, 1.0))
+    tire_finish = model.material("scooter_tire_black", rgba=(0.10, 0.10, 0.11, 1.0))
+
+    assembly = model.part("scooter_wheel")
+    assembly.visual(
+        mesh_from_geometry(
+            WheelGeometry(
+                0.090,
+                0.036,
+                rim=WheelRim(inner_radius=0.060, flange_height=0.008, flange_thickness=0.003),
+                hub=WheelHub(
+                    radius=0.022,
+                    width=0.026,
+                    cap_style="domed",
+                    bolt_pattern=BoltPattern(count=5, circle_diameter=0.028, hole_diameter=0.0035),
+                ),
+                face=WheelFace(dish_depth=0.004, front_inset=0.002),
+                spokes=WheelSpokes(style="straight", count=6, thickness=0.003, window_radius=0.008),
+                bore=WheelBore(style="round", diameter=0.010),
+            ),
+            "scooter_wheel",
+        ),
+        material=wheel_finish,
+        name="wheel",
+    )
+    assembly.visual(
+        mesh_from_geometry(
+            TireGeometry(
+                TIRE_OUTER_RADIUS,
+                TIRE_WIDTH,
+                inner_radius=0.091,
+                tread=TireTread(style="circumferential", depth=0.0035, count=3),
+                grooves=(TireGroove(center_offset=0.0, width=0.004, depth=0.002),),
+                sidewall=TireSidewall(style="rounded", bulge=0.05),
+            ),
+            "scooter_tire",
+        ),
+        material=tire_finish,
+        name="tire",
+    )
+    assembly.inertial = Inertial.from_geometry(Box((TIRE_WIDTH, 0.216, 0.216)), mass=0.34)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
-    # If overlap QC reports an intersection, classify it first: intentional
-    # embeddings or nested fits should get a scoped allowance; unintended
-    # collisions should be fixed in geometry, support, mount, or pose.
+    assembly = object_model.get_part("scooter_wheel")
+    ctx.check("scooter_wheel_part_present", assembly is not None, "Expected a scooter_wheel part.")
+    if assembly is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check("scooter_wheel_visual_present", assembly.get_visual("wheel") is not None, "Expected a wheel visual.")
+    ctx.check("scooter_tire_visual_present", assembly.get_visual("tire") is not None, "Expected a tire visual.")
+    aabb = ctx.part_world_aabb(assembly)
+    ctx.check("scooter_wheel_aabb_present", aabb is not None, "Expected a world AABB for the wheel assembly.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    center = tuple(float((maxs[i] + mins[i]) * 0.5) for i in range(3))
+    diameter = max(size[1], size[2])
+    ctx.check("scooter_wheel_diameter", 0.210 <= diameter <= 0.220, f"size={size!r}")
+    ctx.check("scooter_wheel_width", 0.040 <= size[0] <= 0.050, f"size={size!r}")
+    ctx.check("scooter_wheel_centered", max(abs(value) for value in center) <= 0.006, f"center={center!r}")
     return ctx.report()
 
 

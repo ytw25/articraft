@@ -1,56 +1,67 @@
 from __future__ import annotations
 
-# Draft scaffold created by `articraft-workbench init-record`.
-# The target prompt for this record is stored in prompt.txt.
-# Extend this scaffold with a valid Articraft model implementation.
+from sdk import (
+    ArticulatedObject,
+    Box,
+    Inertial,
+    KnobBore,
+    KnobGeometry,
+    TestContext,
+    TestReport,
+    mesh_from_geometry,
+)
 
-import cadquery as cq
-from sdk import ArticulatedObject, TestContext, TestReport, mesh_from_cadquery
+DIAMETER = 0.040
+HEIGHT = 0.020
 
 
 def build_object_model() -> ArticulatedObject:
-    model = ArticulatedObject(name="draft_model")
+    model = ArticulatedObject(name="smooth_knob_demo")
+    finish = model.material("knob_gray", rgba=(0.70, 0.72, 0.76, 1.0))
+
+    knob = model.part("smooth_knob")
+    knob.visual(
+        mesh_from_geometry(
+            KnobGeometry(
+                DIAMETER,
+                HEIGHT,
+                body_style="cylindrical",
+                edge_radius=0.0016,
+                crown_radius=0.0012,
+                bore=KnobBore(style="round", diameter=0.006),
+            ),
+            "smooth_knob",
+        ),
+        material=finish,
+        name="smooth_knob",
+    )
+    knob.inertial = Inertial.from_geometry(Box((0.042, 0.042, HEIGHT)), mass=0.08)
     return model
 
 
 def run_tests() -> TestReport:
     ctx = TestContext(object_model)
-    # `compile_model` automatically runs baseline sanity/QC:
-    # - `check_model_valid()`
-    # - exactly one root part
-    # - `check_mesh_assets_ready()`
-    # - disconnected floating-part-group detection
-    # - disconnected within-part geometry-island detection
-    # - current-pose real 3D overlap detection
-    # Use `run_tests()` only for prompt-specific exact checks, targeted poses,
-    # and explicit allowances such as `ctx.allow_overlap(...)`.
-    # If overlap QC reports an intersection, classify it first: intentional
-    # embeddings or nested fits should get a scoped allowance; unintended
-    # collisions should be fixed in geometry, support, mount, or pose.
+    knob = object_model.get_part("smooth_knob")
+    ctx.check("smooth_knob_part_present", knob is not None, "Expected a smooth_knob part.")
+    if knob is None:
+        return ctx.report()
 
-    # Encode the actual visual/mechanical claims with prompt-specific exact checks.
-    # Cover each applicable category before returning:
-    # - hero features are present and legible
-    # - mounted parts are connected/seated, not floating
-    # - important parts are in the right place
-    # - each new visible form or mechanism has a matching assertion
-    # Resolve exact Part / Articulation / named Visual objects once here, then
-    # pass those objects into ctx.expect_*, ctx.allow_*, and ctx.pose({joint: value}).
-    # For ctx.expect_* helpers, keep the first body/link arguments as Part objects.
-    # Named Visuals belong only in elem_a/elem_b/positive_elem/negative_elem/inner_elem/outer_elem.
-    # Prefer this object-first pattern over raw string test calls or global REFS bags.
-    # Example:
-    # lid = object_model.get_part("lid")
-    # body = object_model.get_part("body")
-    # lid_hinge = object_model.get_articulation("lid_hinge")
-    # hinge_leaf = lid.get_visual("hinge_leaf")
-    # body_leaf = body.get_visual("body_leaf")
-    # ctx.expect_overlap(lid, body, axes="xy", min_overlap=0.05)
-    # ctx.expect_gap(lid, body, axis="z", max_gap=0.001, max_penetration=0.0)
-    # ctx.expect_contact(lid, body, elem_a=hinge_leaf, elem_b=body_leaf)
-    # Keep pose-specific checks lean.
-    # Prefer a few decisive exact checks over broad heuristics.
-    # Add prompt-specific exact visual checks below; optional warning heuristics are not enough.
+    ctx.check(
+        "smooth_knob_visual_present",
+        knob.get_visual("smooth_knob") is not None,
+        "Expected a mesh-backed smooth_knob visual.",
+    )
+    aabb = ctx.part_world_aabb(knob)
+    ctx.check("smooth_knob_aabb_present", aabb is not None, "Expected a world AABB for the knob.")
+    if aabb is None:
+        return ctx.report()
+
+    mins, maxs = aabb
+    size = tuple(float(maxs[i] - mins[i]) for i in range(3))
+    center = tuple(float((maxs[i] + mins[i]) * 0.5) for i in range(3))
+    ctx.check("smooth_knob_diameter", 0.036 <= max(size[0], size[1]) <= 0.044, f"size={size!r}")
+    ctx.check("smooth_knob_height", 0.018 <= size[2] <= 0.024, f"size={size!r}")
+    ctx.check("smooth_knob_centered", max(abs(value) for value in center) <= 0.004, f"center={center!r}")
     return ctx.report()
 
 
