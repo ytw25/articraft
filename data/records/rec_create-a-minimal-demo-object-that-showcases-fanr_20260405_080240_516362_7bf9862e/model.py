@@ -3,7 +3,10 @@ from __future__ import annotations
 from sdk import (
     ArticulatedObject,
     Box,
+    FanRotorBlade,
     FanRotorGeometry,
+    FanRotorHub,
+    FanRotorShroud,
     Inertial,
     TestContext,
     TestReport,
@@ -24,10 +27,25 @@ def build_object_model() -> ArticulatedObject:
             FanRotorGeometry(
                 OUTER_RADIUS,
                 0.020,
-                5,
+                7,
                 thickness=THICKNESS,
-                blade_pitch_deg=24.0,
-                blade_sweep_deg=14.0,
+                blade_pitch_deg=31.0,
+                blade_sweep_deg=24.0,
+                blade=FanRotorBlade(
+                    shape="scimitar",
+                    tip_pitch_deg=12.0,
+                    camber=0.16,
+                ),
+                hub=FanRotorHub(
+                    style="spinner",
+                    bore_diameter=0.005,
+                ),
+                shroud=FanRotorShroud(
+                    thickness=0.004,
+                    depth=0.012,
+                    clearance=0.0015,
+                    lip_depth=0.002,
+                ),
             ),
             "fan_rotor",
         ),
@@ -66,7 +84,7 @@ def run_tests() -> TestReport:
     )
     ctx.check(
         "fan_rotor_thickness_reasonable",
-        0.008 <= size[2] <= 0.014,
+        0.010 <= size[2] <= 0.018,
         f"size={size!r}",
     )
     ctx.check(
