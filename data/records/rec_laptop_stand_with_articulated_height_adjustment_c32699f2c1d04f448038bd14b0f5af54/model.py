@@ -5,7 +5,7 @@ from __future__ import annotations
 # >>> USER_CODE_START
 from math import atan2, cos, pi, sin, sqrt
 
-from sdk_hybrid import (
+from sdk import (
     ArticulatedObject,
     ArticulationType,
     Box,
