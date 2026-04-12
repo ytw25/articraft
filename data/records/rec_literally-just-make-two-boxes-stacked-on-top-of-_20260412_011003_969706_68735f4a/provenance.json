@@ -1,0 +1,37 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_literally-just-make-two-boxes-stacked-on-top-of-_20260412_011003_969706_68735f4a",
+  "generation": {
+    "provider": "gemini",
+    "model_id": "gemini-3-flash-preview",
+    "thinking_level": "high",
+    "openai_transport": null,
+    "openai_reasoning_summary": null,
+    "max_turns": 250,
+    "max_cost_usd": null
+  },
+  "prompting": {
+    "system_prompt_file": "designer_system_prompt_gemini.txt",
+    "system_prompt_sha256": "1e8769a23d9a2226e05a7f7c7fc863f9ed3bf42a3661a914f9dba79eb764cd17",
+    "sdk_docs_mode": "full",
+    "post_success_design_audit": false,
+    "scaffold_mode": "lite"
+  },
+  "sdk": {
+    "sdk_package": "sdk",
+    "sdk_version": "workspace",
+    "sdk_fingerprint": null
+  },
+  "environment": {
+    "python_version": "3.12.10",
+    "platform": "darwin-arm64",
+    "git_commit": "456e823449109686662a36d34a4c99909e2b4cde",
+    "uv_lock_sha256": "609c6cb5ce8a26122aaeab4bd2bdcc6e45bacfa426781165809f517f6b02bb83"
+  },
+  "run_summary": {
+    "turn_count": 13,
+    "tool_call_count": 11,
+    "compile_attempt_count": 1,
+    "final_status": "success"
+  }
+}
