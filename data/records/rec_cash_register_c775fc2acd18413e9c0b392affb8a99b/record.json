@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_cash_register_c775fc2acd18413e9c0b392affb8a99b",
+  "created_at": "2026-04-11T23:20:57Z",
+  "updated_at": "2026-04-11T23:28:15Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "RuiningLi",
+  "rated_by": "RuiningLi",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "cash_register",
+  "source": {
+    "run_id": "run_20260411_230510_372665_20260411-fill-to20-plus-diverse-exact500-gpt54-h",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260411_fill_to20_plus_diverse_exact500_gpt54_high",
+    "row_id": "cash_register_012",
+    "prompt_index": 202
+  },
+  "sdk_package": "sdk",
+  "provider": "openai",
+  "model_id": "gpt-5.4",
+  "display": {
+    "title": "a compact point of sale register 3-4",
+    "prompt_preview": "A compact point-of-sale register with a rectangular drawer base, an angled control pod, and a rear operator screen on a swivel mount, plus a receipt-cover fl..."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "715a145833cbbbbba54a47e1a03ac684fdff3a425780a88a72b5edbe89b37afa",
+    "model_py_sha256": "c9cc1e0a3c00add8bafb422324404447cb65cd3236db0710ac7a94dde2eb50d2"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
