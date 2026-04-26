@@ -32,6 +32,8 @@ def _assert_shared_contract(text: str) -> None:
     assert "NO FLOATING PARTS" in text
     assert "NO UNINTENTIONAL OVERLAPS" in text
     assert "REALISTIC GEOMETRY" in text
+    assert "Assign plausible colors and materials" in text
+    assert "buttons, knobs, switches, keys, levers, pedals" in text
     assert "small local hidden overlap is acceptable" in text
     assert "Keep intentional overlap local and element-scoped when possible" in text
 
