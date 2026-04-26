@@ -4060,7 +4060,7 @@ class BlowerWheelGeometry(MeshGeometry):
 
 class KnobGeometry(MeshGeometry):
     """
-    Build a flexible rotary knob aligned to local Z.
+    Build a flexible rotary knob aligned to local Z with multiple silhouette families.
     """
 
     def __init__(
@@ -4075,6 +4075,8 @@ class KnobGeometry(MeshGeometry):
             "mushroom",
             "skirted",
             "hourglass",
+            "faceted",
+            "lobed",
         ] = "cylindrical",
         top_diameter: Optional[float] = None,
         base_diameter: Optional[float] = None,
@@ -4177,7 +4179,46 @@ class KnobGeometry(MeshGeometry):
                     return base_diameter * 0.5 + (waist_radius - base_diameter * 0.5) * u
                 u = (t - 0.5) / 0.5
                 return waist_radius + (top_diameter * 0.5 - waist_radius) * u
+            if body_style == "faceted":
+                return (base_diameter * (1.0 - t) + top_diameter * t) * 0.5
+            if body_style == "lobed":
+                lower_radius = base_diameter * 0.5
+                upper_radius = max(top_diameter, diameter * 1.02) * 0.5
+                if t < 0.24:
+                    u = t / 0.24
+                    return lower_radius + (upper_radius * 0.92 - lower_radius) * u
+                if t < 0.80:
+                    u = (t - 0.24) / 0.56
+                    return upper_radius * (0.92 + 0.08 * sin(u * pi))
+                u = (t - 0.80) / 0.20
+                return upper_radius + (top_diameter * 0.5 - upper_radius) * u
             raise ValueError(f"Unsupported body_style {body_style!r}")
+
+        def section_outline(radius: float, t: float) -> list[tuple[float, float]] | None:
+            if body_style == "faceted":
+                facet_count = 6
+                phase = pi / float(facet_count)
+                return [
+                    (
+                        radius * cos(phase + 2.0 * pi * index / float(facet_count)),
+                        radius * sin(phase + 2.0 * pi * index / float(facet_count)),
+                    )
+                    for index in range(facet_count)
+                ]
+            if body_style == "lobed":
+                lobe_count = 5
+                point_count = 72
+                blend = min(max((t - 0.10) / 0.30, 0.0), 1.0)
+                amplitude = radius * (0.04 + 0.14 * blend)
+                valley_floor = radius * 0.62
+                points: list[tuple[float, float]] = []
+                for index in range(point_count):
+                    theta = 2.0 * pi * index / float(point_count)
+                    local_radius = radius - amplitude * (0.5 - 0.5 * cos(lobe_count * theta))
+                    local_radius = max(local_radius, valley_floor)
+                    points.append((local_radius * cos(theta), local_radius * sin(theta)))
+                return points
+            return None
 
         section_offsets = [
             0.0,
@@ -4190,7 +4231,23 @@ class KnobGeometry(MeshGeometry):
             (max(0.001, body_radius_at(offset / body_height)), body_bottom + offset)
             for offset in section_offsets
         ]
-        shape = _loft_between_radii_z(cq, radii_and_offsets)
+        wp = None
+        previous_offset = 0.0
+        for radius, offset in radii_and_offsets:
+            t = (offset - body_bottom) / body_height if body_height > 1e-9 else 0.0
+            profile_points = section_outline(radius, t)
+            if wp is None:
+                wp = cq.Workplane("XY").workplane(offset=offset)
+            else:
+                wp = wp.workplane(offset=offset - previous_offset)
+            if profile_points is None:
+                wp = wp.circle(radius)
+            else:
+                wp = wp.polyline(profile_points).close()
+            previous_offset = offset
+        if wp is None:
+            raise ValueError("KnobGeometry requires at least one loft section")
+        shape = wp.loft(combine=True, ruled=False)
 
         if skirt is not None:
             skirt_radius = skirt.diameter * 0.5
@@ -4203,6 +4260,15 @@ class KnobGeometry(MeshGeometry):
                 ],
             )
             shape = shape.union(skirt_shape)
+            if skirt.chamfer > 1e-6:
+                try:
+                    shape = (
+                        shape.faces("<Z")
+                        .edges()
+                        .chamfer(min(skirt.chamfer, skirt.height * 0.7, skirt_radius * 0.25))
+                    )
+                except Exception:
+                    pass
 
         if edge_radius > 0.0:
             try:

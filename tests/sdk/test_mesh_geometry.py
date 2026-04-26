@@ -1421,6 +1421,54 @@ def test_new_fan_geometry_helpers_validate_invalid_inputs(builder, message: str)
             id="knob-detailed-variant",
         ),
         pytest.param(
+            lambda: sdk.KnobGeometry(
+                0.036,
+                0.021,
+                body_style="faceted",
+                base_diameter=0.039,
+                top_diameter=0.028,
+                edge_radius=0.0008,
+                grip=sdk.KnobGrip(
+                    style="ribbed",
+                    count=12,
+                    depth=0.0010,
+                    width=0.0018,
+                ),
+                indicator=sdk.KnobIndicator(
+                    style="wedge",
+                    mode="raised",
+                    angle_deg=10.0,
+                ),
+                top_feature=sdk.KnobTopFeature(
+                    style="top_insert",
+                    diameter=0.012,
+                    height=0.0012,
+                ),
+            ),
+            "knob-faceted",
+            id="knob-faceted-variant",
+        ),
+        pytest.param(
+            lambda: sdk.KnobGeometry(
+                0.040,
+                0.024,
+                body_style="lobed",
+                base_diameter=0.028,
+                top_diameter=0.036,
+                crown_radius=0.0012,
+                body_reliefs=(
+                    sdk.KnobRelief(
+                        style="top_recess",
+                        width=0.014,
+                        depth=0.0016,
+                    ),
+                ),
+                bore=sdk.KnobBore(style="round", diameter=0.008),
+            ),
+            "knob-lobed",
+            id="knob-lobed-variant",
+        ),
+        pytest.param(
             lambda: sdk.BezelGeometry(
                 (0.056, 0.056),
                 (0.084, 0.084),
