@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import copy
 import hashlib
 import json
 import logging
@@ -97,8 +96,8 @@ class GeminiLLM:
         without making any network calls.
         """
         self._reset_request_state()
-        self._sync_messages_state(messages)
-        contents = self._convert_messages(messages)
+        self._append_new_contents(messages)
+        contents = self._request_contents()
         config = self._build_generate_config(
             system_prompt=system_prompt,
             tools=tools,
@@ -122,7 +121,7 @@ class GeminiLLM:
         last_compile_failure_sig: Optional[str] = None,
     ) -> PrepareRequestResult:
         result = PrepareRequestResult()
-        self._sync_messages_state(messages)
+        self._append_new_contents(messages)
         if consecutive_compile_failure_count <= 0 or not last_compile_failure_sig:
             self._last_soft_compaction_failure_sig = None
 
@@ -158,8 +157,8 @@ class GeminiLLM:
                 )
             )
 
-        immutable_prefix_messages, compactable_messages, raw_tail_messages = (
-            self._partition_compaction_messages()
+        immutable_prefix_contents, compactable_contents, raw_tail_contents = (
+            self._partition_compaction_contents()
         )
         # Keep the trigger policy shared across providers so pressure bands,
         # cache-aware thresholds, and cooldown behavior stay aligned.
@@ -170,7 +169,7 @@ class GeminiLLM:
             consecutive_compile_failure_count=consecutive_compile_failure_count,
             last_compile_failure_sig=last_compile_failure_sig,
             last_soft_compaction_failure_sig=self._last_soft_compaction_failure_sig,
-            compactable_item_count=len(compactable_messages),
+            compactable_item_count=len(compactable_contents),
             turn_number=turn_number,
             last_soft_compaction_turn_number=self._last_soft_compaction_turn_number,
             last_soft_compaction_prompt_tokens=self._last_soft_compaction_prompt_tokens,
@@ -198,7 +197,7 @@ class GeminiLLM:
                 )
             return result
 
-        if not compactable_messages:
+        if not compactable_contents:
             result.trace_events.append(
                 ProviderTraceEvent(
                     event_type="compaction_skipped",
@@ -217,11 +216,16 @@ class GeminiLLM:
         after_tokens: int | None = None
         estimate_error = "Gemini preflight token counting is disabled by design."
 
-        summary_message, usage = await self._compact_messages(
+        summary_content, usage = await self._compact_messages(
             system_prompt=system_prompt,
-            messages=compactable_messages,
+            messages=compactable_contents,
         )
-        self._summary_message = summary_message
+        self._contents = [
+            *immutable_prefix_contents,
+            summary_content,
+            *raw_tail_contents,
+        ]
+        self._last_response_start_index = len(immutable_prefix_contents) + 1
         self._last_compaction_turn_number = turn_number
         if trigger == "compile_plateau":
             self._last_soft_compaction_failure_sig = last_compile_failure_sig
@@ -268,8 +272,8 @@ class GeminiLLM:
         tools: list[dict],
     ) -> dict:
         """Generate a response with optional tool calls."""
-        self._sync_messages_state(messages)
-        contents = self._convert_messages(self._request_messages())
+        self._append_new_contents(messages)
+        contents = self._request_contents()
         config = self._build_generate_config(
             system_prompt=system_prompt,
             tools=tools,
@@ -297,6 +301,11 @@ class GeminiLLM:
             context=f"gemini.generate_content(model={self.model_id})",
         )
 
+        response_start_index = len(self._contents)
+        history_content = self._history_content_from_response(response)
+        if history_content is not None:
+            self._contents.append(history_content)
+            self._last_response_start_index = response_start_index
         self._last_usage = self._extract_usage(response)
         return self._convert_response(response)
 
@@ -336,7 +345,7 @@ class GeminiLLM:
         return events
 
     def _reset_request_state(self) -> None:
-        self._conversation_messages: list[dict[str, Any]] = []
+        self._contents: list[Any] = []
         self._last_message_count = 0
         self._last_response_start_index: int | None = None
         self._last_usage: Optional[dict[str, int]] = None
@@ -345,86 +354,75 @@ class GeminiLLM:
         self._last_soft_compaction_turn_number: int | None = None
         self._last_soft_compaction_prompt_tokens: int | None = None
         self._unsupported_threshold_event_emitted = False
-        self._summary_message: dict[str, Any] | None = None
         self._cached_content_name: str | None = None
         self._cached_content_expire_time: datetime | None = None
         self._cached_prefix_digest: str | None = None
 
-    def _sync_messages_state(self, messages: list[dict]) -> None:
+    def _append_new_contents(self, messages: list[dict]) -> None:
         if not messages:
-            self._conversation_messages = []
+            self._contents = []
             self._last_message_count = 0
             self._last_response_start_index = None
             return
 
-        copied_messages = copy.deepcopy(messages)
-        if (
-            self._conversation_messages
-            and self._last_message_count <= len(copied_messages)
-            and copied_messages[: self._last_message_count] == self._conversation_messages
-        ):
-            appended_messages = copied_messages[self._last_message_count :]
-            if appended_messages and appended_messages[0].get("role") == "assistant":
-                self._last_response_start_index = self._last_message_count
-            self._conversation_messages = copied_messages
-            self._last_message_count = len(copied_messages)
-            return
+        if self._last_message_count > len(messages):
+            self._contents = []
+            self._last_message_count = 0
+            self._last_response_start_index = None
 
-        self._conversation_messages = copied_messages
-        self._last_message_count = len(copied_messages)
-        self._last_response_start_index = self._find_latest_assistant_start(copied_messages)
+        latest_assistant_content_index: int | None = None
+        start = 0 if not self._contents else self._last_message_count
+        for message in messages[start:]:
+            if not isinstance(message, dict):
+                continue
+            role = message.get("role")
+            if role == "assistant" and self._last_response_start_index is not None:
+                continue
+            content = self._convert_message(message)
+            if content is None:
+                continue
+            if role == "assistant":
+                latest_assistant_content_index = len(self._contents)
+            self._contents.append(content)
 
-    def _find_latest_assistant_start(self, messages: list[dict[str, Any]]) -> int | None:
-        for index in range(len(messages) - 1, -1, -1):
-            if messages[index].get("role") == "assistant":
-                return index
-        return None
+        self._last_message_count = len(messages)
+        if self._last_response_start_index is None and latest_assistant_content_index is not None:
+            self._last_response_start_index = latest_assistant_content_index
 
     def _immutable_prefix_count(self) -> int:
         count = 0
-        for message in self._conversation_messages:
+        for content in self._contents:
             if count >= 2:
                 break
-            if message.get("role") != "user":
+            if not _is_standard_user_content(content):
                 break
             count += 1
         return count
 
-    def _partition_compaction_messages(
+    def _partition_compaction_contents(
         self,
-    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    ) -> tuple[list[Any], list[Any], list[Any]]:
         immutable_prefix_count = self._immutable_prefix_count()
         raw_tail_start = self._last_response_start_index
         if raw_tail_start is None:
-            raw_tail_start = len(self._conversation_messages)
+            raw_tail_start = len(self._contents)
         raw_tail_start = max(
             immutable_prefix_count,
-            min(raw_tail_start, len(self._conversation_messages)),
+            min(raw_tail_start, len(self._contents)),
         )
-        immutable_prefix_messages = copy.deepcopy(
-            self._conversation_messages[:immutable_prefix_count]
-        )
-        compactable_messages = []
-        if self._summary_message:
-            compactable_messages.append(copy.deepcopy(self._summary_message))
-        compactable_messages.extend(
-            copy.deepcopy(self._conversation_messages[immutable_prefix_count:raw_tail_start])
-        )
-        raw_tail_messages = copy.deepcopy(self._conversation_messages[raw_tail_start:])
-        return immutable_prefix_messages, compactable_messages, raw_tail_messages
+        immutable_prefix_contents = list(self._contents[:immutable_prefix_count])
+        compactable_contents = list(self._contents[immutable_prefix_count:raw_tail_start])
+        raw_tail_contents = list(self._contents[raw_tail_start:])
+        return immutable_prefix_contents, compactable_contents, raw_tail_contents
 
-    def _request_messages(self) -> list[dict[str, Any]]:
-        immutable_prefix_messages, _, raw_tail_messages = self._partition_compaction_messages()
-        request_messages: list[dict[str, Any]] = []
+    def _request_contents(self) -> list[Any]:
+        request_contents = list(self._contents)
         if not self._active_cached_content_name():
-            request_messages.extend(immutable_prefix_messages)
-        if self._summary_message:
-            request_messages.append(copy.deepcopy(self._summary_message))
-        request_messages.extend(raw_tail_messages)
-        return request_messages
+            return request_contents
+        return request_contents[self._immutable_prefix_count() :]
 
     def _effective_message_count(self) -> int:
-        return len(self._request_messages())
+        return len(self._request_contents())
 
     def _last_prompt_tokens(self) -> int | None:
         if not isinstance(self._last_usage, dict):
@@ -492,7 +490,7 @@ class GeminiLLM:
         *,
         system_prompt: str,
         tools: list[dict],
-        messages: list[dict[str, Any]],
+        messages: list[Any],
     ) -> Any:
         if not self._clients:
             raise RuntimeError("Gemini cached content requires a real API client")
@@ -500,7 +498,7 @@ class GeminiLLM:
 
         tool_declarations = self._convert_tools(tools)
         cache_config = types.CreateCachedContentConfig(
-            contents=self._convert_messages(messages),
+            contents=list(messages),
             system_instruction=system_prompt,
             tools=[types.Tool(function_declarations=tool_declarations)]
             if tool_declarations
@@ -568,15 +566,15 @@ class GeminiLLM:
         self,
         *,
         system_prompt: str,
-        messages: list[dict[str, Any]],
-    ) -> tuple[dict[str, Any], dict[str, int] | None]:
+        messages: list[Any],
+    ) -> tuple[Any, dict[str, int] | None]:
         if not self._clients:
             raise RuntimeError("Gemini compaction requires a real API client")
         from google.genai import types  # type: ignore
 
         compact_input = {
             "system_prompt": system_prompt,
-            "messages": [_message_for_compaction_prompt(message) for message in messages],
+            "messages": [_content_for_compaction_prompt(message) for message in messages],
         }
         prompt_text = _gemini_compaction_prompt_text()
         compaction_config = types.GenerateContentConfig(
@@ -620,7 +618,9 @@ class GeminiLLM:
             context=f"gemini.compact(model={self.compaction_model_id})",
         )
         parsed = _parse_json_response_text(response)
-        return _render_compaction_summary_message(parsed), self._extract_usage(response)
+        return _content_from_text_message(
+            _render_compaction_summary_message(parsed)
+        ), self._extract_usage(response)
 
     def _next_client(self) -> Any:
         if not self._clients:
@@ -725,16 +725,21 @@ class GeminiLLM:
             )
         return declarations
 
-    def _convert_messages(self, messages: list[dict]) -> list[Any]:
-        return [self._convert_message(message) for message in messages]
-
-    def _convert_message(self, message: dict) -> Any:
+    def _convert_message(self, message: dict) -> Any | None:
         from google.genai import types  # type: ignore
         from google.genai.types import Content, FunctionCall, Part  # type: ignore
 
         role = message.get("role", "user")
         if role == "assistant":
             role = "model"
+
+        google_content = (
+            message.get("extra_content", {}).get("google", {}).get("content")
+            if isinstance(message, dict)
+            else None
+        )
+        if role == "model" and isinstance(google_content, dict):
+            return _deserialize_content(google_content)
 
         parts: list[Part] = []
 
@@ -750,6 +755,8 @@ class GeminiLLM:
                 item_type = item.get("type")
                 signature = item.get("thought_signature")
                 if item_type == "text":
+                    if bool(item.get("thought", False)):
+                        continue
                     text = item.get("text")
                     if isinstance(text, str) and text:
                         part_kwargs: dict[str, Any] = {
@@ -836,6 +843,9 @@ class GeminiLLM:
             elif content:
                 parts.append(Part(text=content))
 
+        if not parts and role == "model":
+            return None
+
         if not parts:
             raise ValueError("Message must contain content or tool calls")
 
@@ -899,7 +909,6 @@ class GeminiLLM:
         text = ""
         thought = ""
         tool_calls: list[dict] = []
-        google_parts: list[dict[str, Any]] = []
         usage = self._extract_usage(response)
 
         candidates = getattr(response, "candidates", None) or []
@@ -925,15 +934,6 @@ class GeminiLLM:
 
         for part in parts:
             if getattr(part, "text", None):
-                encoded_signature = _encode_signature(getattr(part, "thought_signature", None))
-                google_parts.append(
-                    {
-                        "type": "text",
-                        "text": part.text,
-                        "thought": bool(getattr(part, "thought", False)),
-                        "thought_signature": encoded_signature,
-                    }
-                )
                 if getattr(part, "thought", False):
                     thought += part.text
                 else:
@@ -948,15 +948,6 @@ class GeminiLLM:
                     function_call, "thought_signature", None
                 )
                 encoded_signature = _encode_signature(raw_signature)
-                google_parts.append(
-                    {
-                        "type": "function_call",
-                        "id": getattr(function_call, "id", None),
-                        "name": getattr(function_call, "name", ""),
-                        "arguments": args,
-                        "thought_signature": encoded_signature,
-                    }
-                )
                 tool_calls.append(
                     {
                         "id": getattr(function_call, "id", None) or f"call_{uuid.uuid4().hex}",
@@ -1016,11 +1007,45 @@ class GeminiLLM:
         result = {"content": text, "tool_calls": tool_calls}
         if thought:
             result["thought_summary"] = thought
-        if google_parts:
-            result["extra_content"] = {"google": {"parts": google_parts}}
+        if content is not None:
+            result["extra_content"] = {"google": {"content": _serialize_content(content)}}
         if usage:
             result["usage"] = usage
         return result
+
+    def _history_content_from_response(self, response: Any) -> Any | None:
+        candidates = getattr(response, "candidates", None) or []
+        if not candidates:
+            return None
+
+        candidate = candidates[0]
+        content = getattr(candidate, "content", None)
+        if content is not None:
+            raw_parts = getattr(content, "parts", None)
+            if raw_parts is None:
+                parts: list[Any] = []
+            elif isinstance(raw_parts, list):
+                parts = raw_parts
+            else:
+                try:
+                    parts = list(raw_parts)
+                except TypeError:
+                    parts = [raw_parts]
+            if parts:
+                return content
+
+        if content is not None or getattr(candidate, "function_calls", None):
+            synthesized = self._convert_response(response)
+            assistant_message = {"role": "assistant"}
+            extra_content = synthesized.get("extra_content")
+            if isinstance(extra_content, dict):
+                assistant_message["extra_content"] = extra_content
+            if synthesized.get("content"):
+                assistant_message["content"] = synthesized["content"]
+            if synthesized.get("tool_calls"):
+                assistant_message["tool_calls"] = synthesized["tool_calls"]
+            return self._convert_message(assistant_message)
+        return None
 
 
 def _encode_signature(signature: Optional[Union[bytes, str]]) -> Optional[str]:
@@ -1092,47 +1117,160 @@ def _gemini_compaction_prompt_text() -> str:
     return text
 
 
-def _message_for_compaction_prompt(message: dict[str, Any]) -> dict[str, Any]:
-    payload: dict[str, Any] = {"role": message.get("role")}
-    content = message.get("content")
-    if isinstance(content, str):
-        payload["content"] = content
-    elif isinstance(content, list):
-        rendered_parts: list[str] = []
-        for item in content:
-            if not isinstance(item, dict):
-                rendered_parts.append(str(item))
-                continue
-            item_type = item.get("type")
-            if item_type == "input_text" and isinstance(item.get("text"), str):
-                rendered_parts.append(item["text"])
-            elif item_type == "input_image":
-                image_ref = item.get("image_path") or item.get("image_url") or "<image>"
-                rendered_parts.append(f"[image] {image_ref}")
-            elif isinstance(item.get("text"), str):
-                rendered_parts.append(item["text"])
-        payload["content"] = "\n".join(part for part in rendered_parts if part)
-    elif content is not None:
-        payload["content"] = json.dumps(content, ensure_ascii=False, default=str)
+def _content_for_compaction_prompt(content: Any) -> dict[str, Any]:
+    role = getattr(content, "role", None) or "user"
+    if role == "model":
+        role = "assistant"
+    payload: dict[str, Any] = {"role": role}
+    rendered_parts: list[str] = []
+    tool_calls: list[dict[str, Any]] = []
 
-    thought_summary = message.get("thought_summary")
-    if isinstance(thought_summary, str) and thought_summary.strip():
-        payload["thought_summary"] = thought_summary.strip()
+    for part in getattr(content, "parts", None) or []:
+        part_text = getattr(part, "text", None)
+        if isinstance(part_text, str) and part_text.strip():
+            if not bool(getattr(part, "thought", False)):
+                rendered_parts.append(part_text)
 
-    if message.get("role") == "assistant" and isinstance(message.get("tool_calls"), list):
-        payload["tool_calls"] = [
-            {
-                "id": call.get("id"),
-                "name": call.get("function", {}).get("name"),
-                "arguments": call.get("function", {}).get("arguments"),
-            }
-            for call in message["tool_calls"]
-            if isinstance(call, dict)
-        ]
-    elif message.get("role") == "tool":
-        payload["name"] = message.get("name")
-        payload["tool_call_id"] = message.get("tool_call_id")
+        function_call = getattr(part, "function_call", None)
+        if function_call is not None:
+            tool_calls.append(
+                {
+                    "id": getattr(function_call, "id", None),
+                    "name": getattr(function_call, "name", None),
+                    "arguments": getattr(function_call, "args", None)
+                    or getattr(function_call, "arguments", None),
+                }
+            )
+
+        function_response = getattr(part, "function_response", None)
+        if function_response is not None:
+            payload["role"] = "tool"
+            payload["name"] = getattr(function_response, "name", None)
+            response_body = getattr(function_response, "response", None)
+            payload["content"] = json.dumps(response_body, ensure_ascii=False, default=str)
+
+        inline_data = getattr(part, "inline_data", None)
+        if inline_data is not None:
+            mime_type = getattr(inline_data, "mime_type", None) or "<image>"
+            rendered_parts.append(f"[image] {mime_type}")
+
+    if rendered_parts and "content" not in payload:
+        payload["content"] = "\n".join(rendered_parts)
+    if tool_calls:
+        payload["tool_calls"] = tool_calls
     return payload
+
+
+def _serialize_content(content: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {"role": getattr(content, "role", "model")}
+    parts_payload: list[dict[str, Any]] = []
+    for part in getattr(content, "parts", None) or []:
+        serialized = _serialize_part(part)
+        if serialized is not None:
+            parts_payload.append(serialized)
+    payload["parts"] = parts_payload
+    return payload
+
+
+def _serialize_part(part: Any) -> dict[str, Any] | None:
+    text = getattr(part, "text", None)
+    if isinstance(text, str):
+        return {
+            "type": "text",
+            "text": text,
+            "thought": bool(getattr(part, "thought", False)),
+            "thought_signature": _encode_signature(getattr(part, "thought_signature", None)),
+        }
+
+    function_call = getattr(part, "function_call", None)
+    if function_call is not None:
+        args = getattr(function_call, "args", None)
+        if args is None:
+            args = getattr(function_call, "arguments", None)
+        raw_signature = getattr(part, "thought_signature", None) or getattr(
+            function_call, "thought_signature", None
+        )
+        return {
+            "type": "function_call",
+            "id": getattr(function_call, "id", None),
+            "name": getattr(function_call, "name", ""),
+            "arguments": args,
+            "thought_signature": _encode_signature(raw_signature),
+        }
+
+    return None
+
+
+def _deserialize_content(payload: dict[str, Any]) -> Any:
+    from google.genai.types import Content  # type: ignore
+
+    role = payload.get("role", "model")
+    parts = [_deserialize_part(part) for part in payload.get("parts", []) if isinstance(part, dict)]
+    return Content(role=role, parts=parts)
+
+
+def _deserialize_part(payload: dict[str, Any]) -> Any:
+    from google.genai import types  # type: ignore
+    from google.genai.types import FunctionCall, Part  # type: ignore
+
+    part_type = payload.get("type")
+    signature = _decode_signature(payload.get("thought_signature"))
+    if part_type == "text":
+        part_kwargs: dict[str, Any] = {
+            "text": payload.get("text", ""),
+            "thought_signature": signature,
+        }
+        if "thought" in payload:
+            part_kwargs["thought"] = bool(payload.get("thought", False))
+        try:
+            return Part(**part_kwargs)
+        except TypeError:
+            part_kwargs.pop("thought", None)
+            return Part(**part_kwargs)
+    if part_type == "function_call":
+        args = payload.get("arguments", {})
+        if isinstance(args, str):
+            try:
+                args = json.loads(args)
+            except json.JSONDecodeError:
+                args = {"_raw": args}
+        call_kwargs = {"name": payload.get("name", ""), "args": args}
+        if payload.get("id") is not None:
+            call_kwargs["id"] = payload.get("id")
+        try:
+            function_call = FunctionCall(**call_kwargs)
+        except TypeError:
+            call_kwargs.pop("id", None)
+            function_call = FunctionCall(**call_kwargs)
+        return Part(function_call=function_call, thought_signature=signature)
+    if part_type == "function_response":
+        return Part(
+            function_response=types.FunctionResponse(
+                name=payload.get("name", ""),
+                response=payload.get("response"),
+            ),
+            thought_signature=signature,
+        )
+    raise ValueError(f"Unsupported Gemini content part type: {part_type}")
+
+
+def _content_from_text_message(message: dict[str, Any]) -> Any:
+    from google.genai.types import Content, Part  # type: ignore
+
+    return Content(role=message.get("role", "user"), parts=[Part(text=message.get("content", ""))])
+
+
+def _is_standard_user_content(content: Any) -> bool:
+    if getattr(content, "role", None) != "user":
+        return False
+    parts = getattr(content, "parts", None) or []
+    if not parts:
+        return False
+    for part in parts:
+        if getattr(part, "function_response", None) is not None:
+            continue
+        return True
+    return False
 
 
 def _parse_json_response_text(response: Any) -> dict[str, Any]:
