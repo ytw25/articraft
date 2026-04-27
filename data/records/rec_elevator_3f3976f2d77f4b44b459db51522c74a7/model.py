@@ -13,7 +13,7 @@ from sdk import (
     TestContext,
     TestReport,
     mesh_from_geometry,
-    wire_from_points,
+    tube_from_spline_points,
 )
 
 
@@ -186,26 +186,18 @@ def build_object_model() -> ArticulatedObject:
         name="barrier_hinge_leaf",
     )
 
-    chain_loop = wire_from_points(
+    chain_loop = tube_from_spline_points(
         [
             (0.06, 0.0, 0.06),
-            (0.36, 0.0, -0.005),
-            (0.70, 0.0, -0.035),
-            (1.02, 0.0, -0.005),
+            (0.36, 0.0, -0.02),
+            (0.70, 0.0, -0.055),
+            (1.02, 0.0, -0.02),
             (1.27, 0.0, 0.04),
-            (1.27, 0.0, -0.22),
-            (1.02, 0.0, -0.265),
-            (0.70, 0.0, -0.285),
-            (0.36, 0.0, -0.265),
-            (0.06, 0.0, -0.22),
         ],
         radius=0.012,
-        radial_segments=14,
-        closed_path=True,
-        cap_ends=False,
-        corner_mode="fillet",
-        corner_radius=0.035,
-        corner_segments=8,
+        samples_per_segment=18,
+        radial_segments=16,
+        cap_ends=True,
         up_hint=(0.0, 1.0, 0.0),
     )
     barrier.visual(
