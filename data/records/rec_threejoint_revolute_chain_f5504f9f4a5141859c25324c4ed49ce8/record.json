@@ -1,0 +1,43 @@
+{
+  "schema_version": 2,
+  "record_id": "rec_threejoint_revolute_chain_f5504f9f4a5141859c25324c4ed49ce8",
+  "created_at": "2026-04-26T14:34:45Z",
+  "updated_at": "2026-04-26T14:38:45Z",
+  "rating": null,
+  "secondary_rating": null,
+  "author": "RuiningLi",
+  "rated_by": "RuiningLi",
+  "secondary_rated_by": null,
+  "kind": "generated_model",
+  "prompt_kind": "single_prompt",
+  "category_slug": "threejoint_revolute_chain",
+  "source": {
+    "run_id": "run_20260426_133558_742008_20260426-avg-rating-gt-4p2-gpt54-prompts-gemini3",
+    "prompt_batch_id": null,
+    "batch_spec_id": "20260426_avg_rating_gt_4p2_gpt54_prompts_gemini31pro_high_2000",
+    "row_id": "threejoint_revolute_chain_001",
+    "prompt_index": 127
+  },
+  "sdk_package": "sdk",
+  "provider": "gemini",
+  "model_id": "gemini-3.1-pro-preview",
+  "display": {
+    "title": "A three-link articulated task arm with shoulder, elbow, and wrist revolute joints ending in a fixed rectangular pad.",
+    "prompt_preview": "A three-link articulated task arm with shoulder, elbow, and wrist revolute joints ending in a fixed rectangular pad."
+  },
+  "artifacts": {
+    "prompt_txt": "prompt.txt",
+    "prompt_series_json": null,
+    "model_py": "model.py",
+    "provenance_json": "provenance.json",
+    "cost_json": "cost.json",
+    "inputs_dir": "inputs"
+  },
+  "hashes": {
+    "prompt_sha256": "bc89116d23fba6262c3ce389180cd8c2f5f76c923b1e9254e4d648b042ce0ae1",
+    "model_py_sha256": "aeb290d614a6f07cd3b55c866e59b469500815f18e1afcc66fa476982747ea25"
+  },
+  "collections": [
+    "dataset"
+  ]
+}
