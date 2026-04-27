@@ -1,0 +1,180 @@
+{
+  "model_id": "gpt-5.5-2026-04-23",
+  "total": {
+    "tokens": {
+      "prompt_tokens": 213756,
+      "cached_tokens": 163328,
+      "uncached_prompt_tokens": 50428,
+      "candidates_tokens": 14133,
+      "total_tokens": 227889
+    },
+    "costs_usd": {
+      "input_uncached": 0.12607,
+      "input_cached": 0.040832,
+      "output": 0.211995,
+      "total": 0.378897
+    }
+  },
+  "maintenance_total": {
+    "tokens": {
+      "prompt_tokens": 0,
+      "cached_tokens": 0,
+      "uncached_prompt_tokens": 0,
+      "candidates_tokens": 0,
+      "total_tokens": 0
+    },
+    "costs_usd": {
+      "input_uncached": 0.0,
+      "input_cached": 0.0,
+      "output": 0.0,
+      "total": 0.0
+    }
+  },
+  "all_in_total": {
+    "tokens": {
+      "prompt_tokens": 213756,
+      "cached_tokens": 163328,
+      "uncached_prompt_tokens": 50428,
+      "candidates_tokens": 14133,
+      "total_tokens": 227889
+    },
+    "costs_usd": {
+      "input_uncached": 0.12607,
+      "input_cached": 0.040832,
+      "output": 0.211995,
+      "total": 0.378897
+    }
+  },
+  "pricing": {
+    "input_uncached": 2.5,
+    "input_cached": 0.25,
+    "output": 15.0,
+    "prompt_tier_threshold_tokens": 272000,
+    "input_uncached_above_threshold": 5.0,
+    "input_cached_above_threshold": 0.5,
+    "output_above_threshold": 22.5
+  },
+  "turns": [
+    {
+      "tokens": {
+        "prompt_tokens": 11722,
+        "cached_tokens": 11264,
+        "uncached_prompt_tokens": 458,
+        "candidates_tokens": 34,
+        "total_tokens": 11756
+      },
+      "costs_usd": {
+        "input_uncached": 0.001145,
+        "input_cached": 0.002816,
+        "output": 0.00051,
+        "total": 0.004471
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 12121,
+        "cached_tokens": 11264,
+        "uncached_prompt_tokens": 857,
+        "candidates_tokens": 158,
+        "total_tokens": 12279
+      },
+      "costs_usd": {
+        "input_uncached": 0.0021425,
+        "input_cached": 0.002816,
+        "output": 0.00237,
+        "total": 0.0073285
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 20252,
+        "cached_tokens": 11264,
+        "uncached_prompt_tokens": 8988,
+        "candidates_tokens": 5730,
+        "total_tokens": 25982
+      },
+      "costs_usd": {
+        "input_uncached": 0.02247,
+        "input_cached": 0.002816,
+        "output": 0.08595,
+        "total": 0.111236
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 27223,
+        "cached_tokens": 11264,
+        "uncached_prompt_tokens": 15959,
+        "candidates_tokens": 6933,
+        "total_tokens": 34156
+      },
+      "costs_usd": {
+        "input_uncached": 0.0398975,
+        "input_cached": 0.002816,
+        "output": 0.103995,
+        "total": 0.1467085
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 34193,
+        "cached_tokens": 19968,
+        "uncached_prompt_tokens": 14225,
+        "candidates_tokens": 23,
+        "total_tokens": 34216
+      },
+      "costs_usd": {
+        "input_uncached": 0.0355625,
+        "input_cached": 0.004992,
+        "output": 0.000345,
+        "total": 0.0408995
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 35242,
+        "cached_tokens": 27136,
+        "uncached_prompt_tokens": 8106,
+        "candidates_tokens": 1182,
+        "total_tokens": 36424
+      },
+      "costs_usd": {
+        "input_uncached": 0.020265,
+        "input_cached": 0.006784,
+        "output": 0.01773,
+        "total": 0.044779
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 36461,
+        "cached_tokens": 34816,
+        "uncached_prompt_tokens": 1645,
+        "candidates_tokens": 14,
+        "total_tokens": 36475
+      },
+      "costs_usd": {
+        "input_uncached": 0.0041125,
+        "input_cached": 0.008704,
+        "output": 0.00021,
+        "total": 0.0130265
+      }
+    },
+    {
+      "tokens": {
+        "prompt_tokens": 36542,
+        "cached_tokens": 36352,
+        "uncached_prompt_tokens": 190,
+        "candidates_tokens": 59,
+        "total_tokens": 36601
+      },
+      "costs_usd": {
+        "input_uncached": 0.000475,
+        "input_cached": 0.009088,
+        "output": 0.000885,
+        "total": 0.010448
+      }
+    }
+  ],
+  "maintenance_events": []
+}
