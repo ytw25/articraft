@@ -11,7 +11,6 @@ from sdk import (
     AssetContext,
     Box,
     Cylinder,
-    CylinderGeometry,
     Inertial,
     LatheGeometry,
     MeshGeometry,
@@ -19,7 +18,6 @@ from sdk import (
     Origin,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
     repair_loft,
     rounded_rect_profile,
@@ -52,7 +50,7 @@ def _yz_section(
 
 
 def _build_body_shell_mesh() -> MeshGeometry:
-    shell = repair_loft(
+    return repair_loft(
         section_loft(
             [
                 _xy_section(0.092, 0.092, 0.000, 0.012),
@@ -63,12 +61,6 @@ def _build_body_shell_mesh() -> MeshGeometry:
             ]
         )
     )
-    neck_cavity = CylinderGeometry(radius=0.008, height=0.042, radial_segments=40).translate(
-        0.0,
-        0.0,
-        0.129,
-    )
-    return boolean_difference(shell, neck_cavity)
 
 
 def _build_neck_finish_mesh() -> MeshGeometry:

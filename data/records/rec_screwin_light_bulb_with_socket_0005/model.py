@@ -39,13 +39,13 @@ def _ring_shell(
     z_center: float,
     radial_segments: int = 64,
 ):
-    outer = CylinderGeometry(radius=outer_radius, height=height, radial_segments=radial_segments)
-    inner = CylinderGeometry(
-        radius=inner_radius,
-        height=height + 0.002,
-        radial_segments=radial_segments,
-    )
-    return boolean_difference(outer, inner).translate(0.0, 0.0, z_center)
+    return LatheGeometry.from_shell_profiles(
+        [(outer_radius, -0.5 * height), (outer_radius, 0.5 * height)],
+        [(inner_radius, -0.5 * height), (inner_radius, 0.5 * height)],
+        segments=radial_segments,
+        start_cap="flat",
+        end_cap="flat",
+    ).translate(0.0, 0.0, z_center)
 
 
 def _helix_points(
@@ -113,17 +113,7 @@ def _build_socket_housing():
         0.0,
         0.037,
     )
-    threaded_body = boolean_difference(outer_body, bore)
-    thread_cutter = _thread_wire(
-        radius=0.0149,
-        z_start=0.0305,
-        z_end=0.0465,
-        turns=2.7,
-        wire_radius=0.0006,
-        phase=0.15,
-        samples_per_turn=30,
-    )
-    return boolean_difference(threaded_body, thread_cutter)
+    return boolean_difference(outer_body, bore)
 
 
 def _build_glass_envelope():

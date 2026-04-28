@@ -117,6 +117,13 @@ def build_object_model() -> ArticulatedObject:
         name="bowl_shell",
     )
     bowl.inertial = Inertial.from_geometry(Cylinder(bowl_radius, bowl_height), mass=1.0)
+    model.articulation(
+        "body_to_bowl",
+        ArticulationType.FIXED,
+        parent=body,
+        child=bowl,
+        origin=Origin(),
+    )
 
     # --- Head ---
     head = model.part("head")

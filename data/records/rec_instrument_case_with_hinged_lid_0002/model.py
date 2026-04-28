@@ -18,7 +18,6 @@ from sdk import (
     Origin,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
     repair_loft,
     sample_catmull_rom_spline_2d,
@@ -91,7 +90,7 @@ def _build_lower_shell_geometry(
     outer_profile: list[tuple[float, float]],
     inner_profile: list[tuple[float, float]],
 ):
-    outer = repair_loft(
+    return repair_loft(
         section_loft(
             [
                 [(x, y, 0.0) for x, y in _scale_profile(outer_profile, 0.952, 0.900)],
@@ -100,23 +99,13 @@ def _build_lower_shell_geometry(
             ]
         )
     )
-    inner = repair_loft(
-        section_loft(
-            [
-                [(x, y, LOWER_FLOOR_THICKNESS) for x, y in _scale_profile(inner_profile, 0.945, 0.895)],
-                [(x, y, 0.024) for x, y in _scale_profile(inner_profile, 0.972, 0.944)],
-                [(x, y, LOWER_DEPTH + 0.010) for x, y in inner_profile],
-            ]
-        )
-    )
-    return boolean_difference(outer, inner)
 
 
 def _build_lid_shell_geometry(
     outer_profile: list[tuple[float, float]],
     inner_profile: list[tuple[float, float]],
 ):
-    outer = repair_loft(
+    return repair_loft(
         section_loft(
             [
                 [(x, y, 0.0) for x, y in outer_profile],
@@ -125,16 +114,6 @@ def _build_lid_shell_geometry(
             ]
         )
     )
-    inner = repair_loft(
-        section_loft(
-            [
-                [(x, y, -0.004) for x, y in inner_profile],
-                [(x, y, 0.032) for x, y in _scale_profile(inner_profile, 0.964, 0.930)],
-                [(x, y, LID_DEPTH - LID_TOP_THICKNESS + 0.004) for x, y in _scale_profile(inner_profile, 0.914, 0.842)],
-            ]
-        )
-    )
-    return boolean_difference(outer, inner)
 
 
 def _build_handle_geometry():

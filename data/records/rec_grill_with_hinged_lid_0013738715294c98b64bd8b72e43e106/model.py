@@ -74,15 +74,7 @@ def _build_lid_shell_mesh():
         _rounded_rect_section(0.408, 0.238, 0.060, 0.055, center_y=0.140),
         _rounded_rect_section(0.378, 0.192, 0.072, 0.080, center_y=0.128),
     ]
-    inner_sections = [
-        _rounded_rect_section(0.420, 0.274, 0.028, -0.014, center_y=0.153),
-        _rounded_rect_section(0.414, 0.264, 0.036, 0.022, center_y=0.148),
-        _rounded_rect_section(0.396, 0.228, 0.052, 0.049, center_y=0.138),
-        _rounded_rect_section(0.366, 0.184, 0.064, 0.072, center_y=0.126),
-    ]
-    outer = repair_loft(section_loft(outer_sections))
-    inner = repair_loft(section_loft(inner_sections))
-    return boolean_difference(outer, inner)
+    return repair_loft(section_loft(outer_sections))
 
 
 def build_object_model() -> ArticulatedObject:

@@ -16,7 +16,6 @@ from sdk import (
     Origin,
     TestContext,
     TestReport,
-    boolean_difference,
     mesh_from_geometry,
     rounded_rect_profile,
 )
@@ -34,8 +33,7 @@ def _mesh(name: str, geometry):
 
 
 def _build_barrel_shell():
-    outer_profile = [
-        (0.0, 0.0),
+    outer_wall = [
         (0.0010, 0.0002),
         (0.00115, 0.0042),
         (0.0018, 0.0062),
@@ -46,65 +44,62 @@ def _build_barrel_shell():
         (BARREL_OUTER_RADIUS, 0.0790),
         (0.00695, 0.0812),
         (0.00695, BARREL_REAR_Z),
-        (0.0, BARREL_REAR_Z),
     ]
-    inner_profile = [
-        (0.0, -0.0010),
-        (0.00042, -0.0010),
+    inner_wall = [
         (0.00045, 0.0100),
         (0.00130, 0.0128),
         (0.00172, 0.0178),
         (BARREL_INNER_RADIUS, 0.0180),
         (BARREL_INNER_RADIUS, 0.0860),
-        (0.0, 0.0860),
     ]
-    return boolean_difference(
-        LatheGeometry(outer_profile, segments=144),
-        LatheGeometry(inner_profile, segments=144),
+    return LatheGeometry.from_shell_profiles(
+        outer_wall,
+        inner_wall,
+        segments=144,
+        start_cap="flat",
+        end_cap="flat",
     )
 
 
 def _build_rear_collar():
-    outer_profile = [
-        (0.0, -0.00155),
+    outer_wall = [
         (0.00635, -0.00155),
         (0.00695, -0.00115),
         (0.00720, -0.00010),
         (0.00720, 0.00080),
         (0.00685, 0.00135),
         (0.00635, 0.00155),
-        (0.0, 0.00155),
     ]
-    inner_profile = [
-        (0.0, -0.00195),
+    inner_wall = [
         (0.00205, -0.00195),
         (0.00205, 0.00195),
-        (0.0, 0.00195),
     ]
-    return boolean_difference(
-        LatheGeometry(outer_profile, segments=72),
-        LatheGeometry(inner_profile, segments=72),
+    return LatheGeometry.from_shell_profiles(
+        outer_wall,
+        inner_wall,
+        segments=72,
+        start_cap="flat",
+        end_cap="flat",
     )
 
 
 def _build_nozzle_collar():
-    outer_profile = [
-        (0.0, -0.00080),
+    outer_wall = [
         (0.00415, -0.00080),
         (0.00445, -0.00025),
         (0.00445, 0.00045),
         (0.00415, 0.00080),
-        (0.0, 0.00080),
     ]
-    inner_profile = [
-        (0.0, -0.00110),
+    inner_wall = [
         (0.00210, -0.00110),
         (0.00210, 0.00110),
-        (0.0, 0.00110),
     ]
-    return boolean_difference(
-        LatheGeometry(outer_profile, segments=72),
-        LatheGeometry(inner_profile, segments=72),
+    return LatheGeometry.from_shell_profiles(
+        outer_wall,
+        inner_wall,
+        segments=72,
+        start_cap="flat",
+        end_cap="flat",
     )
 
 

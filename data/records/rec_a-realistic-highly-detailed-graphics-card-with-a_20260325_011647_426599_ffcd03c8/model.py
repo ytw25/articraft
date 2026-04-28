@@ -14,6 +14,7 @@ from sdk import (
     Cylinder,
     CylinderGeometry,
     Inertial,
+    LatheGeometry,
     MeshGeometry,
     MotionLimits,
     Origin,
@@ -52,13 +53,13 @@ def _ring_band(
     length: float,
     radial_segments: int = 56,
 ) -> MeshGeometry:
-    outer = CylinderGeometry(radius=outer_radius, height=length, radial_segments=radial_segments)
-    inner = CylinderGeometry(
-        radius=inner_radius,
-        height=length + 0.002,
-        radial_segments=radial_segments,
+    return LatheGeometry.from_shell_profiles(
+        [(outer_radius, -0.5 * length), (outer_radius, 0.5 * length)],
+        [(inner_radius, -0.5 * length), (inner_radius, 0.5 * length)],
+        segments=radial_segments,
+        start_cap="flat",
+        end_cap="flat",
     )
-    return boolean_difference(outer, inner)
 
 
 def _section_loop(
@@ -94,19 +95,6 @@ def _build_body_shell_mesh() -> MeshGeometry:
         )
     )
 
-    for fan_center_x in FAN_CENTERS_X:
-        opening = CylinderGeometry(radius=0.0475, height=0.032, radial_segments=72).translate(
-            fan_center_x,
-            0.0,
-            0.0045,
-        )
-        shell = boolean_difference(shell, opening)
-
-    intake_relief = BoxGeometry((0.032, 0.074, 0.020)).translate(0.294, 0.0, 0.002)
-    shell = boolean_difference(shell, intake_relief)
-
-    top_power_notch = BoxGeometry((0.036, 0.016, 0.012)).translate(0.248, 0.050, 0.010)
-    shell = boolean_difference(shell, top_power_notch)
     return shell
 
 
