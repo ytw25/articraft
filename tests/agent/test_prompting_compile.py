@@ -156,6 +156,11 @@ def test_prompt_outputs_are_current() -> None:
         "Do not keep planning in assistant text. Once you know the next concrete step, use a tool."
         in openrouter_text
     )
+    assert "Treat overlap failures by classifying them first." in openrouter_text
+    assert (
+        "silence it with a scoped `ctx.allow_overlap(...)` plus an exact proof check"
+        in openrouter_text
+    )
     assert (
         "Available tools: `read_file`, `replace`, `write_file`, `compile_model`, `probe_model`, and `find_examples`."
         in openrouter_text

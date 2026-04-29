@@ -450,6 +450,11 @@ def test_openrouter_prompt_resolution_and_payload_preview() -> None:
     assert "<modeling>" in instructions
     assert "Work evidence-first. Before editing, read `model.py`" in instructions
     assert "use `find_examples` for one or two relevant construction patterns" in instructions
+    assert "Treat overlap failures by classifying them first." in instructions
+    assert (
+        "silence it with a scoped `ctx.allow_overlap(...)` plus an exact proof check"
+        in instructions
+    )
     assert (
         "Available tools: `read_file`, `replace`, `write_file`, `compile_model`, `probe_model`, and `find_examples`."
         in instructions

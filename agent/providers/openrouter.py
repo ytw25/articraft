@@ -618,6 +618,8 @@ def _extract_http_status(exc: BaseException) -> int | None:
 def _should_retry_openrouter_exception(exc: BaseException) -> bool:
     if isinstance(exc, (asyncio.TimeoutError, TimeoutError)):
         return True
+    if isinstance(exc, json.JSONDecodeError):
+        return True
     status = _extract_http_status(exc)
     if status is not None:
         if status in {408, 409, 425, 429, 500, 502, 503, 504}:
@@ -632,12 +634,28 @@ def _should_retry_openrouter_exception(exc: BaseException) -> bool:
         for needle in (
             "timeout",
             "timed out",
+            "connection error",
             "connection reset",
             "connection aborted",
+            "server disconnected",
+            "protocol error",
             "temporarily unavailable",
             "rate limit",
+            "bad gateway",
+            "service unavailable",
         )
     )
+
+
+def _format_retry_exception(exc: BaseException) -> str:
+    status = _extract_http_status(exc)
+    message = str(exc).strip()
+    summary = type(exc).__name__
+    if status is not None:
+        summary += f" (HTTP {status})"
+    if message:
+        return f"{summary}: {message}"
+    return f"{summary}: {repr(exc)}"
 
 
 async def _async_retry(
@@ -649,23 +667,29 @@ async def _async_retry(
     max_delay: float,
     logger: logging.Logger,
     context: str,
+    sleep_fn: Any = asyncio.sleep,
+    rng: Any = random.random,
 ) -> Any:
+    if max_attempts <= 0:
+        raise ValueError("max_attempts must be >= 1")
+
     attempt = 0
     while True:
-        attempt += 1
         try:
             return await operation()
         except Exception as exc:
+            attempt += 1
             if attempt >= max_attempts or not should_retry(exc):
                 raise
-            delay = min(max_delay, base_delay * (2 ** (attempt - 1)))
-            delay *= random.uniform(0.75, 1.25)
+
+            cap = min(max_delay, base_delay * (2 ** (attempt - 1)))
+            delay = max(0.0, float(rng()) * cap)
             logger.warning(
-                "%s request failed on attempt %s/%s; retrying in %.2fs: %s",
+                "%s failed (attempt %s/%s), retrying in %.2fs: %s",
                 context,
                 attempt,
                 max_attempts,
                 delay,
-                exc,
+                _format_retry_exception(exc),
             )
-            await asyncio.sleep(delay)
+            await sleep_fn(delay)
