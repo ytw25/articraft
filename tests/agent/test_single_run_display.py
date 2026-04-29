@@ -253,6 +253,47 @@ def test_add_tool_call_renders_compile_model_failure_details() -> None:
     assert "Failures are blocking and should be investigated." in output
 
 
+def test_add_tool_call_renders_compile_model_severity_section_headings() -> None:
+    display, buffer = _make_display()
+
+    display.add_tool_call(
+        tool_name="compile_model",
+        args={},
+        success=True,
+        duration=0.25,
+        result=(
+            "<compile_signals>\n"
+            "<summary>\n"
+            "status=failure failures=1 warnings=0 notes=1\n"
+            "Primary issue: compiler-owned global QC reported part overlap that needs classification.\n"
+            "</summary>\n\n"
+            "<failures>\n"
+            "- FAILURE [real_overlap] Compiler-owned global QC reported real 3D overlap.\n"
+            "  pair=('base','latch')\n"
+            "</failures>\n"
+            "\n<notes>\n"
+            "- NOTE [allowed_isolated_part] Isolated-part allowance declared.\n"
+            "  allow_isolated_part('latch'): articulated but not touching at rest\n"
+            "</notes>\n"
+            "\n<response_rules>\n"
+            "- Compiler-owned overlap QC reported a real 3D overlap.\n"
+            "</response_rules>\n"
+            "</compile_signals>"
+        ),
+        compilation={
+            "status": "error",
+            "error": "Primary issue: compiler-owned global QC reported part overlap",
+        },
+    )
+
+    output = buffer.getvalue()
+    assert "Failures (blocking):" in output
+    assert "- FAILURE [real_overlap] Compiler-owned global QC reported real 3D overlap." in output
+    assert "Notes (informational):" in output
+    assert "- NOTE [allowed_isolated_part] Isolated-part allowance declared." in output
+    assert "Suggested next steps:" in output
+
+
 def test_add_tool_call_renders_all_compile_warnings_without_truncating_count() -> None:
     display, buffer = _make_display()
 

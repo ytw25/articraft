@@ -5,10 +5,10 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from agent.compiler import _warn_geometry_scale_anomalies
-from agent.feedback import build_compile_signal_bundle
+from agent.feedback import build_compile_signal_bundle, render_compile_signals
 from agent.harness import ArticraftAgent
 from agent.models import CompileReport
-from sdk import ArticulatedObject, Box, Cylinder
+from sdk import AllowedOverlap, ArticulatedObject, Box, Cylinder
 from sdk import TestReport as SDKTestReport
 
 
@@ -414,6 +414,54 @@ def test_compile_signal_bundle_renders_allowed_isolated_part_distinctly() -> Non
     assert len(signals) == 2
     assert any("allowed by justification" in signal.summary.lower() for signal in signals)
     assert any("allow_isolated_part('antenna')" in signal.details for signal in signals)
+
+
+def test_render_compile_signals_separates_failures_and_allowance_notes() -> None:
+    bundle = build_compile_signal_bundle(
+        status="failure",
+        test_report=SDKTestReport(
+            passed=False,
+            checks_run=1,
+            checks=("fail_if_parts_overlap_in_current_pose()",),
+            failures=(
+                SimpleNamespace(
+                    name="fail_if_parts_overlap_in_current_pose()",
+                    details=(
+                        "Part overlaps detected (overlap_tol=0.005, overlap_volume_tol=0):\n"
+                        "pair=('base','latch') depth=(0.04,0.01,0.06) min_depth=0.01 "
+                        "vol=2.4e-05 elem_a=#0 'base_shell':Mesh elem_b=#0 "
+                        "'latch_catch':Box pose={}"
+                    ),
+                ),
+            ),
+            warnings=(),
+            allowances=(
+                "allow_isolated_part('latch'): connected by revolute joint without rest contact",
+                "allow_overlap('base', 'latch', elem_b='latch_catch'): catch touches rim",
+            ),
+            allowed_overlaps=(
+                AllowedOverlap(
+                    "base",
+                    "latch",
+                    "catch touches rim",
+                    elem_b="latch_catch",
+                ),
+            ),
+        ),
+    )
+
+    rendered = render_compile_signals(bundle, failure_streak=8)
+
+    assert "status=failure failures=1 warnings=0 notes=2" in rendered
+    assert "Failures (blocking):" in rendered
+    assert "- FAILURE [real_overlap]" in rendered
+    assert "Warnings (non-blocking):" not in rendered
+    assert "Notes (informational):" in rendered
+    assert "- NOTE [allowed_isolated_part] Isolated-part allowance declared." in rendered
+    assert "- NOTE [allowed_overlap] Overlap allowance declared." in rendered
+    assert "  allow_isolated_part('latch')" in rendered
+    assert "  allow_overlap('base', 'latch')" in rendered
+    assert "Suggested next steps:" in rendered
 
 
 def test_compile_signal_bundle_classifies_isolated_part_failures_cleanly() -> None:

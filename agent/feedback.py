@@ -1154,14 +1154,23 @@ def compile_signal_bundle_from_exception(exc: BaseException) -> CompileSignalBun
     )
 
 
+def _indent_signal_details(details: str) -> str:
+    return "\n".join(f"  {line}" if line else "" for line in details.splitlines())
+
+
 def _render_signal_lines(signals: Iterable[CompileSignal]) -> str:
     rendered: list[str] = []
     for signal in signals:
-        line = f"- [{signal.kind}] {signal.summary}"
+        severity = signal.severity.upper()
+        line = f"- {severity} [{signal.kind}] {signal.summary}"
         if signal.details:
-            line += f"\n{signal.details}"
+            line += f"\n{_indent_signal_details(signal.details)}"
         rendered.append(line)
     return "\n".join(rendered)
+
+
+def _render_signal_section(heading: str, signals: Iterable[CompileSignal]) -> str:
+    return f"{heading}\n{_render_signal_lines(signals)}"
 
 
 def render_compile_signals(
@@ -1193,11 +1202,32 @@ def render_compile_signals(
 
     parts = ["<compile_signals>", "<summary>", summary, "</summary>"]
     if failures:
-        parts.extend(["", "<failures>", _render_signal_lines(failures), "</failures>"])
+        parts.extend(
+            [
+                "",
+                "<failures>",
+                _render_signal_section("Failures (blocking):", failures),
+                "</failures>",
+            ]
+        )
     if warnings:
-        parts.extend(["", "<warnings>", _render_signal_lines(warnings), "</warnings>"])
+        parts.extend(
+            [
+                "",
+                "<warnings>",
+                _render_signal_section("Warnings (non-blocking):", warnings),
+                "</warnings>",
+            ]
+        )
     if notes and (failures or warnings):
-        parts.extend(["", "<notes>", _render_signal_lines(notes), "</notes>"])
+        parts.extend(
+            [
+                "",
+                "<notes>",
+                _render_signal_section("Notes (informational):", notes),
+                "</notes>",
+            ]
+        )
 
     response_rules = _response_rules_for_failures(
         failures,
@@ -1205,15 +1235,16 @@ def render_compile_signals(
         failure_streak=failure_streak,
         include_warning_note=bool(warnings),
     )
-    parts.extend(
-        [
-            "",
-            "<response_rules>",
-            "\n".join(response_rules),
-            "</response_rules>",
-            "</compile_signals>",
-        ]
-    )
+    if response_rules:
+        parts.extend(
+            [
+                "",
+                "<response_rules>",
+                "Suggested next steps:\n" + "\n".join(response_rules),
+                "</response_rules>",
+            ]
+        )
+    parts.append("</compile_signals>")
     return "\n".join(parts)
 
 

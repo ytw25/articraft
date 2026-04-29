@@ -122,6 +122,23 @@ class SingleRunDisplay:
             return None
         return text[start:end].strip()
 
+    def _compile_block_with_heading(self, tag: str, block: str | None) -> str | None:
+        if not isinstance(block, str):
+            return None
+        cleaned = block.strip()
+        if not cleaned:
+            return None
+        headings = {
+            "failures": "Failures (blocking):",
+            "warnings": "Warnings (non-blocking):",
+            "notes": "Notes (informational):",
+            "response_rules": "Suggested next steps:",
+        }
+        heading = headings.get(tag)
+        if heading is None or cleaned.startswith(heading):
+            return cleaned
+        return f"{heading}\n{cleaned}"
+
     def _parse_compile_output(
         self,
         result: Any,
@@ -135,7 +152,7 @@ class SingleRunDisplay:
 
         has_warnings = bool(self._extract_tagged_block(result, "warnings"))
         blocks = [
-            self._extract_tagged_block(result, tag)
+            self._compile_block_with_heading(tag, self._extract_tagged_block(result, tag))
             for tag in ("summary", "failures", "warnings", "notes", "response_rules")
         ]
         visible_blocks = [
