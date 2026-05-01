@@ -8,19 +8,16 @@ the repo can be used without OpenAI installed.
 from __future__ import annotations
 
 import asyncio
-import base64
-import copy
 import json
 import logging
-import mimetypes
 import os
 import random
 import time
 import uuid
-from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import urlparse, urlunparse
 
+from agent.providers import openai_codec
 from agent.providers.base import (
     CompactionEvent,
     ContextWindowPressure,
@@ -74,87 +71,6 @@ def openai_api_keys_from_env(env: dict[str, str] | None = None) -> list[str]:
 def openai_api_key_from_env(env: dict[str, str] | None = None) -> str | None:
     keys = openai_api_keys_from_env(env)
     return random.choice(keys) if keys else None
-
-
-def _make_json_schema_nullable(schema: dict[str, Any]) -> dict[str, Any]:
-    normalized = copy.deepcopy(schema)
-    schema_type = normalized.get("type")
-    if isinstance(schema_type, str):
-        if schema_type != "null":
-            normalized["type"] = [schema_type, "null"]
-        return normalized
-    if isinstance(schema_type, list):
-        if "null" not in schema_type:
-            normalized["type"] = [*schema_type, "null"]
-        return normalized
-
-    any_of = normalized.get("anyOf")
-    if isinstance(any_of, list) and not any(
-        isinstance(option, dict) and option.get("type") == "null" for option in any_of
-    ):
-        normalized["anyOf"] = [*any_of, {"type": "null"}]
-        return normalized
-
-    one_of = normalized.get("oneOf")
-    if isinstance(one_of, list) and not any(
-        isinstance(option, dict) and option.get("type") == "null" for option in one_of
-    ):
-        normalized["oneOf"] = [*one_of, {"type": "null"}]
-    return normalized
-
-
-def _normalize_tool_json_schema_for_responses(
-    schema: dict[str, Any] | None,
-    *,
-    nullable: bool = False,
-) -> dict[str, Any]:
-    """Normalize a JSON Schema node to OpenAI Responses strict-mode requirements."""
-
-    normalized: dict[str, Any] = copy.deepcopy(schema) if isinstance(schema, dict) else {}
-    properties = normalized.get("properties")
-    if isinstance(properties, dict):
-        original_required = normalized.get("required")
-        required_names = set(original_required) if isinstance(original_required, list) else set()
-        normalized_properties: dict[str, Any] = {}
-        for name, child_schema in properties.items():
-            normalized_properties[name] = _normalize_tool_json_schema_for_responses(
-                child_schema,
-                nullable=name not in required_names,
-            )
-        normalized["properties"] = normalized_properties
-        normalized["required"] = list(normalized_properties.keys())
-        normalized["additionalProperties"] = False
-
-    items = normalized.get("items")
-    if isinstance(items, dict):
-        normalized["items"] = _normalize_tool_json_schema_for_responses(items)
-    elif isinstance(items, list):
-        normalized["items"] = [
-            _normalize_tool_json_schema_for_responses(item) if isinstance(item, dict) else item
-            for item in items
-        ]
-
-    if nullable:
-        normalized = _make_json_schema_nullable(normalized)
-    return normalized
-
-
-def _normalize_function_parameters_for_responses(
-    parameters: dict[str, Any] | None,
-    *,
-    required_override: list[str] | None = None,
-) -> dict[str, Any]:
-    normalized = _normalize_tool_json_schema_for_responses(parameters or {"type": "object"})
-    properties = normalized.get("properties")
-    if not isinstance(properties, dict):
-        properties = {}
-        normalized["properties"] = properties
-    normalized["type"] = "object"
-    normalized["required"] = (
-        list(required_override) if required_override is not None else list(properties.keys())
-    )
-    normalized["additionalProperties"] = False
-    return normalized
 
 
 class OpenAILLM:
@@ -674,7 +590,7 @@ class OpenAILLM:
         for item in self._input_items:
             if count >= 2:
                 break
-            if not _is_user_message_item(item):
+            if not openai_codec.is_user_message_item(item):
                 break
             count += 1
         return count
@@ -956,351 +872,25 @@ class OpenAILLM:
         return new_items
 
     def _convert_message_content(self, content: Any) -> list[dict[str, Any]]:
-        if isinstance(content, str):
-            if not content.strip():
-                return []
-            return [{"type": "input_text", "text": content}]
-
-        if not isinstance(content, list):
-            return []
-
-        parts: list[dict[str, Any]] = []
-        for part in content:
-            if not isinstance(part, dict):
-                continue
-
-            part_type = part.get("type")
-            if part_type in {"input_text", "text"}:
-                text = part.get("text")
-                if isinstance(text, str) and text.strip():
-                    parts.append({"type": "input_text", "text": text})
-                continue
-
-            if part_type == "input_image":
-                image_part = self._convert_image_part(part)
-                if image_part:
-                    parts.append(image_part)
-
-        return parts
+        return openai_codec.convert_message_content(content)
 
     def _convert_image_part(self, part: dict[str, Any]) -> Optional[dict[str, Any]]:
-        detail = part.get("detail")
-
-        if isinstance(part.get("image_url"), str) and part["image_url"]:
-            item: dict[str, Any] = {
-                "type": "input_image",
-                "image_url": part["image_url"],
-            }
-            if isinstance(detail, str) and detail:
-                item["detail"] = detail
-            return item
-
-        if isinstance(part.get("file_id"), str) and part["file_id"]:
-            item = {
-                "type": "input_image",
-                "file_id": part["file_id"],
-            }
-            if isinstance(detail, str) and detail:
-                item["detail"] = detail
-            return item
-
-        image_path = part.get("image_path")
-        if isinstance(image_path, str) and image_path:
-            item = {
-                "type": "input_image",
-                "image_url": _image_path_to_data_url(image_path),
-            }
-            if isinstance(detail, str) and detail:
-                item["detail"] = detail
-            return item
-
-        return None
+        return openai_codec.convert_image_part(part)
 
     def _convert_tools(self, tools: list[dict]) -> list[dict[str, Any]]:
-        """
-        Convert existing OpenAI-style function tool schemas into Responses API format.
-
-        Supported input formats:
-          {"type":"function","function":{"name":...,"description":...,"parameters":...}}
-          {"type":"custom","name":...,"description":...,"format":{...}}
-        """
-
-        converted: list[dict[str, Any]] = []
-        for tool in tools or []:
-            if not isinstance(tool, dict):
-                continue
-            tool_type = tool.get("type")
-            if tool_type == "custom":
-                fmt = tool.get("format") if isinstance(tool.get("format"), dict) else None
-                if not fmt:
-                    continue
-                converted.append(
-                    {
-                        "type": "custom",
-                        "name": tool.get("name", ""),
-                        "description": tool.get("description", ""),
-                        "format": {
-                            "type": fmt.get("type", ""),
-                            "syntax": fmt.get("syntax", ""),
-                            "definition": fmt.get("definition", ""),
-                        },
-                    }
-                )
-                continue
-
-            if tool_type == "function":
-                func = tool.get("function") if isinstance(tool.get("function"), dict) else None
-                if not func:
-                    continue
-                declared_parameters = (
-                    func.get("parameters") if isinstance(func.get("parameters"), dict) else None
-                )
-                is_read_file = func.get("name") == "read_file"
-                required_override = (
-                    declared_parameters.get("required")
-                    if isinstance(declared_parameters, dict)
-                    and isinstance(declared_parameters.get("required"), list)
-                    and is_read_file
-                    else None
-                )
-
-                converted.append(
-                    {
-                        "type": "function",
-                        "name": func.get("name", ""),
-                        "description": func.get("description", ""),
-                        "parameters": _normalize_function_parameters_for_responses(
-                            declared_parameters
-                            if isinstance(declared_parameters, dict)
-                            else {"type": "object", "properties": {}},
-                            required_override=required_override,
-                        ),
-                        "strict": False if is_read_file else True,
-                    }
-                )
-        return converted
+        return openai_codec.convert_tools(tools)
 
     def _serialize_response_output(self, response: Any) -> list[dict[str, Any]]:
-        output = (
-            response.get("output")
-            if isinstance(response, dict)
-            else getattr(response, "output", None)
-        )
-        if output is None:
-            return []
-
-        serialized: list[dict[str, Any]] = []
-        for item in output:
-            if item is None:
-                continue
-            if isinstance(item, dict):
-                serialized.append(item)
-                continue
-
-            dump_json = getattr(item, "model_dump_json", None)
-            if callable(dump_json):
-                serialized.append(json.loads(dump_json(exclude_none=True)))
-                continue
-
-            dump = getattr(item, "model_dump", None)
-            if callable(dump):
-                serialized.append(
-                    dump(
-                        mode="json",
-                        exclude_none=True,
-                        warnings="none",
-                        serialize_as_any=True,
-                    )
-                )
-                continue
-
-            # Best-effort fallback for tests / duck-typed objects.
-            item_type = getattr(item, "type", None)
-            record: dict[str, Any] = {"type": item_type} if item_type else {}
-            for attr in (
-                "role",
-                "content",
-                "name",
-                "arguments",
-                "input",
-                "output",
-                "call_id",
-                "id",
-                "summary",
-            ):
-                value = getattr(item, attr, None)
-                if value is not None:
-                    record[attr] = value
-            if record:
-                serialized.append(record)
-
-        return serialized
+        return openai_codec.serialize_response_output(response)
 
     def _extract_usage(self, response: Any) -> Optional[dict[str, int]]:
-        usage = (
-            response.get("usage")
-            if isinstance(response, dict)
-            else getattr(response, "usage", None)
-        )
-        if usage is None:
-            return None
-
-        def get(field: str) -> Any:
-            if isinstance(usage, dict):
-                return usage.get(field)
-            return getattr(usage, field, None)
-
-        def get_details() -> Any:
-            for name in ("input_tokens_details", "prompt_tokens_details", "input_token_details"):
-                details = get(name)
-                if details is not None:
-                    return details
-            return None
-
-        def get_from(obj: Any, field: str) -> Any:
-            if obj is None:
-                return None
-            if isinstance(obj, dict):
-                return obj.get(field)
-            return getattr(obj, field, None)
-
-        input_tokens = get("input_tokens")
-        output_tokens = get("output_tokens")
-        total_tokens = get("total_tokens")
-        cached_tokens = get("cached_tokens")
-        if not isinstance(cached_tokens, int):
-            details = get_details()
-            for field in (
-                "cached_tokens",
-                "cached_input_tokens",
-                "cache_read_tokens",
-                "cache_read_input_tokens",
-            ):
-                value = get_from(details, field)
-                if isinstance(value, int):
-                    cached_tokens = value
-                    break
-
-        cleaned: dict[str, int] = {}
-        if isinstance(input_tokens, int):
-            cleaned["prompt_tokens"] = input_tokens
-        if isinstance(output_tokens, int):
-            cleaned["candidates_tokens"] = output_tokens
-        if isinstance(total_tokens, int):
-            cleaned["total_tokens"] = total_tokens
-        if isinstance(cached_tokens, int):
-            cleaned["cached_tokens"] = cached_tokens
-
-        return cleaned or None
+        return openai_codec.extract_usage(response)
 
     def _convert_response(self, response: Any) -> dict[str, Any]:
-        text_fragments: list[str] = []
-        reasoning_fragments: list[str] = []
-        tool_calls: list[dict[str, Any]] = []
-        usage = self._extract_usage(response)
-
-        output = (
-            response.get("output")
-            if isinstance(response, dict)
-            else getattr(response, "output", None)
-        )
-        output = output or []
-        for item in output:
-            if item is None:
-                continue
-
-            item_type = item.get("type") if isinstance(item, dict) else getattr(item, "type", None)
-            if item_type == "reasoning":
-                summary = (
-                    item.get("summary")
-                    if isinstance(item, dict)
-                    else getattr(item, "summary", None)
-                )
-                reasoning_text = _extract_reasoning_summary(summary)
-                if reasoning_text:
-                    reasoning_fragments.append(reasoning_text)
-                continue
-
-            if item_type == "message":
-                content = (
-                    item.get("content")
-                    if isinstance(item, dict)
-                    else getattr(item, "content", None)
-                )
-                text = _extract_message_text(content)
-                if text:
-                    text_fragments.append(text)
-                continue
-
-            if item_type == "function_call":
-                name = item.get("name") if isinstance(item, dict) else getattr(item, "name", None)
-                arguments = (
-                    item.get("arguments")
-                    if isinstance(item, dict)
-                    else getattr(item, "arguments", None)
-                )
-                call_id = (
-                    item.get("call_id")
-                    if isinstance(item, dict)
-                    else getattr(item, "call_id", None)
-                )
-                tool_calls.append(
-                    {
-                        "id": call_id or f"call_{uuid.uuid4().hex}",
-                        "type": "function",
-                        "function": {
-                            "name": str(name or ""),
-                            "arguments": str(arguments or ""),
-                        },
-                    }
-                )
-                continue
-
-            if item_type == "custom_tool_call":
-                name = item.get("name") if isinstance(item, dict) else getattr(item, "name", None)
-                input_text = (
-                    item.get("input") if isinstance(item, dict) else getattr(item, "input", None)
-                )
-                call_id = (
-                    item.get("call_id")
-                    if isinstance(item, dict)
-                    else getattr(item, "call_id", None)
-                )
-                tool_calls.append(
-                    {
-                        "id": call_id or f"call_{uuid.uuid4().hex}",
-                        "type": "custom",
-                        "custom": {
-                            "name": str(name or ""),
-                            "input": str(input_text or ""),
-                        },
-                    }
-                )
-                continue
-
-        result: dict[str, Any] = {
-            "content": "\n".join(text_fragments).strip(),
-            "tool_calls": tool_calls,
-        }
-        if reasoning_fragments:
-            result["thought_summary"] = "\n".join(reasoning_fragments).strip()
-        if usage:
-            result["usage"] = usage
-        return result
+        return openai_codec.convert_response(response)
 
     def _extract_response_id(self, response: Any) -> Optional[str]:
-        response_id = (
-            response.get("id") if isinstance(response, dict) else getattr(response, "id", None)
-        )
-        if isinstance(response_id, str) and response_id:
-            return response_id
-        return None
-
-
-def _is_user_message_item(item: Any) -> bool:
-    if not isinstance(item, dict):
-        return False
-    return item.get("role") == "user" and item.get("content") is not None
+        return openai_codec.extract_response_id(response)
 
 
 def _hard_pressure_threshold_for_model(model_id: str) -> int | None:
@@ -1323,24 +913,6 @@ def _context_window_tokens_for_model(model_id: str) -> int | None:
     if normalized.startswith("gpt-4.1"):
         return 1_000_000
     return None
-
-
-def _extract_reasoning_summary(summary: Any) -> str:
-    if not summary:
-        return ""
-    if isinstance(summary, str):
-        return summary.strip()
-    parts: list[str] = []
-    if isinstance(summary, list):
-        for item in summary:
-            if isinstance(item, str):
-                if item.strip():
-                    parts.append(item.strip())
-                continue
-            text = item.get("text") if isinstance(item, dict) else getattr(item, "text", None)
-            if isinstance(text, str) and text.strip():
-                parts.append(text.strip())
-    return " ".join(parts).strip()
 
 
 def _normalize_reasoning_summary(value: Optional[str]) -> Optional[str]:
@@ -1374,28 +946,6 @@ def _normalize_prompt_cache_retention(value: Optional[str]) -> Optional[str]:
     return text
 
 
-def _extract_message_text(content: Any) -> str:
-    if not content:
-        return ""
-    if isinstance(content, str):
-        return content
-    fragments: list[str] = []
-    if isinstance(content, list):
-        for part in content:
-            if part is None:
-                continue
-            part_type = part.get("type") if isinstance(part, dict) else getattr(part, "type", None)
-            if part_type in {"output_text", "input_text", "text"}:
-                text = part.get("text") if isinstance(part, dict) else getattr(part, "text", None)
-                if isinstance(text, str) and text:
-                    fragments.append(text)
-                continue
-            text = part.get("text") if isinstance(part, dict) else getattr(part, "text", None)
-            if isinstance(text, str) and text:
-                fragments.append(text)
-    return "\n".join(fragments).strip()
-
-
 def _effort_from_thinking_level(thinking_level: str) -> str:
     level = (thinking_level or "").strip().lower()
     if level == "med":
@@ -1424,15 +974,6 @@ def _env_int_or_none(name: str) -> int | None:
     except Exception:
         return None
     return value if value > 0 else None
-
-
-def _image_path_to_data_url(image_path: str) -> str:
-    path = Path(image_path).expanduser().resolve()
-    mime_type, _ = mimetypes.guess_type(path.name)
-    if not mime_type:
-        mime_type = "application/octet-stream"
-    data = base64.b64encode(path.read_bytes()).decode("ascii")
-    return f"data:{mime_type};base64,{data}"
 
 
 def _normalize_transport(transport: str) -> str:

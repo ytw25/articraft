@@ -41,9 +41,15 @@ from agent.prompts import (
     normalize_sdk_package,
     resolve_system_prompt_path,
 )
-from agent.providers.gemini import GeminiLLM, gemini_client_config_from_env
-from agent.providers.openai import OpenAILLM, openai_api_key_from_env
-from agent.providers.openrouter import OpenRouterLLM, openrouter_api_key_from_env
+from agent.providers.factory import (
+    ProviderConfig,
+    create_provider_client,
+    default_model_id,
+    infer_provider_from_model_id,
+    normalize_provider_name,
+    validate_provider_credentials,
+)
+from agent.run_config import SingleRunSettings
 from agent.runtime_limits import BatchRuntimeLimits, local_work_slot
 from agent.tools import (
     build_first_turn_messages as _build_first_turn_messages,
@@ -397,16 +403,7 @@ def _platform_id() -> str:
 
 
 def _infer_provider_from_model_id(model_id: str | None) -> str | None:
-    model_norm = (model_id or "").strip().lower()
-    if not model_norm:
-        return None
-    if model_norm.startswith(("gpt-", "o1", "o3", "o4")):
-        return "openai"
-    if model_norm.startswith("gemini-"):
-        return "gemini"
-    if "/" in model_norm or model_norm.startswith("openrouter/"):
-        return "openrouter"
-    return None
+    return infer_provider_from_model_id(model_id)
 
 
 def _default_model_id(
@@ -417,21 +414,15 @@ def _default_model_id(
     openai_transport: str,
     openai_reasoning_summary: str | None,
 ) -> str:
-    provider_norm = (provider or "").strip().lower()
-    if model_id:
-        return model_id
-    if provider_norm == "gemini":
-        return GeminiLLM(thinking_level=thinking_level, dry_run=True).model_id
-    if provider_norm == "openrouter":
-        return OpenRouterLLM(thinking_level=thinking_level, dry_run=True).model_id
-    if provider_norm == "openai":
-        return OpenAILLM(
+    return default_model_id(
+        ProviderConfig(
+            provider=provider,
+            model_id=model_id,
             thinking_level=thinking_level,
-            reasoning_summary=openai_reasoning_summary,
-            transport=openai_transport,
-            dry_run=True,
-        ).model_id
-    raise ValueError(f"Unsupported provider: {provider}")
+            openai_transport=openai_transport,
+            openai_reasoning_summary=openai_reasoning_summary,
+        )
+    )
 
 
 def _single_run_settings_summary(
@@ -448,21 +439,19 @@ def _single_run_settings_summary(
     post_success_design_audit: bool,
     max_cost_usd: float | None,
 ) -> dict[str, Any]:
-    summary: dict[str, Any] = {
-        "provider": provider,
-        "model_id": model_id,
-        "thinking_level": thinking_level,
-        "max_turns": max_turns,
-        "max_cost_usd": max_cost_usd,
-        "system_prompt_path": system_prompt_path,
-        "sdk_package": sdk_package,
-        "sdk_docs_mode": sdk_docs_mode,
-        "post_success_design_audit": post_success_design_audit,
-    }
-    if provider == "openai":
-        summary["openai_transport"] = openai_transport
-        summary["openai_reasoning_summary"] = openai_reasoning_summary
-    return summary
+    return SingleRunSettings(
+        provider=provider,
+        model_id=model_id,
+        thinking_level=thinking_level,
+        max_turns=max_turns,
+        system_prompt_path=system_prompt_path,
+        sdk_package=sdk_package,
+        sdk_docs_mode=sdk_docs_mode,
+        openai_transport=openai_transport,
+        openai_reasoning_summary=openai_reasoning_summary,
+        post_success_design_audit=post_success_design_audit,
+        max_cost_usd=max_cost_usd,
+    ).to_summary()
 
 
 def _thinking_level_from_run_parameters(
@@ -1229,7 +1218,9 @@ def build_provider_payload_preview(
     )
     tools = build_tool_registry(provider, sdk_package=sdk_package).get_tool_schemas()
 
-    provider_norm = (provider or "").strip().lower()
+    provider_norm = normalize_provider_name(provider)
+    prompt_cache_key: str | None = None
+    prompt_cache_retention: str | None = None
     if provider_norm == "openai":
         prompt_cache_key, prompt_cache_retention = build_openai_prompt_cache_settings(
             model_id=model_id,
@@ -1239,39 +1230,23 @@ def build_provider_payload_preview(
             sdk_docs_context=docs,
             tools=tools,
         )
-        llm = OpenAILLM(
+    llm = create_provider_client(
+        ProviderConfig(
+            provider=provider_norm,
             model_id=model_id,
             thinking_level=thinking_level,
-            reasoning_summary=openai_reasoning_summary,
-            transport=openai_transport,
-            prompt_cache_key=prompt_cache_key,
-            prompt_cache_retention=prompt_cache_retention,
-            dry_run=True,
-        )
-        return llm.build_request_preview(
-            system_prompt=system_prompt,
-            messages=conversation,
-            tools=tools,
-        )
-    if provider_norm == "openrouter":
-        llm = OpenRouterLLM(
-            model_id=model_id,
-            thinking_level=thinking_level,
-            dry_run=True,
-        )
-        return llm.build_request_preview(
-            system_prompt=system_prompt,
-            messages=conversation,
-            tools=tools,
-        )
-    if provider_norm == "gemini":
-        llm = GeminiLLM(model_id=model_id, thinking_level=thinking_level, dry_run=True)
-        return llm.build_request_preview(
-            system_prompt=system_prompt,
-            messages=conversation,
-            tools=tools,
-        )
-    raise ValueError(f"Unsupported provider: {provider}")
+            openai_transport=openai_transport,
+            openai_reasoning_summary=openai_reasoning_summary,
+            openai_prompt_cache_key=prompt_cache_key,
+            openai_prompt_cache_retention=prompt_cache_retention,
+        ),
+        dry_run=True,
+    )
+    return llm.build_request_preview(
+        system_prompt=system_prompt,
+        messages=conversation,
+        tools=tools,
+    )
 
 
 async def run_from_input(
@@ -1411,6 +1386,19 @@ async def _execute_single_run(
         model_id=selected_model_id,
         enabled=post_success_design_audit,
     )
+    run_settings = SingleRunSettings(
+        provider=provider,
+        model_id=selected_model_id,
+        thinking_level=thinking_level,
+        max_turns=resolved_max_turns,
+        system_prompt_path=system_prompt_path,
+        sdk_package=sdk_package,
+        sdk_docs_mode=sdk_docs_mode,
+        openai_transport=openai_transport,
+        openai_reasoning_summary=openai_reasoning_summary,
+        post_success_design_audit=resolved_post_success_design_audit,
+        max_cost_usd=max_cost_usd,
+    )
 
     async def _persist_failure(
         *,
@@ -1451,17 +1439,17 @@ async def _execute_single_run(
                     category_slug=category_slug,
                     prompt_count=1,
                     settings_summary=_single_run_settings_summary(
-                        provider=provider,
+                        provider=run_settings.provider,
                         model_id=actual_model_id,
-                        thinking_level=thinking_level,
-                        max_turns=resolved_max_turns,
-                        system_prompt_path=system_prompt_path,
-                        sdk_package=sdk_package,
-                        sdk_docs_mode=sdk_docs_mode,
-                        openai_transport=openai_transport,
-                        openai_reasoning_summary=openai_reasoning_summary,
-                        post_success_design_audit=resolved_post_success_design_audit,
-                        max_cost_usd=max_cost_usd,
+                        thinking_level=run_settings.thinking_level,
+                        max_turns=run_settings.max_turns,
+                        system_prompt_path=run_settings.system_prompt_path,
+                        sdk_package=run_settings.sdk_package,
+                        sdk_docs_mode=run_settings.sdk_docs_mode,
+                        openai_transport=run_settings.openai_transport,
+                        openai_reasoning_summary=run_settings.openai_reasoning_summary,
+                        post_success_design_audit=run_settings.post_success_design_audit,
+                        max_cost_usd=run_settings.max_cost_usd,
                     ),
                 ),
             )
@@ -1738,17 +1726,17 @@ async def _execute_single_run(
                 category_slug=category_slug,
                 prompt_count=1,
                 settings_summary=_single_run_settings_summary(
-                    provider=provider,
+                    provider=run_settings.provider,
                     model_id=actual_model_id,
-                    thinking_level=thinking_level,
-                    max_turns=max_turns,
-                    system_prompt_path=system_prompt_path,
-                    sdk_package=sdk_package,
-                    sdk_docs_mode=sdk_docs_mode,
-                    openai_transport=openai_transport,
-                    openai_reasoning_summary=openai_reasoning_summary,
-                    post_success_design_audit=resolved_post_success_design_audit,
-                    max_cost_usd=max_cost_usd,
+                    thinking_level=run_settings.thinking_level,
+                    max_turns=run_settings.max_turns,
+                    system_prompt_path=run_settings.system_prompt_path,
+                    sdk_package=run_settings.sdk_package,
+                    sdk_docs_mode=run_settings.sdk_docs_mode,
+                    openai_transport=run_settings.openai_transport,
+                    openai_reasoning_summary=run_settings.openai_reasoning_summary,
+                    post_success_design_audit=run_settings.post_success_design_audit,
+                    max_cost_usd=run_settings.max_cost_usd,
                 ),
             ),
         )
@@ -2300,27 +2288,11 @@ def main(argv: list[str] | None = None) -> int:
             print(text)
         return 0
 
-    if args.provider == "gemini":
-        try:
-            gemini_client_config_from_env()
-        except ValueError as exc:
-            print(str(exc), file=sys.stderr)
-            return 1
-    elif args.provider == "openrouter":
-        if not openrouter_api_key_from_env():
-            print(
-                "OpenRouter credentials are required. "
-                "Set OPENROUTER_API_KEY or OPENROUTER_API_KEYS.",
-                file=sys.stderr,
-            )
-            return 1
-    elif args.provider == "openai":
-        if not openai_api_key_from_env():
-            print(
-                "OpenAI credentials are required. Set OPENAI_API_KEY or OPENAI_API_KEYS.",
-                file=sys.stderr,
-            )
-            return 1
+    try:
+        validate_provider_credentials(args.provider)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
     model_id = args.model
 

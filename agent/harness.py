@@ -35,6 +35,13 @@ from agent.prompts import (
 from agent.prompts import (
     normalize_sdk_package as _normalize_sdk_package,
 )
+from agent.providers.base import ProviderClient
+from agent.providers.factory import (
+    ProviderConfig,
+    ProviderConstructors,
+    create_provider_client,
+    normalize_provider_name,
+)
 from agent.providers.gemini import GeminiLLM
 from agent.providers.openai import OpenAILLM
 from agent.providers.openrouter import OpenRouterLLM
@@ -334,34 +341,22 @@ class ArticraftAgent:
             TraceWriter(Path(trace_dir)) if trace_dir else None
         )
 
-        provider_norm = (provider or "openai").strip().lower()
+        provider_norm = normalize_provider_name(provider)
         self.provider = provider_norm
-        if provider_norm == "gemini":
-            if model_id is not None:
-                self.llm = GeminiLLM(model_id=model_id, thinking_level=thinking_level)
-            else:
-                self.llm = GeminiLLM(thinking_level=thinking_level)
-        elif provider_norm == "openrouter":
-            if model_id is not None:
-                self.llm = OpenRouterLLM(model_id=model_id, thinking_level=thinking_level)
-            else:
-                self.llm = OpenRouterLLM(thinking_level=thinking_level)
-        elif provider_norm == "openai":
-            if model_id is not None:
-                self.llm = OpenAILLM(
-                    model_id=model_id,
-                    thinking_level=thinking_level,
-                    reasoning_summary=openai_reasoning_summary,
-                    transport=openai_transport,
-                )
-            else:
-                self.llm = OpenAILLM(
-                    thinking_level=thinking_level,
-                    reasoning_summary=openai_reasoning_summary,
-                    transport=openai_transport,
-                )
-        else:
-            raise ValueError(f"Unsupported provider: {provider}")
+        self.llm: ProviderClient = create_provider_client(
+            ProviderConfig(
+                provider=provider_norm,
+                model_id=model_id,
+                thinking_level=thinking_level,
+                openai_transport=openai_transport,
+                openai_reasoning_summary=openai_reasoning_summary,
+            ),
+            constructors=ProviderConstructors(
+                gemini=GeminiLLM,
+                openai=OpenAILLM,
+                openrouter=OpenRouterLLM,
+            ),
+        )
 
         actual_model_id = self.llm.model_id
         self.max_turns = resolve_max_turns(model_id=actual_model_id, max_turns=max_turns)
