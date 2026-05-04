@@ -14,6 +14,7 @@ import os
 import random
 import time
 import uuid
+from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import urlparse, urlunparse
 
@@ -42,6 +43,12 @@ DEFAULT_OPENAI_MODEL = "gpt-5.5-2026-04-23"
 _GPT_5_4_AND_5_5_DANGER_ZONE_TOKENS = 272_000
 _GPT_5_2_AND_5_3_CODEX_DANGER_ZONE_TOKENS = 280_000
 DEFAULT_OPENAI_COMPACTION_MODEL = "gpt-5.4-mini"
+
+
+def _load_cwd_dotenv_override() -> None:
+    dotenv_path = Path.cwd() / ".env"
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path=dotenv_path, override=True)
 
 
 def openai_api_keys_from_env(env: dict[str, str] | None = None) -> list[str]:
@@ -114,7 +121,7 @@ class OpenAILLM:
             self._client = None
             self._client_is_async = False
         else:
-            load_dotenv()
+            _load_cwd_dotenv_override()
             api_key = openai_api_key_from_env()
             if not api_key:
                 raise ValueError(

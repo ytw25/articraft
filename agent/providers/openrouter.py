@@ -42,6 +42,12 @@ DEFAULT_OPENROUTER_MAX_TOKENS = 262_144
 DEFAULT_OPENROUTER_OUTPUT_SAFETY_TOKENS = 1_024
 
 
+def _load_cwd_dotenv_override() -> None:
+    dotenv_path = Path.cwd() / ".env"
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path=dotenv_path, override=True)
+
+
 def openrouter_api_keys_from_env(env: dict[str, str] | None = None) -> list[str]:
     values = os.environ if env is None else env
 
@@ -104,7 +110,7 @@ class OpenRouterLLM:
             self._client = None
             self._client_is_async = False
         else:
-            load_dotenv()
+            _load_cwd_dotenv_override()
             api_key = openrouter_api_key_from_env()
             if not api_key:
                 raise ValueError(

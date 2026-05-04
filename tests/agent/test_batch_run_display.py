@@ -58,6 +58,28 @@ def test_add_maintenance_event_shows_cache_lifecycle_line() -> None:
     assert "cachedContents/cache_1" in output
 
 
+def test_run_lines_show_provider_model_and_thinking_metadata() -> None:
+    display, buffer = _make_display()
+    display.add_run(
+        "rec_camcorder_0001",
+        "make a camcorder",
+        row_id="camcorder_claude_high",
+        provider="anthropic",
+        model_id="claude-opus-4-7",
+        thinking_level="high",
+    )
+
+    display.start_run("rec_camcorder_0001")
+    display.update_run_progress("rec_camcorder_0001", turn=1, cost=0.0)
+    display.complete_run("rec_camcorder_0001", success=True, cost=0.01)
+
+    output = buffer.getvalue()
+    assert "camcorder_claude_high" in output
+    assert "anthropic" in output
+    assert "claude-opus-4-7" in output
+    assert "thinking=high" in output
+
+
 def test_resume_preserved_rows_do_not_affect_rate_or_eta(monkeypatch) -> None:
     now = 100.0
 

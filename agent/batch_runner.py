@@ -59,7 +59,7 @@ ResumeAction = Literal["run", "skip", "reuse_success"]
 BATCH_RUN_MODE = "dataset_batch"
 DEFAULT_RESUME_POLICY: ResumePolicy = "failed_or_pending"
 RESUME_POLICIES: set[ResumePolicy] = {"failed_or_pending", "failed_only", "all"}
-VALID_PROVIDERS = {"openai", "gemini", "openrouter"}
+VALID_PROVIDERS = {"anthropic", "openai", "gemini", "openrouter"}
 VALID_THINKING_LEVELS = {"low", "med", "high"}
 _SUPPORTED_HEADERS = {
     "row_id",
@@ -195,6 +195,8 @@ def _infer_provider_from_model_id(model_id: str) -> str | None:
         return None
     if model_norm.startswith(("gpt-", "o1", "o3", "o4")):
         return "openai"
+    if model_norm.startswith("claude-"):
+        return "anthropic"
     if model_norm.startswith("gemini-"):
         return "gemini"
     if "/" in model_norm or model_norm.startswith("openrouter/"):
@@ -1717,7 +1719,14 @@ async def run_dataset_batch(config: BatchRunConfig) -> dict[str, Any]:
         enabled=os.environ.get("URDF_TUI_ENABLED", "1") != "0",
     )
     for row in config.rows:
-        display.add_run(config.allocations[row.row_id].record_id, row.prompt)
+        display.add_run(
+            config.allocations[row.row_id].record_id,
+            row.prompt,
+            row_id=row.row_id,
+            provider=row.provider,
+            model_id=row.model_id,
+            thinking_level=row.thinking_level,
+        )
     pause_controller = PauseController(
         pause_file=config.pause_file,
         poll_seconds=config.pause_poll_seconds,

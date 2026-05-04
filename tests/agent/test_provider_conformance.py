@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from agent.providers.anthropic import AnthropicLLM
 from agent.providers.gemini import GeminiLLM
 from agent.providers.openai import OpenAILLM
 from agent.providers.openrouter import OpenRouterLLM
@@ -145,9 +146,47 @@ def test_openrouter_preview_preserves_replayed_tool_call_chain() -> None:
     ]
 
 
+def test_anthropic_preview_preserves_replayed_tool_call_chain() -> None:
+    provider = AnthropicLLM(dry_run=True)
+
+    payload = provider.build_request_preview(
+        system_prompt="system",
+        messages=_tool_conversation(),
+        tools=[_compile_tool_schema()],
+    )
+
+    assert payload["tools"][0]["name"] == "compile_model"
+    assert payload["messages"] == [
+        {"role": "user", "content": "build a latch"},
+        {
+            "role": "assistant",
+            "content": [
+                {"type": "text", "text": "I will compile the current draft."},
+                {
+                    "type": "tool_use",
+                    "id": "call_compile",
+                    "name": "compile_model",
+                    "input": {},
+                },
+            ],
+        },
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "tool_result",
+                    "tool_use_id": "call_compile",
+                    "content": '{"result":"Compile passed cleanly."}',
+                }
+            ],
+        },
+    ]
+
+
 @pytest.mark.parametrize(
     "provider",
     [
+        AnthropicLLM(dry_run=True),
         OpenAILLM(dry_run=True),
         GeminiLLM(dry_run=True),
         OpenRouterLLM(dry_run=True),

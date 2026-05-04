@@ -6,6 +6,7 @@ import pytest
 
 from agent import runner
 from agent.prompts import (
+    ANTHROPIC_DESIGNER_PROMPT_NAME,
     DESIGNER_PROMPT_NAME,
     GEMINI_DESIGNER_PROMPT_NAME,
     OPENAI_DESIGNER_PROMPT_NAME,
@@ -428,6 +429,59 @@ def test_openrouter_prompt_resolution_and_payload_preview() -> None:
     assert "<process>" in instructions
     assert "<modeling>" in instructions
     assert "Work evidence-first. Before editing, read `model.py`" in instructions
+    assert "use `find_examples` for one or two relevant construction patterns" in instructions
+    assert "Treat overlap failures by classifying them first." in instructions
+    assert (
+        "silence it with a scoped `ctx.allow_overlap(...)` plus an exact proof check"
+        in instructions
+    )
+    assert (
+        "Available tools: `read_file`, `replace`, `write_file`, `compile_model`, `probe_model`, and `find_examples`."
+        in instructions
+    )
+    assert "FREEFORM tool" not in instructions
+    assert "Prefer small exact `replace` edits over broad rewrites" in instructions
+    assert "Do not keep planning in assistant text" in instructions
+    assert "NO FLOATING PARTS" in instructions
+    assert "NO UNINTENTIONAL OVERLAPS" in instructions
+    assert "REALISTIC GEOMETRY" in instructions
+
+    assert task_message.startswith("<runtime_task_guidance>")
+    assert "Read the current `model.py` before editing." in task_message
+    assert task_message.endswith("a pair of scissors")
+    assert "## docs/sdk/references/quickstart.md" in docs_message
+    assert "## docs/sdk/references/probe-tooling.md" in docs_message
+
+
+def test_anthropic_prompt_resolution_and_payload_preview() -> None:
+    repo_root = Path(__file__).resolve().parents[2]
+
+    resolved = resolve_system_prompt_path(
+        DESIGNER_PROMPT_NAME,
+        provider="anthropic",
+        repo_root=repo_root,
+    )
+    assert resolved.name == ANTHROPIC_DESIGNER_PROMPT_NAME
+
+    payload = build_provider_payload_preview(
+        "a pair of scissors",
+        provider="anthropic",
+        model_id="claude-opus-4-7",
+        thinking_level="high",
+        system_prompt_path=DESIGNER_PROMPT_NAME,
+    )
+    instructions = payload["system"]
+    docs_message = payload["messages"][0]["content"]
+    task_message = payload["messages"][1]["content"]
+
+    assert payload["thinking"] == {"type": "adaptive"}
+    assert payload["output_config"] == {"effort": "high"}
+    assert "<tools>" in instructions
+    assert "<process>" in instructions
+    assert "<modeling>" in instructions
+    assert "Work evidence-first. Before editing, read `model.py`" in instructions
+    assert "## docs/sdk/references/quickstart.md" in docs_message
+    assert "a pair of scissors" in task_message
     assert "use `find_examples` for one or two relevant construction patterns" in instructions
     assert "Treat overlap failures by classifying them first." in instructions
     assert (

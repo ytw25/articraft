@@ -83,6 +83,20 @@ def test_openai_api_key_from_env_uses_key_pool_when_primary_missing() -> None:
     assert key in {"sk-first", "sk-second"}
 
 
+def test_openai_provider_loads_dotenv_over_exported_key(monkeypatch, tmp_path) -> None:
+    env_name = "OPENAI_API_" + "KEY"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv(env_name, "test-exported")
+    (tmp_path / ".env").write_text(f"{env_name}=test-dotenv\n", encoding="utf-8")
+
+    try:
+        OpenAILLM()
+    except Exception:
+        pass
+
+    assert openai_api_key_from_env() == "test-dotenv"
+
+
 def test_openai_context_window_pressure_reports_prompt_fraction() -> None:
     provider = OpenAILLM(model_id="gpt-5.4", dry_run=True)
 
@@ -310,6 +324,7 @@ def test_websocket_uses_full_payload_without_previous_response_id() -> None:
 
 def test_openai_client_disables_sdk_retries_and_uses_request_timeout(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
 ) -> None:
     captured: dict[str, object] = {}
 
@@ -317,6 +332,7 @@ def test_openai_client_disables_sdk_retries_and_uses_request_timeout(
         def __init__(self, **kwargs: object) -> None:
             captured.update(kwargs)
 
+    monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENAI_API_KEY", "sk-primary")
     monkeypatch.setenv("OPENAI_REQUEST_TIMEOUT_SECONDS", "37")
     monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(AsyncOpenAI=_FakeAsyncOpenAI))
@@ -390,6 +406,7 @@ def test_convert_tools_normalizes_function_schemas_for_responses_strict_mode() -
 
 def test_openai_sync_client_disables_sdk_retries_and_uses_request_timeout(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path,
 ) -> None:
     captured: dict[str, object] = {}
 
@@ -401,6 +418,7 @@ def test_openai_sync_client_disables_sdk_retries_and_uses_request_timeout(
         def __init__(self, **kwargs: object) -> None:
             raise RuntimeError("async unavailable")
 
+    monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("OPENAI_API_KEY", "sk-primary")
     monkeypatch.setenv("OPENAI_REQUEST_TIMEOUT_SECONDS", "42")
     monkeypatch.setitem(

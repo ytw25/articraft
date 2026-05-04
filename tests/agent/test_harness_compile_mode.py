@@ -95,6 +95,34 @@ def test_compile_async_uses_timeout_wrapper(
     }
 
 
+def test_assistant_message_preserves_provider_extra_content_without_text_or_tools() -> None:
+    agent = ArticraftAgent.__new__(ArticraftAgent)
+    response = {
+        "content": "",
+        "tool_calls": [],
+        "extra_content": {
+            "anthropic": {
+                "content": [
+                    {
+                        "type": "thinking",
+                        "thinking": "",
+                        "signature": "sig",
+                    }
+                ],
+                "stop_reason": "end_turn",
+            }
+        },
+        "usage": {"prompt_tokens": 1, "candidates_tokens": 1, "total_tokens": 2},
+    }
+
+    assistant_message = agent._build_assistant_message(response)
+
+    assert assistant_message["role"] == "assistant"
+    assert "content" not in assistant_message
+    assert "tool_calls" not in assistant_message
+    assert assistant_message["extra_content"]["anthropic"]["content"][0]["signature"] == "sig"
+
+
 def test_execute_compile_model_reuses_cached_success_for_current_revision() -> None:
     agent = ArticraftAgent.__new__(ArticraftAgent)
     agent._current_edit_revision = 2

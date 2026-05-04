@@ -3,6 +3,11 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from agent.providers.anthropic import (
+    DEFAULT_ANTHROPIC_MODEL,
+    AnthropicLLM,
+    anthropic_api_key_from_env,
+)
 from agent.providers.base import ProviderClient
 from agent.providers.gemini import GeminiLLM, gemini_client_config_from_env
 from agent.providers.openai import DEFAULT_OPENAI_MODEL, OpenAILLM, openai_api_key_from_env
@@ -13,7 +18,7 @@ from agent.providers.openrouter import (
 )
 
 DEFAULT_GEMINI_MODEL = "gemini-3.1-pro-preview"
-SUPPORTED_PROVIDERS = frozenset({"gemini", "openai", "openrouter"})
+SUPPORTED_PROVIDERS = frozenset({"anthropic", "gemini", "openai", "openrouter"})
 
 
 @dataclass(slots=True, frozen=True)
@@ -33,6 +38,7 @@ class ProviderConfig:
 
 @dataclass(slots=True, frozen=True)
 class ProviderConstructors:
+    anthropic: Callable[..., ProviderClient] = AnthropicLLM
     gemini: Callable[..., ProviderClient] = GeminiLLM
     openai: Callable[..., ProviderClient] = OpenAILLM
     openrouter: Callable[..., ProviderClient] = OpenRouterLLM
@@ -51,6 +57,8 @@ def infer_provider_from_model_id(model_id: str | None) -> str | None:
         return None
     if model_norm.startswith(("gpt-", "o1", "o3", "o4")):
         return "openai"
+    if model_norm.startswith("claude-"):
+        return "anthropic"
     if model_norm.startswith("gemini-"):
         return "gemini"
     if "/" in model_norm or model_norm.startswith("openrouter/"):
@@ -62,6 +70,8 @@ def default_model_id(config: ProviderConfig) -> str:
     if config.model_id:
         return config.model_id
     provider = config.normalized_provider
+    if provider == "anthropic":
+        return DEFAULT_ANTHROPIC_MODEL
     if provider == "gemini":
         return DEFAULT_GEMINI_MODEL
     if provider == "openrouter":
@@ -80,6 +90,12 @@ def create_provider_client(
     provider = config.normalized_provider
     model_id = default_model_id(config)
     provider_constructors = constructors or ProviderConstructors()
+    if provider == "anthropic":
+        return provider_constructors.anthropic(
+            model_id=model_id,
+            thinking_level=config.thinking_level,
+            dry_run=dry_run,
+        )
     if provider == "gemini":
         return provider_constructors.gemini(
             model_id=model_id,
@@ -107,6 +123,12 @@ def create_provider_client(
 
 def validate_provider_credentials(provider: str) -> None:
     provider_norm = normalize_provider_name(provider)
+    if provider_norm == "anthropic":
+        if not anthropic_api_key_from_env():
+            raise ValueError(
+                "Anthropic credentials are required. Set ANTHROPIC_API_KEY or ANTHROPIC_API_KEYS."
+            )
+        return
     if provider_norm == "gemini":
         gemini_client_config_from_env()
         return

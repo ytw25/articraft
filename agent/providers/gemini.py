@@ -45,6 +45,12 @@ _GEMINI_COMPACTION_PROMPT_FILE = "gemini_compaction.md"
 DEFAULT_GEMINI_COMPACTION_MODEL = "gemini-3-flash-preview"
 
 
+def _load_cwd_dotenv_override() -> None:
+    dotenv_path = Path.cwd() / ".env"
+    if dotenv_path.exists():
+        load_dotenv(dotenv_path=dotenv_path, override=True)
+
+
 class GeminiLLM:
     """Minimal Gemini client for tool-calling workflows."""
 
@@ -73,7 +79,7 @@ class GeminiLLM:
             self._client_lock = threading.Lock()
             self._next_client_index = 0
         else:
-            load_dotenv()
+            _load_cwd_dotenv_override()
             config = gemini_client_config_from_env()
             from google import genai  # type: ignore
 

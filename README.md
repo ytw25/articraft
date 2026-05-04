@@ -65,6 +65,12 @@ or:
 Set `GEMINI_API_KEYS` to your Gemini keys in `.env`
 ```
 
+or:
+
+```text
+Set `ANTHROPIC_API_KEYS` to your Anthropic keys in `.env`
+```
+
 Optional:
 
 ```text

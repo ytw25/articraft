@@ -167,3 +167,15 @@ def test_prompt_outputs_are_current() -> None:
     )
     assert "write_code" not in openrouter_text
     assert "Prefer small exact `replace` edits over broad rewrites" in openrouter_text
+
+    anthropic_text = compiled_by_name["designer_system_prompt_anthropic.txt"]
+    _assert_shared_contract(anthropic_text, allow_process=True)
+    assert "<process>" in anthropic_text
+    assert "Work evidence-first. Before editing, read `model.py`" in anthropic_text
+    assert "use `find_examples` for one or two relevant construction patterns" in anthropic_text
+    assert (
+        "Available tools: `read_file`, `replace`, `write_file`, `compile_model`, `probe_model`, and `find_examples`."
+        in anthropic_text
+    )
+    assert "write_code" not in anthropic_text
+    assert "Prefer small exact `replace` edits over broad rewrites" in anthropic_text

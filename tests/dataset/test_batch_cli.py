@@ -161,7 +161,7 @@ class RecordingBatchDisplay:
         type(self).events.append("init")
         return None
 
-    def add_run(self, slug: str, prompt: str) -> None:
+    def add_run(self, slug: str, prompt: str, **kwargs: object) -> None:
         return None
 
     def start(self) -> None:

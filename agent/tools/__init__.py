@@ -24,6 +24,12 @@ from agent.tools.registry import ToolRegistry
 from agent.tools.write_code import WriteCodeTool, WriteFileTool
 
 SUPPORTED_IMAGE_MIME_TYPES_BY_PROVIDER: dict[str, set[str]] = {
+    "anthropic": {
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/gif",
+    },
     "openai": {
         "image/png",
         "image/jpeg",

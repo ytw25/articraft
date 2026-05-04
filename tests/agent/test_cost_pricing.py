@@ -5,6 +5,73 @@ import pytest
 from agent.cost import calculate_cost, pricing_for_provider_model
 
 
+def test_anthropic_latest_opus_pricing_uses_explicit_model_rates() -> None:
+    pricing = pricing_for_provider_model("anthropic", "claude-opus-4-7")
+
+    assert pricing == {
+        "input_uncached": 5.00,
+        "input_cached": 0.50,
+        "input_cache_write": 6.25,
+        "output": 25.00,
+    }
+
+
+def test_anthropic_latest_opus_pricing_calculates_cache_hits() -> None:
+    pricing = pricing_for_provider_model("anthropic", "claude-opus-4-7")
+    assert pricing is not None
+
+    cost = calculate_cost(
+        {
+            "prompt_tokens": 1_000_000,
+            "cached_tokens": 400_000,
+            "candidates_tokens": 100_000,
+            "total_tokens": 1_100_000,
+        },
+        pricing,
+    )
+
+    assert cost.input_uncached_cost == 3.0
+    assert cost.input_cached_cost == 0.2
+    assert cost.output_cost == 2.5
+    assert cost.total_cost == pytest.approx(5.7)
+
+
+def test_anthropic_latest_opus_pricing_calculates_cache_writes() -> None:
+    pricing = pricing_for_provider_model("anthropic", "claude-opus-4-7")
+    assert pricing is not None
+
+    cost = calculate_cost(
+        {
+            "prompt_tokens": 1_000_000,
+            "cached_tokens": 400_000,
+            "cache_creation_input_tokens": 100_000,
+            "candidates_tokens": 100_000,
+            "total_tokens": 1_100_000,
+        },
+        pricing,
+    )
+
+    assert cost.input_uncached_cost == pytest.approx(3.125)
+    assert cost.input_cached_cost == 0.2
+    assert cost.output_cost == 2.5
+    assert cost.total_cost == pytest.approx(5.825)
+
+
+def test_anthropic_sonnet_and_haiku_pricing_are_available() -> None:
+    assert pricing_for_provider_model("anthropic", "claude-sonnet-4-6") == {
+        "input_uncached": 3.00,
+        "input_cached": 0.30,
+        "input_cache_write": 3.75,
+        "output": 15.00,
+    }
+    assert pricing_for_provider_model("anthropic", "claude-haiku-4-5") == {
+        "input_uncached": 1.00,
+        "input_cached": 0.10,
+        "input_cache_write": 1.25,
+        "output": 5.00,
+    }
+
+
 def test_gpt55_pricing_uses_explicit_model_rates() -> None:
     pricing = pricing_for_provider_model("openai", "gpt-5.5-2026-04-23")
 

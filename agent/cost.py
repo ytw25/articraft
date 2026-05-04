@@ -55,6 +55,30 @@ OPENAI_GPT_5_5_PRICING: dict[str, float] = {
     "output_above_threshold": 45.00,
 }
 
+ANTHROPIC_OPUS_4_7_PRICING: dict[str, float] = {
+    "input_uncached": 5.00,
+    "input_cached": 0.50,
+    "input_cache_write": 6.25,
+    "output": 25.00,
+}
+
+ANTHROPIC_OPUS_4_6_PRICING = ANTHROPIC_OPUS_4_7_PRICING
+ANTHROPIC_OPUS_4_5_PRICING = ANTHROPIC_OPUS_4_7_PRICING
+
+ANTHROPIC_SONNET_4_PRICING: dict[str, float] = {
+    "input_uncached": 3.00,
+    "input_cached": 0.30,
+    "input_cache_write": 3.75,
+    "output": 15.00,
+}
+
+ANTHROPIC_HAIKU_4_5_PRICING: dict[str, float] = {
+    "input_uncached": 1.00,
+    "input_cached": 0.10,
+    "input_cache_write": 1.25,
+    "output": 5.00,
+}
+
 
 @dataclass(slots=True)
 class CostBreakdown:
@@ -104,8 +128,13 @@ def _breakdown_dict(breakdown: CostBreakdown) -> dict[str, object]:
 def calculate_cost(usage: dict[str, int], pricing: dict[str, float]) -> CostBreakdown:
     prompt_tokens = usage.get("prompt_tokens", 0)
     cached_tokens = usage.get("cached_tokens", 0)
+    cache_creation_tokens = usage.get("cache_creation_input_tokens", 0)
     candidates_tokens = usage.get("candidates_tokens", 0)
     uncached_prompt_tokens = max(0, prompt_tokens - cached_tokens)
+    regular_uncached_prompt_tokens = max(
+        0,
+        prompt_tokens - cached_tokens - cache_creation_tokens,
+    )
 
     threshold = pricing.get("prompt_tier_threshold_tokens")
     if threshold is not None and prompt_tokens > int(threshold):
@@ -122,8 +151,12 @@ def calculate_cost(usage: dict[str, int], pricing: dict[str, float]) -> CostBrea
         input_uncached_rate = pricing["input_uncached"]
         input_cached_rate = pricing["input_cached"]
         output_rate = pricing["output"]
+    input_cache_write_rate = pricing.get("input_cache_write", input_uncached_rate)
 
-    input_uncached_cost = (uncached_prompt_tokens * input_uncached_rate) / 1_000_000
+    input_uncached_cost = (
+        (regular_uncached_prompt_tokens * input_uncached_rate)
+        + (cache_creation_tokens * input_cache_write_rate)
+    ) / 1_000_000
     input_cached_cost = (cached_tokens * input_cached_rate) / 1_000_000
     output_cost = (candidates_tokens * output_rate) / 1_000_000
     total_cost = input_uncached_cost + input_cached_cost + output_cost
@@ -285,8 +318,39 @@ def is_gpt_5_5_model(model_id: str) -> bool:
     return model_id.strip().lower().startswith("gpt-5.5")
 
 
+def is_claude_opus_4_7_model(model_id: str) -> bool:
+    return model_id.strip().lower().startswith("claude-opus-4-7")
+
+
+def is_claude_opus_4_6_model(model_id: str) -> bool:
+    return model_id.strip().lower().startswith("claude-opus-4-6")
+
+
+def is_claude_opus_4_5_model(model_id: str) -> bool:
+    return model_id.strip().lower().startswith("claude-opus-4-5")
+
+
+def is_claude_sonnet_4_model(model_id: str) -> bool:
+    normalized = model_id.strip().lower()
+    return normalized.startswith(("claude-sonnet-4-6", "claude-sonnet-4-5", "claude-sonnet-4"))
+
+
+def is_claude_haiku_4_5_model(model_id: str) -> bool:
+    return model_id.strip().lower().startswith("claude-haiku-4-5")
+
+
 def pricing_for_provider_model(provider: str, model_id: str) -> dict[str, float] | None:
     provider_norm = (provider or "").strip().lower()
+    if provider_norm == "anthropic" and is_claude_opus_4_7_model(model_id):
+        return ANTHROPIC_OPUS_4_7_PRICING
+    if provider_norm == "anthropic" and is_claude_opus_4_6_model(model_id):
+        return ANTHROPIC_OPUS_4_6_PRICING
+    if provider_norm == "anthropic" and is_claude_opus_4_5_model(model_id):
+        return ANTHROPIC_OPUS_4_5_PRICING
+    if provider_norm == "anthropic" and is_claude_sonnet_4_model(model_id):
+        return ANTHROPIC_SONNET_4_PRICING
+    if provider_norm == "anthropic" and is_claude_haiku_4_5_model(model_id):
+        return ANTHROPIC_HAIKU_4_5_PRICING
     if provider_norm == "gemini" and is_flash_model(model_id):
         return GEMINI_FLASH_PRICING
     if provider_norm == "gemini" and is_gemini_3_pro_model(model_id):

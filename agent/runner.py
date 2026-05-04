@@ -2098,7 +2098,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--provider",
         default="openai",
-        choices=["gemini", "openai", "openrouter"],
+        choices=["anthropic", "gemini", "openai", "openrouter"],
         help="LLM provider.",
     )
     parser.add_argument(

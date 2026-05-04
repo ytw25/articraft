@@ -32,6 +32,7 @@ from agent.prompts import (
 from agent.prompts import (
     normalize_sdk_package as _normalize_sdk_package,
 )
+from agent.providers.anthropic import AnthropicLLM
 from agent.providers.base import ProviderClient
 from agent.providers.factory import (
     ProviderConfig,
@@ -344,6 +345,7 @@ class ArticraftAgent:
                 openai_reasoning_summary=openai_reasoning_summary,
             ),
             constructors=ProviderConstructors(
+                anthropic=AnthropicLLM,
                 gemini=GeminiLLM,
                 openai=OpenAILLM,
                 openrouter=OpenRouterLLM,
@@ -1434,7 +1436,8 @@ class ArticraftAgent:
 
             assistant_message = self._build_assistant_message(response)
             has_assistant_payload = any(
-                key in assistant_message for key in ("content", "tool_calls", "thought_summary")
+                key in assistant_message
+                for key in ("content", "tool_calls", "thought_summary", "extra_content")
             )
             if has_assistant_payload:
                 conversation.append(assistant_message)
@@ -1491,7 +1494,7 @@ class ArticraftAgent:
             if isinstance(thinking, str) and thinking.strip():
                 self.display.add_thinking_summary(thinking)
 
-            is_empty_response = not has_assistant_payload and not tool_calls and not text.strip()
+            is_empty_response = not tool_calls and not text.strip()
             if is_empty_response:
                 finish_result = await self._handle_finish_attempt(
                     conversation,

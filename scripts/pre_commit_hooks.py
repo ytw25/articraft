@@ -28,6 +28,10 @@ SECRET_PATTERNS = (
         "OpenRouter API key assignment",
         re.compile(r"OPENROUTER_API_KEYS?\s*=\s*['\"]?[^'\"\s]+"),
     ),
+    (
+        "Anthropic API key assignment",
+        re.compile(r"ANTHROPIC_API_KEYS?\s*=\s*['\"]?[^'\"\s]+"),
+    ),
     ("Gemini API keys assignment", re.compile(r"GEMINI_API_KEYS\s*=\s*['\"]?[^'\"\s]+")),
     ("OpenAI secret token", re.compile(r"\bsk-[A-Za-z0-9_-]{16,}\b")),
     (

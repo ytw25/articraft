@@ -662,7 +662,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run_single.add_argument(
         "--provider",
         default="openai",
-        choices=("openai", "gemini", "openrouter"),
+        choices=("openai", "gemini", "openrouter", "anthropic"),
         help="LLM provider to use for the generation run.",
     )
     run_single.add_argument(

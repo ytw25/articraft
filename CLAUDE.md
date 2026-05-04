@@ -136,4 +136,4 @@ Files under `data/` are exempt from the trailing-newline requirement. Paths like
 
 ## Environment
 
-Provider keys go in `.env`: `OPENAI_API_KEYS` (preferred) or `OPENAI_API_KEY` for OpenAI, `GEMINI_API_KEYS` for Gemini. The `.env` file is gitignored.
+Provider keys go in `.env`: `OPENAI_API_KEYS` (preferred) or `OPENAI_API_KEY` for OpenAI, `ANTHROPIC_API_KEYS` (preferred) or `ANTHROPIC_API_KEY` for Anthropic, and `GEMINI_API_KEYS` for Gemini. The `.env` file is gitignored.
