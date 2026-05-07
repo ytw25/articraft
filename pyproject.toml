@@ -4,6 +4,17 @@ version = "0.1.0"
 description = "Agentic articulated object generation, dataset curation, and workbench tooling."
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
+license = { file = "LICENSE" }
+authors = [{ name = "Articraft contributors" }]
+keywords = ["3d-assets", "articulation", "cad", "urdf", "agentic-generation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
 dependencies = [
     "aiofiles>=24.1.0",
     "cadquery>=2.5",
@@ -30,6 +41,11 @@ dependencies = [
 articraft-dataset = "cli.dataset:main"
 articraft-workbench = "cli.workbench:main"
 articraft-performance = "performance.runner:main"
+
+[project.urls]
+Homepage = "https://github.com/mattzh72/articraft"
+Repository = "https://github.com/mattzh72/articraft"
+Issues = "https://github.com/mattzh72/articraft/issues"
 
 [build-system]
 requires = ["hatchling"]

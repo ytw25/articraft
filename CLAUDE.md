@@ -10,7 +10,7 @@ The SDK docs under `sdk/_docs/` are part of the agent authoring contract in this
 
 ## Common Commands
 
-Use `uv` for direct Python commands and `just` for the agent-facing shortcuts that help with record iteration. Run `just` or check [`justfile`](/Users/matthewzhou/articraft/justfile) for the full recipe list.
+Use `uv` for direct Python commands and `just` for the agent-facing shortcuts that help with record iteration. Run `just` or check [`justfile`](justfile) for the full recipe list.
 When a recipe supports optional settings, pass them as `just` overrides before the recipe name, for example `just model=gemini-3-flash-preview image=reference.png wb "prompt text"`.
 
 ```bash
@@ -25,7 +25,7 @@ just compile-all               # Fast visual-only materialization for viewer bro
 just compile-all-full          # Non-strict full bulk compile with collision-inclusive URDFs
 just compile-all-strict        # Full path with validation-heavy geometry checks
 just name=<batch-id> batch-spec-new   # Create an empty tracked batch CSV with the canonical header
-just spec=data/batch_specs/<batch-id>.csv concurrency=8 dataset-batch  # Run a tracked dataset batch CSV
+just row_concurrency=8 subprocess_concurrency=auto dataset-batch data/batch_specs/<batch-id>.csv  # Run a tracked dataset batch CSV
 just wb-init "prompt text"     # Create a draft workbench record to edit manually
 just compile data/records/<id> # Recompile model.py into cache-backed materialization outputs
 just rerun data/records/<id>   # Re-run generation for an existing record
@@ -35,8 +35,8 @@ just viewer-dev                # Start viewer in dev mode
 just wb "prompt text"          # Generate an object from a prompt
 just image=reference.png wb-init "prompt text"   # Draft a record with a stored reference image
 just model=gemini-3-flash-preview image=reference.png wb "prompt text"  # Override defaults
-uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8  # Run a dataset batch
-uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8 --resume  # Resume latest run for that spec
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto  # Run a dataset batch
+uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto --resume  # Resume latest run for that spec
 ```
 
 ### Running a single test
@@ -78,7 +78,7 @@ npm --prefix viewer/web run typecheck   # tsc
 Dataset batch flow:
 
 1. Tracked CSV spec in `data/batch_specs/<batch-id>.csv`
-2. `articraft-dataset run-batch ... --concurrency N` validates rows, preallocates collision-resistant dataset IDs, and creates one batch run record
+2. `articraft-dataset run-batch ... --row-concurrency N --subprocess-concurrency auto` validates rows, preallocates collision-resistant dataset IDs, and creates one batch run record
 3. Rows execute concurrently with per-row `provider`, `model_id`, `thinking_level`, `max_turns`, and `sdk_package`
 4. Successful rows are promoted into canonical `data/records/<record_id>/` storage; resumable row state and latest row results stay under `data/cache/runs/<run_id>/`
 
@@ -109,7 +109,7 @@ Validation rules:
 - `sdk_package` is normalized through the same validation path as single runs
 - `image_path` is intentionally unsupported in v1
 - If `row_id` is omitted, it defaults to `row_0001`, `row_0002`, and so on
-- Prompt writing guidelines are in [`data/CATEGORY_PROMPT_GUIDE.md`](/Users/matthewzhou/articraft/data/CATEGORY_PROMPT_GUIDE.md)
+- Prompt writing guidelines are in [`data/CATEGORY_PROMPT_GUIDE.md`](data/CATEGORY_PROMPT_GUIDE.md)
 
 ### Viewer architecture
 

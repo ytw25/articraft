@@ -4,14 +4,14 @@
 `agent/` contains the generation runtime, providers, prompt compiler, and TUI helpers. `storage/` owns the canonical `data/` layout, batch spec storage, record models, and query helpers used by the dataset and workbench flows. `sdk/` and `sdk/_core/` define the articulated-object SDK layers and shared geometry/export logic. `viewer/api/` exposes the FastAPI surface. `cli/` contains the repository entry points, while `tests/` mirrors the main packages with smoke-style checks such as `tests/storage/test_repo.py`.
 
 ## Build, Test, and Development Commands
-Use `uv` for direct Python workflows, and `just` for the agent-facing shortcuts that speed up common iteration loops. For additional shortcuts, run `just` or check [`justfile`](/Users/matthewzhou/articraft/justfile).
+Use `uv` for direct Python workflows, and `just` for the agent-facing shortcuts that speed up common iteration loops. For additional shortcuts, run `just` or check [`justfile`](justfile).
 When a `just` recipe supports optional settings, pass them as overrides before the recipe name, for example `just model=gemini-3-flash-preview image=reference.png wb "prompt text"`.
 
 - `uv sync --group dev` installs the project and development dependencies.
 - `uv build` creates the wheel and source distribution in `dist/`.
 - `uv run articraft-dataset --repo-root . init-storage` creates the canonical `data/` tree for dataset work.
-- `uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8` runs a tracked dataset batch CSV into canonical records.
-- `uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --concurrency 8 --resume` resumes the latest prior run for that batch spec.
+- `uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto` runs a tracked dataset batch CSV into canonical records.
+- `uv run articraft-dataset --repo-root . run-batch data/batch_specs/<batch-id>.csv --row-concurrency 8 --subprocess-concurrency auto --resume` resumes the latest prior run for that batch spec.
 - `uv run articraft-workbench --repo-root . status` inspects the workbench store state.
 - `uv run uvicorn viewer.api.app:app --reload --host 127.0.0.1 --port 8765` starts the local API directly.
 - `uv run --group dev pytest -q` runs the full Python regression suite.
@@ -22,7 +22,7 @@ When a `just` recipe supports optional settings, pass them as overrides before t
 - `just compile-all-full` runs the non-strict full bulk compile path when you need collision-inclusive URDFs without the validation-heavy strict checks.
 - `just compile-all-strict` runs the validation-heavy full compile path.
 - `just name=<batch-id> batch-spec-new` creates `data/batch_specs/<batch-id>.csv` with the canonical batch CSV header.
-- `just concurrency=8 dataset-batch data/batch_specs/<batch-id>.csv` runs the dataset batch shortcut; batch row provider/model settings come from the CSV.
+- `just row_concurrency=8 subprocess_concurrency=auto dataset-batch data/batch_specs/<batch-id>.csv` runs the dataset batch shortcut; batch row provider/model settings come from the CSV.
 - `just wb-init "prompt text"` creates a draft workbench record without running generation, which is useful when you want an empty record directory to work in.
 - `just image=reference.png wb-init "prompt text"` stores a reference image with the draft so later reruns keep the same conditioning.
 - `just compile data/records/<id>` recompiles a record's `model.py` into cache-backed materialization outputs under `data/cache/record_materialization/<id>/`.
@@ -42,7 +42,10 @@ Tests run under `pytest`. Add new coverage under the mirrored package path, name
 Recent commits use short, imperative subjects such as `Move prompt compiler under agent` and `Consolidate SDK around canonical core profiles`. Keep commit titles concise and scoped to one logical change. PRs should describe the affected surface (`agent`, `storage`, `sdk`, or `viewer`), include the exact `uv` commands run, and attach screenshots only when API or viewer behavior changes.
 
 ## Configuration Tips
-Provider code loads environment variables from `.env`. Set `OPENAI_API_KEYS` (preferred) or `OPENAI_API_KEY` for OpenAI flows, `ANTHROPIC_API_KEYS` (preferred) or `ANTHROPIC_API_KEY` for Anthropic flows, and `GEMINI_API_KEYS` for Gemini flows before running the agent runtime. Dataset batch specs live under `data/batch_specs/`; each row sets its own `provider`, `model_id`, `thinking_level`, `max_turns`, and `sdk_package`, while `concurrency` is supplied at invocation time. Do not enable design audit in new agent or dataset flows; it is no longer supported. For new dataset batch specs, leave per-row cost caps blank unless explicitly requested and use `max_turns=100` by default.
+Provider code loads environment variables from `.env`. Set `OPENAI_API_KEYS` (preferred) or `OPENAI_API_KEY` for OpenAI flows, `ANTHROPIC_API_KEYS` (preferred) or `ANTHROPIC_API_KEY` for Anthropic flows, and `GEMINI_API_KEYS` for Gemini flows before running the agent runtime. Dataset batch specs live under `data/batch_specs/`; each row sets its own `provider`, `model_id`, `thinking_level`, `max_turns`, and `sdk_package`, while row and subprocess concurrency are supplied at invocation time. Do not enable design audit in new agent or dataset flows; it is no longer supported. For new dataset batch specs, leave per-row cost caps blank unless explicitly requested and use `max_turns=100` by default.
+
+## Paper Dataset Counts
+When editing the Articraft paper, distinguish raw generated records from the final curated dataset. The final paper dataset includes only retained 4-5 star objects; lower-rated 1/2/3-star records may exist in `data/records/` as bad examples or audit material but should not be counted as final dataset objects. Use "over 10K" for the final curated object count unless the retained 4-5-star subset is recomputed and the paper is intentionally updated.
 
 ## Agent Docs Contract
 The SDK docs under `sdk/_docs/` are part of the agent authoring contract in this repository. Keep them aligned with the intended agent behavior and baseline compile/tooling policy; do not document agent-facing workflows there that the harness is supposed to own automatically.

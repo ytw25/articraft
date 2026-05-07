@@ -1,6 +1,6 @@
-# articraft
+# {Articraft}: An Agentic System for Scalable Articulated 3D Asset Generation
 
-Generate articulated 3D objects from prompts and inspect them locally.
+Generate articulated 3D assets from prompts and inspect them locally.
 
 ## 1. Install Prerequisites
 
@@ -39,7 +39,7 @@ This does the initial local setup:
 - installs Python dev dependencies, including `pre-commit` and `ruff`
 - installs `viewer/web` dependencies when `npm` is available
 - installs the git `pre-commit` and `pre-push` hooks
-- installs the managed git `post-commit` hook used to auto-sync record metadata such as `author` and `rated_by`
+- installs the managed git `post-commit` hook used to auto-sync record metadata
 - initializes local storage under `data/`
 - builds the dataset manifest used by the viewer
 
@@ -136,7 +136,7 @@ To run a single prompt directly into a dataset category instead of the workbench
 just category=grill_with_hinged_lid wb-category "Create a backyard gas grill with a wheeled lower cart, a rectangular cookbox, side shelves, a front control panel, and a domed lid hinged along the rear edge of the cookbox."
 ```
 
-`wb-category` accepts the same `model=...`, `thinking=...`, `image=...`, and `design_audit=...` overrides as `wb`. It auto-allocates a collision-resistant `ds_<category>_<token>` dataset ID for the target category unless you also pass `dataset_id=...`.
+`wb-category` accepts the same `model=...`, `thinking=...`, and `image=...` overrides as `wb`. It auto-allocates a collision-resistant `ds_<category>_<token>` dataset ID for the target category unless you also pass `dataset_id=...`.
 
 The underlying CLI command is:
 
@@ -198,7 +198,7 @@ Each row is one dataset generation job.
 | `max_turns` | Yes | Positive integer turn cap for the row. |
 | `max_cost_usd` | No | Optional positive per-row USD budget. If blank, the row inherits the batch CLI flag or `ARTICRAFT_MAX_COST_USD`. |
 | `label` | No | Optional free-form label for your own tracking. |
-| `design_audit` | No | `true` or `false`. If blank, the row inherits the CLI default for the batch. |
+| `design_audit` | No | Legacy compatibility column. Leave blank or `false` for new specs. |
 
 Batch CSV v1 notes:
 
@@ -210,7 +210,7 @@ Example:
 
 ```csv
 row_id,category_slug,category_title,prompt,provider,model_id,thinking_level,max_turns,max_cost_usd,label,design_audit
-hinge_01,hinge,Hinge,"Create a steel door hinge with two rectangular leaves and a center pin.",openai,gpt-5.4,high,12,1.5,baseline,true
+hinge_01,hinge,Hinge,"Create a steel door hinge with two rectangular leaves and a center pin.",openai,gpt-5.4,high,12,1.5,baseline,false
 hinge_02,hinge,Hinge,"Create a compact cabinet hinge with offset leaves and a short pin.",gemini,gemini-3-flash-preview,med,10,,compact,false
 ```
 
@@ -235,7 +235,7 @@ Useful execution controls:
 - `--row-concurrency`: maximum number of live batch rows at once; use `auto`, `max`, or a positive integer
 - `--subprocess-concurrency`: maximum number of compile/QC/probe subprocess-heavy operations at once; use `auto`, `max`, or a positive integer
 - `--max-cost-usd`: default per-row USD budget for rows whose `max_cost_usd` CSV cell is blank
-- `--design-audit` or `--no-design-audit`: set the batch-wide default for rows whose `design_audit` cell is blank
+- The legacy `--design-audit` flag remains available for older experiments; keep it disabled for new dataset runs.
 
 If any row fails, the batch exits non-zero. That is expected. The normal recovery path is to fix the issue and rerun with `--resume`.
 
@@ -277,7 +277,7 @@ Important resume rules:
 
 - keep the CSV filename stable so the `batch_spec_id` stays the same
 - keep `row_id` stable; changing or reordering implicit row ids can break resume matching
-- by default, resume rejects spec changes for `category_slug`, `prompt`, `provider`, `model_id`, `thinking_level`, `max_turns`, `max_cost_usd`, and `design_audit`
+- by default, resume rejects spec changes for `category_slug`, `prompt`, `provider`, `model_id`, `thinking_level`, `max_turns`, `max_cost_usd`, and the legacy `design_audit` field
 - if a row already produced a durable record but the cached state says `running`, resume reconciles that success instead of rerunning it
 
 You can bypass the spec-compatibility check:
@@ -294,7 +294,7 @@ just resume=true allow_resume_spec_mismatch=true dataset-batch data/batch_specs/
 
 Use `--allow-resume-spec-mismatch` only for deliberate recovery work. It forces the current CSV to reuse the prior run's row allocations even though the row definitions no longer match.
 
-This is the escape hatch for "retry the same row, but with different execution settings." A common example is raising `max_turns` or `max_cost_usd` for failed rows, or switching a failed row to a different `provider`, `model_id`, `thinking_level`, `prompt`, or `design_audit` setting before resuming.
+This is the escape hatch for "retry the same row, but with different execution settings." A common example is raising `max_turns` or `max_cost_usd` for failed rows, or switching a failed row to a different `provider`, `model_id`, `thinking_level`, or `prompt` before resuming.
 
 Typical override workflow:
 
@@ -366,7 +366,6 @@ Recompile one saved record:
 just compile data/records/<record-id>
 just compile-strict data/records/<record-id>
 just compile-unsafe data/records/<record-id>
-just compile-unsafe data/records/<record-id>
 ```
 
 Bulk compile variants:
@@ -404,7 +403,7 @@ See Section 6 for the batch CSV schema, resume policies, and run-state details.
 
 ```bibtex
 @misc{articraft2026,
-  title={{Articraft}: Agentic articulated object generation, dataset curation, and workbench tooling},
+  title={{Articraft}: An Agentic System for Scalable Articulated 3D Asset Generation},
   author={{Articraft contributors}},
   howpublished={\url{https://github.com/mattzh72/articraft}},
   year={2026}
