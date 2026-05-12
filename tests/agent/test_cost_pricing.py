@@ -12,6 +12,7 @@ def test_anthropic_latest_opus_pricing_uses_explicit_model_rates() -> None:
         "input_uncached": 5.00,
         "input_cached": 0.50,
         "input_cache_write": 6.25,
+        "input_cache_write_1h": 10.00,
         "output": 25.00,
     }
 
@@ -57,17 +58,40 @@ def test_anthropic_latest_opus_pricing_calculates_cache_writes() -> None:
     assert cost.total_cost == pytest.approx(5.825)
 
 
+def test_anthropic_latest_opus_pricing_calculates_one_hour_cache_writes() -> None:
+    pricing = pricing_for_provider_model("anthropic", "claude-opus-4-7")
+    assert pricing is not None
+
+    cost = calculate_cost(
+        {
+            "prompt_tokens": 1_000_000,
+            "cache_creation_input_tokens": 100_000,
+            "cache_creation_5m_input_tokens": 40_000,
+            "cache_creation_1h_input_tokens": 60_000,
+            "candidates_tokens": 100_000,
+            "total_tokens": 1_100_000,
+        },
+        pricing,
+    )
+
+    assert cost.input_uncached_cost == pytest.approx(4.5 + 0.25 + 0.6)
+    assert cost.output_cost == 2.5
+    assert cost.total_cost == pytest.approx(7.85)
+
+
 def test_anthropic_sonnet_and_haiku_pricing_are_available() -> None:
     assert pricing_for_provider_model("anthropic", "claude-sonnet-4-6") == {
         "input_uncached": 3.00,
         "input_cached": 0.30,
         "input_cache_write": 3.75,
+        "input_cache_write_1h": 6.00,
         "output": 15.00,
     }
     assert pricing_for_provider_model("anthropic", "claude-haiku-4-5") == {
         "input_uncached": 1.00,
         "input_cached": 0.10,
         "input_cache_write": 1.25,
+        "input_cache_write_1h": 2.00,
         "output": 5.00,
     }
 

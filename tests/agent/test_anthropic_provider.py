@@ -73,7 +73,14 @@ def test_anthropic_request_preview_uses_messages_shape() -> None:
     assert payload["base_url"] == "https://api.anthropic.com"
     assert payload["anthropic_version"] == ANTHROPIC_VERSION
     assert payload["model"] == "claude-opus-4-7"
-    assert payload["system"] == "system"
+    assert payload["cache_control"] == {"type": "ephemeral"}
+    assert payload["system"] == [
+        {
+            "type": "text",
+            "text": "system",
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
     assert payload["thinking"] == {"type": "adaptive"}
     assert payload["output_config"] == {"effort": "high"}
     assert payload["messages"] == [{"role": "user", "content": "task"}]
@@ -82,8 +89,65 @@ def test_anthropic_request_preview_uses_messages_shape() -> None:
             "name": "compile_model",
             "description": "Compile",
             "input_schema": {"type": "object", "properties": {}, "required": []},
+            "cache_control": {"type": "ephemeral"},
         }
     ]
+
+
+def test_anthropic_prompt_cache_can_be_disabled(monkeypatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_PROMPT_CACHE", "off")
+    provider = AnthropicLLM(dry_run=True)
+
+    payload = provider.build_request_preview(
+        system_prompt="system",
+        messages=[{"role": "user", "content": "task"}],
+        tools=[],
+    )
+
+    assert "cache_control" not in payload
+    assert payload["system"] == "system"
+
+
+def test_anthropic_prompt_cache_marks_stable_workspace_docs() -> None:
+    provider = AnthropicLLM(dry_run=True)
+
+    payload = provider.build_request_preview(
+        system_prompt="system",
+        messages=[
+            {
+                "role": "user",
+                "content": "\n\n# Workspace Documentation (read-only)\nshared docs",
+            },
+            {"role": "user", "content": "per-record prompt"},
+        ],
+        tools=[],
+    )
+
+    assert payload["messages"][0] == {
+        "role": "user",
+        "content": [
+            {
+                "type": "text",
+                "text": "\n\n# Workspace Documentation (read-only)\nshared docs",
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
+    }
+    assert payload["messages"][1] == {"role": "user", "content": "per-record prompt"}
+
+
+def test_anthropic_prompt_cache_supports_one_hour_ttl(monkeypatch) -> None:
+    monkeypatch.setenv("ANTHROPIC_PROMPT_CACHE_TTL", "1h")
+    provider = AnthropicLLM(dry_run=True)
+
+    payload = provider.build_request_preview(
+        system_prompt="system",
+        messages=[{"role": "user", "content": "task"}],
+        tools=[],
+    )
+
+    assert payload["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert payload["system"][0]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
 
 
 def test_anthropic_preview_coalesces_tool_results_and_preserves_raw_blocks() -> None:
@@ -186,6 +250,10 @@ def test_anthropic_response_converts_text_thinking_tool_use_and_usage() -> None:
             "input_tokens": 10,
             "cache_creation_input_tokens": 3,
             "cache_read_input_tokens": 7,
+            "cache_creation": {
+                "ephemeral_5m_input_tokens": 1,
+                "ephemeral_1h_input_tokens": 2,
+            },
             "output_tokens": 5,
         },
     }
@@ -209,6 +277,8 @@ def test_anthropic_response_converts_text_thinking_tool_use_and_usage() -> None:
         "cached_tokens": 7,
         "cache_creation_input_tokens": 3,
         "cache_read_input_tokens": 7,
+        "cache_creation_5m_input_tokens": 1,
+        "cache_creation_1h_input_tokens": 2,
     }
 
 

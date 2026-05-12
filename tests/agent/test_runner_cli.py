@@ -138,6 +138,8 @@ def test_runner_dump_provider_payload_supports_anthropic(
     assert payload["model"] == "claude-opus-4-7"
     assert payload["thinking"] == {"type": "adaptive"}
     assert payload["output_config"] == {"effort": "high"}
-    assert "<process>" in payload["system"]
-    assert "Work evidence-first. Before editing, read `model.py`" in payload["system"]
+    system_text = payload["system"][0]["text"]
+    assert payload["system"][0]["cache_control"] == {"type": "ephemeral"}
+    assert "<process>" in system_text
+    assert "Work evidence-first. Before editing, read `model.py`" in system_text
     assert payload["messages"][0]["role"] == "user"

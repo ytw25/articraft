@@ -59,6 +59,7 @@ ANTHROPIC_OPUS_4_7_PRICING: dict[str, float] = {
     "input_uncached": 5.00,
     "input_cached": 0.50,
     "input_cache_write": 6.25,
+    "input_cache_write_1h": 10.00,
     "output": 25.00,
 }
 
@@ -69,6 +70,7 @@ ANTHROPIC_SONNET_4_PRICING: dict[str, float] = {
     "input_uncached": 3.00,
     "input_cached": 0.30,
     "input_cache_write": 3.75,
+    "input_cache_write_1h": 6.00,
     "output": 15.00,
 }
 
@@ -76,6 +78,7 @@ ANTHROPIC_HAIKU_4_5_PRICING: dict[str, float] = {
     "input_uncached": 1.00,
     "input_cached": 0.10,
     "input_cache_write": 1.25,
+    "input_cache_write_1h": 2.00,
     "output": 5.00,
 }
 
@@ -129,6 +132,8 @@ def calculate_cost(usage: dict[str, int], pricing: dict[str, float]) -> CostBrea
     prompt_tokens = usage.get("prompt_tokens", 0)
     cached_tokens = usage.get("cached_tokens", 0)
     cache_creation_tokens = usage.get("cache_creation_input_tokens", 0)
+    cache_creation_5m_tokens = usage.get("cache_creation_5m_input_tokens", 0)
+    cache_creation_1h_tokens = usage.get("cache_creation_1h_input_tokens", 0)
     candidates_tokens = usage.get("candidates_tokens", 0)
     uncached_prompt_tokens = max(0, prompt_tokens - cached_tokens)
     regular_uncached_prompt_tokens = max(
@@ -152,10 +157,15 @@ def calculate_cost(usage: dict[str, int], pricing: dict[str, float]) -> CostBrea
         input_cached_rate = pricing["input_cached"]
         output_rate = pricing["output"]
     input_cache_write_rate = pricing.get("input_cache_write", input_uncached_rate)
+    input_cache_write_1h_rate = pricing.get("input_cache_write_1h", input_cache_write_rate)
+    detailed_cache_creation_tokens = cache_creation_5m_tokens + cache_creation_1h_tokens
+    unknown_cache_creation_tokens = max(0, cache_creation_tokens - detailed_cache_creation_tokens)
+    cache_write_cost = (
+        cache_creation_5m_tokens + unknown_cache_creation_tokens
+    ) * input_cache_write_rate + cache_creation_1h_tokens * input_cache_write_1h_rate
 
     input_uncached_cost = (
-        (regular_uncached_prompt_tokens * input_uncached_rate)
-        + (cache_creation_tokens * input_cache_write_rate)
+        (regular_uncached_prompt_tokens * input_uncached_rate) + cache_write_cost
     ) / 1_000_000
     input_cached_cost = (cached_tokens * input_cached_rate) / 1_000_000
     output_cost = (candidates_tokens * output_rate) / 1_000_000
@@ -217,7 +227,15 @@ class CostTracker:
         usage = event.get("usage")
         usage_dict: dict[str, int] = {}
         if isinstance(usage, dict):
-            for key in ("prompt_tokens", "cached_tokens", "candidates_tokens", "total_tokens"):
+            for key in (
+                "prompt_tokens",
+                "cached_tokens",
+                "cache_creation_input_tokens",
+                "cache_creation_5m_input_tokens",
+                "cache_creation_1h_input_tokens",
+                "candidates_tokens",
+                "total_tokens",
+            ):
                 value = usage.get(key)
                 if isinstance(value, int):
                     usage_dict[key] = value

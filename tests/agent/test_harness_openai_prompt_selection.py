@@ -470,12 +470,15 @@ def test_anthropic_prompt_resolution_and_payload_preview() -> None:
         thinking_level="high",
         system_prompt_path=DESIGNER_PROMPT_NAME,
     )
-    instructions = payload["system"]
-    docs_message = payload["messages"][0]["content"]
+    instructions = payload["system"][0]["text"]
+    docs_message = payload["messages"][0]["content"][0]["text"]
     task_message = payload["messages"][1]["content"]
 
     assert payload["thinking"] == {"type": "adaptive"}
     assert payload["output_config"] == {"effort": "high"}
+    assert payload["cache_control"] == {"type": "ephemeral"}
+    assert payload["system"][0]["cache_control"] == {"type": "ephemeral"}
+    assert payload["messages"][0]["content"][0]["cache_control"] == {"type": "ephemeral"}
     assert "<tools>" in instructions
     assert "<process>" in instructions
     assert "<modeling>" in instructions

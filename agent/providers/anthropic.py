@@ -47,6 +47,8 @@ DEFAULT_ANTHROPIC_MODEL = "claude-opus-4-7"
 DEFAULT_ANTHROPIC_CONTEXT_TOKENS = 1_000_000
 DEFAULT_ANTHROPIC_MAX_TOKENS = 16_000
 DEFAULT_ANTHROPIC_OUTPUT_SAFETY_TOKENS = 1_024
+ANTHROPIC_PROMPT_CACHE_ENV = "ANTHROPIC_PROMPT_CACHE"
+ANTHROPIC_PROMPT_CACHE_TTL_ENV = "ANTHROPIC_PROMPT_CACHE_TTL"
 _ADAPTIVE_THINKING_MODELS = (
     "claude-mythos-preview",
     "claude-opus-4-7",
@@ -222,6 +224,13 @@ class AnthropicLLM:
     ) -> dict[str, Any]:
         converted_messages = _convert_messages(messages)
         converted_tools = _convert_tools(tools)
+        cache_control = _prompt_cache_control()
+        if cache_control is not None:
+            _apply_prompt_cache_controls(
+                messages=converted_messages,
+                tools=converted_tools,
+                cache_control=cache_control,
+            )
         payload: dict[str, Any] = {
             "model": self.model_id,
             "max_tokens": self._request_max_tokens(
@@ -232,9 +241,20 @@ class AnthropicLLM:
             "messages": converted_messages,
         }
         if system_prompt.strip():
-            payload["system"] = system_prompt
+            if cache_control is None:
+                payload["system"] = system_prompt
+            else:
+                payload["system"] = [
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                        "cache_control": dict(cache_control),
+                    }
+                ]
         if converted_tools:
             payload["tools"] = converted_tools
+        if cache_control is not None:
+            payload["cache_control"] = dict(cache_control)
         thinking = _thinking_config_for_model(self.model_id, self.thinking_level)
         if thinking is not None:
             payload["thinking"] = thinking
@@ -447,6 +467,85 @@ def _convert_tools(tools: list[dict]) -> list[dict[str, Any]]:
     return converted
 
 
+def _prompt_cache_control() -> dict[str, str] | None:
+    enabled = os.environ.get(ANTHROPIC_PROMPT_CACHE_ENV, "1").strip().lower()
+    if enabled in {"0", "false", "no", "off", "disabled"}:
+        return None
+
+    cache_control = {"type": "ephemeral"}
+    ttl = os.environ.get(ANTHROPIC_PROMPT_CACHE_TTL_ENV, "").strip().lower()
+    if ttl in {"1h", "1hr", "1hour", "hour"}:
+        cache_control["ttl"] = "1h"
+    elif ttl in {"", "5m", "5min", "5mins", "5minute", "5minutes"}:
+        pass
+    else:
+        logger.warning(
+            "Ignoring unsupported %s=%r; expected 5m or 1h",
+            ANTHROPIC_PROMPT_CACHE_TTL_ENV,
+            ttl,
+        )
+    return cache_control
+
+
+def _apply_prompt_cache_controls(
+    *,
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    cache_control: dict[str, str],
+) -> None:
+    if tools:
+        tools[-1]["cache_control"] = dict(cache_control)
+
+    # The harness sends the reusable SDK documentation as the first user
+    # message, followed by the per-record task prompt. Cache that stable prefix
+    # explicitly so different records can share it; automatic caching then handles
+    # the growing conversation after the variable task prompt.
+    if messages and _is_workspace_docs_message(messages[0]):
+        _mark_message_content_for_cache(messages[0], cache_control)
+
+
+def _is_workspace_docs_message(message: dict[str, Any]) -> bool:
+    if message.get("role") != "user":
+        return False
+    content = message.get("content")
+    if isinstance(content, str):
+        return "# Workspace Documentation (read-only)" in content
+    if isinstance(content, list):
+        return any(
+            isinstance(part, dict)
+            and part.get("type") == "text"
+            and isinstance(part.get("text"), str)
+            and "# Workspace Documentation (read-only)" in part["text"]
+            for part in content
+        )
+    return False
+
+
+def _mark_message_content_for_cache(
+    message: dict[str, Any],
+    cache_control: dict[str, str],
+) -> None:
+    content = message.get("content")
+    if isinstance(content, str):
+        if content.strip():
+            message["content"] = [
+                {"type": "text", "text": content, "cache_control": dict(cache_control)}
+            ]
+        return
+    if not isinstance(content, list):
+        return
+
+    for part in reversed(content):
+        if not isinstance(part, dict):
+            continue
+        if part.get("type") == "text" and isinstance(part.get("text"), str) and part["text"]:
+            part["cache_control"] = dict(cache_control)
+            return
+        if part.get("type") in {"image", "document", "tool_result", "tool_use"}:
+            part["cache_control"] = dict(cache_control)
+            return
+
+
 def _convert_image_part(part: dict[str, Any]) -> dict[str, Any] | None:
     image_url = part.get("image_url")
     image_path = part.get("image_path")
@@ -549,6 +648,7 @@ def _extract_usage(response: Any) -> dict[str, int] | None:
     output_tokens = _get(usage, "output_tokens")
     cache_creation = _get(usage, "cache_creation_input_tokens")
     cache_read = _get(usage, "cache_read_input_tokens")
+    cache_creation_detail = _get(usage, "cache_creation")
 
     prompt_tokens = sum(
         value for value in (input_tokens, cache_creation, cache_read) if isinstance(value, int)
@@ -568,6 +668,13 @@ def _extract_usage(response: Any) -> dict[str, int] | None:
         cleaned["cache_creation_input_tokens"] = cache_creation
     if isinstance(cache_read, int):
         cleaned["cache_read_input_tokens"] = cache_read
+    if isinstance(cache_creation_detail, dict):
+        cache_creation_5m = _get(cache_creation_detail, "ephemeral_5m_input_tokens")
+        cache_creation_1h = _get(cache_creation_detail, "ephemeral_1h_input_tokens")
+        if isinstance(cache_creation_5m, int):
+            cleaned["cache_creation_5m_input_tokens"] = cache_creation_5m
+        if isinstance(cache_creation_1h, int):
+            cleaned["cache_creation_1h_input_tokens"] = cache_creation_1h
     return cleaned or None
 
 
