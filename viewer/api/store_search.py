@@ -263,7 +263,7 @@ class ViewerStoreSearchMixin:
                 continue
             if not _within_cost_filter(summary.total_cost_usd, cost_min, cost_max):
                 continue
-            if not _within_rating_filter(summary.effective_rating, rating_filter):
+            if not _within_rating_filter(summary.rating, rating_filter):
                 continue
             if not _within_rating_filter(summary.secondary_rating, secondary_rating_filter):
                 continue
@@ -358,7 +358,7 @@ class ViewerStoreSearchMixin:
                 continue
             if not _within_cost_filter(summary.total_cost_usd, cost_min, cost_max):
                 continue
-            if not _within_rating_filter(summary.effective_rating, rating_filter):
+            if not _within_rating_filter(summary.rating, rating_filter):
                 continue
             if not _within_rating_filter(summary.secondary_rating, secondary_rating_filter):
                 continue

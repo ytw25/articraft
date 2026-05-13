@@ -785,7 +785,7 @@ def _row_matches(
         return False
     if not _within_cost_filter(row.total_cost_usd, cost_min, cost_max):
         return False
-    if not _within_rating_filter(row.effective_rating, rating_filter):
+    if not _within_rating_filter(row.rating, rating_filter):
         return False
     if not _within_rating_filter(row.secondary_rating, secondary_rating_filter):
         return False

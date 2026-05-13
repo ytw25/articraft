@@ -355,6 +355,16 @@ function MultiSelectFilter({
   );
 }
 
+function primaryRatingTriggerLabel(options: CategoryOption[], selectedValues: string[]): string {
+  if (selectedValues.length === 0) {
+    return "Any primary rating";
+  }
+  if (selectedValues.length === 1) {
+    return options.find((option) => option.value === selectedValues[0])?.label ?? selectedValues[0];
+  }
+  return `${selectedValues.length} primary ratings`;
+}
+
 function ratingTriggerLabel(options: CategoryOption[], selectedValues: string[]): string {
   if (selectedValues.length === 0) {
     return "Any rating";
@@ -930,10 +940,10 @@ export function ExplorerFilters({
           options={ratingOptions}
           selectedValues={ratingFilter}
           onChange={(nextValues) => dispatch({ type: "SET_RATING_FILTER", payload: nextValues as RatingFilter })}
-          title="Ratings"
+          title="Primary ratings"
           searchPlaceholder="Search ratings…"
           noMatchLabel="No ratings match"
-          triggerLabel={ratingTriggerLabel}
+          triggerLabel={primaryRatingTriggerLabel}
         />
 
         <MultiSelectFilter

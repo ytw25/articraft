@@ -58,6 +58,7 @@ const BROWSER_TABS = ["workbench", "dataset", "staging"] as const satisfies read
 const SOURCE_FILTERS = ["workbench", "dataset"] as const satisfies readonly SourceFilter[];
 const TIME_FILTER_POINTS = new Set<string>(["1y", "180d", "90d", "60d", "30d", "14d", "7d", "3d", "24h", "12h", "6h", "1h"]);
 const RATING_FILTERS = ["1", "2", "3", "4", "5", "unrated"] as const satisfies readonly RatingFilterValue[];
+const DEFAULT_DATASET_RATING_FILTER = ["5", "unrated"] as const satisfies readonly RatingFilterValue[];
 
 const STAGING_POLL_INTERVAL_MS = 3000;
 
@@ -182,6 +183,28 @@ function normalizeRatingFilter(values: string[]): RatingFilter {
   );
 }
 
+function datasetDefaultRatingFilter(): RatingFilter {
+  return [...DEFAULT_DATASET_RATING_FILTER];
+}
+
+function sameRatingFilter(left: RatingFilter, right: RatingFilter): boolean {
+  if (left.length !== right.length) {
+    return false;
+  }
+  const normalizedLeft = new Set(left);
+  return right.every((value) => normalizedLeft.has(value));
+}
+
+function ratingFilterForBrowserTab(tab: BrowserTab, current: RatingFilter): RatingFilter {
+  if (tab === "dataset" && current.length === 0) {
+    return datasetDefaultRatingFilter();
+  }
+  if (tab === "workbench" && sameRatingFilter(current, datasetDefaultRatingFilter())) {
+    return [];
+  }
+  return current;
+}
+
 function readViewerUrlState(): ViewerUrlState {
   if (typeof window === "undefined") {
     return defaultViewerUrlState;
@@ -245,7 +268,11 @@ function readViewerUrlState(): ViewerUrlState {
       min: parseCostBoundParam(params.get(URL_QUERY_PARAMS.costMin)),
       max: parseCostBoundParam(params.get(URL_QUERY_PARAMS.costMax)),
     });
-    const ratingFilter = normalizeRatingFilter(params.getAll(URL_QUERY_PARAMS.rating));
+    const ratingFilter = params.has(URL_QUERY_PARAMS.rating)
+      ? normalizeRatingFilter(params.getAll(URL_QUERY_PARAMS.rating))
+      : parsedBrowserTab === "dataset"
+      ? datasetDefaultRatingFilter()
+      : [];
     const secondaryRatingFilter = normalizeRatingFilter(params.getAll(URL_QUERY_PARAMS.secondaryRating));
     const selectedRunId = normalizeOptionalQueryParam(params.get(URL_QUERY_PARAMS.run));
 
@@ -722,6 +749,7 @@ function viewerReducer(state: ViewerState, action: ViewerAction): ViewerState {
         sourceFilter: action.payload,
         modelFilter: null,
         sdkFilter: null,
+        ratingFilter: ratingFilterForBrowserTab(action.payload, state.ratingFilter),
         selectedRunId: null,
         multiSelection: new Set(),
       };
@@ -732,6 +760,7 @@ function viewerReducer(state: ViewerState, action: ViewerAction): ViewerState {
         sourceFilter: action.payload,
         modelFilter: null,
         sdkFilter: null,
+        ratingFilter: ratingFilterForBrowserTab(action.payload, state.ratingFilter),
         selectedRunId: null,
         multiSelection: new Set(),
       };

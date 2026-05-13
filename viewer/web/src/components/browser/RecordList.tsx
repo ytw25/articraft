@@ -292,7 +292,7 @@ export function RecordList({
     if (!deferredSearchQuery) {
       list = list.filter((record) => withinTimeFilter(record.created_at, timeFilter));
       list = list.filter((record) => withinCostFilter(record.total_cost_usd, costFilter));
-      list = list.filter((record) => withinRatingFilter(record.effective_rating, ratingFilter));
+      list = list.filter((record) => withinRatingFilter(record.rating, ratingFilter));
       list = list.filter((record) => withinRatingFilter(record.secondary_rating ?? null, secondaryRatingFilter));
       if (modelFilter) {
         list = list.filter((record) => record.model_id === modelFilter);
