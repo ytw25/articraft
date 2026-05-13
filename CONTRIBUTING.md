@@ -59,3 +59,24 @@ We care deeply about commit hygiene.
 2. Include the exact `uv`, `just`, and `npm` commands you ran to verify the change.
 3. Attach screenshots **only** when API or viewer behavior changes.
 4. **Data Caveat:** Do not commit `.env`, `data/cache/`, `data/local/`, generated URDFs, or record asset directories. The pre-commit checks will generally block sensitive paths. Files under `data/` are exempt from the trailing-newline requirement.
+
+## Data Contribution Workflow
+
+A huge part of Articraft's mission is crowdsourcing a massive, diverse dataset. If you're contributing objects, follow this consistent workflow:
+
+1. **Choose Your Generation Path**:
+   - *Targeted Authoring*: Use `uv run articraft dataset run <prompt> --category-slug <slug>`.
+   - *AI-Assisted*: Open Claude Code, Cursor, or Codex in the repo and prompt it to "Follow `EXTERNAL_AGENT_DATA.md`". (Do not run the `articraft external` CLI yourself; the agent will do it internally).
+   - *Bulk Generation*: Use batch CSVs. See our [Dataset Generation Guide](docs/dataset_generation.md).
+2. **Local Validation**: 
+   - All assets MUST compile without errors locally. Any physics warnings, overlapping parts, or disconnected links must be fixed before proceeding.
+3. **Visual Curation & Rating**:
+   - Open the viewer (`just viewer`) and manually inspect your generated asset.
+   - **Crucial Step:** Rate the asset! You must use the viewer's rating system (1-5 stars) to submit an asset. We accept all ratings (even 1-star assets are incredibly useful as negative examples), but you must actively record the rating.
+4. **Finalize & Categorize**:
+   - Only records assigned to a dataset category should be pushed. Workbench records are local drafts.
+5. **Commit and PR**:
+   - Stage **only** the `data/records/<id>` folders. The pre-commit hooks will block caches and URDF files.
+   - Create a PR with standard naming, for instance: `Add 50 washing machines to dataset`.
+   - **Massive PRs Are Welcome**: You can submit anywhere from a single object to thousands of records at once.
+   - **Screenshots Strongly Encouraged**: Including a screenshot or GIF of the asset in the PR description makes reviewer validation much faster.

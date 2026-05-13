@@ -73,9 +73,11 @@ If you don't have API keys set up, or prefer to use external AI agents, simply p
 ```text
 Create a realistic articulated washing machine and add it to the Articraft dataset. Follow EXTERNAL_AGENT_DATA.md.
 ```
-Your external agent will automatically use the `articraft external` CLI to author, compile, validate, and promote the asset into the repository. Open a Pull Request with the finalized record directory to contribute it upstream!
+Your external agent will orchestrate the authoring, compilation, validation, and curation automatically behind the scenes. Once it finishes, open a Pull Request with the finalized record directory to contribute it upstream!
 
 Before submitting your PR, make sure to rate all assets that you generate in the viewer!
+
+For full details on opening pull requests, visual rating expectations, and our data pipelines, please read the complete **[Data Contribution Workflow in CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
 
