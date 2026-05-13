@@ -45,6 +45,7 @@ export function ViewportPanel({
 }: ViewportPanelProps): JSX.Element {
   // Map from useRenderOptions format to RenderOptionsPanel format for SceneCanvas
   const sceneRenderOptions = {
+    fancyGraphics: renderOptions.fancyGraphics,
     showEdges: renderOptions.showEdges,
     showGrid: renderOptions.showGrid,
     showCollisions: renderOptions.showCollisions,

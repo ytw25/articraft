@@ -1,5 +1,5 @@
 import { useState, type JSX } from "react";
-import { AlertTriangle, Check, Copy } from "lucide-react";
+import { AlertTriangle, Check, Copy, Sparkles, Zap } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +19,7 @@ type RenderOptionsPanelProps = {
 };
 
 type OptionRow = {
-  key: keyof RenderOptions;
+  key: Exclude<keyof RenderOptions, "fancyGraphics">;
   label: string;
   description: string;
   section: "display" | "motion";
@@ -105,6 +105,42 @@ export function RenderOptionsPanel({
           <div className="h-px flex-1 bg-[var(--border-subtle)]" />
         </div>
         <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3 py-1.5">
+            <div className="min-w-0">
+              <Label className="text-[12px] text-[var(--text-primary)]">Graphics</Label>
+              <p className="text-[10px] leading-[1.3] text-[var(--text-tertiary)]">
+                {options.fancyGraphics ? "Reflections, shadows, and clean surfaces" : "Performance-oriented renderer"}
+              </p>
+            </div>
+            <div className="grid w-[116px] shrink-0 grid-cols-2 gap-0.5 rounded-md bg-[var(--surface-2)] p-0.5">
+              <button
+                type="button"
+                aria-pressed={!options.fancyGraphics}
+                onClick={() => onOptionChange("fancyGraphics", false)}
+                className={`inline-flex h-7 items-center justify-center rounded-[5px] text-[10px] font-medium transition-colors ${
+                  !options.fancyGraphics
+                    ? "bg-[var(--surface-0)] text-[var(--text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                <Zap className="size-3" />
+                <span className="sr-only">Fast</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={options.fancyGraphics}
+                onClick={() => onOptionChange("fancyGraphics", true)}
+                className={`inline-flex h-7 items-center justify-center rounded-[5px] text-[10px] font-medium transition-colors ${
+                  options.fancyGraphics
+                    ? "bg-[var(--surface-0)] text-[var(--text-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+                    : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                <Sparkles className="size-3" />
+                <span className="sr-only">Fancy</span>
+              </button>
+            </div>
+          </div>
           {displayRows.map((row) => (
             <div key={row.key}>
               <div

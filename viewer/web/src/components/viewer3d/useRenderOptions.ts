@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { updateUrlSearchParams } from '@/lib/url';
 
 export interface RenderOptions {
+  fancyGraphics: boolean;
   showEdges: boolean;
   showGrid: boolean;
   showCollisions: boolean;
@@ -14,7 +15,7 @@ export interface RenderOptions {
 }
 
 const STORAGE_KEY = 'articraft-render-options';
-const STORAGE_SCHEMA_VERSION = 5;
+const STORAGE_SCHEMA_VERSION = 6;
 const RENDER_QUERY_PARAM = 'render';
 const RENDER_OPTION_KEYS: Array<keyof RenderOptions> = [
   'showEdges',
@@ -25,9 +26,11 @@ const RENDER_OPTION_KEYS: Array<keyof RenderOptions> = [
   'autoAnimate',
   'showJointOverlay',
   'showSurfaceSamples',
+  'fancyGraphics',
 ];
 
 export const defaultRenderOptions: RenderOptions = {
+  fancyGraphics: false,
   showEdges: true,
   showGrid: true,
   showCollisions: false,
@@ -64,6 +67,7 @@ function loadOptions(): RenderOptions {
           ...parsed,
           showSegmentColors: false,
           doubleSided: true,
+          fancyGraphics: false,
         };
       }
     }
@@ -103,6 +107,8 @@ function parseOptions(value: string | null): RenderOptions | null {
       ? RENDER_OPTION_KEYS
       : value.length === RENDER_OPTION_KEYS.length - 1
         ? RENDER_OPTION_KEYS.slice(0, -1)
+      : value.length === RENDER_OPTION_KEYS.length - 2
+        ? RENDER_OPTION_KEYS.slice(0, -2)
         : null;
   if (!keys) {
     return null;

@@ -440,6 +440,7 @@ export default function ViewerShell(): JSX.Element {
   }, [applyJointValues, renderOptions.autoAnimate, urdfSpec]);
 
   const inspectorRenderOptions = {
+    fancyGraphics: renderOptions.fancyGraphics,
     showEdges: renderOptions.showEdges,
     showGrid: renderOptions.showGrid,
     showCollisions: renderOptions.showCollisions,

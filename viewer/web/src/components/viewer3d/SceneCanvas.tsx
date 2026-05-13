@@ -26,6 +26,7 @@ const SEGMENTATION_PALETTE = [
   '#ff3d77',
 ] as const;
 const SEGMENTATION_SNAPSHOT_KEY = '__articraftSegmentColorSnapshot__';
+const STUDIO_SHADING_SNAPSHOT_KEY = '__articraftStudioShadingSnapshot__';
 const PREVIEW_MAX_PIXEL_RATIO = 1.25;
 const DEFAULT_MAX_PIXEL_RATIO = 2;
 
@@ -36,6 +37,9 @@ type MaterialWithColor = THREE.Material & {
   emissiveMap?: THREE.Texture | null;
   metalness?: number;
   roughness?: number;
+  transmission?: number;
+  clearcoat?: number;
+  envMapIntensity?: number;
   depthWrite?: boolean;
   colorWrite?: boolean;
 };
@@ -51,6 +55,14 @@ type SegmentMaterialSnapshot = {
   opacity: number;
   depthWrite?: boolean;
   colorWrite?: boolean;
+};
+
+type StudioMaterialSnapshot = {
+  roughness?: number;
+  clearcoat?: number;
+  envMapIntensity?: number;
+  onBeforeCompile: THREE.Material['onBeforeCompile'];
+  customProgramCacheKey: THREE.Material['customProgramCacheKey'];
 };
 
 type SegmentEmphasis = 'default' | 'selected' | 'dimmed';
@@ -170,6 +182,117 @@ function applySurfaceSampleMeshPresentation(material: MaterialWithColor): void {
     material.colorWrite = false;
   }
   material.needsUpdate = true;
+}
+
+function injectStudioShading(shader: THREE.WebGLProgramParametersWithUniforms): void {
+  shader.vertexShader = shader.vertexShader
+    .replace(
+      '#include <common>',
+      `
+#include <common>
+varying vec3 vArticraftWorldPosition;
+varying vec3 vArticraftWorldNormal;
+      `.trim(),
+    )
+    .replace(
+      '#include <beginnormal_vertex>',
+      `
+#include <beginnormal_vertex>
+vArticraftWorldNormal = normalize(mat3(modelMatrix) * objectNormal);
+      `.trim(),
+    )
+    .replace(
+      '#include <worldpos_vertex>',
+      `
+#include <worldpos_vertex>
+vArticraftWorldPosition = worldPosition.xyz;
+      `.trim(),
+    );
+
+  shader.fragmentShader = shader.fragmentShader
+    .replace(
+      '#include <common>',
+      `
+#include <common>
+varying vec3 vArticraftWorldPosition;
+varying vec3 vArticraftWorldNormal;
+      `.trim(),
+    )
+    .replace(
+      '#include <dithering_fragment>',
+      `
+vec3 articraftNormal = normalize(vArticraftWorldNormal);
+vec3 articraftViewDir = normalize(cameraPosition - vArticraftWorldPosition);
+float articraftKey = max(dot(articraftNormal, normalize(vec3(-0.38, 0.78, 0.50))), 0.0);
+float articraftFill = max(dot(articraftNormal, normalize(vec3(0.68, 0.30, -0.44))), 0.0);
+float articraftUnderside = 1.0 - smoothstep(-0.12, 0.42, articraftNormal.y);
+float articraftRim = pow(1.0 - max(dot(articraftNormal, articraftViewDir), 0.0), 2.4);
+float articraftForm = 0.82 + articraftKey * 0.16 + articraftFill * 0.035 + articraftRim * 0.075 - articraftUnderside * 0.075;
+gl_FragColor.rgb *= clamp(articraftForm, 0.66, 1.08);
+gl_FragColor.rgb += vec3(0.015) * articraftRim;
+#include <dithering_fragment>
+      `.trim(),
+    );
+}
+
+function applyStudioShading(material: MaterialWithColor): void {
+  if (material.userData[STUDIO_SHADING_SNAPSHOT_KEY]) {
+    return;
+  }
+
+  if (material.transparent || material.opacity < 0.999 || (material.transmission ?? 0) > 0.01) {
+    return;
+  }
+
+  material.userData[STUDIO_SHADING_SNAPSHOT_KEY] = {
+    roughness: material.roughness,
+    clearcoat: material.clearcoat,
+    envMapIntensity: material.envMapIntensity,
+    onBeforeCompile: material.onBeforeCompile,
+    customProgramCacheKey: material.customProgramCacheKey,
+  } satisfies StudioMaterialSnapshot;
+
+  const snapshot = material.userData[STUDIO_SHADING_SNAPSHOT_KEY] as StudioMaterialSnapshot;
+  if (typeof material.roughness === 'number') {
+    material.roughness = Math.max(material.roughness, 0.56);
+  }
+  if (typeof material.clearcoat === 'number') {
+    material.clearcoat = Math.min(material.clearcoat, 0.1);
+  }
+  if (typeof material.envMapIntensity === 'number') {
+    material.envMapIntensity = Math.min(material.envMapIntensity, 0.62);
+  }
+
+  material.onBeforeCompile = (shader, renderer) => {
+    snapshot.onBeforeCompile.call(material, shader, renderer);
+    injectStudioShading(shader);
+  };
+  material.customProgramCacheKey = () => {
+    const previousKey = snapshot.customProgramCacheKey.call(material);
+    return `${previousKey}:articraft-studio-shading-v1`;
+  };
+  material.needsUpdate = true;
+}
+
+function restoreStudioShading(material: MaterialWithColor): void {
+  const snapshot = material.userData[STUDIO_SHADING_SNAPSHOT_KEY] as StudioMaterialSnapshot | undefined;
+  if (!snapshot) {
+    return;
+  }
+
+  if (typeof snapshot.roughness === 'number') {
+    material.roughness = snapshot.roughness;
+  }
+  if (typeof snapshot.clearcoat === 'number') {
+    material.clearcoat = snapshot.clearcoat;
+  }
+  if (typeof snapshot.envMapIntensity === 'number') {
+    material.envMapIntensity = snapshot.envMapIntensity;
+  }
+  material.onBeforeCompile = snapshot.onBeforeCompile;
+  material.customProgramCacheKey = snapshot.customProgramCacheKey;
+  material.needsUpdate = true;
+  delete material.userData[STUDIO_SHADING_SNAPSHOT_KEY];
 }
 
 function restoreSegmentMaterial(material: MaterialWithColor): void {
@@ -342,6 +465,7 @@ export function SceneCanvas({
   const jointOverlayRef = useRef<THREE.Object3D[]>([]);
   const partHighlightRef = useRef<THREE.LineSegments[]>([]);
   const surfaceSampleRef = useRef<THREE.Points[]>([]);
+  const shadowPlaneRef = useRef<THREE.Mesh<THREE.PlaneGeometry, THREE.ShadowMaterial> | null>(null);
   const pointerDownRef = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const [selectedPartSelection, setSelectedPartSelection] = useState<PartLegendSelection | null>(null);
   const isStagingSelection = selectionKey?.startsWith("staging:") ?? false;
@@ -351,6 +475,7 @@ export function SceneCanvas({
     {
       maxPixelRatio: renderOptions.autoAnimate ? PREVIEW_MAX_PIXEL_RATIO : DEFAULT_MAX_PIXEL_RATIO,
       continuousRender: renderOptions.autoAnimate,
+      fancyGraphics: renderOptions.fancyGraphics,
     },
   );
   const { urdfSpec, jointNodes, jointFrames, loading, error, collisionGeometryState } = useUrdfLoader(
@@ -457,6 +582,61 @@ export function SceneCanvas({
     }
   }, [gridGroup, renderOptions.showGrid]);
 
+  useEffect(() => {
+    if (!scene) {
+      return;
+    }
+
+    const previousPlane = shadowPlaneRef.current;
+    if (previousPlane) {
+      previousPlane.parent?.remove(previousPlane);
+      previousPlane.geometry.dispose();
+      previousPlane.material.dispose();
+      shadowPlaneRef.current = null;
+    }
+
+    if (!renderOptions.fancyGraphics || !urdfSpec) {
+      return;
+    }
+
+    const robot = scene.getObjectByName(ROBOT_GROUP_NAME);
+    if (!robot) {
+      return;
+    }
+
+    const bounds = new THREE.Box3().setFromObject(robot);
+    if (bounds.isEmpty()) {
+      return;
+    }
+
+    const size = bounds.getSize(new THREE.Vector3());
+    const planeSize = Math.max(size.x, size.z, 1) * 2.6;
+    const geometry = new THREE.PlaneGeometry(planeSize, planeSize);
+    const material = new THREE.ShadowMaterial({
+      color: 0x111827,
+      opacity: 0.12,
+      transparent: true,
+      depthWrite: false,
+    });
+    const plane = new THREE.Mesh(geometry, material);
+    plane.name = '__articraft_shadow_catcher__';
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.y = -0.001;
+    plane.receiveShadow = true;
+    plane.renderOrder = -10;
+    scene.add(plane);
+    shadowPlaneRef.current = plane;
+
+    return () => {
+      plane.parent?.remove(plane);
+      plane.geometry.dispose();
+      plane.material.dispose();
+      if (shadowPlaneRef.current === plane) {
+        shadowPlaneRef.current = null;
+      }
+    };
+  }, [renderOptions.fancyGraphics, scene, urdfSpec]);
+
   // Show edges
   useEffect(() => {
     if (!scene) return;
@@ -468,7 +648,12 @@ export function SceneCanvas({
     }
     edgeLinesRef.current = [];
 
-    if (!renderOptions.showEdges || renderOptions.showCollisions || renderOptions.showSurfaceSamples) return;
+    if (
+      !renderOptions.showEdges ||
+      renderOptions.fancyGraphics ||
+      renderOptions.showCollisions ||
+      renderOptions.showSurfaceSamples
+    ) return;
 
     const robot = scene.getObjectByName(ROBOT_GROUP_NAME);
     if (!robot) return;
@@ -482,7 +667,64 @@ export function SceneCanvas({
       }
     });
     edgeLinesRef.current = newLines;
-  }, [scene, renderOptions.showEdges, renderOptions.showCollisions, renderOptions.showSurfaceSamples, urdfSpec]);
+  }, [
+    scene,
+    renderOptions.fancyGraphics,
+    renderOptions.showEdges,
+    renderOptions.showCollisions,
+    renderOptions.showSurfaceSamples,
+    urdfSpec,
+  ]);
+
+  useEffect(() => {
+    if (!scene || !urdfSpec) {
+      return;
+    }
+
+    const robot = scene.getObjectByName(ROBOT_GROUP_NAME);
+    if (!robot) {
+      return;
+    }
+
+    const shouldApplyStudioShading =
+      renderOptions.fancyGraphics &&
+      !renderOptions.showCollisions &&
+      !renderOptions.showSegmentColors &&
+      !renderOptions.showSurfaceSamples;
+
+    robot.traverse((obj) => {
+      if (!(obj instanceof THREE.Mesh) || obj.userData.articraftVisual !== true) {
+        return;
+      }
+
+      withMeshMaterials(obj, (material) => {
+        if (shouldApplyStudioShading) {
+          applyStudioShading(material);
+        } else {
+          restoreStudioShading(material);
+        }
+      });
+    });
+
+    return () => {
+      robot.traverse((obj) => {
+        if (!(obj instanceof THREE.Mesh) || obj.userData.articraftVisual !== true) {
+          return;
+        }
+
+        withMeshMaterials(obj, (material) => {
+          restoreStudioShading(material);
+        });
+      });
+    };
+  }, [
+    scene,
+    renderOptions.fancyGraphics,
+    renderOptions.showCollisions,
+    renderOptions.showSegmentColors,
+    renderOptions.showSurfaceSamples,
+    urdfSpec,
+  ]);
 
   // Double-sided materials
   useEffect(() => {
@@ -809,6 +1051,7 @@ export function SceneCanvas({
     invalidate,
     jointPoseSignal,
     renderOptions.doubleSided,
+    renderOptions.fancyGraphics,
     renderOptions.showCollisions,
     renderOptions.showEdges,
     renderOptions.showGrid,
