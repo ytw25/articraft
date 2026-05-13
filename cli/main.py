@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from shutil import which
 
 from agent import runner as agent_runner
 from agent.providers.factory import infer_provider_from_model_id
@@ -221,7 +222,7 @@ def _viewer_url(args: argparse.Namespace, *, dev_frontend: bool = False) -> str:
 
 
 def _run_viewer(args: argparse.Namespace) -> int:
-    if not shutil_which("npm"):
+    if not which("npm"):
         print("npm is required for viewer/web. Install Node.js and npm first.")
         return 1
     node_modules = args.repo_root / "viewer" / "web" / "node_modules"
@@ -275,14 +276,6 @@ def _run_viewer(args: argparse.Namespace) -> int:
         ],
         cwd=args.repo_root,
     )
-
-
-def shutil_which(command: str) -> str | None:
-    for directory in os.environ.get("PATH", "").split(os.pathsep):
-        path = Path(directory) / command
-        if path.exists() and os.access(path, os.X_OK):
-            return str(path)
-    return None
 
 
 def _run_view(args: argparse.Namespace) -> int:
