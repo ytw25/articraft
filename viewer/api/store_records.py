@@ -4,11 +4,21 @@ import json
 from pathlib import Path
 from typing import Any
 
+from storage.revisions import (
+    active_cost_path,
+    active_provenance_path,
+    active_revision_id,
+    active_traces_dir,
+    descendants_for_record,
+    list_record_revisions,
+)
 from storage.runs import RunStore
 from viewer.api.agent_harness import agent_harness_from_record
 from viewer.api.schemas import (
     DatasetEntryResponse,
     RecordDetailResponse,
+    RecordHistoryResponse,
+    RecordHistoryRevisionResponse,
     RecordSummaryResponse,
     WorkbenchEntryResponse,
 )
@@ -79,6 +89,47 @@ class ViewerRecordsStore(ViewerStoreComponent):
         except OSError:
             return None
 
+    def _history_revision_response(
+        self,
+        *,
+        record_id: str,
+        revision_id: str,
+        active: bool,
+        revision: dict[str, Any],
+        prompt: str | None,
+    ) -> RecordHistoryRevisionResponse:
+        generation = (
+            revision.get("generation") if isinstance(revision.get("generation"), dict) else {}
+        )
+        source = revision.get("source") if isinstance(revision.get("source"), dict) else {}
+        parent = revision.get("parent") if isinstance(revision.get("parent"), dict) else {}
+        run_summary = (
+            revision.get("run_summary") if isinstance(revision.get("run_summary"), dict) else {}
+        )
+        revision_dir = self.repo.layout.record_revision_dir(record_id, revision_id)
+        cost_path = revision_dir / "cost.json"
+        cost = self.repo.read_json(cost_path) if cost_path.exists() else None
+        total_cost_usd, _, _ = _cost_totals(cost)
+        return RecordHistoryRevisionResponse(
+            record_id=record_id,
+            revision_id=revision_id,
+            active=active,
+            created_at=_coerce_string(revision.get("created_at")),
+            prompt_preview=(prompt or "").replace("\n", " ")[:160],
+            provider=_coerce_string(generation.get("provider")),
+            model_id=_coerce_string(generation.get("model_id")),
+            run_id=_coerce_string(source.get("run_id")),
+            parent_record_id=_coerce_string(parent.get("record_id")),
+            parent_revision_id=_coerce_string(parent.get("revision_id")),
+            status=_coerce_string(run_summary.get("final_status")),
+            total_cost_usd=total_cost_usd,
+            has_cost=cost_path.exists(),
+            has_traces=(revision_dir / "traces").is_dir()
+            and any((revision_dir / "traces").iterdir()),
+            has_model=(revision_dir / "model.py").exists(),
+            has_provenance=(revision_dir / "provenance.json").exists(),
+        )
+
     def _record_creator_fields(self, record: dict[str, Any]) -> tuple[str | None, str | None]:
         creator = record.get("creator")
         if not isinstance(creator, dict):
@@ -91,7 +142,7 @@ class ViewerRecordsStore(ViewerStoreComponent):
         creator = record.get("creator")
         if isinstance(creator, dict) and creator.get("trace_available") is False:
             return False
-        traces_dir = self.repo.layout.record_traces_dir(record_id)
+        traces_dir = active_traces_dir(self.repo, record_id, record=record)
         return traces_dir.is_dir() and any(traces_dir.iterdir())
 
     def _record_summary(
@@ -115,15 +166,27 @@ class ViewerRecordsStore(ViewerStoreComponent):
         record_dir = self.repo.layout.record_dir(record_id)
 
         compile_path = self.repo.layout.record_materialization_compile_report_path(record_id)
-        provenance_name = "provenance.json"
-        provenance_path = record_dir / provenance_name
+        provenance_path = active_provenance_path(self.repo, record_id, record=record)
         cost_name = artifacts.get("cost_json")
         provenance = self.repo.read_json(provenance_path)
-        cost = self.repo.read_json(record_dir / str(cost_name)) if cost_name else None
+        cost_path = (
+            record_dir / str(cost_name)
+            if cost_name
+            else active_cost_path(self.repo, record_id, record=record)
+        )
+        cost = self.repo.read_json(cost_path) if cost_path.exists() else None
         materialization_status = self.materialization._materialization_status_for_record(record_id)
         creator_mode, external_agent = self._record_creator_fields(record)
         agent_harness = agent_harness_from_record(record)
         has_traces = self._record_has_traces(record_id, record)
+        lineage = record.get("lineage") if isinstance(record.get("lineage"), dict) else {}
+        active_id = _coerce_string(record.get("active_revision_id"))
+        revision_root = self.repo.layout.record_revisions_dir(record_id)
+        revision_count = (
+            len([path for path in revision_root.iterdir() if path.is_dir()])
+            if revision_root.is_dir()
+            else 0
+        )
 
         turn_count: int | None = None
         thinking_level: str | None = None
@@ -178,11 +241,17 @@ class ViewerRecordsStore(ViewerStoreComponent):
             run_id=run_id,
             run_status=run_status,
             run_message=run_message,
+            active_revision_id=active_id,
+            origin_record_id=_coerce_string(lineage.get("origin_record_id")),
+            parent_record_id=_coerce_string(lineage.get("parent_record_id")),
+            revision_count=revision_count,
+            has_history=revision_count > 1
+            or _coerce_string(lineage.get("parent_record_id")) is not None,
             collections=[str(item) for item in record.get("collections", [])],
             materialization_status=materialization_status,
             has_compile_report=compile_path.exists(),
             has_provenance=provenance_path.exists(),
-            has_cost=(record_dir / str(cost_name)).exists() if cost_name else False,
+            has_cost=cost_path.exists(),
         )
         if summary_cache is not None:
             summary_cache[record_id] = summary
@@ -209,14 +278,26 @@ class ViewerRecordsStore(ViewerStoreComponent):
         record_dir = self.repo.layout.record_dir(record_id)
 
         compile_path = self.repo.layout.record_materialization_compile_report_path(record_id)
-        provenance_path = record_dir / "provenance.json"
+        provenance_path = active_provenance_path(self.repo, record_id, record=record)
         cost_name = artifacts.get("cost_json")
-        cost_path = record_dir / str(cost_name) if cost_name else None
+        cost_path = (
+            record_dir / str(cost_name)
+            if cost_name
+            else active_cost_path(self.repo, record_id, record=record)
+        )
         provenance = self.repo.read_json(provenance_path) if provenance_path.exists() else None
         cost = self.repo.read_json(cost_path) if cost_path and cost_path.exists() else None
         creator_mode, external_agent = self._record_creator_fields(record)
         agent_harness = agent_harness_from_record(record)
         has_traces = self._record_has_traces(record_id, record)
+        lineage = record.get("lineage") if isinstance(record.get("lineage"), dict) else {}
+        active_id = _coerce_string(record.get("active_revision_id"))
+        revision_root = self.repo.layout.record_revisions_dir(record_id)
+        revision_count = (
+            len([path for path in revision_root.iterdir() if path.is_dir()])
+            if revision_root.is_dir()
+            else 0
+        )
 
         turn_count: int | None = None
         thinking_level: str | None = None
@@ -260,11 +341,17 @@ class ViewerRecordsStore(ViewerStoreComponent):
             run_id=run_id,
             run_status=None,
             run_message=None,
+            active_revision_id=active_id,
+            origin_record_id=_coerce_string(lineage.get("origin_record_id")),
+            parent_record_id=_coerce_string(lineage.get("parent_record_id")),
+            revision_count=revision_count,
+            has_history=revision_count > 1
+            or _coerce_string(lineage.get("parent_record_id")) is not None,
             collections=[str(item) for item in record.get("collections", [])],
             materialization_status=None,
             has_compile_report=compile_path.exists(),
             has_provenance=provenance_path.exists(),
-            has_cost=cost_path.exists() if cost_path else False,
+            has_cost=cost_path.exists(),
         )
         if summary_cache is not None:
             summary_cache[record_id] = summary
@@ -285,11 +372,17 @@ class ViewerRecordsStore(ViewerStoreComponent):
         artifacts = record.get("artifacts") or {}
         record_dir = self.repo.layout.record_dir(record_id)
         compile_path = self.repo.layout.record_materialization_compile_report_path(record_id)
-        provenance_name = "provenance.json"
         cost_name = artifacts.get("cost_json")
         compile_report = self.repo.read_json(compile_path)
-        provenance = self.repo.read_json(record_dir / provenance_name)
-        cost = self.repo.read_json(record_dir / str(cost_name)) if cost_name else None
+        provenance = self.repo.read_json(
+            active_provenance_path(self.repo, record_id, record=record)
+        )
+        cost_path = (
+            record_dir / str(cost_name)
+            if cost_name
+            else active_cost_path(self.repo, record_id, record=record)
+        )
+        cost = self.repo.read_json(cost_path) if cost_path.exists() else None
 
         return RecordDetailResponse(
             summary=summary,
@@ -297,6 +390,73 @@ class ViewerRecordsStore(ViewerStoreComponent):
             compile_report=compile_report,
             provenance=provenance,
             cost=cost,
+        )
+
+    def record_history(self, record_id: str) -> RecordHistoryResponse | None:
+        record = self.repo.read_json(self.repo.layout.record_metadata_path(record_id))
+        if not isinstance(record, dict):
+            return None
+        active_id = active_revision_id(self.repo, record_id, record=record)
+        revisions = [
+            self._history_revision_response(
+                record_id=row.record_id,
+                revision_id=row.revision_id,
+                active=row.active,
+                revision=row.revision,
+                prompt=row.prompt,
+            )
+            for row in list_record_revisions(self.repo, record_id)
+        ]
+
+        ancestors: list[RecordHistoryRevisionResponse] = []
+        lineage = record.get("lineage") if isinstance(record.get("lineage"), dict) else {}
+        parent_record_id = _coerce_string(lineage.get("parent_record_id"))
+        parent_revision_id = _coerce_string(lineage.get("parent_revision_id"))
+        seen: set[str] = set()
+        while parent_record_id and parent_revision_id and parent_record_id not in seen:
+            seen.add(parent_record_id)
+            parent_revision_dir = self.repo.layout.record_revision_dir(
+                parent_record_id,
+                parent_revision_id,
+            )
+            parent_revision = (
+                self.repo.read_json(parent_revision_dir / "revision.json", default={}) or {}
+            )
+            prompt = self._read_text(parent_revision_dir / "prompt.txt")
+            ancestors.append(
+                self._history_revision_response(
+                    record_id=parent_record_id,
+                    revision_id=parent_revision_id,
+                    active=False,
+                    revision=parent_revision if isinstance(parent_revision, dict) else {},
+                    prompt=prompt,
+                )
+            )
+            parent_record = self.repo.read_json(
+                self.repo.layout.record_metadata_path(parent_record_id)
+            )
+            parent_lineage = (
+                parent_record.get("lineage")
+                if isinstance(parent_record, dict)
+                and isinstance(parent_record.get("lineage"), dict)
+                else {}
+            )
+            parent_record_id = _coerce_string(parent_lineage.get("parent_record_id"))
+            parent_revision_id = _coerce_string(parent_lineage.get("parent_revision_id"))
+
+        summary_cache: dict[str, RecordSummaryResponse | None] = {}
+        descendants = [
+            summary
+            for descendant_id, _record in descendants_for_record(self.repo, record_id)
+            if (summary := self._record_summary(descendant_id, summary_cache=summary_cache))
+            is not None
+        ]
+        return RecordHistoryResponse(
+            record_id=record_id,
+            active_revision_id=active_id,
+            ancestors=ancestors,
+            revisions=revisions,
+            descendants=descendants,
         )
 
     def list_workbench_entries(

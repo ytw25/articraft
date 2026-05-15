@@ -4,6 +4,7 @@ Compatibility entrypoints for the agent runtime.
 The implementation is split across focused modules:
 - agent.single_run owns lifecycle orchestration.
 - agent.record_persistence owns record/provenance/materialization writes.
+- agent.edit owns copy-edit workflows.
 - agent.rerun owns rerun reconstruction.
 - agent.payload_preview owns provider payload previews.
 - agent.runner_cli owns argument parsing.
@@ -23,6 +24,7 @@ from agent.compiler import (
 from agent.compiler import (
     compile_urdf_report_maybe_timeout as _compile_urdf_report_maybe_timeout,
 )
+from agent.edit import edit_record as _edit_record_impl
 from agent.harness import ArticraftAgent
 from agent.models import CompileReport as AgentCompileReport
 from agent.payload_preview import (
@@ -161,6 +163,7 @@ __all__ = [
     "compile_urdf",
     "compile_urdf_report_maybe_timeout",
     "create_workbench_draft_record",
+    "edit_record",
     "main",
     "rerun_record_in_place",
     "resolve_system_prompt_path",
@@ -251,6 +254,15 @@ def create_workbench_draft_record(**kwargs: Any) -> Path:
     """Create a draft workbench record without running generation."""
     return _create_workbench_draft_record_impl(
         **kwargs,
+        resolve_record_author_func=_resolve_runtime_record_author,
+    )
+
+
+async def edit_record(**kwargs: Any) -> RunExecutionOutcome:
+    """Edit an existing record as a copy."""
+    return await _edit_record_impl(
+        **kwargs,
+        execute_single_run_func=_execute_single_run,
         resolve_record_author_func=_resolve_runtime_record_author,
     )
 

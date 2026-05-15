@@ -18,6 +18,23 @@ def fake_agent(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(runner, "ArticraftAgent", FakeAgent)
 
 
+def _active_revision_dir(record_dir: Path) -> Path:
+    record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
+    return record_dir / "revisions" / record.get("active_revision_id", "rev_000001")
+
+
+def _artifact_path(record_dir: Path, filename: str) -> Path:
+    return _active_revision_dir(record_dir) / filename
+
+
+def _dataset_entry_path(record_dir: Path) -> Path:
+    return record_dir / "collections" / "dataset.json"
+
+
+def _workbench_entry_path(record_dir: Path) -> Path:
+    return record_dir / "collections" / "workbench.json"
+
+
 class DeletingImageAgent(FakeAgent):
     async def run(self, user_content: object):  # type: ignore[override]
         if isinstance(user_content, list):
@@ -204,14 +221,15 @@ def test_workbench_run_and_rerun_persist_runtime_artifacts(
     record_dir = record_dirs[0]
     materialization_dir = repo_root / "data" / "cache" / "record_materialization" / record_dir.name
 
-    assert (record_dir / "prompt.txt").read_text(encoding="utf-8") == "make a gearbox"
-    assert (record_dir / "model.py").exists()
-    assert (record_dir / "provenance.json").exists()
-    assert (record_dir / "cost.json").exists()
-    assert (record_dir / "traces").exists()
-    assert (record_dir / "traces" / "trajectory.jsonl.zst").exists()
-    assert not (record_dir / "traces" / "trajectory.jsonl").exists()
-    assert not (record_dir / "traces" / "conversation.jsonl").exists()
+    revision_dir = _active_revision_dir(record_dir)
+    assert _artifact_path(record_dir, "prompt.txt").read_text(encoding="utf-8") == "make a gearbox"
+    assert _artifact_path(record_dir, "model.py").exists()
+    assert _artifact_path(record_dir, "provenance.json").exists()
+    assert _artifact_path(record_dir, "cost.json").exists()
+    assert (revision_dir / "traces").exists()
+    assert (revision_dir / "traces" / "trajectory.jsonl.zst").exists()
+    assert not (revision_dir / "traces" / "trajectory.jsonl").exists()
+    assert not (revision_dir / "traces" / "conversation.jsonl").exists()
     assert (materialization_dir / "model.urdf").read_text(
         encoding="utf-8"
     ) == "<robot name='test'/>"
@@ -224,11 +242,10 @@ def test_workbench_run_and_rerun_persist_runtime_artifacts(
     assert compile_report["metrics"]["materialization_fingerprint"]
     assert not (materialization_dir / "assets" / "meshes").exists()
 
-    workbench_path = repo_root / "data" / "local" / "workbench.json"
-    workbench = json.loads(workbench_path.read_text(encoding="utf-8"))
-    assert len(workbench["entries"]) == 1
-    assert workbench["entries"][0]["record_id"] == record_dir.name
-    assert workbench["entries"][0]["label"] == "gearbox try"
+    workbench_path = _workbench_entry_path(record_dir)
+    workbench_entry = json.loads(workbench_path.read_text(encoding="utf-8"))
+    assert workbench_entry["record_id"] == record_dir.name
+    assert workbench_entry["label"] == "gearbox try"
 
     runs_root = repo_root / "data" / "cache" / "runs"
     run_dirs = [path for path in runs_root.iterdir() if path.is_dir()]
@@ -244,20 +261,22 @@ def test_workbench_run_and_rerun_persist_runtime_artifacts(
     original_record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
     original_run_id = original_record["source"]["run_id"]
     original_created_at = original_record["created_at"]
-    original_provenance = json.loads((record_dir / "provenance.json").read_text(encoding="utf-8"))
+    original_provenance = json.loads(
+        _artifact_path(record_dir, "provenance.json").read_text(encoding="utf-8")
+    )
     system_prompt_sha = original_provenance["prompting"]["system_prompt_sha256"]
     assert (repo_root / "data" / "system_prompts" / f"{system_prompt_sha}.txt").exists()
-    (record_dir / "provenance.json").write_text(
+    _artifact_path(record_dir, "provenance.json").write_text(
         json.dumps(original_provenance, indent=2) + "\n",
         encoding="utf-8",
     )
 
-    workbench["entries"][0]["archived"] = True
-    workbench_path.write_text(json.dumps(workbench, indent=2) + "\n", encoding="utf-8")
+    workbench_entry["archived"] = True
+    workbench_path.write_text(json.dumps(workbench_entry, indent=2) + "\n", encoding="utf-8")
 
-    (record_dir / "model.py").write_text("# stale\n", encoding="utf-8")
-    (record_dir / "cost.json").write_text('{"stale": true}\n', encoding="utf-8")
-    (record_dir / "traces" / "stale.txt").write_text("stale\n", encoding="utf-8")
+    _artifact_path(record_dir, "model.py").write_text("# stale\n", encoding="utf-8")
+    _artifact_path(record_dir, "cost.json").write_text('{"stale": true}\n', encoding="utf-8")
+    (revision_dir / "traces" / "stale.txt").write_text("stale\n", encoding="utf-8")
     stale_glb_dir = record_dir / "assets" / "glb"
     stale_glb_dir.mkdir(parents=True, exist_ok=True)
     (stale_glb_dir / "stale.glb").write_text("stale\n", encoding="utf-8")
@@ -280,30 +299,30 @@ def test_workbench_run_and_rerun_persist_runtime_artifacts(
     assert updated_record["created_at"] == original_created_at
     assert updated_record["source"]["run_id"] != original_run_id
     assert (
-        (record_dir / "model.py")
+        _artifact_path(record_dir, "model.py")
         .read_text(encoding="utf-8")
         .startswith("from __future__ import annotations")
     )
     assert (
-        json.loads((record_dir / "cost.json").read_text(encoding="utf-8"))["total"]["costs_usd"][
-            "total"
-        ]
+        json.loads(_artifact_path(record_dir, "cost.json").read_text(encoding="utf-8"))["total"][
+            "costs_usd"
+        ]["total"]
         == 0.123456
     )
-    assert (record_dir / "traces" / "trajectory.jsonl.zst").exists()
-    assert not (record_dir / "traces" / "trajectory.jsonl").exists()
-    assert not (record_dir / "traces" / "conversation.jsonl").exists()
-    assert not (record_dir / "traces" / "stale.txt").exists()
+    updated_revision_dir = _active_revision_dir(record_dir)
+    assert (updated_revision_dir / "traces" / "trajectory.jsonl.zst").exists()
+    assert not (updated_revision_dir / "traces" / "trajectory.jsonl").exists()
+    assert not (updated_revision_dir / "traces" / "conversation.jsonl").exists()
+    assert not (updated_revision_dir / "traces" / "stale.txt").exists()
     assert not (record_dir / "assets" / "glb").exists()
     assert not (record_dir / "assets" / "viewer").exists()
     assert not (materialization_dir / "assets" / "meshes").exists()
 
-    workbench = json.loads(workbench_path.read_text(encoding="utf-8"))
-    assert len(workbench["entries"]) == 1
-    assert workbench["entries"][0]["record_id"] == record_dir.name
-    assert workbench["entries"][0]["label"] == "gearbox try"
-    assert workbench["entries"][0]["tags"] == ["gear", "test"]
-    assert workbench["entries"][0]["archived"] is True
+    workbench_entry = json.loads(workbench_path.read_text(encoding="utf-8"))
+    assert workbench_entry["record_id"] == record_dir.name
+    assert workbench_entry["label"] == "gearbox try"
+    assert workbench_entry["tags"] == ["gear", "test"]
+    assert workbench_entry["archived"] is True
 
     run_dirs = sorted(path for path in runs_root.iterdir() if path.is_dir())
     assert len(run_dirs) == 2
@@ -569,7 +588,7 @@ def test_dataset_run_and_rerun_preserve_dataset_metadata(
     assert record["collections"] == ["dataset"]
     assert record["category_slug"] == "crane_tower"
 
-    dataset_entry = json.loads((record_dir / "dataset_entry.json").read_text(encoding="utf-8"))
+    dataset_entry = json.loads(_dataset_entry_path(record_dir).read_text(encoding="utf-8"))
     assert dataset_entry["dataset_id"] == "ds_crane_tower_0001"
     assert dataset_entry["category_slug"] == "crane_tower"
 
@@ -602,7 +621,7 @@ def test_dataset_run_and_rerun_preserve_dataset_metadata(
 
     original_run_id = record["source"]["run_id"]
     original_promoted_at = dataset_entry["promoted_at"]
-    (record_dir / "model.py").write_text("# stale dataset\n", encoding="utf-8")
+    _artifact_path(record_dir, "model.py").write_text("# stale dataset\n", encoding="utf-8")
 
     rerun_exit_code = asyncio.run(
         runner.rerun_record_in_place(
@@ -618,12 +637,12 @@ def test_dataset_run_and_rerun_preserve_dataset_metadata(
     assert record["collections"] == ["dataset"]
     assert record["category_slug"] == "crane_tower"
     assert (
-        (record_dir / "model.py")
+        _artifact_path(record_dir, "model.py")
         .read_text(encoding="utf-8")
         .startswith("from __future__ import annotations")
     )
 
-    dataset_entry = json.loads((record_dir / "dataset_entry.json").read_text(encoding="utf-8"))
+    dataset_entry = json.loads(_dataset_entry_path(record_dir).read_text(encoding="utf-8"))
     assert dataset_entry["dataset_id"] == "ds_crane_tower_0001"
     assert dataset_entry["category_slug"] == "crane_tower"
     assert dataset_entry["promoted_at"] == original_promoted_at
@@ -688,7 +707,7 @@ def test_workbench_run_succeeds_when_persisted_input_image_disappears(
     record_dir = next((repo_root / "data" / "records").iterdir())
     materialization_dir = repo_root / "data" / "cache" / "record_materialization" / record_dir.name
     assert (record_dir / "record.json").exists()
-    assert (record_dir / "provenance.json").exists()
+    assert _artifact_path(record_dir, "provenance.json").exists()
     assert (materialization_dir / "compile_report.json").exists()
     compile_report = json.loads(
         (materialization_dir / "compile_report.json").read_text(encoding="utf-8")
@@ -696,7 +715,7 @@ def test_workbench_run_succeeds_when_persisted_input_image_disappears(
     assert compile_report["metrics"]["compile_level"] == "full"
     assert compile_report["metrics"]["fingerprint_inputs"]["model_py_sha256"]
     assert compile_report["metrics"]["materialization_fingerprint"]
-    assert list((record_dir / "inputs").iterdir()) == []
+    assert list((_active_revision_dir(record_dir) / "inputs").iterdir()) == []
 
     run_dir = next((repo_root / "data" / "cache" / "runs").iterdir())
     run_metadata = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))

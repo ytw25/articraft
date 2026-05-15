@@ -1,7 +1,15 @@
 import { useEffect, useState, type JSX } from "react";
 
 import { useViewer } from "@/lib/viewer-context";
-import { fetchRecordFile, fetchRecordTraceFile, fetchStagingFile, fetchStagingTraceFile } from "@/lib/api";
+import {
+  fetchRecordFile,
+  fetchRecordHistory,
+  fetchRecordTraceFile,
+  fetchStagingFile,
+  fetchStagingTraceFile,
+  recordRevisionTraceUrl,
+} from "@/lib/api";
+import type { RecordHistory, RecordHistoryRevision, RecordSummary } from "@/lib/types";
 import { findStagingEntryInBootstrap } from "@/lib/record-summary";
 import { TracePanel } from "@/components/inspector/TracePanel";
 import { Badge } from "@/components/ui/badge";
@@ -38,11 +46,145 @@ function externalAgentLabel(agent: string | null | undefined): string {
   return agent ?? "External";
 }
 
+function formatCost(value: number | null | undefined): string {
+  return value != null ? `$${value.toFixed(4)}` : "--";
+}
+
+function HistoryRevisionRow({ row }: { row: RecordHistoryRevision }): JSX.Element {
+  const modelLabel = [row.provider, row.model_id].filter(Boolean).join(" / ") || "--";
+  return (
+    <li className="border-t border-[var(--border-subtle)] py-2 first:border-t-0 first:pt-0 last:pb-0">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate font-mono text-[10px] text-[var(--text-secondary)]">
+            {row.record_id}/{row.revision_id}
+          </span>
+          {row.active ? <Badge variant="success">active</Badge> : null}
+        </div>
+        <span className="shrink-0 font-mono text-[10px] text-[var(--text-tertiary)]">
+          {formatCost(row.total_cost_usd)}
+        </span>
+      </div>
+      <p className="mt-1 line-clamp-2 text-[11px] text-[var(--text-secondary)]">
+        {row.prompt_preview || "--"}
+      </p>
+      <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-[var(--text-tertiary)]">
+        <span className="min-w-0 truncate">{modelLabel}</span>
+        <span className="shrink-0">{row.status ?? "unknown"}</span>
+      </div>
+      {row.has_traces ? (
+        <a
+          className="mt-1 inline-flex text-[11px] text-[var(--accent)] hover:text-[var(--text-primary)]"
+          href={recordRevisionTraceUrl(row.record_id, row.revision_id)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          View trajectory
+        </a>
+      ) : null}
+    </li>
+  );
+}
+
+function HistoryPanel({
+  history,
+  selectedRecord,
+}: {
+  history: RecordHistory | null;
+  selectedRecord: RecordSummary;
+}): JSX.Element | null {
+  if (!history) return null;
+  const hasAncestors = history.ancestors.length > 0;
+  const hasDescendants = history.descendants.length > 0;
+  const hasRevisions = history.revisions.length > 0;
+  if (!hasAncestors && !hasDescendants && !hasRevisions) return null;
+
+  return (
+    <section>
+      <SectionLabel>History</SectionLabel>
+      <div className="space-y-3">
+        <div className="space-y-0">
+          <div className="prop-row">
+            <span className="prop-label">Active Revision</span>
+            <span className="prop-value font-mono text-[10px]">
+              {history.active_revision_id ?? selectedRecord.active_revision_id ?? "--"}
+            </span>
+          </div>
+          <div className="prop-row">
+            <span className="prop-label">Origin</span>
+            <span className="prop-value font-mono text-[10px]">
+              {selectedRecord.origin_record_id ?? selectedRecord.record_id}
+            </span>
+          </div>
+        </div>
+
+        {hasAncestors ? (
+          <div>
+            <p className="pb-1 text-[10px] font-medium uppercase tracking-[0.05em] text-[var(--text-tertiary)]">
+              Ancestors
+            </p>
+            <ul>
+              {history.ancestors.map((row) => (
+                <HistoryRevisionRow
+                  key={`${row.record_id}:${row.revision_id}:ancestor`}
+                  row={row}
+                />
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {hasRevisions ? (
+          <div>
+            <p className="pb-1 text-[10px] font-medium uppercase tracking-[0.05em] text-[var(--text-tertiary)]">
+              Revisions
+            </p>
+            <ul>
+              {history.revisions.map((row) => (
+                <HistoryRevisionRow key={`${row.record_id}:${row.revision_id}`} row={row} />
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {hasDescendants ? (
+          <div>
+            <p className="pb-1 text-[10px] font-medium uppercase tracking-[0.05em] text-[var(--text-tertiary)]">
+              Descendants
+            </p>
+            <ul>
+              {history.descendants.map((descendant) => (
+                <li
+                  key={descendant.record_id}
+                  className="border-t border-[var(--border-subtle)] py-2 first:border-t-0 first:pt-0 last:pb-0"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate font-mono text-[10px] text-[var(--text-secondary)]">
+                      {descendant.record_id}
+                    </span>
+                    <span className="shrink-0 text-[10px] text-[var(--text-tertiary)]">
+                      {descendant.active_revision_id ?? "--"}
+                    </span>
+                  </div>
+                  <p className="mt-1 line-clamp-2 text-[11px] text-[var(--text-secondary)]">
+                    {descendant.title}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 export function MetadataPanel(): JSX.Element {
   const { bootstrap, selectedRecordId, selectedRecordSummary, selection } = useViewer();
   const [compileReport, setCompileReport] = useState<Record<string, unknown> | null>(null);
   const [cost, setCost] = useState<Record<string, unknown> | null>(null);
   const [traceText, setTraceText] = useState<string | null>(null);
+  const [history, setHistory] = useState<RecordHistory | null>(null);
   const [loadingExtras, setLoadingExtras] = useState(false);
 
   const isStaging = selection?.kind === "staging";
@@ -114,6 +256,7 @@ export function MetadataPanel(): JSX.Element {
       setCompileReport(null);
       setCost(null);
       setTraceText(null);
+      setHistory(null);
       setLoadingExtras(false);
       return;
     }
@@ -186,6 +329,25 @@ export function MetadataPanel(): JSX.Element {
     stagingRunId,
     stagingSelectionKey,
   ]);
+
+  useEffect(() => {
+    if (!selectedRecordId || !record) {
+      setHistory(null);
+      return;
+    }
+
+    let cancelled = false;
+    fetchRecordHistory(selectedRecordId)
+      .then((payload) => {
+        if (!cancelled) setHistory(payload);
+      })
+      .catch(() => {
+        if (!cancelled) setHistory(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [record, selectedRecordId]);
 
   if (!selection) {
     return (
@@ -352,6 +514,8 @@ export function MetadataPanel(): JSX.Element {
             </div>
           </div>
         </section>
+
+        <HistoryPanel history={history} selectedRecord={record} />
 
         {loadingExtras && (
           <div className="space-y-1.5">

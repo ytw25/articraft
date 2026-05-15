@@ -49,6 +49,7 @@ from storage.materialize import (
     urdf_references_external_meshes,
 )
 from storage.repo import StorageRepo
+from storage.revisions import active_model_path
 
 _GIB = 1024**3
 _DEFAULT_MEM_PER_WORKER_GB = 3.0
@@ -316,14 +317,11 @@ def _record_model_script_path(
     record_id: str,
     record: object,
 ) -> Path:
-    record_dir = repo.layout.record_dir(record_id)
-    artifacts = record.get("artifacts") if isinstance(record, dict) else None
-    model_name = (
-        str(artifacts.get("model_py"))
-        if isinstance(artifacts, dict) and artifacts.get("model_py")
-        else "model.py"
+    return (
+        active_model_path(repo, record_id, record=record)
+        if isinstance(record, dict)
+        else repo.layout.record_dir(record_id) / "model.py"
     )
-    return record_dir / model_name
 
 
 def _artifact_materialization_status(
@@ -402,7 +400,8 @@ def _collect_candidates(
         compile_level = _compile_level(compile_report)
         compile_fingerprint = _compile_fingerprint(compile_report)
         cached_materialization_status = _compile_materialization_status(compile_report)
-        default_script_path = record_dir / "model.py"
+        record = repo.read_json(record_dir / "record.json")
+        default_script_path = _record_model_script_path(repo, record_id, record)
 
         if _can_fast_skip_default_model_record(
             compile_report=compile_report,
@@ -418,7 +417,6 @@ def _collect_candidates(
         ):
             continue
 
-        record = repo.read_json(record_dir / "record.json")
         sdk_package = _normalize_sdk_package(
             record.get("sdk_package") if isinstance(record, dict) else "sdk"
         )

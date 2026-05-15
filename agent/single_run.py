@@ -279,6 +279,10 @@ async def execute_single_run(
     prompt_index: int | None = None,
     runtime_limits: BatchRuntimeLimits | None = None,
     record_author: str | None = None,
+    lineage: dict[str, Any] | None = None,
+    revision_parent: dict[str, str] | None = None,
+    revision_seed: dict[str, str] | None = None,
+    inherited_inputs: list[dict[str, str]] | None = None,
     agent_cls: type[ArticraftAgent] = ArticraftAgent,
     compile_report_func: CompileReportFunc = compile_urdf_report_maybe_timeout,
     write_success_record_func: WriteSuccessRecord = write_success_record,
@@ -323,6 +327,7 @@ async def execute_single_run(
         finished_at = _utc_now()
         result_row = {
             "record_id": resolved_context.record_id,
+            "revision_id": resolved_context.revision_id,
             "status": "failed",
             "message": message,
             "staging_dir": _relative_to_repo(resolved_context.staging_dir, resolved_repo_root),
@@ -561,6 +566,10 @@ async def execute_single_run(
             dataset_entry=loaded_dataset_entry,
             update_dataset_manifest=update_dataset_manifest,
             record_author=record_author,
+            lineage=lineage,
+            revision_parent=revision_parent,
+            revision_seed=revision_seed,
+            inherited_inputs=inherited_inputs,
         )
         record_dir = await asyncio.to_thread(write_success_record_func, write_request)
         if reconcile_category_after_success and collection == "dataset" and category_slug:
@@ -605,6 +614,7 @@ async def execute_single_run(
         "turn_count": result.turn_count,
         "tool_call_count": result.tool_call_count,
         "compile_attempt_count": result.compile_attempt_count,
+        "revision_id": resolved_context.revision_id,
     }
     if persist_run_metadata:
         await asyncio.to_thread(

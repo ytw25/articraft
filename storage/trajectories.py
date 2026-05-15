@@ -7,6 +7,7 @@ from pathlib import Path
 import zstandard as zstd
 
 from storage.repo import StorageRepo
+from storage.revisions import active_traces_dir, validate_revision_id
 
 LEGACY_CONVERSATION_FILENAME = "conversation.jsonl"
 TRAJECTORY_FILENAME = "trajectory.jsonl"
@@ -104,8 +105,17 @@ def find_compressed_trajectory_path(trace_dir: Path) -> Path | None:
     return None
 
 
-def canonicalize_record_trace_dir(repo: StorageRepo, record_id: str) -> Path | None:
-    trace_dir = repo.layout.record_traces_dir(record_id)
+def canonicalize_record_trace_dir(
+    repo: StorageRepo,
+    record_id: str,
+    *,
+    revision_id: str | None = None,
+) -> Path | None:
+    trace_dir = (
+        repo.layout.record_revision_traces_dir(record_id, validate_revision_id(revision_id))
+        if revision_id is not None
+        else active_traces_dir(repo, record_id)
+    )
     if not trace_dir.exists():
         return None
     compressed_path = trace_dir / COMPRESSED_TRAJECTORY_FILENAME
@@ -125,11 +135,24 @@ def unroll_record_trajectory(
     repo: StorageRepo,
     record_id: str,
     *,
+    revision_id: str | None = None,
     force: bool = False,
 ) -> Path:
-    trace_dir = repo.layout.record_traces_dir(record_id)
+    trace_dir = (
+        repo.layout.record_revision_traces_dir(record_id, validate_revision_id(revision_id))
+        if revision_id is not None
+        else active_traces_dir(repo, record_id)
+    )
     source = trace_dir / COMPRESSED_TRAJECTORY_FILENAME
-    destination = repo.layout.record_trajectory_unroll_path(record_id)
+    if revision_id is None:
+        destination = repo.layout.record_trajectory_unroll_path(record_id)
+    else:
+        destination = (
+            repo.layout.trajectory_unroll_records_root
+            / record_id
+            / validate_revision_id(revision_id)
+            / "trajectory.jsonl"
+        )
     if source.exists():
         if (
             not force

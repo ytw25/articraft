@@ -73,18 +73,37 @@ Allowed external agent ids are:
 - `codex`
 - `claude-code`
 
-## 3. Author The Object
+## 3. Edit Existing Records
+
+When the user asks you to modify an existing Articraft asset, fork it instead of manually copying record folders.
+
+```bash
+uv run articraft external fork --agent codex data/records/<record_id> "make the handle longer"
+uv run articraft external fork --agent claude-code data/records/<record_id> "make the handle longer"
+```
+
+`fork` creates a child record and prints the active `model=` and `prompt=` paths. Edit only the printed active `model=` path. In-place modification of an existing record is intentionally unsupported for external agents.
+
+Forked records inherit the parent collection by default. Dataset forks get a new dataset ID derived from the parent; parent traces, costs, provenance history, older model snapshots, and inputs are not copied. Historical parent conversations remain viewable through lineage in the UI.
+
+## 4. Author The Object
 
 Edit:
 
 ```text
-data/records/<record_id>/model.py
+the CLI-printed active model= path
+```
+
+For v3 records this is usually:
+
+```text
+data/records/<record_id>/revisions/<revision_id>/model.py
 ```
 
 The user prompt is stored in:
 
 ```text
-data/records/<record_id>/prompt.txt
+the CLI-printed active prompt= path
 ```
 
 Use the SDK docs and examples:
@@ -96,7 +115,7 @@ sdk/_examples/
 
 Your object must be a high-quality articulated asset: meaningful parts, correct joints, visible mechanical structure, stable geometry, realistic materials/colors, semantic link names, and prompt-specific tests in `run_tests()`.
 
-## 4. Iterate
+## 5. Iterate
 
 Run the external check during development. This compiles the record with the strict validation gate used before finalizing:
 
@@ -106,7 +125,7 @@ uv run articraft external check data/records/<record_id>
 
 Repeat authoring and checking until the record passes.
 
-## 5. Finalize
+## 6. Finalize
 
 For a workbench-only object, finalize without a category:
 
@@ -132,16 +151,19 @@ Use `--category-slug` only when the user asked to add the object to the dataset.
 
 You must:
 
-- use `articraft external init` before writing a record
+- use `articraft external init` before writing a new record from scratch
+- use `articraft external fork` before modifying an existing record
 - preserve `creator.mode=external_agent`
 - preserve `creator.agent=codex` or `creator.agent=claude-code`
 - preserve `creator.trace_available=false`
 - use `articraft external check` and `finalize`
 - leave workbench-only records uncommitted
+- edit only the active revision `model.py` path printed by the CLI
 
 You must not:
 
 - manually create record directories
+- manually copy parent record folders for edits
 - claim internal Articraft harness traces
 - write files under `traces/`
 - edit unrelated records while authoring one object

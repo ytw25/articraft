@@ -64,6 +64,11 @@ class RecordSummaryResponse(BaseModel):
     run_id: str | None = None
     run_status: str | None = None
     run_message: str | None = None
+    active_revision_id: str | None = None
+    origin_record_id: str | None = None
+    parent_record_id: str | None = None
+    revision_count: int = 0
+    has_history: bool = False
     collections: list[str] = Field(default_factory=list)
     materialization_status: str | None = None
     has_compile_report: bool = False
@@ -191,6 +196,33 @@ class RecordDetailResponse(BaseModel):
     compile_report: dict[str, Any] | None = None
     provenance: dict[str, Any] | None = None
     cost: dict[str, Any] | None = None
+
+
+class RecordHistoryRevisionResponse(BaseModel):
+    record_id: str
+    revision_id: str
+    active: bool = False
+    created_at: str | None = None
+    prompt_preview: str = ""
+    provider: str | None = None
+    model_id: str | None = None
+    run_id: str | None = None
+    parent_record_id: str | None = None
+    parent_revision_id: str | None = None
+    status: str | None = None
+    total_cost_usd: float | None = None
+    has_cost: bool = False
+    has_traces: bool = False
+    has_model: bool = False
+    has_provenance: bool = False
+
+
+class RecordHistoryResponse(BaseModel):
+    record_id: str
+    active_revision_id: str | None = None
+    ancestors: list[RecordHistoryRevisionResponse] = Field(default_factory=list)
+    revisions: list[RecordHistoryRevisionResponse] = Field(default_factory=list)
+    descendants: list[RecordSummaryResponse] = Field(default_factory=list)
 
 
 class RecordRatingRequest(BaseModel):

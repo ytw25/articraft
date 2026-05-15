@@ -22,6 +22,7 @@ from agent.providers.factory import (
 from agent.run_config import SingleRunSettings
 from storage.record_authors import resolve_current_record_author
 from storage.repo import StorageRepo
+from storage.revisions import INITIAL_REVISION_ID, validate_revision_id
 from storage.trajectories import ensure_shared_system_prompt_file
 
 MAX_SINGLE_RUN_SLUG_LEN = 120
@@ -33,6 +34,7 @@ class SingleRunContext:
     created_at: str
     run_id: str
     record_id: str
+    revision_id: str
     run_dir: Path
     staging_dir: Path
     staging_prompt_path: Path
@@ -41,8 +43,13 @@ class SingleRunContext:
     trace_dir: Path
     cost_path: Path
     record_dir: Path
+    record_revision_dir: Path
     record_prompt_path: Path
     record_model_path: Path
+    record_provenance_path: Path
+    record_cost_path: Path
+    record_trace_dir: Path
+    record_inputs_dir: Path
     record_urdf_path: Path
 
 
@@ -334,6 +341,7 @@ def _build_single_run_context(
     storage_repo: StorageRepo,
     record_id: str | None = None,
     run_id: str | None = None,
+    revision_id: str | None = None,
     now: datetime | None = None,
 ) -> SingleRunContext:
     created_at = _utc_now(now)
@@ -342,15 +350,18 @@ def _build_single_run_context(
     digest = hashlib.sha1(prompt.encode("utf-8")).hexdigest()[:8]
     resolved_run_id = run_id or f"run_{token}_{digest}"
     resolved_record_id = record_id or f"rec_{prompt_slug}_{token}_{digest}"
+    resolved_revision_id = validate_revision_id(revision_id or INITIAL_REVISION_ID)
     run_dir = storage_repo.layout.run_dir(resolved_run_id)
     staging_dir = storage_repo.layout.run_staging_dir(resolved_run_id) / resolved_record_id
     staging_dir.mkdir(parents=True, exist_ok=True)
     record_dir = storage_repo.layout.record_dir(resolved_record_id)
+    revision_dir = storage_repo.layout.record_revision_dir(resolved_record_id, resolved_revision_id)
     return SingleRunContext(
         repo_root=repo_root.resolve(),
         created_at=created_at,
         run_id=resolved_run_id,
         record_id=resolved_record_id,
+        revision_id=resolved_revision_id,
         run_dir=run_dir,
         staging_dir=staging_dir,
         staging_prompt_path=staging_dir / "prompt.txt",
@@ -359,7 +370,12 @@ def _build_single_run_context(
         trace_dir=staging_dir / "traces",
         cost_path=staging_dir / "cost.json",
         record_dir=record_dir,
-        record_prompt_path=record_dir / "prompt.txt",
-        record_model_path=record_dir / "model.py",
+        record_revision_dir=revision_dir,
+        record_prompt_path=revision_dir / "prompt.txt",
+        record_model_path=revision_dir / "model.py",
+        record_provenance_path=revision_dir / "provenance.json",
+        record_cost_path=revision_dir / "cost.json",
+        record_trace_dir=revision_dir / "traces",
+        record_inputs_dir=revision_dir / "inputs",
         record_urdf_path=storage_repo.layout.record_materialization_urdf_path(resolved_record_id),
     )

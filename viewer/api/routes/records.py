@@ -16,6 +16,7 @@ from viewer.api.schemas import (
     PromoteRecordRequest,
     RecordBrowseIdsResponse,
     RecordBrowseResponse,
+    RecordHistoryResponse,
     RecordRatingRequest,
     RecordRatingResponse,
     RecordSecondaryRatingRequest,
@@ -39,6 +40,15 @@ async def record_summary(record_id: str, store: ViewerStoreDep) -> RecordSummary
     if summary is None:
         raise HTTPException(status_code=404, detail=f"Record not found: {record_id}")
     return summary
+
+
+@router.get("/api/records/{record_id}/history", response_model=RecordHistoryResponse)
+async def record_history(record_id: str, store: ViewerStoreDep) -> RecordHistoryResponse:
+    _validate_record_id(record_id)
+    history = await asyncio.to_thread(store.records.record_history, record_id)
+    if history is None:
+        raise HTTPException(status_code=404, detail=f"Record not found: {record_id}")
+    return history
 
 
 @router.get("/api/records/browse", response_model=RecordBrowseResponse)

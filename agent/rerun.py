@@ -10,7 +10,7 @@ from typing import Callable, Optional
 
 from agent.cost import max_cost_usd_from_env
 from agent.defaults import resolve_max_turns
-from agent.prompts import normalize_sdk_package
+from agent.prompts import DESIGNER_PROMPT_NAME, normalize_sdk_package
 from agent.record_persistence import (
     _load_workbench_entry,
     _normalize_collection_names,
@@ -33,9 +33,28 @@ from storage.collections import CollectionStore
 from storage.datasets import DatasetStore
 from storage.records import RecordStore
 from storage.repo import StorageRepo
+from storage.revisions import (
+    active_prompt_path,
+    active_provenance_path,
+    active_revision_id,
+    next_revision_id,
+)
 from storage.runs import RunStore
 
 logger = logging.getLogger(__name__)
+EXTERNAL_AGENT_DOC_PROMPT_NAME = "EXTERNAL_AGENT_DATA.md"
+
+
+def _system_prompt_for_internal_rerun(
+    prompting: dict,
+    existing_record: dict,
+) -> str:
+    stored_prompt = _first_string(prompting.get("system_prompt_file"), DESIGNER_PROMPT_NAME)
+    creator = existing_record.get("creator")
+    is_external_record = isinstance(creator, dict) and creator.get("mode") == "external_agent"
+    if is_external_record or stored_prompt == EXTERNAL_AGENT_DOC_PROMPT_NAME:
+        return DESIGNER_PROMPT_NAME
+    return stored_prompt
 
 
 async def rerun_record_in_place(
@@ -64,13 +83,13 @@ async def rerun_record_in_place(
         logger.error("Record not found: %s", record_id)
         return 1
 
-    prompt_path = storage_repo.layout.record_dir(record_id) / "prompt.txt"
+    prompt_path = active_prompt_path(storage_repo, record_id, record=existing_record)
     if not prompt_path.exists():
         logger.error("Missing prompt.txt for record %s", record_id)
         return 1
     prompt_text = prompt_path.read_text(encoding="utf-8")
 
-    provenance_path = storage_repo.layout.record_dir(record_id) / "provenance.json"
+    provenance_path = active_provenance_path(storage_repo, record_id, record=existing_record)
     provenance = storage_repo.read_json(provenance_path)
     if not isinstance(provenance, dict):
         logger.error("Missing provenance.json for record %s", record_id)
@@ -107,10 +126,7 @@ async def rerun_record_in_place(
     openai_reasoning_summary = (
         _optional_string(generation.get("openai_reasoning_summary")) or "auto"
     )
-    system_prompt_path = _first_string(
-        prompting.get("system_prompt_file"),
-        "designer_system_prompt.txt",
-    )
+    system_prompt_path = _system_prompt_for_internal_rerun(prompting, existing_record)
     sdk_package = normalize_sdk_package(
         sdk_package
         if sdk_package is not None
@@ -184,7 +200,9 @@ async def rerun_record_in_place(
         prompt=prompt_text,
         storage_repo=storage_repo,
         record_id=record_id,
+        revision_id=next_revision_id(storage_repo, record_id),
     )
+    parent_revision_id = active_revision_id(storage_repo, record_id, record=existing_record)
     outcome: RunExecutionOutcome = await execute_single_run_func(
         user_content,
         prompt_text=prompt_text,
@@ -226,5 +244,7 @@ async def rerun_record_in_place(
         workbench_entry=workbench_entry if isinstance(workbench_entry, dict) else None,
         dataset_entry=dataset_entry if isinstance(dataset_entry, dict) else None,
         record_author=record_author,
+        revision_parent={"record_id": record_id, "revision_id": parent_revision_id},
+        revision_seed=None,
     )
     return outcome.exit_code

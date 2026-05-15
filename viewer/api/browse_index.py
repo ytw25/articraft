@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from storage.repo import StorageRepo
+from storage.revisions import active_cost_path, active_provenance_path, active_traces_dir
 from viewer.api.agent_harness import agent_harness_from_record, within_agent_harness_filters
 from viewer.api.schemas import (
     RecordBrowseFacetsResponse,
@@ -637,7 +638,8 @@ class DatasetBrowseIndex:
         return frozenset(
             record_dir.name
             for record_dir in records_root.iterdir()
-            if record_dir.is_dir() and (record_dir / "dataset_entry.json").exists()
+            if record_dir.is_dir()
+            and self.repo.layout.record_dataset_entry_path(record_dir.name).exists()
         )
 
     def _build_rows(self) -> list[BrowseIndexRecord]:
@@ -671,13 +673,15 @@ class DatasetBrowseIndex:
         source = record.get("source") if isinstance(record.get("source"), dict) else {}
         artifacts = record.get("artifacts") if isinstance(record.get("artifacts"), dict) else {}
 
-        provenance_path = record_dir / "provenance.json"
+        provenance_path = active_provenance_path(self.repo, record_id, record=record)
         provenance = self.repo.read_json(provenance_path) if provenance_path.exists() else None
         cost_name = artifacts.get("cost_json")
-        cost_path = record_dir / str(cost_name) if cost_name else None
-        cost = (
-            self.repo.read_json(cost_path) if cost_path is not None and cost_path.exists() else None
+        cost_path = (
+            record_dir / str(cost_name)
+            if cost_name
+            else active_cost_path(self.repo, record_id, record=record)
         )
+        cost = self.repo.read_json(cost_path) if cost_path.exists() else None
         compile_path = self.repo.layout.record_materialization_compile_report_path(record_id)
 
         turn_count: int | None = None
@@ -702,7 +706,7 @@ class DatasetBrowseIndex:
         agent_harness = agent_harness_from_record(record)
         has_traces = not (isinstance(creator, dict) and creator.get("trace_available") is False)
         if has_traces:
-            traces_dir = self.repo.layout.record_traces_dir(record_id)
+            traces_dir = active_traces_dir(self.repo, record_id, record=record)
             has_traces = traces_dir.is_dir() and any(traces_dir.iterdir())
         source_files = [
             BrowseSourceFile.from_path(self.repo.root, record_path),
@@ -710,8 +714,7 @@ class DatasetBrowseIndex:
             BrowseSourceFile.from_path(self.repo.root, provenance_path),
             BrowseSourceFile.from_path(self.repo.root, compile_path),
         ]
-        if cost_path is not None:
-            source_files.append(BrowseSourceFile.from_path(self.repo.root, cost_path))
+        source_files.append(BrowseSourceFile.from_path(self.repo.root, cost_path))
 
         return BrowseIndexRecord(
             record_id=record_id,
@@ -747,7 +750,7 @@ class DatasetBrowseIndex:
             ),
             has_compile_report=compile_path.exists(),
             has_provenance=provenance_path.exists(),
-            has_cost=cost_path.exists() if cost_path is not None else False,
+            has_cost=cost_path.exists(),
             source_files=tuple(source_files),
         )
 

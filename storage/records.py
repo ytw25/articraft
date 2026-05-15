@@ -9,6 +9,12 @@ from pathlib import Path
 from storage.identifiers import validate_record_id
 from storage.models import Provenance, Record
 from storage.repo import StorageRepo
+from storage.revisions import (
+    INITIAL_REVISION_ID,
+    active_inputs_dir,
+    active_provenance_path,
+    validate_revision_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +53,10 @@ class RecordStore:
         record_id = validate_record_id(record_id)
         record_dir = self.repo.layout.record_dir(record_id)
         record_dir.mkdir(parents=True, exist_ok=True)
-        self.repo.layout.record_inputs_dir(record_id).mkdir(parents=True, exist_ok=True)
+        self.repo.layout.record_collections_dir(record_id).mkdir(parents=True, exist_ok=True)
+        self.repo.layout.record_revision_inputs_dir(record_id, INITIAL_REVISION_ID).mkdir(
+            parents=True, exist_ok=True
+        )
         return record_dir
 
     def write_record(self, record: Record) -> Path:
@@ -64,9 +73,20 @@ class RecordStore:
             remove_workbench_record_gitignore_marker(record_dir)
         return path
 
-    def write_provenance(self, record_id: str, provenance: Provenance) -> Path:
+    def write_provenance(
+        self,
+        record_id: str,
+        provenance: Provenance,
+        *,
+        revision_id: str | None = None,
+    ) -> Path:
         record_id = validate_record_id(record_id)
-        path = self.repo.layout.record_dir(record_id) / "provenance.json"
+        if revision_id is None:
+            path = active_provenance_path(self.repo, record_id)
+        else:
+            path = self.repo.layout.record_revision_provenance_path(
+                record_id, validate_revision_id(revision_id)
+            )
         self.repo.write_json(path, provenance.to_dict())
         return path
 
@@ -77,9 +97,16 @@ class RecordStore:
         destination_name: str | None = None,
         *,
         missing_ok: bool = False,
+        revision_id: str | None = None,
     ) -> Path | None:
         record_id = validate_record_id(record_id)
-        inputs_dir = self.repo.layout.record_inputs_dir(record_id)
+        inputs_dir = (
+            self.repo.layout.record_revision_inputs_dir(
+                record_id, validate_revision_id(revision_id)
+            )
+            if revision_id is not None
+            else active_inputs_dir(self.repo, record_id)
+        )
         inputs_dir.mkdir(parents=True, exist_ok=True)
         destination = inputs_dir / (destination_name or source.name)
         if source.resolve() == destination.resolve():

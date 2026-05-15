@@ -14,6 +14,7 @@ from storage.materialize import (
 )
 from storage.models import CompileReport as StorageCompileReport
 from storage.models import CompileWarning
+from storage.revisions import active_model_path
 from viewer.api.store_compile import (
     _compile_report_matches_fingerprint,
     _compile_report_satisfies_target,
@@ -43,15 +44,8 @@ class ViewerMaterializationStore(ViewerStoreComponent):
         record_id: str,
         record: dict[str, Any] | None = None,
     ) -> tuple[Path, Path, Path]:
-        record_dir = self.repo.layout.record_dir(record_id)
-        artifacts = record.get("artifacts") if isinstance(record, dict) else None
-        model_name = (
-            str(artifacts.get("model_py"))
-            if isinstance(artifacts, dict) and artifacts.get("model_py")
-            else "model.py"
-        )
         return (
-            record_dir / model_name,
+            active_model_path(self.repo, record_id, record=record),
             self.repo.layout.record_materialization_urdf_path(record_id),
             self.repo.layout.record_materialization_compile_report_path(record_id),
         )
@@ -80,6 +74,7 @@ class ViewerMaterializationStore(ViewerStoreComponent):
         record_id: str,
         *,
         record_dir: Path,
+        model_dir: Path,
         urdf_path: Path,
         compile_path: Path,
     ) -> None:
@@ -89,28 +84,36 @@ class ViewerMaterializationStore(ViewerStoreComponent):
             record_dir / "model.urdf",
             record_dir / "compile_report.json",
             record_dir / "assets",
+            model_dir / "assets",
             self.repo.layout.record_materialization_asset_meshes_dir(record_id),
             self.repo.layout.record_materialization_asset_glb_dir(record_id),
             self.repo.layout.record_materialization_asset_viewer_dir(record_id),
         ):
             _remove_path_if_exists(path)
 
-    def _promote_local_materialization_outputs(self, record_id: str, *, record_dir: Path) -> None:
+    def _promote_local_materialization_outputs(
+        self,
+        record_id: str,
+        *,
+        record_dir: Path,
+        model_dir: Path,
+    ) -> None:
         _remove_path_if_exists(record_dir / "model.urdf")
         _remove_path_if_exists(record_dir / "compile_report.json")
         _remove_path_if_exists(self.repo.layout.record_materialization_assets_dir(record_id))
         _replace_tree_from_source(
-            record_dir / "assets" / "meshes",
+            model_dir / "assets" / "meshes",
             self.repo.layout.record_materialization_asset_meshes_dir(record_id),
         )
         _replace_tree_from_source(
-            record_dir / "assets" / "glb",
+            model_dir / "assets" / "glb",
             self.repo.layout.record_materialization_asset_glb_dir(record_id),
         )
         _replace_tree_from_source(
-            record_dir / "assets" / "viewer",
+            model_dir / "assets" / "viewer",
             self.repo.layout.record_materialization_asset_viewer_dir(record_id),
         )
+        _remove_path_if_exists(model_dir / "assets")
         _remove_path_if_exists(record_dir / "assets")
 
     def _write_compile_report(
@@ -261,6 +264,7 @@ class ViewerMaterializationStore(ViewerStoreComponent):
                 self._clear_derived_asset_outputs(
                     record_id,
                     record_dir=record_dir,
+                    model_dir=model_path.parent,
                     urdf_path=urdf_path,
                     compile_path=compile_path,
                 )
@@ -320,7 +324,11 @@ class ViewerMaterializationStore(ViewerStoreComponent):
 
             compile_elapsed_seconds = time.perf_counter() - compile_started_at
             self.repo.write_text(urdf_path, compile_result.urdf_xml)
-            self._promote_local_materialization_outputs(record_id, record_dir=record_dir)
+            self._promote_local_materialization_outputs(
+                record_id,
+                record_dir=record_dir,
+                model_dir=model_path.parent,
+            )
             warning_lines = [str(item) for item in compile_result.warnings]
             compile_signal_bundle = getattr(compile_result, "signal_bundle", None)
             if compile_signal_bundle is None:

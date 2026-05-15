@@ -7,10 +7,15 @@ from pathlib import Path
 
 from agent.cost import max_cost_usd_from_env, parse_max_cost_usd
 from agent.prompts import normalize_sdk_package
-from agent.runner import create_workbench_draft_record, rerun_record_in_place
+from agent.runner import create_workbench_draft_record, edit_record, rerun_record_in_place
 from agent.tools import resolve_image_path
 from articraft.values import PROVIDER_VALUES
-from cli.common import add_data_root_argument, warn_if_post_commit_hook_missing
+from cli.common import (
+    add_data_root_argument,
+    provider_for_record_image,
+    refresh_dataset_manifest_if_member,
+    warn_if_post_commit_hook_missing,
+)
 from storage.collections import CollectionStore
 from storage.models import WorkbenchCollection
 from storage.queries import StorageQueries
@@ -41,6 +46,28 @@ def _resolve_record_reference(repo: StorageRepo, record_ref: str) -> str:
     if repo.layout.record_metadata_path(record_id).exists():
         return record_id
     raise ValueError(f"Record not found: {record_ref}")
+
+
+def _add_edit_record_options(
+    parser: argparse.ArgumentParser,
+    *,
+    allow_record_id: bool,
+    allow_label: bool,
+) -> None:
+    parser.add_argument("record", help="Record ID or canonical record directory path.")
+    parser.add_argument("prompt", help="Edit request to apply to the existing asset.")
+    parser.add_argument("--image", default=None, help="Optional new edit reference image.")
+    parser.add_argument("--provider", choices=PROVIDER_VALUES, default=None)
+    parser.add_argument("--model-id", default=None)
+    parser.add_argument("--thinking-level", default=None)
+    parser.add_argument("--max-turns", type=int, default=None)
+    parser.add_argument("--max-cost-usd", type=float, default=None)
+    parser.add_argument("--sdk-package", default=None, help=argparse.SUPPRESS)
+    if allow_record_id:
+        parser.add_argument("--record-id", default=None, help="Optional child record ID.")
+    if allow_label:
+        parser.add_argument("--label", default=None)
+        parser.add_argument("--tag", dest="tags", action="append", default=None)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -154,6 +181,9 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help=argparse.SUPPRESS,
     )
+    fork = subparsers.add_parser("fork-record", help="Edit an existing record as a copy.")
+    _add_edit_record_options(fork, allow_record_id=True, allow_label=True)
+
     subparsers.add_parser("status", help="Show workbench storage status.")
     return parser
 
@@ -177,7 +207,7 @@ def main(argv: list[str] | None = None) -> int:
                     updated_at=_utc_now(),
                 )
             )
-        print(f"Initialized workbench storage at {repo.layout.local_workbench_path()}")
+        print(f"Initialized workbench storage under {repo.layout.records_root}")
         return 0
 
     if args.command == "status":
@@ -286,6 +316,69 @@ def main(argv: list[str] | None = None) -> int:
             )
         else:
             print(f"reran record_id={record_id} run_id={source.get('run_id') or '(unknown)'}")
+        print(
+            f"search_index={stats.path} "
+            f"records={stats.record_count} "
+            f"categories={stats.category_count} "
+            f"workbench_entries={stats.workbench_entry_count}"
+        )
+        return 0
+
+    if args.command == "fork-record":
+        repo.ensure_layout()
+        warn_if_post_commit_hook_missing(args.repo_root)
+        try:
+            record_id = _resolve_record_reference(repo, args.record)
+            image_provider = provider_for_record_image(
+                repo,
+                record_id,
+                provider_override=args.provider,
+            )
+            image_path = resolve_image_path(args.image, provider=image_provider)
+            sdk_package = (
+                normalize_sdk_package(args.sdk_package) if args.sdk_package is not None else None
+            )
+            max_cost_usd = (
+                parse_max_cost_usd(args.max_cost_usd, label="--max-cost-usd")
+                if args.max_cost_usd is not None
+                else None
+            )
+        except Exception as exc:
+            print(str(exc))
+            return 1
+
+        outcome = asyncio.run(
+            edit_record(
+                repo_root=args.repo_root,
+                parent_record_id=record_id,
+                edit_prompt=args.prompt,
+                image_path=image_path,
+                provider=args.provider,
+                model_id=args.model_id,
+                thinking_level=args.thinking_level,
+                max_turns=args.max_turns,
+                max_cost_usd=max_cost_usd,
+                sdk_package=sdk_package,
+                record_id=getattr(args, "record_id", None),
+                label=getattr(args, "label", None),
+                tags=list(getattr(args, "tags", None) or []),
+            )
+        )
+        if outcome.exit_code != 0:
+            print(outcome.message or "Edit failed.")
+            return outcome.exit_code
+
+        record = (
+            repo.read_json(repo.layout.record_metadata_path(outcome.record_id), default={}) or {}
+        )
+        revision_id = record.get("active_revision_id") if isinstance(record, dict) else None
+        refresh_dataset_manifest_if_member(repo, outcome.record_id)
+        stats = search.rebuild()
+        print(
+            f"edited mode=fork parent_record_id={record_id} "
+            f"record_id={outcome.record_id} revision_id={revision_id or '(unknown)'} "
+            f"run_id={outcome.run_id}"
+        )
         print(
             f"search_index={stats.path} "
             f"records={stats.record_count} "

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import os
 import subprocess
 import sys
@@ -19,7 +20,9 @@ from cli import external as external_cli
 from cli import hooks as hooks_cli
 from cli import pre_commit as pre_commit_cli
 from cli import workbench as workbench_cli
+from cli.common import provider_for_record_image, refresh_dataset_manifest_if_member
 from storage.repo import StorageRepo
+from storage.search import SearchIndex
 
 DEFAULT_MODEL = "gpt-5.5-2026-04-23"
 DEFAULT_THINKING = "high"
@@ -144,6 +147,61 @@ def _run_rerun(args: argparse.Namespace) -> int:
     if args.max_cost_usd is not None:
         argv.extend(["--max-cost-usd", str(args.max_cost_usd)])
     return _workbench(args, argv)
+
+
+def _run_edit(args: argparse.Namespace) -> int:
+    repo = StorageRepo(args.repo_root)
+    try:
+        record_id = _resolve_record_id(args.repo_root, args.record)
+        image_provider = provider_for_record_image(
+            repo,
+            record_id,
+            provider_override=args.provider,
+        )
+        image_path = agent_runner._resolve_image_path(
+            args.image,
+            provider=image_provider,
+        )
+    except Exception as exc:
+        print(str(exc))
+        return 1
+
+    outcome = asyncio.run(
+        agent_runner.edit_record(
+            repo_root=args.repo_root,
+            parent_record_id=record_id,
+            edit_prompt=args.prompt,
+            image_path=image_path,
+            provider=args.provider,
+            model_id=args.model,
+            thinking_level=args.thinking_level,
+            max_turns=args.max_turns,
+            max_cost_usd=args.max_cost_usd,
+            record_id=getattr(args, "record_id", None),
+            label=getattr(args, "label", None),
+            tags=list(getattr(args, "tags", None) or []),
+        )
+    )
+    if outcome.exit_code != 0:
+        print(outcome.message or "Edit failed.")
+        return outcome.exit_code
+
+    record = repo.read_json(repo.layout.record_metadata_path(outcome.record_id), default={}) or {}
+    revision_id = record.get("active_revision_id") if isinstance(record, dict) else None
+    refresh_dataset_manifest_if_member(repo, outcome.record_id)
+    stats = SearchIndex(repo).rebuild()
+    print(
+        f"edited mode=fork parent_record_id={record_id} "
+        f"record_id={outcome.record_id} revision_id={revision_id or '(unknown)'} "
+        f"run_id={outcome.run_id}"
+    )
+    print(
+        f"search_index={stats.path} "
+        f"records={stats.record_count} "
+        f"categories={stats.category_count} "
+        f"workbench_entries={stats.workbench_entry_count}"
+    )
+    return 0
 
 
 def _run_compile(args: argparse.Namespace) -> int:
@@ -485,6 +543,13 @@ def _run_data_check(args: argparse.Namespace) -> int:
     return _dataset(args, ["validate-format"])
 
 
+def _run_data_migrate_records_v3(args: argparse.Namespace) -> int:
+    argv = ["migrate-records-v3"]
+    if args.dry_run:
+        argv.append("--dry-run")
+    return _dataset(args, argv)
+
+
 def _run_env_bootstrap(args: argparse.Namespace) -> int:
     return env_cli.main([str(args.repo_root)])
 
@@ -518,6 +583,25 @@ def _add_generation_options(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument("--image", default=None, help="Optional reference image.")
     parser.add_argument("--max-cost-usd", type=float, default=None)
+
+
+def _add_internal_edit_options(
+    parser: argparse.ArgumentParser,
+    *,
+    allow_record_id: bool,
+    allow_label: bool,
+) -> None:
+    parser.add_argument("--provider", choices=PROVIDER_VALUES, default=None)
+    parser.add_argument("--model", default=None, help="Optional model override.")
+    parser.add_argument("--thinking-level", "--thinking", default=None)
+    parser.add_argument("--max-turns", type=int, default=None)
+    parser.add_argument("--image", default=None, help="Optional new edit reference image.")
+    parser.add_argument("--max-cost-usd", type=float, default=None)
+    if allow_record_id:
+        parser.add_argument("--record-id", default=None, help="Optional child record ID.")
+    if allow_label:
+        parser.add_argument("--label", default=None)
+        parser.add_argument("--tag", dest="tags", action="append", default=None)
 
 
 def _add_internal_pre_commit_commands(subparsers: argparse._SubParsersAction) -> None:
@@ -575,6 +659,13 @@ def _build_parser() -> argparse.ArgumentParser:
     rerun.add_argument("--max-cost-usd", type=float, default=None)
     rerun.set_defaults(func=_run_rerun)
 
+    fork = subparsers.add_parser("fork", help="Edit an existing record as a copy.")
+    _add_repo_root(fork)
+    fork.add_argument("record")
+    fork.add_argument("prompt")
+    _add_internal_edit_options(fork, allow_record_id=True, allow_label=True)
+    fork.set_defaults(func=_run_edit)
+
     compile_one = subparsers.add_parser("compile", help="Compile one record.")
     _add_repo_root(compile_one)
     compile_one.add_argument("record")
@@ -615,6 +706,13 @@ def _build_parser() -> argparse.ArgumentParser:
     data_check = data_sub.add_parser("check", help="Validate checked-in data format.")
     _add_repo_root(data_check)
     data_check.set_defaults(func=_run_data_check)
+    data_migrate_v3 = data_sub.add_parser(
+        "migrate-records-v3",
+        help="Migrate flat v2 records to revision-based v3 records.",
+    )
+    _add_repo_root(data_migrate_v3)
+    data_migrate_v3.add_argument("--dry-run", action="store_true")
+    data_migrate_v3.set_defaults(func=_run_data_migrate_records_v3)
 
     external = subparsers.add_parser(
         "external",

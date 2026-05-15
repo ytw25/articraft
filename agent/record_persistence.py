@@ -62,6 +62,12 @@ from storage.models import (
 )
 from storage.records import RecordStore
 from storage.repo import StorageRepo
+from storage.revisions import (
+    active_inputs_dir,
+    build_revision_payload,
+    revision_artifacts_payload,
+    validate_revision_id,
+)
 from storage.trajectories import canonicalize_record_trace_dir
 
 
@@ -272,21 +278,18 @@ def _build_record_display(
 
 def _build_record_artifacts(
     *,
-    existing_record: dict | None,
+    revision_id: str,
     has_cost_file: bool,
 ) -> RecordArtifacts:
-    existing_artifacts = (
-        existing_record.get("artifacts") if isinstance(existing_record, dict) else None
-    )
-    if not isinstance(existing_artifacts, dict):
-        existing_artifacts = {}
+    artifacts = revision_artifacts_payload(revision_id=revision_id, has_cost_file=has_cost_file)
     return RecordArtifacts(
-        prompt_txt=str(existing_artifacts.get("prompt_txt") or "").strip() or "prompt.txt",
-        prompt_series_json=str(existing_artifacts.get("prompt_series_json") or "").strip() or None,
-        model_py=_first_string(existing_artifacts.get("model_py"), "model.py"),
-        provenance_json=_first_string(existing_artifacts.get("provenance_json"), "provenance.json"),
-        cost_json="cost.json" if has_cost_file else None,
-        inputs_dir=str(existing_artifacts.get("inputs_dir") or "").strip() or "inputs",
+        prompt_txt=artifacts["prompt_txt"],
+        prompt_series_json=artifacts["prompt_series_json"],
+        model_py=str(artifacts["model_py"]),
+        provenance_json=str(artifacts["provenance_json"]),
+        cost_json=artifacts["cost_json"],
+        inputs_dir=artifacts["inputs_dir"],
+        traces_dir=artifacts["traces_dir"],
     )
 
 
@@ -296,7 +299,7 @@ def _resolve_input_image_for_record(
     record_id: str,
     provider: str,
 ) -> Path | None:
-    inputs_dir = storage_repo.layout.record_inputs_dir(record_id)
+    inputs_dir = active_inputs_dir(storage_repo, record_id)
     if not inputs_dir.exists():
         return None
     files = sorted(path for path in inputs_dir.iterdir() if path.is_file())
@@ -356,6 +359,10 @@ class SuccessRecordWrite:
     dataset_entry: dict | None = None
     update_dataset_manifest: bool = True
     record_author: str | None = None
+    lineage: dict[str, Any] | None = None
+    revision_parent: dict[str, str] | None = None
+    revision_seed: dict[str, str] | None = None
+    inherited_inputs: list[dict[str, str]] | None = None
 
 
 def create_workbench_draft_record(
@@ -388,7 +395,6 @@ def create_workbench_draft_record(
     record_author = resolve_record_author_func(resolved_repo_root)
     record_store = RecordStore(storage_repo)
     collections = CollectionStore(storage_repo)
-    collections.ensure_workbench()
 
     context = _build_single_run_context(
         repo_root=resolved_repo_root,
@@ -435,12 +441,15 @@ def create_workbench_draft_record(
         system_prompt_sha = _ensure_shared_system_prompt(storage_repo, loaded_system_prompt_path)
 
     record_store.ensure_record_dirs(context.record_id)
+    context.record_revision_dir.mkdir(parents=True, exist_ok=True)
     storage_repo.write_text(context.record_prompt_path, normalized_prompt)
     storage_repo.write_text(
         context.record_model_path, _draft_model_template(sdk_package=sdk_package)
     )
     if image_path is not None:
-        record_store.copy_input_image(context.record_id, image_path)
+        record_store.copy_input_image(
+            context.record_id, image_path, revision_id=context.revision_id
+        )
 
     prompt_sha = _sha256_text(normalized_prompt)
     model_py_sha = _sha256_file(context.record_model_path)
@@ -479,10 +488,45 @@ def create_workbench_draft_record(
             final_status="draft",
         ),
     )
-    record_store.write_provenance(context.record_id, provenance)
+    record_store.write_provenance(context.record_id, provenance, revision_id=context.revision_id)
+    artifacts_payload = revision_artifacts_payload(
+        revision_id=context.revision_id,
+        has_cost_file=False,
+    )
+    source_payload = SourceRef(run_id=None).to_dict()
+    generation_payload = GenerationSettings(
+        provider=selected_provider,
+        model_id=selected_model_id,
+        thinking_level=selected_thinking_level,
+        openai_transport=selected_openai_transport,
+        openai_reasoning_summary=selected_openai_reasoning_summary,
+        max_turns=resolved_max_turns,
+        max_cost_usd=max_cost_usd,
+    ).to_dict()
+    run_summary_payload = RunSummary(
+        turn_count=0,
+        tool_call_count=0,
+        compile_attempt_count=0,
+        final_status="draft",
+    ).to_dict()
+    storage_repo.write_json(
+        storage_repo.layout.record_revision_metadata_path(context.record_id, context.revision_id),
+        build_revision_payload(
+            record_id=context.record_id,
+            revision_id=context.revision_id,
+            created_at=context.created_at,
+            prompt_text=normalized_prompt,
+            prompt_kind="single_prompt",
+            source=source_payload,
+            generation=generation_payload,
+            artifacts=artifacts_payload,
+            hashes={"prompt_sha256": prompt_sha, "model_py_sha256": model_py_sha},
+            run_summary=run_summary_payload,
+        ),
+    )
 
     record = Record(
-        schema_version=2,
+        schema_version=3,
         record_id=context.record_id,
         created_at=context.created_at,
         updated_at=context.created_at,
@@ -499,18 +543,26 @@ def create_workbench_draft_record(
             prompt_preview=_prompt_preview(normalized_prompt),
         ),
         artifacts=RecordArtifacts(
-            prompt_txt="prompt.txt",
+            prompt_txt=artifacts_payload["prompt_txt"],
             prompt_series_json=None,
-            model_py="model.py",
-            provenance_json="provenance.json",
+            model_py=str(artifacts_payload["model_py"]),
+            provenance_json=str(artifacts_payload["provenance_json"]),
             cost_json=None,
-            inputs_dir="inputs",
+            inputs_dir=artifacts_payload["inputs_dir"],
+            traces_dir=artifacts_payload["traces_dir"],
         ),
         hashes=RecordHashes(
             prompt_sha256=prompt_sha,
             model_py_sha256=model_py_sha,
         ),
         collections=["workbench"],
+        active_revision_id=context.revision_id,
+        lineage={
+            "origin_record_id": context.record_id,
+            "parent_record_id": None,
+            "parent_revision_id": None,
+            "edit_mode": "root",
+        },
         creator=(
             CreatorMetadata(
                 mode="external_agent",
@@ -579,6 +631,10 @@ def write_success_record(
     dataset_entry = request.dataset_entry
     update_dataset_manifest = request.update_dataset_manifest
     record_author = request.record_author
+    lineage = request.lineage
+    revision_parent = request.revision_parent
+    revision_seed = request.revision_seed
+    inherited_inputs = request.inherited_inputs or []
 
     materializations = MaterializationStore(storage_repo)
     persisted_warnings = list(compile_warnings)
@@ -594,7 +650,9 @@ def write_success_record(
             warnings=persisted_warnings,
         )
 
+    revision_id = validate_revision_id(context.revision_id)
     record_store.ensure_record_dirs(context.record_id)
+    context.record_revision_dir.mkdir(parents=True, exist_ok=True)
     referenced_assets = _referenced_materialization_assets(persisted_urdf_xml)
     storage_repo.write_text(context.record_prompt_path, prompt_text)
     storage_repo.write_text(context.record_model_path, final_code)
@@ -608,14 +666,19 @@ def write_success_record(
     _remove_tree_if_exists(context.record_dir / "assets")
 
     if image_path is not None:
-        record_store.copy_input_image(context.record_id, image_path, missing_ok=True)
+        record_store.copy_input_image(
+            context.record_id,
+            image_path,
+            missing_ok=True,
+            revision_id=revision_id,
+        )
 
-    _replace_file_from_source(context.cost_path, context.record_dir / "cost.json")
+    _replace_file_from_source(context.cost_path, context.record_cost_path)
     _replace_tree_from_source(
         context.trace_dir,
-        storage_repo.layout.record_traces_dir(context.record_id),
+        context.record_trace_dir,
     )
-    canonicalize_record_trace_dir(storage_repo, context.record_id)
+    canonicalize_record_trace_dir(storage_repo, context.record_id, revision_id=revision_id)
     if context.trace_dir.exists():
         shutil.rmtree(context.trace_dir)
     _replace_selected_files_from_source(
@@ -654,6 +717,7 @@ def write_success_record(
             "turn_count": turn_count,
             "tool_call_count": tool_call_count,
             "compile_attempt_count": compile_attempt_count,
+            "active_revision_id": revision_id,
             "fingerprint_inputs": fingerprint_inputs,
             "materialization_fingerprint": build_compile_fingerprint_from_inputs(
                 fingerprint_inputs
@@ -698,10 +762,72 @@ def write_success_record(
             final_status="success",
         ),
     )
-    record_store.write_provenance(context.record_id, provenance)
+    record_store.write_provenance(context.record_id, provenance, revision_id=revision_id)
+
+    source_payload = SourceRef(
+        run_id=context.run_id,
+        prompt_batch_id=prompt_batch_id,
+        batch_spec_id=batch_spec_id,
+        row_id=row_id,
+        prompt_index=prompt_index,
+    ).to_dict()
+    generation_payload = GenerationSettings(
+        provider=provider,
+        model_id=model_id,
+        thinking_level=thinking_level,
+        openai_transport=openai_transport if provider == ProviderName.OPENAI.value else None,
+        openai_reasoning_summary=(
+            openai_reasoning_summary if provider == ProviderName.OPENAI.value else None
+        ),
+        max_turns=max_turns,
+        max_cost_usd=max_cost_usd,
+    ).to_dict()
+    run_summary_payload = RunSummary(
+        turn_count=turn_count,
+        tool_call_count=tool_call_count,
+        compile_attempt_count=compile_attempt_count,
+        final_status="success",
+    ).to_dict()
+    artifacts_payload = revision_artifacts_payload(
+        revision_id=revision_id,
+        has_cost_file=context.record_cost_path.exists(),
+    )
+    storage_repo.write_json(
+        storage_repo.layout.record_revision_metadata_path(context.record_id, revision_id),
+        build_revision_payload(
+            record_id=context.record_id,
+            revision_id=revision_id,
+            created_at=context.created_at,
+            prompt_text=prompt_text,
+            prompt_kind=(
+                _normalize_prompt_kind(existing_record.get("prompt_kind"))
+                if isinstance(existing_record, dict)
+                else "single_prompt"
+            ),
+            source=source_payload,
+            generation=generation_payload,
+            artifacts=artifacts_payload,
+            hashes={"prompt_sha256": prompt_sha, "model_py_sha256": model_py_sha},
+            run_summary=run_summary_payload,
+            parent=revision_parent,
+            seed=revision_seed,
+            inherited_inputs=inherited_inputs,
+        ),
+    )
+
+    if lineage is None:
+        if isinstance(existing_record, dict) and isinstance(existing_record.get("lineage"), dict):
+            lineage = dict(existing_record["lineage"])
+        else:
+            lineage = {
+                "origin_record_id": context.record_id,
+                "parent_record_id": None,
+                "parent_revision_id": None,
+                "edit_mode": "root",
+            }
 
     record = Record(
-        schema_version=2,
+        schema_version=3,
         record_id=context.record_id,
         created_at=(
             _first_string(existing_record.get("created_at"), context.created_at)
@@ -740,8 +866,8 @@ def write_success_record(
             label=label,
         ),
         artifacts=_build_record_artifacts(
-            existing_record=existing_record,
-            has_cost_file=(context.record_dir / "cost.json").exists(),
+            revision_id=revision_id,
+            has_cost_file=context.record_cost_path.exists(),
         ),
         hashes=RecordHashes(
             prompt_sha256=prompt_sha,
@@ -752,6 +878,8 @@ def write_success_record(
             if isinstance(existing_record, dict)
             else [collection]
         ),
+        active_revision_id=revision_id,
+        lineage=lineage,
         author=(
             str(existing_record.get("author") or "").strip()
             if isinstance(existing_record, dict)

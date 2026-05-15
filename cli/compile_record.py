@@ -8,6 +8,7 @@ from typing import Any
 from agent.feedback import render_compile_signals
 from agent.models import CompileSignalBundle
 from storage.repo import StorageRepo
+from storage.revisions import active_model_path
 from viewer.api.store import ViewerStore
 
 
@@ -61,14 +62,23 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     repo_root = args.repo_root.resolve()
-    record_dir = args.record_dir.resolve()
-    model_path = record_dir / "model.py"
+    repo = StorageRepo(repo_root)
+    record_arg = args.record_dir.expanduser()
+    if record_arg.exists():
+        record_dir = record_arg.resolve()
+    else:
+        record_dir = repo.layout.record_dir(str(record_arg)).resolve()
+    record = repo.read_json(repo.layout.record_metadata_path(record_dir.name))
+    model_path = (
+        active_model_path(repo, record_dir.name, record=record)
+        if isinstance(record, dict)
+        else record_dir / "model.py"
+    )
     if not model_path.is_file():
         parser.error(f"Record model not found: {model_path}")
 
     viewer_store = ViewerStore(repo_root)
     started_at = time.perf_counter()
-    repo = StorageRepo(repo_root)
     try:
         result = viewer_store.materialization.materialize_record_assets(
             record_dir.name,

@@ -28,6 +28,7 @@ from storage.models import (
 from storage.record_authors import RecordAuthorSyncSummary, RecordRatedBySyncSummary
 from storage.records import RecordStore
 from storage.repo import StorageRepo
+from storage.revisions import active_provenance_path
 from storage.runs import RunStore
 from tests.helpers import FakeAgent
 
@@ -581,9 +582,7 @@ def test_run_single_generates_dataset_record_and_creates_category(
     assert record["collections"] == ["dataset"]
     assert record["category_slug"] == "internet_router"
     provenance = json.loads(
-        (repo.layout.record_dir("rec_router_single") / "provenance.json").read_text(
-            encoding="utf-8"
-        )
+        active_provenance_path(repo, "rec_router_single", record=record).read_text(encoding="utf-8")
     )
     assert provenance["generation"]["max_cost_usd"] == 1.5
 

@@ -14,6 +14,7 @@ from storage.identifiers import RECORD_ID_RE as _RECORD_ID_RE
 from storage.identifiers import SLUG_RE as _SLUG_RE
 from storage.records import WORKBENCH_RECORD_GITIGNORE_TEXT
 from storage.repo import StorageRepo
+from storage.revisions import REVISION_ID_RE, active_provenance_path, active_traces_dir
 
 _SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
 _ALLOWED_COLLECTIONS = {"dataset", "workbench"}
@@ -353,7 +354,7 @@ class _DataFormatValidator:
             self._validate_record_dir(record_dir, seen_dataset_ids)
 
     def _is_local_workbench_record_dir(self, record_dir: Path) -> bool:
-        if (record_dir / "dataset_entry.json").exists():
+        if self.repo.layout.record_dataset_entry_path(record_dir.name).exists():
             return False
         marker = record_dir / ".gitignore"
         if not marker.exists():
@@ -379,14 +380,30 @@ class _DataFormatValidator:
             self._add_error(
                 record_path, "record_id must start with rec_ and contain only safe path characters"
             )
-        if record.get("schema_version") not in {1, 2}:
+        schema_version = record.get("schema_version")
+        if schema_version not in {1, 2, 3}:
             self._add_error(
                 record_path, f"unsupported schema_version={record.get('schema_version')!r}"
             )
+        if schema_version == 3:
+            for stale_name in (
+                "prompt.txt",
+                "model.py",
+                "provenance.json",
+                "cost.json",
+                "dataset_entry.json",
+                "traces",
+                "inputs",
+            ):
+                if (record_dir / stale_name).exists():
+                    self._add_error(
+                        record_dir / stale_name, "v3 records must not use flat v2 artifact paths"
+                    )
         self._validate_record_fields(record_path, record)
         self._validate_record_artifacts(record_dir, record_path, record)
         self._validate_provenance(record_dir, record_path, record)
         self._validate_dataset_entry(record_dir, record_path, record, seen_dataset_ids)
+        self._validate_revisions(record_dir, record_path, record)
 
     def _validate_record_fields(self, record_path: Path, record: dict[str, Any]) -> None:
         required = {
@@ -410,6 +427,15 @@ class _DataFormatValidator:
         for key in sorted(required):
             if key not in record:
                 self._add_error(record_path, f"missing required field {key!r}")
+        if record.get("schema_version") == 3:
+            active_revision_id = record.get("active_revision_id")
+            if not isinstance(active_revision_id, str) or not REVISION_ID_RE.fullmatch(
+                active_revision_id
+            ):
+                self._add_error(record_path, "active_revision_id must match rev_000001 style IDs")
+            lineage = record.get("lineage")
+            if not isinstance(lineage, dict):
+                self._add_error(record_path, "lineage must be an object for v3 records")
         for key in ("created_at", "updated_at"):
             if not _is_utc_timestamp(record.get(key)):
                 self._add_error(record_path, f"{key} must be a UTC ISO timestamp ending in Z")
@@ -474,7 +500,7 @@ class _DataFormatValidator:
                 self._add_error(record_path, "creator.agent must be 'codex' or 'claude-code'")
             if creator.get("trace_available") is not False:
                 self._add_error(record_path, "creator.trace_available must be false")
-            trace_dir = record_path.parent / "traces"
+            trace_dir = active_traces_dir(self.repo, record_path.parent.name)
             if trace_dir.exists() and any(trace_dir.iterdir()):
                 self._add_error(record_path, "external records must not include traces")
         else:
@@ -498,7 +524,7 @@ class _DataFormatValidator:
                 self._add_error(record_path, f"artifacts.{key} must be a non-empty relative path")
                 continue
             self._validate_artifact_reference(record_dir, record_path, key, value, required=True)
-        for key in ("prompt_txt", "prompt_series_json", "cost_json"):
+        for key in ("prompt_txt", "prompt_series_json", "cost_json", "traces_dir"):
             value = artifacts.get(key)
             if value is None:
                 continue
@@ -547,13 +573,13 @@ class _DataFormatValidator:
         target = record_dir / path
         if required and not target.exists():
             self._add_error(record_path, f"artifacts.{key} references missing path {value!r}")
-        if target.exists() and key == "inputs_dir" and not target.is_dir():
+        if target.exists() and key in {"inputs_dir", "traces_dir"} and not target.is_dir():
             self._add_error(record_path, f"artifacts.{key} must reference a directory")
 
     def _validate_provenance(
         self, record_dir: Path, record_path: Path, record: dict[str, Any]
     ) -> None:
-        path = record_dir / "provenance.json"
+        path = active_provenance_path(self.repo, record_dir.name, record=record)
         if not path.exists():
             self._add_error(path, "missing provenance")
             return
@@ -595,6 +621,45 @@ class _DataFormatValidator:
         if not isinstance(provenance.get("run_summary"), dict):
             self._add_error(path, "run_summary must be an object")
 
+    def _validate_revisions(
+        self, record_dir: Path, record_path: Path, record: dict[str, Any]
+    ) -> None:
+        if record.get("schema_version") != 3:
+            return
+        revisions_dir = record_dir / "revisions"
+        if not revisions_dir.is_dir():
+            self._add_error(revisions_dir, "missing revisions directory")
+            return
+        active_revision_id = str(record.get("active_revision_id") or "")
+        active_revision_dir = revisions_dir / active_revision_id
+        if not active_revision_dir.is_dir():
+            self._add_error(active_revision_dir, "active revision directory is missing")
+        for revision_dir in sorted(path for path in revisions_dir.iterdir() if path.is_dir()):
+            revision_id = revision_dir.name
+            if not REVISION_ID_RE.fullmatch(revision_id):
+                self._add_error(revision_dir, "revision directory must match rev_000001 style IDs")
+                continue
+            revision_path = revision_dir / "revision.json"
+            if not revision_path.exists():
+                self._add_error(revision_path, "missing revision metadata")
+                continue
+            revision = self._load_json(revision_path)
+            if not isinstance(revision, dict):
+                self._add_error(revision_path, "revision metadata must be a JSON object")
+                continue
+            if revision.get("record_id") != record.get("record_id"):
+                self._add_error(revision_path, "record_id must match record.json")
+            if revision.get("revision_id") != revision_id:
+                self._add_error(revision_path, "revision_id must match revision directory")
+            artifacts = revision.get("artifacts")
+            if not isinstance(artifacts, dict):
+                self._add_error(revision_path, "artifacts must be an object")
+            for filename in ("prompt.txt", "model.py", "provenance.json"):
+                if not (revision_dir / filename).exists():
+                    self._add_error(
+                        revision_dir / filename, f"missing revision artifact {filename}"
+                    )
+
     def _validate_dataset_entry(
         self,
         record_dir: Path,
@@ -602,9 +667,12 @@ class _DataFormatValidator:
         record: dict[str, Any],
         seen_dataset_ids: dict[str, str],
     ) -> None:
-        path = record_dir / "dataset_entry.json"
+        path = self.repo.layout.record_dataset_entry_path(record_dir.name)
         if not path.exists():
-            return
+            legacy_path = self.repo.layout.legacy_record_dataset_entry_path(record_dir.name)
+            if not legacy_path.exists():
+                return
+            path = legacy_path
         collections = record.get("collections")
         collection_names = set(collections) if isinstance(collections, list) else set()
         self.dataset_entry_count += 1
@@ -636,7 +704,8 @@ class _DataFormatValidator:
             self._add_error(path, "promoted_at must be a UTC ISO timestamp ending in Z")
         if "dataset" not in collection_names:
             self._add_error(
-                record_path, "records with dataset_entry.json must include collection 'dataset'"
+                record_path,
+                "records with dataset collection metadata must include collection 'dataset'",
             )
 
 

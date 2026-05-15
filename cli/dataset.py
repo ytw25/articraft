@@ -43,6 +43,7 @@ from storage.dataset_workflow import (
 )
 from storage.datasets import DatasetStore
 from storage.identifiers import validate_category_slug, validate_supercategory_slug
+from storage.migrations import migrate_records_to_v3
 from storage.models import CategoryRecord, SupercategoryEntry
 from storage.queries import StorageQueries
 from storage.record_authors import sync_record_authors, sync_record_rated_by
@@ -848,6 +849,15 @@ def _build_parser() -> argparse.ArgumentParser:
     subparsers.add_parser(
         "build-manifest", help="Build the derived dataset manifest under data/cache/manifests/."
     )
+    migrate_v3 = subparsers.add_parser(
+        "migrate-records-v3",
+        help="Migrate flat v2 records to revision-based v3 records.",
+    )
+    migrate_v3.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview the migration without changing files.",
+    )
     prune_cache = subparsers.add_parser(
         "prune-cache", help="Remove recursively empty directories under data/cache/."
     )
@@ -1458,6 +1468,33 @@ def main(argv: list[str] | None = None) -> int:
         manifest = datasets.write_dataset_manifest()
         print(
             f"Wrote dataset manifest to {repo.layout.dataset_manifest_path()} entries={len(manifest['generated'])}"
+        )
+        return 0
+
+    if args.command == "migrate-records-v3":
+        result = migrate_records_to_v3(repo, dry_run=bool(args.dry_run))
+        if args.dry_run:
+            print(
+                f"records_to_migrate={len(result.planned_record_ids)} "
+                f"records_skipped={result.skipped_count}"
+            )
+            if result.planned_record_ids:
+                print(f"sample_record_ids={', '.join(result.planned_record_ids[:10])}")
+            else:
+                print("sample_record_ids=(none)")
+            return 0
+        manifest = datasets.write_dataset_manifest()
+        stats = SearchIndex(repo).rebuild()
+        print(
+            f"migrated_records={result.migrated_count} "
+            f"records_skipped={result.skipped_count} "
+            f"removed_paths={len(result.removed_paths)}"
+        )
+        print(
+            f"Wrote dataset manifest to {repo.layout.dataset_manifest_path()} entries={len(manifest['generated'])}"
+        )
+        print(
+            f"Rebuilt search index at {stats.path} records={stats.record_count} categories={stats.category_count}"
         )
         return 0
 

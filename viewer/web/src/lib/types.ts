@@ -27,6 +27,11 @@ export type RecordSummary = {
   run_id: string | null;
   run_status: string | null;
   run_message: string | null;
+  active_revision_id: string | null;
+  origin_record_id: string | null;
+  parent_record_id: string | null;
+  revision_count: number;
+  has_history: boolean;
   collections: string[];
   materialization_status: string | null;
   has_compile_report: boolean;
@@ -154,6 +159,33 @@ export type RecordDetail = {
   compile_report: Record<string, unknown> | null;
   provenance: Record<string, unknown> | null;
   cost: Record<string, unknown> | null;
+};
+
+export type RecordHistoryRevision = {
+  record_id: string;
+  revision_id: string;
+  active: boolean;
+  created_at: string | null;
+  prompt_preview: string;
+  provider: string | null;
+  model_id: string | null;
+  run_id: string | null;
+  parent_record_id: string | null;
+  parent_revision_id: string | null;
+  status: string | null;
+  total_cost_usd: number | null;
+  has_cost: boolean;
+  has_traces: boolean;
+  has_model: boolean;
+  has_provenance: boolean;
+};
+
+export type RecordHistory = {
+  record_id: string;
+  active_revision_id: string | null;
+  ancestors: RecordHistoryRevision[];
+  revisions: RecordHistoryRevision[];
+  descendants: RecordSummary[];
 };
 
 export type RecordRatingResponse = {

@@ -11,6 +11,7 @@ from storage.categories import CategoryStore
 from storage.models import CategoryRecord, DisplayMetadata, Record, RecordArtifacts, SourceRef
 from storage.records import RecordStore
 from storage.repo import StorageRepo
+from storage.revisions import active_model_path, active_provenance_path
 
 
 def _fake_compile(repo_root: Path):
@@ -42,6 +43,22 @@ def _fake_compile(repo_root: Path):
     return _compile
 
 
+def _record_payload(record_dir: Path) -> dict:
+    return json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
+
+
+def _provenance_payload(repo_root: Path, record_dir: Path) -> dict:
+    repo = StorageRepo(repo_root)
+    record = _record_payload(record_dir)
+    return json.loads(
+        active_provenance_path(repo, record_dir.name, record=record).read_text(encoding="utf-8")
+    )
+
+
+def _dataset_entry_payload(record_dir: Path) -> dict:
+    return json.loads((record_dir / "collections" / "dataset.json").read_text(encoding="utf-8"))
+
+
 def test_external_init_creates_identified_workbench_record(tmp_path: Path) -> None:
     exit_code = external_cli.main(
         [
@@ -60,8 +77,8 @@ def test_external_init_creates_identified_workbench_record(tmp_path: Path) -> No
 
     assert exit_code == 0
     record_dir = next((tmp_path / "data" / "records").iterdir())
-    record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
-    provenance = json.loads((record_dir / "provenance.json").read_text(encoding="utf-8"))
+    record = _record_payload(record_dir)
+    provenance = _provenance_payload(tmp_path, record_dir)
 
     assert record["collections"] == ["workbench"]
     assert record["provider"] == "openai"
@@ -93,14 +110,190 @@ def test_external_init_defaults_claude_code_to_anthropic(tmp_path: Path) -> None
 
     assert exit_code == 0
     record_dir = next((tmp_path / "data" / "records").iterdir())
-    record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
-    provenance = json.loads((record_dir / "provenance.json").read_text(encoding="utf-8"))
+    record = _record_payload(record_dir)
+    provenance = _provenance_payload(tmp_path, record_dir)
     assert record["provider"] == "anthropic"
     assert record["model_id"] is None
     assert provenance["generation"]["provider"] == "anthropic"
     assert provenance["generation"]["model_id"] is None
     assert provenance["generation"]["openai_transport"] is None
     assert provenance["generation"]["openai_reasoning_summary"] is None
+
+
+def test_external_fork_workbench_creates_child_revision_without_parent_mutation(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    assert (
+        external_cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "init",
+                "--agent",
+                "codex",
+                "washing machine",
+            ]
+        )
+        == 0
+    )
+    parent_dir = next((tmp_path / "data" / "records").iterdir())
+    repo = StorageRepo(tmp_path)
+    parent_record_before = (parent_dir / "record.json").read_text(encoding="utf-8")
+    parent_model = active_model_path(repo, parent_dir.name, record=_record_payload(parent_dir))
+    parent_model.write_text("# parent unique model\n", encoding="utf-8")
+    capsys.readouterr()
+
+    exit_code = external_cli.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "fork",
+            "--agent",
+            "codex",
+            str(parent_dir),
+            "make the handle longer",
+            "--record-id",
+            "rec_external_child",
+        ]
+    )
+
+    assert exit_code == 0
+    output = capsys.readouterr().out
+    assert "external fork created" in output
+    assert "record_id=rec_external_child" in output
+    assert "model=" in output
+    assert "revisions/rev_000001/model.py" in output
+    assert (parent_dir / "record.json").read_text(encoding="utf-8") == parent_record_before
+    child_dir = tmp_path / "data" / "records" / "rec_external_child"
+    child_record = _record_payload(child_dir)
+    child_model = active_model_path(repo, "rec_external_child", record=child_record)
+    assert child_model.read_text(encoding="utf-8") == "# parent unique model\n"
+    assert child_record["lineage"]["parent_record_id"] == parent_dir.name
+    assert child_record["lineage"]["parent_revision_id"] == "rev_000001"
+    assert child_record["creator"] == {
+        "mode": "external_agent",
+        "agent": "codex",
+        "trace_available": False,
+    }
+    assert (child_dir / "collections" / "workbench.json").exists()
+    assert not (child_dir / "cost.json").exists()
+    assert not (child_dir / "traces").exists()
+
+
+def test_external_fork_dataset_creates_dataset_child_without_copying_parent_run_artifacts(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = StorageRepo(tmp_path)
+    repo.ensure_layout()
+    CategoryStore(repo).save(
+        CategoryRecord(schema_version=1, slug="washing_machine", title="Washing Machine")
+    )
+    assert (
+        external_cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "init",
+                "--agent",
+                "codex",
+                "washing machine",
+            ]
+        )
+        == 0
+    )
+    parent_dir = next((tmp_path / "data" / "records").iterdir())
+    monkeypatch.setattr(external_cli.compile_record_cli, "main", _fake_compile(tmp_path))
+    assert (
+        external_cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "finalize",
+                str(parent_dir),
+                "--category-slug",
+                "washing_machine",
+            ]
+        )
+        == 0
+    )
+    parent_record = _record_payload(parent_dir)
+    parent_revision_dir = parent_dir / "revisions" / parent_record["active_revision_id"]
+    (parent_revision_dir / "cost.json").write_text('{"parent_only": true}\n', encoding="utf-8")
+    (parent_revision_dir / "traces").mkdir(exist_ok=True)
+    (parent_revision_dir / "traces" / "trajectory.jsonl").write_text("{}\n", encoding="utf-8")
+    parent_provenance = _provenance_payload(tmp_path, parent_dir)
+    parent_provenance["parent_only"] = True
+    active_provenance_path(repo, parent_dir.name, record=parent_record).write_text(
+        json.dumps(parent_provenance, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    exit_code = external_cli.main(
+        [
+            "--repo-root",
+            str(tmp_path),
+            "fork",
+            "--agent",
+            "claude-code",
+            str(parent_dir),
+            "make the washer door wider",
+            "--record-id",
+            "rec_dataset_child",
+        ]
+    )
+
+    assert exit_code == 0
+    child_dir = tmp_path / "data" / "records" / "rec_dataset_child"
+    child_record = _record_payload(child_dir)
+    child_entry = _dataset_entry_payload(child_dir)
+    parent_entry = _dataset_entry_payload(parent_dir)
+    child_revision_dir = child_dir / "revisions" / "rev_000001"
+    child_provenance = _provenance_payload(tmp_path, child_dir)
+    assert child_record["collections"] == ["dataset"]
+    assert child_record["category_slug"] == "washing_machine"
+    assert child_record["creator"]["agent"] == "claude-code"
+    assert child_entry["dataset_id"].startswith(f"{parent_entry['dataset_id']}_edit_")
+    assert child_entry["dataset_id"] != parent_entry["dataset_id"]
+    assert not (child_revision_dir / "cost.json").exists()
+    assert not (child_revision_dir / "traces" / "trajectory.jsonl").exists()
+    assert "parent_only" not in child_provenance
+
+
+def test_external_revise_command_is_removed(tmp_path: Path) -> None:
+    assert (
+        external_cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "init",
+                "--agent",
+                "codex",
+                "washing machine",
+            ]
+        )
+        == 0
+    )
+    record_dir = next((tmp_path / "data" / "records").iterdir())
+
+    with pytest.raises(SystemExit) as exc_info:
+        external_cli.main(
+            [
+                "--repo-root",
+                str(tmp_path),
+                "revise",
+                "--agent",
+                "claude-code",
+                str(record_dir),
+                "make the drum larger",
+            ]
+        )
+
+    assert exc_info.value.code == 2
+    record = _record_payload(record_dir)
+    assert record["active_revision_id"] == "rev_000001"
+    assert not (record_dir / "revisions" / "rev_000002").exists()
 
 
 def test_external_init_rejects_unknown_agent(tmp_path: Path) -> None:
@@ -193,8 +386,8 @@ def test_external_finalize_workbench_keeps_record_local(
     exit_code = external_cli.main(["--repo-root", str(tmp_path), "finalize", str(record_dir)])
 
     assert exit_code == 0
-    record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
-    provenance = json.loads((record_dir / "provenance.json").read_text(encoding="utf-8"))
+    record = _record_payload(record_dir)
+    provenance = _provenance_payload(tmp_path, record_dir)
     assert record["collections"] == ["workbench"]
     assert record["kind"] == "external_model"
     assert (record_dir / ".gitignore").exists()
@@ -242,9 +435,9 @@ def test_external_finalize_with_category_promotes_to_dataset(
     )
 
     assert exit_code == 0
-    record = json.loads((record_dir / "record.json").read_text(encoding="utf-8"))
-    dataset_entry = json.loads((record_dir / "dataset_entry.json").read_text(encoding="utf-8"))
-    provenance = json.loads((record_dir / "provenance.json").read_text(encoding="utf-8"))
+    record = _record_payload(record_dir)
+    dataset_entry = _dataset_entry_payload(record_dir)
+    provenance = _provenance_payload(tmp_path, record_dir)
     assert record["collections"] == ["dataset"]
     assert record["category_slug"] == "washing_machine"
     assert record["creator"]["agent"] == "codex"
@@ -364,5 +557,10 @@ def test_top_level_external_command_delegates(tmp_path: Path, monkeypatch) -> No
 def test_agent_docs_reference_external_contract() -> None:
     root = Path(__file__).resolve().parents[2]
 
+    external_docs = (root / "EXTERNAL_AGENT_DATA.md").read_text(encoding="utf-8")
     assert "EXTERNAL_AGENT_DATA.md" in (root / "AGENTS.md").read_text(encoding="utf-8")
     assert "EXTERNAL_AGENT_DATA.md" in (root / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "articraft external fork" in external_docs
+    assert "articraft external revise" not in external_docs
+    assert "the CLI-printed active model= path" in external_docs
+    assert "data/records/<record_id>/model.py" not in external_docs

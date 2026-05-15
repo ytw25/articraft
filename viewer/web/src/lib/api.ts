@@ -7,6 +7,7 @@ import type {
   DeleteRecordResult,
   OpenRecordFolderResult,
   OpenStagingFolderResult,
+  RecordHistory,
   RecordBrowseIdsResponse,
   RecordBrowseResponse,
   RecordRatingResponse,
@@ -137,6 +138,10 @@ export async function fetchDatasetEntries(): Promise<DatasetEntry[]> {
 
 export async function fetchRecordSummary(recordId: string): Promise<RecordSummary> {
   return fetchJson<RecordSummary>(`/api/records/${encodeURIComponent(recordId)}/summary`);
+}
+
+export async function fetchRecordHistory(recordId: string): Promise<RecordHistory> {
+  return fetchJson<RecordHistory>(`/api/records/${encodeURIComponent(recordId)}/history`);
 }
 
 export async function browseRecords(params: {
@@ -404,6 +409,16 @@ export async function fetchRecordTraceFile(recordId: string, filePath: string): 
     throw new Error(await readErrorMessage(response));
   }
   return response.text();
+}
+
+export function recordRevisionTraceUrl(
+  recordId: string,
+  revisionId: string,
+  filePath = "trajectory.jsonl",
+): string {
+  return `/api/records/${encodeURIComponent(recordId)}/revisions/${encodeURIComponent(
+    revisionId,
+  )}/traces/${filePath}`;
 }
 
 export async function fetchStagingEntries(): Promise<StagingEntry[]> {

@@ -97,14 +97,50 @@ class StorageLayout:
     def record_metadata_path(self, record_id: str) -> Path:
         return self.record_dir(record_id) / "record.json"
 
+    def record_collections_dir(self, record_id: str) -> Path:
+        return self.record_dir(record_id) / "collections"
+
     def record_dataset_entry_path(self, record_id: str) -> Path:
+        return self.record_collections_dir(record_id) / "dataset.json"
+
+    def legacy_record_dataset_entry_path(self, record_id: str) -> Path:
         return self.record_dir(record_id) / "dataset_entry.json"
 
+    def record_workbench_entry_path(self, record_id: str) -> Path:
+        return self.record_collections_dir(record_id) / "workbench.json"
+
+    def record_revisions_dir(self, record_id: str) -> Path:
+        return self.record_dir(record_id) / "revisions"
+
+    def record_revision_dir(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revisions_dir(record_id) / revision_id
+
+    def record_revision_metadata_path(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "revision.json"
+
+    def record_revision_prompt_path(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "prompt.txt"
+
+    def record_revision_model_path(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "model.py"
+
+    def record_revision_provenance_path(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "provenance.json"
+
+    def record_revision_cost_path(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "cost.json"
+
+    def record_revision_inputs_dir(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "inputs"
+
+    def record_revision_traces_dir(self, record_id: str, revision_id: str) -> Path:
+        return self.record_revision_dir(record_id, revision_id) / "traces"
+
     def record_inputs_dir(self, record_id: str) -> Path:
-        return self.record_dir(record_id) / "inputs"
+        return self.record_revision_inputs_dir(record_id, "rev_000001")
 
     def record_traces_dir(self, record_id: str) -> Path:
-        return self.record_dir(record_id) / "traces"
+        return self.record_revision_traces_dir(record_id, "rev_000001")
 
     def record_trajectory_unroll_path(self, record_id: str) -> Path:
         return self.trajectory_unroll_records_root / record_id / "trajectory.jsonl"

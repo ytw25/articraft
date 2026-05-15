@@ -17,6 +17,7 @@ from storage.datasets import DatasetStore
 from storage.models import CategoryRecord
 from storage.queries import StorageQueries
 from storage.repo import StorageRepo
+from storage.revisions import active_provenance_path
 from storage.search import SearchIndex
 from viewer.api.store import ViewerStore
 
@@ -119,22 +120,27 @@ class FlakyBatchAgent(SuccessBatchAgent):
         record_id = self.file_path.parent.name
         self.attempts_by_record[record_id] = self.attempts_by_record.get(record_id, 0) + 1
         if "retry" in str(user_content).lower() and self.attempts_by_record[record_id] == 1:
-            await asyncio.sleep(0.05)
-            self.file_path.parent.mkdir(parents=True, exist_ok=True)
-            self.file_path.write_text("# failed\n", encoding="utf-8")
-            return AgentResult(
-                success=False,
-                reason=TerminateReason.MAX_TURNS,
-                message="synthetic failure",
-                conversation=[{"role": "user", "content": user_content}],
-                final_code=None,
-                urdf_xml=None,
-                compile_warnings=[],
-                turn_count=1,
-                tool_call_count=1,
-                compile_attempt_count=1,
-                usage=None,
-            )
+            type(self).active += 1
+            type(self).max_active = max(type(self).max_active, type(self).active)
+            try:
+                await asyncio.sleep(0.05)
+                self.file_path.parent.mkdir(parents=True, exist_ok=True)
+                self.file_path.write_text("# failed\n", encoding="utf-8")
+                return AgentResult(
+                    success=False,
+                    reason=TerminateReason.MAX_TURNS,
+                    message="synthetic failure",
+                    conversation=[{"role": "user", "content": user_content}],
+                    final_code=None,
+                    urdf_xml=None,
+                    compile_warnings=[],
+                    turn_count=1,
+                    tool_call_count=1,
+                    compile_attempt_count=1,
+                    usage=None,
+                )
+            finally:
+                type(self).active -= 1
         return await super().run(user_content)
 
 
@@ -857,8 +863,10 @@ def test_run_batch_persists_records_and_batch_metadata(
     assert hinge_record["source"]["prompt_index"] == 1
     assert fan_record["source"]["row_id"] == "fan_row"
     assert fan_record["sdk_package"] == "sdk"
-    hinge_provenance = repo.read_json(repo.layout.record_dir("rec_hinge_0001") / "provenance.json")
-    fan_provenance = repo.read_json(repo.layout.record_dir("rec_fan_0001") / "provenance.json")
+    hinge_provenance = repo.read_json(
+        active_provenance_path(repo, "rec_hinge_0001", record=hinge_record)
+    )
+    fan_provenance = repo.read_json(active_provenance_path(repo, "rec_fan_0001", record=fan_record))
     assert "scaffold_mode" not in hinge_provenance["prompting"]
     assert "scaffold_mode" not in fan_provenance["prompting"]
 

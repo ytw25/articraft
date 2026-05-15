@@ -49,6 +49,7 @@ from storage.queries import StorageQueries
 from storage.record_authors import resolve_current_record_author
 from storage.records import RecordStore
 from storage.repo import StorageRepo
+from storage.revisions import active_cost_path, active_provenance_path
 from storage.runs import RunStore
 from storage.search import SearchIndex
 
@@ -1056,10 +1057,10 @@ async def _remove_staging_dir(path: Path) -> None:
     await asyncio.to_thread(shutil.rmtree, path)
 
 
-def _read_total_cost(run_dir: Path | None) -> float:
-    if run_dir is None:
+def _read_total_cost(cost_source: Path | None) -> float:
+    if cost_source is None:
         return 0.0
-    cost_path = run_dir / "cost.json"
+    cost_path = cost_source if cost_source.name == "cost.json" else cost_source / "cost.json"
     if not cost_path.exists():
         return 0.0
     try:
@@ -1169,7 +1170,8 @@ def _load_persisted_batch_row_outcome(
         return None
 
     provenance = repo.read_json(
-        repo.layout.record_dir(allocation.record_id) / "provenance.json", default={}
+        active_provenance_path(repo, allocation.record_id, record=record),
+        default={},
     )
     run_summary = provenance.get("run_summary") if isinstance(provenance, dict) else None
     turn_count = run_summary.get("turn_count") if isinstance(run_summary, dict) else None
@@ -1187,7 +1189,7 @@ def _load_persisted_batch_row_outcome(
         compile_attempt_count=compile_attempt_count
         if isinstance(compile_attempt_count, int)
         else None,
-        total_cost=_read_total_cost(repo.layout.record_dir(allocation.record_id)),
+        total_cost=_read_total_cost(active_cost_path(repo, allocation.record_id, record=record)),
         record_dir=repo.layout.record_dir(allocation.record_id),
         staging_dir=repo.layout.run_staging_dir(run_id) / allocation.record_id,
         model_id=str(record.get("model_id") or row.model_id),

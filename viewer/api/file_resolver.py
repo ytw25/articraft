@@ -15,6 +15,16 @@ from agent.prompts import (
 )
 from storage.identifiers import validate_record_id
 from storage.repo import StorageRepo
+from storage.revisions import (
+    active_cost_path,
+    active_inputs_dir,
+    active_model_path,
+    active_prompt_path,
+    active_provenance_path,
+    active_revision_id,
+    active_traces_dir,
+    validate_revision_id,
+)
 from storage.trajectories import (
     COMPRESSED_TRAJECTORY_FILENAME,
     LEGACY_CONVERSATION_FILENAME,
@@ -79,6 +89,33 @@ class ViewerFileResolver:
         elif len(requested_path.parts) >= 2 and requested_path.parts[0] == "assets":
             root = self.repo.layout.record_materialization_dir(record_id).resolve()
             target = (root / requested_path).resolve()
+        elif requested_path.parts in {
+            ("prompt.txt",),
+            ("model.py",),
+            ("provenance.json",),
+            ("cost.json",),
+        }:
+            record = self.repo.read_json(self.repo.layout.record_metadata_path(record_id))
+            if not isinstance(record, dict):
+                raise HTTPException(status_code=404, detail=f"Record not found: {record_id}")
+            root = self.repo.layout.record_revision_dir(
+                record_id,
+                active_revision_id(self.repo, record_id, record=record),
+            ).resolve()
+            active_paths = {
+                ("prompt.txt",): active_prompt_path(self.repo, record_id, record=record),
+                ("model.py",): active_model_path(self.repo, record_id, record=record),
+                ("provenance.json",): active_provenance_path(self.repo, record_id, record=record),
+                ("cost.json",): active_cost_path(self.repo, record_id, record=record),
+            }
+            target = active_paths[requested_path.parts].resolve()
+            root = target.parent.resolve()
+        elif len(requested_path.parts) >= 2 and requested_path.parts[0] == "inputs":
+            record = self.repo.read_json(self.repo.layout.record_metadata_path(record_id))
+            if not isinstance(record, dict):
+                raise HTTPException(status_code=404, detail=f"Record not found: {record_id}")
+            root = active_inputs_dir(self.repo, record_id, record=record).resolve()
+            target = (root / Path(*requested_path.parts[1:])).resolve()
         else:
             root = record_dir.resolve()
             target = (record_dir / requested_path).resolve()
@@ -136,7 +173,9 @@ class ViewerFileResolver:
         self._validate_record_id(record_id)
         record_dir = self.repo.layout.record_dir(record_id)
         record = self.repo.read_json(self.repo.layout.record_metadata_path(record_id))
-        provenance = self.repo.read_json(record_dir / "provenance.json")
+        provenance = self.repo.read_json(
+            active_provenance_path(self.repo, record_id, record=record)
+        )
 
         if not record_dir.exists() or not isinstance(record, dict):
             raise HTTPException(status_code=404, detail=f"Record not found: {record_id}")
@@ -146,11 +185,12 @@ class ViewerFileResolver:
             raise HTTPException(status_code=404, detail=f"Trace file not found: {file_path}")
 
         requested_name = requested_path.name
-        trace_root = self.repo.layout.record_traces_dir(record_id).resolve()
+        revision_id = active_revision_id(self.repo, record_id, record=record)
+        trace_root = active_traces_dir(self.repo, record_id, record=record).resolve()
 
         if requested_name in {LEGACY_CONVERSATION_FILENAME, TRAJECTORY_FILENAME}:
             try:
-                target = unroll_record_trajectory(self.repo, record_id)
+                target = unroll_record_trajectory(self.repo, record_id, revision_id=revision_id)
             except FileNotFoundError as exc:
                 raise HTTPException(
                     status_code=404, detail=f"Trace file not found: {file_path}"
@@ -204,6 +244,54 @@ class ViewerFileResolver:
         target = (trace_root / requested_path).resolve()
         self._ensure_within_root(target, trace_root)
 
+        if not target.exists() or not target.is_file():
+            raise HTTPException(status_code=404, detail=f"Trace file not found: {file_path}")
+        return target, trace_media_type(target)
+
+    def resolve_record_revision_target(
+        self,
+        record_id: str,
+        revision_id: str,
+        file_path: str,
+    ) -> tuple[Path, Path]:
+        self._validate_record_id(record_id)
+        revision_id = validate_revision_id(revision_id)
+        root = self.repo.layout.record_revision_dir(record_id, revision_id).resolve()
+        if not root.exists() or not root.is_dir():
+            raise HTTPException(status_code=404, detail=f"Revision not found: {revision_id}")
+        requested_path = self._validated_relative_path(file_path)
+        target = (root / requested_path).resolve()
+        self._ensure_within_root(target, root)
+        if not target.exists() or not target.is_file():
+            raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
+        return root, target
+
+    def resolve_record_revision_trace_target(
+        self,
+        record_id: str,
+        revision_id: str,
+        file_path: str,
+    ) -> tuple[Path, str]:
+        requested_path = self._validated_relative_path(file_path)
+        if len(requested_path.parts) != 1:
+            raise HTTPException(status_code=400, detail="Invalid file path")
+        revision_id = validate_revision_id(revision_id)
+        requested_name = requested_path.name
+        trace_root = self.repo.layout.record_revision_traces_dir(record_id, revision_id).resolve()
+        if requested_name in {LEGACY_CONVERSATION_FILENAME, TRAJECTORY_FILENAME}:
+            try:
+                target = unroll_record_trajectory(
+                    self.repo,
+                    record_id,
+                    revision_id=revision_id,
+                )
+            except FileNotFoundError as exc:
+                raise HTTPException(
+                    status_code=404, detail=f"Trace file not found: {file_path}"
+                ) from exc
+            return target, "application/x-ndjson"
+        target = (trace_root / requested_name).resolve()
+        self._ensure_within_root(target, trace_root)
         if not target.exists() or not target.is_file():
             raise HTTPException(status_code=404, detail=f"Trace file not found: {file_path}")
         return target, trace_media_type(target)

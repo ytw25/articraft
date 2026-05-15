@@ -32,6 +32,7 @@ class RecordArtifacts:
     provenance_json: str
     cost_json: str | None
     inputs_dir: str | None = "inputs"
+    traces_dir: str | None = "traces"
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -84,6 +85,8 @@ class Record:
     artifacts: RecordArtifacts
     hashes: RecordHashes = field(default_factory=RecordHashes)
     collections: list[CollectionName] = field(default_factory=list)
+    active_revision_id: str | None = None
+    lineage: dict[str, Any] | None = None
     creator: CreatorMetadata | None = None
     author: str | None = None
     rated_by: str | None = None
@@ -113,6 +116,10 @@ class Record:
             "hashes": self.hashes.to_dict(),
             "collections": list(self.collections),
         }
+        if self.active_revision_id is not None:
+            payload["active_revision_id"] = self.active_revision_id
+        if self.lineage is not None:
+            payload["lineage"] = dict(self.lineage)
         if self.creator is not None:
             payload["creator"] = self.creator.to_dict()
         return payload
