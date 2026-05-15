@@ -64,6 +64,7 @@ A huge part of Articraft's mission is crowdsourcing a massive, diverse dataset. 
 
 1. **Choose Your Generation Path**:
    - *Targeted Authoring*: Use `uv run articraft dataset run <prompt> --category-slug <slug>`.
+   - *Editing Existing Assets*: Use `uv run articraft fork data/records/<record_id> "<edit prompt>"`. Forking creates a child record and leaves the parent unchanged; see [Editing Existing Records](docs/record_editing.md).
    - *AI-Assisted*: Open Claude Code, Cursor, or Codex in the repo and prompt it to "Follow `EXTERNAL_AGENT_DATA.md`". (Do not run the `articraft external` CLI yourself; the agent will do it internally).
    - *Bulk Generation*: Use batch CSVs. See our [Dataset Generation Guide](docs/dataset_generation.md).
 2. **Local Validation**: 

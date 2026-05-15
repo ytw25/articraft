@@ -51,6 +51,14 @@ Browse the objects you just generated. The local viewer API and React frontend c
 just viewer
 ```
 
+### 6. Edit an Existing Asset
+Fork an existing record when you want to modify it:
+```bash
+uv run articraft fork data/records/<record_id> "make the handle longer"
+```
+
+Forking creates a new child record and leaves the parent unchanged. See [Editing Existing Records](docs/record_editing.md) for model options, dataset behavior, and history viewing.
+
 ---
 
 ## Contribute Data
@@ -67,6 +75,7 @@ By contributing data to the Articraft project, you acknowledge and agree that yo
 ## Documentation & Advanced Usage
 
 - **[Architecture & Project Structure](docs/architecture.md)**
+- **[Editing Existing Records](docs/record_editing.md)**
 - **[Dataset Generation & Batch Processing](docs/dataset_generation.md)**
 - **[Contributing Standards & Workflow](CONTRIBUTING.md)**
 - **[Security Policy](SECURITY.md)**
